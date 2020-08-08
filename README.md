@@ -11,9 +11,9 @@ license](https://img.shields.io/badge/License-GPLv3-blue.svg)](http://perso.cran
 of tools to post-process simulations performed with the Einstein Toolkit
 originally developed by Wolfgang Kastaun. This repository contains a fork of
 PostCactus with following differences:
-    1. We use Python 3 instead of Python 2
-    2. We test and document all the code
-    3. We are overall fewer features, but also different ones
+1. We use Python 3 instead of Python 2
+2. We test and document all the code
+3. Consistency across the classes and their methods
     
 The goal of this fork is to make PostCactus more robust and user-friendly, hence
 the emphasis on documentation and testing.
