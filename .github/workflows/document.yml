@@ -9,7 +9,15 @@ jobs:
     - uses: ammaraskar/sphinx-action@master
       with:
         docs-folder: "docs/"
-        pre-build-command: "python -m pip install --upgrade pip"
+        pre-build-command: |
+                           apt-get update
+                           apt-get install -y pandoc
+                           python -m pip install --upgrade pip
+                           pip install ipython
+                           pip install ipykernel
+                           pip install matplotlib
+                           pip install nbsphinx
+                           pip install .
     - name: Commit documentation changes
       run: |
         git clone https://github.com/ammaraskar/sphinx-action-test.git --branch gh-pages --single-branch gh-pages
