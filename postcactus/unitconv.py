@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""This module provides a class Units representing unit sytems or unit
+r"""This module provides a class Units representing unit sytems or unit
 conversions.
 
 Units can be used to convert from geometrized units to SI.
