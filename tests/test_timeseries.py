@@ -57,15 +57,23 @@ class TestTimeseries(unittest.TestCase):
     def test_len(self):
         self.assertEqual(len(self.TS), 100)
 
-    def test_tmin_tmax_length(self):
-        self.assertAlmostEqual(self.TS.tmin(), 0)
-        self.assertAlmostEqual(self.TS.tmax(), 2 * np.pi)
+    def test_tmin_tmax_length_dt(self):
+        self.assertAlmostEqual(self.TS.tmin, 0)
+        self.assertAlmostEqual(self.TS.tmax, 2 * np.pi)
 
         times = np.linspace(1, 2, 100)
 
         sins = ts.TimeSeries(times, self.values)
 
-        self.assertAlmostEqual(sins.length(), 1)
+        self.assertAlmostEqual(sins.time_length, 1)
+
+        self.assertAlmostEqual(self.TS.dt,
+                               self.TS.tmax / (len(self.TS) - 1))
+
+        with self.assertRaises(ValueError):
+            sins.t[-1] = 20
+            sins.dt
+
 
     def test__apply_binary(self):
         # Check that errors are thrown if:
@@ -324,10 +332,7 @@ class TestTimeseries(unittest.TestCase):
         tscopy = self.TS.copy()
         tscopyc = self.TS_c.copy()
         self.assertEqual(self.TS, tscopy)
-        self.assertEqual(self.TS.spline_real, tscopy.spline_real)
         self.assertEqual(self.TS_c, tscopyc)
-        self.assertEqual(self.TS_c.spline_real, tscopyc.spline_real)
-        self.assertEqual(self.TS_c.spline_imag, tscopyc.spline_imag)
 
     def test_time_shift(self):
 
@@ -355,19 +360,19 @@ class TestTimeseries(unittest.TestCase):
 
         sins = ts.TimeSeries(self.times, self.values)
 
-        self.assertGreaterEqual(sins.cropped(tmin=1).tmin(), 1)
-        self.assertLessEqual(sins.cropped(tmax=1).tmax(), 1)
-        self.assertGreaterEqual(sins.clipped(tmin=1).tmin(), 1)
-        self.assertLessEqual(sins.clipped(tmax=1).tmin(), 1)
+        self.assertGreaterEqual(sins.cropped(init=1).tmin, 1)
+        self.assertLessEqual(sins.cropped(end=1).tmax, 1)
+        self.assertGreaterEqual(sins.clipped(init=1).tmin, 1)
+        self.assertLessEqual(sins.clipped(end=1).tmin, 1)
 
-        sins.crop(tmin=0.5, tmax=1.5)
+        sins.crop(init=0.5, end=1.5)
 
-        self.assertGreaterEqual(sins.tmin(), 0.5)
-        self.assertLessEqual(sins.tmax(), 1.5)
+        self.assertGreaterEqual(sins.tmin, 0.5)
+        self.assertLessEqual(sins.tmax, 1.5)
 
-        sins.clip(tmin=1, tmax=1.4)
-        self.assertGreaterEqual(sins.tmin(), 1)
-        self.assertLessEqual(sins.tmax(), 1.4)
+        sins.clip(init=1, end=1.4)
+        self.assertGreaterEqual(sins.tmin, 1)
+        self.assertLessEqual(sins.tmax, 1.4)
 
     def test_save(self):
 
@@ -764,3 +769,16 @@ class TestTimeseries(unittest.TestCase):
         smoothed_deriv = signal.savgol_filter(deriv, 11, 3)
         self.assertTrue(np.allclose(exp.phase_frequency(tsmooth=0.63).y,
                                     smoothed_deriv / (2 * np.pi)))
+
+    def test_to_FrequencySeries(self):
+
+        dt = self.times[1] - self.times[0]
+        freq = np.fft.fftfreq(len(self.values), d=dt)
+        freq = np.fft.fftshift(freq)
+        fft = np.fft.fft(self.values)
+        fft = np.fft.fftshift(fft)
+
+        fs = self.TS.to_FrequencySeries()
+
+        self.assertTrue(np.allclose(fs.f, freq))
+        self.assertTrue(np.allclose(fs.fft, fft))

@@ -14,11 +14,11 @@ PostCactus with following differences:
 1. We use Python 3 instead of Python 2
 2. We test and document all the code
 3. Consistency across the classes and their methods
-    
+
 The goal of this fork is to make PostCactus more robust and user-friendly, hence
 the emphasis on documentation and testing.
 
-Documentation is found [here](https://sbozzolo.github.io/PostCactus). 
+Documentation is found [here](https://sbozzolo.github.io/PostCactus).
 
 ## Documentation
 
@@ -28,9 +28,13 @@ cd docs && make html
 ```
 Documentation is automatically generated after each commit by GitHub Actions.
 
+We use [nbsphinx](https://nbsphinx.readthedocs.io/) to translate Jupyter
+notebooks to the examples. The extension is required. Note: Jupyter notebooks
+have to be un-evaluated.
+
 ## Tests
 
-`PostCactus` comes with a suite of unit tests. To run the tests, 
+`PostCactus` comes with a suite of unit tests. To run the tests,
 ```sh
 python3 -m unittest
 ```
