@@ -12,13 +12,32 @@ of tools to post-process simulations performed with the Einstein Toolkit
 originally developed by Wolfgang Kastaun. This repository contains a fork of
 PostCactus with the following differences:
 1. We use Python 3 instead of Python 2
-2. We drop support to some features, but add others
+2. We drop support to some features, but add others (see documentation for a
+   list of the available features)
 3. We test and document all the code
 
 The goal of this fork is to make PostCactus more robust and user-friendly, hence
 the emphasis on documentation and testing.
 
 Documentation is found [here](https://sbozzolo.github.io/PostCactus).
+
+## Installation
+
+Clone this repo:
+``` bash
+   git clone https://github.com/Sbozzolo/PostCactus.git
+```
+Move into the folder and install with `pip`:
+``` bash
+   cd PostCactus && pip3 install --user .
+```
+For development, it is convenient to use `pip3 install -e . --user`, so that
+modifying the files will have a direct effect on the library (otherwise it has
+to be installed after every edit).
+
+If they are not already available, `pip` will install the following packages:
+- `numpy`
+- `scipy`.
 
 ## Documentation
 
