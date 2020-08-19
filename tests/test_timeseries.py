@@ -74,7 +74,6 @@ class TestTimeseries(unittest.TestCase):
             sins.t[-1] = 20
             sins.dt
 
-
     def test__apply_binary(self):
         # Check that errors are thrown if:
         # 1. Lists have different times
