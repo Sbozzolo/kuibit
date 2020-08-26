@@ -12,15 +12,16 @@ Features
 
 Features currently implemented:
 
-- Represent and manipulate time series (``postcactus.timeseries``). Examples of
+- Read and organize simulation data :py:mod:`~.simdir`).
+- Represent and manipulate time series :py:mod:`~.timeseries`). Examples of
   functions available for time series: ``zero_pad``. ``time_shift``,
   ``phase_shift``, ``mean_remove``, ``integrate``, ``derive``, ``resample``,
   ``to_FrequencySeries`` (Fourier transform).
-- Represent and manipulate frequency series (``postcactus.frequencyseries``), like
-  Fourier transforms of time series. Inverse Fuorier transform is available.
-- Manipulate and analyze gravitational-waves (``postcactus.gw_utils``).
+- Represent and manipulate frequency series (:py:mod:`~.frequencyseries`), like
+  Fourier transforms of time series. Inverse Fourier transform is available.
+- Manipulate and analyze gravitational-waves (:py:mod:`~.gw_utils`).
 - Handle unit conversion, in particular from geometrized to physical
-  (``postcactus.unitconv``).
+  (:py:mod:`~.unitconv`).
 
 Installation
 ------------
@@ -45,6 +46,7 @@ Usage
 .. toctree::
    :maxdepth: 1
 
+   simdir.rst
    series.rst
    gw_utils.rst
    unitconv.rst

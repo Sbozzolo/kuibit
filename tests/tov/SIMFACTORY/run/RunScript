@@ -1,0 +1,46 @@
+#! /bin/bash
+
+echo "Preparing:"
+set -x                          # Output commands
+set -e                          # Abort on errors
+
+cd @RUNDIR@-active
+
+module load openmpi3
+
+module list
+
+
+echo "Checking:"
+pwd
+hostname
+date
+
+echo "Environment:"
+#export I_MPI_FABRICS=shm:ofa
+#export I_MPI_MIC=1
+#export I_MPI_OFA_ADAPTER_NAME=mlx4_0
+export CACTUS_NUM_PROCS=@NUM_PROCS@
+export CACTUS_NUM_THREADS=@NUM_THREADS@
+# export CACTUS_SET_THREAD_BINXDINGS=1
+export CXX_MAX_TASKS=500
+export GMON_OUT_PREFIX=gmon.out
+export OMP_MAX_TASKS=500
+export OMP_NUM_THREADS=@NUM_THREADS@
+export OMP_STACKSIZE=8192       # kByte
+export PTHREAD_MAX_TASKS=500
+# see http://pages.tacc.utexas.edu/~eijkhout/pcse/html/omp-affinity.html
+# stampede2 enables hyperthreading so in principle there are 96 logical cores
+# export OMP_PLACES=cores
+# export OMP_PROC_BIND=close
+env | sort > SIMFACTORY/ENVIRONMENT
+echo ${SLURM_NODELIST} > NODES
+
+echo "Starting:"
+export CACTUS_STARTTIME=$(date +%s)
+time mpirun -np @NUM_PROCS@ @EXECUTABLE@ -L 3 @PARFILE@
+
+echo "Stopping:"
+date
+
+echo "Done."
