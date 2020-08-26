@@ -254,6 +254,7 @@ class TimeSeries(BaseSeries):
     # The following are the setters and getters, so that we can "resolve" .t
     # and .y
 
+    # The @property decorator allows us to call .t instead of .t()
     @property
     def t(self):
         # This is defined BaseClass

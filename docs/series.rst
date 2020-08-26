@@ -11,7 +11,6 @@ types. Both the classes are derived from a base class ``BaseSeries`
 and features, so ``TimeSeries`` and ``FrequencySeries`` share a lot of
 functionalities.
 
-
 The TimeSeries and FrequencySeries objects
 ------------------------------------------
 

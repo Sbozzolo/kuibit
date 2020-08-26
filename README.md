@@ -39,6 +39,7 @@ If they are not already available, `pip` will install the following packages:
 - `numpy`
 - `scipy`.
 
+The minimum version of Python required is 3.5.
 ## Documentation
 
 `PostCactus` uses Sphinx to generate the documentation. To produce the documentation

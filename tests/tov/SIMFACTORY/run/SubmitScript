@@ -1,0 +1,13 @@
+#! /bin/bash
+#SBATCH -A @ALLOCATION@
+#SBATCH -p @QUEUE@
+#SBATCH -t @WALLTIME@
+#SBATCH -N @NODES@ -n @NUM_PROCS@
+#SBATCH @("@CHAINED_JOB_ID@" != "" ? "-d afterany:@CHAINED_JOB_ID@" : "")@
+#SBATCH -J @SHORT_SIMULATION_NAME@
+#SBATCH --mail-type=ALL
+#SBATCH --mail-user=gabrielebozzola@email.arizona.edu
+#SBATCH -o @RUNDIR@/@SIMULATION_NAME@.out
+#SBATCH -e @RUNDIR@/@SIMULATION_NAME@.err
+cd @SOURCEDIR@
+@SIMFACTORY@ run @SIMULATION_NAME@ --machine=puma --restart-id=@RESTART_ID@ @FROM_RESTART_COMMAND@
