@@ -22,7 +22,7 @@ class TestCactusScalar(unittest.TestCase):
 
         self.assertFalse(asc._is_one_file_per_group)
         self.assertFalse(asc._was_header_scanned)
-        self.assertEqual(asc.reduction_type, "max")
+        self.assertEqual(asc.reduction_type, "maximum")
         self.assertDictEqual(asc._vars, {'vel[0]': None})
 
         # no reduction, scalar, one file per group
@@ -39,7 +39,7 @@ class TestCactusScalar(unittest.TestCase):
 
         self.assertTrue(asc_gz._is_one_file_per_group)
         self.assertFalse(asc_gz._was_header_scanned)
-        self.assertEqual(asc_gz.reduction_type, "min")
+        self.assertEqual(asc_gz.reduction_type, "minimum")
         self.assertEqual(asc_gz._compression, "gz")
 
         # Compressed, scalar, one file per group
