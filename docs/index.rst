@@ -12,8 +12,9 @@ Features
 
 Features currently implemented:
 
-- Read and organize simulation data :py:mod:`~.simdir`).
-- Represent and manipulate time series :py:mod:`~.timeseries`). Examples of
+- Read and organize simulation data (:py:mod:`~.simdir`). Checkpoints and
+  restarts are handled transparantely.
+- Represent and manipulate time series (:py:mod:`~.timeseries`). Examples of
   functions available for time series: ``zero_pad``. ``time_shift``,
   ``phase_shift``, ``mean_remove``, ``integrate``, ``derive``, ``resample``,
   ``to_FrequencySeries`` (Fourier transform).
@@ -48,6 +49,7 @@ Usage
 
    simdir.rst
    series.rst
+   cactus_scalars.rst
    gw_utils.rst
    unitconv.rst
 
@@ -66,6 +68,8 @@ Reference material (classes, functions, ...)
 .. toctree::
    :maxdepth: 1
 
+   simdir_ref.rst
+   cactus_scalars_ref.rst
    series_ref.rst
    timeseries_ref.rst
    frequencyseries_ref.rst
