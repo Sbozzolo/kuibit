@@ -253,7 +253,7 @@ class BaseSeries:
                     "The objects do not have the same x!")
             return type(self)(self.data_x, function(self.data_y, other.data_y))
         # If it is a number
-        elif isinstance(other, (int, float, complex)):
+        if isinstance(other, (int, float, complex)):
             return type(self)(self.data_x, function(self.data_y, other))
 
         # If we are here, it is because we cannot add the two objects
