@@ -86,11 +86,8 @@ class CactusScalarASCII:
 
         self._compression = compression
 
-        if reduction_type not in self._reduction_types:
-            raise RuntimeError(
-                f"Reduction type {reduction_type} not recognized")
-
-        self.reduction_type = self._reduction_types[reduction_type]
+        self.reduction_type = reduction_type if reduction_type is not None \
+            else "scalar"
 
         # If the file contains multiple variables, we will scan the header
         # immediately to understand the content. If not, we scan the header
