@@ -59,6 +59,7 @@ Examples
 .. toctree::
    :maxdepth: 1
 
+   examples/simdir.ipynb
    examples/timeseries.ipynb
 
 
