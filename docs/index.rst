@@ -14,6 +14,7 @@ Features currently implemented:
 
 - Read and organize simulation data (:py:mod:`~.simdir`). Checkpoints and
   restarts are handled transparantely.
+- Work with scalar data as produced by CarpetASCII (:py:mod:`~.cactus_scalars`).
 - Represent and manipulate time series (:py:mod:`~.timeseries`). Examples of
   functions available for time series: ``zero_pad``. ``time_shift``,
   ``phase_shift``, ``mean_remove``, ``integrate``, ``derive``, ``resample``,
