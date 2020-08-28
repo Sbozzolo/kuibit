@@ -7,7 +7,10 @@ data types.
 """
 
 import os
-
+# We ideally would like to use cached_property, but it is in Python 3.8
+# which is quite new
+from functools import lru_cache
+from postcactus import cactus_scalars
 
 class SimDir:
     """This class represents a CACTUS simulation directory.
@@ -151,3 +154,19 @@ class SimDir:
         self.ignore = ignore
         self._sanitize_path(str(path))
         self._scan_folders(int(max_depth))
+
+    @property
+    # We only need to keep it 1 in memory: it is the only possible!
+    @lru_cache(1)
+    def ts(self):
+        return cactus_scalars.ScalarsDir(self)
+
+    timeseries = ts
+
+    def __str__(self):
+        header = f"Indexed {len(self.allfiles)} files"
+        header += f"and {len(self.dirs)} subdirectories\n"
+
+        ts_ret = self.ts.__str__()
+
+        return header + ts_ret

@@ -7,14 +7,21 @@ The data loaded by this module is represented as
 :py:class:`~.TimeSeries` objects.
 """
 
-from bz2 import BZ2File as bopen
+from bz2 import open as bopen
 from gzip import open as gopen
+from postcactus import timeseries as ts
+from postcactus import simdir
+from postcactus.attr_dict import pythonize_name_dict
+import numpy as np
 import os
 import re
 
 
 class CactusScalarASCII:
     """Read scalar data produced by CarpetASCII.
+
+    CactusScalarASCII is a dictionary-like object: it has keys() and you can
+    TimeSeries using the ['key'] syntax.
 
     Single variable per file or single file per group are supported. In the
     latter case, the header is inspected to understand the content of the file.
@@ -46,14 +53,23 @@ class CactusScalarASCII:
     \.asc
     (\.(gz|bz2))?$"""
 
-    _pattern_datacolumns = r"^# data columns: (.+)$"
-    _pattern_columnformat = r"^# column format: (.+)$"
+    # Example of data column:
+    # 1 2 3 are always: 1:iteration 2:time 3:data
+    # data columns: 3:kxx 4:kxy 5:kxz 6:kyy 7:kyz 8:kzz
+    _pattern_data_columns = r"^# data columns: (.+)$"
+
+    # Example of column format:
+    # column format: 1:it 2:tl 3:rl 4:c 5:ml 6:ix 7:iy 8:iz 9:time 10:x 11:y
+    # 12:z 13:data
+    _pattern_column_format = r"^# column format: (.+)$"
+
     # Here we match (number):(word[number])
+    # We are matching expressions like 3:kxx
     _pattern_columns = r"^(\d+):(\w+(\[\d+\])?)$"
 
     _rx_filename = re.compile(_pattern_filename, re.VERBOSE)
-    _rx_datacolumns = re.compile(_pattern_datacolumns)
-    _rx_columnformat = re.compile(_pattern_columnformat)
+    _rx_data_columns = re.compile(_pattern_data_columns)
+    _rx_column_format = re.compile(_pattern_column_format)
     _rx_columns = re.compile(_pattern_columns)
 
     _reduction_types = {
@@ -66,11 +82,19 @@ class CactusScalarASCII:
         None: 'scalar'
     }
 
+    # How many lines do we read as header?
+    _header_line_number = 20
+
     # What function to use to open the file?
-    _decompr = {None: open, 'gz': gopen, 'bz2': bopen}
+    # What mode?
+    _decompressor = {None: (open, 'r'),
+                     'gz': (gopen, 'rt'),
+                     'bz2': (bopen, 'rt')}
 
     def __init__(self, path):
         self.path = str(path)
+        # The _vars dictionary contains a mapping between the various variable
+        # and the column numbers in which they are stored.
         self._vars = {}
         self.folder, filename = os.path.split(self.path)
 
@@ -82,9 +106,9 @@ class CactusScalarASCII:
         # variable_name1 may be a thorn name (e.g. hydrobase-press)
         # Or the actual variable name (e.g. H)
         (variable_name1, _0, _1, variable_name2, index_in_brackets,
-         reduction_type, _2, compression) = filename_match.groups()
+         reduction_type, _2, compression_method) = filename_match.groups()
 
-        self._compression = compression
+        self._compression_method = compression_method
 
         self.reduction_type = reduction_type if reduction_type is not None \
             else "scalar"
@@ -96,11 +120,285 @@ class CactusScalarASCII:
         self._was_header_scanned = False
 
         if self._is_one_file_per_group:
-            pass
-            # self._scan_column_header()
+            # We need the variable names
+            self._scan_header()
         else:
-            self._time_column = None
             variable_name = variable_name1
             if (index_in_brackets is not None):
                 variable_name += index_in_brackets
             self._vars = {variable_name: None}
+
+    def _scan_strings_for_columns(self, strings, pattern):
+        """Match each string in strings against pattern and each matching
+        result against _pattern_columns. Then, return a dictionary that maps
+        variable to column number.
+
+        """
+
+        # We scan these lines and see if any matches with the regexp for the
+        # column format
+        for line in strings:
+            matched_pattern = pattern.match(line)
+            if (matched_pattern is not None):
+                break
+        # Here we are using an else clause with a for loop. This else
+        # branch is reached only if the break in the for loop is never
+        # called. In this case, this happens if we never match the
+        # column format
+        else:
+            raise RuntimeError(f"Missing column information in {self.path}")
+
+        # Here we should have matched the column format. It should be
+        # like:
+        # column format: 1:it 2:tl 3:rl 4:c 5:ml 6:ix 7:iy 8:iz 9:time
+        # 10:x 11:y 12:z 13:data
+
+        # Let's make sure that this is the case.
+        #
+        # In matched_column_format.groups()[0] we have the matched
+        # expression (there is only one group). The different column
+        # meanings are separated by a space, so
+        # matched_column_format.groups()[0].split() is a list with the
+        # various subgroups. Each has to match against self.rx_columns.
+        # So, to check that they all match we apply rx_columns.match()
+        # to each element and see if they are all not None with the
+        # all() function
+
+        columns = list(map(self._rx_columns.match,
+                           matched_pattern.groups()[0].split()))
+
+        are_real_columns = all(columns)
+
+        if not are_real_columns:
+            raise RuntimeError(f"Bad header in {self.path}")
+
+        # Columns are good. Let's create a dictionary to map the number
+        # to the description. Columns are indexed starting from 1.
+        columns_description = {
+            variable_name: int(column_number) - 1
+            for column_number, variable_name, _ in (c.groups()
+                                                    for c in columns)
+        }
+
+        return columns_description
+
+    def _scan_header(self):
+        """Use regular expressions to understand the content of a file.
+        In particular, we look for column format and data columns.
+        """
+        # What method to we need to use to open the file?
+        # opener can be open, gopen, or bopen depending on the extension
+        # of the file
+        opener, opener_mode = self._decompressor[self._compression_method]
+
+        with opener(self.path, mode=opener_mode) as f:
+            # Read the first 20 lines
+            header = [f.readline() for i in range(self._header_line_number)]
+
+            # Column format is relevant only for scalar output, so we start
+            # from that
+            if self.reduction_type == 'scalar':
+                columns_description = \
+                    self._scan_strings_for_columns(header,
+                                                   self._rx_column_format)
+
+                time_column = columns_description.get('time', None)
+
+                if time_column is None:
+                    raise RuntimeError(f"Missing time column in {self.path}")
+
+                data_column = columns_description.get('data', None)
+
+                if data_column is None:
+                    raise RuntimeError(f"Missing data column in {self.path}")
+
+                self._time_column = time_column
+            else:
+                # The reductions have always the same form:
+                # 1:iteration 2:time 3:data
+                self._time_column = 1
+                data_column = 2
+
+            # When we have one file per group we have many data columns
+            # Se update _vars to add all the new ones
+            if self._is_one_file_per_group:
+                columns_description = \
+                    self._scan_strings_for_columns(header,
+                                                   self._rx_data_columns)
+
+                self._vars.update(columns_description)
+            else:
+                # There is only one data_column
+                self._vars = {list(self._vars.keys())[0]: data_column}
+
+        self._was_header_scanned = True
+
+    def load(self, variable):
+        """Read file and return a TimeSeries with the requested variable.
+
+        :param variable: Requested variable
+        :type variable: str
+
+        :returns: TimeSeries with requested variable as read from file
+        :rtype:        :py:class:`~.TimeSeries`
+
+        """
+        if (not self._was_header_scanned):
+            self._scan_header()
+
+        if (variable not in self):
+            raise ValueError(f"{variable} not available")
+
+        column_number = self._vars[variable]
+        t, y = np.loadtxt(self.path, unpack=True, ndmin=2,
+                          usecols=(self._time_column, column_number))
+
+        return ts.remove_duplicate_iters(t, y)
+
+    def __getitem__(self, key):
+        return self.load(key)
+
+    def __contains__(self, key):
+        return key in self._vars
+
+    def keys(self):
+        """Return the list of variables available.
+
+        :returns: List of variables in the file
+        :rtype:   list
+
+        """
+        return list(self._vars.keys())
+
+
+class ScalarReader:
+    """Helper class to read various types of scalar data in a SimDir and
+    properly order them. The core of this object is the _vars dictionary
+    which contains the location of all the files for a specific variable
+    and reduction.
+
+    ScalarReader is a dictionary-like object.
+
+    Using the [] notation you can access values with as TimeSeries.
+
+    Not intended for direct use.
+
+    """
+
+    def __init__(self, sd, reduction_type):
+        """sd has to be a SimDir object, reduction_type has to be a reduction
+        or scalar.
+        """
+        self.reduction_type = str(reduction_type)
+        # _vars is like _vars['variable']['folder'] -> CactusScalarASCII(f)
+        # _vars['variable'] is a dictionary with as keys the folders where
+        # to find the files associated to the variable and the reduction
+        # reduction_type
+        self._vars = {}
+        for f in sd.allfiles:
+            # We only save those that variables are well-behaved
+            try:
+                cactusascii_file = CactusScalarASCII(f)
+                if cactusascii_file.reduction_type == reduction_type:
+                    for v in list(cactusascii_file.keys()):
+                        # We add to the _vars dictionary the mapping:
+                        # [v][folder] to CactusScalarASCII(f)
+
+                        self._vars.setdefault(v, {})[cactusascii_file.folder] \
+                            = cactusascii_file
+            except RuntimeError:
+                pass
+
+        # Fields are attributes
+        self.fields = pythonize_name_dict(list(self.keys()), self.__getitem__)
+
+    def __getitem__(self, key):
+        # We read all the files associated to variable key
+        folders = self._vars[key]
+        series = [f.load(key) for f in folders.values()]
+        return ts.combine_ts(series)
+
+    def __contains__(self, key):
+        return key in self._vars
+
+    def keys(self):
+        """Return the list of available variables corresponding to the given
+        reduction.
+
+        :returns: List of variables with given reduction
+        :rtype:   list
+
+        """
+        return list(self._vars.keys())
+
+    def get(self, key, default=None):
+        """Return variable if available, else return the default value.
+
+        :param key: Requested variable
+        :type key: str
+        :param default: Returned value if variable is not available
+        :type default: any
+
+        :returns: Timeseries of the requested variable
+        :rtype: :py:class:`~.TimeSeries`
+
+        """
+        if key in self:
+            return self[key]
+
+        return default
+
+    def __str__(self):
+        ret = f"Available {self.reduction_type} timeseries:\n"
+        ret += f"{list(self.keys())}\n"
+        return ret
+
+
+class ScalarsDir:
+    """This class provides acces to various types of scalar data in a given
+    simulation directory. Typically used from simdir instance. The different
+    scalars are available as attributes:
+
+    :ivar scalar:    access to grid scalars.
+    :ivar minimum:   access to minimum reduction.
+    :ivar maximum:   access to maximum reduction.
+    :ivar norm1:     access to norm1 reduction.
+    :ivar norm2:     access to norm2 reduction.
+    :ivar average:   access to average reduction.
+    :ivar infnorm:   access to inf-norm reduction.
+
+    Each of those works as a dictionary mapping variable names to
+    :py:class:`~.TimeSeries` instances.
+
+    """
+
+    # TODO: Implement the following, possibly in a clean way
+
+    # .. note::
+    #    infnorm is reconstructed from min and max if infnorm
+    #    itself is not available.
+
+
+    def __init__(self, sd):
+        """The constructor is not intended for direct use.
+
+        :param sd: Simulation directory
+        :type sd:  :py:class:`~.SimDir` instance.
+        """
+        if (not isinstance(sd, simdir.SimDir)):
+            raise TypeError("Input is not SimDir")
+
+        self.path = sd.path
+        self.point = ScalarReader(sd, 'scalar')
+        self.scalar = ScalarReader(sd, 'scalar')
+        self.minimum = ScalarReader(sd, 'minimum')
+        self.maximum = ScalarReader(sd, 'maximum')
+        self.norm1 = ScalarReader(sd, 'norm1')
+        self.norm2 = ScalarReader(sd, 'norm2')
+        self.average = ScalarReader(sd, 'average')
+        self.infnorm = ScalarReader(sd, 'infnorm')
+
+    def __str__(self):
+        return "Folder %s\n%s\n%s\n%s\n%s\n%s\n%s\n"\
+            % (self.path, self.scalar, self.minimum,
+               self.maximum, self.norm1, self.norm2, self.average)
