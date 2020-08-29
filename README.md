@@ -37,6 +37,7 @@ to be installed after every edit).
 
 If they are not already available, `pip` will install the following packages:
 - `numpy`
+- `h5py`
 - `scipy`.
 
 The minimum version of Python required is 3.5.
