@@ -14,7 +14,9 @@ Features currently implemented:
 
 - Read and organize simulation data (:py:mod:`~.simdir`). Checkpoints and
   restarts are handled transparantely.
-- Work with scalar data as produced by CarpetASCII (:py:mod:`~.cactus_scalars`).
+- Work with scalar data as produced by ``CarpetASCII`` (:py:mod:`~.cactus_scalars`).
+- Analyze the multipololar decompositions output by ``Multipoles``
+  (:py:mod:`~.cactus_multipoles`).
 - Represent and manipulate time series (:py:mod:`~.timeseries`). Examples of
   functions available for time series: ``zero_pad``. ``time_shift``,
   ``phase_shift``, ``mean_remove``, ``integrate``, ``derive``, ``resample``,
@@ -51,6 +53,7 @@ Usage
    simdir.rst
    series.rst
    cactus_scalars.rst
+   cactus_multipoles.rst
    gw_utils.rst
    unitconv.rst
 
@@ -71,9 +74,10 @@ Reference material (classes, functions, ...)
    :maxdepth: 1
 
    simdir_ref.rst
-   cactus_scalars_ref.rst
    series_ref.rst
    timeseries_ref.rst
    frequencyseries_ref.rst
+   cactus_scalars_ref.rst
+   cactus_multipoles_ref.rst
    gw_utils_ref.rst
    unitconv_ref.rst

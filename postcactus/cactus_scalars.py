@@ -309,7 +309,8 @@ class ScalarReader:
             except RuntimeError:
                 pass
 
-        # Fields are attributes
+        # What pythonize_name_dict does is to make the various variables
+        # accessible as attributes, e.g. self.fields.rho
         self.fields = pythonize_name_dict(list(self.keys()), self.__getitem__)
 
     def __getitem__(self, key):
