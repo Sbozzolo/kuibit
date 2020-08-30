@@ -42,3 +42,11 @@ can use
 
 The resulting object is a :py:class:`~.ScalarDirs`. The page
 :ref:`cactus_scalars:Scalar data` contains a lot of information on how to use
+these.
+
+For the multipoles (documentation: :ref:`cactus_scalars:Working with multipolar
+decompositions`):
+
+.. code-block:: python
+
+    multipoles = sd.multipoles

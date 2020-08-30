@@ -12,6 +12,7 @@ from gzip import open as gopen
 from postcactus import timeseries as ts
 from postcactus import simdir
 from postcactus.attr_dict import pythonize_name_dict
+from functools import lru_cache
 import numpy as np
 import os
 import re
@@ -233,6 +234,7 @@ class CactusScalarASCII:
 
         self._was_header_scanned = True
 
+    @lru_cache(128)
     def load(self, variable):
         """Read file and return a TimeSeries with the requested variable.
 
@@ -313,6 +315,7 @@ class ScalarReader:
         # accessible as attributes, e.g. self.fields.rho
         self.fields = pythonize_name_dict(list(self.keys()), self.__getitem__)
 
+    @lru_cache(128)
     def __getitem__(self, key):
         # We read all the files associated to variable key
         folders = self._vars[key]
@@ -378,7 +381,6 @@ class ScalarsDir:
     # .. note::
     #    infnorm is reconstructed from min and max if infnorm
     #    itself is not available.
-
 
     def __init__(self, sd):
         """The constructor is not intended for direct use.

@@ -2,7 +2,7 @@
 
 import unittest
 import numpy as np
-import os
+import h5py
 from postcactus import timeseries as ts
 from postcactus import simdir as sd
 from postcactus import cactus_multipoles as mp
@@ -18,7 +18,7 @@ class TestCactusMultipoles(unittest.TestCase):
         self.y2 = np.sin(self.t2)
         self.ts1 = ts.TimeSeries(self.t1, self.y1)
         self.ts2 = ts.TimeSeries(self.t2, self.y2)
-        
+
     def test_MultipoleDet(self):
 
         ts_comb = ts.combine_ts([self.ts1, self.ts2])
@@ -67,6 +67,9 @@ class TestCactusMultipoles(unittest.TestCase):
         self.assertNotEqual(mult1, 1)
         self.assertEqual(mult1, mult1)
 
+        # test __str__()
+        self.assertIn("[(2, 2)]", mult1.__str__())
+
     def test_MultipoleAllDet(self):
 
         data = [(2, 2, 100, self.ts1),
@@ -98,7 +101,6 @@ class TestCactusMultipoles(unittest.TestCase):
 
         self.assertNotEqual(alldets, alldets2)
 
-
         # test __iter__
         for det, r in zip(alldets, radii):
             self.assertEqual(det.radius, r)
@@ -108,3 +110,57 @@ class TestCactusMultipoles(unittest.TestCase):
 
         # keys()
         self.assertCountEqual(alldets.keys(), radii)
+
+    def test_MultipolesDir(self):
+
+        sim = sd.SimDir("tests/tov")
+        cacdir = mp.MultipolesDir(sim)
+
+        # multipoles from textfile
+        with self.assertRaises(RuntimeError):
+            cacdir._multipole_from_textfile("tests/tov/output-0000/static_tov/carpet-timing..asc")
+
+        path = "tests/tov/output-0000/static_tov/mp_Phi2_l2_m-1_r110.69.asc"
+        path_h5 = "tests/tov/output-0000/static_tov/mp_harmonic.h5"
+        t, real, imag = np.loadtxt(path)
+
+        with h5py.File(path_h5, 'r') as data:
+            # Loop over the groups in the hdf5
+            a = data["l2_m2_r8.00"][()].T
+
+        # Capture unrelated warnings due to splines
+        with self.assertWarns(Warning):
+            mpts = ts.TimeSeries(t, real + 1j * imag)
+            ts_h5 = ts.TimeSeries(a[0], a[1] + 1j*a[2])
+
+            self.assertEqual(mpts, cacdir._multipole_from_textfile(path))
+            self.assertEqual(ts_h5,
+                             cacdir._multipoles_from_h5files([path_h5])[8.00](2,2))
+
+            mpfiles = [(2, 2, 100, path)]
+
+            # Check one specific case
+            self.assertEqual(mpts,
+                             cacdir._multipoles_from_textfiles(mpfiles)[100](2, 2))
+
+            self.assertEqual(cacdir['phi2'][110.69](2, -1), mpts)
+            self.assertEqual(cacdir['harmonic'][8.00](2, 2), ts_h5)
+
+            # test get
+            self.assertIs(cacdir.get("bubu"), None)
+            self.assertEqual(cacdir.get('harmonic')[8.00](2, 2), ts_h5)
+
+        # test __getitem__
+        with self.assertRaises(KeyError):
+            cacdir['bubu']
+
+        # test __contains__
+        self.assertIn('phi2', cacdir)
+
+        # test keys()
+        self.assertCountEqual(cacdir.keys(), ['harmonic', 'phi2', 'psi4'])
+
+        # test __str__()
+        # Capture unrelated warnings due to splines
+        with self.assertWarns(Warning):
+            self.assertIn("harmonic", cacdir.__str__())

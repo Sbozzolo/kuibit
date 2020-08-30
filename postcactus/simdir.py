@@ -11,6 +11,7 @@ import os
 # which is quite new
 from functools import lru_cache
 from postcactus import cactus_scalars
+from postcactus import cactus_multipoles
 
 class SimDir:
     """This class represents a CACTUS simulation directory.
@@ -163,10 +164,16 @@ class SimDir:
 
     timeseries = ts
 
+    @property
+    @lru_cache(1)
+    def multipoles(self):
+        return cactus_multipoles.MultipolesDir(self)
+
     def __str__(self):
         header = f"Indexed {len(self.allfiles)} files"
         header += f"and {len(self.dirs)} subdirectories\n"
 
         ts_ret = self.ts.__str__()
+        mp_ret = self.multipoles.__str__()
 
-        return header + ts_ret
+        return header + ts_ret + mp_ret
