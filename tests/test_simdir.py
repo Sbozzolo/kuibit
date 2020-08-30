@@ -37,8 +37,8 @@ class TestSimDir(unittest.TestCase):
         self.assertEqual(len(self.sim.dirs), 5)
 
         # find . -type f | grep -v "SIMFACTORY" | grep -v "NODES" | wc -l
-        # 391
-        self.assertEqual(len(self.sim.allfiles), 391)
+        # 442
+        self.assertEqual(len(self.sim.allfiles), 442)
 
         # Checking max_depth
         sim_max_depth = sd.SimDir("tests/tov", max_depth=2)
@@ -61,4 +61,11 @@ class TestSimDir(unittest.TestCase):
 
         # Check that all the expected components are in
         # the string representation
-        self.assertIn(self.sim.ts.__str__(), self.sim.__str__())
+        #
+        # To look at the multipoles we have to build some
+        # timeseries, so there may be a warning on too few points
+        # we caputre that:
+        with self.assertWarns(Warning):
+            self.assertIn(self.sim.ts.__str__(), self.sim.__str__())
+            self.assertIn(self.sim.multipoles.__str__(),
+                          self.sim.__str__())

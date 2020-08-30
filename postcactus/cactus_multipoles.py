@@ -2,16 +2,18 @@
 
 """This module provides access to data saved by the multipoles thorn.
 
-   The main class is :py:class:`CactusMultipoleDir`, which is typically
+   The main class is :py:class:`MultipolesDir`, which is typically
    accessed through :py:class:`~.SimDir` instances.
 
 """
 
 from postcactus import timeseries
-# import numpy as np
-# import h5py
-# import re
-# import os
+from functools import lru_cache
+from postcactus.attr_dict import pythonize_name_dict
+import numpy as np
+import h5py
+import re
+import os
 
 
 class MultipoleDet:
@@ -27,6 +29,8 @@ class MultipoleDet:
     called as a function(l,m). Iteration is supported and yields tuples
     (l, m, data), which can be used to loop through all the multipoles
     available.
+
+    Not intended for direct use.
 
     :ivar dist: Radius of the sphere
     :vartype dist: float
@@ -94,6 +98,9 @@ class MultipoleDet:
     def keys(self):
         return self.available_lm
 
+    def __str__(self):
+        return f"(l, m) available: {self.keys()}"
+
 
 class MultipoleAllDets:
     """This class collects available surfaces with multipole data.
@@ -102,6 +109,8 @@ class MultipoleAllDets:
     returning a :py:class:`MultipoleDet` object. Iteration is supported,
     sorted by ascending radius. You can iterate over all the radii and
     all the available l and m with a nested loop.
+
+    Not intended for direct use.
 
     :ivar radii:        Available surface radii.
     :vartype radii: float
@@ -115,6 +124,7 @@ class MultipoleAllDets:
     :vartype available_l: list
     :ivar available_m:  List of available "m".
     :vartype available_m: list
+
     """
 
     def __init__(self, data):
@@ -173,129 +183,177 @@ class MultipoleAllDets:
         return len(self._dets)
 
     def keys(self):
-        return self._dets.keys()
+        # TODO: In Python3 keys are not list, but iterables
+        return list(self._dets.keys())
+
+    def __str__(self):
+        ret = f"Radii avilable: {self.keys()}\n\n"
+        for d in sorted(self.keys()):
+            ret += f"At radius {d}, {self._dets[d]}\n"
+        return ret
 
 
-# class CactusMultipoleDir:
-#     """This class provides acces to various types of multipole data in a given
-#     simulation directory.
+class MultipolesDir:
+    """This class provides acces to various types of multipole data in a given
+    simulation directory.
 
-#     Files are lazily loaded.
+    This class is like a dictionary, you can access its values using the
+    brackets operator. The output is a :py:mod:`~.MultipoleAllDets`, which has
+    a full multipolar description for all the available radii. Files are lazily
+    loaded. If both h5 and ASCII are present, h5 are preferred. There's no
+    attempt to combine the two.
 
-#     If both h5 and ASCII are present, h5 are preferred. There's no attempt to
-#     combine the two.
-#     """
+    Alternatively, you can access variables with get() or with fields.var_name.
+    """
 
-#     def __init__(self, sd):
-#         # self._vars is a dictionary. The keys are the variables,
-#         # and the items are lists of tuples of the form
-#         # (multipole_l, multipole_m, radius, filename) for text
-#         # files and
-#         # (0, 0, -1, filename) for h5 files (since we have to read
-#         # the content to find the l and m)
-#         self._vars = {}
+    def __init__(self, sd):
+        # self._vars is a dictionary. For _vars_txt, the keys are the
+        # variables  and the items are lists of tuples of the form
+        # (multipole_l,  multipole_m, radius, filename) for text files.
+        #
+        # For _vars_h5 they are lists (since we have to read the content
+        # to find the l and m)
+        self._vars_txt = {}
+        self._vars_h5 = {}
 
-#         # First, we need to find the multipole files.
-#         # There are text files and h5 files
-#         #
-#         # We use a regular expressions on the name
-#         # The structure is like mp_Psi4_l_m2_r110.69.asc
-#         #
-#         # Let's understand the regexp:
-#         # 0. ^ and $ means that we match the entire name
-#         # 1. We match mp_ followed my the variable name, which is
-#         #    any combination of characters
-#         # 2. We match _l with a number
-#         # 3. We match _m with possibly a minus sign and a number
-#         # 4. We match _r with any combination of numbers with possibly
-#         #    dots
-#         # 5. We possibly match a compression
-#         rx_txt = re.compile(r"""^
-#         mp_([a-zA-Z0-9\[\]_]+)
-#         _l(\d+)
-#         _m([-]?\d+)
-#         _r([0-9.]+)
-#         .asc
-#         (?:.bz2|.gz)?
-#         $""", re.VERBOSE)
+        self.path = sd.path
+        # First, we need to find the multipole files.
+        # There are text files and h5 files
+        #
+        # We use a regular expressions on the name
+        # The structure is like mp_Psi4_l_m2_r110.69.asc
+        #
+        # Let's understand the regexp:
+        # 0. ^ and $ means that we match the entire name
+        # 1. We match mp_ followed my the variable name, which is
+        #    any combination of characters
+        # 2. We match _l with a number
+        # 3. We match _m with possibly a minus sign and a number
+        # 4. We match _r with any combination of numbers with possibly
+        #    dots
+        # 5. We possibly match a compression
+        rx_txt = re.compile(r"""^
+        mp_([a-zA-Z0-9\[\]_]+)
+        _l(\d+)
+        _m([-]?\d+)
+        _r([0-9.]+)
+        .asc
+        (?:.bz2|.gz)?
+        $""", re.VERBOSE)
 
-#         # For h5 files is easy: it is just the var name
-#         rx_h5 = re.compile(r'^mp_([a-zA-Z0-9\[\]_]+).h5$')
+        # For h5 files is easy: it is just the var name
+        rx_h5 = re.compile(r'^mp_([a-zA-Z0-9\[\]_]+).h5$')
 
-#         for f in sd.allfiles:
-#             filename = os.path.split(f)[1]
-#             matched_h5 = rx_h5.match(filename)
-#             matched_txt = rx_txt.match(filename)
-#             if (matched_h5 is not None):
-#                 variable_name = matched_h5.group(1).lower()
-#                 var_list = self._vars.setdefault(variable_name, [])
-#                 # We are flagging that this h5
-#                 var_list.append((0, 0, -1, filename))
-#             elif (matched_txt is not None):
-#                 variable_name = matched_txt.group(1).lower()
-#                 mult_l = int(matched_txt.group(2))
-#                 mult_m = int(matched_txt.group(3))
-#                 radius = float(matched_txt.group(4))
-#                 var_list = self._vars.setdefault(variable_name, [])
-#                 var_list.append((mult_l, mult_m, radius,
-#                                  filename))
+        for f in sd.allfiles:
+            filename = os.path.split(f)[1]
+            matched_h5 = rx_h5.match(filename)
+            matched_txt = rx_txt.match(filename)
+            if (matched_h5 is not None):
+                variable_name = matched_h5.group(1).lower()
+                var_list = self._vars_h5.setdefault(variable_name, [])
+                # We are flagging that this h5
+                var_list.append(f)
+            elif (matched_txt is not None):
+                variable_name = matched_txt.group(1).lower()
+                mult_l = int(matched_txt.group(2))
+                mult_m = int(matched_txt.group(3))
+                radius = float(matched_txt.group(4))
+                var_list = self._vars_txt.setdefault(variable_name, [])
+                var_list.append((mult_l, mult_m, radius, f))
 
-#     def __contains__(self, key):
-#         return str(key).lower() in self._vars
+        # What pythonize_name_dict does is to make the various variables
+        # accessible as attributes, e.g. self.fields.rho
+        self.fields = pythonize_name_dict(list(self.keys()),
+                                          self.__getitem__)
 
-#     def _multipole_from_textfile(self, path):
-#         a = np.loadtxt(path, unpack=True, ndmin=2)
-#         if ((len(a) != 3)):
-#             raise RuntimeError('Wrong format')
-#         mp = a[1] + 1j * a[2]
-#         return timeseries.remove_duplicate_iters(a[0], mp)
+    def __contains__(self, key):
+        return str(key).lower() in self.keys()
 
-#     def _multipoles_from_textfiles(self, mpfiles):
-#         amp = [(mult_l, mult_m, radius, self._multipole_from_textfile(filename))
-#                for mult_l, mult_m, radius, filename in mpfiles]
+    # The following are staticmethods because they do not depend on the bound
+    # object. Using this decorator we save memory because Python will
+    # initialize them only once.
 
-#         return MultipoleAllDets(amp)
+    @staticmethod
+    def _multipole_from_textfile(path):
+        a = np.loadtxt(path, unpack=True, ndmin=2)
+        if (len(a) != 3):
+            raise RuntimeError(f'Wrong format in {path}')
+        complex_mp = a[1] + 1j * a[2]
+        return timeseries.remove_duplicate_iters(a[0],
+                                                 complex_mp)
 
-#     def _multipoles_from_h5file(self, mpfile):
-#         mpfiles = h5py.File(mpfile, 'r')
-#         amp = []
-#         # This regexp matched : l(number)_m(-number)_r(number)
-#         fieldname_pattern = re.compile(r'l(\d+)_m([-]?\d+)_r([0-9.]+)')
+    @staticmethod
+    def _multipoles_from_h5file(path):
+        alldets = []
+        # This regexp matches : l(number)_m(-number)_r(number)
+        fieldname_pattern = re.compile(r'l(\d+)_m([-]?\d+)_r([0-9.]+)')
 
-#         for n in mpfile.keys():
-#             matched = fieldname_pattern.match(n)
-#             if not matched:
-#                 continue
+        with h5py.File(path, 'r') as data:
 
-#             mult_l = int(matched.group(1))
-#             mult_m = int(matched.group(2))
-#             radius = float(matched.group(3))
-#             a = mpfile[n][()]
-#             ts = timeseries.TimeSeries(a[:, 0], a[:, 1] + 1j*a[:, 2])
-#             amp.append((mult_l, mult_m, radius, ts))
+            # Loop over the groups in the hdf5
+            for entry in data.keys():
+                matched = fieldname_pattern.match(entry)
+                if matched:
+                    mult_l = int(matched.group(1))
+                    mult_m = int(matched.group(2))
+                    radius = float(matched.group(3))
+                    # Read the actual data
+                    a = data[entry][()].T
+                    ts = timeseries.TimeSeries(a[0],
+                                               a[1] + 1j*a[2])
+                    alldets.append((mult_l, mult_m,
+                                    radius, ts))
 
-#     def _multipoles_from_h5files(self, mpfiles):
-#         mult_l = []
+        return alldets
 
-#         for filename in mpfiles:
-#             mult_l.extend(self._mp_from_h5file(filename))
+    def _multipoles_from_textfiles(self, mpfiles):
+        # We prepare the data for MultipoleAllDets checking
+        # for errors
+        alldets = [(mult_l, mult_m, radius,
+                    self._multipole_from_textfile(filename)) for
+                   mult_l, mult_m, radius, filename in mpfiles]
+        return MultipoleAllDets(alldets)
 
-#         return MultipoleAllDets(mult_l)
+    def _multipoles_from_h5files(self, mpfiles):
+        mult_l = []
 
-#     def __getitem__(self, key):
-#         k = str(key).lower()
-#         if self._vars[k][2] == -1:  # When the radius is -1 it's h5
-#             return self._multipoles_from_h5files(self._vars[k])
-#         else:
-#             return self._multipoles_from_textfiles(self._vars[k])
+        for filename in mpfiles:
+            mult_l.extend(self._multipoles_from_h5file(filename))
 
-#     def get(self, key, default=None):
-#         if key not in self:
-#             return default
-#         return self[key]
+        return MultipoleAllDets(mult_l)
 
-#     def keys(self):
-#         return list(self._vars.keys())
+    @lru_cache(128)
+    def __getitem__(self, key):
+        """:The return value is py:class:`~.MultipoleAllDets`.
+        """
+        k = str(key).lower()
+        # We prefer h5
+        if k in self._vars_h5:
+            return self._multipoles_from_h5files(self._vars_h5[k])
 
-#     def __str__(self):
-#         pass
+        if k in self._vars_txt:
+            return self._multipoles_from_textfiles(self._vars_txt[k])
+
+        raise KeyError
+
+    def get(self, key, default=None):
+        if key not in self:
+            return default
+        return self[key]
+
+    def keys(self):
+        # To find the unique keys we use transofrm the keys in sets, and then
+        # we unite them.
+        return list(
+            set(self._vars_h5.keys()).union(set(self._vars_txt.keys())))
+
+    def __str__(self):
+        """NOTE: __str__ requires opening all the h5 files!
+        This can be slow!
+        """
+        ret = f"Folder: {self.path}\n"
+        ret += f"Variables available: {self.keys()}\n"
+        for variable in self.keys():
+            ret += f"For variable {variable}:\n\n"
+            ret += f"{self[variable]}\n"
+        return ret
