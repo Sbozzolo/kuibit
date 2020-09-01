@@ -14,6 +14,7 @@ import numpy as np
 import h5py
 import re
 import os
+import warnings
 
 
 class MultipoleDet:
@@ -30,27 +31,39 @@ class MultipoleDet:
     (l, m, data), which can be used to loop through all the multipoles
     available.
 
+    The reason we allow for l_min is to remove those files that are not
+    necessary when considering gravitational waves (l<2).
+
     Not intended for direct use.
 
     :ivar dist: Radius of the sphere
     :vartype dist: float
     :ivar radius: Radius of the sphere
-    :vartype dist: float
+    :vartype radius: float
+    :ivar l_min: l smaller than l_min are dropped
+    :vartype l_min: int
     :ivar available_l: Available l values
-    :vartype available_l: list
+    :vartype available_l: set
     :ivar available_m: Available m values
-    :ivar available_m: list
+    :ivar available_m: set
     :ivar available_lm: Available (l, m) values
-    :ivar available_lm: list of tuples
+    :ivar available_lm: set of tuples
+    :ivar missing_lm: Missing (l, m) values to have all from l_min to l_max
+    :ivar missing_lm: set of tuples
 
     """
 
-    def __init__(self, dist, data):
+    def __init__(self, dist, data, l_min=0):
         """ Data is a list of tuples with (l, m, timeseries).
+
+        l smaller than l_min are dropped
         """
 
         self.dist = float(dist)
         self.radius = self.dist  # This is just an alias
+
+        self.l_min = l_min
+
         # Associate multipoles to list of timeseries
         multipoles_list_ts = {}
 
@@ -59,19 +72,35 @@ class MultipoleDet:
         # the key is not already present, we create it with value an empty
         # list, then we append the timeseries to this list
         for mult_l, mult_m, ts in data:  # mult = "multipole"
-            lm_list = multipoles_list_ts.setdefault((mult_l, mult_m), [])
-            # This means: multipoles[(mult_t, mult_m)] = []
-            lm_list.append(ts)
-            # At the end we have:
-            # multipoles[(mult_t, mult_m)] = [ts1, ts2, ...]
+            if (mult_l >= l_min):
+                lm_list = multipoles_list_ts.setdefault((mult_l, mult_m), [])
+                # This means: multipoles[(mult_t, mult_m)] = []
+                lm_list.append(ts)
+                # At the end we have:
+                # multipoles[(mult_t, mult_m)] = [ts1, ts2, ...]
 
         # Now self._multipoles is a dictionary in which all the timeseries are
         # collapse in a single one. So it is a straightforward map (l, m) -> ts
         self._multipoles = {lm: timeseries.combine_ts(ts)
                             for lm, ts in multipoles_list_ts.items()}
-        self.available_l = {mult_l for mult_l, _ in self._multipoles.keys()}
-        self.available_m = {mult_m for _, mult_m in self._multipoles.keys()}
-        self.available_lm = list(self._multipoles.keys())
+        self.available_l = sorted({mult_l for mult_l, _
+                                   in self._multipoles.keys()})
+        self.available_m = sorted({mult_m for _, mult_m
+                                   in self._multipoles.keys()})
+        self.available_lm = set(self._multipoles.keys())
+
+        # Check if all the (l, m) from l_min to l_max are available
+        all_lm = set()
+        for mult_l in range(self.l_min, max(self.available_l) + 1):
+            for mult_m in range(-mult_l, mult_l + 1):
+                all_lm.add((mult_l, mult_m))
+
+        # set subtraction
+        self.missing_lm = all_lm - self.available_lm
+
+    def copy(self):
+        data = [(lm[0], lm[1], ts) for lm, ts in self._multipoles.items()]
+        return type(self)(self.dist, data, self.l_min)
 
     def __contains__(self, key):
         return key in self._multipoles
@@ -99,7 +128,16 @@ class MultipoleDet:
         return self.available_lm
 
     def __str__(self):
-        return f"(l, m) available: {self.keys()}"
+        ret = f"(l, m) available: {self.keys()}"
+        if (self.missing_lm):
+            ret += f" (missing: {list(self.missing_lm)})"
+        return ret
+
+    def _warn_missing(self, where):
+        # To be used for computating, ie, energy
+        if self.missing_lm:
+            warnings.warn(f"{where}: missing {list(self.missing_lm)},"
+                          "(assuming zero)", RuntimeWarning)
 
 
 class MultipoleAllDets:
@@ -116,6 +154,8 @@ class MultipoleAllDets:
     :vartype radii: float
     :ivar r_outer:      Radius of the outermost detector
     :vartype r_outer: float
+    :ivar l_min: l smaller than l_min are dropped
+    :vartype l_min: int
     :ivar outermost:    Outermost detector
     :vartype outermost: :py:class:`~MultipoleDet`
     :ivar available_lm: Available components as tuple (l,m).
@@ -127,10 +167,12 @@ class MultipoleAllDets:
 
     """
 
-    def __init__(self, data):
+    def __init__(self, data, l_min=0):
         """Data is a list of tuples with structure
         (multipole_l, multipole_m, extraction_radius, [timeseries])
         """
+        self.l_min = l_min
+
         detectors = {}
         self.available_lm = set()
 
@@ -140,14 +182,15 @@ class MultipoleAllDets:
         # We accumulate in the list all the ones for the same
         # radius
         for mult_l, mult_m, radius, ts in data:
-            # If we don't have the radius yet, let's create an empty list
-            d = detectors.setdefault(radius, [])
-            # Add the new values
-            d.append((mult_l, mult_m, ts))
-            # Tally the available l and m
-            self.available_lm.add((mult_l, mult_m))
+            if (mult_l >= self.l_min):
+                # If we don't have the radius yet, let's create an empty list
+                d = detectors.setdefault(radius, [])
+                # Add the new values
+                d.append((mult_l, mult_m, ts))
+                # Tally the available l and m
+                self.available_lm.add((mult_l, mult_m))
 
-        self._detectors = {radius: MultipoleDet(radius, multipoles)
+        self._detectors = {radius: MultipoleDet(radius, multipoles, self.l_min)
                            for radius, multipoles in detectors.items()}
 
         # In Python3 .keys() is not a list
@@ -157,11 +200,20 @@ class MultipoleAllDets:
             self.r_outer = self.radii[-1]
             self.outermost = self._detectors[self.r_outer]
         #
-        self.available_l = {mult_l for mult_l, _ in self.available_lm}
-        self.available_m = {mult_m for _, mult_m in self.available_lm}
+        self.available_l = sorted({mult_l for mult_l, _ in self.available_lm})
+        self.available_m = sorted({mult_m for _, mult_m in self.available_lm})
 
         # Alias
         self._dets = self._detectors
+
+    def copy(self):
+        # Now we have to prepare data with format:
+        # (multipole_l, multipole_m, extraction_radius, [timeseries])
+        data = []
+        for radius, det in self._dets.items():
+            for mult_l, mult_m, ts in det:
+                data.append((mult_l, mult_m, radius, ts))
+        return type(self)(data, self.l_min)
 
     def __contains__(self, key):
         return key in self._dets

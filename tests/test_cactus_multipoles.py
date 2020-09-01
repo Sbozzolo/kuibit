@@ -27,12 +27,16 @@ class TestCactusMultipoles(unittest.TestCase):
 
         data = [(2, 2, self.ts1), (2, 2, self.ts2)]
         data2 = [(2, 2, self.ts1), (2, -2, self.ts2)]
+        data3 = [(2, 2, self.ts1), (1, 1, self.ts2)]
 
         mult1 = mp.MultipoleDet(100, data)
         mult2 = mp.MultipoleDet(100, data2)
+        mult3 = mp.MultipoleDet(100, data3, l_min=2)
 
         self.assertEqual(mult1.dist, 100)
         self.assertEqual(mult1.radius, 100)
+        self.assertEqual(mult1.l_min, 0)
+        self.assertEqual(mult3.l_min, 2)
 
         # test __call__
         self.assertEqual(mult1(2, 2), ts_comb)
@@ -50,6 +54,17 @@ class TestCactusMultipoles(unittest.TestCase):
         self.assertCountEqual(mult2.available_m, {2, -2})
         self.assertCountEqual(mult1.available_lm, {(2, 2)})
         self.assertCountEqual(mult2.available_lm, {(2, 2), (2, -2)})
+        self.assertCountEqual(mult3.available_l, {2})
+        self.assertCountEqual(mult3.available_m, {2})
+        self.assertCountEqual(mult3.missing_lm, {(2, -2),
+                                                 (2, -1),
+                                                 (2, 0),
+                                                 (2, 1)})
+
+        # test _warn_missing
+        with self.assertWarns(Warning):
+            mult3._warn_missing("Energy")
+
 
         # test contains
         self.assertIn((2, 2), mult1)
@@ -75,6 +90,7 @@ class TestCactusMultipoles(unittest.TestCase):
 
         # test __str__()
         self.assertIn("(2, 2)", mult1.__str__())
+        self.assertIn("missing", mult3.__str__())
 
     def test_MultipoleAllDet(self):
 
@@ -138,8 +154,6 @@ class TestCactusMultipoles(unittest.TestCase):
             # Loop over the groups in the hdf5
             a = data["l2_m2_r8.00"][()].T
 
-        # Capture unrelated warnings due to splines
-        # with self.assertWarns(Warning):
         mpts = ts.TimeSeries(t, real + 1j * imag)
         ts_h5 = ts.TimeSeries(a[0], a[1] + 1j*a[2])
 
