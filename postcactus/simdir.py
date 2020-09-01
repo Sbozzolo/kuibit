@@ -12,6 +12,8 @@ import os
 from functools import lru_cache
 from postcactus import cactus_scalars
 from postcactus import cactus_multipoles
+from postcactus import cactus_waves
+
 
 class SimDir:
     """This class represents a CACTUS simulation directory.
@@ -31,12 +33,12 @@ class SimDir:
                           :py:class:`~.ScalarsDir`
     :ivar grid:           Access to grid function data, see
                           :py:class:`~.GridOmniDir`.
-    :ivar gwmoncrief:     GW signal obtained using Moncrief formalism,
-                          see :py:class:`~.CactusGWMoncrief`.
-    :ivar gwpsi4mp:       GW signal from the Weyl scalar multipole
-                          decomposition, see :py:class:`~.CactusGWPsi4MP`.
-    :ivar emphi2mp:       EM signal from the Weyl scalar multipole
-                          decomposition, see :py:class:`~.CactusEMPhi2MP`.
+    :ivar gws:            GW signal from the Weyl scalar multipole
+                          decomposition, see
+                          :py:class:`~.GravitationalWavesDir`.
+    :ivar emws:           EM signal from the Weyl scalar multipole
+                          decomposition, see
+                          :py:class:`~.ElectromagneticWavesDir`.
     :ivar ahoriz:         Apparent horizon information, see
                           :py:class:`~.CactusAH`.
     :ivar multipoles:     Multipole components, see
@@ -168,6 +170,16 @@ class SimDir:
     @lru_cache(1)
     def multipoles(self):
         return cactus_multipoles.MultipolesDir(self)
+
+    @property
+    @lru_cache(1)
+    def gws(self):
+        return cactus_waves.GravitationalWavesDir(self)
+
+    @property
+    @lru_cache(1)
+    def emws(self):
+        return cactus_waves.ElectromagneticWavesDir(self)
 
     def __str__(self):
         header = f"Indexed {len(self.allfiles)} files"
