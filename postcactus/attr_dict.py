@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
-"""The :py:mod:`~.attr_dict` module provides supporting infrastructure to access
-dictionary as attributes. That is, to be able to do something like
+"""The :py:mod:`~.attr_dict` module provides supporting infrastructure to
+access dictionary as attributes. That is, to be able to do something like
 object.attribute instead of object['attribute'] with attribute dynamically
 determined.
 
@@ -70,16 +70,17 @@ class TransformDictionary:
     TransformDictionary with td._elem = {'nested': 'dictionary'}.
     """
 
-    def __init__(self, elem, transform=lambda x:x):
+    def __init__(self, elem, transform=lambda x: x):
 
         if not hasattr(elem, 'items'):
             raise TypeError("Input is not dictionary-like")
 
         def dict_filter(x):
-            return TransformDictionary(x, transform) if isinstance(x, dict) else x
+            return (TransformDictionary(x, transform)
+                    if isinstance(x, dict) else x)
 
-        self._elem = {k:dict_filter(v) for k,v in elem.items()}
-        self._transform  = transform
+        self._elem = {k: dict_filter(v) for k, v in elem.items()}
+        self._transform = transform
 
     def __getitem__(self, name):
         e = self._elem[name]
@@ -100,9 +101,9 @@ class TransformDictionary:
         return name in self._elem
 
 
-def pythonize_name_dict(names_list, transform=lambda x:x):
-    """Take a list of names, like ['rho[0]', 'rho[1], 'energy', 'bob'] and return a
-    AttributeDictionary with attributes passed through the function.
+def pythonize_name_dict(names_list, transform=lambda x: x):
+    """Take a list of names, like ['rho[0]', 'rho[1], 'energy', 'bob'] and
+    return a AttributeDictionary with attributes passed through the function.
 
     Names that those that are not like are 'rho[0]' are set as keys (the values
     are transform(name)). Names that are like 'rho[0]', the key is set as rho,
@@ -115,8 +116,8 @@ def pythonize_name_dict(names_list, transform=lambda x:x):
 
     p.rho is a dictionary-like object.
 
-    We will use this function with transform = __getitem__ so that p.energy will
-    return the value of energy (not the key).
+    We will use this function with transform = __getitem__ so that p.energy
+    will return the value of energy (not the key).
 
     """
     res = {}
@@ -127,18 +128,17 @@ def pythonize_name_dict(names_list, transform=lambda x:x):
     # - ([^\[\]]+) match everything that is not [ and ] (var name)
     # - \[([\d]+)\] matches numbers in brakets (e.g. [0])
     for name in names_list:
-       matched = pattern.search(name)
-       if matched is None:
-           # It's not something like rho[0], we can use it
-           # as a key
-           res[name] = name
-       else:
-          # The setdefault() method returns the value of the item with the specified
-          # key. if the key does not exist, insert the key, with the specified value
-          # e.g.:
-          # res.setdefault("a", {})[1] = "a[1]"
-          # a -> {'a': {1: 'a[1]'}}
-          res.setdefault(matched.group(1), {})[int(matched.group(2))] = name
+        matched = pattern.search(name)
+        if matched is None:
+            # It's not something like rho[0], we can use it
+            # as a key
+            res[name] = name
+        else:
+            # The setdefault() method returns the value of the item with the
+            # specified key. if the key does not exist, insert the key, with
+            # the specified value e.g.:
+            # res.setdefault("a", {})[1] = "a[1]" a -> {'a': {1: 'a[1]'}}
+            res.setdefault(matched.group(1), {})[int(matched.group(2))] = name
 
     res = TransformDictionary(res, transform)
     return AttributeDictionary(res)
