@@ -98,9 +98,11 @@ class MultipoleDet:
         # set subtraction
         self.missing_lm = all_lm - self.available_lm
 
+        # Data is in the format expected by __init__
+        self.data = [(lm[0], lm[1], ts) for lm, ts in self._multipoles.items()]
+
     def copy(self):
-        data = [(lm[0], lm[1], ts) for lm, ts in self._multipoles.items()]
-        return type(self)(self.dist, data, self.l_min)
+        return type(self)(self.dist, self.data, self.l_min)
 
     def __contains__(self, key):
         return key in self._multipoles
@@ -178,7 +180,7 @@ class MultipoleAllDets:
 
         # Populate detectors
         # detectors is a dictionary with keys the radii and
-        # items that look like ([l, m, [timeseries], ...]).
+        # items that look like ([l, m, timeseries, ...]).
         # We accumulate in the list all the ones for the same
         # radius
         for mult_l, mult_m, radius, ts in data:
@@ -206,14 +208,15 @@ class MultipoleAllDets:
         # Alias
         self._dets = self._detectors
 
-    def copy(self):
-        # Now we have to prepare data with format:
+        # Data is in the format expected by __init__
         # (multipole_l, multipole_m, extraction_radius, [timeseries])
-        data = []
+        self.data = []
         for radius, det in self._dets.items():
             for mult_l, mult_m, ts in det:
-                data.append((mult_l, mult_m, radius, ts))
-        return type(self)(data, self.l_min)
+                self.data.append((mult_l, mult_m, radius, ts))
+
+    def copy(self):
+        return type(self)(self.data, self.l_min)
 
     def __contains__(self, key):
         return key in self._dets

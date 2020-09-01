@@ -29,8 +29,11 @@ class TestCactusMultipoles(unittest.TestCase):
         data2 = [(2, 2, self.ts1), (2, -2, self.ts2)]
         data3 = [(2, 2, self.ts1), (1, 1, self.ts2)]
 
+        # Combinging ts
         mult1 = mp.MultipoleDet(100, data)
+        # Different multipoles
         mult2 = mp.MultipoleDet(100, data2)
+        # l_min != 0
         mult3 = mp.MultipoleDet(100, data3, l_min=2)
 
         self.assertEqual(mult1.dist, 100)
