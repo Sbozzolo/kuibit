@@ -17,7 +17,7 @@ import os
 import warnings
 
 
-class MultipoleDet:
+class MultipoleOneDet:
     """This class collects multipole components of a specific variable
     a given spherical surface.
 
@@ -146,7 +146,7 @@ class MultipoleAllDets:
     """This class collects available surfaces with multipole data.
 
     It works as a dictionary in terms of spherical surface radius,
-    returning a :py:class:`MultipoleDet` object. Iteration is supported,
+    returning a :py:class:`MultipoleOneDet` object. Iteration is supported,
     sorted by ascending radius. You can iterate over all the radii and
     all the available l and m with a nested loop.
 
@@ -159,7 +159,7 @@ class MultipoleAllDets:
     :ivar l_min: l smaller than l_min are dropped
     :vartype l_min: int
     :ivar outermost:    Outermost detector
-    :vartype outermost: :py:class:`~MultipoleDet`
+    :vartype outermost: :py:class:`~MultipoleOneDet`
     :ivar available_lm: Available components as tuple (l,m).
     :vartype available_lm: list of tuples
     :ivar available_l:  List of available "l".
@@ -192,7 +192,7 @@ class MultipoleAllDets:
                 # Tally the available l and m
                 self.available_lm.add((mult_l, mult_m))
 
-        self._detectors = {radius: MultipoleDet(radius, multipoles, self.l_min)
+        self._detectors = {radius: MultipoleOneDet(radius, multipoles, self.l_min)
                            for radius, multipoles in detectors.items()}
 
         # In Python3 .keys() is not a list

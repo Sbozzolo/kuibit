@@ -185,7 +185,13 @@ class SimDir:
         header = f"Indexed {len(self.allfiles)} files"
         header += f"and {len(self.dirs)} subdirectories\n"
 
-        ts_ret = self.ts.__str__()
-        mp_ret = self.multipoles.__str__()
+        ts_ret = f"{self.ts}"
+        mp_ret = f"{self.multipoles}"
 
-        return header + ts_ret + mp_ret
+        if len(self.gws) > 0:
+            gw_ret = "Available gravitational wave data"
+
+        if len(self.emws) > 0:
+            em_ret = "Available electromagnetic wave data"
+
+        return (header + ts_ret + mp_ret + gw_ret + em_ret)

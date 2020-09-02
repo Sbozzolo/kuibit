@@ -108,16 +108,16 @@ def sYlm(ss, ll, mm, theta, phi):
 
         if (local_l == local_m + 1):
             return Pm1
-        else:
-            for n in range(local_m + 2, local_l + 1):
-                Pn = ((x + local_s*local_m * 1.0 / (n * (n-1.0)))
-                      * sYlm_Cslm(local_s, n, local_m) * Pm1 -
-                      sYlm_Cslm(local_s, n, local_m) * 1.0 /
-                      sYlm_Cslm(local_s, n-1, local_m) * Pm)
-                Pm = Pm1
-                Pm1 = Pn
 
-            return Pn
+        for n in range(local_m + 2, local_l + 1):
+            Pn = ((x + local_s*local_m * 1.0 / (n * (n-1.0)))
+                  * sYlm_Cslm(local_s, n, local_m) * Pm1 -
+                  sYlm_Cslm(local_s, n, local_m) * 1.0 /
+                  sYlm_Cslm(local_s, n-1, local_m) * Pm)
+            Pm = Pm1
+            Pm1 = Pn
+
+        return Pn
 
     Pm = 1.0
 

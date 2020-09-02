@@ -9,13 +9,13 @@ from postcactus import cactus_multipoles as mp
 from postcactus import simdir
 
 
-class GravitationalWavesDet(mp.MultipoleDet):
+class GravitationalWavesOneDet(mp.MultipoleOneDet):
     """This class represents is an abstract class to represent multipole
     signals from Weyl scalars available at a given distance. To check if
     component is available, use the operator "in". You can iterate over all
     the availble components with a for loop.
 
-    This class is derived from :py:class:`~.MultipoleDet`, so it shares most of
+    This class is derived from :py:class:`~.MultipoleOneDet`, so it shares most of
     the features, while expanding with methods specific for gravitational waves
     (e.g, to compute the strain).
 
@@ -28,7 +28,7 @@ class GravitationalWavesDet(mp.MultipoleDet):
         super().__init__(dist, data, 2)
 
 
-class ElectromagneticWavesDet(mp.MultipoleDet):
+class ElectromagneticWavesOneDet(mp.MultipoleOneDet):
     """These are electromagnetic waves computed with the Newman-Penrose approach,
     using Phi2.
 
@@ -76,13 +76,14 @@ class GravitationalWavesDir(mp.MultipoleAllDets):
 
         super().__init__(data)
 
-        # Next step is to change the type of the objects from MultipoleDet to
-        # GravitationalWaveDet.
+        # Next step is to change the type of the objects from MultipoleOneDet to
+        # GravitationalWaveOneDet.
         #
         # To do this, we redefine the objects by instantiating new ones with
         # the same data
-        for _, det in self._dets.items():
-            det = GravitationalWavesDet(det.dist, det.data)
+        for r, det in self._dets.items():
+            self._dets[r] = GravitationalWavesOneDet(det.dist,
+                                                     det.data)
 
 
 class ElectromagneticWavesDir(mp.MultipoleAllDets):
@@ -108,5 +109,6 @@ class ElectromagneticWavesDir(mp.MultipoleAllDets):
                     data.append((mult_l, mult_m, radius, ts))
 
         super().__init__(data)
-        for det in self._dets:
-            det = ElectromagneticWavesDet(det.dist, det.data)
+        for r, det in self._dets.items():
+            self._dets[r] = ElectromagneticWavesOneDet(det.dist,
+                                                       det.data)
