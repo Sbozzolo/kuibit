@@ -12,7 +12,7 @@ import time
 
 class TestCactusWaves(unittest.TestCase):
 
-    def test_WavesDet(self):
+    def test_WavesOneDet(self):
 
         t1 = np.linspace(0, np.pi, 100)
         t2 = np.linspace(2 * np.pi, 3 * np.pi, 100)
@@ -27,8 +27,8 @@ class TestCactusWaves(unittest.TestCase):
         data2 = [(1, 1, ts1), (1, 0, ts2),
                  (1, -1, ts2)]
 
-        gw = cw.GravitationalWavesDet(dist1, data1)
-        em = cw.ElectromagneticWavesDet(dist1, data2)
+        gw = cw.GravitationalWavesOneDet(dist1, data1)
+        em = cw.ElectromagneticWavesOneDet(dist1, data2)
 
 
         self.assertEqual(gw.l_min, 2)
@@ -46,3 +46,10 @@ class TestCactusWaves(unittest.TestCase):
 
         sim = sd.SimDir("tests/tov")
         gwdir = cw.GravitationalWavesDir(sim)
+        emdir = cw.ElectromagneticWavesDir(sim)
+
+        # Check type
+        self.assertTrue(isinstance(gwdir[110.69],
+                                   cw.GravitationalWavesOneDet))
+        self.assertTrue(isinstance(emdir[110.69],
+                                   cw.ElectromagneticWavesOneDet))

@@ -18,7 +18,7 @@ import os
 import re
 
 
-class CactusScalarASCII:
+class OneScalar:
     """Read scalar data produced by CarpetASCII.
 
     CactusScalarASCII is a dictionary-like object: it has keys() and you can
@@ -273,13 +273,13 @@ class CactusScalarASCII:
         return list(self._vars.keys())
 
 
-class ScalarReader:
-    """Helper class to read various types of scalar data in a SimDir and
-    properly order them. The core of this object is the _vars dictionary
-    which contains the location of all the files for a specific variable
-    and reduction.
+class AllScalars:
+    """Helper class to read various types of scalar data in a list of files and
+    properly order them. The core of this object is the _vars dictionary which
+    contains the location of all the files for a specific variable and
+    reduction.
 
-    ScalarReader is a dictionary-like object.
+    AllScalars is a dictionary-like object.
 
     Using the [] notation you can access values with as TimeSeries.
 
@@ -287,9 +287,11 @@ class ScalarReader:
 
     """
 
-    def __init__(self, sd, reduction_type):
+    def __init__(self, allfiles, reduction_type):
         """sd has to be a SimDir object, reduction_type has to be a reduction
         or scalar.
+
+        allfiles is a list of files
         """
         self.reduction_type = str(reduction_type)
         # _vars is like _vars['variable']['folder'] -> CactusScalarASCII(f)
@@ -297,10 +299,10 @@ class ScalarReader:
         # to find the files associated to the variable and the reduction
         # reduction_type
         self._vars = {}
-        for f in sd.allfiles:
+        for f in allfiles:
             # We only save those that variables are well-behaved
             try:
-                cactusascii_file = CactusScalarASCII(f)
+                cactusascii_file = OneScalar(f)
                 if cactusascii_file.reduction_type == reduction_type:
                     for v in list(cactusascii_file.keys()):
                         # We add to the _vars dictionary the mapping:
@@ -392,16 +394,38 @@ class ScalarsDir:
             raise TypeError("Input is not SimDir")
 
         self.path = sd.path
-        self.point = ScalarReader(sd, 'scalar')
-        self.scalar = ScalarReader(sd, 'scalar')
-        self.minimum = ScalarReader(sd, 'minimum')
-        self.maximum = ScalarReader(sd, 'maximum')
-        self.norm1 = ScalarReader(sd, 'norm1')
-        self.norm2 = ScalarReader(sd, 'norm2')
-        self.average = ScalarReader(sd, 'average')
-        self.infnorm = ScalarReader(sd, 'infnorm')
+        self.point = AllScalars(sd.allfiles, 'scalar')
+        self.scalar = AllScalars(sd.allfiles, 'scalar')
+        self.minimum = AllScalars(sd.allfiles, 'minimum')
+        self.maximum = AllScalars(sd.allfiles, 'maximum')
+        self.norm1 = AllScalars(sd.allfiles, 'norm1')
+        self.norm2 = AllScalars(sd.allfiles, 'norm2')
+        self.average = AllScalars(sd.allfiles, 'average')
+        self.infnorm = AllScalars(sd.allfiles, 'infnorm')
+
+    def __getitem__(self, reduction):
+        return getattr(self, reduction)
+
+    def get(self, key, default=None):
+        """Return a reduction if available, else return the default value.
+
+        :param key: Requested reduction
+        :type key: str
+        :param default: Returned value if reduction is not available
+        :type default: any
+
+        :returns: Timeseries of the requested variable
+        :rtype: :py:class:`~.AllScalars`
+
+        """
+        if key in ["point", "scalar", "minimum", "maximum", "norm1",
+                   "norm2", "average", "infnorm"]:
+            return self[key]
+
+        return default
 
     def __str__(self):
         return "Folder %s\n%s\n%s\n%s\n%s\n%s\n%s\n"\
             % (self.path, self.scalar, self.minimum,
                self.maximum, self.norm1, self.norm2, self.average)
+

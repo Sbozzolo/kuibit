@@ -21,7 +21,7 @@ class TestCactusMultipoles(unittest.TestCase):
         self.ts1 = ts.TimeSeries(self.t1, self.y1)
         self.ts2 = ts.TimeSeries(self.t2, self.y2)
 
-    def test_MultipoleDet(self):
+    def test_MultipoleOneDet(self):
 
         ts_comb = ts.combine_ts([self.ts1, self.ts2])
 
@@ -30,11 +30,11 @@ class TestCactusMultipoles(unittest.TestCase):
         data3 = [(2, 2, self.ts1), (1, 1, self.ts2)]
 
         # Combinging ts
-        mult1 = mp.MultipoleDet(100, data)
+        mult1 = mp.MultipoleOneDet(100, data)
         # Different multipoles
-        mult2 = mp.MultipoleDet(100, data2)
+        mult2 = mp.MultipoleOneDet(100, data2)
         # l_min != 0
-        mult3 = mp.MultipoleDet(100, data3, l_min=2)
+        mult3 = mp.MultipoleOneDet(100, data3, l_min=2)
 
         self.assertEqual(mult1.dist, 100)
         self.assertEqual(mult1.radius, 100)
@@ -95,7 +95,7 @@ class TestCactusMultipoles(unittest.TestCase):
         self.assertIn("(2, 2)", mult1.__str__())
         self.assertIn("missing", mult3.__str__())
 
-    def test_MultipoleAllDet(self):
+    def test_MultipoleAllDets(self):
 
         data = [(2, 2, 100, self.ts1),
                 (2, -2, 150, self.ts2)]
@@ -116,7 +116,7 @@ class TestCactusMultipoles(unittest.TestCase):
 
         # test __getitem__
         data_single = [(2, 2, self.ts1)]
-        mult_single = mp.MultipoleDet(100, data_single)
+        mult_single = mp.MultipoleOneDet(100, data_single)
         self.assertEqual(alldets[100], mult_single)
 
         # test __eq__
