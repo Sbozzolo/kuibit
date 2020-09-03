@@ -21,3 +21,23 @@ sYlm
 Compute the spin-weighted spherical harmonics using recursion relationships. The
 angles are defined as :math:`\theta` the meridional angle and :math:`\phi` the
 azimulathal one.
+
+antenna_responses
+^^^^^^^^^^^^^^^^^
+
+Compute the antenna pattern :math:`F` for Hanford, Livingston, and the Virgo
+interferometers for a given source localization (as right ascension and
+declination in degrees, and the UTC time). The antenna pattern is used to
+compute the strain measured by a detector with the formula. The output of this
+:py:meth:`antenna_responses` is a ``namedtuple`` with attributes ``hanford``,
+``livingston``, and ``virgo``, each containing a standard tuple with the
+responses of that detector for the cross and plus polarizations.
+
+.. code-block:: python
+
+   # GW150914
+   antenna = antenna_responses(8, -70, "2015-09-14 09:50:45")
+   (Fc_H, Fp_H) = antenna_LIGO.hanford  # or antenna_LIGO['hanford']
+
+   # Alternatively, unpack everything
+   ((Fc_H, Fp_H), (Fc_L, Fp_L), (Fc_V, Fp_V)) = antenna
