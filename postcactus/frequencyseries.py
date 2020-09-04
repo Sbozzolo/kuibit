@@ -9,7 +9,7 @@ import numpy as np
 from scipy.signal import argrelextrema
 
 from postcactus import timeseries
-from postcactus.series import BaseSeries
+from postcactus.series import BaseSeries, sample_common
 
 
 class FrequencySeries(BaseSeries):
@@ -264,26 +264,79 @@ class FrequencySeries(BaseSeries):
 
         return timeseries.TimeSeries(t, y)
 
-    # def inner_product(self, other, fmin, fmax, noise=None):
-    #     r"""Compute the inner product.
+    def inner_product(self, other, fmin=0, fmax=np.inf, noise=None):
+        r"""Compute the inner product.
 
-    #     :math:`(h_1, h_2) = \int_{f_min}^{f_max} \frac{h_1 h_2^*}{S_n}`
+        :math:`(h_1, h_2) = 4 \Re \int_{f_min}^{f_max} \frac{h_1 h_2^*}{S_n}`
 
-    #     :param other:
-    #     :type other: :py:class:`.FrequencySeries`
-    #     :param fmin:
-    #     :type fmin: float
-    #     :param fmax:
-    #     :type fmax: float
-    #     :param noise:
-    #     :type noise: :py:class:`.FrequencySeries`
+        We assume that the frequencyseries are zero outside of the interval of
+        definition, so if fmax (fmin) is larger (smaller) than the one
+        available, it is effectively set to the one available.
 
-    #     :returns: Inner product between self and other
-    #     :rtype: float
+        :param other: Second frequency series in the inner product
+        :type other: :py:class:`.FrequencySeries`
+        :param fmin: Remove frequencies below fmin
+        :type fmin: float
+        :param fmax: Remove frequencies above fmin
+        :type fmax: float
+        :param noise: If None, no weight is applied
+        :type noise: :py:class:`.FrequencySeries` or None
 
-    #     """
-    #     if (not isinstance(other, type(self))):
-    #         raise TypeError("The other object is not a FrequencySeries")
+        :returns: Inner product between self and other
+        :rtype: float
 
-    #     if ((not isinstance(noise, type(self))) or (noise is not None)):
-    #         raise TypeError("Noise is not FrequencySeries or None")
+        """
+        if (not isinstance(other, type(self))):
+            raise TypeError("The other object is not a FrequencySeries")
+
+        if ((not isinstance(noise, type(self))) and (noise is not None)):
+            raise TypeError("Noise is not FrequencySeries or None")
+
+        if (noise is None):
+            # If noise is None, it means that the weight is one everywhere so,
+            # we prepare a FrequencySeries that has the same frequencies as self.
+            # Everything will be resampled to a common set
+            noise = FrequencySeries(self.f, np.ones_like(self.fft))
+
+        # "res" = "resampled"
+        [res_self, res_other, res_noise] = sample_common([self, other, noise])
+        integrand = 4 * res_self * res_other.conjugate() / res_noise
+        # 4 Re * \int
+        integral = integrand.integrated().real()
+
+        # We assume that the frequencyseries are zero outside of the interval of
+        # definition
+        if fmax > integral.fmax:
+            fmax = integral.fmax
+        if fmin < integral.fmin:
+            fmin = integral.fmin
+
+        return integral(fmax) - integral(fmin)
+
+    def overlap(self, other, fmin=0, fmax=np.inf, noise=None):
+        r"""Compute the overlap.
+
+        :math:`\textrm{overlap} = (h_1, h_2) / \sqrt{(h_1, h_1)(h_2, h_2)}`
+
+        We assume that the frequencyseries are zero outside of the interval of
+        definition, so if fmax (fmin) is larger (smaller) than the one
+        available, it is effectively set to the one available.
+
+        :param other: Second frequency series in the overlap
+        :type other: :py:class:`.FrequencySeries`
+        :param fmin: Remove frequencies below fmin
+        :type fmin: float
+        :param fmax: Remove frequencies above fmin
+        :type fmax: float
+        :param noise: If None, no weight is applied
+        :type noise: :py:class:`.FrequencySeries` or None
+
+        :returns: Overlap between self and other
+        :rtype: float
+
+        """
+        # Error handling is done by inner_product
+        inner_11 = self.inner_product(self, fmin, fmax, noise)
+        inner_22 = other.inner_product(other, fmin, fmax, noise)
+        inner_12 = self.inner_product(other, fmin, fmax, noise)
+        return inner_12 / np.sqrt(inner_11 * inner_22)

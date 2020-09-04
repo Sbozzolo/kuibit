@@ -172,13 +172,17 @@ class SimDir:
 
     @property
     @lru_cache(1)
-    def gws(self):
+    def gravitationalwaves(self):
         return cactus_waves.GravitationalWavesDir(self)
+
+    gws = gravitationalwaves
 
     @property
     @lru_cache(1)
-    def emws(self):
+    def electromagneticwaves(self):
         return cactus_waves.ElectromagneticWavesDir(self)
+
+    emws = electromagneticwaves
 
     def __str__(self):
         header = f"Indexed {len(self.allfiles)} files"
@@ -187,10 +191,10 @@ class SimDir:
         ts_ret = f"{self.ts}"
         mp_ret = f"{self.multipoles}"
 
-        if len(self.gws) > 0:
+        if len(self.gravitationalwaves) > 0:
             gw_ret = "Available gravitational wave data"
 
-        if len(self.emws) > 0:
+        if len(self.electromagneticwaves) > 0:
             em_ret = "Available electromagnetic wave data"
 
         return (header + ts_ret + mp_ret + gw_ret + em_ret)
