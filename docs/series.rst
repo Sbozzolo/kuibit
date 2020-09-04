@@ -303,6 +303,16 @@ With the inner product, one compute the overlap between two series:
    `\textrm{overlap} = (h_1, h_2) / \sqrt{(h_1, h_1)(h_2, h_2)}`
 
 
+load_FrequencySeries
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+This function can be used to load a file as a :py:mod:`~.FrequencySeries`. This
+is particularly useful for noise curves. Internally, this function uses Numpy's
+``loadtxt`` so, additional arguments can be passed directly to that method.
+
+For noise curves, you can use :py:meth:`~.load_noise_curve` with the path of the
+file. (This internally uses :py:meth:`~.load_FrequencySeries`).
+
 Additional functions in :py:mod:`~.timeseries`
 ----------------------------------------------
 

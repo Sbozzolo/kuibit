@@ -12,6 +12,48 @@ from postcactus import timeseries
 from postcactus.series import BaseSeries, sample_common
 
 
+def load_FrequencySeries(path, complex_on_two_columns=False, *args, **kwargs):
+    """Load a text file as a FrequencySeries.
+
+    The backend is np.loadtxt, so you can pass args or kwargs (for example to
+    specify the columns).
+
+    :param path: Path of the file to be loaded
+    :type path: str
+    :param complex_on_two_columns: When true, it is assumed that the real and
+                                   the imaginary parts of the frequency series
+                                   are on two columns. Otherwise, on one.
+                                   This has to be False to load real data (e.g.,
+                                   noise curves).
+    :type complex_on_two_columns: bool
+    :returns: Loaded Frequencyseries
+    :rtype: :py:mod:`~.FrequencySeries`
+
+    """
+    if (complex_on_two_columns):
+        f, fft_real, fft_imag = np.loadtxt(path, unpack=True, ndmin=2,
+                                           *args, **kwargs)
+        fft = fft_real + 1j * fft_imag
+    else:
+        f, fft = np.loadtxt(path, unpack=True, ndmin=2,
+                            *args, **kwargs)
+    return FrequencySeries(f, fft)
+
+
+def load_noise_curve(path, *args, **kwargs):
+    """Load a noise curve as a FrequencySeries.
+
+    This is syntatic sugar for the function load_FrequencySeries.
+
+    :param path: Path of the file to be loaded
+    :type path: str
+    :returns: Loaded Frequencyseries
+    :rtype: :py:mod:`~.FrequencySeries`
+    """
+    return load_FrequencySeries(path, complex_on_two_columns=False,
+                                *args, **kwargs)
+
+
 class FrequencySeries(BaseSeries):
     """Class representing a Fourier spectrum.
 
@@ -300,6 +342,7 @@ class FrequencySeries(BaseSeries):
 
         # "res" = "resampled"
         [res_self, res_other, res_noise] = sample_common([self, other, noise])
+        # Noise has better be real.
         integrand = 4 * res_self * res_other.conjugate() / res_noise
         # 4 Re * \int
         integral = integrand.integrated().real()

@@ -156,3 +156,18 @@ class TestFrequencySeries(unittest.TestCase):
         self.assertAlmostEqual(self.FS.overlap(-self.FS), -1)
 
         # TODO: Add stronger test
+
+    def test_load_FrequencySeries(self):
+
+        path = "tests/tov/output-0000/static_tov/mp_Phi2_l2_m-1_r110.69.asc"
+        f, fft_real, fft_imag = np.loadtxt(path).T
+
+        ffs = fs.FrequencySeries(f, fft_real + 1j * fft_imag)
+        self.assertEqual(ffs,
+                         fs.load_FrequencySeries(path,
+                                                 complex_on_two_columns=True))
+
+        path_ligo = "tests/tov/ligo_sens.dat"
+        f, fft = np.loadtxt(path_ligo).T
+        ffs_ligo = fs.FrequencySeries(f, fft)
+        self.assertEqual(ffs_ligo, fs.load_noise_curve(path_ligo))
