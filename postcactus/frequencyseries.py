@@ -23,8 +23,8 @@ def load_FrequencySeries(path, complex_on_two_columns=False, *args, **kwargs):
     :param complex_on_two_columns: When true, it is assumed that the real and
                                    the imaginary parts of the frequency series
                                    are on two columns. Otherwise, on one.
-                                   This has to be False to load real data (e.g.,
-                                   noise curves).
+                                   This has to be False to load real data
+                                   (e.g., noise curves).
     :type complex_on_two_columns: bool
     :returns: Loaded Frequencyseries
     :rtype: :py:mod:`~.FrequencySeries`
