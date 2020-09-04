@@ -117,6 +117,10 @@ class BaseSeries:
         """The number of data points."""
         return len(self.data_x)
 
+    def __iter__(self):
+        for x, y in zip(self.data_x, self.data_y):
+            yield x, y
+
     def is_complex(self):
         """Return whether the data is complex.
 
