@@ -1,11 +1,14 @@
 #!/usr/bin/env python3
 
-import unittest
-import numpy as np
 import os
+import unittest
+
+import numpy as np
+
 from postcactus import cactus_scalars as cs
-from postcactus import timeseries as ts
 from postcactus import simdir as sd
+from postcactus import timeseries as ts
+
 
 class TestCactusScalar(unittest.TestCase):
 

@@ -3,8 +3,10 @@
 """
 
 import unittest
-from postcactus import frequencyseries as fs
+
 import numpy as np
+
+from postcactus import frequencyseries as fs
 
 
 class TestFrequencySeries(unittest.TestCase):

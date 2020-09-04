@@ -1,7 +1,9 @@
 #!/usr/bin/env python3
 
 import unittest
+
 from postcactus import gw_utils as gwu
+
 
 class TestGWUtils(unittest.TestCase):
 

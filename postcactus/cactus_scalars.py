@@ -7,15 +7,17 @@ The data loaded by this module is represented as
 :py:class:`~.TimeSeries` objects.
 """
 
-from bz2 import open as bopen
-from gzip import open as gopen
-from postcactus import timeseries as ts
-from postcactus import simdir
-from postcactus.attr_dict import pythonize_name_dict
-from functools import lru_cache
-import numpy as np
 import os
 import re
+from bz2 import open as bopen
+from functools import lru_cache
+from gzip import open as gopen
+
+import numpy as np
+
+from postcactus import simdir
+from postcactus import timeseries as ts
+from postcactus.attr_dict import pythonize_name_dict
 
 
 class OneScalar:
@@ -428,4 +430,3 @@ class ScalarsDir:
         return "Folder %s\n%s\n%s\n%s\n%s\n%s\n%s\n"\
             % (self.path, self.scalar, self.minimum,
                self.maximum, self.norm1, self.norm2, self.average)
-

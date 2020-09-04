@@ -6,11 +6,10 @@ derived).
 
 """
 
-import numpy as np
-from scipy import interpolate
-from scipy import integrate
-from scipy import signal
 import warnings
+
+import numpy as np
+from scipy import integrate, interpolate, signal
 
 
 # Note, we test this class testing its derived class TimeSeries
@@ -91,6 +90,28 @@ class BaseSeries:
             warnings.warn('Spline will not be computed: too few points')
         else:
             self._make_spline()
+
+    @property
+    def xmin(self):
+        """Return the min of the independent variable x
+
+        :rvalue: Min of x
+        :rtype: float
+        """
+        # Derived classes can implement more efficients methods if x has known
+        # ordering
+        return np.amin(self.data_x)
+
+    @property
+    def xmax(self):
+        """Return the max of the independent variable x
+
+        :rvalue: Max of x
+        :rtype: float
+        """
+        # Derived classes can implement more efficients methods if x has known
+        # ordering
+        return np.amax(self.data_x)
 
     def __len__(self):
         """The number of data points."""
@@ -623,3 +644,27 @@ class BaseSeries:
 
     def conjugate(self):
         return self._apply_unary(np.conjugate)
+
+
+def sample_common(series):
+    """Resample a list of series to the largest interval covered by all series,
+    using regularly spaced x.
+
+    The number of sample points is the minimum over all series.
+
+    :param ts: The series to resample
+    :type ts:  list of :py:class:`~.Series`
+
+    :returns:  Resampled series so that they are all defined in
+               the same interval
+    :rtype:    list of :py:class:`~.Series`
+
+    """
+    # Find the series with max xmin
+    s_xmin = max(series, key=lambda x: x.xmin)
+    # Find the series with min xmax
+    s_xmax = min(series, key=lambda x: x.xmax)
+    # Find the series with min number of points
+    s_ns = min(series, key=len)
+    t = np.linspace(s_xmin.xmin, s_xmax.xmax, len(s_ns))
+    return [s.resampled(t) for s in series]
