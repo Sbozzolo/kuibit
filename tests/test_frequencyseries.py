@@ -155,7 +155,7 @@ class TestFrequencySeries(unittest.TestCase):
         # Overlap with -self should be -one
         self.assertAlmostEqual(self.FS.overlap(-self.FS), -1)
 
-        # TODO: Add stronger test
+        # TODO: Add stronger test. Compare with pyCBC?
 
     def test_load_FrequencySeries(self):
 

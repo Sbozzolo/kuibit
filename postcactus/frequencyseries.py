@@ -12,7 +12,7 @@ from postcactus import timeseries
 from postcactus.series import BaseSeries, sample_common
 
 
-def load_FrequencySeries(path, complex_on_two_columns=False, *args, **kwargs):
+def load_FrequencySeries(path, *args, complex_on_two_columns=False, **kwargs):
     """Load a text file as a FrequencySeries.
 
     The backend is np.loadtxt, so you can pass args or kwargs (for example to
@@ -336,7 +336,8 @@ class FrequencySeries(BaseSeries):
 
         if (noise is None):
             # If noise is None, it means that the weight is one everywhere so,
-            # we prepare a FrequencySeries that has the same frequencies as self.
+            # we prepare a FrequencySeries that has the same frequencies as
+            # self.
             # Everything will be resampled to a common set
             noise = FrequencySeries(self.f, np.ones_like(self.fft))
 
@@ -347,8 +348,8 @@ class FrequencySeries(BaseSeries):
         # 4 Re * \int
         integral = integrand.integrated().real()
 
-        # We assume that the frequencyseries are zero outside of the interval of
-        # definition
+        # We assume that the frequencyseries are zero outside of the interval
+        # of definition
         if fmax > integral.fmax:
             fmax = integral.fmax
         if fmin < integral.fmin:

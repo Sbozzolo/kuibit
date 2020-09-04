@@ -3,6 +3,7 @@
 import unittest
 
 import numpy as np
+from scipy import signal
 
 from postcactus import cactus_waves as cw
 from postcactus import simdir as sd
@@ -71,6 +72,60 @@ class TestCactusWaves(unittest.TestCase):
         integral3 = gwdum._fixed_frequency_integrated(tts, 1e-4)
         self.assertTrue(np.allclose(integral3.y * 2 * np.pi * 1e4, -np.cos(t),
                                     atol=1e-3))
+
+        # Check warning for irregularly spaced
+        with self.assertWarns(RuntimeWarning):
+            tts.t[1] *= 1.01
+            integral4 = gwdum._fixed_frequency_integrated(tts, 1e-4)
+
+    def test_get_strain_lm(self):
+
+        sim = sd.SimDir("tests/tov")
+        gwdir = cw.GravitationalWavesDir(sim)
+        psi4 = gwdir[110.69]
+
+        with self.assertRaises(ValueError):
+            psi4.get_strain_lm(3, 3, 1)
+
+        # Large pcut
+        with self.assertRaises(ValueError):
+            psi4.get_strain_lm(2, 2, 1000)
+
+        # Test window function errors
+        with self.assertRaises(ValueError):
+            psi4.get_strain_lm(2, 2, 0.1, window_function=1)
+        # Not implemented
+        with self.assertRaises(ValueError):
+            psi4.get_strain_lm(2, 2, 0.1, window_function='bubu')
+
+        # We do not need to test the FFI, hopefully that is already tested
+
+        # Test window = set verything to 0
+        self.assertTrue(np.allclose(
+            psi4.get_strain_lm(2, 2, 0.1, window_function=lambda x: 0).y,
+                        0))
+
+        psi4lm = (psi4[(2, 2)])
+
+        # Test when window is a function
+        ham_array = signal.hamming(len(psi4lm))
+        ham_psi4lm = psi4lm.copy()
+        ham_psi4lm.y *= ham_array
+        ffi_ham = psi4._fixed_frequency_integrated(ham_psi4lm, 0.1).y,
+
+        self.assertTrue(np.allclose(
+            psi4.get_strain_lm(2, 2, 0.1, window_function=signal.hamming,
+                               trim_ends=False).y, ffi_ham, atol=1e-7))
+
+        # Test window is a string, like hamming
+        self.assertTrue(np.allclose(
+            psi4.get_strain_lm(2, 2, 0.1, window_function='hamming',
+                               trim_ends=False).y, ffi_ham, atol=1e-7))
+
+        # Test no window
+        self.assertTrue(np.allclose(
+            psi4.get_strain_lm(2, 2, 0.1, trim_ends=False).y,
+            psi4._fixed_frequency_integrated(psi4lm, 0.1).y))
 
     def test_WavesDir(self):
 

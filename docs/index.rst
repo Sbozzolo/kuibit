@@ -18,7 +18,8 @@ Features currently implemented:
 - Analyze the multipololar decompositions output by ``Multipoles``
   (:py:mod:`~.cactus_multipoles`).
 - Analyze gravitational waves extracted with the Newman-Penrose formalism
-  (:py:mod:`~.cactus_waves`).
+  (:py:mod:`~.cactus_waves`) computing, among the other things, strains, overlaps,
+  energy lost.
 - Represent and manipulate time series (:py:mod:`~.timeseries`). Examples of
   functions available for time series: `integrate``, ``derive``, ``resample``,
   ``to_FrequencySeries`` (Fourier transform).
