@@ -7,14 +7,16 @@
 
 """
 
-from postcactus import timeseries
-from functools import lru_cache
-from postcactus.attr_dict import pythonize_name_dict
-import numpy as np
-import h5py
-import re
 import os
+import re
 import warnings
+from functools import lru_cache
+
+import h5py
+import numpy as np
+
+from postcactus import timeseries
+from postcactus.attr_dict import pythonize_name_dict
 
 
 class MultipoleOneDet:

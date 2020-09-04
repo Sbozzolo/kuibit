@@ -5,10 +5,11 @@
 
 import datetime
 from collections import namedtuple
+
 import numpy as np
+from scipy import integrate, optimize
+
 import postcactus.unitconv as uc
-from scipy import optimize
-from scipy import integrate
 
 
 def luminosity_distance_to_redshift(luminosity_distance,

@@ -5,6 +5,9 @@ and electromagnetic wave signals computed using Weyl scalars.
 
 """
 
+
+import warnings
+
 from postcactus import cactus_multipoles as mp
 from postcactus import simdir
 

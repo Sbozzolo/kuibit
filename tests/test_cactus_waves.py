@@ -1,13 +1,12 @@
 #!/usr/bin/env python3
 
 import unittest
+
 import numpy as np
-import h5py
-from postcactus import timeseries as ts
-from postcactus import simdir as sd
-from postcactus import cactus_multipoles as mp
+
 from postcactus import cactus_waves as cw
-import time
+from postcactus import simdir as sd
+from postcactus import timeseries as ts
 
 
 class TestCactusWaves(unittest.TestCase):

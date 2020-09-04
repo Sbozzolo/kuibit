@@ -4,10 +4,13 @@ and convenience functions to create timeseries.
 
 """
 
+import warnings
+
 import numpy as np
 from scipy import signal
-from postcactus.series import BaseSeries
+
 from postcactus import frequencyseries
+from postcactus.series import BaseSeries
 
 
 def remove_duplicate_iters(t, y):

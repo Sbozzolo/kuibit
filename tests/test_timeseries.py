@@ -2,11 +2,14 @@
 """Tests for postcactus.timeseries
 """
 
+import os
 import unittest
-from postcactus import timeseries as ts
+
 import numpy as np
 from scipy import signal
-import os
+
+from postcactus import series
+from postcactus import timeseries as ts
 
 
 class TestTimeseries(unittest.TestCase):

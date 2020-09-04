@@ -6,9 +6,10 @@ frequency series.
 """
 
 import numpy as np
-from postcactus.series import BaseSeries
-from postcactus import timeseries
 from scipy.signal import argrelextrema
+
+from postcactus import timeseries
+from postcactus.series import BaseSeries
 
 
 class FrequencySeries(BaseSeries):

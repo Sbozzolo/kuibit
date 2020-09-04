@@ -1,12 +1,13 @@
 #!/usr/bin/env python3
 
 import unittest
-import numpy as np
+
 import h5py
-from postcactus import timeseries as ts
-from postcactus import simdir as sd
+import numpy as np
+
 from postcactus import cactus_multipoles as mp
-import time
+from postcactus import simdir as sd
+from postcactus import timeseries as ts
 
 
 class TestCactusMultipoles(unittest.TestCase):
