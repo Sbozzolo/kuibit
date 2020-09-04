@@ -60,7 +60,20 @@ class TestTimeseries(unittest.TestCase):
     def test_len(self):
         self.assertEqual(len(self.TS), 100)
 
+    def test_is_regularly_sampled(self):
+        self.assertTrue(self.TS.is_regularly_sampled())
+
+        # Log space is not regular
+        times = np.logspace(0, 1, 100)
+        ts_log = ts.TimeSeries(times, self.values)
+        self.assertFalse(ts_log.is_regularly_sampled())
+
     def test_tmin_tmax_length_dt(self):
+
+        # Testing methods of the base class
+        self.assertAlmostEqual(self.TS.xmin, 0)
+        self.assertAlmostEqual(self.TS.xmax, 2 * np.pi)
+
         self.assertAlmostEqual(self.TS.tmin, 0)
         self.assertAlmostEqual(self.TS.tmax, 2 * np.pi)
 
@@ -678,7 +691,7 @@ class TestTimeseries(unittest.TestCase):
         ts1 = ts.TimeSeries(times1, sins1)
         ts2 = ts.TimeSeries(times2, sins2)
 
-        new_ts1, new_ts2 = ts.sample_common([ts1, ts2])
+        new_ts1, new_ts2 = series.sample_common([ts1, ts2])
 
         self.assertTrue(np.allclose(new_ts1.y, sins3))
 
@@ -729,6 +742,12 @@ class TestTimeseries(unittest.TestCase):
 
         self.assertTrue(np.allclose(self.TS_c.savgol_smoothed_time(0.63, 3).y,
                                     expected_y + 1j * expected_y))
+
+        # Test non regularly sampled
+        with self.assertWarns(RuntimeWarning):
+            tts = self.TS.copy()
+            tts.t[1] *= 1.01
+            tts.savgol_smoothed_time(0.63, 3)
 
         sins = self.TS.copy()
         sins.savgol_smooth(11, 3)
@@ -781,6 +800,12 @@ class TestTimeseries(unittest.TestCase):
         fft = np.fft.fftshift(fft)
 
         fs = self.TS.to_FrequencySeries()
+
+        # Test warning for non reqularly sampled
+        with self.assertWarns(RuntimeWarning):
+            tts = self.TS.copy()
+            tts.t[1] *= 1.01
+            ffs = tts.to_FrequencySeries()
 
         self.assertTrue(np.allclose(fs.f, freq))
         self.assertTrue(np.allclose(fs.fft, fft))

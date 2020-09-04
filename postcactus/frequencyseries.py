@@ -119,11 +119,10 @@ class FrequencySeries(BaseSeries):
         return df0
 
     def normalized(self):
-        """FIXME! briefly describe function
+        """Return a new frequencyseries with maximum amplitude of 1.
 
-        :param ignore_zero:
-        :returns:
-        :rtype:
+        :returns: Normalized frequency series.
+        :rtype: :py:mod:`~.FrequencySeries`
 
         """
         m = self.amplitude.max()
@@ -134,27 +133,24 @@ class FrequencySeries(BaseSeries):
         return self / m
 
     def normalize(self):
-        """FIXME! briefly describe function
-
-        :returns:
-        :rtype:
+        """Scale values so that the maximum of the amplitude is 1.
 
         """
         self._apply_to_self(self.normalized)
 
     def low_passed(self, f):
-        """Remove frequencies higher or equal than f (absolute value).
+        """FIXME
+
+        :param f: Frequency above which series will be zeroed.
+        :returns:
+        :rtype:
 
         """
         msk = (np.abs(self.f) <= f)
         return FrequencySeries(self.f[msk], self.fft[msk])
 
     def low_pass(self, f):
-        """FIXME! briefly describe function
-
-        :param f:
-        :returns:
-        :rtype:
+        """Remove frequencies higher or equal than f (absolute value).
 
         """
         self._apply_to_self(self.low_passed, f)
@@ -200,7 +196,7 @@ class FrequencySeries(BaseSeries):
         self._apply_to_self(self.band_passed, fmin, fmax)
 
     def peaks(self, amp_threshold=0.0):
-        """FIXME! briefly describe function
+        """Return the location and amplitue of the peaks of the amplitue.
 
         Peaks at the boundaries are not considered.
 
@@ -274,9 +270,13 @@ class FrequencySeries(BaseSeries):
     #     :math:`(h_1, h_2) = \int_{f_min}^{f_max} \frac{h_1 h_2^*}{S_n}`
 
     #     :param other:
+    #     :type other: :py:class:`.FrequencySeries`
     #     :param fmin:
+    #     :type fmin: float
     #     :param fmax:
+    #     :type fmax: float
     #     :param noise:
+    #     :type noise: :py:class:`.FrequencySeries`
 
     #     :returns: Inner product between self and other
     #     :rtype: float
@@ -287,6 +287,3 @@ class FrequencySeries(BaseSeries):
 
     #     if ((not isinstance(noise, type(self))) or (noise is not None)):
     #         raise TypeError("Noise is not FrequencySeries or None")
-
-    #     if (not (self.f == other.f and self.f == noise.f)):
-    #         raise TypeError("The series do not have same frequencies")
