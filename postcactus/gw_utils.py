@@ -294,7 +294,7 @@ def antenna_responses(right_ascension, declination, time_utc, polarization=0):
 
 
     # This is just a convenience to avoid having to remember the order of
-    # the output
+    # the output (and for easy of extension)
     # One can access the output as antenna_LIGO.hanford, or
     # antenna_LIGO['hanford']
     AntennaResponse = namedtuple("AntennaResponse", "hanford livingston virgo")

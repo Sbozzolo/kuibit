@@ -157,30 +157,6 @@ def combine_ts(series, prefer_late=True):
     return TimeSeries(times[::sign], values[::sign])
 
 
-def sample_common(series):
-    """Resample a list of timeseries to the largest time interval covered
-    by all timeseries, using regularly spaced time.
-
-    The number of sample points is the minimum over all time series.
-
-    :param ts: The timeseries to resample
-    :type ts:  List of :py:class:`~.TimeSeries`
-
-    :returns:  Resampled time series so that they are all defined in
-               the same interval
-    :rtype:    List of :py:class:`~.TimeSeries`
-
-    """
-    # Find the series with max tmin
-    s_tmin = max(series, key=lambda x: x.tmin)
-    # Find the series with min tmax
-    s_tmax = min(series, key=lambda x: x.tmax)
-    # Find the series with min number of points
-    s_ns = min(series, key=len)
-    t = np.linspace(s_tmin.tmin, s_tmax.tmax, len(s_ns))
-    return [s.resampled(t) for s in series]
-
-
 class TimeSeries(BaseSeries):
     """This class represents real or complex valued time series.
 
@@ -296,6 +272,16 @@ class TimeSeries(BaseSeries):
         """
         return self.t[-1]
 
+    def is_regularly_sampled(self):
+        """Return whether the timeseries is regularly sampled.
+
+        :returns:  Is the timeseries regularly sampled?
+        :rtype:    bool
+        """
+        dt = self.t[1:] - self.t[:-1]
+
+        return np.allclose(dt, dt[0])
+
     @property
     def dt(self):
         """Return the delta t if the series is regularly sampled,
@@ -305,13 +291,10 @@ class TimeSeries(BaseSeries):
         :rtype: float
 
         """
-        dt = self.t[1:] - self.t[:-1]
-        dt0 = dt[0]
-
-        if (not np.allclose(dt, dt0)):
+        if (not self.is_regularly_sampled()):
             raise ValueError("Timeseries is not regularly sampled")
 
-        return dt0
+        return self.t[1] - self.t[0]
 
     @property
     def time_length(self):
@@ -720,7 +703,12 @@ class TimeSeries(BaseSeries):
         :rtype:    :py:class:`~.TimeSeries`
 
         """
-        ts = self.regular_resampled()
+        if (not self.is_regularly_sampled()):
+            warnings.warn("TimeSeries is not regularly samples. Resampling.",
+                          RuntimeWarning)
+            ts = self.regular_resampled()
+        else:
+            ts = self
         dt = ts.t[1] - ts.t[0]
         # The savgol method requires a odd window
         # If it is not, we add one point
@@ -758,7 +746,13 @@ class TimeSeries(BaseSeries):
         :rtype: :py:class:`~.FrequencySeries`
 
         """
-        regular_ts = self.regular_resampled()
+        if (not self.is_regularly_sampled()):
+            warnings.warn("TimeSeries is not regularly samples. Resampling.",
+                          RuntimeWarning)
+            regular_ts = self.regular_resampled()
+        else:
+            regular_ts = self
+
         dt = regular_ts.dt
         freqencies = np.fft.fftfreq(len(regular_ts), d=dt)
         fft = np.fft.fft(regular_ts.y)

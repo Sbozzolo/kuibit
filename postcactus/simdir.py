@@ -10,9 +10,8 @@ import os
 # We ideally would like to use cached_property, but it is in Python 3.8
 # which is quite new
 from functools import lru_cache
-from postcactus import cactus_scalars
-from postcactus import cactus_multipoles
-from postcactus import cactus_waves
+
+from postcactus import cactus_multipoles, cactus_scalars, cactus_waves
 
 
 class SimDir:

@@ -3,7 +3,7 @@ Overview
 
 PostCactus is a set of tools to post-process simulations performed with the
 `Einstein Toolkit <https://einsteintoolkit.org/>`_. The code was originally
-written by Wolfgang Kastaun. This is fork with emphasis on documentation and
+developed by Wolfgang Kastaun. This is a fork with emphasis on documentation and
 testing.
 
 
@@ -17,9 +17,10 @@ Features currently implemented:
 - Work with scalar data as produced by ``CarpetASCII`` (:py:mod:`~.cactus_scalars`).
 - Analyze the multipololar decompositions output by ``Multipoles``
   (:py:mod:`~.cactus_multipoles`).
+- Analyze gravitational waves extracted with the Newman-Penrose formalism
+  (:py:mod:`~.cactus_waves`).
 - Represent and manipulate time series (:py:mod:`~.timeseries`). Examples of
-  functions available for time series: ``zero_pad``. ``time_shift``,
-  ``phase_shift``, ``mean_remove``, ``integrate``, ``derive``, ``resample``,
+  functions available for time series: `integrate``, ``derive``, ``resample``,
   ``to_FrequencySeries`` (Fourier transform).
 - Represent and manipulate frequency series (:py:mod:`~.frequencyseries`), like
   Fourier transforms of time series. Inverse Fourier transform is available.
@@ -44,6 +45,13 @@ Move into the folder and install with pip:
 
    cd PostCactus && pip3 install --user .
 
+If they are not already available, ``pip`` will install the following packages:
+- ``numpy``,
+- ``h5py``,
+- ``scipy``.
+
+The minimum version of Python required is 3.5.
+
 Usage
 -----
 
@@ -54,6 +62,7 @@ Usage
    series.rst
    cactus_scalars.rst
    cactus_multipoles.rst
+   cactus_waves.rst
    gw_utils.rst
    unitconv.rst
 
@@ -79,5 +88,6 @@ Reference material (classes, functions, ...)
    frequencyseries_ref.rst
    cactus_scalars_ref.rst
    cactus_multipoles_ref.rst
+   cactus_waves_ref.rst
    gw_utils_ref.rst
    unitconv_ref.rst
