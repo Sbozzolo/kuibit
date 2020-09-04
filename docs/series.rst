@@ -276,6 +276,32 @@ is from :math:`-1\slash (2 * \Delta f)` to :math:`1\slash (2 * \Delta f)`.
 Occasionally signals that are supposed to be real are turned into complex with
 imaginary part that is zero to machine precision.
 
+inner_product, and overlap
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Given :math:`h1, h2` frequency series and :math:`S_n` spectral noise density,
+the inner product is typically defined as
+.. :math:
+
+   `(h_1, h_2) = 4 \Re \int_{f_min}^{f_max} \frac{h_1 h_2^*}{S_n}`.
+
+The method :py:meth:`~.inner_product` computes this quantity. If the noise is
+not provided, ``S_n`` will be fixed to one. Alternatively, the noise has to be a
+:py:class:`~.FrequencySeries`. Internally, ``h_1``, ``h_2``, and ``S_n`` will be
+resampled to a common frequency interval with the number of points of the series
+with fewest points. Hence, the accuracy of the computation is determined by the
+accuracy of the series with fewest points.
+
+The series are assumed to be zero outside the range of definition. So, if
+``f_min`` or ``f_max`` are too large or too small, the effective parameter will
+be determined by the series. By default, ``f_min=0`` and ``f_max=inf``.
+
+With the inner product, one compute the overlap between two series:
+
+.. :math:
+
+   `\textrm{overlap} = (h_1, h_2) / \sqrt{(h_1, h_1)(h_2, h_2)}`
+
 
 Additional functions in :py:mod:`~.timeseries`
 ----------------------------------------------

@@ -103,3 +103,56 @@ class TestFrequencySeries(unittest.TestCase):
         ts = self.FS.to_TimeSeries()
 
         self.assertTrue(np.allclose(ts.y, self.y))
+
+    def test_inner_product(self):
+
+        with self.assertRaises(TypeError):
+            self.FS.inner_product(1)
+
+        with self.assertRaises(TypeError):
+            self.FS.inner_product(self.FS, noise=1)
+
+        # To test the inner product we construct two simple linear frequency
+        # series y(f) = f + 2j * f and y2(f) = 3j * f
+        #
+        # The inner product is y * y2^* = (6 f**2 - 3j f**2)
+        # Integrated this is 2 (fmax**3 - fmin**3) - j (fmax**3 - fmin**3)
+        # Taken 4 Real is 8 (fmax**3 - fmin**3)
+        # First, we test with no noise
+
+        # Small interval and many points, so that the analtical and numerical
+        # predictions agree
+        f = np.linspace(1, 1.2, 1000)
+        fft1 = f + 2j * f
+        fft2 = 3j * f
+
+        fs1 = fs.FrequencySeries(f, fft1)
+        fs2 = fs.FrequencySeries(f, fft2)
+
+        # Test with no fmin or fmax. This means fmin = 0, fmax = 10.
+        # The result should be -2 * 10**3 + j 10**3
+
+        self.assertAlmostEqual(fs1.inner_product(fs2),
+                               8 * (1.2**3 - 1))
+
+        # Now restrict to (fmin = 1.1, fmax = 1.15)
+        self.assertAlmostEqual(fs1.inner_product(fs2, fmin=1.1, fmax=1.15),
+                               8 * (1.15**3 - 1.1**3))
+
+        # Now add a noise of f**2
+        # The inner product is y * y2^* / noise= (6 - 3j)
+        # Integrated it is (6 - 3j) * (fmax - fmin)
+        noise = fs.FrequencySeries(f, f**2)
+
+        self.assertAlmostEqual(fs1.inner_product(fs2, noise=noise),
+                               4 * 6 * (1.2 - 1))
+
+    def test_overlap(self):
+
+        # Overlap with self should be one
+        self.assertAlmostEqual(self.FS.overlap(self.FS), 1)
+
+        # Overlap with -self should be -one
+        self.assertAlmostEqual(self.FS.overlap(-self.FS), -1)
+
+        # TODO: Add stronger test

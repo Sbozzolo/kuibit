@@ -666,5 +666,5 @@ def sample_common(series):
     s_xmax = min(series, key=lambda x: x.xmax)
     # Find the series with min number of points
     s_ns = min(series, key=len)
-    t = np.linspace(s_xmin.xmin, s_xmax.xmax, len(s_ns))
-    return [s.resampled(t) for s in series]
+    x = np.linspace(s_xmin.xmin, s_xmax.xmax, len(s_ns))
+    return [s.resampled(x) for s in series]
