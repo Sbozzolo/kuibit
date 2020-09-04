@@ -81,9 +81,9 @@ class GravitationalWavesOneDet(mp.MultipoleOneDet):
 
         """
         if (not timeseries.is_regularly_sampled()):
-            warnings.warning("Timeseries not regularly sampled. Resampling.",
-                             RuntimeWarning)
-            integrand = timeseries.regularly_sampled()
+            warnings.warn("Timeseries not regularly sampled. Resampling.",
+                          RuntimeWarning)
+            integrand = timeseries.regular_resampled()
         else:
             integrand = timeseries
 
@@ -109,6 +109,96 @@ class GravitationalWavesOneDet(mp.MultipoleOneDet):
         integrated_y = np.fft.ifft(fft * integration_factor)
 
         return ts.TimeSeries(integrand.t, integrated_y)
+
+    def get_strain_lm(self, mult_l, mult_m, pcut, *args, window_function=None,
+                      trim_ends=True, **kwargs):
+        r"""Return the strain associated to the multipolar component (l, m).
+
+        The strain returned is multiplied by the distance.
+
+        The strain is extracted from the Weyl Scalar using the formula
+
+        .. math::
+
+        h_+^{lm}(r,t)
+       -     i h_\times^{lm}(r,t) = \int_{-\infty}^t \mathrm{d}u
+                    \int_{-\infty}^u \mathrm{d}v\, \Psi_4^{lm}(r,v)
+
+        The return value is complex timeseries (r * h_plus + i r * h_cross).
+
+        It is always important to have a function that goes smoothly to zero
+        before taking Fourier transform (to avoid spectral leakage and
+        aliasing). You can pass the window function to apply as a paramter.
+        If window_function is None, no tapering is performed.
+        If window_function is a function, it has to be a function that takes
+        as first argument the length of the array and returns a new array
+        with the same length that is to be multiplied to the data (this is
+        how SciPy's windows work)
+        If window_function is a string, use the method with corresponding
+        name from the TimeSeries class. You must only provide the name
+        (e.g, 'tukey' will call 'tukey_windowed').
+        Optional arguments to the window function can be passed directly to
+        this function.
+
+        pcut is the period associated to the angular velocity that enters in
+        the fixed frequency integration (omega_th = 2 pi / pcut). In general,
+        a wise choise is to pick the longest physical period in the signal.
+
+        Optionally, remove part of the output signal at both the beginning and
+        the end. If trim_ends is True, pcut is removed. This is because those
+        parts of the signal are typically not very accurate.
+
+        :param mult_l: Multipolar component l
+        :type mult_l: int
+        :param mult_m: Multipolar component m
+        :type mult_m: int
+        :param pcut: Period that enters the fixed-frequency integration.
+        Typically, the longest physical period in the signal.
+        :type pcut: float
+        :param window_function: If not None, apply window_function to the
+        series before computing the strain.
+        :type window_function: callable, str, or None
+        :param trim_ends: If True, a portion of the resulting strain is removed
+        at both the initial and final times. The amount removed is equal to
+        pcut.
+        :type trim_ends: bool
+
+        :returns: :math:`r (h^+ - i rh^\times)`
+        :rtype: :py:class:`~.TimeSeries`
+
+        """
+        if ((mult_l, mult_m) not in self.available_lm):
+            raise ValueError(f"l = {mult_l}, m = {mult_m} not available")
+
+        psi4lm = self[(mult_l, mult_m)]
+
+        # If pcut is too large, the result will likely be inaccurate
+        if (psi4lm.time_length < 2 * pcut):
+            raise ValueError("pcut too large for timeseries")
+
+        if (callable(window_function)):
+            integrand = psi4lm.windowed(window_function, *args, **kwargs)
+        elif (isinstance(window_function, str)):
+            window_function_method = f"{window_function}_windowed"
+            if (not hasattr(psi4lm, window_function_method)):
+                raise ValueError(f"Window {window_function} not implemented")
+            window_function_callable = getattr(psi4lm, window_function_method)
+
+            # This returns a new TimeSeries
+            integrand = window_function_callable(*args, **kwargs)
+        elif (window_function is None):
+            integrand = psi4lm
+        else:
+            raise ValueError("Unknown window function")
+
+        strain = self._fixed_frequency_integrated(integrand, pcut, order=2)
+
+        if (trim_ends):
+            strain.crop(strain.tmin + pcut, strain.tmax - pcut)
+
+        # The return value is rh not just h (the strain)
+        # h_plus - i h_cross
+        return strain * self.dist
 
 
 class ElectromagneticWavesOneDet(mp.MultipoleOneDet):
