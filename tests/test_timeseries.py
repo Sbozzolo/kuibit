@@ -60,6 +60,11 @@ class TestTimeseries(unittest.TestCase):
     def test_len(self):
         self.assertEqual(len(self.TS), 100)
 
+    def test_iter(self):
+        for t, y in self.TS:
+            self.assertEqual((t, y), (self.TS.t[0], self.TS.y[0]))
+            break
+
     def test_is_regularly_sampled(self):
         self.assertTrue(self.TS.is_regularly_sampled())
 

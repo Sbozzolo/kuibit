@@ -128,6 +128,17 @@ concerned at every point, the bias introduced in "moving average" approach at
 local maxima or minima, is circumvented. At the moment, this is the preferred
 way to smooth series.
 
+iter
+^^^^
+
+Series are iterable, so you can do
+
+.. code-block:: python
+
+   for t, y in timeseries:
+       print(t, y)
+
+
 The TimeSeries methods
 -----------------------
 
