@@ -73,7 +73,8 @@ class TestFrequencySeries(unittest.TestCase):
         self.assertGreaterEqual(np.amin(np.abs(fs_copy.high_passed(1).f)), 1)
 
         self.assertLessEqual(fs_copy.band_passed(0, 1).fmax, 1)
-        self.assertGreaterEqual(np.amin(np.abs(fs_copy.band_passed(0, 1).f)), 0)
+        self.assertGreaterEqual(np.amin(np.abs(fs_copy.band_passed(0, 1).f)),
+                                0)
 
         fs_copy.low_pass(2)
         self.assertLessEqual(fs_copy.fmax, 2)
