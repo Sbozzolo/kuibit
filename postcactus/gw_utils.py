@@ -154,7 +154,8 @@ def antenna_responses(right_ascension, declination, time_utc, polarization=0):
     """Return the antenna responses for Hanford and Livingston for a given
     source.
 
-    See, research.physics.illinois.edu/cta/movies/bhbh_sim/wavestrain.html,
+    See,
+    http://research.physics.illinois.edu/cta/movies/bhbh_sim/wavestrain.html,
     considering that there is typo in the sign of the second cosine in the F
     cross.
 
@@ -291,7 +292,6 @@ def antenna_responses(right_ascension, declination, time_utc, polarization=0):
     Fc_V = (0.5 * (1 + np.cos(theta_V) * np.cos(theta_V))
             * np.cos(2 * phi_V) * np.sin(2 * polarization)
             + np.cos(theta_V) * np.sin(2 * phi_V) * np.cos(2 * polarization))
-
 
     # This is just a convenience to avoid having to remember the order of
     # the output (and for easy of extension)

@@ -305,6 +305,24 @@ class TimeSeries(BaseSeries):
         """
         return self.tmax - self.tmin
 
+    def time_at_maximum(self):
+        """Return the time at which the timeseries is maximum in absolute
+        value.
+
+        :returns:  Time at absolute maximum
+        :rtype:    float
+        """
+        return self.x_at_maximum_y()
+
+    def time_at_minimum(self):
+        """Return the time at which the timeseries is minimum in absolute
+        value.
+
+        :returns:  Time at absolute minimum
+        :rtype:    float
+        """
+        return self.x_at_minimum_y()
+
     def regular_resampled(self):
         """Return a new timeseries resampled to regularly spaced times,
         with the
@@ -548,16 +566,23 @@ class TimeSeries(BaseSeries):
         """
         self._apply_to_self(self.redshifted, z)
 
-    def unfolded_phase(self):
-        """Compute the complex phase of a complex-valued signal such that
-        no phase wrap-arounds occur, i.e. if the input is continous, so is
-        the output.
+    def unfolded_phase(self, t_of_zero_phase=None):
+        """Compute the complex phase of a complex-valued signal such that no
+        phase wrap-arounds occur, i.e. if the input is continous, so is the
+        output. Optionally, add a phase shift such that phase is zero at the
+        given time.
+
+        :param t_of_zero_phase: Time at which the phase is set to zero
+        :type t_of_zero_phase:   float or None
 
         :returns:   Continuous complex phase
         :rtype:     :py:class:`~.TimeSeries`
-        """
 
-        return TimeSeries(self.t, unfold_phase(np.angle(self.y)))
+        """
+        ret = TimeSeries(self.t, unfold_phase(np.angle(self.y)))
+        if t_of_zero_phase is not None:
+            ret -= ret(t_of_zero_phase)
+        return ret
 
     def phase_angular_velocity(self, use_splines=True, tsmooth=None, order=3):
         """Compute the phase angular velocity, i.e. the time derivative of the

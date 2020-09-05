@@ -34,21 +34,21 @@ class TestTimeseries(unittest.TestCase):
         values = np.array([1, 2, 3])
 
         with self.assertRaises(ValueError):
-            t = ts.TimeSeries(times, values)
+            ts.TimeSeries(times, values)
 
         # 2
         times = np.array([])
         values = np.array([])
 
         with self.assertRaises(ValueError):
-            t = ts.TimeSeries(times, values)
+            ts.TimeSeries(times, values)
 
         # 3
         times = np.linspace(2 * np.pi, 0, 100)
         values = np.sin(times)
 
         with self.assertRaises(ValueError):
-            t = ts.TimeSeries(times, values)
+            ts.TimeSeries(times, values)
 
         # Let's check that we can instantiate TimeSeries with 1 element
         # It shouls throw a warning because it cannot compute the spline
@@ -64,6 +64,13 @@ class TestTimeseries(unittest.TestCase):
         for t, y in self.TS:
             self.assertEqual((t, y), (self.TS.t[0], self.TS.y[0]))
             break
+
+    def test_x_at_maximum_minimum_y(self):
+        t = np.linspace(0, 1, 100)
+
+        self.assertEqual(ts.TimeSeries(t, t).time_at_maximum(), 1)
+        self.assertEqual(ts.TimeSeries(t, t + 1j * t).time_at_maximum(), 1)
+        self.assertEqual(ts.TimeSeries(t, t + 1j * t).time_at_minimum(), 0)
 
     def test_is_regularly_sampled(self):
         self.assertTrue(self.TS.is_regularly_sampled())
@@ -779,6 +786,11 @@ class TestTimeseries(unittest.TestCase):
         self.assertTrue(np.allclose(exp.unfolded_phase().y,
                                     self.times))
 
+        # test t_of_zero_phase
+        # The phase at 1 is 1, so everything has to be scaled down by 1
+        self.assertTrue(np.allclose(exp.unfolded_phase(t_of_zero_phase=1).y,
+                                    self.times - 1))
+
         # deriv is trivial...
         deriv = np.gradient(self.times, self.times)
 
@@ -793,6 +805,7 @@ class TestTimeseries(unittest.TestCase):
                                     deriv / (2 * np.pi)))
 
         smoothed_deriv = signal.savgol_filter(deriv, 11, 3)
+        # 0.63 corresponds to 11 points
         self.assertTrue(np.allclose(exp.phase_frequency(tsmooth=0.63).y,
                                     smoothed_deriv / (2 * np.pi)))
 

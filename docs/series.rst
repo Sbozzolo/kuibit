@@ -358,6 +358,12 @@ sample_common
 the largest time interval covered by all timeseries, using regularly spaced
 time. The number of sample points is the minimum over all time series.
 
+time_at_maximum, time_at_minimum
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Often it is useful to know where is the peak of a signal (for example, for
+gravitational waves). These methods return the time at which the absolute value of
+the signal is maximum and minimum respectively.
 
 remove_duplicate_iters
 ^^^^^^^^^^^^^^^^^^^^^^
@@ -372,4 +378,6 @@ unfold_phase
 In gravitational-wave astronomy the phase of a wave is typically unfolded so
 that instead of going from :math:`0` to :math:`2\pi`, it is free to assume any
 value so that the number of periodicities can be counted. ``unfold_phase`` takes
-a signal and removes all the jumps of :math:`2\pi`.
+a signal and removes all the jumps of :math:`2\pi`. Optionally, provide a time
+``t_of_zero_phase``, the value of the phase is offset so that it is zero when
+the time is ``t_of_zero_phase``.
