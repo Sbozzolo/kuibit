@@ -6,6 +6,7 @@ import numpy as np
 from scipy import signal
 
 from postcactus import cactus_waves as cw
+from postcactus import gw_utils as gwu
 from postcactus import simdir as sd
 from postcactus import timeseries as ts
 
@@ -126,6 +127,33 @@ class TestCactusWaves(unittest.TestCase):
         self.assertTrue(np.allclose(
             psi4.get_strain_lm(2, 2, 0.1, trim_ends=False).y,
             psi4._fixed_frequency_integrated(psi4lm, 0.1).y))
+
+    def test_get_strain(self):
+
+        sim = sd.SimDir("tests/tov")
+        gwdir = cw.GravitationalWavesDir(sim)
+        psi4 = gwdir[110.69]
+
+        # test l_max
+        with self.assertRaises(ValueError):
+            psi4.get_strain(0, 0, 1, l_max=100)
+
+        theta, phi = np.pi/2, 1
+        ym2 = gwu.sYlm(-2, 2, -2, theta, phi)
+        ym1 = gwu.sYlm(-2, 2, -1, theta, phi)
+        y0 = gwu.sYlm(-2, 2, 0, theta, phi)
+        y1 = gwu.sYlm(-2, 2, 1, theta, phi)
+        y2 = gwu.sYlm(-2, 2, 1, theta, phi)
+
+        strain = (psi4.get_strain_lm(2, -2, 0.1).y * ym2
+                  + psi4.get_strain_lm(2, -1, 0.1).y * ym1
+                  + psi4.get_strain_lm(2, 0, 0.1).y * y0
+                  + psi4.get_strain_lm(2, 1, 0.1).y * y1
+                  + psi4.get_strain_lm(2, 2, 0.1).y *y2)
+
+        self.assertTrue(np.allclose(strain,
+                                    psi4.get_strain(theta, phi, 0.1).y))
+
 
     def test_WavesDir(self):
 

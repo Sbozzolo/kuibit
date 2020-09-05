@@ -12,6 +12,7 @@ import numpy as np
 
 from postcactus import simdir
 from postcactus import cactus_multipoles as mp
+from postcactus.gw_utils import sYlm
 from postcactus import timeseries as ts
 
 
@@ -199,6 +200,60 @@ class GravitationalWavesOneDet(mp.MultipoleOneDet):
         # The return value is rh not just h (the strain)
         # h_plus - i h_cross
         return strain * self.dist
+
+    def get_strain(self, theta, phi, pcut, *args, window_function=None,
+                   l_max=None, trim_ends=True, **kwargs):
+        r"""Return the strain accounting for all the multipoles and the spin
+        weighted spherical harmonics.
+
+        .. math::
+
+        h_+(r,t)
+       -     i h_\times(r,t) = \sum_{l=2}^{l=l_{\mathrm{max}}}
+        \sum_{m=-l}^{m=l} h(r, t)^{lm} {}_{-2}Y_{lm}(\theta, \phi)
+
+        :param theta: Meridional observation angle
+        :type theta: float
+        :param phi: Azimuthal observation angle
+        :type phi: float
+        :param pcut: Period that enters the fixed-frequency integration.
+        Typically, the longest physical period in the signal.
+        :type pcut: float
+        :param window_function: If not None, apply window_function to the
+        series before computing the strain.
+        :type window_function: callable, str, or None
+        :param trim_ends: If True, a portion of the resulting strain is removed
+        at both the initial and final times. The amount removed is equal to
+        pcut.
+        :type trim_ends: bool
+        :param l_max: Ingore multipoles with l > l_max
+        :type l_max: int
+
+        :returns: :math:`r (h^+ - i rh^\times)`
+        :rtype: :py:class:`~.TimeSeries`
+        """
+
+        if (l_max is None):
+            l_max = self.l_max
+
+        if (l_max > self.l_max):
+            raise ValueError("l max larger than l available")
+
+        iter_self = iter(self)
+        first_l, first_m, first_det = next(iter_self)
+        strain = self.get_strain_lm(first_l, first_m, pcut, *args,
+                                    window_function=window_function,
+                                    trim_ends=trim_ends, **kwargs)
+        strain *= sYlm(-2, first_l, first_m, theta, phi)
+
+        for mult_l, mult_m, det in iter_self:
+            if (mult_l <= l_max):
+                strain += self.get_strain_lm(mult_l, mult_m, pcut, *args,
+                                             window_function=window_function,
+                                             trim_ends=trim_ends, **kwargs)
+                strain *= sYlm(-2, mult_l, mult_m, theta, phi)
+
+        return strain
 
 
 class ElectromagneticWavesOneDet(mp.MultipoleOneDet):

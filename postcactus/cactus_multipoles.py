@@ -87,6 +87,7 @@ class MultipoleOneDet:
                             for lm, ts in multipoles_list_ts.items()}
         self.available_l = sorted({mult_l for mult_l, _
                                    in self._multipoles.keys()})
+        self.l_max = max(self.available_l)
         self.available_m = sorted({mult_m for _, mult_m
                                    in self._multipoles.keys()})
         self.available_lm = set(self._multipoles.keys())
@@ -205,6 +206,7 @@ class MultipoleAllDets:
             self.outermost = self._detectors[self.r_outer]
         #
         self.available_l = sorted({mult_l for mult_l, _ in self.available_lm})
+        self.l_max = max(self.available_l)
         self.available_m = sorted({mult_m for _, mult_m in self.available_lm})
 
         # Alias

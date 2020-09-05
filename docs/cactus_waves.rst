@@ -88,9 +88,16 @@ Finally, because of the windowing and the integration, signals around the
 boundaries is not too reliable. It is removed by default. You can opt-out
 setting ``trim_ends`` to ``False``.
 
-.. note::
 
-   Every time a function returns a tuple with the two gravitational-wave
-   polarizations, the order is always alphabetical: the first element is the
-   cross polarization, the second is the plus. However, in most cases, the
-   preferred output is a complex number (or array of numbers).
+In case you are interested in summing up all multipole monopoles, you should use
+the more general function :py:meth:`~.get_strain()`. This function takes input
+similar to :py:meth:`~.get_strain_lm()`, and requires to specify an evaluation
+angle ``(theta, phi)``. In case you want to sum up only up to a given :math:`l`,
+pass the argument ``l_max``.
+..
+   .. note::
+
+      Every time a function returns a tuple with the two gravitational-wave
+      polarizations, the order is always alphabetical: the first element is the
+      cross polarization, the second is the plus. However, in most cases, the
+      preferred output is a complex number (or array of numbers).
