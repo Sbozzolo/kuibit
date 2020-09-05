@@ -141,6 +141,17 @@ class TestCactusMultipoles(unittest.TestCase):
         # keys()
         self.assertCountEqual(alldets.keys(), radii)
 
+    def test_has_detector(self):
+
+        data = [(2, 2, 100, self.ts1),
+                (2, -2, 150, self.ts2)]
+
+        alldets = mp.MultipoleAllDets(data)
+
+        self.assertFalse(alldets.has_detector(2, 2, 0))
+        self.assertFalse(alldets.has_detector(2, 3, 100))
+        self.assertTrue(alldets.has_detector(2, 2, 100))
+
     def test_MultipolesDir(self):
 
         sim = sd.SimDir("tests/tov")
@@ -148,7 +159,8 @@ class TestCactusMultipoles(unittest.TestCase):
 
         # multipoles from textfile
         with self.assertRaises(RuntimeError):
-            cacdir._multipole_from_textfile("tests/tov/output-0000/static_tov/carpet-timing..asc")
+            cacdir._multipole_from_textfile(
+                "tests/tov/output-0000/static_tov/carpet-timing..asc")
 
         path = "tests/tov/output-0000/static_tov/mp_Phi2_l2_m-1_r110.69.asc"
         path_h5 = "tests/tov/output-0000/static_tov/mp_harmonic.h5"
@@ -163,7 +175,7 @@ class TestCactusMultipoles(unittest.TestCase):
 
         self.assertEqual(mpts, cacdir._multipole_from_textfile(path))
         self.assertEqual(ts_h5,
-                         cacdir._multipoles_from_h5files([path_h5])[8.00](2,2))
+                         cacdir._multipoles_from_h5files([path_h5])[8.00](2, 2))
 
         mpfiles = [(2, 2, 100, path)]
 

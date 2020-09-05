@@ -111,7 +111,7 @@ class GravitationalWavesOneDet(mp.MultipoleOneDet):
 
         return ts.TimeSeries(integrand.t, integrated_y)
 
-    # This function is syntatic sugar
+    # This function is only for convenience
     def get_psi4_lm(self, mult_l, mult_m):
         r"""Return the multipolar components l and m of Psi4
 

@@ -195,7 +195,8 @@ class MultipoleAllDets:
                 # Tally the available l and m
                 self.available_lm.add((mult_l, mult_m))
 
-        self._detectors = {radius: MultipoleOneDet(radius, multipoles, self.l_min)
+        self._detectors = {radius: MultipoleOneDet(radius, multipoles,
+                                                   self.l_min)
                            for radius, multipoles in detectors.items()}
 
         # In Python3 .keys() is not a list
@@ -221,6 +222,24 @@ class MultipoleAllDets:
 
     def copy(self):
         return type(self)(self.data, self.l_min)
+
+    def has_detector(self, mult_l, mult_m, dist):
+        """Check if a given multipole component extracted at a given
+        distance is available.
+
+        :param mult_l:     Multipole component mult_l
+        :type mult_l:      int
+        :param mult_m:     Multipole component m
+        :type mult_m:      int
+        :param dist:  Distance of detector
+        :type dist:   float
+
+        :returns:     If available or not
+        :rtype:       bool
+        """
+        if dist in self:
+            return (mult_l, mult_m) in self[dist]
+        return False
 
     def __contains__(self, key):
         return key in self._dets
