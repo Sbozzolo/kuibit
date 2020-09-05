@@ -110,7 +110,7 @@ class TestFrequencySeries(unittest.TestCase):
             self.FS.inner_product(1)
 
         with self.assertRaises(TypeError):
-            self.FS.inner_product(self.FS, noise=1)
+            self.FS.inner_product(self.FS, noises=1)
 
         # To test the inner product we construct two simple linear frequency
         # series y(f) = f + 2j * f and y2(f) = 3j * f
@@ -144,8 +144,15 @@ class TestFrequencySeries(unittest.TestCase):
         # Integrated it is (6 - 3j) * (fmax - fmin)
         noise = fs.FrequencySeries(f, f**2)
 
-        self.assertAlmostEqual(fs1.inner_product(fs2, noise=noise),
+        self.assertAlmostEqual(fs1.inner_product(fs2, noises=noise),
                                4 * 6 * (1.2 - 1))
+
+        # Test multiple noises
+        # Test with twice the same noise. The output should be doubled.
+        twice_noise = [noise, noise]
+        self.assertAlmostEqual(fs1.inner_product(fs2,
+                                                 noises=twice_noise),
+                               2 * 4 * 6 * (1.2 - 1))
 
     def test_overlap(self):
 

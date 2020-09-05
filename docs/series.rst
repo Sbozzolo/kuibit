@@ -296,12 +296,21 @@ the inner product is typically defined as
 
    `(h_1, h_2) = 4 \Re \int_{f_min}^{f_max} \frac{h_1 h_2^*}{S_n}`.
 
-The method :py:meth:`~.inner_product` computes this quantity. If the noise is
-not provided, ``S_n`` will be fixed to one. Alternatively, the noise has to be a
-:py:class:`~.FrequencySeries`. Internally, ``h_1``, ``h_2``, and ``S_n`` will be
-resampled to a common frequency interval with the number of points of the series
-with fewest points. Hence, the accuracy of the computation is determined by the
-accuracy of the series with fewest points.
+The method :py:meth:`~.inner_product` computes this quantity, possibly for a
+network of detectors. If the noise is not provided, ``S_n`` will be fixed to
+one. Alternatively, if the noise is a :py:class:`~.FrequencySeries`, the inner
+product for that weighted with that noise will be computed. Alternatively, if
+``noises`` is a list of :py:class:`~.FrequencySeries`, then we will assume that
+the user wants to compute the network inner product:
+
+.. :math:
+
+   `(h_1, h_2)_{\textrm{network}} = \sum_{\mathrm{detectors}} (h_1, h_2)`
+
+where each detector has its own noise curve. Internally, ``h_1``, ``h_2``, and
+``S_n`` will be resampled to a common frequency interval with the number of
+points of the series with fewest points. Hence, the accuracy of the computation
+is determined by the accuracy of the series with fewest points.
 
 The series are assumed to be zero outside the range of definition. So, if
 ``f_min`` or ``f_max`` are too large or too small, the effective parameter will
@@ -313,6 +322,8 @@ With the inner product, one compute the overlap between two series:
 
    `\textrm{overlap} = (h_1, h_2) / \sqrt{(h_1, h_1)(h_2, h_2)}`
 
+Again, this can be unweighted, or noise-weighted, or for a network of
+detectors (if a list of noises is provided).
 
 load_FrequencySeries
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^

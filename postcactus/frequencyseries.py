@@ -306,10 +306,18 @@ class FrequencySeries(BaseSeries):
 
         return timeseries.TimeSeries(t, y)
 
-    def inner_product(self, other, fmin=0, fmax=np.inf, noise=None):
-        r"""Compute the inner product.
+    def inner_product(self, other, fmin=0, fmax=np.inf, noises=None):
+        r"""Compute the (network) inner product.
 
         :math:`(h_1, h_2) = 4 \Re \int_{f_min}^{f_max} \frac{h_1 h_2^*}{S_n}`
+
+        In case multiple noise curves are supplied, compute
+
+        :math:`(h_1, h_2) = \sum_detectors
+        4 \Re \int_{f_min}^{f_max} \frac{h_1 h_2^*}{S_n}`
+
+        This is the network inner product. To compute this quantity, provide a
+        list of noises.
 
         We assume that the frequencyseries are zero outside of the interval of
         definition, so if fmax (fmin) is larger (smaller) than the one
@@ -322,7 +330,8 @@ class FrequencySeries(BaseSeries):
         :param fmax: Remove frequencies above fmin
         :type fmax: float
         :param noise: If None, no weight is applied
-        :type noise: :py:class:`.FrequencySeries` or None
+        :type noise: :py:class:`.FrequencySeries`, list
+                     of :py:class:`.FrequencySeries` or None
 
         :returns: Inner product between self and other
         :rtype: float
@@ -331,22 +340,39 @@ class FrequencySeries(BaseSeries):
         if (not isinstance(other, type(self))):
             raise TypeError("The other object is not a FrequencySeries")
 
-        if ((not isinstance(noise, type(self))) and (noise is not None)):
-            raise TypeError("Noise is not FrequencySeries or None")
+        if ((not isinstance(noises, type(self)))
+                and (not isinstance(noises, list))
+                and (noises is not None)):
+            raise TypeError("Noise is not (a list of) FrequencySeries or None")
 
-        if (noise is None):
-            # If noise is None, it means that the weight is one everywhere so,
+        if (noises is None):
+            # If noises is None, it means that the weight is one everywhere so,
             # we prepare a FrequencySeries that has the same frequencies as
             # self.
             # Everything will be resampled to a common set
-            noise = FrequencySeries(self.f, np.ones_like(self.fft))
+            noises = FrequencySeries(self.f, np.ones_like(self.fft))
 
         # "res" = "resampled"
-        [res_self, res_other, res_noise] = sample_common([self, other, noise])
-        # Noise has better be real.
-        integrand = 4 * res_self * res_other.conjugate() / res_noise
+        to_be_res_list = [self, other]
+        # Check if noises is a list, in that case add all the elements to
+        # to to_be_res_list
+        if (isinstance(noises, list)):
+            to_be_res_list.extend(noises)
+        else:
+            # noises is not a list, just append it
+            to_be_res_list.append(noises)
+
+        [res_self, res_other, *res_noises] = sample_common(to_be_res_list)
+        # Now everything is sampled to the same frequencies
+
+        # Sum all the integrands
+        integrand = 0
+
+        for res_noise in res_noises:
+            integrand += res_self * res_other.conjugate() / res_noise
+
         # 4 Re * \int
-        integral = integrand.integrated().real()
+        integral = 4 * integrand.integrated().real()
 
         # We assume that the frequencyseries are zero outside of the interval
         # of definition
@@ -357,8 +383,8 @@ class FrequencySeries(BaseSeries):
 
         return integral(fmax) - integral(fmin)
 
-    def overlap(self, other, fmin=0, fmax=np.inf, noise=None):
-        r"""Compute the overlap.
+    def overlap(self, other, fmin=0, fmax=np.inf, noises=None):
+        r"""Compute the (network) overlap.
 
         :math:`\textrm{overlap} = (h_1, h_2) / \sqrt{(h_1, h_1)(h_2, h_2)}`
 
@@ -372,15 +398,16 @@ class FrequencySeries(BaseSeries):
         :type fmin: float
         :param fmax: Remove frequencies above fmin
         :type fmax: float
-        :param noise: If None, no weight is applied
-        :type noise: :py:class:`.FrequencySeries` or None
+        :param noise: If None, no weight is applied. If it is a list,
+                      the netowrk overlap is computed.
+        :type noise: (list of) :py:class:`.FrequencySeries` or None
 
         :returns: Overlap between self and other
         :rtype: float
 
         """
         # Error handling is done by inner_product
-        inner_11 = self.inner_product(self, fmin, fmax, noise)
-        inner_22 = other.inner_product(other, fmin, fmax, noise)
-        inner_12 = self.inner_product(other, fmin, fmax, noise)
+        inner_11 = self.inner_product(self, fmin, fmax, noises)
+        inner_22 = other.inner_product(other, fmin, fmax, noises)
+        inner_12 = self.inner_product(other, fmin, fmax, noises)
         return inner_12 / np.sqrt(inner_11 * inner_22)
