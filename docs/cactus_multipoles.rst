@@ -50,12 +50,14 @@ can loop over the available multipoles:
 MultipoleAllDets
 ________________
 
-:py:class:`~.MultipoleAllDets` collects all the :py:class:`~.MultipoleOneDet` for a
-given variable and multiple radii. ``available_lm`` can be used to see what
-multipoles are available and ``radii`` to see which radii.
-:py:class:`~.MultipoleAllDets` is similar to :py:class:`~.MultipoleOneDet` with the
-exception that the index is the radius and the return value is a
-:py:class:`~.MultipoleOneDet`.
+:py:class:`~.MultipoleAllDets` collects all the :py:class:`~.MultipoleOneDet`
+for a given variable and multiple radii. ``available_lm`` can be used to see
+what multipoles are available and ``radii`` to see which radii. In case you want
+to check, you can use the method :py:meth:`~.has_detector(l, m, re)`.
+
+:py:class:`~.MultipoleAllDets` is similar to class:`~.MultipoleOneDet` with the
+:py:exception that the index is the radius and the return value is a
+:py::py:class:`~.MultipoleOneDet`.
 
 .. code-block:: python
 
