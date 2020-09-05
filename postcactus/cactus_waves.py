@@ -111,6 +111,19 @@ class GravitationalWavesOneDet(mp.MultipoleOneDet):
 
         return ts.TimeSeries(integrand.t, integrated_y)
 
+    # This function is syntatic sugar
+    def get_psi4_lm(self, mult_l, mult_m):
+        r"""Return the multipolar components l and m of Psi4
+
+        :param mult_l:     Multipole component l.
+        :type mult_l:      int
+        :param mult_m:     Multipole component m.
+        :type mult_m:      int
+
+        :returns: :math:`\Psi_4^{lm}` :rtype: complex :py:class:`~.TimeSeries`
+        """
+        return self[(mult_l, mult_m)]
+
     def get_strain_lm(self, mult_l, mult_m, pcut, *args, window_function=None,
                       trim_ends=True, **kwargs):
         r"""Return the strain associated to the multipolar component (l, m).
