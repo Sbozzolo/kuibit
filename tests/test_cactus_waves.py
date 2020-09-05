@@ -33,6 +33,14 @@ class TestCactusWaves(unittest.TestCase):
         self.assertEqual(gw.l_min, 2)
         self.assertEqual(em.l_min, 1)
 
+    def test_get_psi4_lm(self):
+
+        sim = sd.SimDir("tests/tov")
+        gwdir = cw.GravitationalWavesDir(sim)
+
+        self.assertEqual(gwdir[110.69].get_psi4_lm(2, 2),
+                         gwdir[110.69][(2, 2)])
+
     def test__fixed_frequency_integrated(self):
 
         # First, we test the FF integration with a function (sin(x))
