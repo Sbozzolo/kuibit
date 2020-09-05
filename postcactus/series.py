@@ -130,6 +130,16 @@ class BaseSeries:
         """
         return issubclass(self.data_y.dtype.type, complex)
 
+    def x_at_maximum_y(self):
+        """Return the value of x when abs(y) is maximum.
+        """
+        return self.data_x[np.argmax(np.abs(self.data_y))]
+
+    def x_at_minimum_y(self):
+        """Return the value of x when abs(y) is minimum.
+        """
+        return self.data_x[np.argmin(np.abs(self.data_y))]
+
     def _make_spline(self, *args, k=3, s=0, **kwargs):
         """Private function to make spline representation of the data.
 
