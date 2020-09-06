@@ -85,7 +85,7 @@ class TestCactusWaves(unittest.TestCase):
         # Check warning for irregularly spaced
         with self.assertWarns(RuntimeWarning):
             tts.t[1] *= 1.01
-            integral4 = gwdum._fixed_frequency_integrated(tts, 1e-4)
+            gwdum._fixed_frequency_integrated(tts, 1e-4)
 
     def test_get_strain_lm(self):
 
@@ -142,7 +142,7 @@ class TestCactusWaves(unittest.TestCase):
         gwdir = cw.GravitationalWavesDir(sim)
         psi4 = gwdir[110.69]
 
-        # test l_max
+        # test l_max too big
         with self.assertRaises(ValueError):
             psi4.get_strain(0, 0, 1, l_max=100)
 
@@ -157,11 +157,10 @@ class TestCactusWaves(unittest.TestCase):
                   + psi4.get_strain_lm(2, -1, 0.1).y * ym1
                   + psi4.get_strain_lm(2, 0, 0.1).y * y0
                   + psi4.get_strain_lm(2, 1, 0.1).y * y1
-                  + psi4.get_strain_lm(2, 2, 0.1).y *y2)
+                  + psi4.get_strain_lm(2, 2, 0.1).y * y2)
 
         self.assertTrue(np.allclose(strain,
                                     psi4.get_strain(theta, phi, 0.1).y))
-
 
     def test_WavesDir(self):
 
