@@ -94,6 +94,23 @@ the more general function :py:meth:`~.get_strain()`. This function takes input
 similar to :py:meth:`~.get_strain_lm()`, and requires to specify an evaluation
 angle ``(theta, phi)``. In case you want to sum up only up to a given :math:`l`,
 pass the argument ``l_max``.
+
+
+Energy and angular momentum
+___________________________
+
+
+:py:class:`~.GravitationalWavesOneDet` (and
+:py:class:`~.ElectromagneticWavesOneDet`) implements methods to compute the
+instantaneous power and torque along the z axis. To compute these quantities for
+a specific mode, just use :py:meth:`~.get_power_lm` or
+:py::py:meth:`~.get_torque_z_lm`. You can also compute these quantities for all
+the available multipoles up to a given ``l_max`` using the methods
+:py::py:meth:`~.get_total_power` or :py:meth:`~.get_total_torque.` The
+integrated (cumulative) versions are also available. These are the energy and
+angular momentum in gravitational waves. The methods have similar names with
+``energy`` instead of ``power`` and ``angular_momentum`` instead of ``torque_z``.
+
 ..
    .. note::
 

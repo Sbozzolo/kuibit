@@ -1,5 +1,20 @@
 #!/usr/bin/env python3
 
+# Copyright (C) 2020 Gabriele Bozzola, Wolfgang Kastaun
+#
+# This program is free software; you can redistribute it and/or modify it under
+# the terms of the GNU General Public License as published by the Free Software
+# Foundation; either version 3 of the License, or (at your option) any later
+# version.
+#
+# This program is distributed in the hope that it will be useful, but WITHOUT
+# ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+# FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
+# details.
+#
+# You should have received a copy of the GNU General Public License along with
+# this program; if not, see <https://www.gnu.org/licenses/>.
+
 """This module provides access to data saved by the multipoles thorn.
 
    The main class is :py:class:`MultipolesDir`, which is typically
@@ -154,10 +169,17 @@ class MultipoleOneDet:
 
         function can take additional paramters passed directly from
         total_function_on_available_lm (e.g. pcut for FFI).
+
+        :params function: Function that has to be applied on each monopole
+        :type function: callable
+
+        :returns: Sum of function applied to each monopole
+        :rtype: return type of function
+
         """
         # This function is used to compute many quantities with waves (e.g.,
         # total strain, total power emitted, ...)
-        # It is a little bit ugly, but it works well
+        # It is a little bit ugly, but it works
         if (l_max is None):
             l_max = self.l_max
 

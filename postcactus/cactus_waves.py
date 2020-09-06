@@ -1,10 +1,24 @@
 #!/usr/bin/env python3
 
+# Copyright (C) 2020 Gabriele Bozzola, Wolfgang Kastaun
+#
+# This program is free software; you can redistribute it and/or modify it under
+# the terms of the GNU General Public License as published by the Free Software
+# Foundation; either version 3 of the License, or (at your option) any later
+# version.
+#
+# This program is distributed in the hope that it will be useful, but WITHOUT
+# ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+# FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
+# details.
+#
+# You should have received a copy of the GNU General Public License along with
+# this program; if not, see <https://www.gnu.org/licenses/>.
+
 """The :py:mod:`~.cactus_waves` module provides classes to access gravitational
 and electromagnetic wave signals computed using Weyl scalars.
 
 """
-
 
 import warnings
 
@@ -81,6 +95,7 @@ class GravitationalWavesOneDet(mp.MultipoleOneDet):
         :type order: int
 
         """
+
         if (not timeseries.is_regularly_sampled()):
             warnings.warn("Timeseries not regularly sampled. Resampling.",
                           RuntimeWarning)
@@ -124,8 +139,8 @@ class GravitationalWavesOneDet(mp.MultipoleOneDet):
         """
         return self[(mult_l, mult_m)]
 
-    def get_strain_lm(self, mult_l, mult_m, pcut, *args, window_function=None,
-                      trim_ends=True, **kwargs):
+    def get_strain_lm(self, mult_l, mult_m, pcut, *args,
+                      window_function=None, trim_ends=True, **kwargs):
         r"""Return the strain associated to the multipolar component (l, m).
 
         The strain returned is multiplied by the distance.
@@ -262,6 +277,58 @@ class GravitationalWavesOneDet(mp.MultipoleOneDet):
 
         return self.total_function_on_available_lm(compute_strain, l_max=l_max)
 
+    def get_power_lm(self, mult_l, mult_m, pcut):
+        """Return the instantaneous power in the mode (l, m).
+        """
+        psi4_int = self._fixed_frequency_integrated(self[(mult_l, mult_m)],
+                                                    pcut)
+        return self.dist**2 / (16 * np.pi) * np.abs(psi4_int)**2
+
+    def get_energy_lm(self, mult_l, mult_m, pcut):
+        """Return the cumulative energy lost in the mode (l, m).
+        """
+        return self.get_power_lm(mult_l, mult_m, pcut).integrated()
+
+    def get_total_power(self, pcut, l_max=None):
+        """Return the total power in all the modes up to l_max.
+        """
+        def powlm(_1, mult_l, mult_m, _2):
+            return self.get_power_lm(mult_l, mult_m, pcut)
+        return self.total_function_on_available_lm(self, powlm, l_max=None)
+
+    def get_total_energy(self, pcut, l_max=None):
+        """Return the cumulative energy lost in all the modes up to l_max.
+        """
+        return self.get_total_power(pcut, l_max).integrated()
+
+    def get_torque_z_lm(self, mult_l, mult_m, pcut):
+        """Return the instantaneous torque in the z axis in the mode (l, m).
+        """
+        psi4_int1 = self._fixed_frequency_integrated(self[(mult_l, mult_m)],
+                                                     pcut)
+        psi4_int2 = self._fixed_frequency_integrated(self[(mult_l, mult_m)],
+                                                     pcut, order=2)
+        return (self.dist**2 / (16 * np.pi) * mult_m
+                * np.imag(psi4_int1 * np.conj(psi4_int2)))
+
+    def get_angular_momentum_z_lm(self, mult_l, mult_m, pcut):
+        """Return the cumulative angular momentum lost in the mode (l, m).
+        """
+        return self.get_torque_z_lm(mult_l, mult_m, pcut).integrated()
+
+    def get_total_torque_z(self, pcut, l_max=None):
+        """Return the total torque z in all the modes up to l_max.
+        """
+        def torqzlm(_1, mult_l, mult_m, _2):
+            return self.get_torque_z_lm(mult_l, mult_m, pcut)
+        return self.total_function_on_available_lm(self, torqzlm, l_max=None)
+
+    def get_total_angular_momentum_z(self, pcut, l_max=None):
+        """Return the cumulative angular momentum lost in all the modes up to
+        l_max.
+        """
+        return self.get_total_torque_z(pcut, l_max).integrated()
+
 
 class ElectromagneticWavesOneDet(mp.MultipoleOneDet):
     """These are electromagnetic waves computed with the Newman-Penrose
@@ -274,6 +341,32 @@ class ElectromagneticWavesOneDet(mp.MultipoleOneDet):
     def __init__(self, dist, data):
 
         super().__init__(dist, data, 1)
+
+    def get_power_lm(self, mult_l, mult_m, pcut):
+        """Return the instantaneous power in the mode (l, m).
+        """
+        phi2_int = self._fixed_frequency_integrated(self[(mult_l, mult_m)],
+                                                    pcut)
+        return self.dist**2 / (4 * np.pi) * np.abs(phi2_int)**2
+
+    def get_energy_lm(self, mult_l, mult_m, pcut):
+        """Return the cumulative energy lost in the mode (l, m).
+        """
+        return self.get_power_lm(mult_l, mult_m, pcut).integrated()
+
+    def get_total_power(self, pcut, l_max=None):
+        """Return the total power in all the modes up to l_max.
+        """
+        def powlm(_1, mult_l, mult_m, _2):
+            return self.get_power_lm(mult_l, mult_m, pcut)
+        return self.total_function_on_available_lm(self, powlm, l_max=None)
+
+    def get_total_energy(self, pcut, l_max=None):
+        """Return the cumulative energy lost in all the modes up to l_max.
+        """
+        return self.get_total_power(pcut, l_max).integrated()
+
+    # Angular momentum is computed by Proca_LFlux, which is not public
 
 
 class WavesDir(mp.MultipoleAllDets):
