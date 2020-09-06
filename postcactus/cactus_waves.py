@@ -246,27 +246,21 @@ class GravitationalWavesOneDet(mp.MultipoleOneDet):
         :rtype: :py:class:`~.TimeSeries`
         """
 
-        if (l_max is None):
-            l_max = self.l_max
+        # Here we use the BaseClass method total_function_on_available_lm
+        # This function loops over all the available (l, m) (with l < l_max)
+        # and invokes a function that takes as arguments the timeseries
+        # of the multipole component, l, m, r, and potentially others.
+        # Then, it accumulates all the results, and return the sum.
 
-        if (l_max > self.l_max):
-            raise ValueError("l max larger than l available")
+        # This is a closure with theta, phi, pcut, and window_function and
+        # trim_ends
+        def compute_strain(_1, mult_l, mult_m, _2):
+            return (sYlm(-2, mult_l, mult_m, theta, phi)
+                    * self.get_strain_lm(mult_l, mult_m, pcut, *args,
+                                         window_function=window_function,
+                                         trim_ends=trim_ends, **kwargs))
 
-        iter_self = iter(self)
-        first_l, first_m, first_det = next(iter_self)
-        strain = self.get_strain_lm(first_l, first_m, pcut, *args,
-                                    window_function=window_function,
-                                    trim_ends=trim_ends, **kwargs)
-        strain *= sYlm(-2, first_l, first_m, theta, phi)
-
-        for mult_l, mult_m, det in iter_self:
-            if (mult_l <= l_max):
-                strain += self.get_strain_lm(mult_l, mult_m, pcut, *args,
-                                             window_function=window_function,
-                                             trim_ends=trim_ends, **kwargs)
-                strain *= sYlm(-2, mult_l, mult_m, theta, phi)
-
-        return strain
+        return self.total_function_on_available_lm(compute_strain, l_max=l_max)
 
 
 class ElectromagneticWavesOneDet(mp.MultipoleOneDet):
@@ -282,29 +276,35 @@ class ElectromagneticWavesOneDet(mp.MultipoleOneDet):
         super().__init__(dist, data, 1)
 
 
-class GravitationalWavesDir(mp.MultipoleAllDets):
+class WavesDir(mp.MultipoleAllDets):
     """This class provides acces gravitational-wave data at different radii.
 
     It is based on :py:class:`~.MultipoleAllDets` with the difference that
     takes as input :py:class:`~.SimDir`. Objects inside
     :py:class:`~.MultipoleAllDets` are redefined as
     :py:class:`~.GravitationalWavesDet`.
+
+    This class is not meant to be used directly! It is abstract.
+
     """
 
-    def __init__(self, sd):
+    def __init__(self, sd, l_min, var, derived_type_one_det):
+        """This class is meant to be derived to describe gravitational waves
+        and electromagnetic waves.
+
+        var is the quantitiy (Weyl scalar) that describe the wave (Psi4 and
+        Phi2), and derived_type_one_det is the class that describes that
+        one in one detector.
+
+        """
         if (not isinstance(sd, simdir.SimDir)):
             raise TypeError("Input is not SimDir")
-
-        # NOTE: There is significant code duplication between this function and
-        #       the init of ElectromagneticWavesDir. However, we allow for this
-        #       duplication to avoid introducing a third intermediate class
-        l_min = 2
 
         # This module is morally equivalent to mp.MultipoleAllDets because "it
         # is indexed by radius". However, it is the main point of access to GW
         # data, so we keep naming consistent and call it "Dir" and let it have
         # it interface with a SimDir.
-        psi4_mpalldets = sd.multipoles['Psi4']
+        psi4_mpalldets = sd.multipoles[var]
 
         # Now we have to prepare the data for the constructor of the base class
         # The data has format:
@@ -323,11 +323,21 @@ class GravitationalWavesDir(mp.MultipoleAllDets):
         # To do this, we redefine the objects by instantiating new ones with
         # the same data
         for r, det in self._dets.items():
-            self._dets[r] = GravitationalWavesOneDet(det.dist,
-                                                     det.data)
+            self._dets[r] = derived_type_one_det(det.dist, det.data)
 
 
-class ElectromagneticWavesDir(mp.MultipoleAllDets):
+class GravitationalWavesDir(WavesDir):
+    """This class provides acces gravitational-wave data at different radii.
+
+    Gravitational waves are computed from the Psi4 Weyl scalar.
+
+    """
+
+    def __init__(self, sd):
+        super().__init__(sd, 2, 'Psi4', GravitationalWavesOneDet)
+
+
+class ElectromagneticWavesDir(WavesDir):
     """This class provides acces electromagnetic-wave data at different radii.
 
     Electromagnetic waves are computed from the Phi2 Weyl scalar.
@@ -335,21 +345,4 @@ class ElectromagneticWavesDir(mp.MultipoleAllDets):
     """
 
     def __init__(self, sd):
-
-        if (not isinstance(sd, simdir.SimDir)):
-            raise TypeError("Input is not SimDir")
-
-        # NOTE: See comments in init of ElectromagneticWavesDir
-        l_min = 1
-
-        psi4_mpalldets = sd.multipoles['Phi2']
-        data = []
-        for radius, det in psi4_mpalldets._dets.items():
-            for mult_l, mult_m, tts in det:
-                if (mult_l >= l_min):
-                    data.append((mult_l, mult_m, radius, tts))
-
-        super().__init__(data)
-        for r, det in self._dets.items():
-            self._dets[r] = ElectromagneticWavesOneDet(det.dist,
-                                                       det.data)
+        super().__init__(sd, 1, 'Phi2', ElectromagneticWavesOneDet)

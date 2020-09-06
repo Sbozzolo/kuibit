@@ -65,18 +65,14 @@ class TestCactusMultipoles(unittest.TestCase):
                                                  (2, 0),
                                                  (2, 1)})
 
-        # test _warn_missing
-        with self.assertWarns(Warning):
-            mult3._warn_missing("Energy")
-
-
         # test contains
         self.assertIn((2, 2), mult1)
         self.assertIn((2, -2), mult2)
         self.assertEqual(mult2[(2, 2)], self.ts1)
 
         # test_iter
-        expected = [(2, 2, self.ts1), (2, -2, self.ts2)]
+        # Notice the order. It is increasing in (l, m)
+        expected = [(2, -2, self.ts2), (2, 2, self.ts1)]
         for data, exp in zip(mult2, expected):
             self.assertCountEqual(data, exp)
 
@@ -95,6 +91,48 @@ class TestCactusMultipoles(unittest.TestCase):
         # test __str__()
         self.assertIn("(2, 2)", mult1.__str__())
         self.assertIn("missing", mult3.__str__())
+
+    def test_total_function_on_available_lm(self):
+
+        # The two series must have the same times
+        ts3 = ts.TimeSeries(self.t1, self.y2)
+        data = [(2, 2, self.ts1), (1, -1, ts3)]
+        mult = mp.MultipoleOneDet(100, data)
+
+        # Test larger and smaller l
+        with self.assertRaises(ValueError):
+            mult.total_function_on_available_lm(lambda x: x, l_max=100)
+        with self.assertRaises(ValueError):
+            mult.total_function_on_available_lm(lambda x: x, l_max=0)
+
+
+        # First, let's try with identity as function
+        # The output should be just ts1 + ts2
+        def identity(x, *args):
+            return x
+        self.assertEqual(mult.total_function_on_available_lm(identity),
+                         self.ts1 + ts3)
+
+        # Next, we use the l, m, r, information
+        def func1(x, mult_l, mult_m, mult_r):
+            return mult_l * mult_m * mult_r * x
+
+        self.assertEqual(mult.total_function_on_available_lm(func1),
+                         2 * 2 * 100 * self.ts1 + 1 * (-1) * 100 * ts3)
+
+        # Next, we use args and kwargs
+        def func2(x, mult_l, mult_m, mult_r, add, add2=0):
+            return mult_l * mult_m * mult_r * x + add + add2
+
+        # This will just add (add + add2) (2 + 3)
+        self.assertEqual(mult.total_function_on_available_lm(func2, 2, add2=3),
+                         (2 * 2 * 100 * self.ts1 + 2 + 3
+                          + 1 * (-1) * 100 * ts3 + 2 + 3))
+
+        # Finally, test l_max
+        self.assertEqual(mult.total_function_on_available_lm(identity,
+                                                             l_max=1),
+                         ts3)
 
     def test_MultipoleAllDets(self):
 

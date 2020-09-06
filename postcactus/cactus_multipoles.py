@@ -9,7 +9,6 @@
 
 import os
 import re
-import warnings
 from functools import lru_cache
 
 import h5py
@@ -123,7 +122,7 @@ class MultipoleOneDet:
                 self._multipoles == other._multipoles)
 
     def __iter__(self):
-        for (mult_l, mult_m), ts in self._multipoles.items():
+        for (mult_l, mult_m), ts in sorted(self._multipoles.items()):
             yield mult_l, mult_m, ts
 
     def __len__(self):
@@ -138,11 +137,49 @@ class MultipoleOneDet:
             ret += f" (missing: {list(self.missing_lm)})"
         return ret
 
-    def _warn_missing(self, where):
-        # To be used for computating, ie, energy
-        if self.missing_lm:
-            warnings.warn(f"{where}: missing {list(self.missing_lm)},"
-                          "(assuming zero)", RuntimeWarning)
+    def total_function_on_available_lm(self, function, *args, l_max=None,
+                                       **kwargs):
+        """Evaluate function on each multipole and accumulate the result.
+
+        total_function_on_available_lm will call function with the
+        following arguments:
+
+        function(timeseries, mult_l, mult_m, dist, *args, **kwargs)
+
+        If function does not need some paramters, it should use take
+        the *args argument to ignore the additional paramters that
+        are always passed (l, m, r).
+
+        Values of l larger than l_max are ignored.
+
+        function can take additional paramters passed directly from
+        total_function_on_available_lm (e.g. pcut for FFI).
+        """
+        # This function is used to compute many quantities with waves (e.g.,
+        # total strain, total power emitted, ...)
+        # It is a little bit ugly, but it works well
+        if (l_max is None):
+            l_max = self.l_max
+
+        if (l_max > self.l_max):
+            raise ValueError("l max larger than l available")
+
+        # The iterator is increasing in (l, m), so we can start from the first
+        # element
+
+        iter_self = iter(self)
+        first_l, first_m, first_det = next(iter_self)
+        if (first_l > l_max):
+            raise ValueError("l max smaller than all l available")
+        result = function(first_det, first_l, first_m, self.dist,
+                          *args, **kwargs)
+
+        for mult_l, mult_m, det in iter_self:
+            if (mult_l <= l_max):
+                result += function(det, mult_l, mult_m, self.dist,
+                                   *args, **kwargs)
+
+        return result
 
 
 class MultipoleAllDets:
