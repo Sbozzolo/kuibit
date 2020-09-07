@@ -16,10 +16,12 @@ PostCactus with the following differences:
    list of the available features)
 3. We test and document all the code
 
-The goal of this fork is to make PostCactus more robust and user-friendly, hence
-the emphasis on documentation and testing.
+The goal of this fork is to make PostCactus more robust and developer-friendly,
+hence the emphasis on documentation and testing. We try to make the code easy to
+understand and extend.
 
-Documentation is found [here](https://sbozzolo.github.io/PostCactus).
+Documentation is found at the following link:
+[sbozzolo.github.io/PostCactus](https://sbozzolo.github.io/PostCactus).
 
 ## Installation
 

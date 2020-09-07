@@ -259,6 +259,8 @@ class TimeSeries(BaseSeries):
     def t(self, t):
         # This is defined BaseClass
         self.data_x = t
+        # Update the spline
+        self._make_spline()
 
     @property
     def y(self):
@@ -269,6 +271,8 @@ class TimeSeries(BaseSeries):
     def y(self, y):
         # This is defined BaseClass
         self.data_y = y
+        # Update the spline
+        self._make_spline()
 
     @property
     def tmin(self):

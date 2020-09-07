@@ -330,10 +330,8 @@ class GravitationalWavesOneDet(mp.MultipoleOneDet):
                                               time_utc)
 
         # Detectors contains three fields, one for each detector
-        antennas = gw_utils.antenna_responses(right_ascension,
-                                              declination,
-                                              time_utc,
-                                              polarization)
+        antennas = gw_utils.antenna_responses_from_sky_localization(
+            right_ascension, declination, time_utc, polarization)
 
         # We collect all the strains in a list, then we convert it in a
         # nameduples Detectors

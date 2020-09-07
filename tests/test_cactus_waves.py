@@ -178,7 +178,9 @@ class TestCactusWaves(unittest.TestCase):
         # Let's check with Hanford
         angles = gwu.ra_dec_to_theta_phi(8, -70, "2015-09-14 09:50:45")
         theta_H, phi_H = angles.hanford
-        antennas = gwu.antenna_responses(8, -70, "2015-09-14 09:50:45")
+        antennas = gwu.antenna_responses_from_sky_localization(
+            8, -70, "2015-09-14 09:50:45"
+        )
         Fc_H, Fp_H = antennas.hanford
 
         expected_strain = self.psi4.get_strain(theta_H, phi_H, 0.1,

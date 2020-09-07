@@ -65,8 +65,9 @@ class TestGWUtils(unittest.TestCase):
 
     def test_antenna_responses(self):
 
-        antenna_gw150914 = gwu.antenna_responses(8, -70,
-                                                 "2015-09-14 09:50:45")
+        antenna_gw150914 = gwu.antenna_responses_from_sky_localization(
+            8, -70, "2015-09-14 09:50:45"
+        )
 
         # This test is extremely weak: the numbers that are here were
         # obtained with the function itself
