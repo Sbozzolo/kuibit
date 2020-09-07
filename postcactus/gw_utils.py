@@ -293,7 +293,39 @@ def ra_dec_to_theta_phi(right_ascension, declination, time_utc):
     return coords
 
 
-def antenna_responses(right_ascension, declination, time_utc, polarization=0):
+def antenna_responses(theta, phi, polarization=0):
+    """Return the antenna response pattern of a detector on the z = 0 plane with the
+    arms on the x and y directions.
+
+    Theta and phi are the usual spherical angles.
+
+    :param theta: Meridional angle
+    :type theta: float
+    :param phi: Azimuthal angle
+    :type phi: float
+    :param polarization: Polarization angle of the wave (cross and plus,
+    in this order)
+    :type polarization: float
+
+    """
+    # Equations from the website with corrected typo in the sign of F_cross
+    # (It should be + in front of the cosine)
+    # http://research.physics.illinois.edu/cta/movies/bhbh_sim/wavestrain.html
+
+    Fp = (0.5 * (1 + np.cos(theta) * np.cos(theta))
+            * np.cos(2 * phi) * np.cos(2 * polarization)
+            - np.cos(theta) * np.sin(2 * phi) * np.sin(2 * polarization))
+    Fc = (0.5 * (1 + np.cos(theta) * np.cos(theta))
+            * np.cos(2 * phi) * np.sin(2 * polarization)
+            + np.cos(theta) * np.sin(2 * phi) * np.cos(2 * polarization))
+
+    return (Fc, Fp)
+
+
+def antenna_responses_from_sky_localization(right_ascension,
+                                            declination,
+                                            time_utc,
+                                            polarization=0):
     """Return the antenna responses for Hanford, Livingston and Virgo for a
     given source.
 
@@ -325,32 +357,9 @@ def antenna_responses(right_ascension, declination, time_utc, polarization=0):
 
     coords = ra_dec_to_theta_phi(right_ascension, declination, time_utc)
 
-    theta_H, phi_H = coords.hanford
-    theta_L, phi_L = coords.livingston
-    theta_V, phi_V = coords.virgo
-
-    # Equations from the website with corrected typo in the sign of F_cross
-    # (It should be + in front of the cosine)
-    Fp_H = (0.5 * (1 + np.cos(theta_H) * np.cos(theta_H))
-            * np.cos(2 * phi_H) * np.cos(2 * polarization)
-            - np.cos(theta_H) * np.sin(2 * phi_H) * np.sin(2 * polarization))
-    Fc_H = (0.5 * (1 + np.cos(theta_H) * np.cos(theta_H))
-            * np.cos(2 * phi_H) * np.sin(2 * polarization)
-            + np.cos(theta_H) * np.sin(2 * phi_H) * np.cos(2 * polarization))
-
-    Fp_L = (0.5 * (1 + np.cos(theta_L) * np.cos(theta_L))
-            * np.cos(2 * phi_L) * np.cos(2 * polarization)
-            - np.cos(theta_L) * np.sin(2 * phi_L) * np.sin(2 * polarization))
-    Fc_L = (0.5 * (1 + np.cos(theta_L) * np.cos(theta_L))
-            * np.cos(2 * phi_L) * np.sin(2 * polarization)
-            + np.cos(theta_L) * np.sin(2 * phi_L) * np.cos(2 * polarization))
-
-    Fp_V = (0.5 * (1 + np.cos(theta_V) * np.cos(theta_V))
-            * np.cos(2 * phi_V) * np.cos(2 * polarization)
-            - np.cos(theta_V) * np.sin(2 * phi_V) * np.sin(2 * polarization))
-    Fc_V = (0.5 * (1 + np.cos(theta_V) * np.cos(theta_V))
-            * np.cos(2 * phi_V) * np.sin(2 * polarization)
-            + np.cos(theta_V) * np.sin(2 * phi_V) * np.cos(2 * polarization))
+    Fc_H, Fp_H = antenna_responses(*coords.hanford)
+    Fc_L, Fp_L = antenna_responses(*coords.livingston)
+    Fc_V, Fp_V = antenna_responses(*coords.virgo)
 
     antenna = Detectors(hanford=(Fc_H, Fp_H),
                         livingston=(Fc_L, Fp_L),

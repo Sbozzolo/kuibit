@@ -109,6 +109,8 @@ class FrequencySeries(BaseSeries):
     def f(self, f):
         # This is defined BaseClass
         self.data_x = f
+        # Update the spline
+        self._make_spline()
 
     @property
     def fft(self):
@@ -119,6 +121,8 @@ class FrequencySeries(BaseSeries):
     def fft(self, fft):
         # This is defined BaseClass
         self.data_y = fft
+        # Update the spline
+        self._make_spline()
 
     @property
     def fmin(self):

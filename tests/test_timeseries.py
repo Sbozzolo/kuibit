@@ -496,6 +496,16 @@ class TestTimeseries(unittest.TestCase):
         with self.assertRaises(ValueError):
             sins(-1)
 
+        # Test that setting directly the members updates the spline
+        old_spline = sins.spline_real
+        sins.y *= 2
+        # y should change
+        self.assertFalse(np.allclose(sins.spline_real[1], old_spline[1]))
+        old_spline2 = sins.spline_real
+        sins.t *= 2
+        # x should change
+        self.assertFalse(np.allclose(sins.spline_real[0], old_spline2[0]))
+
     def test_resample(self):
 
         new_times = np.array([float(1e-5 * i**2) for i in range(0, 100)])
