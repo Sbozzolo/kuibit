@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 
 # Copyright (C) 2020 Gabriele Bozzola
-# Copyright (C) < 2020 Yuk Tung Liu, Christian Reisswig
+# sYlm: Copyright (C) Christian Reisswig
+# ra_dec_to_theta_phi: Copyright (C) 2020 Yuk Tung Liu
 #
 # This program is free software; you can redistribute it and/or modify it under
 # the terms of the GNU General Public License as published by the Free Software
@@ -28,6 +29,13 @@ import numpy as np
 from scipy import integrate, optimize
 
 import postcactus.unitconv as uc
+
+
+# This is just a convenience to avoid having to remember the order of
+# the output (and for easy of extension)
+# One can access the output as detectos.hanford, or
+# detectors['hanford']
+Detectors = namedtuple("Detectors", "hanford livingston virgo")
 
 
 def luminosity_distance_to_redshift(luminosity_distance,
@@ -168,20 +176,12 @@ def sYlm(ss, ll, mm, theta, phi):
     return complex(result * np.cos(mm * phi), result * np.sin(mm * phi))
 
 
-def antenna_responses(right_ascension, declination, time_utc, polarization=0):
-    """Return the antenna responses for Hanford and Livingston for a given
-    source.
-
-    See,
-    http://research.physics.illinois.edu/cta/movies/bhbh_sim/wavestrain.html,
-    considering that there is typo in the sign of the second cosine in the F
-    cross.
+def ra_dec_to_theta_phi(right_ascension, declination, time_utc):
+    """Compute spherical theta and phi for Hanford, Livingston and Virgo for a
+    given source localization.
 
     utc_time has to have the following formatting: %Y-%m-%d %H:%M,
     eg 2015-09-14 09:50:45
-
-    Return values are plus and cross responses for Hanford, Livingston, and
-    Virgo.
 
     :param right_ascension: Right ascension of the source in degrees
     :type right_ascension: float
@@ -189,11 +189,9 @@ def antenna_responses(right_ascension, declination, time_utc, polarization=0):
     :type declination: float
     :param time_utc: UTC time of the event
     :type declination: str
-    :param polarization: Polarization of the wave
-    :type polarization: float
 
-    :rvalue antenna_pattern: Cross and plus antenna pattern for the different
-    interferometers
+    :rvalue spherical coordinates: Theta, phi for the different
+    detectors
     :rtype: namedtuple with fields hanford, livingston, and virgo
 
     """
@@ -288,6 +286,49 @@ def antenna_responses(right_ascension, declination, time_utc, polarization=0):
         np.sin(delta) * np.cos(lat_V))
     phi_V = xazi_V - A_V
 
+    coords = Detectors(hanford=(theta_H, phi_H),
+                       livingston=(theta_L, phi_L),
+                       virgo=(theta_V, phi_V))
+
+    return coords
+
+
+def antenna_responses(right_ascension, declination, time_utc, polarization=0):
+    """Return the antenna responses for Hanford, Livingston and Virgo for a
+    given source.
+
+    See,
+    http://research.physics.illinois.edu/cta/movies/bhbh_sim/wavestrain.html,
+    considering that there is typo in the sign of the second cosine in the F
+    cross.
+
+    utc_time has to have the following formatting: %Y-%m-%d %H:%M,
+    eg 2015-09-14 09:50:45
+
+    Return values are plus and cross responses for Hanford, Livingston, and
+    Virgo.
+
+    :param right_ascension: Right ascension of the source in degrees
+    :type right_ascension: float
+    :param declination: Declination of the source in degrees
+    :type declination: float
+    :param time_utc: UTC time of the event
+    :type declination: str
+    :param polarization: Polarization of the wave
+    :type polarization: float
+
+    :rvalue antenna_pattern: Cross and plus antenna pattern for the different
+    interferometers
+    :rtype: namedtuple with fields hanford, livingston, and virgo
+
+    """
+
+    coords = ra_dec_to_theta_phi(right_ascension, declination, time_utc)
+
+    theta_H, phi_H = coords.hanford
+    theta_L, phi_L = coords.livingston
+    theta_V, phi_V = coords.virgo
+
     # Equations from the website with corrected typo in the sign of F_cross
     # (It should be + in front of the cosine)
     Fp_H = (0.5 * (1 + np.cos(theta_H) * np.cos(theta_H))
@@ -311,13 +352,10 @@ def antenna_responses(right_ascension, declination, time_utc, polarization=0):
             * np.cos(2 * phi_V) * np.sin(2 * polarization)
             + np.cos(theta_V) * np.sin(2 * phi_V) * np.cos(2 * polarization))
 
-    # This is just a convenience to avoid having to remember the order of
-    # the output (and for easy of extension)
-    # One can access the output as antenna_LIGO.hanford, or
-    # antenna_LIGO['hanford']
-    AntennaResponse = namedtuple("AntennaResponse", "hanford livingston virgo")
-    antenna = AntennaResponse(hanford=(Fc_H, Fp_H),
-                              livingston=(Fc_L, Fp_L),
-                              virgo=(Fc_V, Fp_V))
+    antenna = Detectors(hanford=(Fc_H, Fp_H),
+                        livingston=(Fc_L, Fp_L),
+                        virgo=(Fc_V, Fp_V))
 
     return antenna
+
+

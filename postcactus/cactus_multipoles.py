@@ -193,6 +193,7 @@ class MultipoleOneDet:
         first_l, first_m, first_det = next(iter_self)
         if (first_l > l_max):
             raise ValueError("l max smaller than all l available")
+
         result = function(first_det, first_l, first_m, self.dist,
                           *args, **kwargs)
 

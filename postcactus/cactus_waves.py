@@ -26,7 +26,8 @@ import numpy as np
 
 from postcactus import simdir
 from postcactus import cactus_multipoles as mp
-from postcactus.gw_utils import sYlm
+from postcactus import gw_utils
+from postcactus.gw_utils import Detectors
 from postcactus import timeseries as ts
 
 
@@ -59,6 +60,8 @@ class GravitationalWavesOneDet(mp.MultipoleOneDet):
         the lowest physical frequency).
 
         omega is an angular velocity.
+
+        order is order of integration (how many integrations).
 
         The Fourier transform of f(t) is
 
@@ -119,7 +122,7 @@ class GravitationalWavesOneDet(mp.MultipoleOneDet):
         # np.sign(omega) / (ffi_omega) is omega when omega_abs > omega_thres
         # this is a convient way to group together positive and negative omega
         integration_factor = (np.sign(omega)
-                              / (1j * ffi_omega + 1e-100))**int(order)
+                              / (1j * ffi_omega))**int(order)
 
         # Now, inverse fft
         integrated_y = np.fft.ifft(fft * integration_factor)
@@ -270,46 +273,167 @@ class GravitationalWavesOneDet(mp.MultipoleOneDet):
         # This is a closure with theta, phi, pcut, and window_function and
         # trim_ends
         def compute_strain(_1, mult_l, mult_m, _2):
-            return (sYlm(-2, mult_l, mult_m, theta, phi)
+            return (gw_utils.sYlm(-2, mult_l, mult_m, theta, phi)
                     * self.get_strain_lm(mult_l, mult_m, pcut, *args,
                                          window_function=window_function,
                                          trim_ends=trim_ends, **kwargs))
 
         return self.total_function_on_available_lm(compute_strain, l_max=l_max)
 
+    def get_observed_strain(self, right_ascension, declination, time_utc,
+                            pcut, *args, window_function=None,
+                            polarization=0, l_max=None, trim_ends=True,
+                            **kwargs):
+        r"""Return the strain accounting for all the multipoles and the spin
+        weighted spherical harmonics as observed by Hanford, Livingston and
+        Virgo.
+
+        .. math::
+
+        h_+(r,t)
+       -     i h_\times(r,t) = \sum_{l=2}^{l=l_{\mathrm{max}}}
+        \sum_{m=-l}^{m=l} h(r, t)^{lm} {}_{-2}Y_{lm}(\theta, \phi)
+
+        Then, for each detector
+
+        .. math::
+
+        h(r,t) = F_\times h_\times + F_+ h_+
+
+        :param right_ascension: Right ascension of the source in degrees
+        :type right_ascension: float
+        :param declination: Declination of the source in degrees
+        :type declination: float
+        :param time_utc: UTC time of the event
+        :type declination: str
+        :param pcut: Period that enters the fixed-frequency integration.
+        Typically, the longest physical period in the signal.
+        :type pcut: float
+        :param window_function: If not None, apply window_function to the
+        series before computing the strain.
+        :type window_function: callable, str, or None
+        :param trim_ends: If True, a portion of the resulting strain is removed
+        at both the initial and final times. The amount removed is equal to
+        pcut.
+        :type trim_ends: bool
+        :param l_max: Ingore multipoles with l > l_max
+        :type l_max: int
+
+        :returns: :math:`r (h^+ - i rh^\times)`
+        :rtype: :py:class:`~.TimeSeries`
+
+        """
+
+        # Compute (theta, phi) for all the detectors
+        coords = gw_utils.ra_dec_to_theta_phi(right_ascension,
+                                              declination,
+                                              time_utc)
+
+        # Detectors contains three fields, one for each detector
+        antennas = gw_utils.antenna_responses(right_ascension,
+                                              declination,
+                                              time_utc,
+                                              polarization)
+
+        # We collect all the strains in a list, then we convert it in a
+        # nameduples Detectors
+        strains = []
+
+        # Loop over the detectors in Detectors
+        # antennas and coords are namedtuples Detectors
+        for (theta, phi), (Fc, Fp) in zip(coords, antennas):
+            # Make antenna pattern complex so that we can easily
+            # strain is h = hp - i hc
+            strain = self.get_strain(theta, phi, pcut, *args,
+                                     window_function=window_function,
+                                     l_max=l_max, trim_ends=trim_ends,
+                                     **kwargs)
+            # strain.real = hp
+            # strain.imag = -hc
+            strains.append(strain.real() * Fp - strain.imag() * Fc)
+
+        return Detectors(*strains)
+
     def get_power_lm(self, mult_l, mult_m, pcut):
-        """Return the instantaneous power in the mode (l, m).
+        r"""Return the instantaneous power in the mode (l, m).
+
+        Eq (9.139) Buamgarte Shapiro
+
+        .. math::
+
+        \frac{dE}{\dt}(r, t) = \frac{r^2}{16 \pi}
+        \sum_{l=2}^{l=l_{\mathrm{max}}} \sum_{m=-l}^{m=l}
+        \psi^{lm}_4(\theta, \phi, r, t)
+
+        :param pcut: Period that enters the fixed-frequency integration.
+        Typically, the longest physical period in the signal.
+        :type pcut: float
         """
         psi4_int = self._fixed_frequency_integrated(self[(mult_l, mult_m)],
-                                                    pcut)
+                                                    pcut, order=1)
         return self.dist**2 / (16 * np.pi) * np.abs(psi4_int)**2
 
     def get_energy_lm(self, mult_l, mult_m, pcut):
         """Return the cumulative energy lost in the mode (l, m).
+
+        :param pcut: Period that enters the fixed-frequency integration.
+        Typically, the longest physical period in the signal.
+        :type pcut: float
         """
         return self.get_power_lm(mult_l, mult_m, pcut).integrated()
 
     def get_total_power(self, pcut, l_max=None):
         """Return the total power in all the modes up to l_max.
+
+        :param pcut: Period that enters the fixed-frequency integration.
+        Typically, the longest physical period in the signal.
+        :type pcut: float
+        :param l_max: Ingore multipoles with l > l_max
+        :type l_max: int
         """
         def powlm(_1, mult_l, mult_m, _2):
             return self.get_power_lm(mult_l, mult_m, pcut)
-        return self.total_function_on_available_lm(self, powlm, l_max=None)
+        return self.total_function_on_available_lm(powlm, l_max=l_max)
 
     def get_total_energy(self, pcut, l_max=None):
         """Return the cumulative energy lost in all the modes up to l_max.
+
+        :param pcut: Period that enters the fixed-frequency integration.
+        Typically, the longest physical period in the signal.
+        :type pcut: float
+        :param l_max: Ingore multipoles with l > l_max
+        :type l_max: int
         """
         return self.get_total_power(pcut, l_max).integrated()
 
     def get_torque_z_lm(self, mult_l, mult_m, pcut):
         """Return the instantaneous torque in the z axis in the mode (l, m).
+
+        Eq. (9.140) in Baumgarte Shapiro
         """
+        # This is what we are going to implement
+        # The foruma is dJ/dt = r**2/16pi m (dot(A)B - dot(B)*A)
+        # where ddot(A) = psi4.real and ddot(B) = -psi4.imag
+        # So, A - i B = \int\int psi4, and
+        # dot(A) - i dot(B) = \int psi4
+        #
+        # Considering that:
+        # (A - i B) (dot(A) - i dot(B)) =
+        # = A dot(A) + B dot(B) - i A dot(B) - i B dot(A)
+        #
+        # To get the integrand for the angular momentum we can evaluate
+        # (A + i B) (dot(A) - i dot(B)) =
+        # = A dot(A) - B dot(B) - i A dot(B) + i B dot(A)
+        # and take the imaginary part. So,
+        # torque = - Im(conj(\int\int psi4) * \int psi4)
+
         psi4_int1 = self._fixed_frequency_integrated(self[(mult_l, mult_m)],
                                                      pcut)
+        # We need to integrate twice
         psi4_int2 = self._fixed_frequency_integrated(self[(mult_l, mult_m)],
                                                      pcut, order=2)
         return (self.dist**2 / (16 * np.pi) * mult_m
-                * np.imag(psi4_int1 * np.conj(psi4_int2)))
+                * (psi4_int1 * np.conj(psi4_int2)).imag())
 
     def get_angular_momentum_z_lm(self, mult_l, mult_m, pcut):
         """Return the cumulative angular momentum lost in the mode (l, m).
@@ -318,16 +442,28 @@ class GravitationalWavesOneDet(mp.MultipoleOneDet):
 
     def get_total_torque_z(self, pcut, l_max=None):
         """Return the total torque z in all the modes up to l_max.
+
+        :param pcut: Period that enters the fixed-frequency integration.
+        Typically, the longest physical period in the signal.
+        :type pcut: float
+        :param l_max: Ingore multipoles with l > l_max
+        :type l_max: int
         """
         def torqzlm(_1, mult_l, mult_m, _2):
             return self.get_torque_z_lm(mult_l, mult_m, pcut)
-        return self.total_function_on_available_lm(self, torqzlm, l_max=None)
+        return self.total_function_on_available_lm(torqzlm, l_max=None)
 
     def get_total_angular_momentum_z(self, pcut, l_max=None):
         """Return the cumulative angular momentum lost in all the modes up to
         l_max.
+
+        :param pcut: Period that enters the fixed-frequency integration.
+        Typically, the longest physical period in the signal.
+        :type pcut: float
+        :param l_max: Ingore multipoles with l > l_max
+        :type l_max: int
         """
-        return self.get_total_torque_z(pcut, l_max).integrated()
+        return self.get_total_torque_z(pcut, l_max=l_max).integrated()
 
 
 class ElectromagneticWavesOneDet(mp.MultipoleOneDet):
@@ -342,29 +478,29 @@ class ElectromagneticWavesOneDet(mp.MultipoleOneDet):
 
         super().__init__(dist, data, 1)
 
-    def get_power_lm(self, mult_l, mult_m, pcut):
+    def get_power_lm(self, mult_l, mult_m):
         """Return the instantaneous power in the mode (l, m).
-        """
-        phi2_int = self._fixed_frequency_integrated(self[(mult_l, mult_m)],
-                                                    pcut)
-        return self.dist**2 / (4 * np.pi) * np.abs(phi2_int)**2
 
-    def get_energy_lm(self, mult_l, mult_m, pcut):
+        Eq 2.23 in 1311.6483
+        """
+        return self.dist**2 / (4 * np.pi) * np.abs(self[(mult_l, mult_m)])**2
+
+    def get_energy_lm(self, mult_l, mult_m):
         """Return the cumulative energy lost in the mode (l, m).
         """
-        return self.get_power_lm(mult_l, mult_m, pcut).integrated()
+        return self.get_power_lm(mult_l, mult_m).integrated()
 
-    def get_total_power(self, pcut, l_max=None):
+    def get_total_power(self, l_max=None):
         """Return the total power in all the modes up to l_max.
         """
         def powlm(_1, mult_l, mult_m, _2):
-            return self.get_power_lm(mult_l, mult_m, pcut)
-        return self.total_function_on_available_lm(self, powlm, l_max=None)
+            return self.get_power_lm(mult_l, mult_m)
+        return self.total_function_on_available_lm(powlm, l_max=None)
 
-    def get_total_energy(self, pcut, l_max=None):
+    def get_total_energy(self, l_max=None):
         """Return the cumulative energy lost in all the modes up to l_max.
         """
-        return self.get_total_power(pcut, l_max).integrated()
+        return self.get_total_power(l_max=l_max).integrated()
 
     # Angular momentum is computed by Proca_LFlux, which is not public
 
