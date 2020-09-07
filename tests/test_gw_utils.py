@@ -49,6 +49,20 @@ class TestGWUtils(unittest.TestCase):
         self.assertAlmostEqual(gwu.sYlm(0, 3, 1, 1.5, 2.0),
                                -0.130797156679223 + 0.285797001345366j)
 
+    def test_ra_dec_to_theta_phi(self):
+
+        time = "2015-09-14 09:50:45"
+        angle = gwu.ra_dec_to_theta_phi(8, -70, time)
+
+        self.assertAlmostEqual(angle.hanford[0], 2.36971740)
+        self.assertAlmostEqual(angle.hanford[1], 3.01937907)
+
+        self.assertAlmostEqual(angle.livingston[0], 1.95758940)
+        self.assertAlmostEqual(angle.livingston[1], 1.61110394)
+
+        self.assertAlmostEqual(angle.virgo[0], 2.02280322)
+        self.assertAlmostEqual(angle.virgo[1], -3.00853112)
+
     def test_antenna_responses(self):
 
         antenna_gw150914 = gwu.antenna_responses(8, -70,

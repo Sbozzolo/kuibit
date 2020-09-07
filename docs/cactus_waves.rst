@@ -95,6 +95,16 @@ similar to :py:meth:`~.get_strain_lm()`, and requires to specify an evaluation
 angle ``(theta, phi)``. In case you want to sum up only up to a given :math:`l`,
 pass the argument ``l_max``.
 
+Similarly, you can compute what would be the gravitational wave strain observed
+by the LIGO-Virgo interferometers using :py:meth:`~.get_observed_strain` and
+providing a sky localization. This method computes the strain and convolves it
+with the antenna responses :math:`F` of the single detectors:
+
+.. math::
+
+   h = F_\times h_\times + F_+ h_+
+
+This function does not add noise.
 
 Energy and angular momentum
 ___________________________

@@ -28,6 +28,11 @@ from postcactus import timeseries as ts
 
 class TestCactusWaves(unittest.TestCase):
 
+    def setUp(self):
+        self.sim = sd.SimDir("tests/tov")
+        self.gwdir = cw.GravitationalWavesDir(self.sim)
+        self.psi4 = self.gwdir[110.69]
+
     def test_WavesOneDet(self):
 
         t1 = np.linspace(0, np.pi, 100)
@@ -50,11 +55,8 @@ class TestCactusWaves(unittest.TestCase):
 
     def test_get_psi4_lm(self):
 
-        sim = sd.SimDir("tests/tov")
-        gwdir = cw.GravitationalWavesDir(sim)
-
-        self.assertEqual(gwdir[110.69].get_psi4_lm(2, 2),
-                         gwdir[110.69][(2, 2)])
+        self.assertEqual(self.gwdir[110.69].get_psi4_lm(2, 2),
+                         self.gwdir[110.69][(2, 2)])
 
     def test__fixed_frequency_integrated(self):
 
@@ -104,94 +106,178 @@ class TestCactusWaves(unittest.TestCase):
 
     def test_get_strain_lm(self):
 
-        sim = sd.SimDir("tests/tov")
-        gwdir = cw.GravitationalWavesDir(sim)
-        psi4 = gwdir[110.69]
-
         with self.assertRaises(ValueError):
-            psi4.get_strain_lm(3, 3, 1)
+            self.psi4.get_strain_lm(3, 3, 1)
 
         # Large pcut
         with self.assertRaises(ValueError):
-            psi4.get_strain_lm(2, 2, 1000)
+            self.psi4.get_strain_lm(2, 2, 1000)
 
         # Test window function errors
         with self.assertRaises(ValueError):
-            psi4.get_strain_lm(2, 2, 0.1, window_function=1)
+            self.psi4.get_strain_lm(2, 2, 0.1, window_function=1)
         # Not implemented
         with self.assertRaises(ValueError):
-            psi4.get_strain_lm(2, 2, 0.1, window_function='bubu')
+            self.psi4.get_strain_lm(2, 2, 0.1, window_function='bubu')
 
         # We do not need to test the FFI, hopefully that is already tested
 
         # Test window = set verything to 0
         self.assertTrue(np.allclose(
-            psi4.get_strain_lm(2, 2, 0.1, window_function=lambda x: 0).y,
+            self.psi4.get_strain_lm(2, 2, 0.1, window_function=lambda x: 0).y,
                         0))
 
-        psi4lm = (psi4[(2, 2)])
+        psi4lm = self.psi4[(2, 2)]
+        psi4lm *= self.psi4.dist
 
         # Test when window is a function
         ham_array = signal.hamming(len(psi4lm))
         ham_psi4lm = psi4lm.copy()
         ham_psi4lm.y *= ham_array
-        ffi_ham = psi4._fixed_frequency_integrated(ham_psi4lm, 0.1).y,
+        ffi_ham = self.psi4._fixed_frequency_integrated(ham_psi4lm,
+                                                        0.1, order=2).y
 
         self.assertTrue(np.allclose(
-            psi4.get_strain_lm(2, 2, 0.1, window_function=signal.hamming,
-                               trim_ends=False).y, ffi_ham, atol=1e-7))
+            self.psi4.get_strain_lm(2, 2, 0.1, window_function=signal.hamming,
+                                    trim_ends=False).y, ffi_ham))
 
         # Test window is a string, like hamming
         self.assertTrue(np.allclose(
-            psi4.get_strain_lm(2, 2, 0.1, window_function='hamming',
-                               trim_ends=False).y, ffi_ham, atol=1e-7))
+            self.psi4.get_strain_lm(2, 2, 0.1, window_function='hamming',
+                                    trim_ends=False).y, ffi_ham))
 
         # Test no window
         self.assertTrue(np.allclose(
-            psi4.get_strain_lm(2, 2, 0.1, trim_ends=False).y,
-            psi4._fixed_frequency_integrated(psi4lm, 0.1).y))
+            self.psi4.get_strain_lm(2, 2, 0.1, trim_ends=False).y,
+            self.psi4._fixed_frequency_integrated(psi4lm, 0.1, order=2).y))
 
     def test_get_strain(self):
 
-        sim = sd.SimDir("tests/tov")
-        gwdir = cw.GravitationalWavesDir(sim)
-        psi4 = gwdir[110.69]
-
         # test l_max too big
         with self.assertRaises(ValueError):
-            psi4.get_strain(0, 0, 1, l_max=100)
+            self.psi4.get_strain(0, 0, 1, l_max=100)
 
         theta, phi = np.pi/2, 1
         ym2 = gwu.sYlm(-2, 2, -2, theta, phi)
         ym1 = gwu.sYlm(-2, 2, -1, theta, phi)
         y0 = gwu.sYlm(-2, 2, 0, theta, phi)
         y1 = gwu.sYlm(-2, 2, 1, theta, phi)
-        y2 = gwu.sYlm(-2, 2, 1, theta, phi)
+        y2 = gwu.sYlm(-2, 2, 2, theta, phi)
 
-        strain = (psi4.get_strain_lm(2, -2, 0.1).y * ym2
-                  + psi4.get_strain_lm(2, -1, 0.1).y * ym1
-                  + psi4.get_strain_lm(2, 0, 0.1).y * y0
-                  + psi4.get_strain_lm(2, 1, 0.1).y * y1
-                  + psi4.get_strain_lm(2, 2, 0.1).y * y2)
+        strain = (self.psi4.get_strain_lm(2, -2, 0.1).y * ym2
+                  + self.psi4.get_strain_lm(2, -1, 0.1).y * ym1
+                  + self.psi4.get_strain_lm(2, 0, 0.1).y * y0
+                  + self.psi4.get_strain_lm(2, 1, 0.1).y * y1
+                  + self.psi4.get_strain_lm(2, 2, 0.1).y * y2)
 
         self.assertTrue(np.allclose(strain,
-                                    psi4.get_strain(theta, phi, 0.1).y))
+                                    self.psi4.get_strain(theta, phi, 0.1).y))
+
+    def test_get_observed_strain(self):
+
+        # Let's check with Hanford
+        angles = gwu.ra_dec_to_theta_phi(8, -70, "2015-09-14 09:50:45")
+        theta_H, phi_H = angles.hanford
+        antennas = gwu.antenna_responses(8, -70, "2015-09-14 09:50:45")
+        Fc_H, Fp_H = antennas.hanford
+
+        expected_strain = self.psi4.get_strain(theta_H, phi_H, 0.1,
+                                               trim_ends=False)
+        expected_strain = (expected_strain.real() * Fp_H
+                           - expected_strain.imag() * Fc_H)
+
+        strain = self.psi4.get_observed_strain(8, -70, "2015-09-14 09:50:45",
+                                               0.1, trim_ends=False)
+
+        self.assertEqual(strain.hanford, expected_strain)
+
+    def test_get_power_energy(self):
+
+        psi4lm = self.psi4[(2, 2)]
+
+        psi4lm_int = self.psi4._fixed_frequency_integrated(psi4lm,
+                                                           0.1, order=1)
+
+        power_lm = self.psi4.dist**2 / (16 * np.pi) * np.abs(psi4lm_int)**2
+
+        self.assertEqual(power_lm, self.psi4.get_power_lm(2, 2, 0.1))
+        self.assertEqual(power_lm.integrated(),
+                         self.psi4.get_energy_lm(2, 2, 0.1))
+
+        # Total power
+        total_power = (self.psi4.get_power_lm(2, 2, 0.1)
+                       + self.psi4.get_power_lm(2, 1, 0.1)
+                       + self.psi4.get_power_lm(2, 0, 0.1)
+                       + self.psi4.get_power_lm(2, -1, 0.1)
+                       + self.psi4.get_power_lm(2, -2, 0.1))
+
+        self.assertEqual(total_power, self.psi4.get_total_power(0.1))
+        self.assertEqual(total_power.integrated(),
+                         self.psi4.get_total_energy(0.1))
+
+    def test_get_power_energy_em(self):
+
+        emdir = cw.ElectromagneticWavesDir(self.sim)
+        phi2 = emdir[110.69]
+        phi2lm = phi2[(2, 2)]
+
+        power_lm = phi2.dist**2 / (4 * np.pi) * np.abs(phi2lm)**2
+
+        self.assertEqual(power_lm, phi2.get_power_lm(2, 2))
+        self.assertEqual(power_lm.integrated(),
+                         phi2.get_energy_lm(2, 2))
+
+        # Total power
+        total_power = (phi2.get_power_lm(2, 2)
+                       + phi2.get_power_lm(2, 1)
+                       + phi2.get_power_lm(2, 0)
+                       + phi2.get_power_lm(2, -1)
+                       + phi2.get_power_lm(2, -2))
+
+        self.assertEqual(total_power, phi2.get_total_power())
+        self.assertEqual(total_power.integrated(),
+                         phi2.get_total_energy())
+
+    def test_get_torque_angular_momentum(self):
+
+        psi4lm = self.psi4[(2, 2)]
+
+        psi4lm_int1 = self.psi4._fixed_frequency_integrated(psi4lm,
+                                                            0.1, order=1)
+        psi4lm_int2 = self.psi4._fixed_frequency_integrated(psi4lm,
+                                                            0.1, order=2)
+
+        torque_lm = (self.psi4.dist**2 / (16 * np.pi) * 2
+                     * (np.conj(psi4lm_int2) * psi4lm_int1).imag())
+
+        self.assertEqual(torque_lm, self.psi4.get_torque_z_lm(2, 2, 0.1))
+        self.assertEqual(torque_lm.integrated(),
+                         self.psi4.get_angular_momentum_z_lm(2, 2, 0.1))
+
+        # Total power
+        total_torque_z = (self.psi4.get_torque_z_lm(2, 2, 0.1)
+                          + self.psi4.get_torque_z_lm(2, 1, 0.1)
+                          + self.psi4.get_torque_z_lm(2, 0, 0.1)
+                          + self.psi4.get_torque_z_lm(2, -1, 0.1)
+                          + self.psi4.get_torque_z_lm(2, -2, 0.1))
+
+        self.assertEqual(total_torque_z, self.psi4.get_total_torque_z(0.1))
+        self.assertEqual(total_torque_z.integrated(),
+                         self.psi4.get_total_angular_momentum_z(0.1))
 
     def test_WavesDir(self):
 
         # Test the error on wrong input type
         with self.assertRaises(TypeError):
-            gwdir = cw.GravitationalWavesDir(0)
+            cw.GravitationalWavesDir(0)
 
         with self.assertRaises(TypeError):
-            emdir = cw.ElectromagneticWavesDir(0)
+            cw.ElectromagneticWavesDir(0)
 
-        sim = sd.SimDir("tests/tov")
-        gwdir = cw.GravitationalWavesDir(sim)
-        emdir = cw.ElectromagneticWavesDir(sim)
+        emdir = cw.ElectromagneticWavesDir(self.sim)
 
         # Check type
-        self.assertTrue(isinstance(gwdir[110.69],
+        self.assertTrue(isinstance(self.gwdir[110.69],
                                    cw.GravitationalWavesOneDet))
         self.assertTrue(isinstance(emdir[110.69],
                                    cw.ElectromagneticWavesOneDet))
