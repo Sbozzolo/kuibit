@@ -68,7 +68,7 @@ splines
 
 One of the most powerful features of ``TimeSeries`` (``FrequencySeries``) is
 that they are callable objects and they can evaluate the data at any arbitrary
-time. This is done using splines. When you initialize a ``TimeSeries``
+time. This is done using splines. When you first call a ``TimeSeries``
 (``FrequencySeries``) a cubic spline representation with no smoothing (the
 spline evaluates exactly to the data) is computed. This is cached into the
 attributes ``self.spline_real`` (and ``self.spline_imag`` if the data is

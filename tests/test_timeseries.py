@@ -66,10 +66,8 @@ class TestTimeseries(unittest.TestCase):
         with self.assertRaises(ValueError):
             ts.TimeSeries(times, values)
 
-        # Let's check that we can instantiate TimeSeries with 1 element
-        # It shouls throw a warning because it cannot compute the spline
-        with self.assertWarns(Warning):
-            scalar = ts.TimeSeries(0, 0)
+        # Test timeseries with one element
+        scalar = ts.TimeSeries(0, 0)
 
         self.assertEqual(scalar.y, 0)
 
@@ -496,20 +494,23 @@ class TestTimeseries(unittest.TestCase):
         with self.assertRaises(ValueError):
             sins(-1)
 
-        # Test that setting directly the members updates the spline
-        old_spline = sins.spline_real
+        # Test that setting directly the members invalidates the spline
         sins.y *= 2
-        # y should change
-        self.assertFalse(np.allclose(sins.spline_real[1], old_spline[1]))
-        old_spline2 = sins.spline_real
+        self.assertTrue(sins.invalid_spline)
+        sins.invalid_spline = False
         sins.t *= 2
-        # x should change
-        self.assertFalse(np.allclose(sins.spline_real[0], old_spline2[0]))
+        self.assertTrue(sins.invalid_spline)
 
     def test_resample(self):
 
         new_times = np.array([float(1e-5 * i**2) for i in range(0, 100)])
+
+        # Test no resampling
         sins = self.TS.copy()
+        self.assertTrue(np.allclose(sins.resampled(sins.t).y,
+                                    sins.y))
+        self.assertTrue(np.allclose(sins.resampled(sins.t).t,
+                                    sins.t))
 
         self.assertTrue(np.allclose(sins.resampled(new_times).y,
                                     np.sin(new_times)))
@@ -638,11 +639,9 @@ class TestTimeseries(unittest.TestCase):
         t = np.array([1, 2, 3, 4, 2, 3])
         y = np.array([0, 0, 0, 0, 0, 0])
 
-        # There is warning that is thrown (unrelated to the test)
-        with self.assertWarns(Warning):
-            self.assertEqual(ts.remove_duplicate_iters(t, y),
-                             ts.TimeSeries([1, 2, 3],
-                                           [0, 0, 0]))
+        self.assertEqual(ts.remove_duplicate_iters(t, y),
+                         ts.TimeSeries([1, 2, 3],
+                                       [0, 0, 0]))
 
     def test_time_unit_change(self):
 
@@ -732,6 +731,10 @@ class TestTimeseries(unittest.TestCase):
         new_ts1, new_ts2 = series.sample_common([ts1, ts2])
 
         self.assertTrue(np.allclose(new_ts1.y, sins3))
+
+        # Test a case in which there's no resampling
+        newer_ts1, newer_ts2 = series.sample_common([new_ts1, new_ts2])
+
 
     def test_windows(self):
 

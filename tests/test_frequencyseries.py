@@ -55,16 +55,6 @@ class TestFrequencySeries(unittest.TestCase):
 
         self.assertTrue(np.allclose(fs_copy.f, f2))
 
-        # Test that setting directly the members updates the spline
-        old_spline = fs_copy.spline_real
-        fs_copy.fft *= 2
-        # y should change
-        self.assertFalse(np.allclose(fs_copy.spline_real[1], old_spline[1]))
-        old_spline2 = fs_copy.spline_real
-        fs_copy.f *= 2
-        # x should change
-        self.assertFalse(np.allclose(fs_copy.spline_real[0], old_spline2[0]))
-
     def test_df(self):
 
         self.assertAlmostEqual(self.FS.df, self.f[1] - self.f[0])
