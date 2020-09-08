@@ -109,8 +109,8 @@ class FrequencySeries(BaseSeries):
     def f(self, f):
         # This is defined BaseClass
         self.data_x = f
-        # Update the spline
-        self._make_spline()
+        # Invalidate the spline
+        self.invalid_spline = True
 
     @property
     def fft(self):
@@ -121,8 +121,8 @@ class FrequencySeries(BaseSeries):
     def fft(self, fft):
         # This is defined BaseClass
         self.data_y = fft
-        # Update the spline
-        self._make_spline()
+        # Invalidate the spline
+        self.invalid_spline = True
 
     @property
     def fmin(self):
@@ -247,12 +247,12 @@ class FrequencySeries(BaseSeries):
         return ret.high_passed(fmin)
 
     def band_pass(self, fmin, fmax):
-        """FIXME! briefly describe function
+        """Remove all the frequencies below fmin and above fmax
 
-        :param fmin:
-        :param fmax:
-        :returns:
-        :rtype:
+        :param fmin: Minimum frequency
+        :type fmin: float
+        :param fmax: Maximum frequency
+        :type fmax: float
 
         """
         self._apply_to_self(self.band_passed, fmin, fmax)
@@ -311,7 +311,7 @@ class FrequencySeries(BaseSeries):
         """FIXME! briefly describe function
 
         :returns:
-        :rtype:
+        :rtype: :py:class:`.TimeSeries`
 
         """
         # TimeSeries.to_FrequencySeries() rearranges the frequency so that

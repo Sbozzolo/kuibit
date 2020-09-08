@@ -21,14 +21,14 @@ derived).
 
 """
 
-import warnings
+from abc import ABC
 
 import numpy as np
 from scipy import integrate, interpolate, signal
 
 
 # Note, we test this class testing its derived class TimeSeries
-class BaseSeries:
+class BaseSeries(ABC):
     """Base class (not intended for direct use) for generic series data.
 
     This class is already rich of features.
@@ -98,13 +98,33 @@ class BaseSeries:
             raise ValueError('Trying to construct empty Series.')
 
         # The copy is because we don't want to change the input values
-        self.data_x = np.array(x).copy()
-        self.data_y = np.array(y).copy()
+        self._data_x = np.array(x).copy()
+        self._data_y = np.array(y).copy()
 
-        if (len(x) <= 3):
-            warnings.warn('Spline will not be computed: too few points')
-        else:
-            self._make_spline()
+        # We keep this flag around to know when we have to recompute the
+        # splines
+        self.invalid_spline = True
+
+    @property
+    def data_x(self):
+        return self._data_x
+
+    @data_x.setter
+    def data_x(self, x):
+        self._data_x = x
+        # Invalidate the spline
+        self.invalid_spline = True
+
+    @property
+    def data_y(self):
+        return self._data_y
+
+    @data_y.setter
+    def data_y(self, data_y):
+        # This is defined BaseClass
+        self._data_y = data_y
+        # Invalidate the spline
+        self.invalid_spline = True
 
     @property
     def xmin(self):
@@ -127,6 +147,16 @@ class BaseSeries:
         # Derived classes can implement more efficients methods if x has known
         # ordering
         return np.amax(self.data_x)
+
+    def is_regularly_sampled(self):
+        """Return whether the series is regularly sampled.
+
+        :returns:  Is the series regularly sampled?
+        :rtype:    bool
+        """
+        dx = self.data_x[1:] - self.data_x[:-1]
+
+        return np.allclose(dx, dx[0], atol=1e-15)
 
     def __len__(self):
         """The number of data points."""
@@ -213,6 +243,10 @@ class BaseSeries:
         :rtype:   1D numpy array or float
 
         """
+        if (self.invalid_spline):
+            self._make_spline()
+            self.invalid_spline = False
+
         y_real = interpolate.splev(x, self.spline_real, ext=ext)
         if (self.is_complex()):
             y_imag = interpolate.splev(x, self.spline_imag, ext=ext)
@@ -240,7 +274,21 @@ class BaseSeries:
          :returns:  Deep copy of the series
          :rtype:    :py:class:`~.BaseSeries` or derived class
          """
-        return type(self)(self.data_x, self.data_y)
+        # The following is more complicated copy constructor that is designed
+        # to copy also the spline information without re-computing it.
+        # This can speed up some comutations.
+        copied = type(self).__new__(self.__class__)
+        copied.data_x = self.data_x.copy()
+        copied.data_y = self.data_y.copy()
+        if (not self.invalid_spline):
+            # splines are tuples, with a direct call to the function
+            # tuple() we make a deep copy
+            copied.spline_real = tuple(self.spline_real)
+            if (self.is_complex()):
+                copied.spline_imag = tuple(self.spline_imag)
+            copied.invalid_spline = False
+        copied.invalid_spline = True
+        return copied
 
     def resampled(self, new_x, ext=2):
         """Return a new series resampled from this to new_x.
@@ -256,6 +304,10 @@ class BaseSeries:
         :rtype:   :py:class:`~.BaseSeries` or derived class
 
         """
+        # If x is the same, there's no need to resample
+        if (len(self.data_x) == len(new_x)):
+            if (np.allclose(self.data_x, new_x, atol=1e-15)):
+                return self.copy()
         return type(self)(new_x, self.evaluate_with_spline(new_x,
                                                            ext=ext))
 
@@ -297,7 +349,7 @@ class BaseSeries:
         """
         # If the other object is of the same type
         if (isinstance(other, type(self))):
-            if ((not np.allclose(other.data_x, self.data_x))
+            if ((not np.allclose(other.data_x, self.data_x, atol=1e-15))
                     or (len(self.data_x) != len(other.data_x))):
                 raise ValueError(
                     "The objects do not have the same x!")
@@ -384,7 +436,8 @@ class BaseSeries:
         """
         ret = f(*args, **kwargs)
         self.data_x, self.data_y = ret.data_x, ret.data_y
-        self._make_spline()
+        # We have to recompute the splines
+        self.invalid_spline = True
 
     def save(self, fname, *args, **kwargs):
         """Saves into simple ASCII format with 2 columns (data_x, data_y)
@@ -447,6 +500,10 @@ class BaseSeries:
         """
         if ((order > 3) or (order < 0)):
             raise ValueError(f'Cannot compute differential of order {order}')
+
+        if (self.invalid_spline):
+            self._make_spline()
+            self.invalid_spline = False
 
         if (self.is_complex()):
             ret_value = (interpolate.splev(self.data_x,
@@ -689,6 +746,22 @@ def sample_common(series):
     :rtype:    list of :py:class:`~.Series`
 
     """
+    # In many cases there is no real need for resampling because the array
+    # already have the desired shape. It is worth checking if we need to
+    # resample. If the series are regularly sampled, it is easy to check
+    # if the are the same. We also need to check that they are regularly
+    # sampled, to do this, we check that the first is regularly sampled,
+    # and that all the other ones have the same data_x.
+    s1, *s_others = series
+    if (s1.is_regularly_sampled()):
+        for s in s_others:
+            if (not np.allclose(s1.data_x, s.data_x, atol=1e-15)):
+                break
+            # This is an else to the for loop
+        else:
+            # We have to copy, otherwise one can accidentally modify input data
+            return [ss.copy() for ss in series]
+
     # Find the series with max xmin
     s_xmin = max(series, key=lambda x: x.xmin)
     # Find the series with min xmax

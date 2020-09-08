@@ -259,8 +259,6 @@ class TimeSeries(BaseSeries):
     def t(self, t):
         # This is defined BaseClass
         self.data_x = t
-        # Update the spline
-        self._make_spline()
 
     @property
     def y(self):
@@ -271,8 +269,6 @@ class TimeSeries(BaseSeries):
     def y(self, y):
         # This is defined BaseClass
         self.data_y = y
-        # Update the spline
-        self._make_spline()
 
     @property
     def tmin(self):
@@ -291,16 +287,6 @@ class TimeSeries(BaseSeries):
         :rtype:    float
         """
         return self.t[-1]
-
-    def is_regularly_sampled(self):
-        """Return whether the timeseries is regularly sampled.
-
-        :returns:  Is the timeseries regularly sampled?
-        :rtype:    bool
-        """
-        dt = self.t[1:] - self.t[:-1]
-
-        return np.allclose(dt, dt[0])
 
     @property
     def dt(self):

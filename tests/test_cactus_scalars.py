@@ -191,10 +191,8 @@ class TestCactusScalar(unittest.TestCase):
 
         rho = ts.TimeSeries(np.append(t1, t2), np.append(y1, y2))
 
-        # There's unrelated warning, let's capture it
-        with self.assertWarns(Warning):
-            self.assertEqual(rho, reader['rho'])
-            self.assertEqual(rho, reader.get('rho'))
+        self.assertEqual(rho, reader['rho'])
+        self.assertEqual(rho, reader.get('rho'))
 
         self.assertEqual(1, reader.get('bubu', default=1))
 
