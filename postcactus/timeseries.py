@@ -216,8 +216,14 @@ class TimeSeries(BaseSeries):
 
     # NOTE: Are you adding a function? Document it in timeseries.rst!
 
-    def __init__(self, t, y):
+    def __init__(self, t, y, guarantee_t_is_monotonic=False):
         """Constructor.
+
+        When guarantee_t_is_monotonic is True no checks will be perform to make
+        sure that t is monotonically increasing (increasing performance). This
+        should is used internally whenever a new series is returned from self
+        (since we have already checked that t is good.) or in performance
+        critical routines.
 
         :param t: Sampling times, need to be strictly increasing
         :type t:  1D numpy array or list
@@ -225,26 +231,13 @@ class TimeSeries(BaseSeries):
         :param y: Data samples, can be real or complex valued
         :type y:  1D numpy array or list
 
+        :param guarantee_t_is_monotonic: The codw will assume that t is
+        monotonically incresasing
+        :type guarantee_t_is_monotonic: bool
+
         """
-        # First, let's check if we have a scalar as input
-        # In that case, we turn it into an array
-
-        if (hasattr(y, '__len__')):
-            if (len(t) > 1):
-                # Make sure that it is an array (it could be a list)
-                t_array = np.array(t)
-
-                # Example:
-                # self.t = [1,2,3]
-                # self.t[1:] = [2, 3]
-                # self.t[:-1] = [1, 2]
-                # dt = [1,1]
-                dt = t_array[1:] - t_array[:-1]
-                if (dt.min() <= 0):
-                    raise ValueError('Time not monotonically increasing')
-
         # Use BaseClass init
-        super().__init__(t, y)
+        super().__init__(t, y, guarantee_t_is_monotonic)
 
     # The following are the setters and getters, so that we can "resolve" .t
     # and .y
@@ -252,23 +245,13 @@ class TimeSeries(BaseSeries):
     # The @property decorator allows us to call .t instead of .t()
     @property
     def t(self):
-        # This is defined BaseClass
-        return self.data_x
+        # This is defined BaseClass and it is where the actual data is stored.
+        return self.x
 
     @t.setter
     def t(self, t):
         # This is defined BaseClass
-        self.data_x = t
-
-    @property
-    def y(self):
-        # This is defined BaseClass
-        return self.data_y
-
-    @y.setter
-    def y(self, y):
-        # This is defined BaseClass
-        self.data_y = y
+        self.x = t
 
     @property
     def tmin(self):
@@ -277,7 +260,7 @@ class TimeSeries(BaseSeries):
         :returns:  Initial time of the timeseries
         :rtype:    float
         """
-        return self.t[0]
+        return self.xmin
 
     @property
     def tmax(self):
@@ -286,7 +269,7 @@ class TimeSeries(BaseSeries):
         :returns:  Final time of the timeseries
         :rtype:    float
         """
-        return self.t[-1]
+        return self.xmax
 
     @property
     def dt(self):
