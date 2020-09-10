@@ -39,11 +39,37 @@ class TestTimeseries(unittest.TestCase):
         self.TS_c = ts.TimeSeries(self.times,
                                   self.values + 1j * self.values)
 
+    def test__make_array(self):
+
+        # A number
+        self.assertTrue(isinstance(self.TS._make_array(1), np.ndarray))
+        # A list
+        self.assertTrue(isinstance(self.TS._make_array([1, 2]), np.ndarray))
+        # An array
+        arr = np.array([1, 2])
+        self.assertTrue(isinstance(self.TS._make_array(arr), np.ndarray))
+
+    def test___return_array_if_monotonic(self):
+
+        # The time is not monotonically increasing
+        times = np.linspace(2 * np.pi, 0, 100)
+
+        with self.assertRaises(ValueError):
+            self.TS._return_array_if_monotonic(times)
+
+        # A number
+        self.assertCountEqual(self.TS._return_array_if_monotonic(
+            np.array([1])),
+                              np.array([1]))
+        # A list
+        self.assertCountEqual(self.TS._return_array_if_monotonic(
+            np.array([1, 2])),
+                              np.array([1, 2]))
+
     def test_init(self):
         # Check that errors are thrown if:
         # 1. There is a mismatch between t and y
         # 2. The timeseries is empty
-        # 3. The time is not monotonically increasing
 
         # 1
         times = np.linspace(0, 2 * np.pi, 100)
@@ -59,17 +85,34 @@ class TestTimeseries(unittest.TestCase):
         with self.assertRaises(ValueError):
             ts.TimeSeries(times, values)
 
-        # 3
-        times = np.linspace(2 * np.pi, 0, 100)
-        values = np.sin(times)
-
-        with self.assertRaises(ValueError):
-            ts.TimeSeries(times, values)
-
         # Test timeseries with one element
         scalar = ts.TimeSeries(0, 0)
 
         self.assertEqual(scalar.y, 0)
+
+        # Test guarantee_x_is_monotonic
+        # This should not throw an error even if it is wrong
+        times = np.linspace(2 * np.pi, 0, 100)
+        values = np.sin(times)
+        wrong = ts.TimeSeries(times, values, guarantee_t_is_monotonic=True)
+        self.assertCountEqual(wrong.t, times)
+
+    def test_setters(self):
+
+        # Cannot change the array length
+        with self.assertRaises(ValueError):
+            self.TS.t = [1]
+        with self.assertRaises(ValueError):
+            self.TS.y = [1]
+
+        # Cannot have a non-monotonic array
+        with self.assertRaises(ValueError):
+            self.TS.t = np.linspace(2 * np.pi, 0, 100)
+
+        # Set with valid data
+        self.TS.t = self.TS.t
+        # Check that the spline is invalid
+        self.assertTrue(self.TS.invalid_spline)
 
     def test_len(self):
         self.assertEqual(len(self.TS), 100)
@@ -374,6 +417,12 @@ class TestTimeseries(unittest.TestCase):
         tscopyc = self.TS_c.copy()
         self.assertEqual(self.TS, tscopy)
         self.assertEqual(self.TS_c, tscopyc)
+        self.assertEqual(self.TS_c.invalid_spline, tscopyc.invalid_spline)
+
+        # Test copy also with splines
+        tscopyc._make_spline()
+        tscopyc2 = tscopyc.copy()
+        self.assertEqual(tscopyc.spline_imag, tscopyc2.spline_imag)
 
     def test_time_shift(self):
 
@@ -461,24 +510,29 @@ class TestTimeseries(unittest.TestCase):
 
         # Cannot make a spline with 1 point
         with self.assertRaises(ValueError):
-            sins = self.TS.copy()
-            # We are checking if the number of points change
-            # after initialization because we've already checked
-            # at initialization
-            sins.t = np.array([0])
-            sins.y = np.array([0])
+            sins = ts.TimeSeries([0], [0])
             sins._make_spline()
 
         # Check that spline reproduce data
+        # These are pulled from the data
         self.assertTrue(np.allclose(self.TS(self.times),
                                     self.values))
+        # These have some that computed with splines
+        other_times = np.linspace(0, np.pi, 100)
+        other_values = np.sin(other_times)
+
+        self.assertTrue(np.allclose(self.TS(other_times),
+                                    other_values))
 
         self.assertTrue(np.allclose(self.TS(np.pi/2), 1))
 
+        # From data
         self.assertTrue(np.allclose(self.TS_c(self.times),
                                     self.values + 1j * self.values))
-        self.assertTrue(np.allclose(self.TS(self.times),
-                                    self.values))
+
+        # From spline
+        self.assertTrue(np.allclose(self.TS_c(other_times),
+                                    other_values + 1j * other_values))
 
         # Does the spline update?
         # Let's test with a method that changes the timeseries

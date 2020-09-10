@@ -164,6 +164,11 @@ class TestFrequencySeries(unittest.TestCase):
         self.assertAlmostEqual(fs1.inner_product(fs2, noises=noise),
                                4 * 6 * (1.2 - 1))
 
+        # Test same_domain
+        self.assertAlmostEqual(fs1.inner_product(fs2, noises=noise,
+                                                 same_domain=True),
+                               4 * 6 * (1.2 - 1))
+
         # Test multiple noises
         # Test with twice the same noise. The output should be doubled.
         twice_noise = [noise, noise]

@@ -63,6 +63,22 @@ We follow this convention: methods with an name that is an imperative (e.g.,
 is a past-tense verb (e.g., ``zero_padded``) return a new object with the
 modification applied.
 
+.. note::
+
+   Every mathematical operation between different series will perform a check
+   that the two series are compatible (ie, they have the same `t` or `f`). This
+   can be expensive, so if you are writing performance-critical routines, you
+   should handle the data directly. See :py:meth:`~.inner_product` for an
+   example.
+
+.. note::
+
+   For performance-critical routines where you have to initialize many series
+   and you can guarantee that the ``x`` is monotonically increasing you can pass
+   an additional paramter to the ``init`` to speed up the initalization. See
+   reference.
+
+
 splines
 ^^^^^^^^^^^^^^^^^^^^^^^^
 
@@ -324,6 +340,9 @@ With the inner product, one compute the overlap between two series:
 
 Again, this can be unweighted, or noise-weighted, or for a network of
 detectors (if a list of noises is provided).
+
+If you can guarantee that all the series have the same domain (including the noise),
+then you can set ``same_domain`` to ``True`` to speed up computations.
 
 load_FrequencySeries
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^

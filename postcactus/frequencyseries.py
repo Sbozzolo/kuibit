@@ -81,11 +81,17 @@ class FrequencySeries(BaseSeries):
 
     """
 
-    def __init__(self, f, fft):
+    def __init__(self, f, fft, guarantee_f_is_monotonic=False):
         """Create a FrequencySeries providing frequencies and the
         value at those frequencies.
 
         It is your duty to make sure everything makes sense!
+
+        When guarantee_f_is_monotonic is True no checks will be perform to make
+        sure that f is monotonically increasing (increasing performance). This
+        should is used internally whenever a new series is returned from self
+        (since we have already checked that f is good.) or in performance
+        critical routines.
 
         :param f:  Frequencies
         :type f: 1D numpy array or float
@@ -93,9 +99,13 @@ class FrequencySeries(BaseSeries):
         :param fft:   Fourier transform
         :type fft: 1D numpy array or float
 
+        :param guarantee_f_is_monotonic: The codw will assume that f is
+        monotonically incresasing
+        :type guarantee_f_is_monotonic: bool
+
         """
         # Use BaseClass init
-        super().__init__(f, fft)
+        super().__init__(f, fft, guarantee_f_is_monotonic)
 
     # The following are the setters and getters, so that we can
     # resolve "self.f" and "self.fft"
@@ -103,26 +113,22 @@ class FrequencySeries(BaseSeries):
     @property
     def f(self):
         # This is defined BaseClass
-        return self.data_x
+        return self.x
 
     @f.setter
     def f(self, f):
         # This is defined BaseClass
-        self.data_x = f
-        # Invalidate the spline
-        self.invalid_spline = True
+        self.x = f
 
     @property
     def fft(self):
         # This is defined BaseClass
-        return self.data_y
+        return self.y
 
     @fft.setter
     def fft(self, fft):
         # This is defined BaseClass
-        self.data_y = fft
-        # Invalidate the spline
-        self.invalid_spline = True
+        self.y = fft
 
     @property
     def fmin(self):
@@ -131,7 +137,7 @@ class FrequencySeries(BaseSeries):
         :returns:  Minimum frequency of the frequencyseries
         :rtype:    float
         """
-        return np.amin(self.f)
+        return self.xmin
 
     @property
     def fmax(self):
@@ -140,7 +146,7 @@ class FrequencySeries(BaseSeries):
         :returns:  Maximum frequency of the frequencyseries
         :rtype:    float
         """
-        return np.amax(self.f)
+        return self.xmax
 
     @property
     def frange(self):
@@ -326,7 +332,8 @@ class FrequencySeries(BaseSeries):
 
         return timeseries.TimeSeries(t, y)
 
-    def inner_product(self, other, fmin=0, fmax=np.inf, noises=None):
+    def inner_product(self, other, fmin=0, fmax=np.inf, noises=None,
+                      same_domain=False):
         r"""Compute the (network) inner product.
 
         :math:`(h_1, h_2) = 4 \Re \int_{f_min}^{f_max} \frac{h_1 h_2^*}{S_n}`
@@ -343,6 +350,13 @@ class FrequencySeries(BaseSeries):
         definition, so if fmax (fmin) is larger (smaller) than the one
         available, it is effectively set to the one available.
 
+        Same_domian If True, it is assumed that all the frequency series
+        involved are defined over the same frequencies. Turning this on speeds
+        up computations, but it will result in incorrect results if the
+        assumption is violated. If it is False, the domain of definition of the
+        series is checked, if it is not the same for all the series, then they
+        will be resampled.
+
         :param other: Second frequency series in the inner product
         :type other: :py:class:`.FrequencySeries`
         :param fmin: Remove frequencies below fmin
@@ -352,6 +366,10 @@ class FrequencySeries(BaseSeries):
         :param noise: If None, no weight is applied
         :type noise: :py:class:`.FrequencySeries`, list
                      of :py:class:`.FrequencySeries` or None
+        :param same_domain: Whether to assume that the frequencyseries are
+        defined over the same frequencies. If you can guarantee this, the
+        computation will be faster.
+        :type same_domain: bool
 
         :returns: Inner product between self and other
         :rtype: float
@@ -382,17 +400,25 @@ class FrequencySeries(BaseSeries):
             # noises is not a list, just append it
             to_be_res_list.append(noises)
 
-        [res_self, res_other, *res_noises] = sample_common(to_be_res_list)
-        # Now everything is sampled to the same frequencies
+        if (not same_domain):
+            [res_self, res_other, *res_noises] = sample_common(to_be_res_list)
+        else:
+            [res_self, res_other, *res_noises] = to_be_res_list
+
+        # Now everything is sampled to the same frequencies, so, we will use
+        # the data (.fft) directly instead of the series. This avoid a check on
+        # the compatibility of the series, making the routine faster.
 
         # Sum all the integrands
-        integrand = 0
+        integrand = FrequencySeries(self.f, np.zeros_like(self.fft))
 
         for res_noise in res_noises:
-            integrand += res_self * res_other.conjugate() / res_noise
+            integrand.fft += (res_self.fft * res_other.fft.conjugate()
+                              / res_noise.fft)
 
         # 4 Re * \int
-        integral = 4 * integrand.integrated().real()
+        integral = integrand.integrated().real()
+        integral.fft *= 4
 
         # We assume that the frequencyseries are zero outside of the interval
         # of definition
@@ -403,7 +429,8 @@ class FrequencySeries(BaseSeries):
 
         return integral(fmax) - integral(fmin)
 
-    def overlap(self, other, fmin=0, fmax=np.inf, noises=None):
+    def overlap(self, other, fmin=0, fmax=np.inf, noises=None,
+                same_domain=False):
         r"""Compute the (network) overlap.
 
         :math:`\textrm{overlap} = (h_1, h_2) / \sqrt{(h_1, h_1)(h_2, h_2)}`
@@ -411,6 +438,13 @@ class FrequencySeries(BaseSeries):
         We assume that the frequencyseries are zero outside of the interval of
         definition, so if fmax (fmin) is larger (smaller) than the one
         available, it is effectively set to the one available.
+
+        Same_domian If True, it is assumed that all the frequency series
+        involved are defined over the same frequencies. Turning this on speeds
+        up computations, but it will result in incorrect results if the
+        assumption is violated. If it is False, the domain of definition of the
+        series is checked, if it is not the same for all the series, then they
+        will be resampled.
 
         :param other: Second frequency series in the overlap
         :type other: :py:class:`.FrequencySeries`
@@ -421,13 +455,20 @@ class FrequencySeries(BaseSeries):
         :param noise: If None, no weight is applied. If it is a list,
                       the netowrk overlap is computed.
         :type noise: (list of) :py:class:`.FrequencySeries` or None
+        :param same_domain: Whether to assume that the frequencyseries are
+        defined over the same frequencies. If you can guarantee this, the
+        computation will be faster.
+        :type same_domain: bool
 
         :returns: Overlap between self and other
         :rtype: float
 
         """
         # Error handling is done by inner_product
-        inner_11 = self.inner_product(self, fmin, fmax, noises)
-        inner_22 = other.inner_product(other, fmin, fmax, noises)
-        inner_12 = self.inner_product(other, fmin, fmax, noises)
+        inner_11 = self.inner_product(self, fmin, fmax, noises,
+                                      same_domain=same_domain)
+        inner_22 = other.inner_product(other, fmin, fmax, noises,
+                                       same_domain=same_domain)
+        inner_12 = self.inner_product(other, fmin, fmax, noises,
+                                      same_domain=same_domain)
         return inner_12 / np.sqrt(inner_11 * inner_22)

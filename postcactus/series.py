@@ -29,14 +29,15 @@ from scipy import integrate, interpolate, signal
 
 # Note, we test this class testing its derived class TimeSeries
 class BaseSeries(ABC):
-    """Base class (not intended for direct use) for generic series data.
+    """Base class (not intended for direct use) for generic series data in
+    which the independendent variable x is sorted.
 
     This class is already rich of features.
 
     .. note:
 
-        Derived class should define setters and getters to handle ``data_x``
-        and ``data_y``. This is where the data is stored.
+        Derived class should define setters and getters to handle ``x``
+        and ``y``. This is where the data is stored.
 
         The idea is the following. The actual data is stored in the
         ``BaseSeries` properties ``data_x`` and ``data_y``. These are
@@ -45,7 +46,7 @@ class BaseSeries(ABC):
         should use something that clearly inform the user of their meaning,
         like ``t`` or ``f`` (time or frequency). To do this, we have to
         define getters and setters that access and modify ``data_x``
-        and ``data_y`` but use more meaningful names. To define a getters,
+        and ``y`` but use more meaningful names. To define a getters,
         simply use the ``@property`` decorator:
 
         .. code-block:: python
@@ -68,8 +69,8 @@ class BaseSeries(ABC):
 
     :ivar data_x:   x
     :vartype data_x: 1D numpy array or float
-    :ivar data_y:   y
-    :vartype data_y: 1D numpy array or float
+    :ivar y:   y
+    :vartype y: 1D numpy array or float
 
     :ivar spline_real: Coefficients for a spline represent of the real part
                        of y
@@ -81,48 +82,113 @@ class BaseSeries(ABC):
 
     """
 
-    def __init__(self, x, y):
+    @staticmethod
+    def _make_array(x):
+        """Return a numpy array version of x (if x is not already an array)
+        """
+        return np.atleast_1d(x) if not isinstance(x, np.ndarray) else x
 
-        if (not hasattr(x, '__len__')):
-            x = np.array([x])
-            y = np.array([y])
-        else:
-            # Make sure xhese are arrays
-            x = np.array(x)
-            y = np.array(y)
+    def _return_array_if_monotonic(self, x_array):
+        """Return the import array if it has length 1 or if it is
+        monotonically increasing. Otherwise return error.
 
-        if (len(x) != len(y)):
+        We assume x_array is an array. We will not check for this, it is up to
+        the developer to guarantee this. If this is not true, some errors will
+        be thrown.
+
+        """
+        if (len(x_array) > 1):
+            # Here we compute directly the diff because it seems faster
+            # than using np.diff
+
+            # Example:
+            # self.x = [1,2,3]
+            # self.x[1:] = [2, 3]
+            # self.x[:-1] = [1, 2]
+            # dx = [1,1]
+            dx = x_array[1:] - x_array[:-1]
+            if (dx.min() <= 0):
+                # HACK: To provide more useful information we assume
+                #       that the derived classes are named like TimeSeries.
+                #       Then, we remove the "series"
+                name = type(self).__name__
+                x_name = name[:-6]
+                raise ValueError(f"{x_name} not monotonically increasing")
+
+        return x_array
+
+    def __init__(self, x, y, guarantee_x_is_monotonic=False):
+        """When guarantee_x_is_monotonic is True no checks will be perform to
+        make sure that x is monotonically increasing (increasing performance).
+        This should is used internally whenever a new series is returned from
+        self, since we have already checked that data_x is good.
+
+        """
+
+        x_array = self._make_array(x)
+        y_array = self._make_array(y)
+
+        if (len(x_array) != len(y_array)):
             raise ValueError('Data length mismatch')
-        #
-        if (len(x) == 0):
+
+        if (len(x_array) == 0):
             raise ValueError('Trying to construct empty Series.')
 
+        if (not guarantee_x_is_monotonic):
+            x_array = self._return_array_if_monotonic(x_array)
+
         # The copy is because we don't want to change the input values
-        self._data_x = np.array(x).copy()
-        self._data_y = np.array(y).copy()
+        self.data_x = x_array.copy()
+        self.data_y = y_array.copy()
+
+        # The data is stored in the members self.data_x and self.data_y. We
+        # will never access these directly. We have setters and getters to that
+        # we can do stuff when variables change. For example, we want to
+        # compute or update splines. The setter and getters are for x and y
 
         # We keep this flag around to know when we have to recompute the
         # splines
         self.invalid_spline = True
+        # Here we also define the splines as empty objects so that we know
+        # that they are attributes of the class and they are not uninitialized
+        self.spline_real = None
+        self.spline_imag = None
 
     @property
-    def data_x(self):
-        return self._data_x
+    def x(self):
+        return self.data_x
 
-    @data_x.setter
-    def data_x(self, x):
-        self._data_x = x
+    @x.setter
+    def x(self, x):
+        x_array = self._make_array(x)
+        if (len(x_array) != len(self.x)):
+            raise ValueError("You cannot change the length of the series")
+        x_array = self._return_array_if_monotonic(x_array)
+
+        # This series should own the data, so we copy (to avoid accidentally
+        # changing some other variable).
+        # If you do self.x = z
+        # and then self.x = *2
+        # z will change (if we don't copy)
+        self.data_x = x_array.copy()
+
         # Invalidate the spline
         self.invalid_spline = True
 
     @property
-    def data_y(self):
-        return self._data_y
+    def y(self):
+        return self.data_y
 
-    @data_y.setter
-    def data_y(self, data_y):
-        # This is defined BaseClass
-        self._data_y = data_y
+    @y.setter
+    def y(self, y):
+        y_array = self._make_array(y)
+        if (len(y_array) != len(self.data_y)):
+            raise ValueError("You cannot change the length of the series")
+
+        # This series should own the data, so we copy (to avoid accidentally
+        # changing some other variable)
+        self.data_y = y_array.copy()
+
         # Invalidate the spline
         self.invalid_spline = True
 
@@ -135,7 +201,7 @@ class BaseSeries(ABC):
         """
         # Derived classes can implement more efficients methods if x has known
         # ordering
-        return np.amin(self.data_x)
+        return self.x[0]
 
     @property
     def xmax(self):
@@ -146,7 +212,7 @@ class BaseSeries(ABC):
         """
         # Derived classes can implement more efficients methods if x has known
         # ordering
-        return np.amax(self.data_x)
+        return self.x[-1]
 
     def is_regularly_sampled(self):
         """Return whether the series is regularly sampled.
@@ -154,16 +220,16 @@ class BaseSeries(ABC):
         :returns:  Is the series regularly sampled?
         :rtype:    bool
         """
-        dx = self.data_x[1:] - self.data_x[:-1]
+        dx = self.x[1:] - self.x[:-1]
 
-        return np.allclose(dx, dx[0], atol=1e-15)
+        return np.allclose(dx, dx[0], atol=1e-14)
 
     def __len__(self):
         """The number of data points."""
-        return len(self.data_x)
+        return len(self.x)
 
     def __iter__(self):
-        for x, y in zip(self.data_x, self.data_y):
+        for x, y in zip(self.x, self.y):
             yield x, y
 
     def is_complex(self):
@@ -173,17 +239,17 @@ class BaseSeries(ABC):
         :rtype:   bool
 
         """
-        return issubclass(self.data_y.dtype.type, complex)
+        return issubclass(self.y.dtype.type, complex)
 
     def x_at_maximum_y(self):
         """Return the value of x when abs(y) is maximum.
         """
-        return self.data_x[np.argmax(np.abs(self.data_y))]
+        return self.x[np.argmax(np.abs(self.y))]
 
     def x_at_minimum_y(self):
         """Return the value of x when abs(y) is minimum.
         """
-        return self.data_x[np.argmin(np.abs(self.data_y))]
+        return self.x[np.argmin(np.abs(self.y))]
 
     def _make_spline(self, *args, k=3, s=0, **kwargs):
         """Private function to make spline representation of the data.
@@ -211,14 +277,16 @@ class BaseSeries(ABC):
             raise ValueError(
                 f"Too few points to compute a spline of order {k}")
 
-        self.spline_real = interpolate.splrep(self.data_x, self.data_y.real,
+        self.spline_real = interpolate.splrep(self.x, self.y.real,
                                               k=k, s=s, *args, **kwargs)
 
         if (self.is_complex()):
-            self.spline_imag = interpolate.splrep(self.data_x,
-                                                  self.data_y.imag,
+            self.spline_imag = interpolate.splrep(self.x,
+                                                  self.y.imag,
                                                   k=k, s=s,
                                                   *args, **kwargs)
+
+        self.invalid_spline = False
 
     def evaluate_with_spline(self, x, ext=2):
         """Evaluate the spline on the points x.
@@ -245,7 +313,6 @@ class BaseSeries(ABC):
         """
         if (self.invalid_spline):
             self._make_spline()
-            self.invalid_spline = False
 
         y_real = interpolate.splev(x, self.spline_real, ext=ext)
         if (self.is_complex()):
@@ -258,7 +325,7 @@ class BaseSeries(ABC):
         # would be a 0d numpy scalar array. What's that? - you may ask. I have
         # no idea, but the user is expecting a scalar as output. Hence, we cast
         # the 0d array into at "at_least_1d" array, then we can see its length
-        # and act consequently
+        # and act consequently.
         ret = np.atleast_1d(ret)
         return ret if len(ret) > 1 else ret[0]
 
@@ -266,7 +333,29 @@ class BaseSeries(ABC):
         """Evaluate the spline on the points x. If the value is outside the
         range, a ValueError will be raised.
         """
-        return self.evaluate_with_spline(x, ext=2)
+        # We call the spline only if we need to.
+
+        # TODO: This is not a Pythonic way to write this function.
+        #       The main problem is that it is is not vectorized.
+
+        # First we consider the scalar case
+        if not hasattr(x, '__len__'):
+            if x in self.x:
+                return self.y[np.searchsorted(self.x, x)]
+            return self.evaluate_with_spline(x, ext=2)
+
+        ret = np.zeros(len(x), dtype=type(self.y[0]))
+        # Hash-maps are more efficient than searching every time through the
+        # array, but there is some overhead cost in defining the dictionary.
+        # Experiments show that it is sill more performant.
+        dic_data = dict(zip(self.x, self.y))
+        for index, elem in enumerate(x):
+            if elem in self.x:
+                ret[index] = dic_data[elem]
+            else:
+                ret[index] = self.evaluate_with_spline(elem, ext=2)
+
+        return ret
 
     def copy(self):
         """Return a deep copy.
@@ -278,6 +367,7 @@ class BaseSeries(ABC):
         # to copy also the spline information without re-computing it.
         # This can speed up some comutations.
         copied = type(self).__new__(self.__class__)
+        # We don't use the setters
         copied.data_x = self.data_x.copy()
         copied.data_y = self.data_y.copy()
         if (not self.invalid_spline):
@@ -305,8 +395,8 @@ class BaseSeries(ABC):
 
         """
         # If x is the same, there's no need to resample
-        if (len(self.data_x) == len(new_x)):
-            if (np.allclose(self.data_x, new_x, atol=1e-15)):
+        if (len(self.x) == len(new_x)):
+            if (np.allclose(self.x, new_x, atol=1e-14)):
                 return self.copy()
         return type(self)(new_x, self.evaluate_with_spline(new_x,
                                                            ext=ext))
@@ -324,14 +414,14 @@ class BaseSeries(ABC):
         self._apply_to_self(self.resampled, new_x, ext=ext)
 
     def __neg__(self):
-        return type(self)(self.data_x, -self.data_y)
+        return type(self)(self.x, -self.y, True)
 
     def __abs__(self):
-        return type(self)(self.data_x, np.abs(self.data_y))
+        return type(self)(self.x, np.abs(self.y), True)
 
     def _apply_binary(self, other, function):
         """This is an abstract function that is used to implement mathematical
-        operations with other series (if they have the same data_x) or
+        operations with other series (if they have the same x) or
         scalars.
 
         _apply_binary takes another object that can be of the same type or a
@@ -349,20 +439,23 @@ class BaseSeries(ABC):
         """
         # If the other object is of the same type
         if (isinstance(other, type(self))):
-            if ((not np.allclose(other.data_x, self.data_x, atol=1e-15))
-                    or (len(self.data_x) != len(other.data_x))):
+            if ((not np.allclose(other.x, self.x, atol=1e-14))
+                    or (len(self.x) != len(other.x))):
                 raise ValueError(
                     "The objects do not have the same x!")
-            return type(self)(self.data_x, function(self.data_y, other.data_y))
+            return type(self)(self.x,
+                              function(self.y, other.y),
+                              True)
         # If it is a number
         if isinstance(other, (int, float, complex)):
-            return type(self)(self.data_x, function(self.data_y, other))
+            return type(self)(self.x, function(self.y, other),
+                              True)
 
         # If we are here, it is because we cannot add the two objects
         raise TypeError("I don't know how to combine these objects")
 
     def __add__(self, other):
-        """Add two series (if they have the same data_x), or add a scalar to a
+        """Add two series (if they have the same x), or add a scalar to a
         series.
         """
         return self._apply_binary(other, np.add)
@@ -370,21 +463,21 @@ class BaseSeries(ABC):
     __radd__ = __add__
 
     def __sub__(self, other):
-        """Subtract two series (if they have the same data_x), or subtract a
+        """Subtract two series (if they have the same x), or subtract a
         scalar from a series.
 
         """
         return self._apply_binary(other, np.subtract)
 
     def __rsub__(self, other):
-        """Subtract two series (if they have the same data_x), or subtract a
+        """Subtract two series (if they have the same x), or subtract a
         scalar from a series.
 
         """
         return -self._apply_binary(other, np.subtract)
 
     def __mul__(self, other):
-        """Multiply two series (if they have the same data_x), or multiply
+        """Multiply two series (if they have the same x), or multiply
         by scalar.
         """
         return self._apply_binary(other, np.multiply)
@@ -392,7 +485,7 @@ class BaseSeries(ABC):
     __rmul__ = __mul__
 
     def __truediv__(self, other):
-        """Divide two series (if they have the same data_x), or divide by a
+        """Divide two series (if they have the same x), or divide by a
         scalar.
         """
         if (other == 0):
@@ -401,7 +494,7 @@ class BaseSeries(ABC):
 
     def __pow__(self, other):
         """Raise the first series to second series (if they have the
-        same data_x), or raise the series to a scalar.
+        same x), or raise the series to a scalar.
 
         """
         return self._apply_binary(other, np.power)
@@ -425,8 +518,8 @@ class BaseSeries(ABC):
         """Check for equality up to numerical precision.
         """
         if (isinstance(other, type(self))):
-            return (np.allclose(self.data_x, other.data_x)
-                    and np.allclose(self.data_y, other.data_y))
+            return (np.allclose(self.x, other.x, atol=1e-14)
+                    and np.allclose(self.y, other.y, atol=1e-14))
         return False
 
     def _apply_to_self(self, f, *args, **kwargs):
@@ -435,13 +528,15 @@ class BaseSeries(ABC):
         to modifying self.
         """
         ret = f(*args, **kwargs)
-        self.data_x, self.data_y = ret.data_x, ret.data_y
+        # We avoid the setters to avoid checking for consistency because this
+        # was already done
+        self.data_x, self.data_y = ret.x, ret.y
         # We have to recompute the splines
         self.invalid_spline = True
 
     def save(self, fname, *args, **kwargs):
-        """Saves into simple ASCII format with 2 columns (data_x, data_y)
-        for real valued data and 3 columns (data_x, Re(data_y), Im(data_y))
+        """Saves into simple ASCII format with 2 columns (x, y)
+        for real valued data and 3 columns (x, Re(y), Im(y))
         for complex valued data.
 
         :param fname: Path (with extensiton) of the output file
@@ -449,11 +544,11 @@ class BaseSeries(ABC):
 
         """
         if self.is_complex():
-            np.savetxt(fname, np.transpose((self.data_x, self.data_y.real,
-                                            self.data_y.imag),
+            np.savetxt(fname, np.transpose((self.x, self.y.real,
+                                            self.y.imag),
                                            *args, **kwargs))
         else:
-            np.savetxt(fname, np.transpose((self.data_x, self.data_y),
+            np.savetxt(fname, np.transpose((self.x, self.y),
                                            *args, **kwargs))
 
     def nans_removed(self):
@@ -463,8 +558,8 @@ class BaseSeries(ABC):
         :returns: A new series with only finite values
         :rtype: :py:class:`~.BaseSeries` or derived class
         """
-        msk = np.isfinite(self.data_y)
-        return type(self)(self.data_x[msk], self.data_y[msk])
+        msk = np.isfinite(self.y)
+        return type(self)(self.x[msk], self.y[msk], True)
 
     def nans_remove(self):
         """Filter out nans/infinite values."""
@@ -477,9 +572,9 @@ class BaseSeries(ABC):
         :returns:  New series cumulative integral
         :rtype:    :py:class:`~.BaseSeries` or derived class
         """
-        return type(self)(self.data_x,
-                          integrate.cumtrapz(self.data_y, x=self.data_x,
-                                             initial=0))
+        return type(self)(self.x,
+                          integrate.cumtrapz(self.y, x=self.x,
+                                             initial=0), True)
 
     def integrate(self):
         """Integrate series with method of the trapeziod.
@@ -503,20 +598,19 @@ class BaseSeries(ABC):
 
         if (self.invalid_spline):
             self._make_spline()
-            self.invalid_spline = False
 
         if (self.is_complex()):
-            ret_value = (interpolate.splev(self.data_x,
+            ret_value = (interpolate.splev(self.x,
                                            self.spline_real,
                                            der=order)
-                         + 1j * interpolate.splev(self.data_x,
+                         + 1j * interpolate.splev(self.x,
                                                   self.spline_imag,
                                                   der=order))
         else:
-            ret_value = interpolate.splev(self.data_x, self.spline_real,
+            ret_value = interpolate.splev(self.x, self.spline_real,
                                           der=order)
 
-        return type(self)(self.data_x, ret_value)
+        return type(self)(self.x, ret_value, True)
 
     def spline_derive(self, order=1):
         """Derive the series current one using the spline interpolation.
@@ -545,10 +639,10 @@ class BaseSeries(ABC):
         :rtype:    :py:class:`~.BaseSeries` or derived class
 
         """
-        ret_value = self.data_y
+        ret_value = self.y
         for _num_deriv in range(order):
-            ret_value = np.gradient(ret_value, self.data_x)
-        return type(self)(self.data_x, ret_value)
+            ret_value = np.gradient(ret_value, self.x)
+        return type(self)(self.x, ret_value, True)
 
     def derive(self, order=1):
         """Derive with the numerical order-differentiation. (order = number of
@@ -586,17 +680,19 @@ class BaseSeries(ABC):
 
         """
         if self.is_complex():
-            return type(self)(self.data_x,
-                              signal.savgol_filter(self.data_y.imag,
+            return type(self)(self.x,
+                              signal.savgol_filter(self.y.imag,
                                                    window_size,
                                                    order)
-                              + 1j * signal.savgol_filter(self.data_y.real,
+                              + 1j * signal.savgol_filter(self.y.real,
                                                           window_size,
-                                                          order))
+                                                          order),
+                              True)
 
-        return type(self)(self.data_x, signal.savgol_filter(self.data_y,
-                                                            window_size,
-                                                            order))
+        return type(self)(self.x, signal.savgol_filter(self.y,
+                                                       window_size,
+                                                       order),
+                          True)
 
     def savgol_smooth(self, window_size, order=3):
         """Smooth the series with a Savitzky-Golay filter with window of
@@ -623,16 +719,16 @@ class BaseSeries(ABC):
         [init, end]. If init or end are not specified or None, it does not
         remove anything from this side.
 
-        :param init: New minimum data_x
+        :param init: New minimum x
         :type init: float
-        :param end: New maximum data_x
+        :param end: New maximum x
         :type end: float
 
         :returns:  Series with enforced minimum and maximum
         :rtype:    :py:class:`~.BaseSeries` or derived class
         """
-        x = self.data_x
-        y = self.data_y
+        x = self.x
+        y = self.y
         if (init is not None):
             m = (x >= init)
             x = x[m]
@@ -641,15 +737,15 @@ class BaseSeries(ABC):
             m = (x <= end)
             x = x[m]
             y = y[m]
-        return type(self)(x, y)
+        return type(self)(x, y, True)
 
     def crop(self, init=None, end=None):
         """Remove data outside the intarval [init, end]. If init or end
         are not specified or None, it does not remove anything from this side.
 
-        :param init: New minimum data_x
+        :param init: New minimum x
         :type init: float
-        :param end: New maximum data_x
+        :param end: New maximum x
         :type end: float
 
         """
@@ -669,7 +765,7 @@ class BaseSeries(ABC):
         :rtype: :py:class:`~.BaseSeries` or derived class
 
         """
-        return type(self)(self.data_x, function(self.data_y))
+        return type(self)(self.x, function(self.y), True)
 
     def abs(self):
         return abs(self)
@@ -751,11 +847,11 @@ def sample_common(series):
     # resample. If the series are regularly sampled, it is easy to check
     # if the are the same. We also need to check that they are regularly
     # sampled, to do this, we check that the first is regularly sampled,
-    # and that all the other ones have the same data_x.
+    # and that all the other ones have the same x.
     s1, *s_others = series
     if (s1.is_regularly_sampled()):
         for s in s_others:
-            if (not np.allclose(s1.data_x, s.data_x, atol=1e-15)):
+            if (not np.allclose(s1.x, s.x, atol=1e-14)):
                 break
             # This is an else to the for loop
         else:

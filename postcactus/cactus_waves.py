@@ -449,7 +449,7 @@ class GravitationalWavesOneDet(mp.MultipoleOneDet):
         """
         def torqzlm(_1, mult_l, mult_m, _2):
             return self.get_torque_z_lm(mult_l, mult_m, pcut)
-        return self.total_function_on_available_lm(torqzlm, l_max=None)
+        return self.total_function_on_available_lm(torqzlm, l_max=l_max)
 
     def get_total_angular_momentum_z(self, pcut, l_max=None):
         """Return the cumulative angular momentum lost in all the modes up to
@@ -493,7 +493,7 @@ class ElectromagneticWavesOneDet(mp.MultipoleOneDet):
         """
         def powlm(_1, mult_l, mult_m, _2):
             return self.get_power_lm(mult_l, mult_m)
-        return self.total_function_on_available_lm(powlm, l_max=None)
+        return self.total_function_on_available_lm(powlm, l_max=l_max)
 
     def get_total_energy(self, l_max=None):
         """Return the cumulative energy lost in all the modes up to l_max.
