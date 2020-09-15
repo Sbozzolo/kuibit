@@ -804,7 +804,6 @@ class TestTimeseries(unittest.TestCase):
         ts1_res, ts2_res = series.sample_common([ts2, ts1_longer])
         self.assertTrue(np.allclose(ts1_res.y, sins3))
 
-
     def test_windows(self):
 
         ones = ts.TimeSeries(self.times, np.ones_like(self.times))
@@ -831,6 +830,20 @@ class TestTimeseries(unittest.TestCase):
 
         new_ones = ones.copy()
         new_ones.blackman_window()
+        self.assertTrue(np.allclose(new_ones.y, black_array))
+
+        # Test window directly
+        new_ones = ones.copy()
+        # Error for window not implemented
+        with self.assertRaises(ValueError):
+            new_ones.window("planck")
+
+        # Error for window in wrong format
+        with self.assertRaises(TypeError):
+            new_ones.window([1, 2])
+
+        # Window called as string
+        new_ones.window('blackman')
         self.assertTrue(np.allclose(new_ones.y, black_array))
 
     def test_savgol_smooth(self):
