@@ -424,6 +424,9 @@ class FrequencySeries(BaseSeries):
         if (fmin >= fmax):
             raise ValueError("fmin has to be smaller than fmax")
 
+        if (fmin < 0):
+            raise ValueError("fmin has to be non-negative")
+
         if (noises is None):
             # If noises is None, it means that the weight is one everywhere so,
             # we prepare a FrequencySeries that has the same frequencies as
@@ -455,8 +458,10 @@ class FrequencySeries(BaseSeries):
         for res_noise in res_noises:
             integrand += (res_self * res_other.conjugate() / res_noise)
 
+
         # We assume that the frequencyseries are zero outside of the interval
         # of definition
+        integrand.negative_frequencies_remove()
         integrand.band_pass(fmin=fmin, fmax=fmax)
 
         # 4 Re * \int
@@ -509,4 +514,5 @@ class FrequencySeries(BaseSeries):
         inner_12 = self.inner_product(other, fmin, fmax,
                                       noises=noises,
                                       same_domain=same_domain)
+
         return inner_12 / np.sqrt(inner_11 * inner_22)
