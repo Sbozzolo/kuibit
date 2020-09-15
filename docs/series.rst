@@ -252,10 +252,12 @@ windowed, tukey_windowed, hamming_window, blackman_window
 ``window(window_function)`` applies window_function to the timeseries.
 ``window_function`` has to be a function that takes as first argument the number
 of points of the signal. ``window_function`` can take additional arguments as
-passed by ``windowed``.
+passed by ``windowed``. Alternatively, ``window_function`` can be a string that
+idenfity one of the window functions that are already available
+(``tukey``, ``hamming``, ``blackman``).
 
-Already implemented are ``tukey_windowed``, ``hamming_windowed``,
-``blackman_windowed``.
+You can apply directly one of those windows with the methods
+``tukey_window``, ``hamming_window``, ``blackman_window``.
 
 zero_pad
 ^^^^^^^^

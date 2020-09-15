@@ -629,17 +629,30 @@ class TimeSeries(BaseSeries):
 
         ``window_function`` has to be a function that takes as first argument
         the number of points of the signal. window_function can take additional
-        arguments as passed by windowed.
+        arguments as passed by windowed. Alternatively, ``window_function`` can
+        be a string with the name of the window function, if this is already
+        implemented in :py:class:`~.TimeSeries` (e.g., ``tukey``).
 
         :param window: Window function to apply to the timeseries
-        :type window: callable
+        :type window: callable or str
 
         :returns:  New windowed timeseries
         :rtype:    :py:class:`~.TimeSeries`
 
         """
-        window_array = window_function(len(self), *args, **kwargs)
-        return TimeSeries(self.t, self.y * window_array)
+
+        if (callable(window_function)):
+            window_array = window_function(len(self), *args, **kwargs)
+            return TimeSeries(self.t, self.y * window_array)
+
+        if (isinstance(window_function, str)):
+            window_function_method = f"{window_function}_windowed"
+            if (not hasattr(self, window_function_method)):
+                raise ValueError(f"Window {window_function} not implemented")
+            window_function_callable = getattr(self, window_function_method)
+            return window_function_callable(*args, **kwargs)
+
+        raise TypeError("Window function is neither a callable or a string")
 
     def window(self, window_function, *args, **kwargs):
         """Apply window_function to the data.
