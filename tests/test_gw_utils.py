@@ -17,6 +17,8 @@
 
 import unittest
 
+import numpy as np
+
 from postcactus import gw_utils as gwu
 
 
@@ -77,3 +79,28 @@ class TestGWUtils(unittest.TestCase):
         self.assertAlmostEqual(antenna_gw150914.livingston[1], -0.569292709)
         self.assertAlmostEqual(antenna_gw150914.virgo[0], -0.11486789)
         self.assertAlmostEqual(antenna_gw150914.virgo[1], 0.57442590)
+
+    def test_extrapolation(self):
+
+        # Schwarzschild_radius_to_tortoise
+        self.assertAlmostEqual(gwu.Schwarzschild_radius_to_tortoise(2, 0.5), 2)
+
+        # Test with array
+        rr = np.array([2, 2])
+        self.assertCountEqual(gwu.Schwarzschild_radius_to_tortoise(rr, 0.5),
+                              rr)
+
+        # retarded_times_to_coordinate_times
+        # Scalar
+        self.assertAlmostEqual(gwu.retarded_times_to_coordinate_times(1, 2,
+                                                                      0.5),
+                               3)
+
+        # Array
+        ones = np.ones(2)
+        self.assertCountEqual(gwu.retarded_times_to_coordinate_times(ones,
+                                                                     rr,
+                                                                     0.5),
+                              rr + 1)
+
+        # coordinate_times_to_retarded_times

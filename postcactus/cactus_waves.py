@@ -340,8 +340,6 @@ class GravitationalWavesOneDet(mp.MultipoleOneDet):
         # Loop over the detectors in Detectors
         # antennas and coords are namedtuples Detectors
         for (theta, phi), (Fc, Fp) in zip(coords, antennas):
-            # Make antenna pattern complex so that we can easily
-            # strain is h = hp - i hc
             strain = self.get_strain(theta, phi, pcut, *args,
                                      window_function=window_function,
                                      l_max=l_max, trim_ends=trim_ends,

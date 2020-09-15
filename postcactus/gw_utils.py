@@ -29,6 +29,7 @@ import numpy as np
 from scipy import integrate, optimize
 
 import postcactus.unitconv as uc
+from postcactus import timeseries as ts
 
 # This is just a convenience to avoid having to remember the order of
 # the output (and for easy of extension)
@@ -361,3 +362,121 @@ def antenna_responses_from_sky_localization(right_ascension,
                         virgo=(Fc_V, Fp_V))
 
     return antenna
+
+# Extrapolation of GWs at infinity.
+# Follows what done in the NRAR collaboration (1307.5307)
+# This is what we are going to do:
+
+# 1. Assume that the spacetime is almost Schwarzschild with mass M.
+# 2. Choose a set of retarded times u_i where GWs have to be evaluated
+# 3. Compute the coordinate times t_i that correspond to the retarded
+#    times u_i at the radius r. This uses tortoise coordinates.
+# 4. Interpolate the waveforms at the coordinate times corresponding to
+#    the retarded times u_i for different extraction radii.
+#    Now our waves are so that they are evaluate at different t_i but at
+#    the same u_i.
+# 5. We do this process for a bunch of extraction radii (rex1, rex2, rex3, ...)
+#    So, we should have wave1, wave2, wave3, with all the same number of
+#    points that correspond to the same retarded time.
+# 6. For each element in u_i, fit all the waves (wave1, wave2, ...) with a
+#    polynomial of the form a_n/r^n.
+
+
+def Schwarzschild_radius_to_tortoise(radii, mass):
+    """Transform radial coordinates r to tortoise coordinates assuming mass M.
+
+    Equation (26) in 1307.5307.
+
+    :param radii: Radius in Schwarzschild coordinates
+    :type radii: float or 1D numpy array
+    :param mass: ADM mass
+    :type mass: float
+
+    :returns: Tortoise radii
+    :rtype: float or 1D numpy array
+
+    """
+    return radii + 2 * mass * np.log(radii / (2 * mass) - 1)
+
+
+def retarded_times_to_coordinate_times(retarded_times, rex, mass):
+    """Compute the coordinate times ti corresponding to the retarded times ui
+    at the coordinate radius (of extraction) rex. M is the ADM mass
+    (needed to compute tortoise radius).
+
+  First, the tortoise radius is computed from rex, then the coordinate times
+  are computed with t = u + r_tortoise(rex).
+
+    :param retarded_times: Retarded times
+    :type retarded_times: float or 1D numpy array
+    :param rex: Extraction radii
+    :type rex: float or 1D numpy array
+    :param mass: ADM mass
+    :type mass: float
+
+    """
+    return retarded_times + Schwarzschild_radius_to_tortoise(rex, mass)
+
+
+def coordinate_times_to_retarded_times(coordinate_times, rex, mass):
+    """Compute the coordinate times ti corresponding to the retarded times ui
+    at the coordinate radius (of extraction) rex. M is the ADM mass
+    (needed to compute tortoise radius).
+
+  First, the tortoise radius is computed from rex, then the coordinate times
+  are computed with t = u + r_tortoise(rex).
+
+    :param retarded_times: Coordinate times
+    :type retarded_times: float or 1D numpy array
+    :param rex: Extraction radii
+    :type rex: float or 1D numpy array
+    :param mass: ADM mass
+    :type mass: float
+    """
+    return coordinate_times - Schwarzschild_radius_to_tortoise(rex, mass)
+
+
+def extrapolate_waves_to_infinity(waves, ui, rexs, M, order=2):
+    """WAVES has to be a list of timeseries.
+  UI the
+  REXS the extraction radii.
+  M the ADM Mass.
+  ORDER is the order of extrapolation. Good results are obtained
+  when len(rexs) > order + 2.
+
+  Assume rexs[i] correspond to waves[i].
+
+  Return the coefficients a_n of the fit for each ui
+
+  f(ui, r) = sum^order_n=0 a_n / r^n
+
+  of WAVES. [Equation (29) in 1307.5307.]
+
+  The return value is a timeseries with time ui and value the first coefficient
+  of the fit for each ui."""
+
+    if (order >= len(rexs)):
+        raise RuntimeError(
+            "Order too high for the number of extraction radii provided")
+
+    # First, we copy waves to waves_retarded, which we populate
+    # with the value of the waves associated to the retarded times ui
+    #
+    # Take the timeseries WAVE, and return a timeseries evaluated at coordinate
+    # times that correspond to the retarded times ui at the coordinate extraction
+    # radius rex. M is the ADM mass (needed to compute tortoise radius).
+    waves_retarded = [w.resampled(
+        retarded_times_to_coordinate_times(ui, r, M))
+                      for w, r in zip(waves, rexs)]
+
+    # We perform the fit in ir=1/r instead of r
+    # So, technically, we are fitting sum^p_n=0 a_n * ir^n
+    irexs = 1. / np.array(rexs)
+    # Polyfit returns coefficient ordered from the highest to the lowest
+    # This is why we take the [-1]
+    coefficients = [
+        np.polyfit(irexs, [w.y[i] for w in waves_retarded], order)[-1]
+        for i in range(len(ui))
+    ]
+
+    return ts.TimeSeries(ui, coefficients)

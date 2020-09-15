@@ -153,6 +153,10 @@ class TestFrequencySeries(unittest.TestCase):
         with self.assertRaises(ValueError):
             self.FS.inner_product(self.FS, fmin=1, fmax=0)
 
+        # fmin < 0
+        with self.assertRaises(ValueError):
+            self.FS.inner_product(self.FS, fmin=-1)
+
         # To test the inner product we construct two simple linear frequency
         # series y(f) = f + 2j * f and y2(f) = 3j * f
         #
