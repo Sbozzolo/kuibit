@@ -13,5 +13,5 @@ setup(
     packages=['postcactus'],
     license='LICENSE.txt',
     description='Read and postprocess Einstein Toolkit simulations',
-    install_requires=["scipy", "numpy", "h5py"],
+    install_requires=["scipy", "numpy", "h5py", "numba"],
 )

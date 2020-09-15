@@ -48,6 +48,7 @@ Move into the folder and install with pip:
 
 If they are not already available, ``pip`` will install the following packages:
 - ``numpy``,
+- ``numba``,
 - ``h5py``,
 - ``scipy``.
 

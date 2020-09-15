@@ -525,6 +525,7 @@ class TestTimeseries(unittest.TestCase):
                                     other_values))
 
         self.assertTrue(np.allclose(self.TS(np.pi/2), 1))
+        self.assertTrue(np.allclose(self.TS(self.TS.t[0]), self.TS.y[0]))
 
         # From data
         self.assertTrue(np.allclose(self.TS_c(self.times),
@@ -625,21 +626,26 @@ class TestTimeseries(unittest.TestCase):
 
     def test_integrate(self):
 
-        self.assertTrue(np.allclose(self.TS.integrated().y,
-                                    1 - np.cos(self.times),
-                                    atol=1e-3))
+        times_long = np.linspace(0, 2 * np.pi, 10000)
+        values_long = np.sin(times_long)
+        TS = ts.TimeSeries(times_long, values_long)
+        TS_c = ts.TimeSeries(times_long, values_long + 1j * values_long)
 
-        self.assertTrue(np.allclose(self.TS_c.integrated().y,
-                                    1 - np.cos(self.times)
-                                    + 1j * (1 - np.cos(self.times)),
-                                    atol=1e-3))
+        self.assertTrue(np.allclose(TS.integrated().y,
+                                    1 - np.cos(times_long),
+                                    atol=1e-4))
 
-        sins = self.TS.copy()
+        self.assertTrue(np.allclose(TS_c.integrated().y,
+                                    1 - np.cos(times_long)
+                                    + 1j * (1 - np.cos(times_long)),
+                                    atol=1e-4))
+
+        sins = TS.copy()
         sins.integrate()
 
         self.assertTrue(np.allclose(sins.y,
-                                    1 - np.cos(self.times),
-                                    atol=1e-3))
+                                    1 - np.cos(times_long),
+                                    atol=1e-4))
 
     def test_derive(self):
 
@@ -788,6 +794,15 @@ class TestTimeseries(unittest.TestCase):
 
         # Test a case in which there's no resampling
         newer_ts1, newer_ts2 = series.sample_common([new_ts1, new_ts2])
+        self.assertTrue(np.allclose(new_ts1.y, sins3))
+
+        # Case with different lengths
+        times1_longer = np.append(-1, np.linspace(0, 2 * np.pi, 100))
+        sins1_longer = np.sin(times1_longer)
+        ts1_longer = ts.TimeSeries(times1_longer, sins1_longer)
+
+        ts1_res, ts2_res = series.sample_common([ts2, ts1_longer])
+        self.assertTrue(np.allclose(ts1_res.y, sins3))
 
 
     def test_windows(self):
@@ -894,13 +909,14 @@ class TestTimeseries(unittest.TestCase):
 
     def test_to_FrequencySeries(self):
 
+        # Test complex
         dt = self.times[1] - self.times[0]
         freq = np.fft.fftfreq(len(self.values), d=dt)
         freq = np.fft.fftshift(freq)
-        fft = np.fft.fft(self.values)
+        fft = np.fft.fft(self.values + 1j * self.values)
         fft = np.fft.fftshift(fft)
 
-        fs = self.TS.to_FrequencySeries()
+        fs = self.TS_c.to_FrequencySeries()
 
         # Test warning for non reqularly sampled
         with self.assertWarns(RuntimeWarning):
@@ -910,3 +926,12 @@ class TestTimeseries(unittest.TestCase):
 
         self.assertTrue(np.allclose(fs.f, freq))
         self.assertTrue(np.allclose(fs.fft, fft))
+
+        # Test real
+        rfreq = np.fft.rfftfreq(len(self.values), d=dt)
+        rfft = np.fft.rfft(self.values)
+
+        rfs = self.TS.to_FrequencySeries()
+
+        self.assertTrue(np.allclose(rfs.f, rfreq))
+        self.assertTrue(np.allclose(rfs.fft, rfft))

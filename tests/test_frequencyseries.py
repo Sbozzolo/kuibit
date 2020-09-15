@@ -19,10 +19,12 @@
 """
 
 import unittest
+import warnings
 
 import numpy as np
 
 from postcactus import frequencyseries as fs
+from postcactus import timeseries as ts
 
 
 class TestFrequencySeries(unittest.TestCase):
@@ -30,21 +32,27 @@ class TestFrequencySeries(unittest.TestCase):
     def setUp(self):
         self.x = np.linspace(0, 2 * np.pi, 100)
         self.y = np.sin(self.x)
+        self.y_c = np.sin(self.x) + 1j * np.sin(self.x)
         self.dx = self.x[1] - self.x[0]
 
-        self.f = np.fft.fftfreq(len(self.x), d=self.dx)
-        self.f = np.fft.fftshift(self.f)
-        self.fft = np.fft.fft(self.y)
-        self.fft = np.fft.fftshift(self.fft)
+        self.f_c = np.fft.fftfreq(len(self.x), d=self.dx)
+        self.f_c = np.fft.fftshift(self.f_c)
+        self.fft_c = np.fft.fft(self.y_c)
+        self.fft_c = np.fft.fftshift(self.fft_c)
 
-        self.FS = fs.FrequencySeries(self.f, self.fft)
+        self.f = np.fft.rfftfreq(len(self.x), d=self.dx)
+        self.fft_r = np.fft.rfft(self.y)
+
+        self.FS = fs.FrequencySeries(self.f, self.fft_r)
+
+        self.FS_c = fs.FrequencySeries(self.f_c, self.fft_c)
 
     def test_fmin_fmax_frange(self):
 
-        self.assertAlmostEqual(self.FS.fmin, -7.87816968)
-        self.assertAlmostEqual(self.FS.f[0], -7.87816968)
-        self.assertAlmostEqual(self.FS.fmax, 7.72060629)
-        self.assertAlmostEqual(self.FS.frange, 15.59877597)
+        self.assertAlmostEqual(self.FS.fmin, 0)
+        self.assertAlmostEqual(self.FS.f[0], 0)
+        self.assertAlmostEqual(self.FS.fmax, 7.87816968)
+        self.assertAlmostEqual(self.FS.frange, 7.87816968)
         self.assertAlmostEqual(np.amax(self.FS.amp), 49.74022843)
 
     def test_setter_f(self):
@@ -103,23 +111,35 @@ class TestFrequencySeries(unittest.TestCase):
         self.assertLessEqual(fs_copy.fmax, 1.5)
         self.assertGreaterEqual(np.amin(np.abs(fs_copy.f)), 0.5)
 
+    def test_negative_frequencies_remove(self):
+
+        fs_copy = self.FS.copy()
+
+        self.assertGreaterEqual(fs_copy.negative_frequencies_removed().fmin, 0)
+        fs_copy.negative_frequencies_remove()
+        self.assertGreaterEqual(fs_copy.fmin, 0)
+
     def test_peaks(self):
 
         # From a sin wave we are expecting two peaks
-        [p1, p2] = self.FS.peaks()
+        [p1, p2] = self.FS_c.peaks()
 
         self.assertAlmostEqual(p1[0], -0.15756339)
         self.assertAlmostEqual(p1[1], -0.15810417)
-        self.assertAlmostEqual(p1[2], 49.74022843)
+        self.assertAlmostEqual(p1[2], 70.34330565)
 
-        self.assertAlmostEqual(self.FS.peaks_frequencies()[0],
+        self.assertAlmostEqual(self.FS_c.peaks_frequencies()[0],
                                -0.15810417)
 
     def test_to_TimeSeries(self):
 
-        ts = self.FS.to_TimeSeries()
+        # Complex
+        ts = self.FS_c.to_TimeSeries()
+        self.assertTrue(np.allclose(ts.y, self.y_c))
 
-        self.assertTrue(np.allclose(ts.y, self.y))
+        # real
+        ts_r = self.FS.to_TimeSeries()
+        self.assertTrue(np.allclose(ts_r.y, self.y))
 
     def test_inner_product(self):
 
@@ -128,6 +148,10 @@ class TestFrequencySeries(unittest.TestCase):
 
         with self.assertRaises(TypeError):
             self.FS.inner_product(self.FS, noises=1)
+
+        # fmin > fmax
+        with self.assertRaises(ValueError):
+            self.FS.inner_product(self.FS, fmin=1, fmax=0)
 
         # To test the inner product we construct two simple linear frequency
         # series y(f) = f + 2j * f and y2(f) = 3j * f
@@ -139,7 +163,7 @@ class TestFrequencySeries(unittest.TestCase):
 
         # Small interval and many points, so that the analtical and numerical
         # predictions agree
-        f = np.linspace(1, 1.2, 1000)
+        f = np.linspace(1, 1.2, 25000)
         fft1 = f + 2j * f
         fft2 = 3j * f
 
@@ -150,11 +174,11 @@ class TestFrequencySeries(unittest.TestCase):
         # The result should be -2 * 10**3 + j 10**3
 
         self.assertAlmostEqual(fs1.inner_product(fs2),
-                               8 * (1.2**3 - 1))
+                               8 * (1.2**3 - 1), places=3)
 
         # Now restrict to (fmin = 1.1, fmax = 1.15)
         self.assertAlmostEqual(fs1.inner_product(fs2, fmin=1.1, fmax=1.15),
-                               8 * (1.15**3 - 1.1**3))
+                               8 * (1.15**3 - 1.1**3), places=3)
 
         # Now add a noise of f**2
         # The inner product is y * y2^* / noise= (6 - 3j)
@@ -162,29 +186,84 @@ class TestFrequencySeries(unittest.TestCase):
         noise = fs.FrequencySeries(f, f**2)
 
         self.assertAlmostEqual(fs1.inner_product(fs2, noises=noise),
-                               4 * 6 * (1.2 - 1))
+                               4 * 6 * (1.2 - 1), places=3)
 
         # Test same_domain
         self.assertAlmostEqual(fs1.inner_product(fs2, noises=noise,
                                                  same_domain=True),
-                               4 * 6 * (1.2 - 1))
+                               4 * 6 * (1.2 - 1), places=3)
 
         # Test multiple noises
         # Test with twice the same noise. The output should be doubled.
         twice_noise = [noise, noise]
         self.assertAlmostEqual(fs1.inner_product(fs2,
                                                  noises=twice_noise),
-                               2 * 4 * 6 * (1.2 - 1))
+                               2 * 4 * 6 * (1.2 - 1), places=3)
 
     def test_overlap(self):
 
         # Overlap with self should be one
-        self.assertAlmostEqual(self.FS.overlap(self.FS), 1)
+        self.assertAlmostEqual(self.FS.overlap(self.FS, fmin=0.5), 1)
 
         # Overlap with -self should be -one
-        self.assertAlmostEqual(self.FS.overlap(-self.FS), -1)
+        self.assertAlmostEqual(self.FS.overlap(-self.FS, fmin=0.5), -1)
 
-        # TODO: Add stronger test. Compare with pyCBC?
+        # Test with PyCBC
+        num_times = 2000
+        times = np.linspace(0, 20 * 2 * np.pi, num_times)
+        values1 = np.sin(40*times)
+        values2 = np.sin(60*times)
+
+        f1_series = ts.TimeSeries(times, values1).to_FrequencySeries()
+        f2_series = ts.TimeSeries(times, values2).to_FrequencySeries()
+
+        # Test with PyCBC
+        fmin = 5
+        fmax = 15
+
+        # PyCBC raises some benign warnings. We ignore them.
+        with warnings.catch_warnings():
+            warnings.simplefilter('ignore')
+
+            from pycbc.types import timeseries as pycbcts
+            from pycbc.types import frequencyseries as pycbcfs
+            from pycbc.filter import overlap
+
+        ts1_pcbc = pycbcts.TimeSeries(values1,
+                                      delta_t=times[1] - times[0])
+        ts2_pcbc = pycbcts.TimeSeries(values2,
+                                      delta_t=times[1] - times[0])
+
+        ov = overlap(ts1_pcbc, ts2_pcbc, psd=None,
+                     low_frequency_cutoff=fmin,
+                     high_frequency_cutoff=fmax)
+
+        self.assertAlmostEqual(f1_series.overlap(f2_series,
+                                                 fmin=fmin, fmax=fmax,
+                                                 noises=None),
+                               ov, places=4)
+
+        # Test with non trivial noise
+        # PyCBC requires the noise to be defined on the same frequencies as the
+        # data
+        df_noise = ts1_pcbc.to_frequencyseries().delta_f
+        f_noise = np.array([i * df_noise
+                            for i in range(num_times//2 + 1)])
+
+        # Funky looking noise
+        psd_noise = np.abs(np.sin(50 * f_noise) + 0.1)
+        noise_pycbc = pycbcfs.FrequencySeries(psd_noise,
+                                              delta_f=df_noise)
+        noise2 = fs.FrequencySeries(f_noise, psd_noise)
+
+        ov_noise = overlap(ts1_pcbc, ts2_pcbc, psd=noise_pycbc,
+                           low_frequency_cutoff=fmin,
+                           high_frequency_cutoff=fmax)
+
+        self.assertAlmostEqual(f1_series.overlap(f2_series,
+                                                 fmin=fmin, fmax=fmax,
+                                                 noises=noise2),
+                               ov_noise, places=5)
 
     def test_load_FrequencySeries(self):
 

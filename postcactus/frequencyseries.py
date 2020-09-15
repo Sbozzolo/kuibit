@@ -178,13 +178,10 @@ class FrequencySeries(BaseSeries):
         :rtype: float
 
         """
-        df = self.f[1:] - self.f[:-1]
-        df0 = df[0]
+        if (not self.is_regularly_sampled()):
+            raise ValueError("Frequencyseries is not regularly sampled")
 
-        if (not np.allclose(df, df0)):
-            raise ValueError("FrequencySeries is not regularly sampled")
-
-        return df0
+        return self.f[1] - self.f[0]
 
     def normalized(self):
         """Return a new frequencyseries with maximum amplitude of 1.
@@ -209,9 +206,11 @@ class FrequencySeries(BaseSeries):
     def low_passed(self, f):
         """FIXME
 
-        :param f: Frequency above which series will be zeroed.
-        :returns:
-        :rtype:
+        :param f: Frequency above which series will be zeroed
+        :type f: float
+        :returns: High passed frequencyeseries
+        :rtype: :py:mod:`~.FrequencySeries`
+
 
         """
         msk = (np.abs(self.f) <= f)
@@ -226,21 +225,39 @@ class FrequencySeries(BaseSeries):
     def high_passed(self, f):
         """Remove frequencies lower or equal than f
 
-        :param f:
+        :param f: Frequency below which series will be zeroed
+        :type f: float
+        :returns: High passed frequencyeseries
+        :rtype: :py:mod:`~.FrequencySeries`
 
         """
         msk = (np.abs(self.f) >= f)
         return FrequencySeries(self.f[msk], self.fft[msk])
 
     def high_pass(self, f):
-        """FIXME! briefly describe function
+        """Remove all the frequencies smaller than f
 
         :param f:
-        :returns:
-        :rtype:
+        :type f: float
 
         """
         self._apply_to_self(self.high_passed, f)
+
+    def negative_frequencies_removed(self):
+        """Remove frequencies lower than 0
+
+        :returns:  Frequencyeseries with only positive frequencies
+        :rtype: :py:mod:`~.FrequencySeries`
+
+        """
+        msk = (self.f >= 0)
+        return FrequencySeries(self.f[msk], self.fft[msk])
+
+    def negative_frequencies_remove(self):
+        """Remove all the frequencies smaller than 0
+
+        """
+        self._apply_to_self(self.negative_frequencies_removed)
 
     def band_passed(self, fmin, fmax):
         """Remove frequencies outside the range fmin, fmax
@@ -316,19 +333,37 @@ class FrequencySeries(BaseSeries):
     def to_TimeSeries(self):
         """FIXME! briefly describe function
 
+        If only positive frequencies are found, we will assume that the
+        original signal was real.
+
         :returns:
         :rtype: :py:class:`.TimeSeries`
 
         """
-        # TimeSeries.to_FrequencySeries() rearranges the frequency so that
-        # negative are on the left and positive on the right. Here, we undo
-        # that.
+        # If fmin >= 0, then, the signal was probably real to begin with.
+        # We will restore the negative frequencies so that the operation
+        # is the actual inverse of taking the dft.
+        #
+        if (self.fmin < 0):
 
-        fft = np.fft.ifftshift(self.fft)
+            # TimeSeries.to_FrequencySeries() rearranges the frequency so that
+            # negative are on the left and positive on the right. Here, we undo
+            # that.
 
-        t = np.fft.fftfreq(len(self), d=self.df)
-        t = np.fft.fftshift(t)
-        y = np.fft.ifft(fft)
+            fft = np.fft.ifftshift(self.fft)
+
+            t = np.fft.fftfreq(len(self.f), d=self.df)
+            t = np.fft.fftshift(t)
+            y = np.fft.ifft(fft)
+        else:
+            y = np.fft.irfft(self.fft)
+
+            # To find the times we have to restore the negative frequencies
+            # So, we simply recompute them assuming the current df
+            frequencies = np.linspace(-self.fmax, self.fmax, len(y))
+            t = np.fft.fftfreq(len(frequencies), d=self.df)
+            # This not the order numpy likes
+            t = np.fft.fftshift(t)
 
         return timeseries.TimeSeries(t, y)
 
@@ -349,6 +384,9 @@ class FrequencySeries(BaseSeries):
         We assume that the frequencyseries are zero outside of the interval of
         definition, so if fmax (fmin) is larger (smaller) than the one
         available, it is effectively set to the one available.
+
+        Fourier transform explode at fmin = 0, so the result of the integration
+        is highly sensitive. One should avoid the region with fmin = 0.
 
         Same_domian If True, it is assumed that all the frequency series
         involved are defined over the same frequencies. Turning this on speeds
@@ -383,6 +421,9 @@ class FrequencySeries(BaseSeries):
                 and (noises is not None)):
             raise TypeError("Noise is not (a list of) FrequencySeries or None")
 
+        if (fmin >= fmax):
+            raise ValueError("fmin has to be smaller than fmax")
+
         if (noises is None):
             # If noises is None, it means that the weight is one everywhere so,
             # we prepare a FrequencySeries that has the same frequencies as
@@ -405,29 +446,23 @@ class FrequencySeries(BaseSeries):
         else:
             [res_self, res_other, *res_noises] = to_be_res_list
 
-        # Now everything is sampled to the same frequencies, so, we will use
-        # the data (.fft) directly instead of the series. This avoid a check on
-        # the compatibility of the series, making the routine faster.
-
         # Sum all the integrands
-        integrand = FrequencySeries(self.f, np.zeros_like(self.fft))
+        integrand = FrequencySeries(res_self.f, np.zeros_like(res_self.fft))
 
+        # We manipulate directly the fft fields because we have already
+        # established that the series are defined on the same frequencies.
+        # This is faster because it skips several sanity checks.
         for res_noise in res_noises:
-            integrand.fft += (res_self.fft * res_other.fft.conjugate()
-                              / res_noise.fft)
-
-        # 4 Re * \int
-        integral = integrand.integrated().real()
-        integral.fft *= 4
+            integrand += (res_self * res_other.conjugate() / res_noise)
 
         # We assume that the frequencyseries are zero outside of the interval
         # of definition
-        if fmax > integral.fmax:
-            fmax = integral.fmax
-        if fmin < integral.fmin:
-            fmin = integral.fmin
+        integrand.band_pass(fmin=fmin, fmax=fmax)
 
-        return integral(fmax) - integral(fmin)
+        # 4 Re * \int
+        # To align with PyCBC we do a rectangular integration here instead of
+        # a trapeziodial one
+        return 4 * np.sum(integrand.fft.real) * integrand.df
 
     def overlap(self, other, fmin=0, fmax=np.inf, noises=None,
                 same_domain=False):
@@ -465,10 +500,13 @@ class FrequencySeries(BaseSeries):
 
         """
         # Error handling is done by inner_product
-        inner_11 = self.inner_product(self, fmin, fmax, noises,
+        inner_11 = self.inner_product(self, fmin=fmin, fmax=fmax,
+                                      noises=noises,
                                       same_domain=same_domain)
-        inner_22 = other.inner_product(other, fmin, fmax, noises,
+        inner_22 = other.inner_product(other, fmin=fmin, fmax=fmax,
+                                       noises=noises,
                                        same_domain=same_domain)
-        inner_12 = self.inner_product(other, fmin, fmax, noises,
+        inner_12 = self.inner_product(other, fmin, fmax,
+                                      noises=noises,
                                       same_domain=same_domain)
         return inner_12 / np.sqrt(inner_11 * inner_22)

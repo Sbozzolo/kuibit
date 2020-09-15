@@ -74,20 +74,20 @@ class TestCactusWaves(unittest.TestCase):
         # Dummy object (FFI is a staticmethod)
         gwdum = cw.GravitationalWavesOneDet(0, [(2, 2, tts)])
 
-        # # The integral of sin should be -cos
-        # # The period of sin(x) is 2 pi, so we pick pcut = 1e10
-        # integral = gwdum._fixed_frequency_integrated(tts, 1e10)
+        # The integral of sin should be -cos
+        # The period of sin(x) is 2 pi, so we pick pcut = 1e10
+        integral = gwdum._fixed_frequency_integrated(tts, 1e10)
 
-        # self.assertTrue(np.allclose(integral.t, t))
-        # self.assertTrue(np.allclose(integral.y, -np.cos(t),
-        #                             atol=5e-4))
+        self.assertTrue(np.allclose(integral.t, t))
+        self.assertTrue(np.allclose(integral.y, -np.cos(t),
+                                    atol=5e-4))
 
-        # # The second integral should be sin(x)
-        # integral2 = gwdum._fixed_frequency_integrated(tts, 1e10,
-        #                                               order=2)
+        # The second integral should be sin(x)
+        integral2 = gwdum._fixed_frequency_integrated(tts, 1e10,
+                                                      order=2)
 
-        # self.assertTrue(np.allclose(integral2.y, -np.sin(t),
-        #                             atol=5e-4))
+        self.assertTrue(np.allclose(integral2.y, -np.sin(t),
+                                    atol=5e-4))
 
         # Now, let's see the opposite case in which the frequency is lower than
         # any frequencies. The output should be the same timeseries we started
