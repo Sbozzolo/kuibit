@@ -1,3 +1,5 @@
+![PostCactus-logo](logo.png)
+
 [![codecov](https://codecov.io/gh/Sbozzolo/PostCactus/branch/master/graph/badge.svg)](https://codecov.io/gh/Sbozzolo/PostCactus)
 ![Tests](https://github.com/Sbozzolo/PostCactus/workflows/Tests/badge.svg)
 ![Docs](https://github.com/Sbozzolo/PostCactus/workflows/Docs/badge.svg)
@@ -39,6 +41,7 @@ to be installed after every edit).
 
 If they are not already available, `pip` will install the following packages:
 - `numpy`
+- `numba`
 - `h5py`
 - `scipy`.
 
@@ -63,3 +66,4 @@ python3 -m unittest
 ```
 Tests are automatically run after each commit by GitHub Actions.
 
+`PyCBC` is needed for testing
