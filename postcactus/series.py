@@ -24,7 +24,7 @@ derived).
 from abc import ABC
 
 import numpy as np
-from scipy import integrate, interpolate, signal
+from scipy import interpolate, integrate, signal
 
 
 # Note, we test this class testing its derived class TimeSeries
@@ -437,6 +437,8 @@ class BaseSeries(ABC):
         :rtype:   :py:class:`~.BaseSeries` or derived class (typically)
 
         """
+        # TODO: Turn this into a decorator
+
         # If the other object is of the same type
         if (isinstance(other, type(self))):
             if ((not np.allclose(other.x, self.x, atol=1e-14))
@@ -565,16 +567,25 @@ class BaseSeries(ABC):
         """Filter out nans/infinite values."""
         self._apply_to_self(self.nans_removed)
 
-    def integrated(self):
+    def integrated(self, dx=None):
         """Return a series that is the integral computed with method of
-        the trapeziod.
+        the rectangles.
+
+        :param dx: Delta x in the independent variable. If provided, it
+        will be used. This is especially convenient for evely spaced
+        series, as computations will be faster
+        :type dx: float
 
         :returns:  New series cumulative integral
         :rtype:    :py:class:`~.BaseSeries` or derived class
+
         """
+        # We pass self.x only if dx was not provided
+        passing_x = self.x if dx is None else None
         return type(self)(self.x,
-                          integrate.cumtrapz(self.y, x=self.x,
-                                             initial=0), True)
+                          integrate.cumtrapz(self.y, x=passing_x,
+                                             dx=dx, initial=0),
+                          True)
 
     def integrate(self):
         """Integrate series with method of the trapeziod.
@@ -765,6 +776,8 @@ class BaseSeries(ABC):
         :rtype: :py:class:`~.BaseSeries` or derived class
 
         """
+        # TODO: Turn this into a decorator
+
         return type(self)(self.x, function(self.y), True)
 
     def abs(self):
@@ -851,6 +864,8 @@ def sample_common(series):
     s1, *s_others = series
     if (s1.is_regularly_sampled()):
         for s in s_others:
+            if (not (len(s) == len(s1))):
+                break
             if (not np.allclose(s1.x, s.x, atol=1e-14)):
                 break
             # This is an else to the for loop

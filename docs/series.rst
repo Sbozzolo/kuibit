@@ -111,7 +111,9 @@ integrate
 
 Integrate the ``TimeSeries`` (``FrequencySeries``) as a cumulative sum weighted
 on the time intervals (trapezoid). The result is a new ``Series`` with the
-integral as a function of time.
+integral as a function of time. Optinally, one can provide ``dx``, which is the
+spacing in the independent variable. If provided, it will be used. This is
+especially convenient for evely spaced series, as computations will be faster
 
 derive, spline_derive
 ^^^^^^^^^^^^^^^^^^^^^
@@ -210,7 +212,8 @@ Fourier transform (to_FrequencySeries)
 
 You can compute the discrete Fourier transform of a ``TimeSeries`` with the
 ``to_FrequencySeries`` method. This uses NumPy's ``fft`` module, so the
-conventions are the same. The zero frequency is at the center of the array.
+conventions are the same. If the timeseries real, negative frequencies are
+discarded.
 
 .. note::
 
@@ -296,9 +299,12 @@ Inverse Fourier transform (to_TimeSeries)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Using NumPy's ``fft``, return a ``TimeSeries`` that is the inverse Fourier
-transform. IT is that ``to_TimeSeries()`` composed with ``to_FrequencySeries()``
+transform. It is that ``to_TimeSeries()`` composed with ``to_FrequencySeries()``
 is the identity with the exception of the domain of definition. The time domain
 is from :math:`-1\slash (2 * \Delta f)` to :math:`1\slash (2 * \Delta f)`.
+
+If only positive frequencies are found, we will assume that the original signal
+was real.
 
 Occasionally signals that are supposed to be real are turned into complex with
 imaginary part that is zero to machine precision.
@@ -331,6 +337,12 @@ is determined by the accuracy of the series with fewest points.
 The series are assumed to be zero outside the range of definition. So, if
 ``f_min`` or ``f_max`` are too large or too small, the effective parameter will
 be determined by the series. By default, ``f_min=0`` and ``f_max=inf``.
+
+.. warning::
+
+   Results with the defaults limits are very unstable (for example, Fourier
+   transform typically diverge around zero, so the result of the integration is
+   not accurate). Hence, one should always use physical limits.
 
 With the inner product, one compute the overlap between two series:
 

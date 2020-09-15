@@ -30,7 +30,6 @@ from scipy import integrate, optimize
 
 import postcactus.unitconv as uc
 
-
 # This is just a convenience to avoid having to remember the order of
 # the output (and for easy of extension)
 # One can access the output as detectos.hanford, or
@@ -294,8 +293,8 @@ def ra_dec_to_theta_phi(right_ascension, declination, time_utc):
 
 
 def antenna_responses(theta, phi, polarization=0):
-    """Return the antenna response pattern of a detector on the z = 0 plane with the
-    arms on the x and y directions.
+    """Return the antenna response pattern of a detector on the z = 0 plane
+    with the arms on the x and y directions.
 
     Theta and phi are the usual spherical angles.
 
@@ -308,16 +307,14 @@ def antenna_responses(theta, phi, polarization=0):
     :type polarization: float
 
     """
-    # Equations from the website with corrected typo in the sign of F_cross
-    # (It should be + in front of the cosine)
     # http://research.physics.illinois.edu/cta/movies/bhbh_sim/wavestrain.html
 
     Fp = (0.5 * (1 + np.cos(theta) * np.cos(theta))
-            * np.cos(2 * phi) * np.cos(2 * polarization)
-            - np.cos(theta) * np.sin(2 * phi) * np.sin(2 * polarization))
+          * np.cos(2 * phi) * np.cos(2 * polarization)
+          - np.cos(theta) * np.sin(2 * phi) * np.sin(2 * polarization))
     Fc = (0.5 * (1 + np.cos(theta) * np.cos(theta))
-            * np.cos(2 * phi) * np.sin(2 * polarization)
-            + np.cos(theta) * np.sin(2 * phi) * np.cos(2 * polarization))
+          * np.cos(2 * phi) * np.sin(2 * polarization)
+          + np.cos(theta) * np.sin(2 * phi) * np.cos(2 * polarization))
 
     return (Fc, Fp)
 
@@ -330,9 +327,7 @@ def antenna_responses_from_sky_localization(right_ascension,
     given source.
 
     See,
-    http://research.physics.illinois.edu/cta/movies/bhbh_sim/wavestrain.html,
-    considering that there is typo in the sign of the second cosine in the F
-    cross.
+    http://research.physics.illinois.edu/cta/movies/bhbh_sim/wavestrain.html.
 
     utc_time has to have the following formatting: %Y-%m-%d %H:%M,
     eg 2015-09-14 09:50:45
@@ -357,14 +352,12 @@ def antenna_responses_from_sky_localization(right_ascension,
 
     coords = ra_dec_to_theta_phi(right_ascension, declination, time_utc)
 
-    Fc_H, Fp_H = antenna_responses(*coords.hanford)
-    Fc_L, Fp_L = antenna_responses(*coords.livingston)
-    Fc_V, Fp_V = antenna_responses(*coords.virgo)
+    Fc_H, Fp_H = antenna_responses(*coords.hanford, polarization)
+    Fc_L, Fp_L = antenna_responses(*coords.livingston, polarization)
+    Fc_V, Fp_V = antenna_responses(*coords.virgo, polarization)
 
     antenna = Detectors(hanford=(Fc_H, Fp_H),
                         livingston=(Fc_L, Fp_L),
                         virgo=(Fc_V, Fp_V))
 
     return antenna
-
-

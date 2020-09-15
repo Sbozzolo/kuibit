@@ -768,10 +768,16 @@ class TimeSeries(BaseSeries):
             regular_ts = self
 
         dt = regular_ts.dt
-        freqencies = np.fft.fftfreq(len(regular_ts), d=dt)
-        fft = np.fft.fft(regular_ts.y)
 
-        f = np.fft.fftshift(freqencies)
-        fft = np.fft.fftshift(fft)
+        if (self.is_complex()):
+            frequencies = np.fft.fftfreq(len(regular_ts), d=dt)
+            fft = np.fft.fft(regular_ts.y)
+
+            f = np.fft.fftshift(frequencies)
+            fft = np.fft.fftshift(fft)
+        else:
+            # Note the "r"
+            f = np.fft.rfftfreq(len(regular_ts), d=dt)
+            fft = np.fft.rfft(regular_ts.y)
 
         return frequencyseries.FrequencySeries(f, fft)
