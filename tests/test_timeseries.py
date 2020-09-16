@@ -129,6 +129,25 @@ class TestTimeseries(unittest.TestCase):
         self.assertEqual(ts.TimeSeries(t, t + 1j * t).time_at_maximum(), 1)
         self.assertEqual(ts.TimeSeries(t, t + 1j * t).time_at_minimum(), 0)
 
+    def test_align_maximum_minimum(self):
+        t = np.linspace(0, 1, 100)
+
+        tseries = ts.TimeSeries(t, t)
+
+        # Should shift everything of -1, so new times should be from -1 to 0
+        tseries.align_at_maximum()
+
+        self.assertTrue(np.allclose(tseries.t, t - 1))
+
+        # Minimum is at t = 1, notice we use the above t, so this is a line
+        # that goes from -1 to 0. The absolute minimum is at the end.
+        y2 = np.linspace(-1, 0, 100)
+        tseries2 = ts.TimeSeries(t, y2)
+
+        tseries2.align_at_minimum()
+
+        self.assertTrue(np.allclose(tseries2.t, t - 1))
+
     def test_is_regularly_sampled(self):
         self.assertTrue(self.TS.is_regularly_sampled())
 
