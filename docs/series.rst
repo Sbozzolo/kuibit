@@ -398,6 +398,19 @@ Often it is useful to know where is the peak of a signal (for example, for
 gravitational waves). These methods return the time at which the absolute value of
 the signal is maximum and minimum respectively.
 
+time_shift, phase_shift
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+These methods apply common "shift" operations to the data. With ``time_shift``,
+you can add a constant offset to the times of the series, whereas with
+``phase_shift`` you can apply an offest in the complex phase of the form:
+:math:`\exp(i \phi)`. When you apply a phase shift, if the signal is real it
+will be turned into complex.
+
+Common operations like time-shifting a series so that the absolute maximum (or
+minimum) is at ``t=0`` have specialized methods (for convenience):
+``align_at_maximum`` and ``align_at_minimum``.
+
 remove_duplicate_iters
 ^^^^^^^^^^^^^^^^^^^^^^
 

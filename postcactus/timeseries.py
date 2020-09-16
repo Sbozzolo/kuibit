@@ -312,6 +312,30 @@ class TimeSeries(BaseSeries):
         """
         return self.x_at_minimum_y()
 
+    def aligned_at_minimum(self):
+        """Return a new timeseries with absolute minimum at t=0.
+
+        :returns:  Timeseries shifted so that the minimum is a t=0.
+        :rtype:    :py:class:`~.TimeSeries`
+        """
+        return self.time_shifted(-self.time_at_minimum())
+
+    def align_at_minimum(self):
+        """Time shift the series so that the absolute minimum is at t=0."""
+        self._apply_to_self(self.aligned_at_minimum)
+
+    def aligned_at_maximum(self):
+        """Return a new timeseries with absolute maximum at t=0.
+
+        :returns:  Timeseries shifted so that the maximum is a t=0.
+        :rtype:    :py:class:`~.TimeSeries`
+        """
+        return self.time_shifted(-self.time_at_maximum())
+
+    def align_at_maximum(self):
+        """Time shift the series so that the absolute maximum is at t=0."""
+        self._apply_to_self(self.aligned_at_maximum)
+
     def regular_resampled(self):
         """Return a new timeseries resampled to regularly spaced times,
         with the

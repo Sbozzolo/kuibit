@@ -461,8 +461,8 @@ def network_mismatch_from_psi4(psi1, psi2,
 
     # Align the waves at the peak
     if (align_at_peak):
-        h1.time_shift(-h1.time_at_maximum())
-        h2.time_shift(-h2.time_at_maximum())
+        h1.align_at_maximum()
+        h2.align_at_maximum()
 
     # Now, we convert to physical units
     if (mass_scale1 is not None):
