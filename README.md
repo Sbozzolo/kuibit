@@ -35,9 +35,6 @@ Move into the folder and install with `pip`:
 ``` bash
    cd PostCactus && pip3 install --user .
 ```
-For development, it is convenient to use `pip3 install -e . --user`, so that
-modifying the files will have a direct effect on the library (otherwise it has
-to be installed after every edit).
 
 If they are not already available, `pip` will install the following packages:
 - `numpy`
@@ -46,6 +43,21 @@ If they are not already available, `pip` will install the following packages:
 - `scipy`.
 
 The minimum version of Python required is 3.5.
+
+### Development
+
+For development, we use [poetry](https://python-poetry.org/). Poetry simplifies
+dependency management, building, and publishing the package.
+
+To install `PostCactus` with poetry, move into the folder, and run:
+``` sh
+   poetry install
+```
+This will download all the needed dependencies in a sandboxed environment. When
+you want to use ``PostCactus``, just run ``poetry shell``. This will drop you in
+a shell in which you have full access to ``PostCactus`` in "development" version,
+and its dependencies (also the one needed only for development).
+
 ## Documentation
 
 `PostCactus` uses Sphinx to generate the documentation. To produce the documentation
@@ -60,10 +72,16 @@ have to be un-evaluated.
 
 ## Tests
 
-`PostCactus` comes with a suite of unit tests. To run the tests,
+`PostCactus` comes with a suite of unit tests. To run the tests, (in a poetry shell),
 ```sh
-python3 -m unittest
+poetry run python -m unittest
 ```
 Tests are automatically run after each commit by GitHub Actions.
 
-`PyCBC` is needed for testing
+If you want to look at the coverage of your tests, run (in a poetry shell)
+```sh
+coverage run -m unittest
+coverage html
+```
+This will produce a directory with the html files containing the analysis of
+the coverage of the tests.

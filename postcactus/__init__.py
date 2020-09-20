@@ -3,9 +3,6 @@
 """PostCactus provides utilities to post-process simulations performed with the
 Einstein Toolkit.
 
-Modules available:
-
-* unitconv contains physical and astronomycal constants and provides tools to
-  convert between geometrized units and physical units.
-
 """
+
+__version__ = "3.0.0a3"
