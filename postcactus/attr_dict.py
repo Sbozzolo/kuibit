@@ -46,7 +46,7 @@ class AttributeDictionary:
 
         # If ad is an AttributeDictionary, we will have
         # ad._elem = elements
-        super().__setattr__('_elem', elements)
+        super().__setattr__("_elem", elements)
 
     def __setattr__(self, name, value):
         # We prevent writing directly the attributes
@@ -62,8 +62,7 @@ class AttributeDictionary:
         return self._elem[name]
 
     def __dir__(self):
-        """Return the list of the attributes
-        """
+        """Return the list of the attributes"""
         return list(self._elem.keys())
 
 
@@ -87,32 +86,35 @@ class TransformDictionary:
 
     def __init__(self, elem, transform=lambda x: x):
 
-        if not hasattr(elem, 'items'):
+        if not hasattr(elem, "items"):
             raise TypeError("Input is not dictionary-like")
 
-        def dict_filter(x):
-            return (TransformDictionary(x, transform)
-                    if isinstance(x, dict) else x)
+        def dict_filter(dict_or_elem):
+            return (
+                TransformDictionary(dict_or_elem, transform)
+                if isinstance(dict_or_elem, dict)
+                else dict_or_elem
+            )
 
         self._elem = {k: dict_filter(v) for k, v in elem.items()}
         self._transform = transform
 
     def __getitem__(self, name):
-        e = self._elem[name]
+        elem = self._elem[name]
 
-        if isinstance(e, type(self)):
+        if isinstance(elem, type(self)):
             # Leave TransformDictionary untouched
-            return e
+            return elem
 
-        return self._transform(e)
+        return self._transform(elem)
 
     def keys(self):
+        """Return the list of the available elements"""
         # Like normal dictionaries
         return list(self._elem.keys())
 
     def __contains__(self, name):
-        """This allows to use the 'in' keyword.
-        """
+        """This allows to use the 'in' keyword."""
         return name in self._elem
 
 
@@ -136,7 +138,7 @@ def pythonize_name_dict(names_list, transform=lambda x: x):
 
     """
     res = {}
-    pattern = re.compile(r'^([^\[\]]+)\[([\d]+)\]$')
+    pattern = re.compile(r"^([^\[\]]+)\[([\d]+)\]$")
     # Let's understand this regexp:
     # - ^....$ means that we match the entire string
     # - We have two capturing groups: ([^\[\]]+) and ([\d]+)

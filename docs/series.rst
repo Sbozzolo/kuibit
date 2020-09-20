@@ -134,6 +134,12 @@ valued data and 3 columns :math:`(t, \Re (y), \Im (y))` for complex-valued ones.
 The back-end is ``np.savetxt``, so you can provide additional arguments, like an
 header.
 
+crop
+^^^^
+
+You can specify the initial and final values of the series with the ``crop``
+method, which takes two keyword paramters ``init`` and ``end``
+
 savgol_smooth
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
@@ -266,6 +272,13 @@ zero_pad
 points. If ``N`` is smaller than the number of points in the ``Timeseries``, or
 if the ``Timeseries`` is not equispaced in time, the operation will fail.
 
+initial_time_remove, final_time_remove
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+With these methods you can remove a portion of the signal at the beginning or at
+the end of the timeseries. This is different from cropping, because tmin may not
+be 0 (when you crop, you specify what is the new tmin). Here, you specify the
+amount that you want to remove.
 
 The FrequencySeries methods
 ---------------------------

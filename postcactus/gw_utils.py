@@ -38,10 +38,9 @@ from postcactus import timeseries as ts
 Detectors = namedtuple("Detectors", "hanford livingston virgo")
 
 
-def luminosity_distance_to_redshift(luminosity_distance,
-                                    Omega_m=0.309,
-                                    Omega_L=0.691,
-                                    initial_guess=0.1):
+def luminosity_distance_to_redshift(
+    luminosity_distance, Omega_m=0.309, Omega_L=0.691, initial_guess=0.1
+):
     r"""Compute redshift from luminosity distance in Mpc assuming
     the LCMD cosmology.
 
@@ -70,7 +69,7 @@ def luminosity_distance_to_redshift(luminosity_distance,
     c = uc.C_SI  # m/s
 
     def DL_integral(z):
-        return 1 / np.sqrt(Omega_m * (1 + z)**3 + Omega_L)
+        return 1 / np.sqrt(Omega_m * (1 + z) ** 3 + Omega_L)
 
     def z_to_DL(z):
         return c / H0 * (1 + z) * integrate.quad(DL_integral, 0, z)[0]
@@ -80,10 +79,10 @@ def luminosity_distance_to_redshift(luminosity_distance,
 
     redshift = optimize.root(function_to_root_find, initial_guess)
 
-    if (redshift['status'] != 1):
+    if redshift["status"] != 1:
         raise RuntimeError("Conversion between distance and redshift failed!")
 
-    return redshift['x'][0]
+    return redshift["x"][0]
 
 
 def sYlm(ss, ll, mm, theta, phi):
@@ -110,39 +109,55 @@ def sYlm(ss, ll, mm, theta, phi):
 
     # Coefficient function for spin-weighted spherical harmonics
     def sYlm_Cslm(local_s, local_l, local_m):
-        return np.sqrt(local_l * local_l * (4.0 * local_l * local_l - 1.0) /
-                       ((local_l * local_l - local_m * local_m) *
-                        (local_l * local_l - local_s * local_s)))
+        return np.sqrt(
+            local_l
+            * local_l
+            * (4.0 * local_l * local_l - 1.0)
+            / (
+                (local_l * local_l - local_m * local_m)
+                * (local_l * local_l - local_s * local_s)
+            )
+        )
 
     # Recursion function for spin-weighted spherical harmonics
     def s_lambda_lm(local_s, local_l, local_m, x):
 
         Pm = np.power(-0.5, local_m)
 
-        if (local_m != local_s):
+        if local_m != local_s:
             Pm = Pm * np.power(1.0 + x, (local_m - local_s) * 1.0 / 2)
-        if (local_m != -local_s):
+        if local_m != -local_s:
             Pm = Pm * np.power(1.0 - x, (local_m + local_s) * 1.0 / 2)
 
         Pm = Pm * np.sqrt(
-            np.math.factorial(2 * local_m + 1) * 1.0 /
-            (4.0 * np.pi * np.math.factorial(local_m + local_s) *
-             np.math.factorial(local_m - local_s)))
+            np.math.factorial(2 * local_m + 1)
+            * 1.0
+            / (
+                4.0
+                * np.pi
+                * np.math.factorial(local_m + local_s)
+                * np.math.factorial(local_m - local_s)
+            )
+        )
 
-        if (local_l == local_m):
+        if local_l == local_m:
             return Pm
 
-        Pm1 = (x + local_s * 1.0 /
-               (local_m + 1)) * sYlm_Cslm(local_s, local_m + 1, local_m) * Pm
+        Pm1 = (
+            (x + local_s * 1.0 / (local_m + 1))
+            * sYlm_Cslm(local_s, local_m + 1, local_m)
+            * Pm
+        )
 
-        if (local_l == local_m + 1):
+        if local_l == local_m + 1:
             return Pm1
 
         for n in range(local_m + 2, local_l + 1):
-            Pn = ((x + local_s*local_m * 1.0 / (n * (n-1.0)))
-                  * sYlm_Cslm(local_s, n, local_m) * Pm1 -
-                  sYlm_Cslm(local_s, n, local_m) * 1.0 /
-                  sYlm_Cslm(local_s, n-1, local_m) * Pm)
+            Pn = (x + local_s * local_m * 1.0 / (n * (n - 1.0))) * sYlm_Cslm(
+                local_s, n, local_m
+            ) * Pm1 - sYlm_Cslm(local_s, n, local_m) * 1.0 / sYlm_Cslm(
+                local_s, n - 1, local_m
+            ) * Pm
             Pm = Pm1
             Pm1 = Pn
 
@@ -154,21 +169,21 @@ def sYlm(ss, ll, mm, theta, phi):
     mult_m = mm
     mult_s = ss
 
-    if (mult_l < 0):
+    if mult_l < 0:
         return 0
-    if (abs(mult_m) > mult_l or mult_l < abs(mult_s)):
+    if abs(mult_m) > mult_l or mult_l < abs(mult_s):
         return 0
 
-    if (abs(mm) < abs(ss)):
+    if abs(mm) < abs(ss):
         mult_s = mm
         mult_m = ss
-        if ((mult_m + mult_s) % 2):
+        if (mult_m + mult_s) % 2:
             Pm = -Pm
 
-    if (mult_m < 0):
+    if mult_m < 0:
         mult_s = -mult_s
         mult_m = -mult_m
-        if ((mult_m + mult_s) % 2):
+        if (mult_m + mult_s) % 2:
             Pm = -Pm
 
     result = Pm * s_lambda_lm(mult_s, mult_l, mult_m, np.cos(theta))
@@ -230,18 +245,20 @@ def ra_dec_to_theta_phi(right_ascension, declination, time_utc):
 
     # Virgo detector geometry
     # https://arxiv.org/pdf/1706.09505.pdf (Table 3.1)
-    lat_V = (43 + 37.0/60 + 53.0/3600)*deg_to_rad
-    long_V = -(10 + 30.0/60 + 16.0/3600)*deg_to_rad
-    xazi_V = -(180-19)*deg_to_rad
+    lat_V = (43 + 37.0 / 60 + 53.0 / 3600) * deg_to_rad
+    long_V = -(10 + 30.0 / 60 + 16.0 / 3600) * deg_to_rad
+    xazi_V = -(180 - 19) * deg_to_rad
 
     # Time of detection of GW150914: 2015-09-14 09:50:45 UTC
     # The Greenwich sidereal time theta_G is calculated by
     # the formula at https://en.wikipedia.org/wiki/Sidereal_time
 
     base_posix_date = datetime.datetime.strptime(
-        "2000-01-01 12:00:00", "%Y-%m-%d %H:%M:%S").timestamp()
-    posix_date = datetime.datetime.strptime(time_utc,
-                                            "%Y-%m-%d %H:%M:%S").timestamp()
+        "2000-01-01 12:00:00", "%Y-%m-%d %H:%M:%S"
+    ).timestamp()
+    posix_date = datetime.datetime.strptime(
+        time_utc, "%Y-%m-%d %H:%M:%S"
+    ).timestamp()
     # Days between DATE and 2000-01-01 12:00
     D = (posix_date - base_posix_date) / 86400
     theta_G = 18.697374558 + 24.06570982441908 * D
@@ -259,36 +276,44 @@ def ra_dec_to_theta_phi(right_ascension, declination, time_utc):
 
     # Zenith distance theta and azimuth A
     theta_H = np.arccos(
-        np.sin(lat_H) * np.sin(delta) +
-        np.cos(lat_H) * np.cos(delta) * np.cos(h_H))
+        np.sin(lat_H) * np.sin(delta)
+        + np.cos(lat_H) * np.cos(delta) * np.cos(h_H)
+    )
     theta_L = np.arccos(
-        np.sin(lat_L) * np.sin(delta) +
-        np.cos(lat_L) * np.cos(delta) * np.cos(h_L))
+        np.sin(lat_L) * np.sin(delta)
+        + np.cos(lat_L) * np.cos(delta) * np.cos(h_L)
+    )
     theta_V = np.arccos(
-        np.sin(lat_V) * np.sin(delta) +
-        np.cos(lat_V) * np.cos(delta) * np.cos(h_V))
+        np.sin(lat_V) * np.sin(delta)
+        + np.cos(lat_V) * np.cos(delta) * np.cos(h_V)
+    )
 
     A_H = np.arctan2(
         np.cos(delta) * np.sin(h_H),
-        np.cos(delta) * np.cos(h_H) * np.sin(lat_H) -
-        np.sin(delta) * np.cos(lat_H))
+        np.cos(delta) * np.cos(h_H) * np.sin(lat_H)
+        - np.sin(delta) * np.cos(lat_H),
+    )
     phi_H = xazi_H - A_H
 
     A_L = np.arctan2(
         np.cos(delta) * np.sin(h_L),
-        np.cos(delta) * np.cos(h_L) * np.sin(lat_L) -
-        np.sin(delta) * np.cos(lat_L))
+        np.cos(delta) * np.cos(h_L) * np.sin(lat_L)
+        - np.sin(delta) * np.cos(lat_L),
+    )
     phi_L = xazi_L - A_L
 
     A_V = np.arctan2(
         np.cos(delta) * np.sin(h_V),
-        np.cos(delta) * np.cos(h_V) * np.sin(lat_V) -
-        np.sin(delta) * np.cos(lat_V))
+        np.cos(delta) * np.cos(h_V) * np.sin(lat_V)
+        - np.sin(delta) * np.cos(lat_V),
+    )
     phi_V = xazi_V - A_V
 
-    coords = Detectors(hanford=(theta_H, phi_H),
-                       livingston=(theta_L, phi_L),
-                       virgo=(theta_V, phi_V))
+    coords = Detectors(
+        hanford=(theta_H, phi_H),
+        livingston=(theta_L, phi_L),
+        virgo=(theta_V, phi_V),
+    )
 
     return coords
 
@@ -310,20 +335,19 @@ def antenna_responses(theta, phi, polarization=0):
     """
     # http://research.physics.illinois.edu/cta/movies/bhbh_sim/wavestrain.html
 
-    Fp = (0.5 * (1 + np.cos(theta) * np.cos(theta))
-          * np.cos(2 * phi) * np.cos(2 * polarization)
-          - np.cos(theta) * np.sin(2 * phi) * np.sin(2 * polarization))
-    Fc = (0.5 * (1 + np.cos(theta) * np.cos(theta))
-          * np.cos(2 * phi) * np.sin(2 * polarization)
-          + np.cos(theta) * np.sin(2 * phi) * np.cos(2 * polarization))
+    Fp = 0.5 * (1 + np.cos(theta) * np.cos(theta)) * np.cos(2 * phi) * np.cos(
+        2 * polarization
+    ) - np.cos(theta) * np.sin(2 * phi) * np.sin(2 * polarization)
+    Fc = 0.5 * (1 + np.cos(theta) * np.cos(theta)) * np.cos(2 * phi) * np.sin(
+        2 * polarization
+    ) + np.cos(theta) * np.sin(2 * phi) * np.cos(2 * polarization)
 
     return (Fc, Fp)
 
 
-def antenna_responses_from_sky_localization(right_ascension,
-                                            declination,
-                                            time_utc,
-                                            polarization=0):
+def antenna_responses_from_sky_localization(
+    right_ascension, declination, time_utc, polarization=0
+):
     """Return the antenna responses for Hanford, Livingston and Virgo for a
     given source.
 
@@ -357,11 +381,12 @@ def antenna_responses_from_sky_localization(right_ascension,
     Fc_L, Fp_L = antenna_responses(*coords.livingston, polarization)
     Fc_V, Fp_V = antenna_responses(*coords.virgo, polarization)
 
-    antenna = Detectors(hanford=(Fc_H, Fp_H),
-                        livingston=(Fc_L, Fp_L),
-                        virgo=(Fc_V, Fp_V))
+    antenna = Detectors(
+        hanford=(Fc_H, Fp_H), livingston=(Fc_L, Fp_L), virgo=(Fc_V, Fp_V)
+    )
 
     return antenna
+
 
 # Extrapolation of GWs at infinity.
 # Follows what done in the NRAR collaboration (1307.5307)
@@ -401,18 +426,18 @@ def Schwarzschild_radius_to_tortoise(radii, mass):
 
 def retarded_times_to_coordinate_times(retarded_times, rex, mass):
     """Compute the coordinate times ti corresponding to the retarded times ui
-    at the coordinate radius (of extraction) rex. M is the ADM mass
-    (needed to compute tortoise radius).
+      at the coordinate radius (of extraction) rex. M is the ADM mass
+      (needed to compute tortoise radius).
 
-  First, the tortoise radius is computed from rex, then the coordinate times
-  are computed with t = u + r_tortoise(rex).
+    First, the tortoise radius is computed from rex, then the coordinate times
+    are computed with t = u + r_tortoise(rex).
 
-    :param retarded_times: Retarded times
-    :type retarded_times: float or 1D numpy array
-    :param rex: Extraction radii
-    :type rex: float or 1D numpy array
-    :param mass: ADM mass
-    :type mass: float
+      :param retarded_times: Retarded times
+      :type retarded_times: float or 1D numpy array
+      :param rex: Extraction radii
+      :type rex: float or 1D numpy array
+      :param mass: ADM mass
+      :type mass: float
 
     """
     return retarded_times + Schwarzschild_radius_to_tortoise(rex, mass)
@@ -420,44 +445,45 @@ def retarded_times_to_coordinate_times(retarded_times, rex, mass):
 
 def coordinate_times_to_retarded_times(coordinate_times, rex, mass):
     """Compute the coordinate times ti corresponding to the retarded times ui
-    at the coordinate radius (of extraction) rex. M is the ADM mass
-    (needed to compute tortoise radius).
+      at the coordinate radius (of extraction) rex. M is the ADM mass
+      (needed to compute tortoise radius).
 
-  First, the tortoise radius is computed from rex, then the coordinate times
-  are computed with t = u + r_tortoise(rex).
+    First, the tortoise radius is computed from rex, then the coordinate times
+    are computed with t = u + r_tortoise(rex).
 
-    :param retarded_times: Coordinate times
-    :type retarded_times: float or 1D numpy array
-    :param rex: Extraction radii
-    :type rex: float or 1D numpy array
-    :param mass: ADM mass
-    :type mass: float
+      :param retarded_times: Coordinate times
+      :type retarded_times: float or 1D numpy array
+      :param rex: Extraction radii
+      :type rex: float or 1D numpy array
+      :param mass: ADM mass
+      :type mass: float
     """
     return coordinate_times - Schwarzschild_radius_to_tortoise(rex, mass)
 
 
 def extrapolate_waves_to_infinity(waves, ui, rexs, M, order=2):
     """WAVES has to be a list of timeseries.
-  UI the
-  REXS the extraction radii.
-  M the ADM Mass.
-  ORDER is the order of extrapolation. Good results are obtained
-  when len(rexs) > order + 2.
+    UI the
+    REXS the extraction radii.
+    M the ADM Mass.
+    ORDER is the order of extrapolation. Good results are obtained
+    when len(rexs) > order + 2.
 
-  Assume rexs[i] correspond to waves[i].
+    Assume rexs[i] correspond to waves[i].
 
-  Return the coefficients a_n of the fit for each ui
+    Return the coefficients a_n of the fit for each ui
 
-  f(ui, r) = sum^order_n=0 a_n / r^n
+    f(ui, r) = sum^order_n=0 a_n / r^n
 
-  of WAVES. [Equation (29) in 1307.5307.]
+    of WAVES. [Equation (29) in 1307.5307.]
 
-  The return value is a timeseries with time ui and value the first coefficient
-  of the fit for each ui."""
+    The return value is a timeseries with time ui and value the first coefficient
+    of the fit for each ui."""
 
-    if (order >= len(rexs)):
+    if order >= len(rexs):
         raise RuntimeError(
-            "Order too high for the number of extraction radii provided")
+            "Order too high for the number of extraction radii provided"
+        )
 
     # First, we copy waves to waves_retarded, which we populate
     # with the value of the waves associated to the retarded times ui
@@ -465,13 +491,14 @@ def extrapolate_waves_to_infinity(waves, ui, rexs, M, order=2):
     # Take the timeseries WAVE, and return a timeseries evaluated at coordinate
     # times that correspond to the retarded times ui at the coordinate extraction
     # radius rex. M is the ADM mass (needed to compute tortoise radius).
-    waves_retarded = [w.resampled(
-        retarded_times_to_coordinate_times(ui, r, M))
-                      for w, r in zip(waves, rexs)]
+    waves_retarded = [
+        w.resampled(retarded_times_to_coordinate_times(ui, r, M))
+        for w, r in zip(waves, rexs)
+    ]
 
     # We perform the fit in ir=1/r instead of r
     # So, technically, we are fitting sum^p_n=0 a_n * ir^n
-    irexs = 1. / np.array(rexs)
+    irexs = 1.0 / np.array(rexs)
     # Polyfit returns coefficient ordered from the highest to the lowest
     # This is why we take the [-1]
     coefficients = [

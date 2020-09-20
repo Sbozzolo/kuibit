@@ -26,7 +26,6 @@ from postcactus import timeseries as ts
 
 
 class TestCactusScalar(unittest.TestCase):
-
     def test_OneScalar(self):
 
         # Filename not recogonized
@@ -44,7 +43,7 @@ class TestCactusScalar(unittest.TestCase):
         self.assertFalse(asc._is_one_file_per_group)
         self.assertFalse(asc._was_header_scanned)
         self.assertEqual(asc.reduction_type, "maximum")
-        self.assertDictEqual(asc._vars, {'vel[0]': None})
+        self.assertDictEqual(asc._vars, {"vel[0]": None})
 
         # no reduction, scalar, one file per group
         path = "tests/tov/output-0000/static_tov/carpet-timing..asc"
@@ -52,11 +51,11 @@ class TestCactusScalar(unittest.TestCase):
 
         self.assertTrue(asc_carp._is_one_file_per_group)
         self.assertTrue(asc_carp._was_header_scanned)
-        self.assertIn('current_physical_time_per_hour', asc_carp._vars)
-        self.assertEqual(asc_carp._vars['current_physical_time_per_hour'], 13)
-        self.assertIn('time_total', asc_carp._vars)
-        self.assertEqual(asc_carp._vars['time_total'], 14)
-        self.assertIs(asc_carp.reduction_type, 'scalar')
+        self.assertIn("current_physical_time_per_hour", asc_carp._vars)
+        self.assertEqual(asc_carp._vars["current_physical_time_per_hour"], 13)
+        self.assertIn("time_total", asc_carp._vars)
+        self.assertEqual(asc_carp._vars["time_total"], 14)
+        self.assertIs(asc_carp.reduction_type, "scalar")
 
         # Compressed, scalar, one file per group
         path = "tests/tov/output-0000/static_tov/hydrobase-eps.minimum.asc.gz"
@@ -66,22 +65,22 @@ class TestCactusScalar(unittest.TestCase):
         self.assertTrue(asc_gz._was_header_scanned)
         self.assertEqual(asc_gz.reduction_type, "minimum")
         self.assertEqual(asc_gz._compression_method, "gz")
-        self.assertDictEqual(asc_gz._vars, {'eps': 2})
+        self.assertDictEqual(asc_gz._vars, {"eps": 2})
 
         # Compressed, scalar, one file per group
         path = "tests/tov/output-0000/static_tov/hydrobase-eps.minimum.asc.bz2"
         asc_bz = cs.OneScalar(path)
         self.assertEqual(asc_bz._compression_method, "bz2")
-        self.assertDictEqual(asc_bz._vars, {'eps': 2})
+        self.assertDictEqual(asc_bz._vars, {"eps": 2})
 
     def test_OneScalar_magic_methods(self):
 
         path = "tests/tov/output-0000/static_tov/vel[0].maximum.asc"
         asc = cs.OneScalar(path)
 
-        self.assertIn('vel[0]', asc)
+        self.assertIn("vel[0]", asc)
 
-        self.assertCountEqual(asc.keys(), ['vel[0]'])
+        self.assertCountEqual(asc.keys(), ["vel[0]"])
 
     def test__scan_strings_for_columns(self):
 
@@ -89,23 +88,21 @@ class TestCactusScalar(unittest.TestCase):
         asc = cs.OneScalar(path)
 
         # Not matching strings
-        strings = ['bubu']
+        strings = ["bubu"]
         with self.assertRaises(RuntimeError):
-            asc._scan_strings_for_columns(strings,
-                                          asc._rx_column_format)
+            asc._scan_strings_for_columns(strings, asc._rx_column_format)
 
         # Not matching columns
         strings = ["# data columns: bubu:press"]
         with self.assertRaises(RuntimeError):
-            asc._scan_strings_for_columns(strings,
-                                          asc._rx_data_columns)
+            asc._scan_strings_for_columns(strings, asc._rx_data_columns)
 
         # Good columns
         strings = ["# data columns: 3:press"]
         self.assertDictEqual(
-            asc._scan_strings_for_columns(strings,
-                                          asc._rx_data_columns),
-            {'press': 2})
+            asc._scan_strings_for_columns(strings, asc._rx_data_columns),
+            {"press": 2},
+        )
 
     def test__scan_header(self):
         # __init__ scans the header for some files, so to debug this it may be
@@ -139,12 +136,15 @@ class TestCactusScalar(unittest.TestCase):
         asc_carp = cs.OneScalar(path)
         t, y = np.loadtxt(path, ndmin=2, unpack=True, usecols=(8, 13))
 
-        self.assertEqual(asc_carp.load('current_physical_time_per_hour'),
-                         ts.TimeSeries(t, y))
+        self.assertEqual(
+            asc_carp.load("current_physical_time_per_hour"),
+            ts.TimeSeries(t, y),
+        )
 
         # Test __getitem__
-        self.assertEqual(asc_carp['current_physical_time_per_hour'],
-                         ts.TimeSeries(t, y))
+        self.assertEqual(
+            asc_carp["current_physical_time_per_hour"], ts.TimeSeries(t, y)
+        )
 
         # Value not existing
         with self.assertRaises(ValueError):
@@ -162,26 +162,43 @@ class TestCactusScalar(unittest.TestCase):
         reader = cs.AllScalars(sim.allfiles, "average")
 
         # Let's check that all the files are properly indexed
-        vars_tov = ['H',
-                    'kxx', 'kxy', 'kxz', 'kyy', 'kyz', 'kzz',
-                    'press',
-                    'alp',
-                    'gxx', 'gxy', 'gxz', 'gyy', 'gyz', 'gzz',
-                    'M1', 'M2', 'M3',
-                    'eps', 'rho',
-                    'vel[0]', 'vel[1]', 'vel[2]']
+        vars_tov = [
+            "H",
+            "kxx",
+            "kxy",
+            "kxz",
+            "kyy",
+            "kyz",
+            "kzz",
+            "press",
+            "alp",
+            "gxx",
+            "gxy",
+            "gxz",
+            "gyy",
+            "gyz",
+            "gzz",
+            "M1",
+            "M2",
+            "M3",
+            "eps",
+            "rho",
+            "vel[0]",
+            "vel[1]",
+            "vel[2]",
+        ]
 
         self.assertCountEqual(reader._vars, vars_tov)
 
         self.assertCountEqual(reader.keys(), vars_tov)
 
         self.assertTrue(
-            reader.__str__().startswith("Available average timeseries:\n["))
+            reader.__str__().startswith("Available average timeseries:\n[")
+        )
 
     def test_AllScalars_magic_methods(self):
 
-        reader = cs.AllScalars(sd.SimDir("tests/tov").allfiles,
-                               "average")
+        reader = cs.AllScalars(sd.SimDir("tests/tov").allfiles, "average")
         self.assertIn("rho", reader)
 
         path1 = "tests/tov/output-0000/static_tov/hydrobase-rho.average.asc"
@@ -191,10 +208,10 @@ class TestCactusScalar(unittest.TestCase):
 
         rho = ts.TimeSeries(np.append(t1, t2), np.append(y1, y2))
 
-        self.assertEqual(rho, reader['rho'])
-        self.assertEqual(rho, reader.get('rho'))
+        self.assertEqual(rho, reader["rho"])
+        self.assertEqual(rho, reader.get("rho"))
 
-        self.assertEqual(1, reader.get('bubu', default=1))
+        self.assertEqual(1, reader.get("bubu", default=1))
 
     def test_ScalarsDir(self):
 
@@ -205,11 +222,9 @@ class TestCactusScalar(unittest.TestCase):
         scaldir = cs.ScalarsDir(sd.SimDir("tests/tov"))
 
         # Check that the getter (and []) work
-        self.assertEqual(scaldir['average'].reduction_type,
-                         'average')
-        self.assertEqual(scaldir.get('infnorm').reduction_type,
-                         'infnorm')
-        self.assertIsNone(scaldir.get('bubu', default=None))
+        self.assertEqual(scaldir["average"].reduction_type, "average")
+        self.assertEqual(scaldir.get("infnorm").reduction_type, "infnorm")
+        self.assertIsNone(scaldir.get("bubu", default=None))
 
         # Check string representation
         # (this is a very weak check...)

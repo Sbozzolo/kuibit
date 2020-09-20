@@ -84,8 +84,7 @@ class BaseSeries(ABC):
 
     @staticmethod
     def _make_array(x):
-        """Return a numpy array version of x (if x is not already an array)
-        """
+        """Return a numpy array version of x (if x is not already an array)"""
         return np.atleast_1d(x) if not isinstance(x, np.ndarray) else x
 
     def _return_array_if_monotonic(self, x_array):
@@ -97,7 +96,7 @@ class BaseSeries(ABC):
         be thrown.
 
         """
-        if (len(x_array) > 1):
+        if len(x_array) > 1:
             # Here we compute directly the diff because it seems faster
             # than using np.diff
 
@@ -107,7 +106,7 @@ class BaseSeries(ABC):
             # self.x[:-1] = [1, 2]
             # dx = [1,1]
             dx = x_array[1:] - x_array[:-1]
-            if (dx.min() <= 0):
+            if dx.min() <= 0:
                 # HACK: To provide more useful information we assume
                 #       that the derived classes are named like TimeSeries.
                 #       Then, we remove the "series"
@@ -128,13 +127,13 @@ class BaseSeries(ABC):
         x_array = self._make_array(x)
         y_array = self._make_array(y)
 
-        if (len(x_array) != len(y_array)):
-            raise ValueError('Data length mismatch')
+        if len(x_array) != len(y_array):
+            raise ValueError("Data length mismatch")
 
-        if (len(x_array) == 0):
-            raise ValueError('Trying to construct empty Series.')
+        if len(x_array) == 0:
+            raise ValueError("Trying to construct empty Series.")
 
-        if (not guarantee_x_is_monotonic):
+        if not guarantee_x_is_monotonic:
             x_array = self._return_array_if_monotonic(x_array)
 
         # The copy is because we don't want to change the input values
@@ -161,7 +160,7 @@ class BaseSeries(ABC):
     @x.setter
     def x(self, x):
         x_array = self._make_array(x)
-        if (len(x_array) != len(self.x)):
+        if len(x_array) != len(self.x):
             raise ValueError("You cannot change the length of the series")
         x_array = self._return_array_if_monotonic(x_array)
 
@@ -182,7 +181,7 @@ class BaseSeries(ABC):
     @y.setter
     def y(self, y):
         y_array = self._make_array(y)
-        if (len(y_array) != len(self.data_y)):
+        if len(y_array) != len(self.data_y):
             raise ValueError("You cannot change the length of the series")
 
         # This series should own the data, so we copy (to avoid accidentally
@@ -242,13 +241,11 @@ class BaseSeries(ABC):
         return issubclass(self.y.dtype.type, complex)
 
     def x_at_maximum_y(self):
-        """Return the value of x when abs(y) is maximum.
-        """
+        """Return the value of x when abs(y) is maximum."""
         return self.x[np.argmax(np.abs(self.y))]
 
     def x_at_minimum_y(self):
-        """Return the value of x when abs(y) is minimum.
-        """
+        """Return the value of x when abs(y) is minimum."""
         return self.x[np.argmin(np.abs(self.y))]
 
     def _make_spline(self, *args, k=3, s=0, **kwargs):
@@ -273,18 +270,19 @@ class BaseSeries(ABC):
         :type s:  float
 
         """
-        if (len(self) < k):
+        if len(self) < k:
             raise ValueError(
-                f"Too few points to compute a spline of order {k}")
+                f"Too few points to compute a spline of order {k}"
+            )
 
-        self.spline_real = interpolate.splrep(self.x, self.y.real,
-                                              k=k, s=s, *args, **kwargs)
+        self.spline_real = interpolate.splrep(
+            self.x, self.y.real, k=k, s=s, *args, **kwargs
+        )
 
-        if (self.is_complex()):
-            self.spline_imag = interpolate.splrep(self.x,
-                                                  self.y.imag,
-                                                  k=k, s=s,
-                                                  *args, **kwargs)
+        if self.is_complex():
+            self.spline_imag = interpolate.splrep(
+                self.x, self.y.imag, k=k, s=s, *args, **kwargs
+            )
 
         self.invalid_spline = False
 
@@ -311,11 +309,11 @@ class BaseSeries(ABC):
         :rtype:   1D numpy array or float
 
         """
-        if (self.invalid_spline):
+        if self.invalid_spline:
             self._make_spline()
 
         y_real = interpolate.splev(x, self.spline_real, ext=ext)
-        if (self.is_complex()):
+        if self.is_complex():
             y_imag = interpolate.splev(x, self.spline_imag, ext=ext)
             ret = y_real + 1j * y_imag
         else:
@@ -339,7 +337,7 @@ class BaseSeries(ABC):
         #       The main problem is that it is is not vectorized.
 
         # First we consider the scalar case
-        if not hasattr(x, '__len__'):
+        if not hasattr(x, "__len__"):
             if x in self.x:
                 return self.y[np.searchsorted(self.x, x)]
             return self.evaluate_with_spline(x, ext=2)
@@ -360,9 +358,9 @@ class BaseSeries(ABC):
     def copy(self):
         """Return a deep copy.
 
-         :returns:  Deep copy of the series
-         :rtype:    :py:class:`~.BaseSeries` or derived class
-         """
+        :returns:  Deep copy of the series
+        :rtype:    :py:class:`~.BaseSeries` or derived class
+        """
         # The following is more complicated copy constructor that is designed
         # to copy also the spline information without re-computing it.
         # This can speed up some comutations.
@@ -370,11 +368,11 @@ class BaseSeries(ABC):
         # We don't use the setters
         copied.data_x = self.data_x.copy()
         copied.data_y = self.data_y.copy()
-        if (not self.invalid_spline):
+        if not self.invalid_spline:
             # splines are tuples, with a direct call to the function
             # tuple() we make a deep copy
             copied.spline_real = tuple(self.spline_real)
-            if (self.is_complex()):
+            if self.is_complex():
                 copied.spline_imag = tuple(self.spline_imag)
             copied.invalid_spline = False
         copied.invalid_spline = True
@@ -395,11 +393,10 @@ class BaseSeries(ABC):
 
         """
         # If x is the same, there's no need to resample
-        if (len(self.x) == len(new_x)):
-            if (np.allclose(self.x, new_x, atol=1e-14)):
+        if len(self.x) == len(new_x):
+            if np.allclose(self.x, new_x, atol=1e-14):
                 return self.copy()
-        return type(self)(new_x, self.evaluate_with_spline(new_x,
-                                                           ext=ext))
+        return type(self)(new_x, self.evaluate_with_spline(new_x, ext=ext))
 
     def resample(self, new_x, ext=2):
         """Resample the series to new independent variable new_x using splines.
@@ -440,18 +437,15 @@ class BaseSeries(ABC):
         # TODO: Turn this into a decorator
 
         # If the other object is of the same type
-        if (isinstance(other, type(self))):
-            if ((not np.allclose(other.x, self.x, atol=1e-14))
-                    or (len(self.x) != len(other.x))):
-                raise ValueError(
-                    "The objects do not have the same x!")
-            return type(self)(self.x,
-                              function(self.y, other.y),
-                              True)
+        if isinstance(other, type(self)):
+            if (not np.allclose(other.x, self.x, atol=1e-14)) or (
+                len(self.x) != len(other.x)
+            ):
+                raise ValueError("The objects do not have the same x!")
+            return type(self)(self.x, function(self.y, other.y), True)
         # If it is a number
         if isinstance(other, (int, float, complex)):
-            return type(self)(self.x, function(self.y, other),
-                              True)
+            return type(self)(self.x, function(self.y, other), True)
 
         # If we are here, it is because we cannot add the two objects
         raise TypeError("I don't know how to combine these objects")
@@ -490,7 +484,7 @@ class BaseSeries(ABC):
         """Divide two series (if they have the same x), or divide by a
         scalar.
         """
-        if (other == 0):
+        if other == 0:
             raise ValueError("Cannot divide by zero")
         return self._apply_binary(other, np.divide)
 
@@ -517,11 +511,11 @@ class BaseSeries(ABC):
         return self ** other
 
     def __eq__(self, other):
-        """Check for equality up to numerical precision.
-        """
-        if (isinstance(other, type(self))):
-            return (np.allclose(self.x, other.x, atol=1e-14)
-                    and np.allclose(self.y, other.y, atol=1e-14))
+        """Check for equality up to numerical precision."""
+        if isinstance(other, type(self)):
+            return np.allclose(self.x, other.x, atol=1e-14) and np.allclose(
+                self.y, other.y, atol=1e-14
+            )
         return False
 
     def _apply_to_self(self, f, *args, **kwargs):
@@ -546,12 +540,14 @@ class BaseSeries(ABC):
 
         """
         if self.is_complex():
-            np.savetxt(fname, np.transpose((self.x, self.y.real,
-                                            self.y.imag),
-                                           *args, **kwargs))
+            np.savetxt(
+                fname,
+                np.transpose(
+                    (self.x, self.y.real, self.y.imag), *args, **kwargs
+                ),
+            )
         else:
-            np.savetxt(fname, np.transpose((self.x, self.y),
-                                           *args, **kwargs))
+            np.savetxt(fname, np.transpose((self.x, self.y), *args, **kwargs))
 
     def nans_removed(self):
         """Filter out nans/infinite values.
@@ -582,14 +578,14 @@ class BaseSeries(ABC):
         """
         # We pass self.x only if dx was not provided
         passing_x = self.x if dx is None else None
-        return type(self)(self.x,
-                          integrate.cumtrapz(self.y, x=passing_x,
-                                             dx=dx, initial=0),
-                          True)
+        return type(self)(
+            self.x,
+            integrate.cumtrapz(self.y, x=passing_x, dx=dx, initial=0),
+            True,
+        )
 
     def integrate(self):
-        """Integrate series with method of the trapeziod.
-        """
+        """Integrate series with method of the trapeziod."""
         self._apply_to_self(self.integrated)
 
     def spline_derived(self, order=1):
@@ -604,22 +600,18 @@ class BaseSeries(ABC):
         :rtype:    :py:class:`~.BaseSeries` or derived class
 
         """
-        if ((order > 3) or (order < 0)):
-            raise ValueError(f'Cannot compute differential of order {order}')
+        if (order > 3) or (order < 0):
+            raise ValueError(f"Cannot compute differential of order {order}")
 
-        if (self.invalid_spline):
+        if self.invalid_spline:
             self._make_spline()
 
-        if (self.is_complex()):
-            ret_value = (interpolate.splev(self.x,
-                                           self.spline_real,
-                                           der=order)
-                         + 1j * interpolate.splev(self.x,
-                                                  self.spline_imag,
-                                                  der=order))
+        if self.is_complex():
+            ret_value = interpolate.splev(
+                self.x, self.spline_real, der=order
+            ) + 1j * interpolate.splev(self.x, self.spline_imag, der=order)
         else:
-            ret_value = interpolate.splev(self.x, self.spline_real,
-                                          der=order)
+            ret_value = interpolate.splev(self.x, self.spline_real, der=order)
 
         return type(self)(self.x, ret_value, True)
 
@@ -691,19 +683,16 @@ class BaseSeries(ABC):
 
         """
         if self.is_complex():
-            return type(self)(self.x,
-                              signal.savgol_filter(self.y.imag,
-                                                   window_size,
-                                                   order)
-                              + 1j * signal.savgol_filter(self.y.real,
-                                                          window_size,
-                                                          order),
-                              True)
+            return type(self)(
+                self.x,
+                signal.savgol_filter(self.y.imag, window_size, order)
+                + 1j * signal.savgol_filter(self.y.real, window_size, order),
+                True,
+            )
 
-        return type(self)(self.x, signal.savgol_filter(self.y,
-                                                       window_size,
-                                                       order),
-                          True)
+        return type(self)(
+            self.x, signal.savgol_filter(self.y, window_size, order), True
+        )
 
     def savgol_smooth(self, window_size, order=3):
         """Smooth the series with a Savitzky-Golay filter with window of
@@ -740,12 +729,12 @@ class BaseSeries(ABC):
         """
         x = self.x
         y = self.y
-        if (init is not None):
-            m = (x >= init)
+        if init is not None:
+            m = x >= init
             x = x[m]
             y = y[m]
-        if (end is not None):
-            m = (x <= end)
+        if end is not None:
+            m = x <= end
             x = x[m]
             y = y[m]
         return type(self)(x, y, True)
@@ -862,11 +851,11 @@ def sample_common(series):
     # sampled, to do this, we check that the first is regularly sampled,
     # and that all the other ones have the same x.
     s1, *s_others = series
-    if (s1.is_regularly_sampled()):
+    if s1.is_regularly_sampled():
         for s in s_others:
-            if (not (len(s) == len(s1))):
+            if not (len(s) == len(s1)):
                 break
-            if (not np.allclose(s1.x, s.x, atol=1e-14)):
+            if not np.allclose(s1.x, s.x, atol=1e-14):
                 break
             # This is an else to the for loop
         else:

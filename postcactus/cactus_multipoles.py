@@ -70,7 +70,7 @@ class MultipoleOneDet:
     """
 
     def __init__(self, dist, data, l_min=0):
-        """ Data is a list of tuples with (l, m, timeseries).
+        """Data is a list of tuples with (l, m, timeseries).
 
         l smaller than l_min are dropped
         """
@@ -88,7 +88,7 @@ class MultipoleOneDet:
         # the key is not already present, we create it with value an empty
         # list, then we append the timeseries to this list
         for mult_l, mult_m, ts in data:  # mult = "multipole"
-            if (mult_l >= l_min):
+            if mult_l >= l_min:
                 lm_list = multipoles_list_ts.setdefault((mult_l, mult_m), [])
                 # This means: multipoles[(mult_t, mult_m)] = []
                 lm_list.append(ts)
@@ -97,13 +97,17 @@ class MultipoleOneDet:
 
         # Now self._multipoles is a dictionary in which all the timeseries are
         # collapse in a single one. So it is a straightforward map (l, m) -> ts
-        self._multipoles = {lm: timeseries.combine_ts(ts)
-                            for lm, ts in multipoles_list_ts.items()}
-        self.available_l = sorted({mult_l for mult_l, _
-                                   in self._multipoles.keys()})
+        self._multipoles = {
+            lm: timeseries.combine_ts(ts)
+            for lm, ts in multipoles_list_ts.items()
+        }
+        self.available_l = sorted(
+            {mult_l for mult_l, _ in self._multipoles.keys()}
+        )
         self.l_max = max(self.available_l)
-        self.available_m = sorted({mult_m for _, mult_m
-                                   in self._multipoles.keys()})
+        self.available_m = sorted(
+            {mult_m for _, mult_m in self._multipoles.keys()}
+        )
         self.available_lm = set(self._multipoles.keys())
 
         # Check if all the (l, m) from l_min to l_max are available
@@ -131,10 +135,11 @@ class MultipoleOneDet:
         return self[(mult_l, mult_m)]
 
     def __eq__(self, other):
-        if (not isinstance(other, type(self))):
+        if not isinstance(other, type(self)):
             return False
-        return (self.dist == other.dist and
-                self._multipoles == other._multipoles)
+        return (
+            self.dist == other.dist and self._multipoles == other._multipoles
+        )
 
     def __iter__(self):
         for (mult_l, mult_m), ts in sorted(self._multipoles.items()):
@@ -148,12 +153,13 @@ class MultipoleOneDet:
 
     def __str__(self):
         ret = f"(l, m) available: {self.keys()}"
-        if (self.missing_lm):
+        if self.missing_lm:
             ret += f" (missing: {list(self.missing_lm)})"
         return ret
 
-    def total_function_on_available_lm(self, function, *args, l_max=None,
-                                       **kwargs):
+    def total_function_on_available_lm(
+        self, function, *args, l_max=None, **kwargs
+    ):
         """Evaluate function on each multipole and accumulate the result.
 
         total_function_on_available_lm will call function with the
@@ -180,10 +186,10 @@ class MultipoleOneDet:
         # This function is used to compute many quantities with waves (e.g.,
         # total strain, total power emitted, ...)
         # It is a little bit ugly, but it works
-        if (l_max is None):
+        if l_max is None:
             l_max = self.l_max
 
-        if (l_max > self.l_max):
+        if l_max > self.l_max:
             raise ValueError("l max larger than l available")
 
         # The iterator is increasing in (l, m), so we can start from the first
@@ -191,16 +197,18 @@ class MultipoleOneDet:
 
         iter_self = iter(self)
         first_l, first_m, first_det = next(iter_self)
-        if (first_l > l_max):
+        if first_l > l_max:
             raise ValueError("l max smaller than all l available")
 
-        result = function(first_det, first_l, first_m, self.dist,
-                          *args, **kwargs)
+        result = function(
+            first_det, first_l, first_m, self.dist, *args, **kwargs
+        )
 
         for mult_l, mult_m, det in iter_self:
-            if (mult_l <= l_max):
-                result += function(det, mult_l, mult_m, self.dist,
-                                   *args, **kwargs)
+            if mult_l <= l_max:
+                result += function(
+                    det, mult_l, mult_m, self.dist, *args, **kwargs
+                )
 
         return result
 
@@ -247,7 +255,7 @@ class MultipoleAllDets:
         # We accumulate in the list all the ones for the same
         # radius
         for mult_l, mult_m, radius, ts in data:
-            if (mult_l >= self.l_min):
+            if mult_l >= self.l_min:
                 # If we don't have the radius yet, let's create an empty list
                 d = detectors.setdefault(radius, [])
                 # Add the new values
@@ -255,9 +263,10 @@ class MultipoleAllDets:
                 # Tally the available l and m
                 self.available_lm.add((mult_l, mult_m))
 
-        self._detectors = {radius: MultipoleOneDet(radius, multipoles,
-                                                   self.l_min)
-                           for radius, multipoles in detectors.items()}
+        self._detectors = {
+            radius: MultipoleOneDet(radius, multipoles, self.l_min)
+            for radius, multipoles in detectors.items()
+        }
 
         # In Python3 .keys() is not a list
         self.radii = sorted(list(self._detectors.keys()))
@@ -312,10 +321,9 @@ class MultipoleAllDets:
             yield self[r]
 
     def __eq__(self, other):
-        if (not isinstance(other, type(self))):
+        if not isinstance(other, type(self)):
             return False
-        return (self.radii == other.radii and
-                self._dets == other._dets)
+        return self.radii == other.radii and self._dets == other._dets
 
     def __len__(self):
         return len(self._dets)
@@ -370,28 +378,31 @@ class MultipolesDir:
         # 4. We match _r with any combination of numbers with possibly
         #    dots
         # 5. We possibly match a compression
-        rx_txt = re.compile(r"""^
+        rx_txt = re.compile(
+            r"""^
         mp_([a-zA-Z0-9\[\]_]+)
         _l(\d+)
         _m([-]?\d+)
         _r([0-9.]+)
         .asc
         (?:.bz2|.gz)?
-        $""", re.VERBOSE)
+        $""",
+            re.VERBOSE,
+        )
 
         # For h5 files is easy: it is just the var name
-        rx_h5 = re.compile(r'^mp_([a-zA-Z0-9\[\]_]+).h5$')
+        rx_h5 = re.compile(r"^mp_([a-zA-Z0-9\[\]_]+).h5$")
 
         for f in sd.allfiles:
             filename = os.path.split(f)[1]
             matched_h5 = rx_h5.match(filename)
             matched_txt = rx_txt.match(filename)
-            if (matched_h5 is not None):
+            if matched_h5 is not None:
                 variable_name = matched_h5.group(1).lower()
                 var_list = self._vars_h5.setdefault(variable_name, [])
                 # We are flagging that this h5
                 var_list.append(f)
-            elif (matched_txt is not None):
+            elif matched_txt is not None:
                 variable_name = matched_txt.group(1).lower()
                 mult_l = int(matched_txt.group(2))
                 mult_m = int(matched_txt.group(3))
@@ -401,8 +412,7 @@ class MultipolesDir:
 
         # What pythonize_name_dict does is to make the various variables
         # accessible as attributes, e.g. self.fields.rho
-        self.fields = pythonize_name_dict(list(self.keys()),
-                                          self.__getitem__)
+        self.fields = pythonize_name_dict(list(self.keys()), self.__getitem__)
 
     def __contains__(self, key):
         return str(key).lower() in self.keys()
@@ -414,19 +424,18 @@ class MultipolesDir:
     @staticmethod
     def _multipole_from_textfile(path):
         a = np.loadtxt(path, unpack=True, ndmin=2)
-        if (len(a) != 3):
-            raise RuntimeError(f'Wrong format in {path}')
+        if len(a) != 3:
+            raise RuntimeError(f"Wrong format in {path}")
         complex_mp = a[1] + 1j * a[2]
-        return timeseries.remove_duplicate_iters(a[0],
-                                                 complex_mp)
+        return timeseries.remove_duplicate_iters(a[0], complex_mp)
 
     @staticmethod
     def _multipoles_from_h5file(path):
         alldets = []
         # This regexp matches : l(number)_m(-number)_r(number)
-        fieldname_pattern = re.compile(r'l(\d+)_m([-]?\d+)_r([0-9.]+)')
+        fieldname_pattern = re.compile(r"l(\d+)_m([-]?\d+)_r([0-9.]+)")
 
-        with h5py.File(path, 'r') as data:
+        with h5py.File(path, "r") as data:
 
             # Loop over the groups in the hdf5
             for entry in data.keys():
@@ -437,19 +446,18 @@ class MultipolesDir:
                     radius = float(matched.group(3))
                     # Read the actual data
                     a = data[entry][()].T
-                    ts = timeseries.TimeSeries(a[0],
-                                               a[1] + 1j*a[2])
-                    alldets.append((mult_l, mult_m,
-                                    radius, ts))
+                    ts = timeseries.TimeSeries(a[0], a[1] + 1j * a[2])
+                    alldets.append((mult_l, mult_m, radius, ts))
 
         return alldets
 
     def _multipoles_from_textfiles(self, mpfiles):
         # We prepare the data for MultipoleAllDets checking
         # for errors
-        alldets = [(mult_l, mult_m, radius,
-                    self._multipole_from_textfile(filename)) for
-                   mult_l, mult_m, radius, filename in mpfiles]
+        alldets = [
+            (mult_l, mult_m, radius, self._multipole_from_textfile(filename))
+            for mult_l, mult_m, radius, filename in mpfiles
+        ]
         return MultipoleAllDets(alldets)
 
     def _multipoles_from_h5files(self, mpfiles):
@@ -462,8 +470,7 @@ class MultipolesDir:
 
     @lru_cache(128)
     def __getitem__(self, key):
-        """:The return value is py:class:`~.MultipoleAllDets`.
-        """
+        """:The return value is py:class:`~.MultipoleAllDets`."""
         k = str(key).lower()
         # We prefer h5
         if k in self._vars_h5:
@@ -483,7 +490,8 @@ class MultipolesDir:
         # To find the unique keys we use transofrm the keys in sets, and then
         # we unite them.
         return list(
-            set(self._vars_h5.keys()).union(set(self._vars_txt.keys())))
+            set(self._vars_h5.keys()).union(set(self._vars_txt.keys()))
+        )
 
     def __str__(self):
         """NOTE: __str__ requires opening all the h5 files!

@@ -21,11 +21,13 @@ Features currently implemented:
   (:py:mod:`~.cactus_waves`) computing, among the other things, strains, overlaps,
   energy lost.
 - Represent and manipulate time series (:py:mod:`~.timeseries`). Examples of
-  functions available for time series: `integrate``, ``derive``, ``resample``,
+  functions available for time series: ``integrate``, ``derive``, ``resample``,
   ``to_FrequencySeries`` (Fourier transform).
 - Represent and manipulate frequency series (:py:mod:`~.frequencyseries`), like
   Fourier transforms of time series. Inverse Fourier transform is available.
-- Manipulate and analyze gravitational-waves (:py:mod:`~.gw_utils`).
+- Manipulate and analyze gravitational-waves (:py:mod:`~.gw_utils`,
+  :py:mod:`~.gw_mismatch`). For example, compute energies, mismatches, or
+  extrapolate waves to infinity.
 - Handle unit conversion, in particular from geometrized to physical
   (:py:mod:`~.unitconv`).
 
@@ -66,6 +68,7 @@ Usage
    cactus_multipoles.rst
    cactus_waves.rst
    gw_utils.rst
+   gw_mismatch.rst
    unitconv.rst
 
 Examples
@@ -92,4 +95,5 @@ Reference material (classes, functions, ...)
    cactus_multipoles_ref.rst
    cactus_waves_ref.rst
    gw_utils_ref.rst
+   gw_mismatch_ref.rst
    unitconv_ref.rst

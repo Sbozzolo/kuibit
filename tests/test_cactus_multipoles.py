@@ -26,7 +26,6 @@ from postcactus import timeseries as ts
 
 
 class TestCactusMultipoles(unittest.TestCase):
-
     def setUp(self):
 
         # Prepare fake multipoles
@@ -75,10 +74,9 @@ class TestCactusMultipoles(unittest.TestCase):
         self.assertCountEqual(mult2.available_lm, {(2, 2), (2, -2)})
         self.assertCountEqual(mult3.available_l, {2})
         self.assertCountEqual(mult3.available_m, {2})
-        self.assertCountEqual(mult3.missing_lm, {(2, -2),
-                                                 (2, -1),
-                                                 (2, 0),
-                                                 (2, 1)})
+        self.assertCountEqual(
+            mult3.missing_lm, {(2, -2), (2, -1), (2, 0), (2, 1)}
+        )
 
         # test contains
         self.assertIn((2, 2), mult1)
@@ -120,39 +118,42 @@ class TestCactusMultipoles(unittest.TestCase):
         with self.assertRaises(ValueError):
             mult.total_function_on_available_lm(lambda x: x, l_max=0)
 
-
         # First, let's try with identity as function
         # The output should be just ts1 + ts2
         def identity(x, *args):
             return x
-        self.assertEqual(mult.total_function_on_available_lm(identity),
-                         self.ts1 + ts3)
+
+        self.assertEqual(
+            mult.total_function_on_available_lm(identity), self.ts1 + ts3
+        )
 
         # Next, we use the l, m, r, information
         def func1(x, mult_l, mult_m, mult_r):
             return mult_l * mult_m * mult_r * x
 
-        self.assertEqual(mult.total_function_on_available_lm(func1),
-                         2 * 2 * 100 * self.ts1 + 1 * (-1) * 100 * ts3)
+        self.assertEqual(
+            mult.total_function_on_available_lm(func1),
+            2 * 2 * 100 * self.ts1 + 1 * (-1) * 100 * ts3,
+        )
 
         # Next, we use args and kwargs
         def func2(x, mult_l, mult_m, mult_r, add, add2=0):
             return mult_l * mult_m * mult_r * x + add + add2
 
         # This will just add (add + add2) (2 + 3)
-        self.assertEqual(mult.total_function_on_available_lm(func2, 2, add2=3),
-                         (2 * 2 * 100 * self.ts1 + 2 + 3
-                          + 1 * (-1) * 100 * ts3 + 2 + 3))
+        self.assertEqual(
+            mult.total_function_on_available_lm(func2, 2, add2=3),
+            (2 * 2 * 100 * self.ts1 + 2 + 3 + 1 * (-1) * 100 * ts3 + 2 + 3),
+        )
 
         # Finally, test l_max
-        self.assertEqual(mult.total_function_on_available_lm(identity,
-                                                             l_max=1),
-                         ts3)
+        self.assertEqual(
+            mult.total_function_on_available_lm(identity, l_max=1), ts3
+        )
 
     def test_MultipoleAllDets(self):
 
-        data = [(2, 2, 100, self.ts1),
-                (2, -2, 150, self.ts2)]
+        data = [(2, 2, 100, self.ts1), (2, -2, 150, self.ts2)]
 
         radii = [100, 150]
 
@@ -177,8 +178,7 @@ class TestCactusMultipoles(unittest.TestCase):
         self.assertEqual(alldets, alldets)
         self.assertNotEqual(alldets, 1)
 
-        data2 = [(2, 2, 100, self.ts1),
-                 (2, -2, 180, self.ts2)]
+        data2 = [(2, 2, 100, self.ts1), (2, -2, 180, self.ts2)]
 
         alldets2 = mp.MultipoleAllDets(data2)
 
@@ -196,8 +196,7 @@ class TestCactusMultipoles(unittest.TestCase):
 
     def test_has_detector(self):
 
-        data = [(2, 2, 100, self.ts1),
-                (2, -2, 150, self.ts2)]
+        data = [(2, 2, 100, self.ts1), (2, -2, 150, self.ts2)]
 
         alldets = mp.MultipoleAllDets(data)
 
@@ -213,45 +212,48 @@ class TestCactusMultipoles(unittest.TestCase):
         # multipoles from textfile
         with self.assertRaises(RuntimeError):
             cacdir._multipole_from_textfile(
-                "tests/tov/output-0000/static_tov/carpet-timing..asc")
+                "tests/tov/output-0000/static_tov/carpet-timing..asc"
+            )
 
         path = "tests/tov/output-0000/static_tov/mp_Phi2_l2_m-1_r110.69.asc"
         path_h5 = "tests/tov/output-0000/static_tov/mp_harmonic.h5"
         t, real, imag = np.loadtxt(path).T
 
-        with h5py.File(path_h5, 'r') as data:
+        with h5py.File(path_h5, "r") as data:
             # Loop over the groups in the hdf5
             a = data["l2_m2_r8.00"][()].T
 
         mpts = ts.TimeSeries(t, real + 1j * imag)
-        ts_h5 = ts.TimeSeries(a[0], a[1] + 1j*a[2])
+        ts_h5 = ts.TimeSeries(a[0], a[1] + 1j * a[2])
 
         self.assertEqual(mpts, cacdir._multipole_from_textfile(path))
-        self.assertEqual(ts_h5,
-                         cacdir._multipoles_from_h5files([path_h5])[8.00](2, 2))
+        self.assertEqual(
+            ts_h5, cacdir._multipoles_from_h5files([path_h5])[8.00](2, 2)
+        )
 
         mpfiles = [(2, 2, 100, path)]
 
         # Check one specific case
-        self.assertEqual(mpts,
-                         cacdir._multipoles_from_textfiles(mpfiles)[100](2, 2))
+        self.assertEqual(
+            mpts, cacdir._multipoles_from_textfiles(mpfiles)[100](2, 2)
+        )
 
-        self.assertEqual(cacdir['phi2'][110.69](2, -1), mpts)
-        self.assertEqual(cacdir['harmonic'][8.00](2, 2), ts_h5)
+        self.assertEqual(cacdir["phi2"][110.69](2, -1), mpts)
+        self.assertEqual(cacdir["harmonic"][8.00](2, 2), ts_h5)
 
         # test get
         self.assertIs(cacdir.get("bubu"), None)
-        self.assertEqual(cacdir.get('harmonic')[8.00](2, 2), ts_h5)
+        self.assertEqual(cacdir.get("harmonic")[8.00](2, 2), ts_h5)
 
         # test __getitem__
         with self.assertRaises(KeyError):
-            cacdir['bubu']
+            cacdir["bubu"]
 
         # test __contains__
-        self.assertIn('phi2', cacdir)
+        self.assertIn("phi2", cacdir)
 
         # test keys()
-        self.assertCountEqual(cacdir.keys(), ['harmonic', 'phi2', 'psi4'])
+        self.assertCountEqual(cacdir.keys(), ["harmonic", "phi2", "psi4"])
 
         # test __str__()
         self.assertIn("harmonic", cacdir.__str__())

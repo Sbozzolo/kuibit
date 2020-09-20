@@ -46,13 +46,13 @@ def load_FrequencySeries(path, *args, complex_on_two_columns=False, **kwargs):
     :rtype: :py:mod:`~.FrequencySeries`
 
     """
-    if (complex_on_two_columns):
-        f, fft_real, fft_imag = np.loadtxt(path, unpack=True, ndmin=2,
-                                           *args, **kwargs)
+    if complex_on_two_columns:
+        f, fft_real, fft_imag = np.loadtxt(
+            path, unpack=True, ndmin=2, *args, **kwargs
+        )
         fft = fft_real + 1j * fft_imag
     else:
-        f, fft = np.loadtxt(path, unpack=True, ndmin=2,
-                            *args, **kwargs)
+        f, fft = np.loadtxt(path, unpack=True, ndmin=2, *args, **kwargs)
     return FrequencySeries(f, fft)
 
 
@@ -66,8 +66,9 @@ def load_noise_curve(path, *args, **kwargs):
     :returns: Loaded Frequencyseries
     :rtype: :py:mod:`~.FrequencySeries`
     """
-    return load_FrequencySeries(path, complex_on_two_columns=False,
-                                *args, **kwargs)
+    return load_FrequencySeries(
+        path, complex_on_two_columns=False, *args, **kwargs
+    )
 
 
 class FrequencySeries(BaseSeries):
@@ -178,7 +179,7 @@ class FrequencySeries(BaseSeries):
         :rtype: float
 
         """
-        if (not self.is_regularly_sampled()):
+        if not self.is_regularly_sampled():
             raise ValueError("Frequencyseries is not regularly sampled")
 
         return self.f[1] - self.f[0]
@@ -192,15 +193,13 @@ class FrequencySeries(BaseSeries):
         """
         m = self.amplitude.max()
 
-        if (m <= 0):
+        if m <= 0:
             raise ValueError("Non positive PSD maximum!")
 
         return self / m
 
     def normalize(self):
-        """Scale values so that the maximum of the amplitude is 1.
-
-        """
+        """Scale values so that the maximum of the amplitude is 1."""
         self._apply_to_self(self.normalized)
 
     def low_passed(self, f):
@@ -213,13 +212,11 @@ class FrequencySeries(BaseSeries):
 
 
         """
-        msk = (np.abs(self.f) <= f)
+        msk = np.abs(self.f) <= f
         return FrequencySeries(self.f[msk], self.fft[msk])
 
     def low_pass(self, f):
-        """Remove frequencies higher or equal than f (absolute value).
-
-        """
+        """Remove frequencies higher or equal than f (absolute value)."""
         self._apply_to_self(self.low_passed, f)
 
     def high_passed(self, f):
@@ -231,7 +228,7 @@ class FrequencySeries(BaseSeries):
         :rtype: :py:mod:`~.FrequencySeries`
 
         """
-        msk = (np.abs(self.f) >= f)
+        msk = np.abs(self.f) >= f
         return FrequencySeries(self.f[msk], self.fft[msk])
 
     def high_pass(self, f):
@@ -250,13 +247,11 @@ class FrequencySeries(BaseSeries):
         :rtype: :py:mod:`~.FrequencySeries`
 
         """
-        msk = (self.f >= 0)
+        msk = self.f >= 0
         return FrequencySeries(self.f[msk], self.fft[msk])
 
     def negative_frequencies_remove(self):
-        """Remove all the frequencies smaller than 0
-
-        """
+        """Remove all the frequencies smaller than 0"""
         self._apply_to_self(self.negative_frequencies_removed)
 
     def band_passed(self, fmin, fmax):
@@ -298,15 +293,21 @@ class FrequencySeries(BaseSeries):
         # We do not consider the peaks near the boundaries and those smaller
         # than amp_threshold
         peaks_f_indexes = [
-            i for i in peaks_f_indexes[0]
+            i
+            for i in peaks_f_indexes[0]
             if 1 < i < len(self) - 2 and self.amp[i] > amp_threshold
         ]
 
         peaks_f = self.f[peaks_f_indexes]
         peaks_amp = self.amp[peaks_f_indexes]
         peaks_ff = [
-            (self.f[i] + 0.5 * self.df * (self.amp[i + 1] - self.amp[i - 1]) /
-             (2.0 * self.amp[i] - self.amp[i - 1] - self.amp[i + 1]))
+            (
+                self.f[i]
+                + 0.5
+                * self.df
+                * (self.amp[i + 1] - self.amp[i - 1])
+                / (2.0 * self.amp[i] - self.amp[i - 1] - self.amp[i + 1])
+            )
             for i in peaks_f_indexes
         ]
 
@@ -344,7 +345,7 @@ class FrequencySeries(BaseSeries):
         # We will restore the negative frequencies so that the operation
         # is the actual inverse of taking the dft.
         #
-        if (self.fmin < 0):
+        if self.fmin < 0:
 
             # TimeSeries.to_FrequencySeries() rearranges the frequency so that
             # negative are on the left and positive on the right. Here, we undo
@@ -367,8 +368,9 @@ class FrequencySeries(BaseSeries):
 
         return timeseries.TimeSeries(t, y)
 
-    def inner_product(self, other, fmin=0, fmax=np.inf, noises=None,
-                      same_domain=False):
+    def inner_product(
+        self, other, fmin=0, fmax=np.inf, noises=None, same_domain=False
+    ):
         r"""Compute the (network) inner product.
 
         :math:`(h_1, h_2) = 4 \Re \int_{f_min}^{f_max} \frac{h_1 h_2^*}{S_n}`
@@ -413,21 +415,23 @@ class FrequencySeries(BaseSeries):
         :rtype: float
 
         """
-        if (not isinstance(other, type(self))):
+        if not isinstance(other, type(self)):
             raise TypeError("The other object is not a FrequencySeries")
 
-        if ((not isinstance(noises, type(self)))
-                and (not isinstance(noises, list))
-                and (noises is not None)):
+        if (
+            (not isinstance(noises, type(self)))
+            and (not isinstance(noises, list))
+            and (noises is not None)
+        ):
             raise TypeError("Noise is not (a list of) FrequencySeries or None")
 
-        if (fmin >= fmax):
+        if fmin >= fmax:
             raise ValueError("fmin has to be smaller than fmax")
 
-        if (fmin < 0):
+        if fmin < 0:
             raise ValueError("fmin has to be non-negative")
 
-        if (noises is None):
+        if noises is None:
             # If noises is None, it means that the weight is one everywhere so,
             # we prepare a FrequencySeries that has the same frequencies as
             # self.
@@ -438,13 +442,13 @@ class FrequencySeries(BaseSeries):
         to_be_res_list = [self, other]
         # Check if noises is a list, in that case add all the elements to
         # to to_be_res_list
-        if (isinstance(noises, list)):
+        if isinstance(noises, list):
             to_be_res_list.extend(noises)
         else:
             # noises is not a list, just append it
             to_be_res_list.append(noises)
 
-        if (not same_domain):
+        if not same_domain:
             [res_self, res_other, *res_noises] = sample_common(to_be_res_list)
         else:
             [res_self, res_other, *res_noises] = to_be_res_list
@@ -456,8 +460,7 @@ class FrequencySeries(BaseSeries):
         # established that the series are defined on the same frequencies.
         # This is faster because it skips several sanity checks.
         for res_noise in res_noises:
-            integrand += (res_self * res_other.conjugate() / res_noise)
-
+            integrand += res_self * res_other.conjugate() / res_noise
 
         # We assume that the frequencyseries are zero outside of the interval
         # of definition
@@ -469,8 +472,9 @@ class FrequencySeries(BaseSeries):
         # a trapeziodial one
         return 4 * np.sum(integrand.fft.real) * integrand.df
 
-    def overlap(self, other, fmin=0, fmax=np.inf, noises=None,
-                same_domain=False):
+    def overlap(
+        self, other, fmin=0, fmax=np.inf, noises=None, same_domain=False
+    ):
         r"""Compute the (network) overlap.
 
         :math:`\textrm{overlap} = (h_1, h_2) / \sqrt{(h_1, h_1)(h_2, h_2)}`
@@ -505,14 +509,14 @@ class FrequencySeries(BaseSeries):
 
         """
         # Error handling is done by inner_product
-        inner_11 = self.inner_product(self, fmin=fmin, fmax=fmax,
-                                      noises=noises,
-                                      same_domain=same_domain)
-        inner_22 = other.inner_product(other, fmin=fmin, fmax=fmax,
-                                       noises=noises,
-                                       same_domain=same_domain)
-        inner_12 = self.inner_product(other, fmin, fmax,
-                                      noises=noises,
-                                      same_domain=same_domain)
+        inner_11 = self.inner_product(
+            self, fmin=fmin, fmax=fmax, noises=noises, same_domain=same_domain
+        )
+        inner_22 = other.inner_product(
+            other, fmin=fmin, fmax=fmax, noises=noises, same_domain=same_domain
+        )
+        inner_12 = self.inner_product(
+            other, fmin, fmax, noises=noises, same_domain=same_domain
+        )
 
         return inner_12 / np.sqrt(inner_11 * inner_22)

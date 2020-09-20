@@ -27,7 +27,6 @@ from postcactus import timeseries as ts
 
 
 class TestCactusWaves(unittest.TestCase):
-
     def setUp(self):
         self.sim = sd.SimDir("tests/tov")
         self.gwdir = cw.GravitationalWavesDir(self.sim)
@@ -44,8 +43,7 @@ class TestCactusWaves(unittest.TestCase):
         dist1 = 100
 
         data1 = [(2, 2, ts1), (2, 2, ts2)]
-        data2 = [(1, 1, ts1), (1, 0, ts2),
-                 (1, -1, ts2)]
+        data2 = [(1, 1, ts1), (1, 0, ts2), (1, -1, ts2)]
 
         gw = cw.GravitationalWavesOneDet(dist1, data1)
         em = cw.ElectromagneticWavesOneDet(dist1, data2)
@@ -55,8 +53,9 @@ class TestCactusWaves(unittest.TestCase):
 
     def test_get_psi4_lm(self):
 
-        self.assertEqual(self.gwdir[110.69].get_psi4_lm(2, 2),
-                         self.gwdir[110.69][(2, 2)])
+        self.assertEqual(
+            self.gwdir[110.69].get_psi4_lm(2, 2), self.gwdir[110.69][(2, 2)]
+        )
 
     def test__fixed_frequency_integrated(self):
 
@@ -79,15 +78,12 @@ class TestCactusWaves(unittest.TestCase):
         integral = gwdum._fixed_frequency_integrated(tts, 1e10)
 
         self.assertTrue(np.allclose(integral.t, t))
-        self.assertTrue(np.allclose(integral.y, -np.cos(t),
-                                    atol=5e-4))
+        self.assertTrue(np.allclose(integral.y, -np.cos(t), atol=5e-4))
 
         # The second integral should be sin(x)
-        integral2 = gwdum._fixed_frequency_integrated(tts, 1e10,
-                                                      order=2)
+        integral2 = gwdum._fixed_frequency_integrated(tts, 1e10, order=2)
 
-        self.assertTrue(np.allclose(integral2.y, -np.sin(t),
-                                    atol=5e-4))
+        self.assertTrue(np.allclose(integral2.y, -np.sin(t), atol=5e-4))
 
         # Now, let's see the opposite case in which the frequency is lower than
         # any frequencies. The output should be the same timeseries we started
@@ -96,8 +92,9 @@ class TestCactusWaves(unittest.TestCase):
         # cosine. pcut = 1e-4 -> omega_threshold = 2 pi / pcut = 2 pi * 1e4
         # Hence, the timeseries is divided by 1e-4
         integral3 = gwdum._fixed_frequency_integrated(tts, 1e-4)
-        self.assertTrue(np.allclose(integral3.y * 2 * np.pi * 1e4, -np.cos(t),
-                                    atol=1e-3))
+        self.assertTrue(
+            np.allclose(integral3.y * 2 * np.pi * 1e4, -np.cos(t), atol=1e-3)
+        )
 
         # Check warning for irregularly spaced
         with self.assertWarns(RuntimeWarning):
@@ -118,14 +115,19 @@ class TestCactusWaves(unittest.TestCase):
             self.psi4.get_strain_lm(2, 2, 0.1, window_function=1)
         # Not implemented
         with self.assertRaises(ValueError):
-            self.psi4.get_strain_lm(2, 2, 0.1, window_function='bubu')
+            self.psi4.get_strain_lm(2, 2, 0.1, window_function="bubu")
 
         # We do not need to test the FFI, hopefully that is already tested
 
         # Test window = set verything to 0
-        self.assertTrue(np.allclose(
-            self.psi4.get_strain_lm(2, 2, 0.1, window_function=lambda x: 0).y,
-                        0))
+        self.assertTrue(
+            np.allclose(
+                self.psi4.get_strain_lm(
+                    2, 2, 0.1, window_function=lambda x: 0
+                ).y,
+                0,
+            )
+        )
 
         psi4lm = self.psi4[(2, 2)]
         psi4lm *= self.psi4.dist
@@ -134,22 +136,36 @@ class TestCactusWaves(unittest.TestCase):
         ham_array = signal.hamming(len(psi4lm))
         ham_psi4lm = psi4lm.copy()
         ham_psi4lm.y *= ham_array
-        ffi_ham = self.psi4._fixed_frequency_integrated(ham_psi4lm,
-                                                        0.1, order=2).y
+        ffi_ham = self.psi4._fixed_frequency_integrated(
+            ham_psi4lm, 0.1, order=2
+        ).y
 
-        self.assertTrue(np.allclose(
-            self.psi4.get_strain_lm(2, 2, 0.1, window_function=signal.hamming,
-                                    trim_ends=False).y, ffi_ham))
+        self.assertTrue(
+            np.allclose(
+                self.psi4.get_strain_lm(
+                    2, 2, 0.1, window_function=signal.hamming, trim_ends=False
+                ).y,
+                ffi_ham,
+            )
+        )
 
         # Test window is a string, like hamming
-        self.assertTrue(np.allclose(
-            self.psi4.get_strain_lm(2, 2, 0.1, window_function='hamming',
-                                    trim_ends=False).y, ffi_ham))
+        self.assertTrue(
+            np.allclose(
+                self.psi4.get_strain_lm(
+                    2, 2, 0.1, window_function="hamming", trim_ends=False
+                ).y,
+                ffi_ham,
+            )
+        )
 
         # Test no window
-        self.assertTrue(np.allclose(
-            self.psi4.get_strain_lm(2, 2, 0.1, trim_ends=False).y,
-            self.psi4._fixed_frequency_integrated(psi4lm, 0.1, order=2).y))
+        self.assertTrue(
+            np.allclose(
+                self.psi4.get_strain_lm(2, 2, 0.1, trim_ends=False).y,
+                self.psi4._fixed_frequency_integrated(psi4lm, 0.1, order=2).y,
+            )
+        )
 
     def test_get_strain(self):
 
@@ -157,21 +173,24 @@ class TestCactusWaves(unittest.TestCase):
         with self.assertRaises(ValueError):
             self.psi4.get_strain(0, 0, 1, l_max=100)
 
-        theta, phi = np.pi/2, 1
+        theta, phi = np.pi / 2, 1
         ym2 = gwu.sYlm(-2, 2, -2, theta, phi)
         ym1 = gwu.sYlm(-2, 2, -1, theta, phi)
         y0 = gwu.sYlm(-2, 2, 0, theta, phi)
         y1 = gwu.sYlm(-2, 2, 1, theta, phi)
         y2 = gwu.sYlm(-2, 2, 2, theta, phi)
 
-        strain = (self.psi4.get_strain_lm(2, -2, 0.1).y * ym2
-                  + self.psi4.get_strain_lm(2, -1, 0.1).y * ym1
-                  + self.psi4.get_strain_lm(2, 0, 0.1).y * y0
-                  + self.psi4.get_strain_lm(2, 1, 0.1).y * y1
-                  + self.psi4.get_strain_lm(2, 2, 0.1).y * y2)
+        strain = (
+            self.psi4.get_strain_lm(2, -2, 0.1).y * ym2
+            + self.psi4.get_strain_lm(2, -1, 0.1).y * ym1
+            + self.psi4.get_strain_lm(2, 0, 0.1).y * y0
+            + self.psi4.get_strain_lm(2, 1, 0.1).y * y1
+            + self.psi4.get_strain_lm(2, 2, 0.1).y * y2
+        )
 
-        self.assertTrue(np.allclose(strain,
-                                    self.psi4.get_strain(theta, phi, 0.1).y))
+        self.assertTrue(
+            np.allclose(strain, self.psi4.get_strain(theta, phi, 0.1).y)
+        )
 
     def test_get_observed_strain(self):
 
@@ -183,13 +202,16 @@ class TestCactusWaves(unittest.TestCase):
         )
         Fc_H, Fp_H = antennas.hanford
 
-        expected_strain = self.psi4.get_strain(theta_H, phi_H, 0.1,
-                                               trim_ends=False)
-        expected_strain = (expected_strain.real() * Fp_H
-                           - expected_strain.imag() * Fc_H)
+        expected_strain = self.psi4.get_strain(
+            theta_H, phi_H, 0.1, trim_ends=False
+        )
+        expected_strain = (
+            expected_strain.real() * Fp_H - expected_strain.imag() * Fc_H
+        )
 
-        strain = self.psi4.get_observed_strain(8, -70, "2015-09-14 09:50:45",
-                                               0.1, trim_ends=False)
+        strain = self.psi4.get_observed_strain(
+            8, -70, "2015-09-14 09:50:45", 0.1, trim_ends=False
+        )
 
         self.assertEqual(strain.hanford, expected_strain)
 
@@ -197,25 +219,30 @@ class TestCactusWaves(unittest.TestCase):
 
         psi4lm = self.psi4[(2, 2)]
 
-        psi4lm_int = self.psi4._fixed_frequency_integrated(psi4lm,
-                                                           0.1, order=1)
+        psi4lm_int = self.psi4._fixed_frequency_integrated(
+            psi4lm, 0.1, order=1
+        )
 
-        power_lm = self.psi4.dist**2 / (16 * np.pi) * np.abs(psi4lm_int)**2
+        power_lm = self.psi4.dist ** 2 / (16 * np.pi) * np.abs(psi4lm_int) ** 2
 
         self.assertEqual(power_lm, self.psi4.get_power_lm(2, 2, 0.1))
-        self.assertEqual(power_lm.integrated(),
-                         self.psi4.get_energy_lm(2, 2, 0.1))
+        self.assertEqual(
+            power_lm.integrated(), self.psi4.get_energy_lm(2, 2, 0.1)
+        )
 
         # Total power
-        total_power = (self.psi4.get_power_lm(2, 2, 0.1)
-                       + self.psi4.get_power_lm(2, 1, 0.1)
-                       + self.psi4.get_power_lm(2, 0, 0.1)
-                       + self.psi4.get_power_lm(2, -1, 0.1)
-                       + self.psi4.get_power_lm(2, -2, 0.1))
+        total_power = (
+            self.psi4.get_power_lm(2, 2, 0.1)
+            + self.psi4.get_power_lm(2, 1, 0.1)
+            + self.psi4.get_power_lm(2, 0, 0.1)
+            + self.psi4.get_power_lm(2, -1, 0.1)
+            + self.psi4.get_power_lm(2, -2, 0.1)
+        )
 
         self.assertEqual(total_power, self.psi4.get_total_power(0.1))
-        self.assertEqual(total_power.integrated(),
-                         self.psi4.get_total_energy(0.1))
+        self.assertEqual(
+            total_power.integrated(), self.psi4.get_total_energy(0.1)
+        )
 
     def test_get_power_energy_em(self):
 
@@ -223,49 +250,61 @@ class TestCactusWaves(unittest.TestCase):
         phi2 = emdir[110.69]
         phi2lm = phi2[(2, 2)]
 
-        power_lm = phi2.dist**2 / (4 * np.pi) * np.abs(phi2lm)**2
+        power_lm = phi2.dist ** 2 / (4 * np.pi) * np.abs(phi2lm) ** 2
 
         self.assertEqual(power_lm, phi2.get_power_lm(2, 2))
-        self.assertEqual(power_lm.integrated(),
-                         phi2.get_energy_lm(2, 2))
+        self.assertEqual(power_lm.integrated(), phi2.get_energy_lm(2, 2))
 
         # Total power
-        total_power = (phi2.get_power_lm(2, 2)
-                       + phi2.get_power_lm(2, 1)
-                       + phi2.get_power_lm(2, 0)
-                       + phi2.get_power_lm(2, -1)
-                       + phi2.get_power_lm(2, -2))
+        total_power = (
+            phi2.get_power_lm(2, 2)
+            + phi2.get_power_lm(2, 1)
+            + phi2.get_power_lm(2, 0)
+            + phi2.get_power_lm(2, -1)
+            + phi2.get_power_lm(2, -2)
+        )
 
         self.assertEqual(total_power, phi2.get_total_power())
-        self.assertEqual(total_power.integrated(),
-                         phi2.get_total_energy())
+        self.assertEqual(total_power.integrated(), phi2.get_total_energy())
 
     def test_get_torque_angular_momentum(self):
 
         psi4lm = self.psi4[(2, 2)]
 
-        psi4lm_int1 = self.psi4._fixed_frequency_integrated(psi4lm,
-                                                            0.1, order=1)
-        psi4lm_int2 = self.psi4._fixed_frequency_integrated(psi4lm,
-                                                            0.1, order=2)
+        psi4lm_int1 = self.psi4._fixed_frequency_integrated(
+            psi4lm, 0.1, order=1
+        )
+        psi4lm_int2 = self.psi4._fixed_frequency_integrated(
+            psi4lm, 0.1, order=2
+        )
 
-        torque_lm = (self.psi4.dist**2 / (16 * np.pi) * 2
-                     * (np.conj(psi4lm_int2) * psi4lm_int1).imag())
+        torque_lm = (
+            self.psi4.dist ** 2
+            / (16 * np.pi)
+            * 2
+            * (np.conj(psi4lm_int2) * psi4lm_int1).imag()
+        )
 
         self.assertEqual(torque_lm, self.psi4.get_torque_z_lm(2, 2, 0.1))
-        self.assertEqual(torque_lm.integrated(),
-                         self.psi4.get_angular_momentum_z_lm(2, 2, 0.1))
+        self.assertEqual(
+            torque_lm.integrated(),
+            self.psi4.get_angular_momentum_z_lm(2, 2, 0.1),
+        )
 
         # Total power
-        total_torque_z = (self.psi4.get_torque_z_lm(2, 2, 0.1)
-                          + self.psi4.get_torque_z_lm(2, 1, 0.1)
-                          + self.psi4.get_torque_z_lm(2, 0, 0.1)
-                          + self.psi4.get_torque_z_lm(2, -1, 0.1)
-                          + self.psi4.get_torque_z_lm(2, -2, 0.1))
+        total_torque_z = (
+            self.psi4.get_torque_z_lm(2, 2, 0.1)
+            + self.psi4.get_torque_z_lm(2, 1, 0.1)
+            + self.psi4.get_torque_z_lm(2, 0, 0.1)
+            + self.psi4.get_torque_z_lm(2, -1, 0.1)
+            + self.psi4.get_torque_z_lm(2, -2, 0.1)
+        )
 
         self.assertEqual(total_torque_z, self.psi4.get_total_torque_z(0.1))
-        self.assertEqual(total_torque_z.integrated(),
-                         self.psi4.get_total_angular_momentum_z(0.1))
+        self.assertEqual(
+            total_torque_z.integrated(),
+            self.psi4.get_total_angular_momentum_z(0.1),
+        )
 
     def test_WavesDir(self):
 
@@ -279,7 +318,9 @@ class TestCactusWaves(unittest.TestCase):
         emdir = cw.ElectromagneticWavesDir(self.sim)
 
         # Check type
-        self.assertTrue(isinstance(self.gwdir[110.69],
-                                   cw.GravitationalWavesOneDet))
-        self.assertTrue(isinstance(emdir[110.69],
-                                   cw.ElectromagneticWavesOneDet))
+        self.assertTrue(
+            isinstance(self.gwdir[110.69], cw.GravitationalWavesOneDet)
+        )
+        self.assertTrue(
+            isinstance(emdir[110.69], cw.ElectromagneticWavesOneDet)
+        )
