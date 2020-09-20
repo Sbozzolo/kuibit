@@ -170,6 +170,7 @@ class TestTimeseries(unittest.TestCase):
         sins = ts.TimeSeries(times, self.values)
 
         self.assertAlmostEqual(sins.time_length, 1)
+        self.assertAlmostEqual(sins.duration, 1)
 
         self.assertAlmostEqual(self.TS.dt,
                                self.TS.tmax / (len(self.TS) - 1))
