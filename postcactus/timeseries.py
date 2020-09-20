@@ -294,6 +294,8 @@ class TimeSeries(BaseSeries):
         """
         return self.tmax - self.tmin
 
+    duration = time_length
+
     def time_at_maximum(self):
         """Return the time at which the timeseries is maximum in absolute
         value.
