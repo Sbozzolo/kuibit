@@ -21,7 +21,6 @@ from postcactus import simdir as sd
 
 
 class TestSimDir(unittest.TestCase):
-
     def setUp(self):
 
         # We use the output of a simple simulation to test that everything
@@ -79,5 +78,4 @@ class TestSimDir(unittest.TestCase):
         # the string representation
         #
         self.assertIn(self.sim.ts.__str__(), self.sim.__str__())
-        self.assertIn(self.sim.multipoles.__str__(),
-                      self.sim.__str__())
+        self.assertIn(self.sim.multipoles.__str__(), self.sim.__str__())

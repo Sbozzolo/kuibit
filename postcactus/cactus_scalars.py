@@ -92,13 +92,13 @@ class OneScalar:
     _rx_columns = re.compile(_pattern_columns)
 
     _reduction_types = {
-        'minimum': 'min',
-        'maximum': 'max',
-        'norm1': 'norm1',
-        'norm2': 'norm2',
-        'norm_inf': 'infnorm',
-        'average': 'average',
-        None: 'scalar'
+        "minimum": "min",
+        "maximum": "max",
+        "norm1": "norm1",
+        "norm2": "norm2",
+        "norm_inf": "infnorm",
+        "average": "average",
+        None: "scalar",
     }
 
     # How many lines do we read as header?
@@ -106,9 +106,11 @@ class OneScalar:
 
     # What function to use to open the file?
     # What mode?
-    _decompressor = {None: (open, 'r'),
-                     'gz': (gopen, 'rt'),
-                     'bz2': (bopen, 'rt')}
+    _decompressor = {
+        None: (open, "r"),
+        "gz": (gopen, "rt"),
+        "bz2": (bopen, "rt"),
+    }
 
     def __init__(self, path):
         self.path = str(path)
@@ -124,18 +126,27 @@ class OneScalar:
 
         # variable_name1 may be a thorn name (e.g. hydrobase-press)
         # Or the actual variable name (e.g. H)
-        (variable_name1, _0, _1, variable_name2, index_in_brackets,
-         reduction_type, _2, compression_method) = filename_match.groups()
+        (
+            variable_name1,
+            _0,
+            _1,
+            variable_name2,
+            index_in_brackets,
+            reduction_type,
+            _2,
+            compression_method,
+        ) = filename_match.groups()
 
         self._compression_method = compression_method
 
-        self.reduction_type = reduction_type if reduction_type is not None \
-            else "scalar"
+        self.reduction_type = (
+            reduction_type if reduction_type is not None else "scalar"
+        )
 
         # If the file contains multiple variables, we will scan the header
         # immediately to understand the content. If not, we scan the header
         # only when needed
-        self._is_one_file_per_group = (variable_name2 is not None)
+        self._is_one_file_per_group = variable_name2 is not None
         self._was_header_scanned = False
 
         if self._is_one_file_per_group:
@@ -143,7 +154,7 @@ class OneScalar:
             self._scan_header()
         else:
             variable_name = variable_name1
-            if (index_in_brackets is not None):
+            if index_in_brackets is not None:
                 variable_name += index_in_brackets
             self._vars = {variable_name: None}
 
@@ -158,7 +169,7 @@ class OneScalar:
         # column format
         for line in strings:
             matched_pattern = pattern.match(line)
-            if (matched_pattern is not None):
+            if matched_pattern is not None:
                 break
         # Here we are using an else clause with a for loop. This else
         # branch is reached only if the break in the for loop is never
@@ -183,8 +194,9 @@ class OneScalar:
         # to each element and see if they are all not None with the
         # all() function
 
-        columns = list(map(self._rx_columns.match,
-                           matched_pattern.groups()[0].split()))
+        columns = list(
+            map(self._rx_columns.match, matched_pattern.groups()[0].split())
+        )
 
         are_real_columns = all(columns)
 
@@ -195,8 +207,9 @@ class OneScalar:
         # to the description. Columns are indexed starting from 1.
         columns_description = {
             variable_name: int(column_number) - 1
-            for column_number, variable_name, _ in (c.groups()
-                                                    for c in columns)
+            for column_number, variable_name, _ in (
+                c.groups() for c in columns
+            )
         }
 
         return columns_description
@@ -210,23 +223,23 @@ class OneScalar:
         # of the file
         opener, opener_mode = self._decompressor[self._compression_method]
 
-        with opener(self.path, mode=opener_mode) as f:
+        with opener(self.path, mode=opener_mode) as fil:
             # Read the first 20 lines
-            header = [f.readline() for i in range(self._header_line_number)]
+            header = [fil.readline() for i in range(self._header_line_number)]
 
             # Column format is relevant only for scalar output, so we start
             # from that
-            if self.reduction_type == 'scalar':
-                columns_description = \
-                    self._scan_strings_for_columns(header,
-                                                   self._rx_column_format)
+            if self.reduction_type == "scalar":
+                columns_description = self._scan_strings_for_columns(
+                    header, self._rx_column_format
+                )
 
-                time_column = columns_description.get('time', None)
+                time_column = columns_description.get("time", None)
 
                 if time_column is None:
                     raise RuntimeError(f"Missing time column in {self.path}")
 
-                data_column = columns_description.get('data', None)
+                data_column = columns_description.get("data", None)
 
                 if data_column is None:
                     raise RuntimeError(f"Missing data column in {self.path}")
@@ -241,9 +254,9 @@ class OneScalar:
             # When we have one file per group we have many data columns
             # Se update _vars to add all the new ones
             if self._is_one_file_per_group:
-                columns_description = \
-                    self._scan_strings_for_columns(header,
-                                                   self._rx_data_columns)
+                columns_description = self._scan_strings_for_columns(
+                    header, self._rx_data_columns
+                )
 
                 self._vars.update(columns_description)
             else:
@@ -263,15 +276,19 @@ class OneScalar:
         :rtype:        :py:class:`~.TimeSeries`
 
         """
-        if (not self._was_header_scanned):
+        if not self._was_header_scanned:
             self._scan_header()
 
-        if (variable not in self):
+        if variable not in self:
             raise ValueError(f"{variable} not available")
 
         column_number = self._vars[variable]
-        t, y = np.loadtxt(self.path, unpack=True, ndmin=2,
-                          usecols=(self._time_column, column_number))
+        t, y = np.loadtxt(
+            self.path,
+            unpack=True,
+            ndmin=2,
+            usecols=(self._time_column, column_number),
+        )
 
         return ts.remove_duplicate_iters(t, y)
 
@@ -317,17 +334,18 @@ class AllScalars:
         # to find the files associated to the variable and the reduction
         # reduction_type
         self._vars = {}
-        for f in allfiles:
+        for fil in allfiles:
             # We only save those that variables are well-behaved
             try:
-                cactusascii_file = OneScalar(f)
+                cactusascii_file = OneScalar(fil)
                 if cactusascii_file.reduction_type == reduction_type:
-                    for v in list(cactusascii_file.keys()):
+                    for var in list(cactusascii_file.keys()):
                         # We add to the _vars dictionary the mapping:
-                        # [v][folder] to CactusScalarASCII(f)
-
-                        self._vars.setdefault(v, {})[cactusascii_file.folder] \
-                            = cactusascii_file
+                        # [var][folder] to CactusScalarASCII(f)
+                        folder = cactusascii_file.folder
+                        self._vars.setdefault(var, {})[
+                            folder
+                        ] = cactusascii_file
             except RuntimeError:
                 pass
 
@@ -408,18 +426,18 @@ class ScalarsDir:
         :param sd: Simulation directory
         :type sd:  :py:class:`~.SimDir` instance.
         """
-        if (not isinstance(sd, simdir.SimDir)):
+        if not isinstance(sd, simdir.SimDir):
             raise TypeError("Input is not SimDir")
 
         self.path = sd.path
-        self.point = AllScalars(sd.allfiles, 'scalar')
-        self.scalar = AllScalars(sd.allfiles, 'scalar')
-        self.minimum = AllScalars(sd.allfiles, 'minimum')
-        self.maximum = AllScalars(sd.allfiles, 'maximum')
-        self.norm1 = AllScalars(sd.allfiles, 'norm1')
-        self.norm2 = AllScalars(sd.allfiles, 'norm2')
-        self.average = AllScalars(sd.allfiles, 'average')
-        self.infnorm = AllScalars(sd.allfiles, 'infnorm')
+        self.point = AllScalars(sd.allfiles, "scalar")
+        self.scalar = AllScalars(sd.allfiles, "scalar")
+        self.minimum = AllScalars(sd.allfiles, "minimum")
+        self.maximum = AllScalars(sd.allfiles, "maximum")
+        self.norm1 = AllScalars(sd.allfiles, "norm1")
+        self.norm2 = AllScalars(sd.allfiles, "norm2")
+        self.average = AllScalars(sd.allfiles, "average")
+        self.infnorm = AllScalars(sd.allfiles, "infnorm")
 
     def __getitem__(self, reduction):
         return getattr(self, reduction)
@@ -436,13 +454,27 @@ class ScalarsDir:
         :rtype: :py:class:`~.AllScalars`
 
         """
-        if key in ["point", "scalar", "minimum", "maximum", "norm1",
-                   "norm2", "average", "infnorm"]:
+        if key in [
+            "point",
+            "scalar",
+            "minimum",
+            "maximum",
+            "norm1",
+            "norm2",
+            "average",
+            "infnorm",
+        ]:
             return self[key]
 
         return default
 
     def __str__(self):
-        return "Folder %s\n%s\n%s\n%s\n%s\n%s\n%s\n"\
-            % (self.path, self.scalar, self.minimum,
-               self.maximum, self.norm1, self.norm2, self.average)
+        return "Folder %s\n%s\n%s\n%s\n%s\n%s\n%s\n" % (
+            self.path,
+            self.scalar,
+            self.minimum,
+            self.maximum,
+            self.norm1,
+            self.norm2,
+            self.average,
+        )

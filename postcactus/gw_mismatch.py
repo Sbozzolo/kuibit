@@ -15,6 +15,10 @@
 # You should have received a copy of the GNU General Public License along with
 # this program; if not, see <https://www.gnu.org/licenses/>.
 
+"""The :py:mod:`~.gw_mismatch` module functions to compute the mismatch between
+two waves.
+
+"""
 
 import numpy as np
 from warnings import warn
@@ -27,24 +31,22 @@ from warnings import warn
 # achived.
 from numba import njit, objmode
 
-<<<<<<< HEAD
-=======
-from postcactus.series import sample_common
->>>>>>> f7c45f8... Add gw_mismatch
 from postcactus import unitconv
 from postcactus import frequencyseries as fs
 from postcactus import gw_utils as gwu
 
 
-def _mismatch_core_numerical(h1_c_fft,
-                             h1_p_fft,
-                             h2_t,
-                             frequencies,
-                             frequency_mask,
-                             noises,
-                             antenna_patterns,
-                             polarization_shifts,
-                             time_shifts):
+def _mismatch_core_numerical(
+    h1_c_fft,
+    h1_p_fft,
+    h2_t,
+    frequencies,
+    frequency_mask,
+    noises,
+    antenna_patterns,
+    polarization_shifts,
+    time_shifts,
+):
     """Compute the maximum overlap between h1_fft (frequency domain, cross and
     plus) and h2_t (time domain). This function requires very specific
     pre-processing and should never be used directly.
@@ -82,8 +84,10 @@ def _mismatch_core_numerical(h1_c_fft,
         # Numba does not support fft yet, so we have to go to object mode
         # This context manager does not affect anything when we run without
         # numba
-        with objmode(h2_p_fft_pshifted='complex128[:]',
-                     h2_c_fft_pshifted='complex128[:]'):
+        with objmode(
+            h2_p_fft_pshifted="complex128[:]",
+            h2_c_fft_pshifted="complex128[:]",
+        ):
             h2_p_fft_pshifted = np.fft.fft(h2_p_t_pshifted)
             # We work with shifted frequencies (and ffts)
             h2_p_fft_pshifted = np.fft.fftshift(h2_p_fft_pshifted)
@@ -110,9 +114,10 @@ def _mismatch_core_numerical(h1_c_fft,
 
                 Fc, Fp = antenna_pattern
 
-                numerator = (Fp * h1_p_fft + Fc * h1_c_fft)
-                numerator *= (Fp * h2_p_fft_pshifted
-                              + Fc * h2_c_fft_pshifted).conj()
+                numerator = Fp * h1_p_fft + Fc * h1_c_fft
+                numerator *= (
+                    Fp * h2_p_fft_pshifted + Fc * h2_c_fft_pshifted
+                ).conj()
 
                 inner_product += numerator * np.exp(omega * t_shift) / noise
 
@@ -123,14 +128,19 @@ def _mismatch_core_numerical(h1_c_fft,
     return (np.amax(overlaps), overlaps.argmax())
 
 
-def _mismatch_core(h1, h2, fmin=0, fmax=np.inf,
-                   noises=None,
-                   antenna_patterns=None,
-                   num_polarization_shifts=100,
-                   num_time_shifts=100,
-                   time_shift_start=-5,
-                   time_shift_end=5,
-                   force_numba=False):
+def mismatch_from_strains(
+    h1,
+    h2,
+    fmin=0,
+    fmax=np.inf,
+    noises=None,
+    antenna_patterns=None,
+    num_polarization_shifts=100,
+    num_time_shifts=100,
+    time_shift_start=-5,
+    time_shift_end=5,
+    force_numba=False,
+):
     r"""Compute the netowrk-mismatch between h1 and h2 by maximising the
     overlap over time and polarization shifts.
 
@@ -185,27 +195,30 @@ def _mismatch_core(h1, h2, fmin=0, fmax=np.inf,
     polarization_shifts = np.linspace(0, 2 * np.pi, num_polarization_shifts)
 
     # We make sure that we always have to zero timeshift.
-    time_shifts = np.append([0], np.linspace(time_shift_start, time_shift_end,
-                                             num_time_shifts - 1))
+    time_shifts = np.append(
+        [0], np.linspace(time_shift_start, time_shift_end, num_time_shifts - 1)
+    )
 
     # 2. We resample h1 and h2 to a common timeseries (linearly spaced). This
     #    guarantees that their Fourier transform will be defined over the same
     #    frequencies. To avoid throwing away signal, we resample the two series
     #    to the union of their times, setting them to zero where they were not
-    #    defined, and choosing as number of points the smallest number of points
-    #    between the two series.
+    #    defined, and choosing as number of points the smallest number of
+    #    points between the two series.
 
-    (smallest_len,
-     largest_tmax,
-     smallest_tmin) = (min(len(h1), len(h2)),
-                       max(h1.tmax, h2.tmax),
-                       min(h1.tmin, h2.tmin))
+    (smallest_len, largest_tmax, smallest_tmin) = (
+        min(len(h1), len(h2)),
+        max(h1.tmax, h2.tmax),
+        min(h1.tmin, h2.tmin),
+    )
 
     union_times = np.linspace(smallest_tmin, largest_tmax, smallest_len)
 
     # ext=1 sets zero where the series is not defined
-    h1_res, h2_res = (h1.resampled(union_times, ext=1),
-                      h2.resampled(union_times, ext=1))
+    h1_res, h2_res = (
+        h1.resampled(union_times, ext=1),
+        h2.resampled(union_times, ext=1),
+    )
 
     # 3. We take the Fourier transform of the two polarizations. In doing this,
     #    we also make sure that the arrays are complex.This is because we will
@@ -220,8 +233,8 @@ def _mismatch_core(h1, h2, fmin=0, fmax=np.inf,
     h1_p_res = h1_res.real()
     h1_c_res = -h1_res.imag()
 
-    h1_p_res.y = h1_p_res.y.astype('complex128')
-    h1_c_res.y = h1_c_res.y.astype('complex128')
+    h1_p_res.y = h1_p_res.y.astype("complex128")
+    h1_c_res.y = h1_c_res.y.astype("complex128")
 
     h1f_p_res = h1_p_res.to_FrequencySeries()
     h1f_p_res.band_pass(fmin, fmax)
@@ -237,19 +250,22 @@ def _mismatch_core(h1, h2, fmin=0, fmax=np.inf,
     #    will only need to take care of the h2. If the noise is None, we
     #    prepare a unweighted noise (ones everywhere).
 
-    if (noises is not None):
+    if noises is not None:
         # With this, we can guarantee that everything has the same domain.
         # If there's a None entry, we fill it with a constant noise.
-        noises_res = [n.resampled(h1f_p_res.f) if n is not None else
-                      fs.FrequencySeries(h1f_p_res.f,
-                                         np.ones_like(h1f_p_res.fft))
-                      for n in noises]
+        noises_res = [
+            n.resampled(h1f_p_res.f)
+            if n is not None
+            else fs.FrequencySeries(h1f_p_res.f, np.ones_like(h1f_p_res.fft))
+            for n in noises
+        ]
     else:
         # Here we prepare a noise that is made by ones everywhere. This is what
         # happens internally when noises is None. However, here we do it
         # explicitly because we are going to pass it to the numba function.
-        noises_res = [fs.FrequencySeries(h1f_p_res.f,
-                                         np.ones_like(h1f_p_res.fft))]
+        noises_res = [
+            fs.FrequencySeries(h1f_p_res.f, np.ones_like(h1f_p_res.fft))
+        ]
 
     # 4. We use the linearity of the Fourier transform to apply the antenna
     #    pattern. (This is why we have to carry around the two polarization
@@ -260,8 +276,8 @@ def _mismatch_core(h1, h2, fmin=0, fmax=np.inf,
 
     # This case is "we have 3 noise curves, but we don't care about the antenna
     # response". So we have to have 3 antenna patterns.
-    if (antenna_patterns is None):
-        antenna_patterns = [(1/2, 1/2)] * len(noises_res)
+    if antenna_patterns is None:
+        antenna_patterns = [(1 / 2, 1 / 2)] * len(noises_res)
 
     # This case is "we have N detectors, but we don't care about the actual
     # noise curve". So we have to have N noises. Before, we set noises =
@@ -269,7 +285,7 @@ def _mismatch_core(h1, h2, fmin=0, fmax=np.inf,
     #
     # If both noises and antenna_patterns are None, we will have a single
     # element in the noises list, which is what we expect.
-    if (noises is None):
+    if noises is None:
         noises_res *= len(antenna_patterns)
 
     # Numba doesn't support lists, so we generate a tuple of arrays
@@ -285,8 +301,7 @@ def _mismatch_core(h1, h2, fmin=0, fmax=np.inf,
     all_frequencies = np.fft.fftfreq(len(h2_res.t), d=h2_res.dt)
     shifted_frequencies = np.fft.fftshift(all_frequencies)
 
-    frequency_mask = np.array(
-        [f in h1f_p_res.f for f in shifted_frequencies])
+    frequency_mask = np.array([f in h1f_p_res.f for f in shifted_frequencies])
 
     # 6. Finally we can call the numerical routine which will return the
     #    un-normalized mismatch and the shifts required. We will Fourier
@@ -295,24 +310,26 @@ def _mismatch_core(h1, h2, fmin=0, fmax=np.inf,
 
     frequencies = h1f_p_res.f  # from fmin to fmax
 
-    use_numba = (force_numba
-                 or num_polarization_shifts * num_time_shifts >= 500 * 500)
+    use_numba = (
+        force_numba or num_polarization_shifts * num_time_shifts >= 500 * 500
+    )
 
     if use_numba:
         _core_function = njit(_mismatch_core_numerical)
     else:
         _core_function = _mismatch_core_numerical
 
-    (unnormalized_max_overlap,
-     index_max) = _core_function(h1f_c_res.fft,
-                                 h1f_p_res.fft,
-                                 h2_res.y,
-                                 frequencies,
-                                 frequency_mask,
-                                 noises,
-                                 antenna_patterns,
-                                 polarization_shifts,
-                                 time_shifts)
+    (unnormalized_max_overlap, index_max) = _core_function(
+        h1f_c_res.fft,
+        h1f_p_res.fft,
+        h2_res.y,
+        frequencies,
+        frequency_mask,
+        noises,
+        antenna_patterns,
+        polarization_shifts,
+        time_shifts,
+    )
 
     # 12. The normalization is constant. Again, we do not include df or the
     #     factor of 4.
@@ -321,8 +338,8 @@ def _mismatch_core(h1, h2, fmin=0, fmax=np.inf,
     h2_c_res = -h2_res.imag()
 
     # Transform to complex
-    h2_p_res.y = h2_p_res.y.astype('complex128')
-    h2_c_res.y = h2_c_res.y.astype('complex128')
+    h2_p_res.y = h2_p_res.y.astype("complex128")
+    h2_c_res.y = h2_c_res.y.astype("complex128")
 
     h2f_p_res = h2_p_res.to_FrequencySeries()
     h2f_p_res.band_pass(fmin, fmax)
@@ -339,12 +356,12 @@ def _mismatch_core(h1, h2, fmin=0, fmax=np.inf,
 
         Fc, Fp = antenna_pattern
 
-        numerator11 = (Fp * h1f_p_res + Fc * h1f_c_res)
+        numerator11 = Fp * h1f_p_res + Fc * h1f_c_res
         numerator11 *= (Fp * h1f_p_res + Fc * h1f_c_res).conjugate()
 
         inner11 += numerator11 / noise
 
-        numerator22 = (Fp * h2f_p_res + Fc * h2f_c_res)
+        numerator22 = Fp * h2f_p_res + Fc * h2f_c_res
         numerator22 *= (Fp * h2f_p_res + Fc * h2f_c_res).conjugate()
 
         inner22 += numerator22 / noise
@@ -356,13 +373,14 @@ def _mismatch_core(h1, h2, fmin=0, fmax=np.inf,
 
     # Values that maximise the overlap
 
-    (p_index, t_index) = np.unravel_index(index_max,
-                                          (num_polarization_shifts,
-                                           num_time_shifts))
+    # pylint: disable=unbalanced-tuple-unpacking
+    (p_index, t_index) = np.unravel_index(
+        index_max, (num_polarization_shifts, num_time_shifts)
+    )
 
     # Check t_index is close to the boundary and emit warning
     # We have to check for t_index = 0 because we always put the tshift=0 there
-    if ((not 0.05 < t_index/num_time_shifts < 0.95) and t_index != 0):
+    if (not 0.05 < t_index / num_time_shifts < 0.95) and t_index != 0:
         warn("Maximum of overlap near the boundary of the time shift interval")
 
     p_shift_max = polarization_shifts[p_index]
@@ -371,19 +389,21 @@ def _mismatch_core(h1, h2, fmin=0, fmax=np.inf,
     return 1 - unnormalized_max_overlap / norm, (p_shift_max, t_shift_max)
 
 
-def network_mismatch(h1,
-                     h2,
-                     right_ascension,
-                     declination,
-                     time_utc,
-                     fmin=0,
-                     fmax=np.inf,
-                     noises=None,
-                     num_polarization_shifts=200,
-                     num_time_shifts=1000,
-                     time_shift_start=-20,
-                     time_shift_end=20,
-                     force_numba=False):
+def network_mismatch(
+    h1,
+    h2,
+    right_ascension,
+    declination,
+    time_utc,
+    fmin=0,
+    fmax=np.inf,
+    noises=None,
+    num_polarization_shifts=200,
+    num_time_shifts=1000,
+    time_shift_start=-20,
+    time_shift_end=20,
+    force_numba=False,
+):
     """h1 and h2 have to be already pre-processed for Fourier transform.
 
     At the moment, this mismatch makes sense only for the l=2, m=2 mode.
@@ -393,15 +413,19 @@ def network_mismatch(h1,
     """
 
     antenna_patterns = gwu.antenna_responses_from_sky_localization(
-        right_ascension, declination, time_utc)
+        right_ascension, declination, time_utc
+    )
 
     # Transform Detectors to lists (they are already properly ordered)
-    if (noises is not None):
-        if (isinstance(noises, gwu.Detectors)):
+    if noises is not None:
+        if isinstance(noises, gwu.Detectors):
             # We select thos antennas for which the corresponding noise is not
             # -1
-            antenna_patterns = [ap for ap, noise in
-                                zip(antenna_patterns, noises) if noise != -1]
+            antenna_patterns = [
+                ap
+                for ap, noise in zip(antenna_patterns, noises)
+                if noise != -1
+            ]
             # We remove all the noises that are -1. This modifies the list.
             noises = [noise for noise in noises if noise != -1]
         else:
@@ -410,109 +434,128 @@ def network_mismatch(h1,
         # All three detectors
         antenna_patterns = list(antenna_patterns)
 
-    return _mismatch_core(h1, h2, fmin, fmax,
-                          noises=noises,
-                          antenna_patterns=antenna_patterns,
-                          num_polarization_shifts=num_polarization_shifts,
-                          num_time_shifts=num_time_shifts,
-                          time_shift_start=time_shift_start,
-                          time_shift_end=time_shift_end,
-                          force_numba=force_numba)
+    return mismatch_from_strains(
+        h1,
+        h2,
+        fmin,
+        fmax,
+        noises=noises,
+        antenna_patterns=antenna_patterns,
+        num_polarization_shifts=num_polarization_shifts,
+        num_time_shifts=num_time_shifts,
+        time_shift_start=time_shift_start,
+        time_shift_end=time_shift_end,
+        force_numba=force_numba,
+    )
 
 
-def network_mismatch_from_psi4(psi1, psi2,
-                               right_ascension,
-                               declination,
-                               time_utc,
-                               pcut1, pcut2,
-                               *args,
-                               window_function=None,
-                               align_at_peak=True,
-                               trim_ends=True,
-                               mass_scale1=None,
-                               mass_scale2=None,
-                               distance1=None,
-                               distance2=None,
-                               fmin=0,
-                               fmax=np.inf,
-                               noises=None,
-                               N_zero_pad=16384,
-                               num_time_shifts=100,
-                               num_polarization_shifts=100,
-                               time_shift_start=-50,
-                               time_shift_end=50,
-                               force_numba=False,
-                               t_after_max=100,
-                               crop_initial=20,
-                               **kwargs):
+def network_mismatch_from_psi4(
+    psi1,
+    psi2,
+    right_ascension,
+    declination,
+    time_utc,
+    pcut1,
+    pcut2,
+    *args,
+    window_function=None,
+    align_at_peak=True,
+    trim_ends=True,
+    mass_scale1=None,
+    mass_scale2=None,
+    distance1=None,
+    distance2=None,
+    fmin=0,
+    fmax=np.inf,
+    noises=None,
+    num_zero_pad=16384,
+    num_time_shifts=100,
+    num_polarization_shifts=100,
+    time_shift_start=-50,
+    time_shift_end=50,
+    force_numba=False,
+    time_removed_after_max=None,
+    initial_time_removed=None,
+    **kwargs
+):
 
-    # First, we compute the strains
-    h1 = psi1.get_strain_lm(2, 2, pcut1, *args,
-                            window_function=window_function,
-                            trim_ends=trim_ends, **kwargs)
+    # First, we compute the strains. If we just look at the (2,2) mode, we
+    # don't need to multiply the spin weighted spherical harmonics, since it is
+    # a normalization factor.
+    h1 = psi1.get_strain_lm(
+        2,
+        2,
+        pcut1,
+        *args,
+        window_function=window_function,
+        trim_ends=trim_ends,
+        **kwargs
+    )
 
-    h2 = psi2.get_strain_lm(2, 2, pcut2, *args,
-                            window_function=window_function,
-                            trim_ends=trim_ends, **kwargs)
-
-    if (crop_initial > 0):
-        h1.crop(init=crop_initial + pcut1 * trim_ends)
-        h2.crop(init=crop_initial + pcut2 * trim_ends)
+    h2 = psi2.get_strain_lm(
+        2,
+        2,
+        pcut2,
+        *args,
+        window_function=window_function,
+        trim_ends=trim_ends,
+        **kwargs
+    )
 
     # Align the waves at the peak
-    if (align_at_peak):
+    if align_at_peak:
         h1.align_at_maximum()
         h2.align_at_maximum()
 
     # Now, we convert to physical units
-    if (mass_scale1 is not None):
+    if mass_scale1 is not None:
         CU1 = unitconv.geom_umass_msun(mass_scale1)
         h1.time_unit_change(CU1.time, inverse=True)
-        if (distance1 is not None):
+        if distance1 is not None:
             distance1_SI = distance1 * unitconv.MEGAPARSEC_SI
+            # Remember, h is actually r * h!
             h1 *= CU1.length / distance1_SI
             redshift1 = gwu.luminosity_distance_to_redshift(distance1)
             h1.redshift(redshift1)
 
-    if (mass_scale2 is not None):
+    if mass_scale2 is not None:
         CU2 = unitconv.geom_umass_msun(mass_scale2)
         h2.time_unit_change(CU2.time, inverse=True)
-        if (distance2 is not None):
+        if distance2 is not None:
             distance2_SI = distance2 * unitconv.MEGAPARSEC_SI
+            # Remember, h is actually r * h!
             h2 *= CU2.length / distance2_SI
             redshift2 = gwu.luminosity_distance_to_redshift(distance2)
             h2.redshift(redshift2)
 
-    h1.crop(end=t_after_max)
-    h2.crop(end=t_after_max)
+    if initial_time_removed is not None:
+        h1.initial_time_remove(initial_time_removed)
+        h2.initial_time_remove(initial_time_removed)
 
-    # Zero pad to reach t_after_max
-    # In the worst case, we add one point
-    if (h1.tmax < t_after_max):
-        N_zeros = int((t_after_max - h1.tmax)/h1.dt)
-        h1.zero_pad(len(h1) + N_zeros + 1)
+    if time_removed_after_max is not None:
+        h1.crop(end=time_removed_after_max)
+        h2.crop(end=time_removed_after_max)
 
-    if (h2.tmax < t_after_max):
-        N_zeros = int((t_after_max - h2.tmax)/h2.dt)
-        h2.zero_pad(len(h2) + N_zeros + 1)
+    if window_function is not None:
+        # Next, we window and zero-pad
+        h1.window(window_function, *args, **kwargs)
+        h2.window(window_function, *args, **kwargs)
 
-    # Next, we window and zero-pad
-    h1.window(window_function, *args, **kwargs)
-    h2.window(window_function, *args, **kwargs)
+    h1.zero_pad(num_zero_pad)
+    h2.zero_pad(num_zero_pad)
 
-    h1.zero_pad(N_zero_pad)
-    h2.zero_pad(N_zero_pad)
-
-    return network_mismatch(h1,
-                            h2,
-                            right_ascension,
-                            declination,
-                            time_utc,
-                            fmin=fmin,
-                            fmax=fmax,
-                            noises=noises,
-                            num_polarization_shifts=num_polarization_shifts,
-                            num_time_shifts=num_time_shifts,
-                            time_shift_start=time_shift_start,
-                            time_shift_end=time_shift_end,
-                            force_numba=force_numba)
+    return network_mismatch(
+        h1,
+        h2,
+        right_ascension,
+        declination,
+        time_utc,
+        fmin=fmin,
+        fmax=fmax,
+        noises=noises,
+        num_polarization_shifts=num_polarization_shifts,
+        num_time_shifts=num_time_shifts,
+        time_shift_start=time_shift_start,
+        time_shift_end=time_shift_end,
+        force_numba=force_numba,
+    )

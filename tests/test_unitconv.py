@@ -24,7 +24,6 @@ from postcactus import unitconv as uc
 
 
 class TestUnitconv(unittest.TestCase):
-
     def test_constants(self):
         """Test that the constants are the ones we expect.
 
@@ -58,9 +57,7 @@ class TestUnitconv(unittest.TestCase):
         self.assertAlmostEqual(h0 / uc.H0_SI, 1, places=3)
 
     def test_Units(self):
-        """Test that Units conversion are well coded.
-
-        """
+        """Test that Units conversion are well coded."""
         # This a made-up unit system with non-trivial, but simple, conversions
         # Hardcoded, so that I have to go through all the computations
         CU = uc.Units(1e-2, 3e-3, 5e-4)
@@ -81,22 +78,16 @@ class TestUnitconv(unittest.TestCase):
         self.assertAlmostEqual(CU.moment_inertia, 5e-10)
 
     def test_geom_ulength(self):
-        """Test geom_ulength
-
-        """
-        CU = uc.geom_ulength(1476.6436)   # m
+        """Test geom_ulength"""
+        CU = uc.geom_ulength(1476.6436)  # m
         self.assertAlmostEqual(CU.mass / uc.M_SOL_SI, 1, places=3)
 
     def test_geom_umass(self):
-        """Test geom_umass
-
-        """
-        CU = uc.geom_umass(1)   # 1 kg
+        """Test geom_umass"""
+        CU = uc.geom_umass(1)  # 1 kg
         self.assertAlmostEqual(CU.length, 7.426e-28, places=3)
 
     def test_geom_umass_msun(self):
-        """Test geom_umass_msun
-
-        """
+        """Test geom_umass_msun"""
         CU = uc.geom_umass_msun(1)
         self.assertAlmostEqual(CU.length, 1476.6436, places=3)

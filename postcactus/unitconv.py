@@ -43,15 +43,15 @@ from scipy import constants
 
 class Units:
     """Class representing unit conversion. The unit system is specified by
-length, time, and mass units, from which derived units are computed.
+    length, time, and mass units, from which derived units are computed.
 
-This class can be used to convert units from one system to another.
+    This class can be used to convert units from one system to another.
 
-For example, define ``CGS = Units(1.0e-2, 1.0, 1.0e-3)``.
-If the length d is in SI, then ``d * CGS.length`` will be in CGS.
+    For example, define ``CGS = Units(1.0e-2, 1.0, 1.0e-3)``.
+    If the length d is in SI, then ``d * CGS.length`` will be in CGS.
 
-The main use of Units in PostCactus is to provide a way to convert from
-geometrized units to physical units (see, :py:func:`~.geom_umass`).
+    The main use of Units in PostCactus is to provide a way to convert from
+    geometrized units to physical units (see, :py:func:`~.geom_umass`).
     """
 
     def __init__(self, ulength, utime, umass):
@@ -122,7 +122,7 @@ def geom_ulength(ulength):
     :rtype: :py:class :`~.Units`
 
     """
-    return Units(ulength, ulength / C_SI, ulength * (C_SI**2) / G_SI)
+    return Units(ulength, ulength / C_SI, ulength * (C_SI ** 2) / G_SI)
 
 
 def geom_umass(umass):
@@ -136,7 +136,7 @@ def geom_umass(umass):
     :rtype: :py:class:`~.Units`
 
     """
-    return geom_ulength(umass * G_SI / (C_SI**2))
+    return geom_ulength(umass * G_SI / (C_SI ** 2))
 
 
 def geom_umass_msun(umass):

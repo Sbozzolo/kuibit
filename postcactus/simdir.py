@@ -23,6 +23,7 @@ data types.
 """
 
 import os
+
 # We ideally would like to use cached_property, but it is in Python 3.8
 # which is quite new
 from functools import lru_cache
@@ -67,7 +68,7 @@ class SimDir:
     def _sanitize_path(self, path):
         # Make sure to have complete paths with respect to the current folder
         self.path = os.path.abspath(os.path.expanduser(path))
-        if (not os.path.isdir(self.path)):
+        if not os.path.isdir(self.path):
             raise RuntimeError(f"Folder does not exist: {path}")
 
     def _scan_folders(self, max_depth):
@@ -82,9 +83,7 @@ class SimDir:
         self.allfiles = []
 
         def listdir_no_symlinks(path):
-            """Return a list of files in path that are not symlink
-
-            """
+            """Return a list of files in path that are not symlink"""
             dir_content = [os.path.join(path, p) for p in os.listdir(path)]
             return [p for p in dir_content if not os.path.islink(p)]
 
@@ -100,7 +99,7 @@ class SimDir:
             directories.
 
             """
-            if (level >= max_depth):
+            if level >= max_depth:
                 return
 
             self.dirs.append(path)
@@ -110,12 +109,16 @@ class SimDir:
             files_in_path = list(filter(os.path.isfile, all_files_in_path))
             self.allfiles += files_in_path
 
-            directories_in_path = list(filter(os.path.isdir,
-                                              all_files_in_path))
+            directories_in_path = list(
+                filter(os.path.isdir, all_files_in_path)
+            )
 
             # We ignore the ones in self.ignore
-            directories_to_scan = [p for p in directories_in_path if
-                                   (os.path.basename(p) not in self.ignore)]
+            directories_to_scan = [
+                p
+                for p in directories_in_path
+                if (os.path.basename(p) not in self.ignore)
+            ]
 
             # Apply walk_rec to all the subdirectory, but with level increased
             for p in directories_to_scan:
@@ -123,21 +126,21 @@ class SimDir:
 
         walk_rec(self.path)
 
-        self.logfiles = filter_ext(self.allfiles, '.out')
-        self.errfiles = filter_ext(self.allfiles, '.err')
-        self.parfiles = filter_ext(self.allfiles, '.par')
+        self.logfiles = filter_ext(self.allfiles, ".out")
+        self.errfiles = filter_ext(self.allfiles, ".err")
+        self.parfiles = filter_ext(self.allfiles, ".par")
 
         # Sort by time
         self.parfiles.sort(key=os.path.getmtime)
         self.logfiles.sort(key=os.path.getmtime)
         self.errfiles.sort(key=os.path.getmtime)
 
-        simfac = os.path.join(self.path, 'SIMFACTORY', 'par')
+        simfac = os.path.join(self.path, "SIMFACTORY", "par")
 
         # Simfactory has a folder SIMFATORY with a subdirectory for par files
         # Even if SIMFACTORY is excluded, we should include that par file
         if os.path.isdir(simfac):
-            mainpar = filter_ext(listdir_no_symlinks(simfac), '.par')
+            mainpar = filter_ext(listdir_no_symlinks(simfac), ".par")
             self.parfiles = mainpar + self.parfiles
 
         self.has_parfile = bool(self.parfiles)
@@ -166,8 +169,8 @@ class SimDir:
         parameters. Logfiles (*.out) and errorfiles (*.err) will be
         searched for in all data directories.
         """
-        if (ignore is None):
-            ignore = {'SIMFACTORY', 'report', 'movies', 'tmp', 'temp'}
+        if ignore is None:
+            ignore = {"SIMFACTORY", "report", "movies", "tmp", "temp"}
 
         self.ignore = ignore
         self._sanitize_path(str(path))
@@ -213,4 +216,4 @@ class SimDir:
         if len(self.electromagneticwaves) > 0:
             em_ret = "Available electromagnetic wave data"
 
-        return (header + ts_ret + mp_ret + gw_ret + em_ret)
+        return header + ts_ret + mp_ret + gw_ret + em_ret

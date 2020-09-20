@@ -29,15 +29,13 @@ from postcactus import timeseries as ts
 
 
 class TestTimeseries(unittest.TestCase):
-
     def setUp(self):
         self.times = np.linspace(0, 2 * np.pi, 100)
         self.values = np.sin(self.times)
 
         self.TS = ts.TimeSeries(self.times, self.values)
         # Complex
-        self.TS_c = ts.TimeSeries(self.times,
-                                  self.values + 1j * self.values)
+        self.TS_c = ts.TimeSeries(self.times, self.values + 1j * self.values)
 
     def test__make_array(self):
 
@@ -58,13 +56,14 @@ class TestTimeseries(unittest.TestCase):
             self.TS._return_array_if_monotonic(times)
 
         # A number
-        self.assertCountEqual(self.TS._return_array_if_monotonic(
-            np.array([1])),
-                              np.array([1]))
+        self.assertCountEqual(
+            self.TS._return_array_if_monotonic(np.array([1])), np.array([1])
+        )
         # A list
-        self.assertCountEqual(self.TS._return_array_if_monotonic(
-            np.array([1, 2])),
-                              np.array([1, 2]))
+        self.assertCountEqual(
+            self.TS._return_array_if_monotonic(np.array([1, 2])),
+            np.array([1, 2]),
+        )
 
     def test_init(self):
         # Check that errors are thrown if:
@@ -172,8 +171,7 @@ class TestTimeseries(unittest.TestCase):
         self.assertAlmostEqual(sins.time_length, 1)
         self.assertAlmostEqual(sins.duration, 1)
 
-        self.assertAlmostEqual(self.TS.dt,
-                               self.TS.tmax / (len(self.TS) - 1))
+        self.assertAlmostEqual(self.TS.dt, self.TS.tmax / (len(self.TS) - 1))
 
         with self.assertRaises(ValueError):
             sins.t[-1] = 20
@@ -204,7 +202,7 @@ class TestTimeseries(unittest.TestCase):
 
         # 2
         with self.assertRaises(TypeError):
-            out = self.TS._apply_binary("str", np.add)
+            self.TS._apply_binary("str", np.add)
 
     def test_add(self):
         # Errors are tested by test_apply_binary
@@ -227,7 +225,7 @@ class TestTimeseries(unittest.TestCase):
         self.assertTrue(np.allclose(out.y, 2 + np.sin(times)))
 
         out += self.TS
-        self.assertTrue(np.allclose(out.y, 2 + 2*np.sin(times)))
+        self.assertTrue(np.allclose(out.y, 2 + 2 * np.sin(times)))
 
     def test_sub(self):
         # Errors are tested by test_apply_binary
@@ -250,18 +248,21 @@ class TestTimeseries(unittest.TestCase):
         self.assertTrue(np.allclose(out.y, -np.sin(times)))
 
         out -= self.TS
-        self.assertTrue(np.allclose(out.y, -2*np.sin(times)))
+        self.assertTrue(np.allclose(out.y, -2 * np.sin(times)))
 
     def test_neg(self):
         self.assertTrue(np.allclose((-self.TS).y, -np.sin(self.times)))
 
     def test_abs(self):
-        self.assertTrue(np.allclose(abs(self.TS).y,
-                                    np.abs(np.sin(self.times))))
-        self.assertTrue(np.allclose(np.abs(self.TS).y,
-                                    np.abs(np.sin(self.times))))
-        self.assertTrue(np.allclose(self.TS.abs().y,
-                                    np.abs(np.sin(self.times))))
+        self.assertTrue(
+            np.allclose(abs(self.TS).y, np.abs(np.sin(self.times)))
+        )
+        self.assertTrue(
+            np.allclose(np.abs(self.TS).y, np.abs(np.sin(self.times)))
+        )
+        self.assertTrue(
+            np.allclose(self.TS.abs().y, np.abs(np.sin(self.times)))
+        )
 
     def test_mul(self):
         # Errors are tested by test_apply_binary
@@ -270,7 +271,7 @@ class TestTimeseries(unittest.TestCase):
         values = np.sin(times)
 
         out = self.TS * ts.TimeSeries(times, values)
-        self.assertTrue(np.allclose(out.y, np.sin(times)**2))
+        self.assertTrue(np.allclose(out.y, np.sin(times) ** 2))
 
         # Scalar
         out = self.TS * 3
@@ -284,7 +285,7 @@ class TestTimeseries(unittest.TestCase):
         self.assertTrue(np.allclose(out.y, 9 * np.sin(times)))
 
         out *= self.TS
-        self.assertTrue(np.allclose(out.y, 9*np.sin(times)**2))
+        self.assertTrue(np.allclose(out.y, 9 * np.sin(times) ** 2))
 
     def test_div(self):
         # Errors are tested by test_apply_binary
@@ -308,19 +309,19 @@ class TestTimeseries(unittest.TestCase):
 
         # Test itruediv
         out /= 2
-        self.assertTrue(np.allclose(out.y, np.sin(times)/6))
+        self.assertTrue(np.allclose(out.y, np.sin(times) / 6))
 
         out /= sins
-        self.assertTrue(np.allclose(out.y, 1/6))
+        self.assertTrue(np.allclose(out.y, 1 / 6))
 
     def test_power(self):
         # Errors are tested by test_apply_binary
 
         times = np.linspace(0, 2 * np.pi, 100)
-        values = np.array([2]*len(times))
+        values = np.array([2] * len(times))
 
         out = self.TS ** ts.TimeSeries(times, values)
-        self.assertTrue(np.allclose(out.y, np.sin(times)**2))
+        self.assertTrue(np.allclose(out.y, np.sin(times) ** 2))
 
         # Scalar
         out = self.TS ** 2
@@ -328,10 +329,10 @@ class TestTimeseries(unittest.TestCase):
 
         # Test ipow
         out **= 2
-        self.assertTrue(np.allclose(out.y, np.sin(times)**4))
+        self.assertTrue(np.allclose(out.y, np.sin(times) ** 4))
 
         out **= ts.TimeSeries(times, values)
-        self.assertTrue(np.allclose(out.y, np.sin(times)**8))
+        self.assertTrue(np.allclose(out.y, np.sin(times) ** 8))
 
     def test_eq(self):
 
@@ -348,39 +349,40 @@ class TestTimeseries(unittest.TestCase):
         self.assertTrue(self.TS_c.is_complex())
 
     def test_unary_functions(self):
-
         def test_f(f):
             times = np.linspace(np.pi / 3, np.pi / 2, 100)
-            values = np.array([0.5]*len(times))
+            values = np.array([0.5] * len(times))
 
             out = f(ts.TimeSeries(times, values))
             self.assertTrue(np.allclose(out.y, f(values)))
 
         def test_f2(f):
             times = np.linspace(np.pi / 3, np.pi / 2, 100)
-            values = np.array([1.5]*len(times))
+            values = np.array([1.5] * len(times))
 
             out = f(ts.TimeSeries(times, values))
             self.assertTrue(np.allclose(out.y, f(values)))
 
-        for f in [np.abs,
-                  np.sin,
-                  np.cos,
-                  np.tan,
-                  np.arcsin,
-                  np.arccos,
-                  np.arctan,
-                  np.sinh,
-                  np.cosh,
-                  np.tanh,
-                  np.arcsinh,
-                  np.arctanh,
-                  np.sqrt,
-                  np.exp,
-                  np.log,
-                  np.log10,
-                  np.conj,
-                  np.conjugate]:
+        for f in [
+            np.abs,
+            np.sin,
+            np.cos,
+            np.tan,
+            np.arcsin,
+            np.arccos,
+            np.arctan,
+            np.sinh,
+            np.cosh,
+            np.tanh,
+            np.arcsinh,
+            np.arctanh,
+            np.sqrt,
+            np.exp,
+            np.log,
+            np.log10,
+            np.conj,
+            np.conjugate,
+        ]:
             with self.subTest(f=f):
                 test_f(f)
 
@@ -400,14 +402,14 @@ class TestTimeseries(unittest.TestCase):
         # Check invalid number of points
 
         with self.assertRaises(ValueError):
-            out = self.TS.zero_pad(50)
+            self.TS.zero_pad(50)
 
         # Check unevenly-space time
         times = np.logspace(0, 1, 100)
         sins = ts.TimeSeries(times, self.values)
 
         with self.assertRaises(ValueError):
-            out = sins.zero_pad(200)
+            sins.zero_pad(200)
 
         sins2 = ts.TimeSeries(self.times, self.values)
 
@@ -432,6 +434,24 @@ class TestTimeseries(unittest.TestCase):
 
         self.assertTrue(np.allclose(sins.y, self.values))
 
+    def test_initial_final_time_remove(self):
+
+        # Check unevenly-space time
+        times = np.linspace(-1, 3, 100)
+        sins = ts.TimeSeries(times, self.values + 1)
+
+        # Remove the first 1
+        sins.initial_time_remove(1)
+
+        new_times = times[times > 0]
+        self.assertTrue(np.allclose(sins.t, new_times))
+
+        # Remove the last 1
+        sins.final_time_remove(1)
+
+        new_times = new_times[new_times < 2]
+        self.assertTrue(np.allclose(sins.t, new_times))
+
     def test_copy(self):
         tscopy = self.TS.copy()
         tscopyc = self.TS_c.copy()
@@ -449,8 +469,7 @@ class TestTimeseries(unittest.TestCase):
         times = np.logspace(0, 1, 100)
         sins = ts.TimeSeries(times, self.values)
 
-        self.assertTrue(np.allclose(sins.time_shifted(1).t,
-                                    times + 1))
+        self.assertTrue(np.allclose(sins.time_shifted(1).t, times + 1))
 
         sins.time_shift(1)
 
@@ -460,9 +479,10 @@ class TestTimeseries(unittest.TestCase):
 
         sins = ts.TimeSeries(self.times, self.values)
 
-        self.assertTrue(np.allclose(sins.phase_shifted(np.pi/2).y,
-                                    1j * self.values))
-        sins.phase_shift(np.pi/2)
+        self.assertTrue(
+            np.allclose(sins.phase_shifted(np.pi / 2).y, 1j * self.values)
+        )
+        sins.phase_shift(np.pi / 2)
 
         self.assertTrue(np.allclose(sins.y, 1j * self.values))
 
@@ -516,10 +536,8 @@ class TestTimeseries(unittest.TestCase):
         values[-1] = np.nan
         sins = ts.TimeSeries(self.times, values)
 
-        self.assertTrue(np.allclose(sins.nans_removed().y,
-                                    values[1:-1]))
-        self.assertTrue(np.allclose(sins.nans_removed().t,
-                                    self.times[1:-1]))
+        self.assertTrue(np.allclose(sins.nans_removed().y, values[1:-1]))
+        self.assertTrue(np.allclose(sins.nans_removed().t, self.times[1:-1]))
 
         sins.nans_remove()
 
@@ -535,36 +553,36 @@ class TestTimeseries(unittest.TestCase):
 
         # Check that spline reproduce data
         # These are pulled from the data
-        self.assertTrue(np.allclose(self.TS(self.times),
-                                    self.values))
+        self.assertTrue(np.allclose(self.TS(self.times), self.values))
         # These have some that computed with splines
         other_times = np.linspace(0, np.pi, 100)
         other_values = np.sin(other_times)
 
-        self.assertTrue(np.allclose(self.TS(other_times),
-                                    other_values))
+        self.assertTrue(np.allclose(self.TS(other_times), other_values))
 
-        self.assertTrue(np.allclose(self.TS(np.pi/2), 1))
+        self.assertTrue(np.allclose(self.TS(np.pi / 2), 1))
         self.assertTrue(np.allclose(self.TS(self.TS.t[0]), self.TS.y[0]))
 
         # From data
-        self.assertTrue(np.allclose(self.TS_c(self.times),
-                                    self.values + 1j * self.values))
+        self.assertTrue(
+            np.allclose(self.TS_c(self.times), self.values + 1j * self.values)
+        )
 
         # From spline
-        self.assertTrue(np.allclose(self.TS_c(other_times),
-                                    other_values + 1j * other_values))
+        self.assertTrue(
+            np.allclose(
+                self.TS_c(other_times), other_values + 1j * other_values
+            )
+        )
 
         # Does the spline update?
         # Let's test with a method that changes the timeseries
         sins = ts.TimeSeries(self.times, self.values + 1)
-        self.assertTrue(np.allclose(sins(self.times),
-                                    self.values + 1))
+        self.assertTrue(np.allclose(sins(self.times), self.values + 1))
 
         sins.mean_remove()
 
-        self.assertTrue(np.allclose(sins(self.times),
-                                    self.values))
+        self.assertTrue(np.allclose(sins(self.times), self.values))
 
         with self.assertRaises(ValueError):
             sins(-1)
@@ -578,19 +596,17 @@ class TestTimeseries(unittest.TestCase):
 
     def test_resample(self):
 
-        new_times = np.array([float(1e-5 * i**2) for i in range(0, 100)])
+        new_times = np.array([float(1e-5 * i ** 2) for i in range(0, 100)])
 
         # Test no resampling
         sins = self.TS.copy()
-        self.assertTrue(np.allclose(sins.resampled(sins.t).y,
-                                    sins.y))
-        self.assertTrue(np.allclose(sins.resampled(sins.t).t,
-                                    sins.t))
+        self.assertTrue(np.allclose(sins.resampled(sins.t).y, sins.y))
+        self.assertTrue(np.allclose(sins.resampled(sins.t).t, sins.t))
 
-        self.assertTrue(np.allclose(sins.resampled(new_times).y,
-                                    np.sin(new_times)))
-        self.assertTrue(np.allclose(sins.resampled(new_times).t,
-                                    new_times))
+        self.assertTrue(
+            np.allclose(sins.resampled(new_times).y, np.sin(new_times))
+        )
+        self.assertTrue(np.allclose(sins.resampled(new_times).t, new_times))
 
         sins.resample(new_times)
 
@@ -601,11 +617,11 @@ class TestTimeseries(unittest.TestCase):
         # sampled
         regular_times = np.linspace(0, new_times[-1], 100)
 
-        self.assertTrue(np.allclose(sins.regular_resampled().t,
-                                    regular_times))
+        self.assertTrue(np.allclose(sins.regular_resampled().t, regular_times))
 
-        self.assertTrue(np.allclose(sins.regular_resampled().y,
-                                    np.sin(regular_times)))
+        self.assertTrue(
+            np.allclose(sins.regular_resampled().y, np.sin(regular_times))
+        )
 
         sins.regular_resample()
 
@@ -618,16 +634,20 @@ class TestTimeseries(unittest.TestCase):
         dt = two_times[1] - two_times[0]
 
         self.assertTrue(
-            np.allclose(sins.fixed_frequency_resampled(1 / dt).t, two_times))
+            np.allclose(sins.fixed_frequency_resampled(1 / dt).t, two_times)
+        )
         self.assertTrue(
             np.allclose(
-                sins.fixed_frequency_resampled(1 / dt).y, np.sin(two_times)))
+                sins.fixed_frequency_resampled(1 / dt).y, np.sin(two_times)
+            )
+        )
 
         self.assertTrue(
-            np.allclose(sins.fixed_timestep_resampled(dt).t, two_times))
+            np.allclose(sins.fixed_timestep_resampled(dt).t, two_times)
+        )
         self.assertTrue(
-            np.allclose(
-                sins.fixed_timestep_resampled(dt).y, np.sin(two_times)))
+            np.allclose(sins.fixed_timestep_resampled(dt).y, np.sin(two_times))
+        )
 
         with self.assertRaises(ValueError):
             sins.fixed_timestep_resampled(50)
@@ -637,7 +657,7 @@ class TestTimeseries(unittest.TestCase):
 
         sins2 = sins.copy()
         sins.fixed_timestep_resample(dt)
-        sins2.fixed_frequency_resample(1/dt)
+        sins2.fixed_frequency_resample(1 / dt)
 
         self.assertTrue(np.allclose(sins.t, two_times))
         self.assertTrue(np.allclose(sins.y, np.sin(two_times)))
@@ -651,43 +671,45 @@ class TestTimeseries(unittest.TestCase):
         TS = ts.TimeSeries(times_long, values_long)
         TS_c = ts.TimeSeries(times_long, values_long + 1j * values_long)
 
-        self.assertTrue(np.allclose(TS.integrated().y,
-                                    1 - np.cos(times_long),
-                                    atol=1e-4))
+        self.assertTrue(
+            np.allclose(TS.integrated().y, 1 - np.cos(times_long), atol=1e-4)
+        )
 
-        self.assertTrue(np.allclose(TS_c.integrated().y,
-                                    1 - np.cos(times_long)
-                                    + 1j * (1 - np.cos(times_long)),
-                                    atol=1e-4))
+        self.assertTrue(
+            np.allclose(
+                TS_c.integrated().y,
+                1 - np.cos(times_long) + 1j * (1 - np.cos(times_long)),
+                atol=1e-4,
+            )
+        )
 
         sins = TS.copy()
         sins.integrate()
 
-        self.assertTrue(np.allclose(sins.y,
-                                    1 - np.cos(times_long),
-                                    atol=1e-4))
+        self.assertTrue(np.allclose(sins.y, 1 - np.cos(times_long), atol=1e-4))
 
     def test_derive(self):
 
-        self.assertTrue(np.allclose(self.TS.derived().y,
-                                    np.cos(self.times),
-                                    atol=1e-3))
+        self.assertTrue(
+            np.allclose(self.TS.derived().y, np.cos(self.times), atol=1e-3)
+        )
 
-        self.assertTrue(np.allclose(self.TS.derived(2).y,
-                                    -np.sin(self.times),
-                                    atol=5e-2))
+        self.assertTrue(
+            np.allclose(self.TS.derived(2).y, -np.sin(self.times), atol=5e-2)
+        )
 
-        self.assertTrue(np.allclose(self.TS_c.derived().y,
-                                    np.cos(self.times)
-                                    + 1j * np.cos(self.times),
-                                    atol=1e-3))
+        self.assertTrue(
+            np.allclose(
+                self.TS_c.derived().y,
+                np.cos(self.times) + 1j * np.cos(self.times),
+                atol=1e-3,
+            )
+        )
 
         sins = self.TS.copy()
         sins.derive()
 
-        self.assertTrue(np.allclose(sins.y,
-                                    np.cos(self.times),
-                                    atol=1e-3))
+        self.assertTrue(np.allclose(sins.y, np.cos(self.times), atol=1e-3))
 
         sins = self.TS.copy()
 
@@ -695,33 +717,39 @@ class TestTimeseries(unittest.TestCase):
             sins.spline_derived(8)
 
         # The boundaries are not accurate
-        self.assertTrue(np.allclose(self.TS.spline_derived().y,
-                                    np.cos(self.times),
-                                    atol=1e-3))
+        self.assertTrue(
+            np.allclose(
+                self.TS.spline_derived().y, np.cos(self.times), atol=1e-3
+            )
+        )
 
-        self.assertTrue(np.allclose(self.TS.spline_derived(2).y,
-                                    -np.sin(self.times),
-                                    atol=5e-2))
+        self.assertTrue(
+            np.allclose(
+                self.TS.spline_derived(2).y, -np.sin(self.times), atol=5e-2
+            )
+        )
 
-        self.assertTrue(np.allclose(self.TS_c.spline_derived().y,
-                                    np.cos(self.times)
-                                    + 1j * np.cos(self.times),
-                                    atol=1e-3))
+        self.assertTrue(
+            np.allclose(
+                self.TS_c.spline_derived().y,
+                np.cos(self.times) + 1j * np.cos(self.times),
+                atol=1e-3,
+            )
+        )
 
         sins.spline_derive()
 
-        self.assertTrue(np.allclose(sins.y,
-                                    np.cos(self.times),
-                                    atol=1e-3))
+        self.assertTrue(np.allclose(sins.y, np.cos(self.times), atol=1e-3))
 
     def test_remove_duplicate_iters(self):
 
         t = np.array([1, 2, 3, 4, 2, 3])
         y = np.array([0, 0, 0, 0, 0, 0])
 
-        self.assertEqual(ts.remove_duplicate_iters(t, y),
-                         ts.TimeSeries([1, 2, 3],
-                                       [0, 0, 0]))
+        self.assertEqual(
+            ts.remove_duplicate_iters(t, y),
+            ts.TimeSeries([1, 2, 3], [0, 0, 0]),
+        )
 
     def test_time_unit_change(self):
 
@@ -730,12 +758,13 @@ class TestTimeseries(unittest.TestCase):
         new_times = np.linspace(0, np.pi, 100)
         new_times_inverse = np.linspace(0, 6 * np.pi, 100)
 
-        self.assertTrue(np.allclose(sins.time_unit_changed(2).t,
-                                    new_times))
+        self.assertTrue(np.allclose(sins.time_unit_changed(2).t, new_times))
 
-        self.assertTrue(np.allclose(
-            sins.time_unit_changed(3, inverse=True).t,
-            new_times_inverse))
+        self.assertTrue(
+            np.allclose(
+                sins.time_unit_changed(3, inverse=True).t, new_times_inverse
+            )
+        )
 
         sins.time_unit_change(2)
 
@@ -749,8 +778,7 @@ class TestTimeseries(unittest.TestCase):
 
         sins = self.TS.copy()
 
-        sins_half_frequency = ts.TimeSeries(two_times,
-                                            np.sin(0.5*two_times))
+        sins_half_frequency = ts.TimeSeries(two_times, np.sin(0.5 * two_times))
 
         self.assertEqual(sins.redshifted(1), sins_half_frequency)
 
@@ -772,12 +800,15 @@ class TestTimeseries(unittest.TestCase):
         ts1 = ts.TimeSeries(times1, sins1)
         ts2 = ts.TimeSeries(times2, coss1)
 
-        self.assertTrue(np.allclose(ts.combine_ts([ts1, ts2],
-                                                  prefer_late=False).y,
-                                    expected_early))
+        self.assertTrue(
+            np.allclose(
+                ts.combine_ts([ts1, ts2], prefer_late=False).y, expected_early
+            )
+        )
 
-        self.assertTrue(np.allclose(ts.combine_ts([ts1, ts2]).y,
-                                    expected_late))
+        self.assertTrue(
+            np.allclose(ts.combine_ts([ts1, ts2]).y, expected_late)
+        )
 
         # Here we test two timeseries with same tmin
         times4 = np.linspace(0, 2 * np.pi, 100)
@@ -788,13 +819,15 @@ class TestTimeseries(unittest.TestCase):
         ts4 = ts.TimeSeries(times4, sins4)
         ts5 = ts.TimeSeries(times5, coss5)
 
-        self.assertTrue(np.allclose(ts.combine_ts([ts1, ts2],
-                                                  prefer_late=False).y,
-                                    expected_early))
+        self.assertTrue(
+            np.allclose(
+                ts.combine_ts([ts1, ts2], prefer_late=False).y, expected_early
+            )
+        )
 
-        self.assertTrue(np.allclose(ts.combine_ts([ts4, ts5],
-                                                  prefer_late=True).y,
-                                    coss5))
+        self.assertTrue(
+            np.allclose(ts.combine_ts([ts4, ts5], prefer_late=True).y, coss5)
+        )
 
     def test_resample_common(self):
 
@@ -831,14 +864,11 @@ class TestTimeseries(unittest.TestCase):
         ham_array = signal.hamming(len(ones))
         black_array = signal.blackman(len(ones))
 
-        self.assertTrue(np.allclose(ones.tukey_windowed(0.5).y,
-                                    tuk_array))
+        self.assertTrue(np.allclose(ones.tukey_windowed(0.5).y, tuk_array))
 
-        self.assertTrue(np.allclose(ones.hamming_windowed().y,
-                                    ham_array))
+        self.assertTrue(np.allclose(ones.hamming_windowed().y, ham_array))
 
-        self.assertTrue(np.allclose(ones.blackman_windowed().y,
-                                    black_array))
+        self.assertTrue(np.allclose(ones.blackman_windowed().y, black_array))
 
         new_ones = ones.copy()
         new_ones.tukey_window(0.5)
@@ -863,7 +893,7 @@ class TestTimeseries(unittest.TestCase):
             new_ones.window([1, 2])
 
         # Window called as string
-        new_ones.window('blackman')
+        new_ones.window("blackman")
         self.assertTrue(np.allclose(new_ones.y, black_array))
 
     def test_savgol_smooth(self):
@@ -873,18 +903,28 @@ class TestTimeseries(unittest.TestCase):
 
         expected_y = signal.savgol_filter(self.values, 11, 3)
 
-        self.assertTrue(np.allclose(self.TS.savgol_smoothed(11, 3).y,
-                                    expected_y))
+        self.assertTrue(
+            np.allclose(self.TS.savgol_smoothed(11, 3).y, expected_y)
+        )
 
-        self.assertTrue(np.allclose(self.TS_c.savgol_smoothed(11, 3).y,
-                                    expected_y + 1j * expected_y))
+        self.assertTrue(
+            np.allclose(
+                self.TS_c.savgol_smoothed(11, 3).y,
+                expected_y + 1j * expected_y,
+            )
+        )
 
         # dt = 0.063...  if tsmooth = 0.63, then window size is 11
-        self.assertTrue(np.allclose(self.TS.savgol_smoothed_time(0.63, 3).y,
-                                    expected_y))
+        self.assertTrue(
+            np.allclose(self.TS.savgol_smoothed_time(0.63, 3).y, expected_y)
+        )
 
-        self.assertTrue(np.allclose(self.TS_c.savgol_smoothed_time(0.63, 3).y,
-                                    expected_y + 1j * expected_y))
+        self.assertTrue(
+            np.allclose(
+                self.TS_c.savgol_smoothed_time(0.63, 3).y,
+                expected_y + 1j * expected_y,
+            )
+        )
 
         # Test non regularly sampled
         with self.assertWarns(RuntimeWarning):
@@ -904,41 +944,49 @@ class TestTimeseries(unittest.TestCase):
 
     def test_unfold_phase(self):
 
-        y = np.append(np.linspace(0, 2 * np.pi, 100),
-                      np.linspace(0, 2 * np.pi, 100))
+        y = np.append(
+            np.linspace(0, 2 * np.pi, 100), np.linspace(0, 2 * np.pi, 100)
+        )
 
-        yexp = np.append(np.linspace(0, 2 * np.pi, 100),
-                         np.linspace(0, 2 * np.pi, 100) + 2 * np.pi)
-        self.assertTrue(np.allclose(ts.unfold_phase(y),
-                                    yexp))
+        yexp = np.append(
+            np.linspace(0, 2 * np.pi, 100),
+            np.linspace(0, 2 * np.pi, 100) + 2 * np.pi,
+        )
+        self.assertTrue(np.allclose(ts.unfold_phase(y), yexp))
 
         exp = ts.TimeSeries(self.times, np.exp(1j * self.times))
 
-        self.assertTrue(np.allclose(exp.unfolded_phase().y,
-                                    self.times))
+        self.assertTrue(np.allclose(exp.unfolded_phase().y, self.times))
 
         # test t_of_zero_phase
         # The phase at 1 is 1, so everything has to be scaled down by 1
-        self.assertTrue(np.allclose(exp.unfolded_phase(t_of_zero_phase=1).y,
-                                    self.times - 1))
+        self.assertTrue(
+            np.allclose(
+                exp.unfolded_phase(t_of_zero_phase=1).y, self.times - 1
+            )
+        )
 
         # deriv is trivial...
         deriv = np.gradient(self.times, self.times)
 
-        self.assertTrue(np.allclose(
-            exp.phase_angular_velocity(use_splines=False).y,
-            deriv))
+        self.assertTrue(
+            np.allclose(exp.phase_angular_velocity(use_splines=False).y, deriv)
+        )
 
-        self.assertTrue(np.allclose(exp.phase_angular_velocity().y,
-                                    deriv))
+        self.assertTrue(np.allclose(exp.phase_angular_velocity().y, deriv))
 
-        self.assertTrue(np.allclose(exp.phase_frequency().y,
-                                    deriv / (2 * np.pi)))
+        self.assertTrue(
+            np.allclose(exp.phase_frequency().y, deriv / (2 * np.pi))
+        )
 
         smoothed_deriv = signal.savgol_filter(deriv, 11, 3)
         # 0.63 corresponds to 11 points
-        self.assertTrue(np.allclose(exp.phase_frequency(tsmooth=0.63).y,
-                                    smoothed_deriv / (2 * np.pi)))
+        self.assertTrue(
+            np.allclose(
+                exp.phase_frequency(tsmooth=0.63).y,
+                smoothed_deriv / (2 * np.pi),
+            )
+        )
 
     def test_to_FrequencySeries(self):
 
@@ -955,7 +1003,7 @@ class TestTimeseries(unittest.TestCase):
         with self.assertWarns(RuntimeWarning):
             tts = self.TS.copy()
             tts.t[1] *= 1.01
-            ffs = tts.to_FrequencySeries()
+            tts.to_FrequencySeries()
 
         self.assertTrue(np.allclose(fs.f, freq))
         self.assertTrue(np.allclose(fs.fft, fft))

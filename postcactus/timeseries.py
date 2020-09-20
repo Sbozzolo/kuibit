@@ -156,8 +156,7 @@ def combine_ts(series, prefer_late=True):
     # Tuples are compared lexicographically; the first items are compared; if
     # they are the same then the second items are compared, and so on.
     # So here we sort by tmin and tmax
-    timeseries = sorted(series,
-                        key=lambda x: (sign * x.tmin, sign * x.tmax))
+    timeseries = sorted(series, key=lambda x: (sign * x.tmin, sign * x.tmax))
     # Now we are going to build up the t and y array, starting with the first
     times = timeseries[0].t[::sign]
     values = timeseries[0].y[::sign]
@@ -280,7 +279,7 @@ class TimeSeries(BaseSeries):
         :rtype: float
 
         """
-        if (not self.is_regularly_sampled()):
+        if not self.is_regularly_sampled():
             raise ValueError("Timeseries is not regularly sampled")
 
         return self.t[1] - self.t[0]
@@ -369,7 +368,7 @@ class TimeSeries(BaseSeries):
         :rtype:   :py:class:`~.TimeSeries`
         """
         dt = 1.0 / float(frequency)
-        if (dt > self.time_length):
+        if dt > self.time_length:
             raise ValueError("Frequency too short for resampling")
         n = int(np.floor(self.time_length / dt))
         # We have to add one to n, so that we can include the tmax point
@@ -405,7 +404,7 @@ class TimeSeries(BaseSeries):
         self._apply_to_self(self.fixed_timestep_resampled, timestep)
 
     def fixed_timestep_resampled(self, timestep):
-        if (timestep > self.time_length):
+        if timestep > self.time_length:
             raise ValueError("Timestep larger then duration of the TimeSeries")
         frequency = 1.0 / float(timestep)
         return self.fixed_frequency_resampled(frequency)
@@ -425,15 +424,18 @@ class TimeSeries(BaseSeries):
         """
         N_new_zeros = N - len(self)
 
-        if (N_new_zeros < 0):
+        if N_new_zeros < 0:
             raise ValueError(
-                'Zero-padding cannot decrease the number of points')
+                "Zero-padding cannot decrease the number of points"
+            )
 
-        new_zeros_t = np.linspace(self.tmax + self.dt,
-                                  self.tmax + N_new_zeros * self.dt,
-                                  N_new_zeros)
-        return TimeSeries(np.append(self.t, new_zeros_t),
-                          np.append(self.y, np.zeros(N_new_zeros)))
+        new_zeros_t = np.linspace(
+            self.tmax + self.dt, self.tmax + N_new_zeros * self.dt, N_new_zeros
+        )
+        return TimeSeries(
+            np.append(self.t, new_zeros_t),
+            np.append(self.y, np.zeros(N_new_zeros)),
+        )
 
     def zero_pad(self, N):
         """Pad the timeseries with zeros so that it has a total of N points.
@@ -450,7 +452,7 @@ class TimeSeries(BaseSeries):
     def mean_removed(self):
         """Return a timeseries with mean removed.
 
-        :returns: A new timeseries zero mean
+        :returns: A new timeseries with zero mean
         :rtype: :py:class:`~.TimeSeries`
         """
         return TimeSeries(self.t, self.y - self.y.mean())
@@ -458,6 +460,58 @@ class TimeSeries(BaseSeries):
     def mean_remove(self):
         """Remove the mean value from the data."""
         self._apply_to_self(self.mean_removed)
+
+    def initial_time_removed(self, time_init):
+        """Return a timeseries without the initial ``time_init`` segment.
+
+        This is different from cropping, because tmin may not be 0
+        (when you crop, you specify what is the new tmin).
+
+        If a series goes from t=-1 to t=10 and you set time_init=2,
+        the series will go from t=1 to t=10.
+
+        :param time_init: Amount of time to be removed from the beginning
+        :type time_init: float
+
+        :returns: A new timeseries without the initial time_init
+        :rtype: :py:class:`~.TimeSeries`
+        """
+        return self.cropped(init=self.tmin + time_init)
+
+    def initial_time_remove(self, time_init):
+        """Remove the first time_init in the timeseries.
+
+        This is different from cropping, because tmin may not be 0
+        (when you crop, you specify what is the new tmin).
+
+        :param time_init: Amount of time to be removed from the beginning
+        :type time_init: float
+
+        """
+        self._apply_to_self(self.initial_time_removed, time_init)
+
+    def final_time_removed(self, time_end):
+        """Return a timeseries without the final ``time_end`` segment.
+
+        If a series goes from t=-1 to t=10 and you set time_end=2,
+        the series will go from t=-1 to t=8.
+
+        :param time_end: Amount of time to be removed from the end
+        :type time_end: float
+
+        :returns: A new timeseries without the initial time_init
+        :rtype: :py:class:`~.TimeSeries`
+        """
+        return self.cropped(end=self.tmax - time_end)
+
+    def final_time_remove(self, time_end):
+        """Remove the final time_end in the timeseries.
+
+        :param time_end: Amount of time to be removed from the end
+        :type time_end: float
+
+        """
+        self._apply_to_self(self.final_time_removed, time_end)
 
     def time_shifted(self, tshift):
         """Return a new timeseries with time shifted by tshift (what was t = 0
@@ -530,7 +584,7 @@ class TimeSeries(BaseSeries):
         :rtype: :py:class:`~.TimeSeries`
 
         """
-        factor = unit if inverse else 1/unit
+        factor = unit if inverse else 1 / unit
         return TimeSeries(self.t * factor, self.y)
 
     def time_unit_change(self, unit, inverse=False):
@@ -647,8 +701,9 @@ class TimeSeries(BaseSeries):
         :returns:  Time derivative of the complex phase divided by 2 pi
         :rtype:    :py:class:`~.TimeSeries`
         """
-        return self.phase_angular_velocity(use_splines,
-                                           tsmooth, order) / (2 * np.pi)
+        return self.phase_angular_velocity(use_splines, tsmooth, order) / (
+            2 * np.pi
+        )
 
     def windowed(self, window_function, *args, **kwargs):
         """Return a timeseries windowed with window_function.
@@ -667,13 +722,13 @@ class TimeSeries(BaseSeries):
 
         """
 
-        if (callable(window_function)):
+        if callable(window_function):
             window_array = window_function(len(self), *args, **kwargs)
             return TimeSeries(self.t, self.y * window_array)
 
-        if (isinstance(window_function, str)):
+        if isinstance(window_function, str):
             window_function_method = f"{window_function}_windowed"
-            if (not hasattr(self, window_function_method)):
+            if not hasattr(self, window_function_method):
                 raise ValueError(f"Window {window_function} not implemented")
             window_function_callable = getattr(self, window_function_method)
             return window_function_callable(*args, **kwargs)
@@ -691,8 +746,7 @@ class TimeSeries(BaseSeries):
         :type window: callable
 
         """
-        self._apply_to_self(self.windowed, window_function,
-                            *args, **kwargs)
+        self._apply_to_self(self.windowed, window_function, *args, **kwargs)
 
     def tukey_windowed(self, alpha):
         """Return a timeseries with Tukey window with paramter alpha applied.
@@ -725,21 +779,15 @@ class TimeSeries(BaseSeries):
         return self.windowed(signal.hamming)
 
     def hamming_window(self):
-        """Apply Hamming window.
-
-        """
+        """Apply Hamming window."""
         self.window(signal.hamming)
 
     def blackman_windowed(self):
-        """Return a timeseries with Blackman window applied.
-
-        """
+        """Return a timeseries with Blackman window applied."""
         return self.windowed(signal.blackman)
 
     def blackman_window(self):
-        """Apply Blackman window.
-
-        """
+        """Apply Blackman window."""
         self.window(signal.blackman)
 
     def savgol_smoothed_time(self, tsmooth, order=3):
@@ -756,9 +804,11 @@ class TimeSeries(BaseSeries):
         :rtype:    :py:class:`~.TimeSeries`
 
         """
-        if (not self.is_regularly_sampled()):
-            warnings.warn("TimeSeries is not regularly samples. Resampling.",
-                          RuntimeWarning)
+        if not self.is_regularly_sampled():
+            warnings.warn(
+                "TimeSeries is not regularly samples. Resampling.",
+                RuntimeWarning,
+            )
             ts = self.regular_resampled()
         else:
             ts = self
@@ -799,16 +849,18 @@ class TimeSeries(BaseSeries):
         :rtype: :py:class:`~.FrequencySeries`
 
         """
-        if (not self.is_regularly_sampled()):
-            warnings.warn("TimeSeries is not regularly samples. Resampling.",
-                          RuntimeWarning)
+        if not self.is_regularly_sampled():
+            warnings.warn(
+                "TimeSeries is not regularly samples. Resampling.",
+                RuntimeWarning,
+            )
             regular_ts = self.regular_resampled()
         else:
             regular_ts = self
 
         dt = regular_ts.dt
 
-        if (self.is_complex()):
+        if self.is_complex():
             frequencies = np.fft.fftfreq(len(regular_ts), d=dt)
             fft = np.fft.fft(regular_ts.y)
 
