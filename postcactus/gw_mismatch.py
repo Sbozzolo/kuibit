@@ -18,6 +18,10 @@
 """The :py:mod:`~.gw_mismatch` module functions to compute the mismatch between
 two waves.
 
+The two main interfaces are network_mismatch_from_psi4 (when computing the
+network mismatch starting from psi4 and the sky localization) and
+mismatch_from_strains (when computing the mismatch from the strains).
+
 """
 
 import numpy as np
@@ -30,6 +34,7 @@ from warnings import warn
 # At the moment, fft is not supported, so the full power of numba cannot be
 # achived.
 from numba import njit, objmode
+from scipy.interpolate import interp1d
 
 from postcactus import unitconv
 from postcactus import frequencyseries as fs
@@ -49,7 +54,51 @@ def _mismatch_core_numerical(
 ):
     """Compute the maximum overlap between h1_fft (frequency domain, cross and
     plus) and h2_t (time domain). This function requires very specific
-    pre-processing and should never be used directly.
+    pre-processing and should never be used directly. All the details are in
+    the comments.
+
+    This can be optinally "numba-ified" to increase the speed. The input and
+    output values and standard numpy objects.
+
+    :param h1_c_fft: Fourier transform of the cross polarization of the first
+                     strain (it will not be modified). It has to be defiend
+                     only over the frequencies of interest.
+    :type h1_c_fft: 1D complex numpy array
+    :param h1_p_fft: Fourier transform of the plus polarization of the first
+                     strain (it will not be modified). It has to be defiend
+                     only over the frequencies of interest.
+    :type h1_p_fft: 1D complex numpy array
+
+    :param h2_t: Timeseries of the second strain. It will be modified with time
+    and polarization shifts. It has to be pre-processed so that is defined over
+    the same times as h1_t :type h2_t: 1D complex numpy array.
+    :type h2_t: 1D complex numpy array
+
+    :param frequencies: Frequencies where we want to compute the integral (ie,
+    from fmin to fmax).
+    :type frequencies: 1d numpy array
+
+    :param frequency_mask: What frequencies we should keep from the unfiltered
+    ones (we start from 0 to 1/dt, which ones are in frequencies). Technically
+    we can compute this in this function, but it is easier and faster to just
+    provide it.
+    :type frequency_mask: 1d numpy array of bools
+
+    :param noises: Power spectral density of the noise, defined on the correct
+    frequencies.
+    :type noises: tuple of 1d numpy arrays
+
+    :param antenna_patterns: Fc, Fp for all the detectors. It has to be ordered
+    in the same way as noises.
+    :type antenna_patterns: tuple of tuples
+
+    :param polarization_shifts: Polarization shifts that will be applied in the
+    search for the maximum.
+    :type polarization_shifts: 1d numpy array
+
+    :param time_shifts: Time shifts that will be applied in the search for
+    the maximum.
+    :type time_shifts: 1d numpy array
 
     """
 
@@ -144,27 +193,69 @@ def mismatch_from_strains(
     r"""Compute the netowrk-mismatch between h1 and h2 by maximising the
     overlap over time and polarization shifts.
 
-    All the transformations are done in h2.
+    Network here means that the inner product is computed for N detectors, as
+    provided by the lists antenna_patterns and noises. Noises and antenna
+    patterns have to be properly ordered: noises[i] has to correspond to
+    antenna_pattern[i].
 
-    This is done by maximizing over time and phase shifts. Phase shifts and are
-    around the 2pi, time shifts are specified by time_shift_start and
-    time_shift_end. If num_time_shifts is 1, then no time shift is performed.
+    See :ref:`gw_mismatch:Overlap and mismatch` for formulas and details.
 
-    Noises has to be a list of FrequencySeries with the PSD of the noise.
-    Antenna patterns has to be the computed antenna pattern corresponding to
-    the noise. Noises and antenna patterns have to be properly ordered:
-    noises[i] has to correspond to antenna_pattern[i].
+    The mismatch is computed by maximizing over time and polarization shifts.
+    Polarization shifts and are around the 2pi, time shifts are specified by
+    time_shift_start and time_shift_end. If num_time_shifts is 1, then no time
+    shift is performed. For times, we make sure that we always have to zero
+    timeshift. All the transformations are done in h2.
 
-    For times, we make sure that we always have to zero timeshift.
-
-    NO phase shifts here!
-
-    There is an overhead in calling numba. Hence, by default we do not always
-    use numba. We use it only when the number
+    This computation is a maximisation, which is very expensive. So, we have a
+    very fast core function called _mismatch_core_numerical to do all the hard
+    work. This function is compiled to native code by numba, resulting to
+    enormous speed-up.There is an overhead in calling numba. Hence, by default
+    we do not always use numba. We use it only when the number
     num_polarization_shifts * num_time_shifts is greater than 500*500. You can
     force using numba passing the keyword argument force_numba=True.
 
-    This function is not meant to be used directly.
+    We do not perform phase shifts here, so this function makes sense only
+    for the (2,2) mode.
+
+    h1 and h2 have to be already pre-processed for Fourier transform, so you
+    should window them and zero pad as needed.
+
+    :param h1: First strain.
+    :type h1: :py:class:`~.TimeSeries`
+
+    :param h2: Second strain (the one that will be modified).
+    :type h2: :py:class:`~.TimeSeries`
+
+    :param fmin: Lower limit of the integration.
+    :type fmin: float
+    :param fmax: Higher limit of the integration.
+    :type fmax: float
+
+    :param noises: Power spectral density of the noise for all the detectors.
+    If None, a uniform noise is applied.
+    :type noises: list of :py:class:`~.FrequencySeries`, or None
+
+    :param antenna_patterns: Fc, Fp for all the detectors. It has to be ordered
+    in the same way as noises. If None, a uniform antenna pattern is applied.
+    :type antenna_patterns: list of tuples, or None
+
+    :param num_polarization_shifts: How many points to divide the range
+    (0, 2 pi) in the polarization shift.
+    :type num_polarization_shifts: int
+
+    :param num_time_shifts: How many points to divide the range
+    (time_shift_start, time_shift_end) in the time shift.
+    :type num_time_shifts: int
+
+    :param time_shift_start: Minimum time shift applied. Search will be done
+    linearly up to time_shift_end.
+    :type time_shift_start: float
+
+    :param time_shift_end: Largest value of time shift applied.
+    :type time_shift_end: float
+
+    :param force_numba: Use numba irrespectively of the size of the input.
+    :type force_numba: bool
 
     """
 
@@ -244,21 +335,33 @@ def mismatch_from_strains(
     h1f_c_res.band_pass(fmin, fmax)
     h1f_c_res.negative_frequencies_remove()
 
-    # 3. Then, the noise is typically defined on several frequencies (many more
-    #    than the series), so we can downsample it to be the same as h1f.
-    #    Hence, h1f and the noises will be defined on the same frequencies. We
-    #    will only need to take care of the h2. If the noise is None, we
-    #    prepare a unweighted noise (ones everywhere).
+    # 3. Then, we resample the noise to have be defined on the same frequencies
+    #    as h1f. We will only need to take care of the h2. If the noise is
+    #    None, we prepare a unweighted noise (ones everywhere).
+    #
+    #    The problem with resampling noises is that PSD curves have often
+    #    strong discontinuities, which are not correctly captured by the
+    #    splines. Therefore, instead of using cubic splines, here we prefer
+    #    using a piecewise constant approximation. Since the noise has
+    #    typically a lot of points, this should be a better approximation than
+    #    having large jumps. PostCactus does not have this option, so we use
+    #    directly SciPy's interp1d.
 
     if noises is not None:
         # With this, we can guarantee that everything has the same domain.
         # If there's a None entry, we fill it with a constant noise.
-        noises_res = [
-            n.resampled(h1f_p_res.f)
-            if n is not None
-            else fs.FrequencySeries(h1f_p_res.f, np.ones_like(h1f_p_res.fft))
-            for n in noises
-        ]
+        noises_res = []
+        for noise in noises:
+            noises_res.append(
+                fs.FrequencySeries(h1f_p_res.f, np.ones_like(h1f_p_res.fft))
+            )
+            if noise is not None:
+                # We start with a FrequencySeries of ones, and we overwrite the
+                # fft attribute
+                noise_function = interp1d(
+                    noise.f, noise.fft, kind="nearest", assume_sorted=True
+                )
+                noises_res[-1].fft = noise_function(noises_res[-1].f)
     else:
         # Here we prepare a noise that is made by ones everywhere. This is what
         # happens internally when noises is None. However, here we do it
@@ -404,12 +507,53 @@ def network_mismatch(
     time_shift_end=20,
     force_numba=False,
 ):
-    """h1 and h2 have to be already pre-processed for Fourier transform.
+    """Compute network mismatch between strains h1 and h2.
 
-    At the moment, this mismatch makes sense only for the l=2, m=2 mode.
-    (No maximisation over phis is done)
+    This is a wrapper around :py:meth:`~.mismatch_from_strains` (read the
+    docstring for more information) that prepares the correct antenna patterns
+    from the sky localization of the event. Moreover, it makes sure that noises
+    (that has to be a gw_utils.Detectors object, or None) is correctly ordered.
 
-    Noises has to be a gw_utils.Detectors object, or None
+    :param h1: First strain.
+    :type h1: :py:class:`~.TimeSeries`
+    :param h2: Second strain (the one that will be modified).
+    :type h2: :py:class:`~.TimeSeries`
+
+    :param right_ascension: Right ascension of the source in the sky.
+    :type right_ascension: float
+
+    :param declination: Declination of the source in the sky.
+    :type declination: float
+
+    :param time_utc: Time UTC of the event.
+    :type time_utc: float
+
+    :param fmin: Lower limit of the integration.
+    :type fmin: float
+    :param fmax: Higher limit of the integration.
+    :type fmax: float
+
+    :param noises: Power spectral density of the noise for all the detectors.
+    :type noises: :py:class:`~.Detector`, or None
+
+    :param num_polarization_shifts: How many points to divide the range
+    (0, 2 pi) in the polarization shift.
+    :type num_polarization_shifts: int
+
+    :param num_time_shifts: How many points to divide the range
+    (time_shift_start, time_shift_end) in the time shift.
+    :type num_time_shifts: int
+
+    :param time_shift_start: Minimum time shift applied. Search will be done
+    linearly up to time_shift_end.
+    :type time_shift_start: float
+
+    :param time_shift_end: Largest value of time shift applied.
+    :type time_shift_end: float
+
+    :param force_numba: Use numba irrespectively of the size of the input.
+    :type force_numba: bool
+
     """
 
     antenna_patterns = gwu.antenna_responses_from_sky_localization(
@@ -461,8 +605,8 @@ def network_mismatch_from_psi4(
     window_function=None,
     align_at_peak=True,
     trim_ends=True,
-    mass_scale1=None,
-    mass_scale2=None,
+    mass_scale1_msun=None,
+    mass_scale2_msun=None,
     distance1=None,
     distance2=None,
     fmin=0,
@@ -474,11 +618,120 @@ def network_mismatch_from_psi4(
     time_shift_start=-50,
     time_shift_end=50,
     force_numba=False,
-    time_removed_after_max=None,
-    initial_time_removed=None,
+    time_to_keep_after_max=None,
+    time_removed_beginning=None,
     **kwargs
 ):
+    r"""Compute the mismatch between strains from psi1 and psi2.
 
+    Extract the strains from (2, 2) mode of psi1 and psi2 (which have to be
+    :py:class:`~.GravitationalWavesOneDet`, as from :py:class:`~.SimDir` when
+    a radius is specified). In doing this, use the fixed-frequency integration
+    method with pcut1 and pcut2 and with the provided window function.
+
+    Then, possibly align the signal to peak, transform it to physical units,
+    and crop it as requested. Send this to the :py:meth:`~.network_mismatch`
+    function.
+
+    This function is complex, read :ref:`gw_mismatch:Overlap and mismatch` for
+    formulas and details.
+
+    :param psi1: :math:`\Psi_4` for the first wave.
+    :type psi1: :py:class:`~.GravitationalWavesOneDet`
+    :param psi2: :math:`\Psi_4` for the second wave (the one that will be
+                 modified).
+    :type psi2: :py:class:`~.GravitationalWavesOneDet`
+
+    :param right_ascension: Right ascension of the source in the sky.
+    :type right_ascension: float
+
+    :param declination: Declination of the source in the sky.
+    :type declination: float
+
+    :param mass_scale1_msun: If not None, the signal h1 is converted from
+    computational units to physical units assuming that
+    M = mass_scale1_msun.
+    :type mass_scale1_msun: float or None
+
+    :param mass_scale2_msun: If not None, the signal h2 is converted from
+    computational units to physical units assuming that
+    M = mass_scale2_msun.
+    :type mass_scale2_msun: float or None
+
+    :param time_utc: Time UTC of the event.
+    :type time_utc: float
+
+    :param pcut1: Period associated with the threshold frequency
+                 ``omega_0 = 2 * pi / pcut`` for the fixed frequency
+                 integration of :math:`\Psi_4`
+    :type pcut1: float
+
+    :param pcut2: Period associated with the threshold frequency
+                 ``omega_0 = 2 * pi / pcut`` for the fixed frequency
+                 integration of :math:`\Psi_4`
+    :type pcut2: float
+
+    :param window_function: If not None, apply window_function to the
+    series before computing the strain.
+    :type window_function: callable, str, or None
+
+    :param trim_ends: If True, a portion of the resulting strain is removed
+    at both the initial and final times. The amount removed is equal to
+    pcut.
+    :type trim_ends: bool
+
+    :param align_at_peak: Time-shifts the strain so that they have both the
+    maximum amplitude at t=0.
+    :type align_at_peak: bool
+
+    :param fmin: Lower limit of the integration.
+    :type fmin: float
+    :param fmax: Higher limit of the integration.
+    :type fmax: float
+
+    :param noises: Power spectral density of the noise for all the
+    detectors. If None, a uniform noise is applied.
+    :type noises: :py:class:`~.Detectors`, or None
+
+    :param num_zero_pad: How many points do the timeseries have to have
+    before Fourier transforms are taken? This is not the number of zeros
+    added (at the end) of the timeseries, this is the total number. If the
+    series already have that length, no zeros will be added.
+    :type num_zero_pad: int
+
+    :param num_polarization_shifts: How many points to divide the range
+    (0, 2 pi) in the polarization shift.
+    :type num_polarization_shifts: int
+
+    :param num_time_shifts: How many points to divide the range
+    (time_shift_start, time_shift_end) in the time shift.
+    :type num_time_shifts: int
+
+    :param time_shift_start: Minimum time shift applied. Search will be
+    done linearly up to time_shift_end.
+    :type time_shift_start: float
+
+    :param time_shift_end: Largest value of time shift applied.
+    :type time_shift_end: float
+
+    :param time_removed_beginning: Remove this amount from the beginning
+    of the strain signals before computing the mismatch. If None, nothing
+    is removed.
+    :type time_removed_beginning: float or None
+
+    :param time_to_keep_after_max: If not None, remove all the signal that
+    comes after t_max + time_to_keep_after_max, where t_max is the time at
+    which the signal peaks.
+    :type time_to_keep_after_max: float or None
+
+    :param force_numba: Use numba irrespectively of the size of the input.
+    :type force_numba: bool
+
+    :param *args: All the other arguments are passed to the window
+     function.
+    :type *args: anything
+
+    """
     # First, we compute the strains. If we just look at the (2,2) mode, we
     # don't need to multiply the spin weighted spherical harmonics, since it is
     # a normalization factor.
@@ -508,8 +761,8 @@ def network_mismatch_from_psi4(
         h2.align_at_maximum()
 
     # Now, we convert to physical units
-    if mass_scale1 is not None:
-        CU1 = unitconv.geom_umass_msun(mass_scale1)
+    if mass_scale1_msun is not None:
+        CU1 = unitconv.geom_umass_msun(mass_scale1_msun)
         h1.time_unit_change(CU1.time, inverse=True)
         if distance1 is not None:
             distance1_SI = distance1 * unitconv.MEGAPARSEC_SI
@@ -518,8 +771,8 @@ def network_mismatch_from_psi4(
             redshift1 = gwu.luminosity_distance_to_redshift(distance1)
             h1.redshift(redshift1)
 
-    if mass_scale2 is not None:
-        CU2 = unitconv.geom_umass_msun(mass_scale2)
+    if mass_scale2_msun is not None:
+        CU2 = unitconv.geom_umass_msun(mass_scale2_msun)
         h2.time_unit_change(CU2.time, inverse=True)
         if distance2 is not None:
             distance2_SI = distance2 * unitconv.MEGAPARSEC_SI
@@ -528,13 +781,13 @@ def network_mismatch_from_psi4(
             redshift2 = gwu.luminosity_distance_to_redshift(distance2)
             h2.redshift(redshift2)
 
-    if initial_time_removed is not None:
-        h1.initial_time_remove(initial_time_removed)
-        h2.initial_time_remove(initial_time_removed)
+    if time_removed_beginning is not None:
+        h1.initial_time_remove(time_removed_beginning)
+        h2.initial_time_remove(time_removed_beginning)
 
-    if time_removed_after_max is not None:
-        h1.crop(end=time_removed_after_max)
-        h2.crop(end=time_removed_after_max)
+    if time_to_keep_after_max is not None:
+        h1.crop(end=time_to_keep_after_max)
+        h2.crop(end=time_to_keep_after_max)
 
     if window_function is not None:
         # Next, we window and zero-pad

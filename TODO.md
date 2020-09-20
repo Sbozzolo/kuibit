@@ -15,6 +15,7 @@ of knowledge of PostCactus or of Python required to complete the task.
 
 * Improve docstrings.  [==]
   (According to PEP8, the first line should be short and descriptive.)
+  Check that all the sphinx param descriptions end with a period.
 * Simplify `apply_unary`, `apply_binary`, `apply_to_self` in `series.py`.
   These functions may be turned into decorators, or at least used in a more
   concise way. [==]
