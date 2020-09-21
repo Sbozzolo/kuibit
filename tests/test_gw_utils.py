@@ -91,7 +91,7 @@ class TestGWUtils(unittest.TestCase):
         self.assertAlmostEqual(antenna_gw150914.virgo[0], -0.11486789)
         self.assertAlmostEqual(antenna_gw150914.virgo[1], 0.57442590)
 
-    def test_extrapolation(self):
+    def test_coordinate_retarded_times(self):
 
         # Schwarzschild_radius_to_tortoise
         self.assertAlmostEqual(gwu.Schwarzschild_radius_to_tortoise(2, 0.5), 2)
@@ -115,3 +115,12 @@ class TestGWUtils(unittest.TestCase):
         )
 
         # coordinate_times_to_retarded_times
+        #
+        # To test this, we just check that the composition with
+        # retarded_times_to_coordinate_times is the identity
+        self.assertCountEqual(
+            gwu.coordinate_times_to_retarded_times(
+                gwu.retarded_times_to_coordinate_times(ones, rr, 0.5), rr, 0.5
+            ),
+            ones,
+        )
