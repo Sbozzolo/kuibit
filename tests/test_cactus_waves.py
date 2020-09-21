@@ -324,3 +324,46 @@ class TestCactusWaves(unittest.TestCase):
         self.assertTrue(
             isinstance(emdir[110.69], cw.ElectromagneticWavesOneDet)
         )
+
+    def test_extrapolation(self):
+
+        # Test too many radii for the extrapolation
+        with self.assertRaises(RuntimeError):
+            self.gwdir._extrapolate_waves_to_infinity(
+                [1, 2], [1, 2], [1, 2], 1, order=3
+            )
+
+        # Number of radii is not the same as waves
+        with self.assertRaises(RuntimeError):
+            self.gwdir._extrapolate_waves_to_infinity(
+                [1, 2], [1, 2], [1, 2, 3], 1, order=1
+            )
+
+        # TODO: Write real tests for these functions. Compare with POWER?
+
+        # NOTE: These tests are not physical tests!
+
+        # Smoke test, we just check that the code returns expected data types
+        times = np.linspace(0, 2 * np.pi, 100)
+        sins = ts.TimeSeries(times, np.sin(times))
+        sins_plus_one = ts.TimeSeries(times, np.sin(times + 1))
+        self.gwdir._extrapolate_waves_to_infinity(
+            [sins, sins_plus_one],
+            np.linspace(-12, -11, 100),
+            [10, 11],
+            1,
+            order=1,
+        )
+
+        self.gwdir.extrapolate_strain_lm_to_infinity(
+            2, 2, 0.1, [110.69, 110.69], [2791, 2791.1], order=0
+        )
+        self.gwdir.extrapolate_strain_lm_to_infinity(
+            2,
+            2,
+            0.1,
+            [110.69, 110.69],
+            [2791, 2791.1],
+            order=0,
+            extrapolate_amplitude_phase=True,
+        )

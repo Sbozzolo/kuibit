@@ -598,8 +598,8 @@ class WavesDir(mp.MultipoleAllDets):
         #
         # To do this, we redefine the objects by instantiating new ones with
         # the same data
-        for r, det in self._dets.items():
-            self._dets[r] = derived_type_one_det(det.dist, det.data)
+        for dist, det in self._dets.items():
+            self._dets[dist] = derived_type_one_det(det.dist, det.data)
 
 
 class GravitationalWavesDir(WavesDir):
@@ -611,6 +611,168 @@ class GravitationalWavesDir(WavesDir):
 
     def __init__(self, sd):
         super().__init__(sd, 2, "Psi4", GravitationalWavesOneDet)
+
+    @staticmethod
+    def _extrapolate_waves_to_infinity(waves, times, radii, mass, order=2):
+        """Extrapolate waves to infinity and evalute the result on times.
+
+        We assume radii[i] correspond to waves[i].
+
+        :param waves: Waves that have to be extrapolated.
+        :type waves: list of :py:class:`~.TimeSeries`
+        :param times: Times at which the waves have to be evaluated
+        :type times: float or 1D numpy array
+        :param radii: Extraction radii
+        :type radii: float or 1D numpy array
+        :param mass: ADM mass of the system
+        :type mass: float
+        :param order: Order of the extrapolation.
+        :type order: int
+
+        :returns: Waves evaluated at the retarded times.
+        :rtype: List of :py:class:`~.TimeSeries`
+        """
+
+        # Follows what done in the NRAR collaboration (1307.5307)
+        # This is what we are going to do:
+
+        # 1. Assume that the spacetime is almost Schwarzschild with mass mass.
+        # 2. Choose a set of retarded times u_i where GWs have to be evaluated
+        # 3. Compute the coordinate times t_i that correspond to the retarded
+        #    times u_i at the radius r. This uses tortoise coordinates.
+        # 4. Interpolate the waveforms at the coordinate times corresponding to
+        #    the retarded times u_i for different extraction radii.
+        #    Now our waves are so that they are evaluated at different t_i but
+        #    at the same u_i.
+        # 5. We do this process for a bunch of extraction radii
+        #    (rex1, rex2, rex3, ...)
+        #    So, we should have wave1, wave2, wave3, with all the same number
+        #    of points that correspond to the same retarded time.
+        # 6. For each element in u_i, fit all the waves (wave1, wave2, ...)
+        #    with a polynomial of the form a_n/r^n.
+
+        if order >= len(radii):
+            raise RuntimeError(
+                "Order too high for the number of extraction radii provided"
+            )
+
+        if len(radii) != len(waves):
+            raise RuntimeError(
+                "Numbers of extraction radii and waves do not agree"
+            )
+        # Make sure radii is an array
+        radii = np.array(radii)
+
+        # First, we resample the waves so that they have all the same retarded
+        # times.
+        #
+        # Take the timeseries w, and return a timeseries evaluated at
+        # coordinate times that correspond to the retarded times ui at the
+        # coordinate extraction radius rex. mass is the ADM mass (needed to
+        # compute tortoise radius).
+        waves_retarded = [
+            w.resampled(
+                gw_utils.retarded_times_to_coordinate_times(times, r, mass)
+            )
+            for w, r in zip(waves, radii)
+        ]
+
+        # We perform the fit in ir=1/r instead of r
+        # So, technically, we are fitting sum^p_n=0 a_n * ir^n
+        inverse_radii = 1.0 / radii
+
+        # waves_matrix is a table. Each line is a different time, each column
+        # is a different extraction radius. We will polyfit on every fixed line
+        # to get the extrapolated waves.
+        waves_matrix = np.vstack([w.y for w in waves_retarded]).T
+
+        # Polyfit returns coefficient ordered from the highest to the lowest
+        # This is why we take the [-1]
+        extrapolated_wave = [
+            np.polyfit(inverse_radii, waves_at_t, order)[-1]
+            for waves_at_t in waves_matrix
+        ]
+
+        return ts.TimeSeries(times, extrapolated_wave)
+
+    def extrapolate_strain_lm_to_infinity(
+        self,
+        mult_l,
+        mult_m,
+        pcut,
+        detectors_distances,
+        retarded_times,
+        *args,
+        window_function=None,
+        trim_ends=True,
+        mass=1,
+        order=2,
+        extrapolate_amplitude_phase=False,
+        **kwargs,
+    ):
+        """Extrapolate strains to spatial infinity.
+
+        TODO: Test this function!
+
+        [Equation (29) in 1307.5307.]
+
+          :param retarded_times: Times at which the waves have to be evaluated
+          :type retarded_times: float or 1D numpy array
+          :param rex: Extraction radii
+          :type rex: float or 1D numpy array
+          :param mass: ADM mass of the system
+          :type mass: float
+          :param order: Order of the extrapolation.
+          :type order: int
+
+          :returns: Waves evaluated at the retarded times.
+          :rtype: List of :py:class:`~.TimeSeries`
+        """
+
+        dists = np.sort(detectors_distances)
+
+        # Strains are in the form r * h_+ - i r * h_cross
+        strains = [
+            self[dist].get_strain_lm(
+                mult_l,
+                mult_m,
+                pcut,
+                *args,
+                window_function=window_function,
+                trim_ends=trim_ends,
+                **kwargs,
+            )
+            for dist in dists
+        ]
+
+        # Resample the waves to have all the same retarded times
+        strains_resampled = [
+            strain.resampled(
+                gw_utils.retarded_times_to_coordinate_times(
+                    retarded_times, dist, mass
+                )
+            )
+            for strain, dist in zip(strains, dists)
+        ]
+
+        if not extrapolate_amplitude_phase:
+            extrapolated = self._extrapolate_waves_to_infinity(
+                strains_resampled, retarded_times, dists, mass, order=order
+            )
+        else:
+            strains_amplitudes = [s.abs() for s in strains_resampled]
+            strains_phases = [s.unfolded_phase() for s in strains_resampled]
+
+            extrapolated_amp = self._extrapolate_waves_to_infinity(
+                strains_amplitudes, retarded_times, dists, mass, order=order
+            )
+            extrapolated_phase = self._extrapolate_waves_to_infinity(
+                strains_phases, retarded_times, dists, mass, order=order
+            )
+
+            extrapolated = extrapolated_amp * np.exp(1j * extrapolated_phase)
+
+        return extrapolated
 
 
 class ElectromagneticWavesDir(WavesDir):

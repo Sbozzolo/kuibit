@@ -106,6 +106,30 @@ with the antenna responses :math:`F` of the single detectors:
 
 This function does not add noise.
 
+Extrapolate_to_infinity
+^^^^^^^^^^^^^^^^^^^^^^^
+
+The function :py:meth:`~.extrapolate_strain_lm_to_infinity` can be used to
+extrapolate gravitational waves strain to spatial infinity. This is done fitting
+polynomials to wavefronts that are aligned in retarded times (assuming a
+background Schwarzschild spacetime). The most important paramter that this
+function takes is the list of distances that you want to use for the
+extrapolation. These have to be distances at which you have detectors. You can
+find all the available distances with the ``keys()`` method.
+
+For improved stability, you can extrapolate the waves as amplitude and phase
+(instead of real and imaginary parts). To do this, provide the
+``extrapolate_amplitude_phase=True`` option.
+
+.. todo::
+
+   Expand this section.
+
+.. warning::
+
+   This function has not been thorougly tested!
+
+
 Energy and angular momentum
 ___________________________
 
