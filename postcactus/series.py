@@ -26,6 +26,8 @@ from abc import ABC
 import numpy as np
 from scipy import interpolate, integrate, signal
 
+from postcactus.attr_dict import AttributeDictionary
+
 
 # Note, we test this class testing its derived class TimeSeries
 class BaseSeries(ABC):
@@ -190,6 +192,36 @@ class BaseSeries(ABC):
 
         # Invalidate the spline
         self.invalid_spline = True
+
+    # Here is where we pretend to be Pandas. We want to be able to plot our
+    # series with matplotlib. Unfortunately, there is no easy way to provide a
+    # custom object to the plot functions. However, matplotlib has a special
+    # hook for pandas in the function matplotlib.cbook.index_of. In this
+    # function is checked if the index property is available, in which case,
+    # index.values and values are returned. We use this to make our objects
+    # plottable.
+    # The function in matplotlib is:
+    # try:
+    #    return y.index.values, y.values
+    # except AttributeError:
+    #    y = _check_1d(y)
+    #    return np.arange(y.shape[0], dtype=float), y
+    #
+    # If we provide index.values and values, we can return x and y
+
+    @property
+    def values(self):
+        """Fake pandas properties, to make Series objects plottable by
+        matplotlib.
+        """
+        return self.y
+
+    @property
+    def index(self):
+        """Fake pandas properties, to make Series objects plottable by
+        matplotlib.
+        """
+        return AttributeDictionary({"values": self.x})
 
     @property
     def xmin(self):
