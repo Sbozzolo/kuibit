@@ -38,7 +38,7 @@ class AttributeDictionary:
     def __init__(self, elements):
         """Store elements in _elem
 
-        :param elements: Dictionary
+        :param elements: Dictionary that has to be converted in collections of attributes
         :type elements: dict
 
         """
