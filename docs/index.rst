@@ -72,6 +72,7 @@ Examples
 
    examples/simdir.ipynb
    examples/timeseries.ipynb
+   examples/gravitational_waves.ipynb
 
 
 Reference material (classes, functions, ...)
