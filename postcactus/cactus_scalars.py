@@ -334,10 +334,10 @@ class AllScalars:
         # to find the files associated to the variable and the reduction
         # reduction_type
         self._vars = {}
-        for fil in allfiles:
+        for file_ in allfiles:
             # We only save those that variables are well-behaved
             try:
-                cactusascii_file = OneScalar(fil)
+                cactusascii_file = OneScalar(file_)
                 if cactusascii_file.reduction_type == reduction_type:
                     for var in list(cactusascii_file.keys()):
                         # We add to the _vars dictionary the mapping:
