@@ -34,19 +34,10 @@ Features currently implemented:
 Installation
 ------------
 
-Clone the repo_:
-
-.. _repo: https://github.com/Sbozzolo/PostCactus:
-
+`PostCactus` is available in TestPyPI. To install it with `pip`
 .. code-block:: bash
 
-   git clone https://github.com/Sbozzolo/PostCactus.git
-
-Move into the folder and install with pip:
-
-.. code-block:: bash
-
-   cd PostCactus && pip3 install --user .
+   pip3 install --index-url https://test.pypi.org/simple/ postcactus
 
 If they are not already available, ``pip`` will install the following packages:
 - ``numpy``,
@@ -55,6 +46,8 @@ If they are not already available, ``pip`` will install the following packages:
 - ``scipy``.
 
 The minimum version of Python required is 3.5.
+
+If you intend to extend/develop ``PostCactus``, follow the instruction on `GitHub <https://github.com/Sbozzolo/PostCactus>`_.
 
 Usage
 -----

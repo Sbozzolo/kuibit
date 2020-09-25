@@ -27,15 +27,10 @@ Documentation is found at the following link:
 
 ## Installation
 
-Clone this repo:
+``PostCactus`` is available in TestPyPI. To install it with `pip`
 ``` bash
-   git clone https://github.com/Sbozzolo/PostCactus.git
+   pip3 install --index-url https://test.pypi.org/simple/ postcactus
 ```
-Move into the folder and install with `pip`:
-``` bash
-   cd PostCactus && pip3 install --user .
-```
-
 If they are not already available, `pip` will install the following packages:
 - `numpy`
 - `numba`
@@ -44,12 +39,14 @@ If they are not already available, `pip` will install the following packages:
 
 The minimum version of Python required is 3.5.
 
+If you intend to develop ``PostCactus``, follow the instruction below.
+
 ### Development
 
 For development, we use [poetry](https://python-poetry.org/). Poetry simplifies
 dependency management, building, and publishing the package.
 
-To install `PostCactus` with poetry, move into the folder, and run:
+To install `PostCactus` with poetry, clone this repo, move into the folder, and run:
 ``` sh
    poetry install
 ```

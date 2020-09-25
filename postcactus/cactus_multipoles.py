@@ -296,7 +296,7 @@ class MultipoleAllDets:
         """Check if a given multipole component extracted at a given
         distance is available.
 
-        :param mult_l:     Multipole component mult_l
+        :param mult_l:     Multipole component l
         :type mult_l:      int
         :param mult_m:     Multipole component m
         :type mult_m:      int

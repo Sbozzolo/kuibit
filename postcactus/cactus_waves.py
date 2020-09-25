@@ -448,7 +448,7 @@ class GravitationalWavesOneDet(mp.MultipoleOneDet):
     def get_torque_z_lm(self, mult_l, mult_m, pcut):
         """Return the instantaneous torque in the z axis in the mode (l, m).
 
-        Eq. (9.140) in Baumgarte Shapiro
+        Eq. (9.140) in Baumgarte Shapiro (or 9.137)
         """
         # This is what we are going to implement
         # The foruma is dJ/dt = r**2/16pi m (dot(A)B - dot(B)*A)
