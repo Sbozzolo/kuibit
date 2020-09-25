@@ -139,8 +139,8 @@ class BaseSeries(ABC):
             x_array = self._return_array_if_monotonic(x_array)
 
         # The copy is because we don't want to change the input values
-        self.data_x = x_array.copy()
-        self.data_y = y_array.copy()
+        self.__data_x = x_array.copy()
+        self.__data_y = y_array.copy()
 
         # The data is stored in the members self.data_x and self.data_y. We
         # will never access these directly. We have setters and getters to that
@@ -157,7 +157,7 @@ class BaseSeries(ABC):
 
     @property
     def x(self):
-        return self.data_x
+        return self.__data_x
 
     @x.setter
     def x(self, x):
@@ -171,24 +171,24 @@ class BaseSeries(ABC):
         # If you do self.x = z
         # and then self.x = *2
         # z will change (if we don't copy)
-        self.data_x = x_array.copy()
+        self.__data_x = x_array.copy()
 
         # Invalidate the spline
         self.invalid_spline = True
 
     @property
     def y(self):
-        return self.data_y
+        return self.__data_y
 
     @y.setter
     def y(self, y):
         y_array = self._make_array(y)
-        if len(y_array) != len(self.data_y):
+        if len(y_array) != len(self.__data_y):
             raise ValueError("You cannot change the length of the series")
 
         # This series should own the data, so we copy (to avoid accidentally
         # changing some other variable)
-        self.data_y = y_array.copy()
+        self.__data_y = y_array.copy()
 
         # Invalidate the spline
         self.invalid_spline = True
@@ -398,8 +398,8 @@ class BaseSeries(ABC):
         # This can speed up some comutations.
         copied = type(self).__new__(self.__class__)
         # We don't use the setters
-        copied.data_x = self.data_x.copy()
-        copied.data_y = self.data_y.copy()
+        copied.__data_x = self.__data_x.copy()
+        copied.__data_y = self.__data_y.copy()
         if not self.invalid_spline:
             # splines are tuples, with a direct call to the function
             # tuple() we make a deep copy
@@ -558,7 +558,7 @@ class BaseSeries(ABC):
         ret = f(*args, **kwargs)
         # We avoid the setters to avoid checking for consistency because this
         # was already done
-        self.data_x, self.data_y = ret.x, ret.y
+        self.__data_x, self.__data_y = ret.x, ret.y
         # We have to recompute the splines
         self.invalid_spline = True
 
