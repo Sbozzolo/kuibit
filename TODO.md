@@ -22,3 +22,5 @@ of knowledge of PostCactus or of Python required to complete the task.
   These functions may be turned into decorators, or at least used in a more
   concise way. [==]
 * Numba-ify low-level functions. [===]
+* `_multipoles_from_textfiles` takes a long time if there are thousands of
+  files. [==]

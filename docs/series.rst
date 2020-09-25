@@ -54,8 +54,17 @@ from ``numpy`` can be applied directly:
 
 Both the Series are callable objects, so they behave like normal functions. If
 ``t0`` is any arbitrary time (or frequency), you can call ``sin_wave(t0)`` to
-get the value of ``sin_wave`` at `t0`. To do this, ``baseSeries`` uses spline
+get the value of ``sin_wave`` at `t0`. To do this, ``BaseSeries`` uses spline
 representation. For more information, read the documentation on splines.
+Moreover, series are natively plottable by ``Matplotlib``: you can simply do:
+
+.. code-block:: python
+
+    import matplotlib.pyplot as plt
+
+    plt.plot(cos_wave)
+
+This is equivalent to ``plt.plot(cos_wave.t, cos_wave.y)``.
 
 ``TimeSeries`` and ``FrequencySeries`` objects have multiple useful functions.
 We follow this convention: methods with an name that is an imperative (e.g.,

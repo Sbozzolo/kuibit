@@ -113,6 +113,10 @@ class TestTimeseries(unittest.TestCase):
         # Check that the spline is invalid
         self.assertTrue(self.TS.invalid_spline)
 
+        # Test getter for plotting
+        self.assertIs(self.TS.index.values, self.TS.x)
+        self.assertIs(self.TS.values, self.TS.y)
+
     def test_len(self):
         self.assertEqual(len(self.TS), 100)
 
