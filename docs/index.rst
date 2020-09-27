@@ -20,6 +20,8 @@ Features currently implemented:
 - Analyze gravitational waves extracted with the Newman-Penrose formalism
   (:py:mod:`~.cactus_waves`) computing, among the other things, strains, overlaps,
   energy lost.
+- Work with the power spectral densities of known detectors
+  (:py:mod:`~.sensitivity_curves`)
 - Represent and manipulate time series (:py:mod:`~.timeseries`). Examples of
   functions available for time series: ``integrate``, ``derive``, ``resample``,
   ``to_FrequencySeries`` (Fourier transform).
@@ -62,6 +64,7 @@ Usage
    cactus_waves.rst
    gw_utils.rst
    gw_mismatch.rst
+   sensitivity_curves
    unitconv.rst
 
 Examples
@@ -90,4 +93,5 @@ Reference material (classes, functions, ...)
    cactus_waves_ref.rst
    gw_utils_ref.rst
    gw_mismatch_ref.rst
+   sensitivity_curves_ref.rst
    unitconv_ref.rst
