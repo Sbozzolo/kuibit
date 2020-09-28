@@ -21,16 +21,14 @@ derived).
 
 """
 
-from abc import ABC
-
 import numpy as np
 from scipy import interpolate, integrate, signal
 
 from postcactus.attr_dict import AttributeDictionary
-
+from postcactus.numerical import BaseNumerical
 
 # Note, we test this class testing its derived class TimeSeries
-class BaseSeries(ABC):
+class BaseSeries(BaseNumerical):
     """Base class (not intended for direct use) for generic series data in
     which the independendent variable x is sorted.
 
@@ -230,8 +228,6 @@ class BaseSeries(ABC):
         :rvalue: Min of x
         :rtype: float
         """
-        # Derived classes can implement more efficients methods if x has known
-        # ordering
         return self.x[0]
 
     @property
@@ -241,8 +237,6 @@ class BaseSeries(ABC):
         :rvalue: Max of x
         :rtype: float
         """
-        # Derived classes can implement more efficients methods if x has known
-        # ordering
         return self.x[-1]
 
     def is_regularly_sampled(self):
@@ -272,13 +266,33 @@ class BaseSeries(ABC):
         """
         return issubclass(self.y.dtype.type, complex)
 
-    def x_at_maximum_y(self):
+    def x_at_abs_maximum_y(self):
         """Return the value of x when abs(y) is maximum."""
         return self.x[np.argmax(np.abs(self.y))]
 
-    def x_at_minimum_y(self):
+    def x_at_abs_minimum_y(self):
         """Return the value of x when abs(y) is minimum."""
         return self.x[np.argmin(np.abs(self.y))]
+
+    def min(self):
+        return np.min(self.y)
+
+    minimum = min
+
+    def max(self):
+        return np.max(self.y)
+
+    maximum = max
+
+    def abs_min(self):
+        return np.min(np.abs(self.y))
+
+    absolute_minimum = abs_min
+
+    def abs_max(self):
+        return np.max(np.abs(self.y))
+
+    absolute_maximum = abs_max
 
     def _make_spline(self, *args, k=3, s=0, **kwargs):
         """Private function to make spline representation of the data.
@@ -442,12 +456,6 @@ class BaseSeries(ABC):
         """
         self._apply_to_self(self.resampled, new_x, ext=ext)
 
-    def __neg__(self):
-        return type(self)(self.x, -self.y, True)
-
-    def __abs__(self):
-        return type(self)(self.x, np.abs(self.y), True)
-
     def _apply_binary(self, other, function):
         """This is an abstract function that is used to implement mathematical
         operations with other series (if they have the same x) or
@@ -481,66 +489,6 @@ class BaseSeries(ABC):
 
         # If we are here, it is because we cannot add the two objects
         raise TypeError("I don't know how to combine these objects")
-
-    def __add__(self, other):
-        """Add two series (if they have the same x), or add a scalar to a
-        series.
-        """
-        return self._apply_binary(other, np.add)
-
-    __radd__ = __add__
-
-    def __sub__(self, other):
-        """Subtract two series (if they have the same x), or subtract a
-        scalar from a series.
-
-        """
-        return self._apply_binary(other, np.subtract)
-
-    def __rsub__(self, other):
-        """Subtract two series (if they have the same x), or subtract a
-        scalar from a series.
-
-        """
-        return -self._apply_binary(other, np.subtract)
-
-    def __mul__(self, other):
-        """Multiply two series (if they have the same x), or multiply
-        by scalar.
-        """
-        return self._apply_binary(other, np.multiply)
-
-    __rmul__ = __mul__
-
-    def __truediv__(self, other):
-        """Divide two series (if they have the same x), or divide by a
-        scalar.
-        """
-        if other == 0:
-            raise ValueError("Cannot divide by zero")
-        return self._apply_binary(other, np.divide)
-
-    def __pow__(self, other):
-        """Raise the first series to second series (if they have the
-        same x), or raise the series to a scalar.
-
-        """
-        return self._apply_binary(other, np.power)
-
-    def __iadd__(self, other):
-        return self + other
-
-    def __isub__(self, other):
-        return self - other
-
-    def __imul__(self, other):
-        return self * other
-
-    def __itruediv__(self, other):
-        return self / other
-
-    def __ipow__(self, other):
-        return self ** other
 
     def __eq__(self, other):
         """Check for equality up to numerical precision."""
@@ -800,66 +748,6 @@ class BaseSeries(ABC):
         # TODO: Turn this into a decorator
 
         return type(self)(self.x, function(self.y), True)
-
-    def abs(self):
-        return abs(self)
-
-    def real(self):
-        return self._apply_unary(np.real)
-
-    def imag(self):
-        return self._apply_unary(np.imag)
-
-    def sin(self):
-        return self._apply_unary(np.sin)
-
-    def cos(self):
-        return self._apply_unary(np.cos)
-
-    def tan(self):
-        return self._apply_unary(np.tan)
-
-    def arcsin(self):
-        return self._apply_unary(np.arcsin)
-
-    def arccos(self):
-        return self._apply_unary(np.arccos)
-
-    def arctan(self):
-        return self._apply_unary(np.arctan)
-
-    def sinh(self):
-        return self._apply_unary(np.sinh)
-
-    def cosh(self):
-        return self._apply_unary(np.cosh)
-
-    def tanh(self):
-        return self._apply_unary(np.tanh)
-
-    def arcsinh(self):
-        return self._apply_unary(np.arcsinh)
-
-    def arccosh(self):
-        return self._apply_unary(np.arccosh)
-
-    def arctanh(self):
-        return self._apply_unary(np.arctanh)
-
-    def sqrt(self):
-        return self._apply_unary(np.sqrt)
-
-    def exp(self):
-        return self._apply_unary(np.exp)
-
-    def log(self):
-        return self._apply_unary(np.log)
-
-    def log10(self):
-        return self._apply_unary(np.log10)
-
-    def conjugate(self):
-        return self._apply_unary(np.conjugate)
 
 
 def sample_common(series):

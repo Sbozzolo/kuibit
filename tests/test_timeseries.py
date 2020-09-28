@@ -20,11 +20,13 @@
 
 import os
 import unittest
+from unittest import mock
 
 import numpy as np
 from scipy import signal
 
 from postcactus import series
+from postcactus import numerical
 from postcactus import timeseries as ts
 
 
@@ -36,6 +38,15 @@ class TestTimeseries(unittest.TestCase):
         self.TS = ts.TimeSeries(self.times, self.values)
         # Complex
         self.TS_c = ts.TimeSeries(self.times, self.values + 1j * self.values)
+
+    # This is to make coverage happy and test the abstract methods
+    # There's no real test here
+    @mock.patch.multiple(numerical.BaseNumerical, __abstractmethods__=set())
+    def test_numerical(self):
+
+        abs_numerical = numerical.BaseNumerical()
+        abs_numerical._apply_unary(lambda x: x)
+        abs_numerical._apply_binary(0, lambda x: x)
 
     def test__make_array(self):
 
