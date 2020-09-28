@@ -424,16 +424,23 @@ class BaseSeries(BaseNumerical):
         copied.invalid_spline = True
         return copied
 
-    def resampled(self, new_x, ext=2):
+    def resampled(self, new_x, ext=2, piecewise_constant=False):
         """Return a new series resampled from this to new_x.
 
         You can specify the details of the spline with the method make_spline.
+
+        If you want to resample without using the spline, and you want a nearest
+        neighbor resampling, pass the keyword piecewise_constant=True.
+        This may be a good choice for data with large discontinuities, where the
+        splines are ineffective.
 
         :param new_x: New independent variable
         :type new_x:  1D numpy array or list of float
         :param ext: How to handle points outside the data interval
         :type ext: 0 for extrapolation, 1 for returning zero, 2 for ValueError,
                    3 for extending the boundary
+        :param piecewise_constant: Do not use splines, use the nearest neighbors.
+        :type piecewise_constant: bool
         :returns: Resampled series.
         :rtype:   :py:class:`~.BaseSeries` or derived class
 
@@ -442,19 +449,42 @@ class BaseSeries(BaseNumerical):
         if len(self.x) == len(new_x):
             if np.allclose(self.x, new_x, atol=1e-14):
                 return self.copy()
-        return type(self)(new_x, self.evaluate_with_spline(new_x, ext=ext))
 
-    def resample(self, new_x, ext=2):
-        """Resample the series to new independent variable new_x using splines.
+        # Unfortunately there is no nearest neighor resampling in SciPy's splines.
+        # Hence, we use directly the method interp1d.
+        if piecewise_constant:
+            interp_function = interpolate.interp1d(
+                self.x, self.y, kind="nearest", assume_sorted=True
+            )
+            new_y = interp_function(new_x)
+        else:
+            new_y = self.evaluate_with_spline(new_x, ext=ext)
+
+        return type(self)(new_x, new_y)
+
+    def resample(self, new_x, ext=2, piecewise_constant=False):
+        """Resample the series to new independent variable new_x.
+
+        If you want to resample without using the spline, and you want a nearest
+        neighbor resampling, pass the keyword piecewise_constant=True.
+        This may be a good choice for data with large discontinuities, where the
+        splines are ineffective.
 
         :param new_x: New independent variable
         :type new_x:  1D numpy array or list of float
         :param ext: How to handle points outside the interval
         :type ext: 0 for extrapolation, 1 for returning zero, 2 for ValueError,
                    3 for extending the boundary
+        :param piecewise_constant: Do not use splines, use the nearest neighbors.
+        :type piecewise_constant: bool
 
         """
-        self._apply_to_self(self.resampled, new_x, ext=ext)
+        self._apply_to_self(
+            self.resampled,
+            new_x,
+            ext=ext,
+            piecewise_constant=piecewise_constant,
+        )
 
     def _apply_binary(self, other, function):
         """This is an abstract function that is used to implement mathematical
@@ -523,7 +553,9 @@ class BaseSeries(BaseNumerical):
             np.savetxt(
                 fname,
                 np.transpose(
-                    (self.x, self.y.real, self.y.imag), *args, **kwargs
+                    (self.x, self.y.real, self.y.imag),
+                    *args,
+                    **kwargs,
                 ),
             )
         else:
@@ -671,7 +703,9 @@ class BaseSeries(BaseNumerical):
             )
 
         return type(self)(
-            self.x, signal.savgol_filter(self.y, window_size, order), True
+            self.x,
+            signal.savgol_filter(self.y, window_size, order),
+            True,
         )
 
     def savgol_smooth(self, window_size, order=3):

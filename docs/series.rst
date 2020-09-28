@@ -227,6 +227,11 @@ frequency).
 
 Before using these methods, read the warning in ``make_spline``!
 
+Then using ``resample``, you can optionally pass the keyword
+``piecewise_constant``. In this case, splines will not be used, and the new
+points will be evaluated using the nearest neighbor. This is useful for those
+cases in which splines are inaccurate.
+
 Fourier transform (to_FrequencySeries)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
