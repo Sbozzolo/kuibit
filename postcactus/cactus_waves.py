@@ -101,7 +101,8 @@ class GravitationalWavesOneDet(mp.MultipoleOneDet):
 
         if not timeseries.is_regularly_sampled():
             warnings.warn(
-                "Timeseries not regularly sampled. Resampling.", RuntimeWarning
+                "Timeseries not regularly sampled. Resampling.",
+                RuntimeWarning,
             )
             integrand = timeseries.regular_resampled()
         else:
@@ -757,17 +758,29 @@ class GravitationalWavesDir(WavesDir):
 
         if not extrapolate_amplitude_phase:
             extrapolated = self._extrapolate_waves_to_infinity(
-                strains_resampled, retarded_times, dists, mass, order=order
+                strains_resampled,
+                retarded_times,
+                dists,
+                mass,
+                order=order,
             )
         else:
             strains_amplitudes = [s.abs() for s in strains_resampled]
             strains_phases = [s.unfolded_phase() for s in strains_resampled]
 
             extrapolated_amp = self._extrapolate_waves_to_infinity(
-                strains_amplitudes, retarded_times, dists, mass, order=order
+                strains_amplitudes,
+                retarded_times,
+                dists,
+                mass,
+                order=order,
             )
             extrapolated_phase = self._extrapolate_waves_to_infinity(
-                strains_phases, retarded_times, dists, mass, order=order
+                strains_phases,
+                retarded_times,
+                dists,
+                mass,
+                order=order,
             )
 
             extrapolated = extrapolated_amp * np.exp(1j * extrapolated_phase)

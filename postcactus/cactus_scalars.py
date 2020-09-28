@@ -195,7 +195,10 @@ class OneScalar:
         # all() function
 
         columns = list(
-            map(self._rx_columns.match, matched_pattern.groups()[0].split())
+            map(
+                self._rx_columns.match,
+                matched_pattern.groups()[0].split(),
+            )
         )
 
         are_real_columns = all(columns)

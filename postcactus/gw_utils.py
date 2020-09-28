@@ -38,7 +38,10 @@ Detectors = namedtuple("Detectors", "hanford livingston virgo")
 
 
 def luminosity_distance_to_redshift(
-    luminosity_distance, Omega_m=0.309, Omega_L=0.691, initial_guess=0.1
+    luminosity_distance,
+    Omega_m=0.309,
+    Omega_L=0.691,
+    initial_guess=0.1,
 ):
     r"""Compute redshift from luminosity distance in Mpc assuming
     the LCMD cosmology.
@@ -381,7 +384,9 @@ def antenna_responses_from_sky_localization(
     Fc_V, Fp_V = antenna_responses(*coords.virgo, polarization)
 
     antenna = Detectors(
-        hanford=(Fc_H, Fp_H), livingston=(Fc_L, Fp_L), virgo=(Fc_V, Fp_V)
+        hanford=(Fc_H, Fp_H),
+        livingston=(Fc_L, Fp_L),
+        virgo=(Fc_V, Fp_V),
     )
 
     return antenna

@@ -430,7 +430,9 @@ class TimeSeries(BaseSeries):
             )
 
         new_zeros_t = np.linspace(
-            self.tmax + self.dt, self.tmax + N_new_zeros * self.dt, N_new_zeros
+            self.tmax + self.dt,
+            self.tmax + N_new_zeros * self.dt,
+            N_new_zeros,
         )
         return TimeSeries(
             np.append(self.t, new_zeros_t),

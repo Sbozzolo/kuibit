@@ -285,7 +285,8 @@ def mismatch_from_strains(
 
     # We make sure that we always have to zero timeshift.
     time_shifts = np.append(
-        [0], np.linspace(time_shift_start, time_shift_end, num_time_shifts - 1)
+        [0],
+        np.linspace(time_shift_start, time_shift_end, num_time_shifts - 1),
     )
 
     # 2. We resample h1 and h2 to a common timeseries (linearly spaced). This
@@ -489,7 +490,10 @@ def mismatch_from_strains(
     p_shift_max = polarization_shifts[p_index]
     t_shift_max = time_shifts[t_index]
 
-    return 1 - unnormalized_max_overlap / norm, (p_shift_max, t_shift_max)
+    return 1 - unnormalized_max_overlap / norm, (
+        p_shift_max,
+        t_shift_max,
+    )
 
 
 def network_mismatch(
