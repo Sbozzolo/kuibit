@@ -23,7 +23,6 @@ network mismatch starting from psi4 and the sky localization) and
 mismatch_from_strains (when computing the mismatch from the strains).
 
 """
-
 import numpy as np
 from warnings import warn
 
@@ -34,7 +33,6 @@ from warnings import warn
 # At the moment, fft is not supported, so the full power of numba cannot be
 # achived.
 from numba import njit, objmode
-from scipy.interpolate import interp1d
 
 from postcactus import unitconv
 from postcactus import frequencyseries as fs
@@ -356,12 +354,14 @@ def mismatch_from_strains(
                 fs.FrequencySeries(h1f_p_res.f, np.ones_like(h1f_p_res.fft))
             )
             if noise is not None:
+                # TODO: Now the Series class has a function for this kind of
+                #       resampling. Use that.
+                #
                 # We start with a FrequencySeries of ones, and we overwrite the
                 # fft attribute
-                noise_function = interp1d(
-                    noise.f, noise.fft, kind="nearest", assume_sorted=True
+                noises_res[-1] = noises[-1].resampled(
+                    h1f_p_res.f, piecewise_constant=True
                 )
-                noises_res[-1].fft = noise_function(noises_res[-1].f)
     else:
         # Here we prepare a noise that is made by ones everywhere. This is what
         # happens internally when noises is None. However, here we do it

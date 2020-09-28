@@ -690,6 +690,14 @@ class TestTimeseries(unittest.TestCase):
         self.assertTrue(np.allclose(sins2.t, two_times))
         self.assertTrue(np.allclose(sins2.y, np.sin(two_times)))
 
+        # Test resample with piecewise_constant
+
+        # For this, we prepare an array with only two values, and resample
+        # on four points.
+        res = ts.TimeSeries([1, 2], [10, 0])
+        res.resample([1, 1.1, 1.9, 2], piecewise_constant=True)
+        self.assertTrue(np.allclose(res.y, np.array([10, 10, 0, 0])))
+
     def test_integrate(self):
 
         times_long = np.linspace(0, 2 * np.pi, 10000)
