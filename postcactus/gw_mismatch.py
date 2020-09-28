@@ -900,7 +900,7 @@ def one_detector_mismatch_from_psi4(
         h2,
         fmin,
         fmax,
-        noises=noise,
+        noises=[noise],
         antenna_patterns=None,
         num_polarization_shifts=num_polarization_shifts,
         num_time_shifts=num_time_shifts,
