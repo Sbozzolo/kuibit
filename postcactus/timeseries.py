@@ -302,7 +302,7 @@ class TimeSeries(BaseSeries):
         :returns:  Time at absolute maximum
         :rtype:    float
         """
-        return self.x_at_maximum_y()
+        return self.x_at_abs_maximum_y()
 
     def time_at_minimum(self):
         """Return the time at which the timeseries is minimum in absolute
@@ -311,7 +311,7 @@ class TimeSeries(BaseSeries):
         :returns:  Time at absolute minimum
         :rtype:    float
         """
-        return self.x_at_minimum_y()
+        return self.x_at_abs_minimum_y()
 
     def aligned_at_minimum(self):
         """Return a new timeseries with absolute minimum at t=0.

@@ -171,6 +171,11 @@ Series are iterable, so you can do
    for t, y in timeseries:
        print(t, y)
 
+min, max, abs_min, abs_max
+^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+These methods return the minimum or maximum of the series. With a prefix
+``abs``, they return the minimum or maximum of the absolute value of the series.
 
 The TimeSeries methods
 -----------------------

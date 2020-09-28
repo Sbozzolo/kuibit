@@ -401,6 +401,17 @@ class TestTimeseries(unittest.TestCase):
         out = (self.TS).imag()
         self.assertTrue(np.allclose(out.y, 0))
 
+    def test_min_max(self):
+
+        self.assertEqual(self.TS.min(), np.min(self.TS.y))
+        self.assertEqual(self.TS.minimum(), np.min(self.TS.y))
+        self.assertEqual(self.TS.max(), np.max(self.TS.y))
+        self.assertEqual(self.TS.maximum(), np.max(self.TS.y))
+        self.assertEqual(self.TS.abs_min(), np.min(np.abs(self.TS.y)))
+        self.assertEqual(self.TS.absolute_minimum(), np.min(np.abs(self.TS.y)))
+        self.assertEqual(self.TS.abs_max(), np.max(np.abs(self.TS.y)))
+        self.assertEqual(self.TS.absolute_maximum(), np.max(np.abs(self.TS.y)))
+
     def test_zero_pad(self):
 
         # Check invalid number of points
