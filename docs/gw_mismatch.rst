@@ -198,6 +198,12 @@ A (roughly) complete example would look like:
                                                  time_to_keep_after_max=400 * CU.time,
                                                  time_removed_beginning=200 * CU.time)
 
+
+In case you want to compute the optimal mismatch considering only one detector,
+you can use the function :py:meth:`~.one_detector_mismatch_from_psi4`, which is
+similar to :py:meth:`~.network_mismatch_from_psi4` but considers only one
+detector.
+
 mismatch_from_strains
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
 

@@ -522,3 +522,35 @@ class TestGWMismatch(unittest.TestCase):
                 time_shift_end=200,
             )[0],
         )
+
+        self.assertAlmostEqual(
+            gwm.one_detector_mismatch_from_psi4(
+                psi1,
+                psi2,
+                1,
+                3,
+                0.1,
+                window_function="tukey",
+                fmin=fmin,
+                fmax=fmax,
+                noise=None,
+                time_removed_beginning=0,
+                time_to_keep_after_max=1000,
+                num_polarization_shifts=50,
+                num_time_shifts=50,
+                time_shift_start=-200,
+                time_shift_end=200,
+            )[0],
+            gwm.mismatch_from_strains(
+                h1,
+                h2,
+                fmin=fmin,
+                fmax=fmax,
+                noises=None,
+                antenna_patterns=None,
+                num_polarization_shifts=50,
+                num_time_shifts=50,
+                time_shift_start=-200,
+                time_shift_end=200,
+            )[0],
+        )

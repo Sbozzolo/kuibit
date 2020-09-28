@@ -593,12 +593,165 @@ def network_mismatch(
     )
 
 
-def network_mismatch_from_psi4(
+def _strains_from_psi4(
     psi1,
     psi2,
-    right_ascension,
-    declination,
-    time_utc,
+    pcut1,
+    pcut2,
+    *args,
+    window_function=None,
+    align_at_peak=True,
+    trim_ends=True,
+    mass_scale1_msun=None,
+    mass_scale2_msun=None,
+    distance1=None,
+    distance2=None,
+    num_zero_pad=16384,
+    time_to_keep_after_max=None,
+    time_removed_beginning=None,
+    **kwargs
+):
+    r"""Extract the strains from (2, 2) mode of psi1 and psi2 (which have to be
+    :py:class:`~.GravitationalWavesOneDet`, as from :py:class:`~.SimDir` when
+    a radius is specified). In doing this, use the fixed-frequency integration
+    method with pcut1 and pcut2 and with the provided window function.
+
+    Then, possibly align the signal to peak, transform it to physical units,
+    and crop it as requested. Send this to the :py:meth:`~.network_mismatch`
+    function.
+
+    :param psi1: :math:`\Psi_4` for the first wave.
+    :type psi1: :py:class:`~.GravitationalWavesOneDet`
+    :param psi2: :math:`\Psi_4` for the second wave (the one that will be
+                 modified).
+    :type psi2: :py:class:`~.GravitationalWavesOneDet`
+
+    :param mass_scale1_msun: If not None, the signal h1 is converted from
+    computational units to physical units assuming that
+    M = mass_scale1_msun.
+    :type mass_scale1_msun: float or None
+
+    :param mass_scale2_msun: If not None, the signal h2 is converted from
+    computational units to physical units assuming that
+    M = mass_scale2_msun.
+    :type mass_scale2_msun: float or None
+
+    :param pcut1: Period associated with the threshold frequency
+                 ``omega_0 = 2 * pi / pcut`` for the fixed frequency
+                 integration of :math:`\Psi_4`
+    :type pcut1: float
+
+    :param pcut2: Period associated with the threshold frequency
+                 ``omega_0 = 2 * pi / pcut`` for the fixed frequency
+                 integration of :math:`\Psi_4`
+    :type pcut2: float
+
+    :param window_function: If not None, apply window_function to the
+    series before computing the strain.
+    :type window_function: callable, str, or None
+
+    :param trim_ends: If True, a portion of the resulting strain is removed
+    at both the initial and final times. The amount removed is equal to
+    pcut.
+    :type trim_ends: bool
+
+    :param align_at_peak: Time-shifts the strain so that they have both the
+    maximum amplitude at t=0.
+    :type align_at_peak: bool
+
+    :param num_zero_pad: How many points do the timeseries have to have
+    before Fourier transforms are taken? This is not the number of zeros
+    added (at the end) of the timeseries, this is the total number. If the
+    series already have that length, no zeros will be added.
+    :type num_zero_pad: int
+
+    :param time_removed_beginning: Remove this amount from the beginning
+    of the strain signals before computing the mismatch. If None, nothing
+    is removed.
+    :type time_removed_beginning: float or None
+
+    :param time_to_keep_after_max: If not None, remove all the signal that
+    comes after t_max + time_to_keep_after_max, where t_max is the time at
+    which the signal peaks.
+    :type time_to_keep_after_max: float or None
+
+    :param *args: All the other arguments are passed to the window
+     function.
+    :type *args: anything
+
+    """
+
+    # First, we compute the strains. If we just look at the (2,2) mode, we
+    # don't need to multiply the spin weighted spherical harmonics, since it is
+    # a normalization factor.
+    h1 = psi1.get_strain_lm(
+        2,
+        2,
+        pcut1,
+        *args,
+        window_function=window_function,
+        trim_ends=trim_ends,
+        **kwargs
+    )
+
+    h2 = psi2.get_strain_lm(
+        2,
+        2,
+        pcut2,
+        *args,
+        window_function=window_function,
+        trim_ends=trim_ends,
+        **kwargs
+    )
+
+    # Align the waves at the peak
+    if align_at_peak:
+        h1.align_at_maximum()
+        h2.align_at_maximum()
+
+    # Now, we convert to physical units
+    if mass_scale1_msun is not None:
+        CU1 = unitconv.geom_umass_msun(mass_scale1_msun)
+        h1.time_unit_change(CU1.time, inverse=True)
+        if distance1 is not None:
+            distance1_SI = distance1 * unitconv.MEGAPARSEC_SI
+            # Remember, h is actually r * h!
+            h1 *= CU1.length / distance1_SI
+            redshift1 = gwu.luminosity_distance_to_redshift(distance1)
+            h1.redshift(redshift1)
+
+    if mass_scale2_msun is not None:
+        CU2 = unitconv.geom_umass_msun(mass_scale2_msun)
+        h2.time_unit_change(CU2.time, inverse=True)
+        if distance2 is not None:
+            distance2_SI = distance2 * unitconv.MEGAPARSEC_SI
+            # Remember, h is actually r * h!
+            h2 *= CU2.length / distance2_SI
+            redshift2 = gwu.luminosity_distance_to_redshift(distance2)
+            h2.redshift(redshift2)
+
+    if time_removed_beginning is not None:
+        h1.initial_time_remove(time_removed_beginning)
+        h2.initial_time_remove(time_removed_beginning)
+
+    if time_to_keep_after_max is not None:
+        h1.crop(end=time_to_keep_after_max)
+        h2.crop(end=time_to_keep_after_max)
+
+    if window_function is not None:
+        # Next, we window and zero-pad
+        h1.window(window_function, *args, **kwargs)
+        h2.window(window_function, *args, **kwargs)
+
+    h1.zero_pad(num_zero_pad)
+    h2.zero_pad(num_zero_pad)
+
+    return h1, h2
+
+
+def one_detector_mismatch_from_psi4(
+    psi1,
+    psi2,
     pcut1,
     pcut2,
     *args,
@@ -611,7 +764,7 @@ def network_mismatch_from_psi4(
     distance2=None,
     fmin=0,
     fmax=np.inf,
-    noises=None,
+    noise=None,
     num_zero_pad=16384,
     num_time_shifts=100,
     num_polarization_shifts=100,
@@ -623,15 +776,6 @@ def network_mismatch_from_psi4(
     **kwargs
 ):
     r"""Compute the mismatch between strains from psi1 and psi2.
-
-    Extract the strains from (2, 2) mode of psi1 and psi2 (which have to be
-    :py:class:`~.GravitationalWavesOneDet`, as from :py:class:`~.SimDir` when
-    a radius is specified). In doing this, use the fixed-frequency integration
-    method with pcut1 and pcut2 and with the provided window function.
-
-    Then, possibly align the signal to peak, transform it to physical units,
-    and crop it as requested. Send this to the :py:meth:`~.network_mismatch`
-    function.
 
     This function is complex, read :ref:`gw_mismatch:Overlap and mismatch` for
     formulas and details.
@@ -732,70 +876,188 @@ def network_mismatch_from_psi4(
     :type *args: anything
 
     """
-    # First, we compute the strains. If we just look at the (2,2) mode, we
-    # don't need to multiply the spin weighted spherical harmonics, since it is
-    # a normalization factor.
-    h1 = psi1.get_strain_lm(
-        2,
-        2,
+    h1, h2 = _strains_from_psi4(
+        psi1,
+        psi2,
         pcut1,
-        *args,
-        window_function=window_function,
-        trim_ends=trim_ends,
-        **kwargs
-    )
-
-    h2 = psi2.get_strain_lm(
-        2,
-        2,
         pcut2,
         *args,
         window_function=window_function,
+        align_at_peak=align_at_peak,
         trim_ends=trim_ends,
+        mass_scale1_msun=mass_scale1_msun,
+        mass_scale2_msun=mass_scale2_msun,
+        distance1=distance1,
+        distance2=distance2,
+        num_zero_pad=num_zero_pad,
+        time_to_keep_after_max=time_to_keep_after_max,
+        time_removed_beginning=time_removed_beginning,
         **kwargs
     )
 
-    # Align the waves at the peak
-    if align_at_peak:
-        h1.align_at_maximum()
-        h2.align_at_maximum()
+    return mismatch_from_strains(
+        h1,
+        h2,
+        fmin,
+        fmax,
+        noises=noise,
+        antenna_patterns=None,
+        num_polarization_shifts=num_polarization_shifts,
+        num_time_shifts=num_time_shifts,
+        time_shift_start=time_shift_start,
+        time_shift_end=time_shift_end,
+        force_numba=force_numba,
+    )
 
-    # Now, we convert to physical units
-    if mass_scale1_msun is not None:
-        CU1 = unitconv.geom_umass_msun(mass_scale1_msun)
-        h1.time_unit_change(CU1.time, inverse=True)
-        if distance1 is not None:
-            distance1_SI = distance1 * unitconv.MEGAPARSEC_SI
-            # Remember, h is actually r * h!
-            h1 *= CU1.length / distance1_SI
-            redshift1 = gwu.luminosity_distance_to_redshift(distance1)
-            h1.redshift(redshift1)
 
-    if mass_scale2_msun is not None:
-        CU2 = unitconv.geom_umass_msun(mass_scale2_msun)
-        h2.time_unit_change(CU2.time, inverse=True)
-        if distance2 is not None:
-            distance2_SI = distance2 * unitconv.MEGAPARSEC_SI
-            # Remember, h is actually r * h!
-            h2 *= CU2.length / distance2_SI
-            redshift2 = gwu.luminosity_distance_to_redshift(distance2)
-            h2.redshift(redshift2)
+def network_mismatch_from_psi4(
+    psi1,
+    psi2,
+    right_ascension,
+    declination,
+    time_utc,
+    pcut1,
+    pcut2,
+    *args,
+    window_function=None,
+    align_at_peak=True,
+    trim_ends=True,
+    mass_scale1_msun=None,
+    mass_scale2_msun=None,
+    distance1=None,
+    distance2=None,
+    fmin=0,
+    fmax=np.inf,
+    noises=None,
+    num_zero_pad=16384,
+    num_time_shifts=100,
+    num_polarization_shifts=100,
+    time_shift_start=-50,
+    time_shift_end=50,
+    force_numba=False,
+    time_to_keep_after_max=None,
+    time_removed_beginning=None,
+    **kwargs
+):
+    r"""Compute the mismatch between strains from psi1 and psi2.
 
-    if time_removed_beginning is not None:
-        h1.initial_time_remove(time_removed_beginning)
-        h2.initial_time_remove(time_removed_beginning)
+    This function is complex, read :ref:`gw_mismatch:Overlap and mismatch` for
+    formulas and details.
 
-    if time_to_keep_after_max is not None:
-        h1.crop(end=time_to_keep_after_max)
-        h2.crop(end=time_to_keep_after_max)
+    :param psi1: :math:`\Psi_4` for the first wave.
+    :type psi1: :py:class:`~.GravitationalWavesOneDet`
+    :param psi2: :math:`\Psi_4` for the second wave (the one that will be
+                 modified).
+    :type psi2: :py:class:`~.GravitationalWavesOneDet`
 
-    if window_function is not None:
-        # Next, we window and zero-pad
-        h1.window(window_function, *args, **kwargs)
-        h2.window(window_function, *args, **kwargs)
+    :param right_ascension: Right ascension of the source in the sky.
+    :type right_ascension: float
 
-    h1.zero_pad(num_zero_pad)
-    h2.zero_pad(num_zero_pad)
+    :param declination: Declination of the source in the sky.
+    :type declination: float
+
+    :param mass_scale1_msun: If not None, the signal h1 is converted from
+    computational units to physical units assuming that
+    M = mass_scale1_msun.
+    :type mass_scale1_msun: float or None
+
+    :param mass_scale2_msun: If not None, the signal h2 is converted from
+    computational units to physical units assuming that
+    M = mass_scale2_msun.
+    :type mass_scale2_msun: float or None
+
+    :param time_utc: Time UTC of the event.
+    :type time_utc: float
+
+    :param pcut1: Period associated with the threshold frequency
+                 ``omega_0 = 2 * pi / pcut`` for the fixed frequency
+                 integration of :math:`\Psi_4`
+    :type pcut1: float
+
+    :param pcut2: Period associated with the threshold frequency
+                 ``omega_0 = 2 * pi / pcut`` for the fixed frequency
+                 integration of :math:`\Psi_4`
+    :type pcut2: float
+
+    :param window_function: If not None, apply window_function to the
+    series before computing the strain.
+    :type window_function: callable, str, or None
+
+    :param trim_ends: If True, a portion of the resulting strain is removed
+    at both the initial and final times. The amount removed is equal to
+    pcut.
+    :type trim_ends: bool
+
+    :param align_at_peak: Time-shifts the strain so that they have both the
+    maximum amplitude at t=0.
+    :type align_at_peak: bool
+
+    :param fmin: Lower limit of the integration.
+    :type fmin: float
+    :param fmax: Higher limit of the integration.
+    :type fmax: float
+
+    :param noises: Power spectral density of the noise for all the
+    detectors. If None, a uniform noise is applied.
+    :type noises: :py:class:`~.Detectors`, or None
+
+    :param num_zero_pad: How many points do the timeseries have to have
+    before Fourier transforms are taken? This is not the number of zeros
+    added (at the end) of the timeseries, this is the total number. If the
+    series already have that length, no zeros will be added.
+    :type num_zero_pad: int
+
+    :param num_polarization_shifts: How many points to divide the range
+    (0, 2 pi) in the polarization shift.
+    :type num_polarization_shifts: int
+
+    :param num_time_shifts: How many points to divide the range
+    (time_shift_start, time_shift_end) in the time shift.
+    :type num_time_shifts: int
+
+    :param time_shift_start: Minimum time shift applied. Search will be
+    done linearly up to time_shift_end.
+    :type time_shift_start: float
+
+    :param time_shift_end: Largest value of time shift applied.
+    :type time_shift_end: float
+
+    :param time_removed_beginning: Remove this amount from the beginning
+    of the strain signals before computing the mismatch. If None, nothing
+    is removed.
+    :type time_removed_beginning: float or None
+
+    :param time_to_keep_after_max: If not None, remove all the signal that
+    comes after t_max + time_to_keep_after_max, where t_max is the time at
+    which the signal peaks.
+    :type time_to_keep_after_max: float or None
+
+    :param force_numba: Use numba irrespectively of the size of the input.
+    :type force_numba: bool
+
+    :param *args: All the other arguments are passed to the window
+     function.
+    :type *args: anything
+
+    """
+    h1, h2 = _strains_from_psi4(
+        psi1,
+        psi2,
+        pcut1,
+        pcut2,
+        *args,
+        window_function=window_function,
+        align_at_peak=align_at_peak,
+        trim_ends=trim_ends,
+        mass_scale1_msun=mass_scale1_msun,
+        mass_scale2_msun=mass_scale2_msun,
+        distance1=distance1,
+        distance2=distance2,
+        num_zero_pad=num_zero_pad,
+        time_to_keep_after_max=time_to_keep_after_max,
+        time_removed_beginning=time_removed_beginning,
+        **kwargs
+    )
 
     return network_mismatch(
         h1,
