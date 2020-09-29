@@ -19,8 +19,8 @@ import unittest
 
 import numpy as np
 
-from postcactus import sensitivity_curves as sc
 from postcactus import frequencyseries as fs
+from postcactus import sensitivity_curves as sc
 
 
 class TestSensitivityCurves(unittest.TestCase):
@@ -71,14 +71,16 @@ class TestSensitivityCurves(unittest.TestCase):
 
     def test_aLIGO(self):
 
-        freqs = np.array([9, 4.3015530306322887e+02])
+        freqs = np.array([9, 4.3015530306322887e02])
 
         aLIGO = sc.Sn_aLIGO(freqs)
 
         self.assertEqual(
             aLIGO,
-            fs.FrequencySeries(freqs, [1.7370722680197635e-21 ** 2,
-                                       3.8885269176411187e-24 ** 2]),
+            fs.FrequencySeries(
+                freqs,
+                [1.7370722680197635e-21 ** 2, 3.8885269176411187e-24 ** 2],
+            ),
         )
 
     def test_voyager(self):
@@ -89,8 +91,7 @@ class TestSensitivityCurves(unittest.TestCase):
 
         self.assertEqual(
             voya,
-            fs.FrequencySeries(freqs, [1.7021e-20 ** 2,
-                                       9.846e-25 ** 2]),
+            fs.FrequencySeries(freqs, [1.7021e-20 ** 2, 9.846e-25 ** 2]),
         )
 
     def test_KAGRA_D(self):
@@ -101,8 +102,7 @@ class TestSensitivityCurves(unittest.TestCase):
 
         self.assertEqual(
             kagra,
-            fs.FrequencySeries(freqs, [1.01841e-18 ** 2,
-                                       6.78164e-24 ** 2]),
+            fs.FrequencySeries(freqs, [1.01841e-18 ** 2, 6.78164e-24 ** 2]),
         )
 
     def test_aLIGO_plus(self):
@@ -113,6 +113,5 @@ class TestSensitivityCurves(unittest.TestCase):
 
         self.assertEqual(
             aligo,
-            fs.FrequencySeries(freqs, [1.9995e-20 ** 2,
-                                       1.8182e-24 ** 2]),
+            fs.FrequencySeries(freqs, [1.9995e-20 ** 2, 1.8182e-24 ** 2]),
         )

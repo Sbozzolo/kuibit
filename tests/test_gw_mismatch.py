@@ -20,10 +20,10 @@ import warnings
 
 import numpy as np
 
-from postcactus import timeseries as ts
 from postcactus import frequencyseries as fs
 from postcactus import gw_mismatch as gwm
 from postcactus import gw_utils as gwu
+from postcactus import timeseries as ts
 from postcactus import unitconv as uc
 from postcactus.cactus_waves import GravitationalWavesOneDet
 

@@ -22,10 +22,11 @@ derived).
 """
 
 import numpy as np
-from scipy import interpolate, integrate, signal
+from scipy import integrate, interpolate, signal
 
 from postcactus.attr_dict import AttributeDictionary
 from postcactus.numerical import BaseNumerical
+
 
 # Note, we test this class testing its derived class TimeSeries
 class BaseSeries(BaseNumerical):
