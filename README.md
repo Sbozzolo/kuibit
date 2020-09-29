@@ -1,4 +1,4 @@
-![PostCactus-logo](logo.png)
+![PostCactus-logo](https://github.com/Sbozzolo/PostCactus/raw/master/logo.png)
 
 [![codecov](https://codecov.io/gh/Sbozzolo/PostCactus/branch/master/graph/badge.svg)](https://codecov.io/gh/Sbozzolo/PostCactus)
 ![Tests](https://github.com/Sbozzolo/PostCactus/workflows/Tests/badge.svg)
