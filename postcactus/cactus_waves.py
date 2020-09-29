@@ -24,11 +24,10 @@ import warnings
 
 import numpy as np
 
-from postcactus import simdir
 from postcactus import cactus_multipoles as mp
-from postcactus import gw_utils
-from postcactus.gw_utils import Detectors
+from postcactus import gw_utils, simdir
 from postcactus import timeseries as ts
+from postcactus.gw_utils import Detectors
 
 
 class GravitationalWavesOneDet(mp.MultipoleOneDet):

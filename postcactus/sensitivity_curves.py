@@ -25,8 +25,7 @@ from io import StringIO
 
 import numpy as np
 
-from postcactus.frequencyseries import FrequencySeries
-from postcactus.frequencyseries import load_FrequencySeries
+from postcactus.frequencyseries import FrequencySeries, load_FrequencySeries
 from postcactus.unitconv import C_SI
 
 

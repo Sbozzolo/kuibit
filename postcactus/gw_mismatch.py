@@ -23,8 +23,9 @@ network mismatch starting from psi4 and the sky localization) and
 mismatch_from_strains (when computing the mismatch from the strains).
 
 """
-import numpy as np
 from warnings import warn
+
+import numpy as np
 
 # What is this? This is numba!
 # numba is a JITter (JIT = Just In Time). The following code is compiled at
@@ -34,9 +35,9 @@ from warnings import warn
 # achived.
 from numba import njit, objmode
 
-from postcactus import unitconv
 from postcactus import frequencyseries as fs
 from postcactus import gw_utils as gwu
+from postcactus import unitconv
 
 
 def _mismatch_core_numerical(

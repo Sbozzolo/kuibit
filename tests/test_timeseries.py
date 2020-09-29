@@ -25,8 +25,7 @@ from unittest import mock
 import numpy as np
 from scipy import signal
 
-from postcactus import series
-from postcactus import numerical
+from postcactus import numerical, series
 from postcactus import timeseries as ts
 
 
