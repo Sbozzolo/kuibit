@@ -82,7 +82,10 @@ def Sn_ET_B(freqs):
 
     Downloaded from https://apps.et-gw.eu/tds/?content=3&r=14323
 
-    (Variant ET-B, the simplest)
+    (Variant ET-B, the simplest).
+
+    fmin = 1
+    fmax = 10000
 
     :param freqs: Frequencies in Hz over to evaluate the sensitivity curve.
     :type freqs: 1d numpy array
@@ -114,6 +117,9 @@ def Sn_CE1(freqs):
     1/Hz.
 
     Downloaded from https://cosmicexplorer.org/data/CE1_strain.txt
+
+    fmin = 3
+    fmax = 10000
 
     The resampling to freqs is done considering the values of the nearest neighbors.
 
@@ -147,6 +153,9 @@ def Sn_CE2(freqs):
 
     The resampling to freqs is done considering the values of the nearest neighbors.
 
+    fmin = 3
+    fmax = 10000
+
     :param freqs: Frequencies in Hz over to evaluate the sensitivity curve.
     :type freqs: 1d numpy array
 
@@ -175,7 +184,12 @@ def Sn_aLIGO(freqs):
 
     Downloaded from https://dcc.ligo.org/LIGO-T1500293-v11/public
 
+    This is the Zero-Detuned-High-Power
+
     The resampling to freqs is done considering the values of the nearest neighbors.
+
+    fmin = 9
+    fmax = 8192
 
     :param freqs: Frequencies in Hz over to evaluate the sensitivity curve.
     :type freqs: 1d numpy array
@@ -206,6 +220,9 @@ def Sn_voyager(freqs):
     Downloaded from https://dcc.ligo.org/LIGO-T1500293-v11/public
 
     The resampling to freqs is done considering the values of the nearest neighbors.
+
+    fmin = 5
+    fmax = 10000
 
     :param freqs: Frequencies in Hz over to evaluate the sensitivity curve.
     :type freqs: 1d numpy array
@@ -238,6 +255,9 @@ def Sn_KAGRA_D(freqs):
 
     The resampling to freqs is done considering the values of the nearest neighbors.
 
+    fmin = 1.00231
+    fmax = 10000
+
     :param freqs: Frequencies in Hz over to evaluate the sensitivity curve.
     :type freqs: 1d numpy array
 
@@ -269,6 +289,9 @@ def Sn_aLIGO_plus(freqs):
     Downloaded from  https://dcc.ligo.org/public/0149/T1800042/005/AplusDesign.txt
 
     The resampling to freqs is done considering the values of the nearest neighbors.
+
+    fmin = 5
+    fmax = 5000
 
     :param freqs: Frequencies in Hz over to evaluate the sensitivity curve.
     :type freqs: 1d numpy array
