@@ -14,3 +14,12 @@ The frequencies supplied have to be in Hertz, and the output is a
 
 The output of the functions in :py:mod:`~.sensitivity_curves` is ready to be
 used elsewhere in ``PostCactus`` where noises are required.
+
+Available detectors are:
+- Advanced LIGO (:py:meth:`~.Sn_aLIGO`)
+- Advanced LIGO Plus (:py:meth:`~.Sn_aLIGO_plus`)
+- Voyager (:py:meth:`~.Sn_voyager`)
+- Cosmic Explorer 1 and 2 (:py:meth:`~.Sn_CE1`, :py:meth:`~.Sn_CE2`)
+- Einstein Telescope (:py:meth:`~.Sn_ET_B`)
+- KAGRA (:py:meth:`~.Sn_KAGRA_D`)
+- LISA (:py:meth:`~.Sn_LISA`)
