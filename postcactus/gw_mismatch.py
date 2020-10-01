@@ -672,13 +672,14 @@ def _strains_from_psi4(
 
     :param time_removed_beginning: Remove this amount from the beginning
     of the strain signals before computing the mismatch. If None, nothing
-    is removed.
+    is removed. This is in computational units regardless of the value of
+    mass_scale.
     :type time_removed_beginning: float or None
 
-    :param time_to_keep_after_max: If not None, remove all the signal that
-    comes after t_max + time_to_keep_after_max, where t_max is the time at
-    which the signal peaks.
-    :type time_to_keep_after_max: float or None
+    :param time_to_keep_after_max: If not None, remove all the signal that comes
+    after t_max + time_to_keep_after_max, where t_max is the time at which the
+    signal peaks. This is in computational units regardless of the value of
+    mass_scale. :type time_to_keep_after_max: float or None
 
     :param *args: All the other arguments are passed to the window
      function.
@@ -735,13 +736,17 @@ def _strains_from_psi4(
             redshift2 = gwu.luminosity_distance_to_redshift(distance2)
             h2.redshift(redshift2)
 
+    # This keeps into account if we are using geometrized units or physical
+    time_factor1 = CU1.time if mass_scale1_msun is not None else 1
+    time_factor2 = CU2.time if mass_scale2_msun is not None else 1
+
     if time_removed_beginning is not None:
-        h1.initial_time_remove(time_removed_beginning)
-        h2.initial_time_remove(time_removed_beginning)
+        h1.initial_time_remove(time_removed_beginning * time_factor1)
+        h2.initial_time_remove(time_removed_beginning * time_factor2)
 
     if time_to_keep_after_max is not None:
-        h1.crop(end=time_to_keep_after_max)
-        h2.crop(end=time_to_keep_after_max)
+        h1.crop(end=time_to_keep_after_max * time_factor1)
+        h2.crop(end=time_to_keep_after_max * time_factor2)
 
     if window_function is not None:
         # Next, we window and zero-pad

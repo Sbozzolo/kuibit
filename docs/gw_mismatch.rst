@@ -124,13 +124,13 @@ is computed without noise.
 In case you want to remove part of the signal from the comparison, you can use
 the two paramters ``time_to_keep_after_max`` and ``time_removed_beginning``. The
 first sets how much signal to keep after the peak, everything else after that is
-removed. The second controls how much signal to remove at the very beginning. If
-you are providing mass scales (see later) these have to be in physical units.
-You may need to set ``trim_ends=False`` if you want to have finer control on how
-much signal to consider. For a meaningful comparison, it is important that the
-time limits are set properly, if they are not, the window function may produce
-incorrect results (because the two series are windowed in physically different
-ways). Visualize your data to make sure that the comparison is meaningful!
+removed. The second controls how much signal to remove at the very beginning.
+They are always provided in computational units. You may need to set
+``trim_ends=False`` if you want to have finer control on how much signal to
+consider. For a meaningful comparison, it is important that the time limits are
+set properly, if they are not, the window function may produce incorrect results
+(because the two series are windowed in physically different ways). Visualize
+your data to make sure that the comparison is meaningful!
 
 Typically, we perform simulations in some geometrized units, but we want to
 compare signals using actual noise (in physical units). For this, you can
@@ -195,8 +195,8 @@ A (roughly) complete example would look like:
                                                  num_polarization_shifts=1000,
                                                  time_shift_start=-10 * CU.time,
                                                  time_shift_end=10 * CU.time,
-                                                 time_to_keep_after_max=400 * CU.time,
-                                                 time_removed_beginning=200 * CU.time)
+                                                 time_to_keep_after_max=400,
+                                                 time_removed_beginning=200)
 
 
 In case you want to compute the optimal mismatch considering only one detector,
