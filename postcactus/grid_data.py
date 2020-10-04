@@ -8,7 +8,7 @@ Rudimentary vector and matrix oprations are also supported, using
 Vectors of data grids (instead of grids of vectors).
 
 The important classes defined here are
- * :py:class:`~.RegularGeometry`  represents the geometry of a uniform grid.
+ * :py:class:`~.UniformGrid`  represents the geometry of a uniform grid.
  * :py:class:`~.RegData`    represents data on a uniform grid and the
    geometry.
  * :py:class:`~.CompData`   represents data on a refined grid hirachy.
@@ -19,7 +19,7 @@ The important classes defined here are
 import numpy as np
 
 
-class RegularGeometry:
+class UniformGrid:
     """Describes the geometry of a regular rectangular dataset, as well as
     information needed if part of refined grid hierachy, namely component
     number and refinement level. In practice, this a fixed refinement level.
@@ -250,6 +250,7 @@ class RegularGeometry:
         :returns:   If point is contained.
         :rtype:     bool
         """
+        point = np.array(point)
         if not np.alltrue(point > (self.x0 - 0.5 * self.dx)):
             return False
         if not np.alltrue(point < (self.x1 + 0.5 * self.dx)):
@@ -315,9 +316,13 @@ class RegularGeometry:
                 ]
             )
 
-        i = np.indices(self.shape)
-        c = [i[d] * self.dx[d] + self.x0[d] for d in range(0, self.shape.size)]
-        return c
+        # np.indeces prepares a multimensional array given a shape with content
+        # the corresponding index.
+
+        return [
+            np.indices(self.shape)[d] * self.dx[d] + self.x0[d]
+            for d in range(0, self.shape.size)
+        ]
 
     def flat_dimensions_remove(self):
         """Remove dimensions which are only one gridpoint across"""
@@ -348,10 +353,10 @@ class RegularGeometry:
 Num ghost zones  = {self.num_ghost}
 Ref. level       = {self.ref_level}
 Component        = {self.component}
-Edge0            = {self.x0}
-Edge0/delta      = {self.x0/self.dx}
-Edge1            = {self.x1}
-Edge1/delta      = {self.x0/self.dx}
+x0               = {self.x0}
+x0/delta         = {self.x0/self.dx}
+x1               = {self.x1}
+x1/delta         = {self.x0/self.dx}
 Volume           = {self.volume}
 Delta            = {self.dx}
 Time             = {self.time}
