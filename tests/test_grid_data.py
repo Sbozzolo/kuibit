@@ -25,44 +25,42 @@ import numpy as np
 from postcactus import grid_data as gd
 
 
-class TestRegularGeometry(unittest.TestCase):
+class TestUniformGrid(unittest.TestCase):
     def test__check_dims(self):
 
         # Test multidimensional shape
         with self.assertRaises(ValueError):
-            gd.RegularGeometry(np.array([[1, 2], [3, 4]]), np.array([1, 2]))
+            gd.UniformGrid(np.array([[1, 2], [3, 4]]), np.array([1, 2]))
 
         # Test different len between shape and origin
         with self.assertRaises(ValueError):
-            gd.RegularGeometry(np.array([100, 200]), np.array([1, 2, 3]))
+            gd.UniformGrid(np.array([100, 200]), np.array([1, 2, 3]))
 
     def test_init_getters(self):
 
         # Test error neither of delta and x1 provided
         with self.assertRaises(ValueError):
-            geom = gd.RegularGeometry([101, 101], [1, 1])
+            geom = gd.UniformGrid([101, 101], [1, 1])
 
         # Test delta
-        geom = gd.RegularGeometry([101, 101], [1, 1], x1=[101, 51])
+        geom = gd.UniformGrid([101, 101], [1, 1], x1=[101, 51])
 
         self.assertTrue(np.allclose(geom.delta, [1, 0.5]))
         self.assertIs(geom.dx, geom.delta)
 
         # Test x1 and delta given, but incompatible
         with self.assertRaises(ValueError):
-            geom = gd.RegularGeometry(
-                [101, 51], [1, 1], x1=[4, 4], delta=[1, 1]
-            )
+            geom = gd.UniformGrid([101, 51], [1, 1], x1=[4, 4], delta=[1, 1])
 
         # Test x1
-        geom2 = gd.RegularGeometry([101, 101], [1, 1], delta=[1, 0.5])
+        geom2 = gd.UniformGrid([101, 101], [1, 1], delta=[1, 0.5])
 
         self.assertTrue(np.allclose(geom2.x1, [101, 51]))
 
         # Test num_ghost
         self.assertCountEqual(geom.num_ghost, np.zeros(2))
 
-        geom3 = gd.RegularGeometry(
+        geom3 = gd.UniformGrid(
             [101, 101], [1, 1], delta=[1, 0.5], num_ghost=[3, 3]
         )
 
@@ -72,7 +70,7 @@ class TestRegularGeometry(unittest.TestCase):
         self.assertEqual(geom3.ref_level, -1)
         self.assertEqual(geom3.component, -1)
 
-        geom4 = gd.RegularGeometry(
+        geom4 = gd.UniformGrid(
             [101, 101],
             [1, 1],
             delta=[1, 0.5],
@@ -89,7 +87,7 @@ class TestRegularGeometry(unittest.TestCase):
         self.assertAlmostEqual(geom4.dv, 0.5)
         self.assertAlmostEqual(geom4.volume, 0.5 * 101 * 101)
 
-        geom5 = gd.RegularGeometry(
+        geom5 = gd.UniformGrid(
             [101, 101, 1],
             [1, 1, 0],
             delta=[1, 0.5, 0],
@@ -104,7 +102,7 @@ class TestRegularGeometry(unittest.TestCase):
     def test__in__(self):
 
         # We test __in__ testing contains, which calls in
-        geom4 = gd.RegularGeometry(
+        geom4 = gd.UniformGrid(
             [101, 101],
             [1, 1],
             x1=[101, 51],
@@ -121,7 +119,7 @@ class TestRegularGeometry(unittest.TestCase):
 
     def test__str(self):
 
-        geom4 = gd.RegularGeometry(
+        geom4 = gd.UniformGrid(
             [101, 101],
             [1, 1],
             delta=[1, 0.5],
@@ -134,7 +132,7 @@ class TestRegularGeometry(unittest.TestCase):
 
     def test_coordinates(self):
 
-        geom4 = gd.RegularGeometry(
+        geom4 = gd.UniformGrid(
             [11, 15],
             [1, 1],
             delta=[1, 0.5],
@@ -169,7 +167,7 @@ class TestRegularGeometry(unittest.TestCase):
 
     def test__getitem__(self):
 
-        geom4 = gd.RegularGeometry(
+        geom4 = gd.UniformGrid(
             [11, 15],
             [1, 1],
             delta=[1, 0.5],
@@ -185,7 +183,7 @@ class TestRegularGeometry(unittest.TestCase):
 
     def test_flat_dimensions_remove(self):
 
-        geom = gd.RegularGeometry(
+        geom = gd.UniformGrid(
             [101, 101, 1],
             [1, 1, 0],
             delta=[1, 0.5, 0],
@@ -196,7 +194,7 @@ class TestRegularGeometry(unittest.TestCase):
 
         geom.flat_dimensions_remove()
 
-        geom2 = gd.RegularGeometry(
+        geom2 = gd.UniformGrid(
             [101, 101],
             [1, 1],
             delta=[1, 0.5],
