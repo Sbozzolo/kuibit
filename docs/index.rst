@@ -30,6 +30,7 @@ Features currently implemented:
 - Manipulate and analyze gravitational-waves (:py:mod:`~.gw_utils`,
   :py:mod:`~.gw_mismatch`). For example, compute energies, mismatches, or
   extrapolate waves to infinity.
+- Work with grid functions (:py:mod:`~.grid_data`).
 - Handle unit conversion, in particular from geometrized to physical
   (:py:mod:`~.unitconv`).
 
@@ -64,7 +65,8 @@ Usage
    cactus_waves.rst
    gw_utils.rst
    gw_mismatch.rst
-   sensitivity_curves
+   grid_data.rst
+   sensitivity_curves.rst
    unitconv.rst
 
 Examples
@@ -93,5 +95,6 @@ Reference material (classes, functions, ...)
    cactus_waves_ref.rst
    gw_utils_ref.rst
    gw_mismatch_ref.rst
+   grid_data_ref.rst
    sensitivity_curves_ref.rst
    unitconv_ref.rst
