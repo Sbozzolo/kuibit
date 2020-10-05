@@ -421,5 +421,3 @@ def common_bounding_box(grids):
     x0 = np.array([min(b) for b in np.transpose(x0s)])
     x1 = np.array([max(b) for b in np.transpose(x1s)])
     return (x0, x1)
-
-
