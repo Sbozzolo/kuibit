@@ -139,7 +139,7 @@ class UniformGrid:
             self._check_dims(self.delta, "delta")
             expected_x1 = self.origin + (self.shape - 1) * self.delta
             if x1 is not None:
-                if not np.allclose(expected_x1, x1):
+                if not np.allclose(expected_x1, x1, atol=1e-14):
                     raise ValueError("Incompatible x1 and delta")
 
         if num_ghost is None:
@@ -335,16 +335,34 @@ class UniformGrid:
         self.__delta = self.__delta[extended_dims]
         self.__num_ghost = self.__num_ghost[extended_dims]
 
+    def copy(self):
+        """Return a deep copy.
+
+        :returns:  Deep copy of the UniformGrid
+        :rtype:    :py:class:`~.UniformGrid`
+        """
+        return type(self)(
+            self.shape,
+            self.origin,
+            delta=self.delta,
+            x1=self.x1,
+            ref_level=self.ref_level,
+            component=self.component,
+            num_ghost=self.num_ghost,
+            time=self.time,
+            iteration=self.iteration,
+        )
+
     def __eq__(self, other):
         return (
-            np.allclose(self.shape, other.shape)
-            and np.allclose(self.origin, other.origin)
-            and np.allclose(self.delta, other.delta)
-            and np.allclose(self.num_ghost, other.num_ghost)
-            and np.allclose(self.ref_level, other.ref_level)
-            and np.allclose(self.component, other.component)
-            and np.allclose(self.time, other.time)
-            and np.allclose(self.iteration, other.iteration)
+            np.allclose(self.shape, other.shape, atol=1e-14)
+            and np.allclose(self.origin, other.origin, atol=1e-14)
+            and np.allclose(self.delta, other.delta, atol=1e-14)
+            and np.allclose(self.num_ghost, other.num_ghost, atol=1e-14)
+            and np.allclose(self.ref_level, other.ref_level, atol=1e-14)
+            and np.allclose(self.component, other.component, atol=1e-14)
+            and np.allclose(self.time, other.time, atol=1e-14)
+            and np.allclose(self.iteration, other.iteration, atol=1e-14)
         )
 
     def __str__(self):
