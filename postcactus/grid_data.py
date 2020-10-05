@@ -380,3 +380,46 @@ Delta            = {self.dx}
 Time             = {self.time}
 Iteration        = {self.iteration}
 """
+
+
+def common_bounding_box(grids):
+    """Return corners of smallest common bounding box of regular grids.
+
+    :param geoms: list of grid geometries.
+    :type geoms:  list of :py:class:`~.UniformGrid`
+    :returns: the common bounding box of a list of geometries
+    :rtype: tuple of coordinates (x0 and x1)
+    """
+    # We have to check that the number of dimensions is the same
+    try:
+        num_dim = grids[0].num_dimensions
+    except AttributeError:
+        raise TypeError("bounding_box takes a list of UniformGrids")
+
+    for g in grids:
+        if g.num_dimensions != num_dim:
+            raise ValueError(
+                "All the UniformGrids must have the same number of dimensions"
+            )
+
+    # Let's consider three 2d grids as example with
+    # x0 being respectively (0, 0), (-1, 0), (-3, 3)
+    # x1 being (5, 5), (2, 2), (1, 2)
+    x0s = np.array([g.x0 for g in grids])
+    x1s = np.array([g.x1 for g in grids])
+    # We put x0 and x1 in arrays:
+    # x0s = [[0, 0], [-1, 0], [-3, 3]]
+    # x1s = [[5, 5], [2, 2], [1, 2]]
+    # Now, if we transpose that, we have
+    # x0sT = [[0, -1, 0],
+    #         [0, 0, 3]]
+    # x1sT = [[5, 2, 1],
+    #         [5, 2, 2]]
+    # In this way we put all the same coordiantes in a single
+    # row. We can take the minimum and maximum along these rows
+    # to find the common bounding box.
+    x0 = np.array([min(b) for b in np.transpose(x0s)])
+    x1 = np.array([max(b) for b in np.transpose(x1s)])
+    return (x0, x1)
+
+

@@ -204,3 +204,39 @@ class TestUniformGrid(unittest.TestCase):
         )
 
         self.assertEqual(geom, geom2)
+
+    def test_copy(self):
+
+        geom = gd.UniformGrid(
+            [101, 101, 1],
+            [1, 1, 0],
+            delta=[1, 0.5, 0],
+            num_ghost=[3, 3, 3],
+            time=1,
+            iteration=1,
+        )
+
+        geom2 = geom.copy()
+
+        self.assertEqual(geom, geom2)
+
+    def test_common_bounding_box(self):
+
+        # The first element is not a uniform grid
+        with self.assertRaises(TypeError):
+            gd.common_bounding_box([1, 2])
+
+        geom1 = gd.UniformGrid([101, 101], [1, 1], x1=[3, 5])
+        geom2 = gd.UniformGrid([101], [1], x1=[3])
+
+        # Different dimensions
+        with self.assertRaises(ValueError):
+            gd.common_bounding_box([geom1, geom2])
+
+        geom3 = gd.UniformGrid([11, 11], [0, 0], x1=[5, 5])
+        geom4 = gd.UniformGrid([11, 11], [0, -2], x1=[1, 5])
+
+        self.assertCountEqual(gd.common_bounding_box([geom1, geom3, geom4])[0],
+                              [0, -2])
+        self.assertCountEqual(gd.common_bounding_box([geom1, geom3, geom4])[1],
+                              [5, 5])
