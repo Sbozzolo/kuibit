@@ -308,9 +308,6 @@ class BaseSeries(BaseNumerical):
         splines. Even values of k should be avoided especially with small s
         values. 1 <= k <= 5
 
-        make_spline is called at initialization and every time a modifying
-        function is called (through _apply_to_self).
-
         :param k: Order of the spline representation
         :type k:  int
         :param s: Smoothing of the spline
