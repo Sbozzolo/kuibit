@@ -506,8 +506,8 @@ class BaseSeries(BaseNumerical):
 
         # If the other object is of the same type
         if isinstance(other, type(self)):
-            if (not np.allclose(other.x, self.x, atol=1e-14)) or (
-                len(self.x) != len(other.x)
+            if (len(self.x) != len(other.x)) or (
+                not np.allclose(other.x, self.x, atol=1e-14)
             ):
                 raise ValueError("The objects do not have the same x!")
             return type(self)(self.x, function(self.y, other.y), True)
