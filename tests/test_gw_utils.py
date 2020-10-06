@@ -20,6 +20,7 @@ import unittest
 import numpy as np
 
 from postcactus import gw_utils as gwu
+from postcactus import timeseries as ts
 
 
 class TestGWUtils(unittest.TestCase):
@@ -123,4 +124,24 @@ class TestGWUtils(unittest.TestCase):
                 gwu.retarded_times_to_coordinate_times(ones, rr, 0.5), rr, 0.5
             ),
             ones,
+        )
+
+    def test_signal_to_noise_ratio_from_strain(self):
+
+        # Test strain is not timeseries
+        with self.assertRaises(TypeError):
+            gwu.signal_to_noise_ratio_from_strain(1)
+
+        times = np.linspace(0, 3 * np.pi, 1000)
+        sins = np.sin(times)
+
+        h = ts.TimeSeries(times, sins)
+        h_win = h.windowed("tukey", 0.1)
+        h_fft = h_win.to_FrequencySeries()
+
+        self.assertAlmostEqual(
+            gwu.signal_to_noise_ratio_from_strain(
+                h, 0.1, noise=None, window_function="tukey", fmin=1, fmax=10
+            ),
+            np.sqrt(h_fft.inner_product(h_fft, noises=None, fmin=1, fmax=10)),
         )

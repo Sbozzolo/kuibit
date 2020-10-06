@@ -65,3 +65,13 @@ and plus polarizations.
 If you are working with a single generic detector, you can use
 :py:meth:`antenna_responses` which takes the spherical angles with respect to
 a detector on the :math:`z=0` plane and with arms on the two other directions.
+
+signal_to_noise_ratio_from_strain
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+:py:meth:`signal_to_noise_ratio_from_strain` takes a strain, a noise curve, and
+two boundary frequencies and return the signal-to-noise ratio as
+
+.. :math:
+
+   `\rho^2 = 4 \int_{f_{\mathrm{min}}}^{f_{\mathrm{max}}}\frac{\|\tilde{h}\|^2}{S_n(f)}df`
