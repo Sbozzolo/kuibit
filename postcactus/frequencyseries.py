@@ -462,6 +462,10 @@ class FrequencySeries(BaseSeries):
         else:
             [res_self, res_other, *res_noises] = to_be_res_list
 
+        for series in [res_self, res_other, *res_noises]:
+            series.negative_frequencies_remove()
+            series.band_pass(fmin=fmin, fmax=fmax)
+
         # Sum all the integrands
         integrand = FrequencySeries(res_self.f, np.zeros_like(res_self.fft))
 
@@ -470,11 +474,6 @@ class FrequencySeries(BaseSeries):
         # This is faster because it skips several sanity checks.
         for res_noise in res_noises:
             integrand += res_self * res_other.conjugate() / res_noise
-
-        # We assume that the frequencyseries are zero outside of the interval
-        # of definition
-        integrand.negative_frequencies_remove()
-        integrand.band_pass(fmin=fmin, fmax=fmax)
 
         # 4 Re * \int
         # To align with PyCBC we do a rectangular integration here instead of
