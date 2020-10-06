@@ -195,22 +195,21 @@ class TestCactusWaves(unittest.TestCase):
     def test_get_observed_strain(self):
 
         # Let's check with Hanford
-        angles = gwu.ra_dec_to_theta_phi(8, -70, "2015-09-14 09:50:45")
-        theta_H, phi_H = angles.hanford
+        theta_GW, phi_GW = np.pi/3, 0
         antennas = gwu.antenna_responses_from_sky_localization(
             8, -70, "2015-09-14 09:50:45"
         )
         Fc_H, Fp_H = antennas.hanford
 
         expected_strain = self.psi4.get_strain(
-            theta_H, phi_H, 0.1, trim_ends=False
+            theta_GW, phi_GW, 0.1, trim_ends=False
         )
         expected_strain = (
             expected_strain.real() * Fp_H - expected_strain.imag() * Fc_H
         )
 
         strain = self.psi4.get_observed_strain(
-            8, -70, "2015-09-14 09:50:45", 0.1, trim_ends=False
+            8, -70, "2015-09-14 09:50:45", theta_GW, phi_GW, 0.1, trim_ends=False
         )
 
         self.assertEqual(strain.hanford, expected_strain)

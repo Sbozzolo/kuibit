@@ -102,9 +102,12 @@ with the antenna responses :math:`F` of the single detectors:
 
 .. math::
 
-   h = F_\times h_\times + F_+ h_+
+   h = F_\times h_\times(\theta_{\mathrm{GW}}, \phi_{\mathrm{GW}}) + F_+ h_+(\theta_{\mathrm{GW}}, \phi_{\mathrm{GW}})
 
-This function does not add noise.
+Here, :math:`\theta_{\mathrm{GW}}` and :math:`\phi_{\mathrm{GW}}` are the
+spherical coordinates of the observer from the binary's frame, taking the
+angular momentum of the binary to point along the z-axis. This function does not
+add noise.
 
 Extrapolate_to_infinity
 ^^^^^^^^^^^^^^^^^^^^^^^

@@ -309,6 +309,8 @@ class GravitationalWavesOneDet(mp.MultipoleOneDet):
         right_ascension,
         declination,
         time_utc,
+        theta_gw,
+        phi_gw,
         pcut,
         *args,
         window_function=None,
@@ -327,11 +329,13 @@ class GravitationalWavesOneDet(mp.MultipoleOneDet):
              -     i h_\times(r,t) = \sum_{l=2}^{l=l_{\mathrm{max}}}
              \sum_{m=-l}^{m=l} h(r, t)^{lm} {}_{-2}Y_{lm}(\theta, \phi)
 
+        Here theta and phi are theta_gw and phi_gw
+
         Then, for each detector
 
         .. math::
 
-             h(r,t) = F_\times h_\times + F_+ h_+
+             h(r,t) = F_\times h_\times(theta_gw, phi_gw) + F_+ h_+(theta_gw, phi_gw)
 
         :param right_ascension: Right ascension of the source in degrees
         :type right_ascension: float
@@ -339,6 +343,10 @@ class GravitationalWavesOneDet(mp.MultipoleOneDet):
         :type declination: float
         :param time_utc: UTC time of the event
         :type declination: str
+        :param theta_gw, phi_gw: Spherical coordinates of the observer
+        from the binary's frame, taking the angular momentum of the binary to
+        point along the z-axis.
+        :type theta_gw, phi_gw: floats
         :param pcut: Period that enters the fixed-frequency integration.
         Typically, the longest physical period in the signal.
         :type pcut: float
@@ -375,8 +383,8 @@ class GravitationalWavesOneDet(mp.MultipoleOneDet):
         # antennas and coords are namedtuples Detectors
         for (theta, phi), (Fc, Fp) in zip(coords, antennas):
             strain = self.get_strain(
-                theta,
-                phi,
+                theta_gw,
+                phi_gw,
                 pcut,
                 *args,
                 window_function=window_function,
