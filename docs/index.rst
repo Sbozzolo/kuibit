@@ -48,7 +48,7 @@ If they are not already available, ``pip`` will install the following packages:
 - ``h5py``,
 - ``scipy``.
 
-The minimum version of Python required is 3.5.
+The minimum version of Python required is 3.6.
 
 If you intend to extend/develop ``PostCactus``, follow the instruction on `GitHub <https://github.com/Sbozzolo/PostCactus>`_.
 
