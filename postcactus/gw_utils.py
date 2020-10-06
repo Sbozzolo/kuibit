@@ -29,6 +29,7 @@ import numpy as np
 from scipy import integrate, optimize
 
 import postcactus.unitconv as uc
+import postcactus.timeseries as ts
 
 # This is just a convenience to avoid having to remember the order of
 # the output (and for easy of extension)
@@ -462,3 +463,38 @@ def coordinate_times_to_retarded_times(coordinate_times, radii, mass):
       :type mass: float
     """
     return coordinate_times - Schwarzschild_radius_to_tortoise(radii, mass)
+
+
+def signal_to_noise_ratio_from_strain(
+    h, *args, noise=None, fmin=0, fmax=np.inf, window_function=None, **kwargs
+):
+    """Return the signal to noise ratio given a strain and a power spectal density
+    distribution for a detector.
+
+        The SNR is computed as sqrt of 4 \int_fmin^fmax |\tilde{h} f|^2 / Sn(f) d f
+
+        Using equation from 1408.0740
+
+          :param h: Strain
+          :type h: :py:class:`~.TimeSeries`
+          :param noise: Power spectral density of the noise of the detector
+          :type noise: :py:class:`~.FrequencySeries`
+          :param fmin: Minimum frequency over which to compute the SNR.
+          :type fmin: float
+          :param fmax: Maximum frequency over which to compute the SNR.
+          :type fmax: float
+        :param window_function: If not None, apply window_function to the
+        series before computing the strain.
+        :type window_function: callable, str, or None
+
+    """
+    if not isinstance(h, ts.TimeSeries):
+        raise TypeError("Strain has to be a TimeSeries")
+    # First, we window to avoid spectral leakage
+    h_win = h.windowed(window_function, *args, **kwargs)
+    # Then, we take the Fouerier transform
+    h_fft = h_win.to_FrequencySeries()
+    # The SNR is just the inner product of h_fft with itself
+    return np.sqrt(
+        h_fft.inner_product(h_fft, noises=noise, fmin=fmin, fmax=fmax)
+    )
