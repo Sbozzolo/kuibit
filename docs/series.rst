@@ -237,13 +237,31 @@ Fourier transform (to_FrequencySeries)
 
 You can compute the discrete Fourier transform of a ``TimeSeries`` with the
 ``to_FrequencySeries`` method. This uses NumPy's ``fft`` module, so the
-conventions are the same. If the timeseries real, negative frequencies are
+conventions are the same, except that we normalize the results. That is, instead
+of computing
+
+.. :math:
+
+   `A_k = \Sum_m^{n-1} a_m \extp(-2\pi i \frac{mk}{n})`
+
+we compute
+
+.. :math:
+
+   `A_k = dt \Sum_m^{n-1} a_m \extp(-2\pi i \frac{mk}{n})`
+
+Intuitively, this amounts to adding the measure of integration to obtain a
+"true" Fourier transform.
+
+If the timeseries real, negative frequencies are
 discarded.
 
 .. note::
 
    You are responsible of pre-processing the data (removing mean, windowing,
    etc.)
+
+
 
 
 unfolded_phase, phase_angular_velocity, phase_frequency
@@ -342,6 +360,25 @@ was real.
 
 Occasionally signals that are supposed to be real are turned into complex with
 imaginary part that is zero to machine precision.
+
+
+This uses NumPy's ``fft`` module, so the
+conventions are the same, except that we normalize the results. That is, instead
+of computing
+
+
+.. :math:
+
+   `a_m = \frac{1}{n} \Sum_k^{n-1} A_k \extp(2\pi i \frac{mk}{n})`
+
+we compute
+
+.. :math:
+
+   `a_m = \frac{df}{n} \Sum_k^{n-1} A_k \extp(2\pi i \frac{mk}{n})`
+
+Intuitively, this amounts to adding the measure of integration to obtain a
+"true" Fourier transform.
 
 inner_product, and overlap
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^

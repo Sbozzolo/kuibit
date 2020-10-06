@@ -873,4 +873,8 @@ class TimeSeries(BaseSeries):
             f = np.fft.rfftfreq(len(regular_ts), d=dt)
             fft = np.fft.rfft(regular_ts.y)
 
-        return frequencyseries.FrequencySeries(f, fft)
+        # We need the normalization dt to compute physical quantities.
+        # Intuitively, numpy computes A_k = \sum a_k exp(-2 pi f t), to
+        # transform this into an integral (true Fourier transform), we have to
+        # multiply this by the measure of integration.
+        return frequencyseries.FrequencySeries(f, fft * dt)
