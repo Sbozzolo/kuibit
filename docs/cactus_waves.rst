@@ -124,7 +124,7 @@ For improved stability, you can extrapolate the waves as amplitude and phase
 (instead of real and imaginary parts). To do this, provide the
 ``extrapolate_amplitude_phase=True`` option.
 
-.. todo::
+TODO
 
    Expand this section.
 
