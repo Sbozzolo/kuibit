@@ -722,6 +722,9 @@ def _strains_from_psi4(
         if distance1 is not None:
             distance1_SI = distance1 * unitconv.MEGAPARSEC_SI
             # Remember, h is actually r * h!
+            #
+            # We will work with rh (in physical units). This does not change the
+            # result because r is just a constant.
             h1 *= CU1.length / distance1_SI
             redshift1 = gwu.luminosity_distance_to_redshift(distance1)
             h1.redshift(redshift1)
@@ -732,6 +735,9 @@ def _strains_from_psi4(
         if distance2 is not None:
             distance2_SI = distance2 * unitconv.MEGAPARSEC_SI
             # Remember, h is actually r * h!
+            #
+            # We will work with rh (in physical units). This does not change the
+            # result because r is just a constant.
             h2 *= CU2.length / distance2_SI
             redshift2 = gwu.luminosity_distance_to_redshift(distance2)
             h2.redshift(redshift2)
