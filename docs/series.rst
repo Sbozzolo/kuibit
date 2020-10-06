@@ -422,6 +422,10 @@ sample_common
 ``resample_common`` takes a list of ``TimeSeries`` and resamples all of them to
 the largest time interval covered by all timeseries, using regularly spaced
 time. The number of sample points is the minimum over all time series.
+Optinally, it takes a paramter ``piecewise_constant``. If this is turned
+``True``, instead of using splines the resampling is done using the nearest
+neighbors. This is useful when data is discontinuous, so splines do not behave
+well.
 
 time_at_maximum, time_at_minimum
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^

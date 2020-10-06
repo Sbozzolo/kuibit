@@ -782,14 +782,23 @@ class BaseSeries(BaseNumerical):
         return type(self)(self.x, function(self.y), True)
 
 
-def sample_common(series):
+def sample_common(series, piecewise_constant=False):
     """Resample a list of series to the largest interval covered by all series,
     using regularly spaced x.
 
     The number of sample points is the minimum over all series.
 
-    :param ts: The series to resample
-    :type ts:  list of :py:class:`~.Series`
+    If piecewise_constant=True, the approximant used for resampling is a
+    piecewise constant function, splines are not used, instead, the nearest
+    neighbors are used. Turn this one when you have series with discontinuities.
+
+    :param series: The series to resample
+    :type series:  list of :py:class:`~.Series`
+
+    :param piecewise_constant: Wheter to use the nearest neighbor resampling
+    method instead of splines. If piecewise_constant=True, the approximant
+    used for resampling is a piecewise constant function.
+    :type piecewise_constant: bool
 
     :returns:  Resampled series so that they are all defined in
                the same interval
@@ -821,4 +830,6 @@ def sample_common(series):
     # Find the series with min number of points
     s_ns = min(series, key=len)
     x = np.linspace(s_xmin.xmin, s_xmax.xmax, len(s_ns))
-    return [s.resampled(x) for s in series]
+    return [
+        s.resampled(x, piecewise_constant=piecewise_constant) for s in series
+    ]

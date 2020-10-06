@@ -454,7 +454,11 @@ class FrequencySeries(BaseSeries):
             to_be_res_list.append(noises)
 
         if not same_domain:
-            [res_self, res_other, *res_noises] = sample_common(to_be_res_list)
+            # Noises typically have Lorentian features, better to use a 0d spline,
+            # so we enable piecewise_constant
+            [res_self, res_other, *res_noises] = sample_common(
+                to_be_res_list, piecewise_constant=True
+            )
         else:
             [res_self, res_other, *res_noises] = to_be_res_list
 
