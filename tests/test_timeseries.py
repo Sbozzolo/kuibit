@@ -864,9 +864,9 @@ class TestTimeseries(unittest.TestCase):
 
     def test_resample_common(self):
 
-        times1 = np.linspace(0, 2 * np.pi, 100)
-        times2 = np.linspace(np.pi, 3 * np.pi, 100)
-        times3 = np.linspace(np.pi, 2 * np.pi, 100)
+        times1 = np.linspace(0, 2 * np.pi, 5000)
+        times2 = np.linspace(np.pi, 3 * np.pi, 5000)
+        times3 = np.linspace(np.pi, 2 * np.pi, 5000)
         sins1 = np.sin(times1)
         sins2 = np.sin(times2)
         sins3 = np.sin(times3)
@@ -878,12 +878,21 @@ class TestTimeseries(unittest.TestCase):
 
         self.assertTrue(np.allclose(new_ts1.y, sins3))
 
+        # Test with piecewise_constant = True
+
+        new_ts1_c, new_ts2_c = series.sample_common(
+            [ts1, ts2], piecewise_constant=True
+        )
+
+        # The accuracy is not as great
+        self.assertTrue(np.allclose(new_ts1_c.y, sins3, atol=1e-3))
+
         # Test a case in which there's no resampling
         newer_ts1, newer_ts2 = series.sample_common([new_ts1, new_ts2])
         self.assertTrue(np.allclose(new_ts1.y, sins3))
 
         # Case with different lengths
-        times1_longer = np.append(-1, np.linspace(0, 2 * np.pi, 100))
+        times1_longer = np.append(-1, np.linspace(0, 2 * np.pi, 5000))
         sins1_longer = np.sin(times1_longer)
         ts1_longer = ts.TimeSeries(times1_longer, sins1_longer)
 
