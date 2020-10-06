@@ -53,7 +53,7 @@ Some useful attributes to know about :py:class:`~.UniformGrid` are:
 - ``x0`` and ``x1`` return the two corners of the grid,
 - ``delta`` or ``dx`` return the cell size,
 - ``dv`` returns the volume of a cell, and ``volume`` returns the
-  total volume,
+total volume,
 - ``num_dimensions`` returns how many dimensions are in the grid,
 ``num_extended_dimensions`` returns how many dimensions are in the grid with
 more than one grid point.
