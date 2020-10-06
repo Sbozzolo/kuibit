@@ -44,6 +44,7 @@ def _mismatch_core_numerical(
     h1_c_fft,
     h1_p_fft,
     h2_t,
+    delta_t,
     frequencies,
     frequency_mask,
     noises,
@@ -72,6 +73,9 @@ def _mismatch_core_numerical(
     and polarization shifts. It has to be pre-processed so that is defined over
     the same times as h1_t :type h2_t: 1D complex numpy array.
     :type h2_t: 1D complex numpy array
+
+    :param delta_t: Timestep
+    :type delta_t: float
 
     :param frequencies: Frequencies where we want to compute the integral (ie,
     from fmin to fmax).
@@ -147,6 +151,10 @@ def _mismatch_core_numerical(
         # Remove negative frequencies, and those outside the range (fmin, fmax)
         h2_p_fft_pshifted = h2_p_fft_pshifted[frequency_mask]
         h2_c_fft_pshifted = h2_c_fft_pshifted[frequency_mask]
+
+        # Normalize
+        h2_p_fft_pshifted *= delta_t
+        h2_c_fft_pshifted *= delta_t
 
         for index_t, t_shift in enumerate(time_shifts):
 
@@ -428,6 +436,7 @@ def mismatch_from_strains(
         h1f_c_res.fft,
         h1f_p_res.fft,
         h2_res.y,
+        h2_res.dt,
         frequencies,
         frequency_mask,
         noises,

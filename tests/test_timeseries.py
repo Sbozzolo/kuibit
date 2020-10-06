@@ -1037,7 +1037,7 @@ class TestTimeseries(unittest.TestCase):
         freq = np.fft.fftfreq(len(self.values), d=dt)
         freq = np.fft.fftshift(freq)
         fft = np.fft.fft(self.values + 1j * self.values)
-        fft = np.fft.fftshift(fft)
+        fft = np.fft.fftshift(fft) * dt
 
         fs = self.TS_c.to_FrequencySeries()
 
@@ -1052,7 +1052,7 @@ class TestTimeseries(unittest.TestCase):
 
         # Test real
         rfreq = np.fft.rfftfreq(len(self.values), d=dt)
-        rfft = np.fft.rfft(self.values)
+        rfft = np.fft.rfft(self.values) * dt
 
         rfs = self.TS.to_FrequencySeries()
 

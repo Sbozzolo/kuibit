@@ -36,11 +36,11 @@ class TestFrequencySeries(unittest.TestCase):
 
         self.f_c = np.fft.fftfreq(len(self.x), d=self.dx)
         self.f_c = np.fft.fftshift(self.f_c)
-        self.fft_c = np.fft.fft(self.y_c)
+        self.fft_c = np.fft.fft(self.y_c) * self.dx
         self.fft_c = np.fft.fftshift(self.fft_c)
 
         self.f = np.fft.rfftfreq(len(self.x), d=self.dx)
-        self.fft_r = np.fft.rfft(self.y)
+        self.fft_r = np.fft.rfft(self.y) * self.dx
 
         self.FS = fs.FrequencySeries(self.f, self.fft_r)
 
@@ -52,7 +52,7 @@ class TestFrequencySeries(unittest.TestCase):
         self.assertAlmostEqual(self.FS.f[0], 0)
         self.assertAlmostEqual(self.FS.fmax, 7.87816968)
         self.assertAlmostEqual(self.FS.frange, 7.87816968)
-        self.assertAlmostEqual(np.amax(self.FS.amp), 49.74022843)
+        self.assertAlmostEqual(np.amax(self.FS.amp), 3.15683911)
 
     def test_setter_f(self):
 
@@ -125,7 +125,7 @@ class TestFrequencySeries(unittest.TestCase):
 
         self.assertAlmostEqual(p1[0], -0.15756339)
         self.assertAlmostEqual(p1[1], -0.15810417)
-        self.assertAlmostEqual(p1[2], 70.34330565)
+        self.assertAlmostEqual(p1[2], 4.46444469)
 
         self.assertAlmostEqual(self.FS_c.peaks_frequencies()[0], -0.15810417)
 
@@ -133,6 +133,7 @@ class TestFrequencySeries(unittest.TestCase):
 
         # Complex
         ts = self.FS_c.to_TimeSeries()
+
         self.assertTrue(np.allclose(ts.y, self.y_c))
 
         # real

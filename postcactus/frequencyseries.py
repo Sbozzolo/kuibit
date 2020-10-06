@@ -366,7 +366,14 @@ class FrequencySeries(BaseSeries):
             # This not the order numpy likes
             t = np.fft.fftshift(t)
 
-        return timeseries.TimeSeries(t, y)
+        # We need the normalization df to compute physical quantities.
+        # Intuitively, numpy computes a_k = 1 / N \sum A_k exp(2 pi f t), to
+        # transform this into an integral (true Fourier transform), we have to
+        # multiply this by the measure of integration.
+
+        # TODO: Why exactly do we need len(t) here?
+        #       It works, and PyCBC does it too. But what is the reason?
+        return timeseries.TimeSeries(t, y * len(t) * self.df)
 
     def inner_product(
         self,
