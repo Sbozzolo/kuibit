@@ -71,7 +71,7 @@ class UniformGrid:
     def __init__(
         self,
         shape,
-        origin,
+        x0,
         delta=None,
         x1=None,
         ref_level=-1,
@@ -83,8 +83,8 @@ class UniformGrid:
         """
         :param shape:     Number of points in each dimension.
         :type shape:      1d numpy arrary or list of int.
-        :param origin:    Position of cell center with lowest coordinate.
-        :type origin:     1d numpy array or list of float.
+        :param x0:    Position of cell center with lowest coordinate.
+        :type x0:     1d numpy array or list of float.
         :param delta:     If not None, specifies grid spacing, else grid
                           spacing is computed from x0, x1, and shape.
         :type delta:      1d numpy array or list of float.
@@ -107,7 +107,7 @@ class UniformGrid:
 
         """
         self.__shape = np.array(shape, dtype=int)
-        self.__origin = np.array(origin, dtype=float)
+        self.__origin = np.array(x0, dtype=float)
 
         self._check_dims(self.__shape, "shape")
         self._check_dims(self.origin, "origin")

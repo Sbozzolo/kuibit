@@ -72,7 +72,7 @@ class TestUniformGrid(unittest.TestCase):
 
         geom4 = gd.UniformGrid(
             [101, 101],
-            [1, 1],
+            x0=[1, 1],
             delta=[1, 0.5],
             num_ghost=[3, 3],
             time=1,
@@ -89,7 +89,7 @@ class TestUniformGrid(unittest.TestCase):
 
         geom5 = gd.UniformGrid(
             [101, 101, 1],
-            [1, 1, 0],
+            x0=[1, 1, 0],
             delta=[1, 0.5, 0],
             num_ghost=[3, 3, 3],
             time=1,
@@ -104,7 +104,7 @@ class TestUniformGrid(unittest.TestCase):
         # We test __in__ testing contains, which calls in
         geom4 = gd.UniformGrid(
             [101, 101],
-            [1, 1],
+            x0=[1, 1],
             x1=[101, 51],
             num_ghost=[3, 3],
             time=1,
@@ -121,7 +121,7 @@ class TestUniformGrid(unittest.TestCase):
 
         geom4 = gd.UniformGrid(
             [101, 101],
-            [1, 1],
+            x0=[1, 1],
             delta=[1, 0.5],
             num_ghost=[3, 3],
             time=1,
@@ -134,7 +134,7 @@ class TestUniformGrid(unittest.TestCase):
 
         geom4 = gd.UniformGrid(
             [11, 15],
-            [1, 1],
+            x0=[1, 1],
             delta=[1, 0.5],
             num_ghost=[3, 3],
             time=1,
@@ -169,7 +169,7 @@ class TestUniformGrid(unittest.TestCase):
 
         geom4 = gd.UniformGrid(
             [11, 15],
-            [1, 1],
+            x0=[1, 1],
             delta=[1, 0.5],
             num_ghost=[3, 3],
             time=1,
@@ -185,7 +185,7 @@ class TestUniformGrid(unittest.TestCase):
 
         geom = gd.UniformGrid(
             [101, 101, 1],
-            [1, 1, 0],
+            x0=[1, 1, 0],
             delta=[1, 0.5, 0],
             num_ghost=[3, 3, 3],
             time=1,
@@ -196,7 +196,7 @@ class TestUniformGrid(unittest.TestCase):
 
         geom2 = gd.UniformGrid(
             [101, 101],
-            [1, 1],
+            x0=[1, 1],
             delta=[1, 0.5],
             num_ghost=[3, 3],
             time=1,
@@ -209,7 +209,7 @@ class TestUniformGrid(unittest.TestCase):
 
         geom = gd.UniformGrid(
             [101, 101, 1],
-            [1, 1, 0],
+            x0=[1, 1, 0],
             delta=[1, 0.5, 0],
             num_ghost=[3, 3, 3],
             time=1,
