@@ -56,6 +56,18 @@ degenerate, so one can consider only one of the two. In :py:mod:`~.gw_mismatch`,
 we implement the mismatch computation for a network of detectors restricting to
 the :math:`l = 2`, :math:`m = 2`.
 
+.. note::
+
+   The approach implemented here is probably not the best. One can compute the
+   overlap directly form :math:`\Psi_4`, since the fixed frequency integration
+   already returns the Fourier transform. This would avoid taking an additional
+   Fourier transform, and would avoid all the problems with windowing and
+   zero-padding. If I had to write this code again, I would follow this
+   approach. Hopefully, the work was not completely useless because the current
+   method is more easily generalizable to cases that are not :math:`l = 2`,
+   :math:`m = 2`.
+
+
 network_mismatch_from_psi4
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
 
