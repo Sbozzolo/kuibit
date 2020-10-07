@@ -354,15 +354,32 @@ class UniformGrid:
         )
 
     def __eq__(self, other):
+        if not isinstance(other, type(self)):
+            return False
+        # Time and iterations can be None, so we check them independently
+        if self.time is not None and other.time is not None:
+            time_bool = np.isclose(self.time, other.time, atol=1e-14)
+        else:
+            # In this case one of the two is None (or both)
+            time_bool = self.time is other.time
+
+        if self.iteration is not None and other.iteration is not None:
+            iteration_bool = np.isclose(
+                self.iteration, other.iteration, atol=1e-14
+            )
+        else:
+            # In this case one of the two is None (or both)
+            iteration_bool = self.iteration is other.iteration
+
         return (
-            np.allclose(self.shape, other.shape, atol=1e-14)
+            np.array_equal(self.shape, other.shape)
             and np.allclose(self.origin, other.origin, atol=1e-14)
             and np.allclose(self.delta, other.delta, atol=1e-14)
             and np.allclose(self.num_ghost, other.num_ghost, atol=1e-14)
             and np.allclose(self.ref_level, other.ref_level, atol=1e-14)
             and np.allclose(self.component, other.component, atol=1e-14)
-            and np.allclose(self.time, other.time, atol=1e-14)
-            and np.allclose(self.iteration, other.iteration, atol=1e-14)
+            and time_bool
+            and iteration_bool
         )
 
     def __str__(self):
