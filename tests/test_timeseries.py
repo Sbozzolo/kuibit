@@ -46,6 +46,7 @@ class TestTimeseries(unittest.TestCase):
         abs_numerical = numerical.BaseNumerical()
         abs_numerical._apply_unary(lambda x: x)
         abs_numerical._apply_binary(0, lambda x: x)
+        abs_numerical._apply_reduction(lambda x: x)
 
     def test__make_array(self):
 
@@ -414,13 +415,9 @@ class TestTimeseries(unittest.TestCase):
     def test_min_max(self):
 
         self.assertEqual(self.TS.min(), np.min(self.TS.y))
-        self.assertEqual(self.TS.minimum(), np.min(self.TS.y))
         self.assertEqual(self.TS.max(), np.max(self.TS.y))
-        self.assertEqual(self.TS.maximum(), np.max(self.TS.y))
         self.assertEqual(self.TS.abs_min(), np.min(np.abs(self.TS.y)))
-        self.assertEqual(self.TS.absolute_minimum(), np.min(np.abs(self.TS.y)))
         self.assertEqual(self.TS.abs_max(), np.max(np.abs(self.TS.y)))
-        self.assertEqual(self.TS.absolute_maximum(), np.max(np.abs(self.TS.y)))
 
     def test_zero_pad(self):
 

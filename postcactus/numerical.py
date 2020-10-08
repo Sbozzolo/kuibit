@@ -33,6 +33,7 @@ class BaseNumerical(ABC):
     The derived classes have to implement:
     - _apply_unary(self, function) that returns function(self)
     - _apply_binary(self, other, function) that returns function(self, other)
+    - _apply_reduction(self, function) that returns function(self)
     """
 
     @abstractmethod
@@ -41,6 +42,10 @@ class BaseNumerical(ABC):
 
     @abstractmethod
     def _apply_binary(self, other, function):
+        pass
+
+    @abstractmethod
+    def _apply_reduction(self, reduction):
         pass
 
     def __add__(self, other):
@@ -87,6 +92,20 @@ class BaseNumerical(ABC):
 
     def __abs__(self):
         return self._apply_unary(np.abs)
+
+    def min(self):
+        return self._apply_reduction(np.min)
+
+    def max(self):
+        return self._apply_reduction(np.max)
+
+    def abs_min(self):
+        """Return the minimum of the absolute value"""
+        return abs(self)._apply_reduction(np.min)
+
+    def abs_max(self):
+        """Return the maximum of the absolute value"""
+        return abs(self)._apply_reduction(np.max)
 
     def abs(self):
         return self._apply_unary(np.abs)
