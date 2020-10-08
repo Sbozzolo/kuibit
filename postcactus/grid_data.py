@@ -109,7 +109,7 @@ class UniformGrid:
         self.__shape = np.array(shape, dtype=int)
         self.__origin = np.array(x0, dtype=float)
 
-        self._check_dims(self.__shape, "shape")
+        self._check_dims(self.shape, "shape")
         self._check_dims(self.origin, "origin")
 
         if delta is None:
