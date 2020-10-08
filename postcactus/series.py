@@ -275,26 +275,6 @@ class BaseSeries(BaseNumerical):
         """Return the value of x when abs(y) is minimum."""
         return self.x[np.argmin(np.abs(self.y))]
 
-    def min(self):
-        return np.min(self.y)
-
-    minimum = min
-
-    def max(self):
-        return np.max(self.y)
-
-    maximum = max
-
-    def abs_min(self):
-        return np.min(np.abs(self.y))
-
-    absolute_minimum = abs_min
-
-    def abs_max(self):
-        return np.max(np.abs(self.y))
-
-    absolute_maximum = abs_max
-
     def _make_spline(self, *args, k=3, s=0, **kwargs):
         """Private function to make spline representation of the data.
 
@@ -780,6 +760,20 @@ class BaseSeries(BaseNumerical):
         # TODO: Turn this into a decorator
 
         return type(self)(self.x, function(self.y), True)
+
+    def _apply_reduction(self, reduction):
+        """Apply a reduction to the data.
+
+        :param function: Function to apply to the series
+        :type function: callable
+
+        :return: Reduction applied to the data
+        :rtype: float
+
+        """
+        # TODO: Turn this into a decorator
+
+        return reduction(self.y)
 
 
 def sample_common(series, piecewise_constant=False):
