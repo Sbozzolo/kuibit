@@ -359,6 +359,10 @@ class BaseSeries(BaseNumerical):
 
         # TODO: This is not a Pythonic way to write this function.
         #       The main problem is that it is is not vectorized.
+        #       It is also not efficient, we are going over the array a lot
+        #       of times, re-checking the same elements over and over. Also,
+        #       we are not considering the floating point arithmetic, we should
+        #       allow for some tolerance.
 
         # First we consider the scalar case
         if not hasattr(x, "__len__"):
