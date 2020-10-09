@@ -9,9 +9,9 @@ of knowledge of PostCactus or of Python required to complete the task.
 ## Features
 
 * Function to compute spectrogram of TimeSeries. [=]
-* Add design noise curves for known detectors. [=]
 * The extrapolation to infinity function for gravitational waves has to be tested
   and can be extended to support generic strains (not only for fixed l, m). [==]
+* Improve algorithm for `__call__` in `Series` to be more Pythonic and faster. [==]
 
 ## Infrastructure
 
