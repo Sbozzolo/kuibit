@@ -286,60 +286,32 @@ class UniformGrid:
         """
         return point in self
 
-    def coordinates(self, as_1d_arrays=False, as_meshgrid=False):
+    def coordinates(self, as_meshgrid=False):
         """Return coordinates of the grid points.
 
-        If as_1d_arrays is True, return the coordinates of the grid points as
+        If as_meshgrid is True, the coordinates are returned as NumPy meshgrid.
+        Otherwise, return the coordinates of the grid points as
         1D arrays (schematically, [array for x coordinates, array for y
         coordinates, ...])
 
-        If as_meshgrid is True, the coordinates are returned as NumPy meshgrid.
+        :param as_meshgrid: If True, return the coordinates as meshgrid.
+        :type as_mesgrid: bool
 
-        If neither is True, return the coordinates a list of as
-        multidimensional arrays with the same shape as the grid. Useful for
-        arithmetic computations involving both data and coordinates.
-
-        For example, for a 2D grid, this would be
-
-        X, Y = self.coordinates()
-
-        X, Y are arrays with have the same shape as the grid. X has the x
-        coordinates of all the points, and similarly does Y.
-
-        :param as_1d_arrays: If True, return a list of 1d arrays of coordinates
+        :returns:  A list of 1d arrays of coordinates
         along the different axes.
-        :type as_1d_arrays: bool
-
-        :returns: The coordinate array of each dimension.
         :rtype:   list of numpy arrays with the same shape as grid
 
         """
-        if as_meshgrid and as_1d_arrays:
-            raise ValueError(
-                "Cannot request two different type of returns in coordinates"
-            )
 
-        if as_1d_arrays:
-            return [
-                np.linspace(x0, x1, n)
-                for n, x0, x1 in zip(self.shape, self.x0, self.x1)
-            ]
+        coordinates_1d = [
+            np.linspace(x0, x1, n)
+            for n, x0, x1 in zip(self.shape, self.x0, self.x1)
+        ]
 
         if as_meshgrid:
-            return np.meshgrid(
-                *[
-                    np.linspace(x0, x1, n)
-                    for n, x0, x1 in zip(self.shape, self.x0, self.x1)
-                ]
-            )
+            return np.meshgrid(*coordinates_1d)
 
-        # np.indeces prepares a multimensional array given a shape with content
-        # the corresponding index.
-
-        return [
-            np.indices(self.shape)[d] * self.dx[d] + self.x0[d]
-            for d in range(0, self.shape.size)
-        ]
+        return coordinates_1d
 
     def flat_dimensions_remove(self):
         """Remove dimensions which are only one gridpoint across"""
@@ -562,7 +534,7 @@ class UniformGridData(BaseNumerical):
 
         """
 
-        coords = self.grid.coordinates(as_1d_arrays=True)
+        coords = self.grid.coordinates()
 
         if k != 0 and k != 1:
             raise ValueError(

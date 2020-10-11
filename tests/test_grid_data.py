@@ -157,10 +157,6 @@ class TestUniformGrid(unittest.TestCase):
             iteration=1,
         )
 
-        # Test asking for two types of returns
-        with self.assertRaises(ValueError):
-            geom4.coordinates(as_meshgrid=True, as_1d_arrays=True)
-
         x = np.linspace(1, 11, 11)
         y = np.linspace(1, 8, 15)
 
@@ -171,15 +167,10 @@ class TestUniformGrid(unittest.TestCase):
         self.assertTrue(np.allclose(c0[0], X))
         self.assertTrue(np.allclose(c0[1], Y))
 
-        c1 = geom4.coordinates(as_1d_arrays=True)
+        c1 = geom4.coordinates()
 
         self.assertTrue(np.allclose(c1[0], x))
         self.assertTrue(np.allclose(c1[1], y))
-
-        c2 = geom4.coordinates()
-
-        self.assertTrue(np.allclose(c2[0][:, 0], x))
-        self.assertTrue(np.allclose(c2[1][0, :], y))
 
     def test__getitem__(self):
 
