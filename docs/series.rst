@@ -177,6 +177,21 @@ min, max, abs_min, abs_max
 These methods return the minimum or maximum of the series. With a prefix
 ``abs``, they return the minimum or maximum of the absolute value of the series.
 
+sample_common
+^^^^^^^^^^^^^^^^^^
+
+``sample_common`` has two possible uses: (1) takes a list of ``Series`` and
+remove all the points that are not shared by all the ``Series`` in the list,
+or (2) resamples all of them to the largest time interval covered by all series,
+using regularly spaced time. In this second case, the number of sample points is
+the minimum over all time series. Optinally, it takes a parameter
+``piecewise_constant``. If this is turned ``True``, instead of using splines the
+resampling is done using the nearest neighbors. This is useful when data is
+discontinuous, so splines do not behave well.
+
+To choose between the two different behaviors, pass the ``resample``
+keyword. Number (1) is for example useful to study convergence.
+
 The TimeSeries methods
 -----------------------
 
@@ -452,17 +467,6 @@ be called with ``prefer_late=True`` (default) or not. The difference between the
 two is that when ``prefer_late=False`` data from the ``TimeSeries`` with smaller
 ``tmin`` (i.e., the previous checkpoint) is preferred, and the opposite is true
 for ``prefer_late=True`` (i.e., the later checkpoint is used).
-
-sample_common
-^^^^^^^^^^^^^^^^^^
-
-``resample_common`` takes a list of ``TimeSeries`` and resamples all of them to
-the largest time interval covered by all timeseries, using regularly spaced
-time. The number of sample points is the minimum over all time series.
-Optinally, it takes a paramter ``piecewise_constant``. If this is turned
-``True``, instead of using splines the resampling is done using the nearest
-neighbors. This is useful when data is discontinuous, so splines do not behave
-well.
 
 time_at_maximum, time_at_minimum
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
