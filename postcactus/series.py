@@ -780,20 +780,30 @@ class BaseSeries(BaseNumerical):
         return reduction(self.y)
 
 
-def sample_common(series, piecewise_constant=False):
-    """Resample a list of series to the largest interval covered by all series,
-    using regularly spaced x.
+def sample_common(series, resample=False, piecewise_constant=False):
+    """Take a list of series and return on so that they are all defined on the
+    same points. If resample is True, resample a list of series to the largest
+    interval covered by all series, using regularly spaced x.
 
-    The number of sample points is the minimum over all series.
+    If resample is False (default), take as input a list of series and return a
+    new list with the same series but only defined on those points that are
+    common to all the lists.
 
-    If piecewise_constant=True, the approximant used for resampling is a
-    piecewise constant function, splines are not used, instead, the nearest
-    neighbors are used. Turn this one when you have series with discontinuities.
+    If resample is True, instead of removing points, find the common interval
+    of definition, and resample all the series on that internal. The number of
+    sample points is the minimum over all series. Additionally, if
+    piecewise_constant=True, the approximant used for resampling is a piecewise
+    constant function, splines are not used, instead, the nearest neighbors are
+    used. Turn this one when you have series with discontinuities.
 
-    :param series: The series to resample
+    :param series: The series to resample or redefine on the common points
     :type series:  list of :py:class:`~.Series`
 
-    :param piecewise_constant: Wheter to use the nearest neighbor resampling
+    :param resample: Whether to resample the series, or just find the common
+    points.
+    :type resample: bool
+
+    :param piecewise_constant: Whether to use the nearest neighbor resampling
     method instead of splines. If piecewise_constant=True, the approximant
     used for resampling is a piecewise constant function.
     :type piecewise_constant: bool
@@ -821,13 +831,34 @@ def sample_common(series, piecewise_constant=False):
             # We have to copy, otherwise one can accidentally modify input data
             return [ss.copy() for ss in series]
 
-    # Find the series with max xmin
-    s_xmin = max(series, key=lambda x: x.xmin)
-    # Find the series with min xmax
-    s_xmax = min(series, key=lambda x: x.xmax)
-    # Find the series with min number of points
-    s_ns = min(series, key=len)
-    x = np.linspace(s_xmin.xmin, s_xmax.xmax, len(s_ns))
-    return [
-        s.resampled(x, piecewise_constant=piecewise_constant) for s in series
-    ]
+    if resample:
+        # Find the series with max xmin
+        s_xmin = max(series, key=lambda x: x.xmin)
+        # Find the series with min xmax
+        s_xmax = min(series, key=lambda x: x.xmax)
+        # Find the series with min number of points
+        s_ns = min(series, key=len)
+        x = np.linspace(s_xmin.xmin, s_xmax.xmax, len(s_ns))
+        return [
+            s.resampled(x, piecewise_constant=piecewise_constant)
+            for s in series
+        ]
+
+    def float_intersection(array_1, array_2):
+        """Here we find the intersection between the two arrays also
+        considering the floating points.
+        """
+        # https://stackoverflow.com/a/32516182
+        return array_2[
+            np.isclose(array_1[:, None], array_2, atol=1e-14).any(0)
+        ]
+
+    # Here we find the common intersection between all the x, starting with
+    # the first one
+    x = s1.x
+    for s in s_others:
+        x = float_intersection(x, s.x)
+        if len(x) == 0:
+            raise ValueError("Series do not have any point in common")
+
+    return [s.resampled(x) for s in series]

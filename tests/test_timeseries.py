@@ -861,6 +861,26 @@ class TestTimeseries(unittest.TestCase):
 
     def test_resample_common(self):
 
+        # Test with resample=False
+        ts_short1 = ts.TimeSeries([1, 2, 3, 4, 5], [11, 12, 13, 14, 15])
+        ts_short2 = ts.TimeSeries([0, 2, 3, 5], [20, 22, 23, 25])
+        ts_short3 = ts.TimeSeries([0, 6, 7, 8], [20, 26, 27, 28])
+
+        new_ts_short1, new_ts_short2 = series.sample_common(
+            [ts_short1, ts_short2]
+        )
+
+        self.assertTrue(np.allclose(new_ts_short1.t, [2, 3, 5]))
+        self.assertTrue(np.allclose(new_ts_short2.t, [2, 3, 5]))
+        self.assertTrue(np.allclose(new_ts_short1.y, [12, 13, 15]))
+        self.assertTrue(np.allclose(new_ts_short2.y, [22, 23, 25]))
+
+        # Test no common point
+        with self.assertRaises(ValueError):
+            series.sample_common(
+            [ts_short1, ts_short2, ts_short3]
+        )
+
         times1 = np.linspace(0, 2 * np.pi, 5000)
         times2 = np.linspace(np.pi, 3 * np.pi, 5000)
         times3 = np.linspace(np.pi, 2 * np.pi, 5000)
@@ -871,21 +891,23 @@ class TestTimeseries(unittest.TestCase):
         ts1 = ts.TimeSeries(times1, sins1)
         ts2 = ts.TimeSeries(times2, sins2)
 
-        new_ts1, new_ts2 = series.sample_common([ts1, ts2])
+        new_ts1, new_ts2 = series.sample_common([ts1, ts2], resample=True)
 
         self.assertTrue(np.allclose(new_ts1.y, sins3))
 
         # Test with piecewise_constant = True
 
         new_ts1_c, new_ts2_c = series.sample_common(
-            [ts1, ts2], piecewise_constant=True
+            [ts1, ts2], piecewise_constant=True, resample=True
         )
 
         # The accuracy is not as great
         self.assertTrue(np.allclose(new_ts1_c.y, sins3, atol=1e-3))
 
         # Test a case in which there's no resampling
-        newer_ts1, newer_ts2 = series.sample_common([new_ts1, new_ts2])
+        newer_ts1, newer_ts2 = series.sample_common(
+            [new_ts1, new_ts2], resample=True
+        )
         self.assertTrue(np.allclose(new_ts1.y, sins3))
 
         # Case with different lengths
@@ -893,7 +915,9 @@ class TestTimeseries(unittest.TestCase):
         sins1_longer = np.sin(times1_longer)
         ts1_longer = ts.TimeSeries(times1_longer, sins1_longer)
 
-        ts1_res, ts2_res = series.sample_common([ts2, ts1_longer])
+        ts1_res, ts2_res = series.sample_common(
+            [ts2, ts1_longer], resample=True
+        )
         self.assertTrue(np.allclose(ts1_res.y, sins3))
 
     def test_windows(self):
