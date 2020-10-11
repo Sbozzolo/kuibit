@@ -71,14 +71,8 @@ The operation considers the size of the cell, for example
 The :py:meth:`~.contains` is syntactic sugar for the same operation.
 
 To obtain all the coordinates in the grid, you can use the
-:py:meth:`~.coordinates` method. This can be used in three different ways. When
-called with no arguments, it returns a list of multidimensional numpy arrays,
-one for each dimension. Each of these arrays are the coordinates for a fixed
-dimension of all the points on the grid (so the array has the same shape as the
-grid). For example, for a two dimensional grid, :py:meth:`~.coordinates` will
-return a list with two arrays, the first contains the x coordinates of all the
-points, the second all the y coordinates. The second way to use the method is to
-call it with ``as_1d_arrays=True``. In this case the output is a list of 1D
+:py:meth:`~.coordinates` method. This can be used in two different ways. When
+called with no arguments, the output is a list of 1D
 arrays. Each of these arrays contains the coordinates along a fixed axis. For
 example, for the 2D grid, the first array will be the x coordinates, the second
 the y. Finally, with ``as_meshgrid=True``, the return value will be a NumPy
