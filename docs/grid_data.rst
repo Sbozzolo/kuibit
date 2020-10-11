@@ -88,3 +88,48 @@ using the method ``flat_dimensions_remove``.
 
 You can also print a :py:class:`~.UniformGrid` object to have a full overview
 of the properties of the grid.
+
+UniformGridData
+---------------
+
+Once we have a grid, we can define data on it. :py:class:`~.UniformGridData`
+packs together a :py:class:`~.UniformGrid` and data defined on it. This is the
+most basic form of a grid function. There are two ways to define
+:py:class:`~.UniformGridData`, first from a :py:class:`~.UniformGrid` and a
+NumPy array with matching shape, or from the details of the grid along with
+the data (again, as a NumPy array with matching shape):
+
+.. code-block:: python
+
+    box = gd.UniformGrid([101, 201], x0=[0, 0], delta=[1, 1])
+
+    data = np.array([i * np.linspace(1, 5, 201) for i in range(101)])
+
+    # First way
+    ug_data1 = gd.UniformGridData(box, data)
+
+    # Second way
+    ug_data2 = gd.from_grid_structure(data, x0=[0, 0], delta=[1, 1])
+
+:py:class:`~.UniformGridData` shares the same basic infrastructure as the
+classes :py:class:`~.TimeSeries` and :py:class:`~.FrequencySeries` (they are
+derived from the same abstract class :py:class:`~.BaseNumerical`). This means
+that all the mathematical operations are defined, such as, adding two
+:py:class:`~.UniformGridData`, or taking the exponential with ``np.exp``.
+
+.. code-block:: python
+
+    ug_data3 = np.exp(ug_data1) / ug_data2
+
+Mathematical operations are performed only if the two
+:py:class:`~.UniformGridData` have the same underlying grid structure.
+
+As :py:class:`~.TimeSeries`, :py:class:`~.UniformGridData` can be represented
+as splines (constant or linear). This means that the objects can be resampled
+or can be called as normal functions.
+
+
+A convenient function is :py:meth:`~.sample_function`. This takes a multivariate
+function (e.g., :math:`sin(x + y)`) and returns a :py:class:`~.UniformGridData`
+sampling that function. If you already have the grid structure, you can use
+:py:meth:`~.sample_function_from_uniformgrid`.
