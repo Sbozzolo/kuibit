@@ -396,6 +396,10 @@ class TestUniformGridData(unittest.TestCase):
 
     def test_sample_function(self):
 
+        # Test not grid as input
+        with self.assertRaises(TypeError):
+            gd.sample_function(np.sin, 0)
+
         # Test 1d
         geom = gd.UniformGrid(100, x0=0, x1=2 * np.pi)
         data = np.sin(np.linspace(0, 2 * np.pi, 100))
@@ -436,6 +440,14 @@ class TestUniformGridData(unittest.TestCase):
             sin_data_complex.evaluate_with_spline(np.pi / 3),
             (1 + 1j) * np.sin(np.pi / 3),
         )
+
+        # Test __call__
+
+        self.assertAlmostEqual(
+            sin_data_complex(np.pi / 3),
+            (1 + 1j) * np.sin(np.pi / 3),
+        )
+
         # Vector input
         self.assertTrue(
             np.allclose(

@@ -626,6 +626,10 @@ class UniformGridData(BaseNumerical):
         ret = np.atleast_1d(ret)
         return ret if len(ret) > 1 else ret[0]
 
+    def __call__(self, x):
+        # TODO: Avoid splines when the data is already available
+        return self.evaluate_with_spline(x)
+
     def is_complex(self):
         """Return whether the data is complex.
 
@@ -822,6 +826,29 @@ class UniformGridData(BaseNumerical):
         )
 
 
+def sample_function_from_uniformgrid(function, grid):
+    """Create a regular dataset by sampling a scalar function of the form
+    f(x, y, z, ...) on a grid.
+
+    :param function:  The function to sample.
+    :type function:   A callable that takes as many arguments as the number
+                      of dimensions (in shape).
+    :param grid:   Grid over which to sample the function.
+    :type grid:    :py:class:`~.UniformGrid`
+    :returns:     Sampled data.
+    :rtype:       :py:class:`~.UniformGridData`
+
+    """
+    if not isinstance(grid, UniformGrid):
+        raise TypeError("grid has to be a UniformGrid")
+
+    # TODO: Check the number of arguments taken by the function
+
+    return UniformGridData(
+        grid, np.vectorize(function)(*grid.coordinates(as_meshgrid=True))
+    )
+
+
 def sample_function(function, x0, x1, shape):
     """Create a regular dataset by sampling a scalar function of the form
     f(x, y, z, ...) on a grid.
@@ -840,9 +867,4 @@ def sample_function(function, x0, x1, shape):
 
     """
     grid = UniformGrid(shape, x0=x0, x1=x1)
-
-    # TODO: Check the number of arguments taken by the function
-
-    return UniformGridData(
-        grid, np.vectorize(function)(*grid.coordinates(as_meshgrid=True))
-    )
+    return sample_function_from_uniformgrid(function, grid)
