@@ -280,10 +280,6 @@ class BaseSeries(BaseNumerical):
 
         This function is not meant to be called directly.
 
-        Values outside the interval are extrapolated if ext=0, set to 0 if
-        ext=1, raise a ValueError if ext=2, or if ext=3, return the boundary
-        value.
-
         k is the degree of the spline fit. It is recommended to use cubic
         splines. Even values of k should be avoided especially with small s
         values. 1 <= k <= 5
@@ -514,6 +510,7 @@ class BaseSeries(BaseNumerical):
         """Apply the method f to self, modifying self.
         This is used to transform the commands from returning an object
         to modifying self.
+        The function has to return a new copy of the object (not a reference).
         """
         ret = f(*args, **kwargs)
         # We avoid the setters to avoid checking for consistency because this
