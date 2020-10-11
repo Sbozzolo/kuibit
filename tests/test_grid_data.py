@@ -52,6 +52,10 @@ class TestUniformGrid(unittest.TestCase):
         with self.assertRaises(ValueError):
             geom = gd.UniformGrid([101, 51], [1, 1], x1=[4, 4], delta=[1, 1])
 
+        # Test x1 not upper corner
+        with self.assertRaises(ValueError):
+            geom = gd.UniformGrid([101, 51], [1, 1], x1=[-1, -1])
+
         # Test x1
         geom2 = gd.UniformGrid([101, 101], [1, 1], delta=[1, 0.5])
 

@@ -132,6 +132,12 @@ class UniformGrid:
             # if we have n points, delta is (x1 - x0)/(n - 1).
             x1_arr = np.atleast_1d(np.array(x1, dtype=float))
             self._check_dims(x1_arr, "x1")
+
+            if not all(self.x0 <= x1_arr):
+                raise ValueError(
+                    f"x1 {x1_arr} should be the upper corner (x0 = {x0})"
+                )
+
             # If shape has ones, then delta does not make sense, so we create a
             # temporary temp_shape object where we substitute the ones with
             # zeros, so delta ends up being negative where shape is 1. Then, we
