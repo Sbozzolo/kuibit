@@ -38,26 +38,26 @@ class TestUniformGrid(unittest.TestCase):
 
     def test_init_getters(self):
 
-        # Test error neither of delta and x1 provided
+        # Test error neither of dx and x1 provided
         with self.assertRaises(ValueError):
             geom = gd.UniformGrid([101, 101], [1, 1])
 
-        # Test delta
+        # Test dx
         geom = gd.UniformGrid([101, 101], [1, 1], x1=[101, 51])
 
-        self.assertTrue(np.allclose(geom.delta, [1, 0.5]))
-        self.assertIs(geom.dx, geom.delta)
+        self.assertTrue(np.allclose(geom.dx, [1, 0.5]))
+        self.assertIs(geom.delta, geom.dx)
 
-        # Test x1 and delta given, but incompatible
+        # Test x1 and dx given, but incompatible
         with self.assertRaises(ValueError):
-            geom = gd.UniformGrid([101, 51], [1, 1], x1=[4, 4], delta=[1, 1])
+            geom = gd.UniformGrid([101, 51], [1, 1], x1=[4, 4], dx=[1, 1])
 
         # Test x1 not upper corner
         with self.assertRaises(ValueError):
             geom = gd.UniformGrid([101, 51], [1, 1], x1=[-1, -1])
 
         # Test x1
-        geom2 = gd.UniformGrid([101, 101], [1, 1], delta=[1, 0.5])
+        geom2 = gd.UniformGrid([101, 101], [1, 1], dx=[1, 0.5])
 
         self.assertTrue(np.allclose(geom2.x1, [101, 51]))
 
@@ -65,7 +65,7 @@ class TestUniformGrid(unittest.TestCase):
         self.assertCountEqual(geom.num_ghost, np.zeros(2))
 
         geom3 = gd.UniformGrid(
-            [101, 101], [1, 1], delta=[1, 0.5], num_ghost=[3, 3]
+            [101, 101], [1, 1], dx=[1, 0.5], num_ghost=[3, 3]
         )
 
         self.assertCountEqual(geom3.num_ghost, 3 * np.ones(2))
@@ -77,7 +77,7 @@ class TestUniformGrid(unittest.TestCase):
         geom4 = gd.UniformGrid(
             [101, 101],
             x0=[1, 1],
-            delta=[1, 0.5],
+            dx=[1, 0.5],
             num_ghost=[3, 3],
             time=1,
             iteration=1,
@@ -94,7 +94,7 @@ class TestUniformGrid(unittest.TestCase):
         geom5 = gd.UniformGrid(
             [101, 101, 1],
             x0=[1, 1, 0],
-            delta=[1, 0.5, 0],
+            dx=[1, 0.5, 0],
             num_ghost=[3, 3, 3],
             time=1,
             iteration=1,
@@ -138,7 +138,7 @@ class TestUniformGrid(unittest.TestCase):
         geom4 = gd.UniformGrid(
             [101, 101],
             x0=[1, 1],
-            delta=[1, 0.5],
+            dx=[1, 0.5],
             num_ghost=[3, 3],
             time=1,
             iteration=1,
@@ -151,7 +151,7 @@ class TestUniformGrid(unittest.TestCase):
         geom4 = gd.UniformGrid(
             [11, 15],
             x0=[1, 1],
-            delta=[1, 0.5],
+            dx=[1, 0.5],
             num_ghost=[3, 3],
             time=1,
             iteration=1,
@@ -177,7 +177,7 @@ class TestUniformGrid(unittest.TestCase):
         geom4 = gd.UniformGrid(
             [11, 15],
             x0=[1, 1],
-            delta=[1, 0.5],
+            dx=[1, 0.5],
             num_ghost=[3, 3],
             time=1,
             iteration=1,
@@ -193,7 +193,7 @@ class TestUniformGrid(unittest.TestCase):
         geom = gd.UniformGrid(
             [101, 101, 1],
             x0=[1, 1, 0],
-            delta=[1, 0.5, 0],
+            dx=[1, 0.5, 0],
             num_ghost=[3, 3, 3],
             time=1,
             iteration=1,
@@ -204,7 +204,7 @@ class TestUniformGrid(unittest.TestCase):
         geom2 = gd.UniformGrid(
             [101, 101],
             x0=[1, 1],
-            delta=[1, 0.5],
+            dx=[1, 0.5],
             num_ghost=[3, 3],
             time=1,
             iteration=1,
@@ -217,7 +217,7 @@ class TestUniformGrid(unittest.TestCase):
         geom = gd.UniformGrid(
             [101, 101, 1],
             x0=[1, 1, 0],
-            delta=[1, 0.5, 0],
+            dx=[1, 0.5, 0],
             num_ghost=[3, 3, 3],
             time=1,
             iteration=1,
