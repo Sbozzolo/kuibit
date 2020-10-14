@@ -396,17 +396,21 @@ def common_bounding_box(grids):
     :returns: the common bounding box of a list of geometries
     :rtype: tuple of coordinates (x0 and x1)
     """
-    # We have to check that the number of dimensions is the same
-    try:
-        num_dim = grids[0].num_dimensions
-    except AttributeError:
-        raise TypeError("bounding_box takes a list of UniformGrids")
+    # Let's check that grids is a list like objects
+    if not hasattr(grids, '__len__'):
+        raise TypeError("common_bounding_box takes a list")
 
-    for g in grids:
-        if g.num_dimensions != num_dim:
-            raise ValueError(
-                "All the UniformGrids must have the same number of dimensions"
-            )
+    # Check that they are all UniformGrids
+    if not all(isinstance(g, UniformGrid) for g in grids):
+        raise TypeError(
+            "common_bounding_boxes takes a list of UniformGrid"
+        )
+
+    # We have to check that the number of dimensions is the same
+    num_dims = set([g.num_dimensions for g in grids])
+
+    if len(num_dims) != 1:
+        raise ValueError("Grids have different dimensions")
 
     # Let's consider three 2d grids as example with
     # x0 being respectively (0, 0), (-1, 0), (-3, 3)
@@ -427,6 +431,55 @@ def common_bounding_box(grids):
     x0 = np.array([min(b) for b in np.transpose(x0s)])
     x1 = np.array([max(b) for b in np.transpose(x1s)])
     return (x0, x1)
+
+
+def merge_uniform_grids(grids, component=-1):
+    """Compute a regular grid covering the bounding box of a list of grid
+    geometries, with the same grid spacing. All geometries must belong to the
+    same refinement level and have the same dx. In practice, we return a new
+    grid that covers all the grids in the list.
+
+    dx is kept constant, but the number of points will change.
+
+    :param geoms: list of grid geometries.
+    :type geoms:  list of :py:class:`~.UniformGrid`
+    :returns: Grid geometry covering all input grids.
+    :rtype: :py:class:`~.UniformGrid`
+
+    """
+    # Let's check that grids is a list like objects
+    if not hasattr(grids, '__len__'):
+        raise TypeError("common_bounding_box takes a list")
+
+    if not all(isinstance(g, UniformGrid) for g in grids):
+        raise TypeError("merge_uniform_grids works only UniformGrid")
+
+    # Check that all the grids have the same refinement levels
+    ref_levels = set([g.ref_level for g in grids])
+
+    if len(ref_levels) != 1:
+        raise ValueError("Can only merge grids on same refinement level.")
+
+    # Extract the only element from the set
+    ref_level = next(iter(ref_levels))
+
+    dx = [g.dx for g in grids]
+
+    if not np.allclose(dx, dx[0]):
+        raise ValueError("Can only merge grids on with same dx.")
+
+    # Find the bounding box
+    x0, x1 = common_bounding_box(grids)
+
+    # We add a little bit more than 1 to ensure that we don't accidentally lose
+    # one point by rounding off (conversion to int always rounds down)
+
+    # dx here is a list of all the dx, we just want one (they are all the same)
+    shape = ((x1 - x0) / dx[0] + 1.5).astype(np.int64)
+
+    return UniformGrid(
+        shape, x0=x0, dx=dx[0], ref_level=ref_level, component=component
+    )
 
 
 class UniformGridData(BaseNumerical):
@@ -652,7 +705,11 @@ class UniformGridData(BaseNumerical):
 
     def flat_dimensions_removed(self):
         """Return a new UniformGridData with dimensions of one grid
-        point removed."""
+        point removed.
+
+        :returns: New UniformGridData without flat dimensions.
+        :rtype: :py:class:`UniformGridData`
+        """
         new_grid = self.grid.copy()
         new_grid.flat_dimensions_remove()
         new_data = self.data.reshape(new_grid.shape)
