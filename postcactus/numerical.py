@@ -101,10 +101,12 @@ class BaseNumerical(ABC):
 
     def abs_min(self):
         """Return the minimum of the absolute value"""
+        # skipcq PYL-W0212
         return abs(self)._apply_reduction(np.min)
 
     def abs_max(self):
         """Return the maximum of the absolute value"""
+        # skipcq PYL-W0212
         return abs(self)._apply_reduction(np.max)
 
     def abs(self):
