@@ -53,8 +53,8 @@ class UniformGrid:
      --------
 
     The concept of shape is the same as NumPy shape: it's the number of points
-    in each dimention. Delta is the spacing (dx, dy, dz, ...). To fully
-    describe a grid, one needs the origin, the shape, and x1 or delta.
+    in each dimention. dx is the spacing (dx, dy, dz, ...). To fully
+    describe a grid, one needs the origin, the shape, and x1 or dx.
 
 
     This class is supposed to be immutable.
@@ -76,7 +76,7 @@ class UniformGrid:
         self,
         shape,
         x0,
-        delta=None,
+        dx=None,
         x1=None,
         ref_level=-1,
         component=-1,
@@ -89,9 +89,9 @@ class UniformGrid:
         :type shape:      1d numpy arrary or list of int.
         :param x0:    Position of cell center with lowest coordinate.
         :type x0:     1d numpy array or list of float.
-        :param delta:     If not None, specifies grid spacing, else grid
+        :param dx:     If not None, specifies grid spacing, else grid
                           spacing is computed from x0, x1, and shape.
-        :type delta:      1d numpy array or list of float.
+        :type dx:      1d numpy array or list of float.
         :param x1:        If grid spacing is None, this specifies the
                           position of the cell center with largest
                           coordinates.
@@ -116,11 +116,11 @@ class UniformGrid:
         self._check_dims(self.shape, "shape")
         self._check_dims(self.origin, "origin")
 
-        if delta is None:
+        if dx is None:
             if x1 is None:
-                raise ValueError("Must provide one between x1 and delta")
+                raise ValueError("Must provide one between x1 and dx")
 
-            # Here x1 is given, we compute delta. Consider the case
+            # Here x1 is given, we compute dx. Consider the case
             # with three cells, origin = (0,0) and x1 = (4,4).
             # Since we work with cell-centered, the x=0 line would
             # look like:
@@ -128,8 +128,8 @@ class UniformGrid:
             # --|------|------|------|------|--
             # (0,0)  (1,0)  (2,0)  (3,0)  (4,0)
             #
-            # If we want a delta of 1, we have need 5 points. Vice versa,
-            # if we have n points, delta is (x1 - x0)/(n - 1).
+            # If we want a dx of 1, we have need 5 points. Vice versa,
+            # if we have n points, dx is (x1 - x0)/(n - 1).
             x1_arr = np.atleast_1d(np.array(x1, dtype=float))
             self._check_dims(x1_arr, "x1")
 
@@ -138,26 +138,26 @@ class UniformGrid:
                     f"x1 {x1_arr} should be the upper corner (x0 = {x0})"
                 )
 
-            # If shape has ones, then delta does not make sense, so we create a
+            # If shape has ones, then dx does not make sense, so we create a
             # temporary temp_shape object where we substitute the ones with
-            # zeros, so delta ends up being negative where shape is 1. Then, we
+            # zeros, so dx ends up being negative where shape is 1. Then, we
             # force the negative values to zero.
             temp_shape = self.shape.copy()
             temp_shape[temp_shape == 1] = 0
-            self.__delta = (x1_arr - self.origin) / (temp_shape - 1)
-            self.__delta[self.__delta < 0] = 0
+            self.__dx = (x1_arr - self.origin) / (temp_shape - 1)
+            self.__dx[self.__dx < 0] = 0
         else:
-            # Here we assume delta is given, but if also x1 is given, that
+            # Here we assume dx is given, but if also x1 is given, that
             # would may lead to problems if the paramters do not agree. So, we
-            # first compute what x1 would be given origin and delta, then if x1
+            # first compute what x1 would be given origin and dx, then if x1
             # is provided, we compare the result with the given x1. We raise an
             # error if they disagree.
-            self.__delta = np.atleast_1d(np.array(delta, dtype=float))
-            self._check_dims(self.delta, "delta")
-            expected_x1 = self.origin + (self.shape - 1) * self.delta
+            self.__dx = np.atleast_1d(np.array(dx, dtype=float))
+            self._check_dims(self.dx, "dx")
+            expected_x1 = self.origin + (self.shape - 1) * self.dx
             if x1 is not None:
                 if not np.allclose(expected_x1, x1, atol=1e-14):
-                    raise ValueError("Incompatible x1 and delta")
+                    raise ValueError("Incompatible x1 and dx")
 
         if num_ghost is None:
             self.__num_ghost = np.zeros_like(self.shape)
@@ -180,19 +180,19 @@ class UniformGrid:
 
     @property
     def x1(self):
-        return self.origin + (self.shape - 1) * self.delta
+        return self.origin + (self.shape - 1) * self.dx
 
     @property
     def origin(self):
         return self.__origin
 
     @property
-    def delta(self):
-        return self.__delta
+    def dx(self):
+        return self.__dx
 
     @property
-    def dx(self):
-        return self.__delta
+    def delta(self):
+        return self.__dx
 
     @property
     def num_ghost(self):
@@ -220,7 +220,7 @@ class UniformGrid:
         :returns: Volume of a grid cell.
         :rtype:   float
         """
-        return self.delta.prod()
+        return self.dx.prod()
 
     @property
     def volume(self):
@@ -255,7 +255,7 @@ class UniformGrid:
         """
         index = np.array(index)
         self._check_dims(index, "index")
-        return index * self.delta + self.origin
+        return index * self.dx + self.origin
 
     def __contains__(self, point):
         """Test if a coordinate is contained in the grid. The size of the
@@ -321,7 +321,7 @@ class UniformGrid:
 
         self.__shape = self.__shape[extended_dims]
         self.__origin = self.__origin[extended_dims]
-        self.__delta = self.__delta[extended_dims]
+        self.__dx = self.__dx[extended_dims]
         self.__num_ghost = self.__num_ghost[extended_dims]
 
     def copy(self):
@@ -333,7 +333,7 @@ class UniformGrid:
         return type(self)(
             self.shape,
             self.origin,
-            delta=self.delta,
+            dx=self.dx,
             x1=self.x1,
             ref_level=self.ref_level,
             component=self.component,
@@ -363,7 +363,7 @@ class UniformGrid:
         return (
             np.array_equal(self.shape, other.shape)
             and np.allclose(self.origin, other.origin, atol=1e-14)
-            and np.allclose(self.delta, other.delta, atol=1e-14)
+            and np.allclose(self.dx, other.dx, atol=1e-14)
             and np.allclose(self.num_ghost, other.num_ghost, atol=1e-14)
             and np.allclose(self.ref_level, other.ref_level, atol=1e-14)
             and np.allclose(self.component, other.component, atol=1e-14)
@@ -378,11 +378,11 @@ Num ghost zones  = {self.num_ghost}
 Ref. level       = {self.ref_level}
 Component        = {self.component}
 x0               = {self.x0}
-x0/delta         = {self.x0/self.dx}
+x0/dx         = {self.x0/self.dx}
 x1               = {self.x1}
-x1/delta         = {self.x0/self.dx}
+x1/dx         = {self.x0/self.dx}
 Volume           = {self.volume}
-Delta            = {self.dx}
+Dx            = {self.dx}
 Time             = {self.time}
 Iteration        = {self.iteration}
 """
@@ -478,7 +478,7 @@ class UniformGridData(BaseNumerical):
         cls,
         data,
         x0,
-        delta=None,
+        dx=None,
         x1=None,
         ref_level=-1,
         component=-1,
@@ -489,9 +489,9 @@ class UniformGridData(BaseNumerical):
         """
         :param x0:    Position of cell center with lowest coordinate.
         :type x0:     1d numpy array or list of float.
-        :param delta:     If not None, specifies grid spacing, else grid
+        :param dx:     If not None, specifies grid spacing, else grid
                           spacing is computed from x0, x1, and shape.
-        :type delta:      1d numpy array or list of float.
+        :type dx:      1d numpy array or list of float.
         :param data:      The data.
         :type data:       A numpy array.
         :param ref_level:  Refinement level if this belongs to a hierachy,
@@ -511,7 +511,7 @@ class UniformGridData(BaseNumerical):
         geom = UniformGrid(
             data.shape,
             x0,
-            delta,
+            dx,
             x1,
             ref_level=ref_level,
             component=component,
@@ -799,13 +799,13 @@ class UniformGridData(BaseNumerical):
         # If the other object is of the same type
         if isinstance(other, type(self)):
             # Check the the coordinates are the same by checking shape, origin
-            # and delta
+            # and dx
             if not (
                 all(self.grid.shape == other.grid.shape)
                 and np.allclose(
                     self.grid.origin, other.grid.origin, atol=1e-14
                 )
-                and np.allclose(self.grid.delta, other.grid.delta, atol=1e-14)
+                and np.allclose(self.grid.dx, other.grid.dx, atol=1e-14)
             ):
                 raise ValueError("The objects do not have the same grid!")
             return type(self)(self.grid, function(self.data, other.data))
