@@ -128,8 +128,23 @@ As :py:class:`~.TimeSeries`, :py:class:`~.UniformGridData` can be represented
 as splines (constant or linear). This means that the objects can be resampled
 or can be called as normal functions.
 
+Some basic useful functions are :py:meth:`~.mean`, :py:meth:`~.integral`,
+:py:meth:`~.norm1`, or :py:meth:`~.norm2`. In general, there's a
+:py:meth:`~.norm_p`, computed as
+
+.. :math:
+
+   \| u \|_p = \left( \Delta v  \sum \|u \| \right)^{(1/p)}
+
+with :math:`\Delta v` being the volume of a cell.
 
 A convenient function is :py:meth:`~.sample_function`. This takes a multivariate
 function (e.g., :math:`sin(x + y)`) and returns a :py:class:`~.UniformGridData`
 sampling that function. If you already have the grid structure, you can use
 :py:meth:`~.sample_function_from_uniformgrid`.
+
+Another useful function is :py:meth:`~.histogram`, which can be used to compute
+histograms of :py:class:`~.UniformGridData` with weights or without. Similarly,
+one can compute percentiles with :py:meth:`~.percentiles`. The input of this
+function can either be relative (percentuals, as 0.01, 0.5, or so, if you enable
+``relative=True``), or the actual number of points.

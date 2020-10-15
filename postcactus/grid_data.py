@@ -17,6 +17,7 @@ The important classes defined here are
 
 import numpy as np
 from scipy import interpolate
+from scipy import linalg
 
 from postcactus.numerical import BaseNumerical
 
@@ -397,14 +398,12 @@ def common_bounding_box(grids):
     :rtype: tuple of coordinates (x0 and x1)
     """
     # Let's check that grids is a list like objects
-    if not hasattr(grids, '__len__'):
+    if not hasattr(grids, "__len__"):
         raise TypeError("common_bounding_box takes a list")
 
     # Check that they are all UniformGrids
     if not all(isinstance(g, UniformGrid) for g in grids):
-        raise TypeError(
-            "common_bounding_boxes takes a list of UniformGrid"
-        )
+        raise TypeError("common_bounding_boxes takes a list of UniformGrid")
 
     # We have to check that the number of dimensions is the same
     num_dims = set([g.num_dimensions for g in grids])
@@ -448,7 +447,7 @@ def merge_uniform_grids(grids, component=-1):
 
     """
     # Let's check that grids is a list like objects
-    if not hasattr(grids, '__len__'):
+    if not hasattr(grids, "__len__"):
         raise TypeError("common_bounding_box takes a list")
 
     if not all(isinstance(g, UniformGrid) for g in grids):
@@ -719,6 +718,10 @@ class UniformGridData(BaseNumerical):
         """Remove dimensions which are only one gridpoint large."""
         self._apply_to_self(self.flat_dimensions_removed)
 
+    def copy(self):
+        """Return a deep of self"""
+        return type(self)(self.grid, self.data)
+
     @property
     def num_dimensions(self):
         """Return the number of dimensions."""
@@ -729,84 +732,173 @@ class UniformGridData(BaseNumerical):
         """Return the number of dimensions with more than one grid point."""
         return self.grid.num_extended_dimensions
 
-    # def histogram(
-    #     self, weights=None, min_value=None, max_value=None, num_bins=400
-    # ):
-    #     """1D Histogram of the data.
-    #     :param weights:    the weight for each cell. Default is one.
-    #     :type weights:     RegData or numpy array of same shape or None.
-    #     :param min_value: Lower bound of data to consider. Default is data range.
-    #     :type min_value: float or None
-    #     :param max_value: Upper bound of data to consider. Default is data range.
-    #     :type max_value: float or None
-    #     :param num_bins:      Number of bins to create.
-    #     :type num_bins:       integer > 1
+    def integral(self):
+        """Compute the integral over the whole volume of the grid.
 
-    #     :returns: the positions of the data bins and the distribution.
-    #     :rtype:   tuple of two 1D numpy arrays.
-    #     """
-    #     if min_value is None:
-    #         min_value = self.min()
+        :returns: The integral computed as volume-weighted sum.
+        :rtype:   float (or complex if data is complex).
+        """
+        return self.data.sum() * self.grid.dv
 
-    #     if max_value is None:
-    #         max_value = self.max()
+    def mean(self):
+        """Compute the mean of the data over the whole volume of the grid.
 
-    #     if isinstance(weights, UniformGridData):
-    #         weights = weights.data
+        :returns: Arithmetic mean of the data.
+        :rtype:   float (or complex if data is complex).
+        """
+        return np.mean(self.data)
 
-    #     return np.histogram(
-    #         self.data,
-    #         range=(min_value, max_value),
-    #         bins=num_bins,
-    #         weights=weights,
-    #     )
+    average = mean
 
-    # def percentiles(
-    #     self,
-    #     fractions,
-    #     weights=None,
-    #     relative=True,
-    #     min_value=None,
-    #     max_value=None,
-    #     num_bins=400,
-    # ):
-    #     """Find values for which a given fraction(s) of the data is smaller.
+    def norm_p(self, ord):
+        r"""Compute the norm over the whole volume of the grid.
 
-    #     Optionally, the cells can have an optional weight, and absolute counts
-    #     can be used insted of fraction.
+        \|u\|_p = (\sum \|u\|^p dv)^1/p
 
-    #     :param fractions: list of fraction/absolute values
-    #     :type fractions:  list or array of floats
-    #     :param weights:    the weight for each cell. Default is one.
-    #     :type weights:     RegData or numpy array of same shape or None.
-    #     :param relative:   whether fractions refer to relative or absolute count.
-    #     :type relative:    bool
-    #     :param min_value: Lower bound of data to consider. Default is data range.
-    #     :type min_value: float or None
-    #     :param max_value: Upper bound of data to consider. Default is data range.
-    #     :type max_value: float or None
-    #     :param num_bins:      Number of bins to create.
-    #     :type num_bins:       integer > 1
+        :returns: The norm2 computed as volume-weighted sum.
+        :rtype:   float (or complex if data is complex).
+        """
+        return linalg.norm(np.ravel(self.data), ord=ord) * self.grid.dv ** (
+            1 / ord
+        )
 
-    #     :returns: data values corresponding to the given fractions.
-    #     :rtype:   1D numpy array
-    #     """
-    #     hist_values, bin_edges = self.histogram(
-    #         min_value=min_value,
-    #         max_value=max_value,
-    #         num_bins=num_bins,
-    #         weights=weights,
-    #     )
+    def norm2(self):
+        r"""Compute the norm over the whole volume of the grid.
 
-    #     hist_cumulative = np.cumsum(hist_values)
+        \|u\|_2 = (\sum \|u\|^2 dv)^1/2
 
-    #     if relative:
-    #         hist_cumulative /= hist_cumulative[-1]
+        :returns: The norm2 computed as volume-weighted sum.
+        :rtype:   float (or complex if data is complex).
+        """
+        return self.norm_p(ord=2)
 
-    #     # TODO: FINISH HERE
-    #     bin_edges = bin_edges[1:]
-    #     fr = np.minimum(hc[-1], np.array(fractions))
-    #     return np.array([hb[hc >= f][0] for f in fr])
+    def norm1(self):
+        r"""Compute the norm over the whole volume of the grid.
+
+        \|u\|_1 = \sum \|u\| dv
+
+        :returns: The norm2 computed as volume-weighted sum.
+        :rtype:   float (or complex if data is complex).
+        """
+        return self.norm_p(ord=1)
+
+    def histogram(
+        self,
+        weights=None,
+        min_value=None,
+        max_value=None,
+        num_bins=400,
+        **kwargs,
+    ):
+        """1D Histogram of the data.
+        :param weights:    the weight for each cell. Default is one.
+        :type weights:     RegData or numpy array of same shape or None.
+        :param min_value: Lower bound of data to consider. Default is data range.
+        :type min_value: float or None
+        :param max_value: Upper bound of data to consider. Default is data range.
+        :type max_value: float or None
+        :param num_bins:      Number of bins to create.
+        :type num_bins:       integer > 1
+
+        :returns: the positions of the data bins and the distribution.
+        :rtype:   tuple of two 1D numpy arrays.
+        """
+        if self.is_complex():
+            raise ValueError("Histogram only works with real data")
+
+        if min_value is None:
+            min_value = self.min()
+        if max_value is None:
+            max_value = self.max()
+
+        if isinstance(weights, UniformGridData):
+            weights = weights.data
+
+        # Check that we have a numpy array or None
+        if weights is not None and not isinstance(weights, np.ndarray):
+            raise TypeError(
+                "Weights has to be a UniformGrid, NumPy array or None"
+            )
+
+        return np.histogram(
+            self.data,
+            range=(min_value, max_value),
+            bins=num_bins,
+            weights=weights,
+            **kwargs,
+        )
+
+    def percentiles(
+        self,
+        fractions,
+        weights=None,
+        relative=True,
+        min_value=None,
+        max_value=None,
+        num_bins=400,
+    ):
+        """Find values for which a given fraction(s) of the data is smaller.
+
+        Optionally, the cells can have an optional weight, and absolute counts
+        can be used insted of fraction.
+
+        :param fractions: list of fraction/absolute values
+        :type fractions:  list or array of floats
+        :param weights:    the weight for each cell. Default is one.
+        :type weights:     UniformGridData or numpy array of same shape or None.
+        :param relative:   whether fractions refer to relative or absolute count.
+        :type relative:    bool
+        :param min_value: Lower bound of data to consider. Default is data range.
+        :type min_value: float or None
+        :param max_value: Upper bound of data to consider. Default is data range.
+        :type max_value: float or None
+        :param num_bins:      Number of bins to create.
+        :type num_bins:       integer > 1
+
+        :returns: data values corresponding to the given fractions.
+        :rtype:   1D numpy array
+        """
+        hist_values, bin_edges = self.histogram(
+            min_value=min_value,
+            max_value=max_value,
+            num_bins=num_bins,
+            weights=weights,
+        )
+
+        hist_cumulative = np.cumsum(hist_values)
+
+        # So that the last element is 1
+        if relative:
+            # We need to make sure that the everything is float here,
+            # otherwise numpy complains
+            hist_cumulative = 1.0 * hist_cumulative
+            hist_cumulative /= hist_cumulative[-1]
+
+        # TODO: Finish this
+
+        # We remove the first point because all the data is larger than that.
+        bin_edges = bin_edges[1:]
+
+        # So that we can use it as an array
+        fractions = np.array(fractions)
+
+        # We must make sure that fractions is not larger than the amount of data
+        # (or of 1, in the case of normalized histogram). If input fraction is
+        # larger than 1, the output must be 100 % of the data anyways.
+        #
+        # We make sure that this is at least 1d so that we can loop over it
+        capped_fractions = np.atleast_1d(
+            np.minimum(hist_cumulative[-1], fractions)
+        )
+        # Here we return the first element of the array bin edges that is larger
+        # than each element in capped_fractions
+        percentiles = np.array(
+            [bin_edges[hist_cumulative >= f][0] for f in capped_fractions]
+        )
+
+        if len(percentiles) == 1:
+            return percentiles[0]
+        return percentiles
 
     def _apply_unary(self, function):
         """Apply a unary function to the data.
