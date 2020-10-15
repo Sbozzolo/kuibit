@@ -552,3 +552,89 @@ class TestUniformGridData(unittest.TestCase):
 
         self.assertTrue(prod_data_complex.spline_real.bounds_error)
         self.assertTrue(prod_data_complex.spline_imag.bounds_error)
+
+    def test_copy(self):
+
+        sin_data = gd.sample_function(np.sin, 0, 2 * np.pi, 1000)
+
+        sin_data2 = sin_data.copy()
+
+        self.assertEqual(sin_data, sin_data2)
+        self.assertIsNot(sin_data.data, sin_data2.data)
+        self.assertIsNot(sin_data.grid, sin_data2.grid)
+
+    def test_histogram(self):
+
+        # There should be no reason why the histogram behaves differently for
+        # different dimensions, so let's test it with 1d
+        sin_data = gd.sample_function(np.sin, 0, 2 * np.pi, 1000)
+        sin_data_complex = sin_data + 1j * sin_data
+
+        # Test error weights
+        with self.assertRaises(TypeError):
+            sin_data.histogram(weights=1)
+
+        # Test error complex
+        with self.assertRaises(ValueError):
+            sin_data_complex.histogram()
+
+        hist = sin_data.histogram()
+        expected_hist = np.histogram(sin_data.data, range=(-1, 1), bins=400)
+
+        self.assertTrue(np.allclose(expected_hist[0], hist[0]))
+        self.assertTrue(np.allclose(expected_hist[1], hist[1]))
+
+        # Test with weights
+        weights = sin_data.copy()
+        weights **= 2
+
+        hist = sin_data.histogram(weights)
+        expected_hist = np.histogram(
+            sin_data.data, range=(-1, 1), bins=400, weights=weights.data
+        )
+
+        self.assertTrue(np.allclose(expected_hist[0], hist[0]))
+        self.assertTrue(np.allclose(expected_hist[1], hist[1]))
+
+    def test_percentiles(self):
+
+        # There should be no reason why the histogram behaves differently for
+        # different dimensions, so let's test it with 1d
+        lin_data = gd.sample_function(lambda x: 1.0 * x, 0, 2 * np.pi, 1000)
+
+        # Scalar input
+        self.assertAlmostEqual(lin_data.percentiles(0.5), np.pi)
+
+        # Vector input
+        self.assertTrue(
+            np.allclose(
+                lin_data.percentiles([0.25, 0.5]), np.array([np.pi / 2, np.pi])
+            )
+        )
+
+        # Not normalized
+        self.assertTrue(
+            np.allclose(
+                lin_data.percentiles([250, 500], relative=False),
+                np.array([np.pi / 2, np.pi]),
+            )
+        )
+
+    def test_mean_integral_norm1_norm2(self):
+
+        data = np.array([i ** 2 * np.linspace(1, 5, 51) for i in range(101)])
+        ug_data = gd.UniformGridData(self.geom, data)
+
+        self.assertAlmostEqual(ug_data.integral(), np.sum(data) * self.geom.dv)
+        self.assertAlmostEqual(
+            ug_data.norm1(), np.sum(np.abs(data)) * self.geom.dv
+        )
+        self.assertAlmostEqual(
+            ug_data.norm2(),
+            np.sum(np.abs(data) ** 2 * self.geom.dv) ** 0.5,
+        )
+        self.assertAlmostEqual(
+            ug_data.norm_p(3),
+            np.sum(np.abs(data) ** 3 * self.geom.dv) ** (1 / 3),
+        )
+        self.assertAlmostEqual(ug_data.average(), np.mean(data))
