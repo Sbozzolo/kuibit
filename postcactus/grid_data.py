@@ -70,7 +70,7 @@ class UniformGrid:
             )
         if len(var) != len(self.shape):
             raise ValueError(
-                f"The dimensions of this object are {self.shape}, not {var.shape} in {name}."
+                f"The dimensions of this object are {self.shape.shape}, not {var.shape} in {name}."
             )
 
     def __init__(
@@ -112,17 +112,17 @@ class UniformGrid:
 
         """
         self.__shape = np.atleast_1d(np.array(shape, dtype=int))
-        self.__origin = np.atleast_1d(np.array(x0, dtype=float))
+        self.__x0 = np.atleast_1d(np.array(x0, dtype=float))
 
         self._check_dims(self.shape, "shape")
-        self._check_dims(self.origin, "origin")
+        self._check_dims(self.x0, "x0")
 
         if dx is None:
             if x1 is None:
                 raise ValueError("Must provide one between x1 and dx")
 
             # Here x1 is given, we compute dx. Consider the case
-            # with three cells, origin = (0,0) and x1 = (4,4).
+            # with three cells, x0 = (0,0) and x1 = (4,4).
             # Since we work with cell-centered, the x=0 line would
             # look like:
             #
@@ -145,17 +145,17 @@ class UniformGrid:
             # force the negative values to zero.
             temp_shape = self.shape.copy()
             temp_shape[temp_shape == 1] = 0
-            self.__dx = (x1_arr - self.origin) / (temp_shape - 1)
+            self.__dx = (x1_arr - self.x0) / (temp_shape - 1)
             self.__dx[self.__dx < 0] = 0
         else:
             # Here we assume dx is given, but if also x1 is given, that
             # would may lead to problems if the paramters do not agree. So, we
-            # first compute what x1 would be given origin and dx, then if x1
+            # first compute what x1 would be given x0 and dx, then if x1
             # is provided, we compare the result with the given x1. We raise an
             # error if they disagree.
             self.__dx = np.atleast_1d(np.array(dx, dtype=float))
             self._check_dims(self.dx, "dx")
-            expected_x1 = self.origin + (self.shape - 1) * self.dx
+            expected_x1 = self.x0 + (self.shape - 1) * self.dx
             if x1 is not None:
                 if not np.allclose(expected_x1, x1, atol=1e-14):
                     raise ValueError("Incompatible x1 and dx")
@@ -173,7 +173,7 @@ class UniformGrid:
 
     @property
     def x0(self):
-        return self.__origin
+        return self.__x0
 
     @property
     def shape(self):
@@ -181,11 +181,11 @@ class UniformGrid:
 
     @property
     def x1(self):
-        return self.origin + (self.shape - 1) * self.dx
+        return self.x0 + (self.shape - 1) * self.dx
 
     @property
     def origin(self):
-        return self.__origin
+        return self.__x0
 
     @property
     def dx(self):
@@ -256,7 +256,7 @@ class UniformGrid:
         """
         index = np.array(index)
         self._check_dims(index, "index")
-        return index * self.dx + self.origin
+        return index * self.dx + self.x0
 
     def __contains__(self, point):
         """Test if a coordinate is contained in the grid. The size of the
@@ -314,16 +314,32 @@ class UniformGrid:
 
         return coordinates_1d
 
-    def flat_dimensions_remove(self):
-        """Remove dimensions which are only one gridpoint across"""
+    def flat_dimensions_removed(self):
+        """Return a new UniformGrid with dimensions which are only one gridpoint across
+        removed."""
+        copied = self.copy()
+
         # We have to save this, otherwise it would be recomputed at every line,
         # affecting the result.
-        extended_dims = self.extended_dimensions
+        extended_dims = copied.extended_dimensions
 
-        self.__shape = self.__shape[extended_dims]
-        self.__origin = self.__origin[extended_dims]
-        self.__dx = self.__dx[extended_dims]
-        self.__num_ghost = self.__num_ghost[extended_dims]
+        copied.__shape = copied.__shape[extended_dims]
+        copied.__x0 = copied.__x0[extended_dims]
+        copied.__dx = copied.__dx[extended_dims]
+        copied.__num_ghost = copied.__num_ghost[extended_dims]
+        return copied
+
+    def shifted(self, shift):
+        """Return a new UniformGrid with coordinates shifted by some amount
+
+        x -> x + shift."""
+        shift = np.array(shift)
+        self._check_dims(shift, "shift")
+
+        copied = self.copy()
+
+        copied.__x0 = copied.__x0 + shift
+        return copied
 
     def copy(self):
         """Return a deep copy.
@@ -333,7 +349,7 @@ class UniformGrid:
         """
         return type(self)(
             self.shape,
-            self.origin,
+            self.x0,
             dx=self.dx,
             x1=self.x1,
             ref_level=self.ref_level,
@@ -363,7 +379,7 @@ class UniformGrid:
 
         return (
             np.array_equal(self.shape, other.shape)
-            and np.allclose(self.origin, other.origin, atol=1e-14)
+            and np.allclose(self.x0, other.x0, atol=1e-14)
             and np.allclose(self.dx, other.dx, atol=1e-14)
             and np.allclose(self.num_ghost, other.num_ghost, atol=1e-14)
             and np.allclose(self.ref_level, other.ref_level, atol=1e-14)
@@ -379,11 +395,11 @@ Num ghost zones  = {self.num_ghost}
 Ref. level       = {self.ref_level}
 Component        = {self.component}
 x0               = {self.x0}
-x0/dx         = {self.x0/self.dx}
+x0/dx            = {self.x0/self.dx}
 x1               = {self.x1}
-x1/dx         = {self.x0/self.dx}
+x1/dx            = {self.x0/self.dx}
 Volume           = {self.volume}
-Dx            = {self.dx}
+dx               = {self.dx}
 Time             = {self.time}
 Iteration        = {self.iteration}
 """
@@ -709,8 +725,7 @@ class UniformGridData(BaseNumerical):
         :returns: New UniformGridData without flat dimensions.
         :rtype: :py:class:`UniformGridData`
         """
-        new_grid = self.grid.copy()
-        new_grid.flat_dimensions_remove()
+        new_grid = self.grid.flat_dimensions_removed()
         new_data = self.data.reshape(new_grid.shape)
         return type(self)(new_grid, new_data)
 
@@ -951,9 +966,7 @@ class UniformGridData(BaseNumerical):
             # and dx
             if not (
                 all(self.grid.shape == other.grid.shape)
-                and np.allclose(
-                    self.grid.origin, other.grid.origin, atol=1e-14
-                )
+                and np.allclose(self.grid.x0, other.grid.x0, atol=1e-14)
                 and np.allclose(self.grid.dx, other.grid.dx, atol=1e-14)
             ):
                 raise ValueError("The objects do not have the same grid!")
@@ -1017,3 +1030,50 @@ def sample_function(function, x0, x1, shape):
     """
     grid = UniformGrid(shape, x0=x0, x1=x1)
     return sample_function_from_uniformgrid(function, grid)
+
+
+# class HierachicalGridData(BaseNumerical):
+#     """Data defined on mesh-refined grids, consisting of one or more regular
+#     datasets with different grid spacings, i.e. a mesh refinement hierachy. The
+#     grid spacings should differ by powers of two. Origins of the components are
+#     shifted relative to each other only by multiples of the finest spacing.
+#     Basic arithmetic operations are defined for this class, as well as
+#     interpolation and resampling. This class can be iterated over to get all the
+#     regular datasets, ordered by refinement level and componen number.
+
+#     """
+
+#     def __init__(self, data):
+#         """
+#         :param data: list of regular datasets
+#         :type adat:  list of :py:class:`~.UniformGridData` instances.
+#         """
+#         if len(data) == 0:
+#             raise ValueError("Cannot create an empty HierarchicalGridData")
+
+#         if not all(isinstance(d, UniformGridData) for d in data):
+#             raise TypeError(
+#                 "RefinedGridData are made by a list of UniformGridData"
+#             )
+
+#         if len(set([d.num_dims for d in data])) != 1:
+#             raise ValueError("Dimensionality mismatch")
+
+#         # We sort by refinement level first, then by component
+#         self.__elements = sorted(
+#             data, key=lambda d: (-d.ref_level(), d.component())
+#         )
+#         self.__ref_levels = {}
+#         for e in self.__elements:
+#             self.__ref_levels.setdefault(e.ref_level(), []).append(e)
+#         self.__grid_at_level = {
+#             level: merge_uniform_grids(el)
+#             for level, el in self.__ref_levels.items()
+#         }
+#         self.__finest = max(self.__lvl.keys())
+#         self.__edims = self.__elements[0].dim_ext()
+#         self.__num_dims = self.__elements[0].num_dims()
+#         self.__origin, self.__x1 = common_bounding_box(self.__elements)
+#         self.time = self.__elements[0].time
+#         self.iteration = self.__elements[0].iteration
+#         # self.bricks           = BrickCoords(self.__elements)
