@@ -188,7 +188,7 @@ class TestUniformGrid(unittest.TestCase):
 
         self.assertCountEqual(geom4[1, 3], [2, 2.5])
 
-    def test_flat_dimensions_remove(self):
+    def test_flat_dimensions_removed(self):
 
         geom = gd.UniformGrid(
             [101, 101, 1],
@@ -199,8 +199,6 @@ class TestUniformGrid(unittest.TestCase):
             iteration=1,
         )
 
-        geom.flat_dimensions_remove()
-
         geom2 = gd.UniformGrid(
             [101, 101],
             x0=[1, 1],
@@ -210,7 +208,34 @@ class TestUniformGrid(unittest.TestCase):
             iteration=1,
         )
 
-        self.assertEqual(geom, geom2)
+        self.assertEqual(geom.flat_dimensions_removed(), geom2)
+
+    def test_shifted(self):
+
+        geom = gd.UniformGrid(
+            [101, 101],
+            x0=[1, 0],
+            x1=[3, 10],
+            num_ghost=[3, 3],
+            time=1,
+            iteration=1,
+        )
+
+        geom2 = gd.UniformGrid(
+            [101, 101],
+            x0=[3, -2],
+            x1=[5, 8],
+            num_ghost=[3, 3],
+            time=1,
+            iteration=1,
+        )
+
+        self.assertEqual(geom.shifted([2, -2]),
+                         geom2)
+
+        # Error incompatible dimensions
+        with self.assertRaises(ValueError):
+            geom.shifted(2)
 
     def test_copy(self):
 

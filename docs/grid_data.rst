@@ -83,8 +83,12 @@ operator (``box[i, j]``).
 
 :py:class:`~.UniformGrid` may have dimensions that are only one point (e.g.,
 when simulating a plane). We call ``extended_dimensions`` those that have more
-than one grid point. You can remove all the dimensions that are not extended
-using the method ``flat_dimensions_remove``.
+than one grid point. You can return a new :py:class:`~.UniformGrid` with removed
+all the dimensions that are not extended using the method
+``flat_dimensions_removed``.
+
+You return a new :py:class:`~.UniformGrid` with coordinates shifted with
+:py:meth:`~.shifted`.
 
 You can also print a :py:class:`~.UniformGrid` object to have a full overview
 of the properties of the grid.
