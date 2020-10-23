@@ -47,6 +47,7 @@ class TestUniformGrid(unittest.TestCase):
 
         self.assertTrue(np.allclose(geom.dx, [1, 0.5]))
         self.assertIs(geom.delta, geom.dx)
+        self.assertIs(geom.origin, geom.x0)
 
         # Test x1 and dx given, but incompatible
         with self.assertRaises(ValueError):
@@ -150,7 +151,7 @@ class TestUniformGrid(unittest.TestCase):
 
         geom4 = gd.UniformGrid(
             [11, 15],
-            x0=[1, 1],
+            x0=[1, 2],
             dx=[1, 0.5],
             num_ghost=[3, 3],
             time=1,
@@ -158,7 +159,7 @@ class TestUniformGrid(unittest.TestCase):
         )
 
         x = np.linspace(1, 11, 11)
-        y = np.linspace(1, 8, 15)
+        y = np.linspace(2, 9, 15)
 
         c0 = geom4.coordinates(as_meshgrid=True)
 
@@ -171,6 +172,12 @@ class TestUniformGrid(unittest.TestCase):
 
         self.assertTrue(np.allclose(c1[0], x))
         self.assertTrue(np.allclose(c1[1], y))
+
+        with self.assertRaises(ValueError):
+            geom4.coordinates(as_meshgrid=True, as_shaped_array=True)
+
+        shaped_array = geom4.coordinates(as_shaped_array=True)
+        self.assertCountEqual(shaped_array[0][0], [1, 2])
 
     def test__getitem__(self):
 
@@ -230,8 +237,7 @@ class TestUniformGrid(unittest.TestCase):
             iteration=1,
         )
 
-        self.assertEqual(geom.shifted([2, -2]),
-                         geom2)
+        self.assertEqual(geom.shifted([2, -2]), geom2)
 
         # Error incompatible dimensions
         with self.assertRaises(ValueError):
@@ -578,6 +584,14 @@ class TestUniformGridData(unittest.TestCase):
         self.assertTrue(prod_data_complex.spline_real.bounds_error)
         self.assertTrue(prod_data_complex.spline_imag.bounds_error)
 
+        # Test on a UniformGrid
+        sin_data = gd.sample_function(np.sin, 0, 2 * np.pi, 12000)
+        linspace = gd.UniformGrid(101, x0=0, x1=3)
+        output = sin_data(linspace)
+        self.assertTrue(
+            np.allclose(output.data, np.sin(linspace.coordinates()))
+        )
+
     def test_copy(self):
 
         sin_data = gd.sample_function(np.sin, 0, 2 * np.pi, 1000)
@@ -663,3 +677,45 @@ class TestUniformGridData(unittest.TestCase):
             np.sum(np.abs(data) ** 3 * self.geom.dv) ** (1 / 3),
         )
         self.assertAlmostEqual(ug_data.average(), np.mean(data))
+
+    def test_resampled(self):
+        def product(x, y):
+            return x * y
+
+        def product_complex(x, y):
+            return (1 + 1j) * x * y
+
+        prod_data = gd.sample_function(product, [0, 0], [3, 3], [101, 101])
+        prod_data_complex = gd.sample_function(
+            product_complex, [0, 0], [3, 3], [3001, 3001]
+        )
+        # Check error
+        with self.assertRaises(TypeError):
+            prod_data.resampled(2)
+
+        # Check same grid
+        self.assertEqual(prod_data.resampled(prod_data.grid), prod_data)
+
+        new_grid = gd.UniformGrid([51, 51], x0=[1, 2], x1=[2, 3])
+
+        resampled = prod_data_complex.resampled(new_grid)
+        exp_resampled = gd.sample_function_from_uniformgrid(
+            product_complex, new_grid
+        )
+
+        self.assertEqual(resampled.grid, new_grid)
+        self.assertTrue(np.allclose(resampled.data, exp_resampled.data))
+
+        # Check that the method of the spline is linear
+        self.assertEqual(prod_data_complex.spline_imag.method, "linear")
+
+        # Test using nearest interpolation
+        resampled_nearest = prod_data_complex.resampled(
+            new_grid, piecewise_constant=True
+        )
+
+        self.assertTrue(np.allclose(resampled_nearest.data,
+                                    exp_resampled.data, atol=1e-3))
+
+        # Check that the method of the spline hasn't linear
+        self.assertEqual(prod_data_complex.spline_imag.method, "linear")

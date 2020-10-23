@@ -71,12 +71,13 @@ The operation considers the size of the cell, for example
 The :py:meth:`~.contains` is syntactic sugar for the same operation.
 
 To obtain all the coordinates in the grid, you can use the
-:py:meth:`~.coordinates` method. This can be used in two different ways. When
-called with no arguments, the output is a list of 1D
-arrays. Each of these arrays contains the coordinates along a fixed axis. For
-example, for the 2D grid, the first array will be the x coordinates, the second
-the y. Finally, with ``as_meshgrid=True``, the return value will be a NumPy
-meshgrid. This is useful for plotting.
+:py:meth:`~.coordinates` method. This can be used in thre different ways. When
+called with no arguments, the output is a list of 1D arrays. Each of these
+arrays contains the coordinates along a fixed axis. For example, for the 2D
+grid, the first array will be the x coordinates, the second the y. Finally, with
+``as_meshgrid=True``, the return value will be a NumPy meshgrid. This is useful
+for plotting. When ``as_shaped_array=True`` the return value is a NumPy array
+with the same shape as self and with values the coordinates.
 
 To obtain a coordinate from a multidimensional index, just use the bracket
 operator (``box[i, j]``).
@@ -128,9 +129,10 @@ that all the mathematical operations are defined, such as, adding two
 Mathematical operations are performed only if the two
 :py:class:`~.UniformGridData` have the same underlying grid structure.
 
-As :py:class:`~.TimeSeries`, :py:class:`~.UniformGridData` can be represented
-as splines (constant or linear). This means that the objects can be resampled
-or can be called as normal functions.
+As :py:class:`~.TimeSeries`, :py:class:`~.UniformGridData` can be represented as
+splines (constant or linear). This means that the objects can be resampled or
+can be called as normal functions. Computing splines is an expensive operation
+that can take several seconds if the grid have thousands of points.
 
 Some basic useful functions are :py:meth:`~.mean`, :py:meth:`~.integral`,
 :py:meth:`~.norm1`, or :py:meth:`~.norm2`. In general, there's a
@@ -152,3 +154,13 @@ histograms of :py:class:`~.UniformGridData` with weights or without. Similarly,
 one can compute percentiles with :py:meth:`~.percentiles`. The input of this
 function can either be relative (percentuals, as 0.01, 0.5, or so, if you enable
 ``relative=True``), or the actual number of points.
+
+You can resample the data to a new grid using the function
+:py:meth:`~.resampled`, which takes as input a :py:class:`~.UniformGrid` and
+returns a new :py:class:`~.UniformGridData` resampled on the new grid. If the
+new grid is outside the old one, you can either raise an error, of fill the
+points outside with zeros. This behavior is controlled by the flag ``ext``. When
+``ext=1``, zeros are returned, when it is 2, ``ValueError`` is raised. By
+default, :py:meth:`~.resampled` uses a multilinear interpolation, but you can
+force to use a piecewise constant interpolation with the nearest neighbors by
+setting ``piecewise_constant=True``.
