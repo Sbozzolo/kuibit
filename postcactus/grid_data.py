@@ -287,22 +287,31 @@ class UniformGrid:
         """
         return point in self
 
-    def coordinates(self, as_meshgrid=False):
+    def coordinates(self, as_meshgrid=False, as_shaped_array=False):
         """Return coordinates of the grid points.
 
         If as_meshgrid is True, the coordinates are returned as NumPy meshgrid.
         Otherwise, return the coordinates of the grid points as
         1D arrays (schematically, [array for x coordinates, array for y
-        coordinates, ...])
+        coordinates, ...]).
+
+        If True as_shaped_array is True return the coordinates as an array
+        with the same shape of self and with values the coordinates.
 
         :param as_meshgrid: If True, return the coordinates as meshgrid.
-        :type as_mesgrid: bool
+        :type as_meshgrid: bool
+
+        :param as_shaped_array: If True, return the coordinates as an array
+        with the same shape of self and with values the coordinates.
+        :type as_shaped_array: bool
 
         :returns:  A list of 1d arrays of coordinates
         along the different axes.
         :rtype:   list of numpy arrays with the same shape as grid
 
         """
+        if as_meshgrid and as_shaped_array:
+            raise ValueError("Cannot ask for both meshgrid and shaped array.")
 
         coordinates_1d = [
             np.linspace(x0, x1, n)
@@ -311,6 +320,9 @@ class UniformGrid:
 
         if as_meshgrid:
             return np.meshgrid(*coordinates_1d)
+
+        if as_shaped_array:
+            return np.moveaxis(np.meshgrid(*coordinates_1d), 0, -1)
 
         return coordinates_1d
 
@@ -338,6 +350,7 @@ class UniformGrid:
 
         copied = self.copy()
 
+        # We only need to shift x0 because x1 is computed from x0 using dx
         copied.__x0 = copied.__x0 + shift
         return copied
 
@@ -641,7 +654,7 @@ class UniformGridData(BaseNumerical):
         for a specific call, otherwise, just use __call__.
 
         :param x: Array of x where to evaluate the series or single x
-        :type x: 1D numpy array of float
+        :type x: 1D numpy array of float, or UniformGrid
 
         :param ext: How to deal values outside the bounaries. Values outside
                     the interval are set to 0 if ext=1,
@@ -665,13 +678,14 @@ class UniformGridData(BaseNumerical):
         # default behavior. We change the bounds_error attribute in
         # RegularGridInterpolator that controls this. By default, we set it
         # to raise an error. We reset it to True when we are done.
-
         if ext == 1:
             self.spline_real.bounds_error = False
             if self.is_complex():
                 self.spline_imag.bounds_error = False
 
-        # ext = 2 is raising an error.
+        if isinstance(x, UniformGrid):
+            x = x.coordinates(as_shaped_array=True)
+
         x = np.atleast_1d(np.array(x))
 
         y_real = self.spline_real(x)
@@ -697,6 +711,58 @@ class UniformGridData(BaseNumerical):
     def __call__(self, x):
         # TODO: Avoid splines when the data is already available
         return self.evaluate_with_spline(x)
+
+    def resampled(self, new_grid, ext=2, piecewise_constant=False):
+        """Return a new UniformGridData resampled from this to new_grid.
+
+        You can specify the details of the spline with the method make_spline.
+
+        If you want to resample without using the spline, and you want a nearest
+        neighbor resampling, pass the keyword piecewise_constant=True.
+        This may be a good choice for data with large discontinuities, where the
+        splines are ineffective.
+
+        :param new_grid: New independent variable
+        :type new_grid:  1D numpy array or list of float
+        :param ext: How to handle points outside the data interval
+        :type ext: 1 for returning zero, 2 for ValueError,
+        :param piecewise_constant: Do not use splines, use the nearest neighbors.
+        :type piecewise_constant: bool
+        :returns: Resampled series.
+        :rtype:   :py:class:`~.UniformGridData` or derived class
+
+        """
+        if not isinstance(new_grid, UniformGrid):
+            raise TypeError("Resample takes another UniformGrid")
+
+        # If grid is the same, there's no need to resample
+        if self.grid == new_grid:
+            return self.copy()
+
+        # To make sure we give what the user asks we temporarly change the
+        # method in the RegularGridInterpolator to 'nearest' (see documentation
+        # in SciPy), if piecewise_constant is True, or 'linear', if it is
+        # False.
+
+        # To change the method, we first must make sure we have splines.
+        if self.invalid_spline:
+            self._make_spline()
+
+        old_method = self.spline_real.method
+        new_method = 'nearest' if piecewise_constant else 'linear'
+
+        self.spline_real.method = new_method
+        if self.is_complex():
+            self.spline_imag.method = new_method
+
+        ret = self(new_grid)
+
+        # Restore the old method
+        self.spline_real.method = old_method
+        if self.is_complex():
+            self.spline_imag.method = old_method
+
+        return type(self)(new_grid, ret)
 
     def is_complex(self):
         """Return whether the data is complex.
