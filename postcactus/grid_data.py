@@ -341,6 +341,18 @@ class UniformGrid:
         copied.__num_ghost = copied.__num_ghost[extended_dims]
         return copied
 
+    def ghost_zones_removed(self):
+        """Return a new UniformGrid with ghostzones removed"""
+        copied = self.copy()
+
+        # We remove twice the number of ghost zones because there are
+        # lower and upper ghostzones
+        copied.__shape = self.shape - 2 * self.num_ghost
+        # We "push x0 inside the grid"
+        copied.__x0 = copied.__x0 + self.num_ghost * self.dx
+        copied.__num_ghost = np.zeros_like(copied.shape)
+        return copied
+
     def shifted(self, shift):
         """Return a new UniformGrid with coordinates shifted by some amount
 

@@ -89,7 +89,9 @@ all the dimensions that are not extended using the method
 ``flat_dimensions_removed``.
 
 You return a new :py:class:`~.UniformGrid` with coordinates shifted with
-:py:meth:`~.shifted`.
+:py:meth:`~.shifted`. You can also remove the ghost zones with
+:py:meth:`~.ghost_zones_removed`. This will return a new
+:py:class:`~.UniformGrid` with no ghost zones.
 
 You can also print a :py:class:`~.UniformGrid` object to have a full overview
 of the properties of the grid.
