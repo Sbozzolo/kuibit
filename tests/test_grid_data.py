@@ -217,6 +217,18 @@ class TestUniformGrid(unittest.TestCase):
 
         self.assertEqual(geom.flat_dimensions_removed(), geom2)
 
+    def test_flat_ghost_zones_removed(self):
+
+        geom = gd.UniformGrid(
+            [101, 101], x0=[1, 1], dx=[1, 0.5], num_ghost=[3, 0]
+        )
+
+        geom2 = gd.UniformGrid(
+            [95, 101], x0=[4, 1], dx=[1, 0.5], num_ghost=[0, 0]
+        )
+
+        self.assertEqual(geom.ghost_zones_removed(), geom2)
+
     def test_shifted(self):
 
         geom = gd.UniformGrid(
