@@ -508,9 +508,9 @@ the time is ``t_of_zero_phase``.
 BaseNumerical object
 --------------------
 
-The :py:mod:class:`~.BaseSeries` class is derived from a even more abstract one,
-:py:mod:class:`~.BaseNumerical`. This class represent anything for which it
-makes sense to do calculations with. :py:mod:class:`~.BaseNumerical` implements
+The :py:class:`~.BaseSeries` class is derived from a even more abstract one,
+:py:class:`~.BaseNumerical`. This class represent anything for which it
+makes sense to do calculations with. :py:class:`~.BaseNumerical` implements
 all the infrastrcture needed to overload the mathematical operations. To do
 this, derived class must define three functions:
 - ``_apply_unary``, that describes the output of applying a function to ``self``
