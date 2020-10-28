@@ -18,17 +18,18 @@
 """The :py:mod:`~.cactus_grid` module provides functions to load
 grid function in Cactus formats.
 """
-import os
-import re
-import warnings
-from contextlib import contextmanager
-from functools import lru_cache
+# import os
+# import re
+# import warnings
+# from contextlib import contextmanager
+# from functools import lru_cache
 
-import h5py
-import numpy as np
+# import h5py
+# import numpy as np
 
-from postcactus import grid_data, simdir
-from postcactus.attr_dict import pythonize_name_dict
+from postcactus import simdir
+# from postcactus import grid_data
+# from postcactus.attr_dict import pythonize_name_dict
 
 
 # class OneGridFunctionH5:

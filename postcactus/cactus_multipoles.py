@@ -162,19 +162,19 @@ class MultipoleOneDet:
     ):
         """Evaluate function on each multipole and accumulate the result.
 
-        total_function_on_available_lm will call function with the
+        ``total_function_on_available_lm`` will call function with the
         following arguments:
 
         function(timeseries, mult_l, mult_m, dist, *args, **kwargs)
 
         If function does not need some paramters, it should use take
-        the *args argument to ignore the additional paramters that
-        are always passed (l, m, r).
+        the ``*args`` argument to ignore the additional paramters that
+        are always passed ``(l, m, r)``.
 
-        Values of l larger than l_max are ignored.
+        Values of l larger than ``l_max`` are ignored.
 
         function can take additional paramters passed directly from
-        total_function_on_available_lm (e.g. pcut for FFI).
+        ``total_function_on_available_lm`` (e.g. pcut for FFI).
 
         :params function: Function that has to be applied on each monopole
         :type function: callable
