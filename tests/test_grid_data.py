@@ -1159,6 +1159,35 @@ class TestHierarchicalGridData(unittest.TestCase):
             hg3.finest_level_component_at_point([3, 4]), (0, 0)
         )
 
+    def test_evaluate_at_point(self):
+
+        hg = gd.HierarchicalGridData(self.grid_data)
+
+        self.assertAlmostEqual(hg._evaluate_at_point((2, 3)), 10)
+
+        # Test with multiple components
+        hg3 = gd.HierarchicalGridData(self.grid_data_two_comp)
+
+        self.assertAlmostEqual(hg3._evaluate_at_point((2, 3)), 10)
+
+    def test_call(self):
+
+        hg = gd.HierarchicalGridData(self.grid_data)
+        # Test with multiple components
+        hg3 = gd.HierarchicalGridData(self.grid_data_two_comp)
+
+        # Scalar input
+        self.assertAlmostEqual(hg((2, 3)), 10)
+        self.assertAlmostEqual(hg3((2, 3)), 10)
+
+        # Scalar input that pretends to be vector
+        self.assertAlmostEqual(hg([(2, 3)]), 10)
+        self.assertAlmostEqual(hg3([(2, 3)]), 10)
+
+        # Vector input
+        self.assertCountEqual(hg([(2, 3), (3, 2)]), [10, 12])
+        self.assertCountEqual(hg3([(2, 3), (3, 2)]), [10, 12])
+
     # def test_coordinates(self):
 
     #     hg = gd.HierarchicalGridData(
