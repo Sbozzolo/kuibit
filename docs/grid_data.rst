@@ -4,7 +4,13 @@ Grid functions
 Other than series (time and frequency), grid functions are probably the other
 most important quantity that we extract from simulations with the Einstein
 Toolkit. In this page, we describe how to use ``PostCactus`` to handle grids.
-(:ref:`frequencyseries_ref:Reference on postcactus.grid_data`).
+(:ref:`frequencyseries_ref:Reference on postcactus.grid_data`). The main object
+that we use to represent grid function is the
+:py:class:`~.HierarchicalGridData`. This represents data defined on a grid with
+multiple refinement levels. On each level, data is represented as
+:py:class:`~.UniformGridData`. While you will likely never initialize these
+objects directly, it is useful to be aware of what they are and what they can
+do.
 
 UniformGrid
 ---------------
@@ -34,14 +40,14 @@ This is a two dimensional grid where the bottom left corner is (0, 0), and the
 top right one is (10, 20). There are 101 points on the x direction and 201 on
 the y. The grid is cell-centered, so the coordinates of the points will be the
 integers. Instead of specifying the other corner with respect to the origin, you
-can specify the size of each cell by providing the ``delta`` parameter.
+can specify the size of each cell by providing the ``dx`` parameter.
 
 .. code-block:: python
 
     box = gd.UniformGrid(
                 [101, 201],  # shape: 101 (201) points along the x (y) direction,
                 [0, 0],  # origin, at 0, 0 (cell-centered)
-                delta=[1, 1]  # cell size
+                dx=[1, 1]  # cell size
                 )
 
 :py:class:`~.UniformGrid` are used as part of grids with refinement levels, so
@@ -51,7 +57,7 @@ quantities.
 
 Some useful attributes to know about :py:class:`~.UniformGrid` are:
 - ``x0`` and ``x1`` return the two corners of the grid,
-- ``delta`` or ``dx`` return the cell size,
+- ``dx`` or ``delta`` return the cell size,
 - ``dv`` returns the volume of a cell, and ``volume`` returns the
 total volume,
 - ``num_dimensions`` returns how many dimensions are in the grid,
@@ -174,3 +180,34 @@ points outside with zeros. This behavior is controlled by the flag ``ext``. When
 default, :py:meth:`~.resampled` uses a multilinear interpolation, but you can
 force to use a piecewise constant interpolation with the nearest neighbors by
 setting ``piecewise_constant=True``.
+
+HierarchicalGridData
+--------------------
+
+A :py:class:`~.HierarchicalGridData` represent data defined on a mesh-refined
+grid. In practice, this is a collection of :py:class:`~.UniformGridData`,
+roughly one per level. You can work directly with the
+:py:class:`~.UniformGridData` on the different levels using the brackets
+operator. As for :py:class:`~.UniformGridData` supports all the mathematical
+operations.
+
+In many cases, one works with a nested series of refinement levels, with a
+domain that is split in multiple patches. Hence, the output data will also be in
+multiple chunks. When initializing an :py:class:`~.HierarchicalGridData`,
+PostCactus will make an effort to put all the different patches back together.
+If the provided components cover an entire grid, PostCactus will merge them. In
+doing this, all the ghost zone information is discarded. If PostCactus finds
+that the provided components do not cover a regular grid, then it will leave
+them untouched. This is the case when one has multiple refinement centers (for
+example in binary simulations). :py:class:`~.HierarchicalGridData` behave in
+slightly different ways for the former and the latter cases. In the former case,
+:py:class:`~.HierarchicalGridData` is essentially a dictionary that maps
+refinement level to a :py:class:`~.UniformGridData`. You can access the relative
+level using the bracket operator (e.g. ``rho[0]`` is ``rho`` on the coarsest
+level). In the latter case, :py:class:`~.HierarchicalGridData` is still a
+dictionary, but the value are not a list of :py:class:`~.UniformGridData` that
+represent the different patches. In this case, it is not convenient to work
+directly with the different :py:class:`~.UniformGridData`.
+
+As for :py:class:`~.UniformGridData`, :py:class:`~.HierarchicalGridData` are
+callable and splines are used to interpolate to the requested points.

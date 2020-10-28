@@ -416,6 +416,10 @@ class GravitationalWavesOneDet(mp.MultipoleOneDet):
     def get_energy_lm(self, mult_l, mult_m, pcut):
         """Return the cumulative energy lost in the mode (l, m).
 
+        :param mult_l: l multipole moment.
+        :type mult_t: int
+        :param mult_m: l multipole moment.
+        :type mult_m: int
         :param pcut: Period that enters the fixed-frequency integration.
         Typically, the longest physical period in the signal.
         :type pcut: float
