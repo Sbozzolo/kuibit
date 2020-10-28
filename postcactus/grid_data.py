@@ -971,9 +971,9 @@ class UniformGridData(BaseNumerical):
         :returns: The norm2 computed as volume-weighted sum.
         :rtype:   float (or complex if data is complex).
         """
-        return linalg.norm(
-            np.ravel(self.data), ord=order
-        ) * self.grid.dv ** (1 / order)
+        return linalg.norm(np.ravel(self.data), ord=order) * self.grid.dv ** (
+            1 / order
+        )
 
     def norm2(self):
         r"""Compute the norm over the whole volume of the grid.
@@ -1517,35 +1517,44 @@ class HierarchicalGridData(BaseNumerical):
 
         return finest_level_comp
 
-    # def _evaluate_at_point(self, point):
+    def _evaluate_at_point(self, point):
 
-    #     # We transform it in list, so we can take the length
-    #     level_comp = [self.finest_level_component_at_point(point)]
+        level_comp = self.finest_level_component_at_point(np.array(point))
 
-    #     # We have only one component
-    #     if len(level_comp) == 1:
-    #         return self[level_comp](x)
+        # If we have no components, level_comp will be just ref_level, if
+        # we have multiple components, it will be (ref_level, component)
 
-    #     # We have multiple components
-    #     level, comp = level_comp
+        # We have only one component
+        if not hasattr(level_comp, "__len__"):
+            return self[level_comp](point)
 
-    #     return self[level][comp](x)
+        # We have multiple components
+        level, comp = level_comp
 
-    # def __call__(self, x):
+        return self[level][comp](point)
 
-    #     return np.vectorize(self._evaluate_on_point)(x)
+    def __call__(self, points):
+        # If we consider the case that points is a single point
+        points_arr = np.array(points)
+        # We check that points has exactly the dimensions of the
+        # data
+        if points_arr.shape == (self.num_dimensions,):
+            return self._evaluate_at_point(points)
 
-    # def resample_to_uniform_grid(self, grid):
-    #     """Combine all the available data and resample it on a provided
-    #     UniformGrid.
+        ret = np.atleast_1d([self._evaluate_at_point(x) for x in points])
+        return ret if len(ret) > 1 else ret[0]
 
-    #     This function works by looping over all the available refinement levels
-    #     and components, intersecating the data of one with the data of the other
-    #     (in order of refinement level) over the provided grid. Optionally data
-    #     is resampled too (with a linear resampling)
+    def merge_refinement_levels(self, resample=False):
+        """Combine all the available data and resample it on a provided
+        UniformGrid.
 
-    #     """
-    #     pass
+        This function works by looping over all the available refinement levels
+        and components, intersecating the data of one with the data of the other
+        (in order of refinement level) over the provided grid. Optionally data
+        is resampled too (with a linear resampling)
+
+        """
+        pass
 
     def _apply_binary(self, other, function):
         """Apply a binary function to the data.
