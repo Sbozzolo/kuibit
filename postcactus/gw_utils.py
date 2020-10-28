@@ -468,7 +468,7 @@ def coordinate_times_to_retarded_times(coordinate_times, radii, mass):
 def signal_to_noise_ratio_from_strain(
     h, *args, noise=None, fmin=0, fmax=np.inf, window_function=None, **kwargs
 ):
-    """Return the signal to noise ratio given a strain and a power spectal density
+    r"""Return the signal to noise ratio given a strain and a power spectal density
     distribution for a detector.
 
         The SNR is computed as sqrt of 4 \int_fmin^fmax |\tilde{h} f|^2 / Sn(f) d f

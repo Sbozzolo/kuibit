@@ -454,7 +454,7 @@ def common_bounding_box(grids):
         raise TypeError("common_bounding_boxes takes a list of UniformGrid")
 
     # We have to check that the number of dimensions is the same
-    num_dims = set([g.num_dimensions for g in grids])
+    num_dims = {g.num_dimensions for g in grids}
 
     if len(num_dims) != 1:
         raise ValueError("Grids have different dimensions")
@@ -502,7 +502,7 @@ def merge_uniform_grids(grids, component=-1):
         raise TypeError("merge_uniform_grids works only UniformGrid")
 
     # Check that all the grids have the same refinement levels
-    ref_levels = set([g.ref_level for g in grids])
+    ref_levels = {g.ref_level for g in grids}
 
     if len(ref_levels) != 1:
         raise ValueError("Can only merge grids on same refinement level.")
@@ -721,7 +721,7 @@ class UniformGridData(BaseNumerical):
 
         coords = self.grid.coordinates()
 
-        if k != 0 and k != 1:
+        if k not in (0, 1):
             raise ValueError(
                 "Order for splines for dimensions > 2 must be 0 or 1"
             )
@@ -772,7 +772,7 @@ class UniformGridData(BaseNumerical):
         # ext = 0 is extrapolation and ext = 3 is setting the boundary
         # value. We cannot do this with RegularGridInterpolator
 
-        if not (ext == 1 or ext == 2):
+        if not ext in (1, 2):
             raise ValueError("Only ext=1 or ext=2 are available")
 
         if self.invalid_spline:
@@ -863,14 +863,14 @@ class UniformGridData(BaseNumerical):
         if self.is_complex():
             self.spline_imag.method = new_method
 
-        ret = self(new_grid)
-
         # Restore the old method
         self.spline_real.method = old_method
         if self.is_complex():
             self.spline_imag.method = old_method
 
-        return type(self)(new_grid, ret)
+        return type(self)(
+            new_grid, self.evaluate_with_spline(new_grid, ext=ext)
+        )
 
     def is_complex(self):
         """Return whether the data is complex.
@@ -963,7 +963,7 @@ class UniformGridData(BaseNumerical):
 
     average = mean
 
-    def norm_p(self, ord):
+    def norm_p(self, order):
         r"""Compute the norm over the whole volume of the grid.
 
         \|u\|_p = (\sum \|u\|^p dv)^1/p
@@ -971,9 +971,9 @@ class UniformGridData(BaseNumerical):
         :returns: The norm2 computed as volume-weighted sum.
         :rtype:   float (or complex if data is complex).
         """
-        return linalg.norm(np.ravel(self.data), ord=ord) * self.grid.dv ** (
-            1 / ord
-        )
+        return linalg.norm(
+            np.ravel(self.data), ord=order
+        ) * self.grid.dv ** (1 / order)
 
     def norm2(self):
         r"""Compute the norm over the whole volume of the grid.
@@ -983,7 +983,7 @@ class UniformGridData(BaseNumerical):
         :returns: The norm2 computed as volume-weighted sum.
         :rtype:   float (or complex if data is complex).
         """
-        return self.norm_p(ord=2)
+        return self.norm_p(order=2)
 
     def norm1(self):
         r"""Compute the norm over the whole volume of the grid.
@@ -993,7 +993,7 @@ class UniformGridData(BaseNumerical):
         :returns: The norm2 computed as volume-weighted sum.
         :rtype:   float (or complex if data is complex).
         """
-        return self.norm_p(ord=1)
+        return self.norm_p(order=1)
 
     def histogram(
         self,
@@ -1276,7 +1276,7 @@ class HierarchicalGridData(BaseNumerical):
         :type adat:  list of :py:class:`~.UniformGridData` instances.
         """
         if not hasattr(uniform_grid_data, "__len__"):
-            return TypeError(
+            raise TypeError(
                 f"{type(self).__name__} is built with list "
                 "of UniformGridData"
             )
@@ -1289,7 +1289,7 @@ class HierarchicalGridData(BaseNumerical):
                 f"{type(self).__name__} requires a list of UniformGridData"
             )
 
-        if len(set([d.num_dimensions for d in uniform_grid_data])) != 1:
+        if len({d.num_dimensions for d in uniform_grid_data}) != 1:
             raise ValueError("Dimensionality mismatch")
 
         # This is a dictionary with keys the refinement level and values the
@@ -1323,8 +1323,10 @@ class HierarchicalGridData(BaseNumerical):
         if len(components) == 1:
             return components[0].ghost_zones_removed()
 
-        # We remove all the ghost zones so that we can arrange all the grids
-        # one next to the other without having to worry about the overlapping
+        # TODO: Instead of throwing away the ghost zones, we should check them
+
+        # We remove all the ghost zones so that we can arrange all the grids one
+        # next to the other without having to worry about the overlapping
         # regions
         components_no_ghosts = [
             comp.ghost_zones_removed() for comp in components
@@ -1475,12 +1477,8 @@ class HierarchicalGridData(BaseNumerical):
         if self.refinement_levels != other.refinement_levels:
             return False
         return all(
-            [
-                data_self == data_other
-                for data_self, data_other in zip(
-                    self.grid_data, other.grid_data
-                )
-            ]
+            data_self == data_other
+            for data_self, data_other in zip(self.grid_data, other.grid_data)
         )
 
     def finest_level_component_at_point(self, coordinate):
@@ -1518,6 +1516,24 @@ class HierarchicalGridData(BaseNumerical):
             return finest_level_comp[0]
 
         return finest_level_comp
+
+    # def _evaluate_at_point(self, point):
+
+    #     # We transform it in list, so we can take the length
+    #     level_comp = [self.finest_level_component_at_point(point)]
+
+    #     # We have only one component
+    #     if len(level_comp) == 1:
+    #         return self[level_comp](x)
+
+    #     # We have multiple components
+    #     level, comp = level_comp
+
+    #     return self[level][comp](x)
+
+    # def __call__(self, x):
+
+    #     return np.vectorize(self._evaluate_on_point)(x)
 
     # def resample_to_uniform_grid(self, grid):
     #     """Combine all the available data and resample it on a provided
@@ -1558,6 +1574,9 @@ class HierarchicalGridData(BaseNumerical):
         # Assume reduction is np.min, we want the real minimum, so we have to
         # take the reduction of the reduction
         return reduction(
+            # Here we are accessing _apply_reduction, which is a protected
+            # member, so we ignore potential complaints.
+            # PYL-W0212
             np.array([data._apply_reduction(reduction) for _, _, data in self])
         )
 
