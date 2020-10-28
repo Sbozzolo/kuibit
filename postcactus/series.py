@@ -490,7 +490,11 @@ class BaseSeries(BaseNumerical):
                 not np.allclose(other.x, self.x, atol=1e-14)
             ):
                 raise ValueError("The objects do not have the same x!")
-            return type(self)(self.x, function(self.y, other.y), True)
+            return type(self)(
+                self.x,
+                function(self.y, other.y),
+                True,
+            )
         # If it is a number
         if isinstance(other, (int, float, complex)):
             return type(self)(self.x, function(self.y, other), True)

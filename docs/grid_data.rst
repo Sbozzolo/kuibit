@@ -76,8 +76,10 @@ called with no arguments, the output is a list of 1D arrays. Each of these
 arrays contains the coordinates along a fixed axis. For example, for the 2D
 grid, the first array will be the x coordinates, the second the y. Finally, with
 ``as_meshgrid=True``, the return value will be a NumPy meshgrid. This is useful
-for plotting. When ``as_shaped_array=True`` the return value is a NumPy array
-with the same shape as self and with values the coordinates.
+for plotting. When ``as_same_shape=True`` the return value is a list of
+coordinates with the same shape of the grid itself, each element of this list is
+the value of that coordinate over the grid. This last one is the most useful way
+to do computations that involve the coordinates.
 
 To obtain a coordinate from a multidimensional index, just use the bracket
 operator (``box[i, j]``).
@@ -135,6 +137,12 @@ As :py:class:`~.TimeSeries`, :py:class:`~.UniformGridData` can be represented as
 splines (constant or linear). This means that the objects can be resampled or
 can be called as normal functions. Computing splines is an expensive operation
 that can take several seconds if the grid have thousands of points.
+
+Splines allow you to use the :py:class:`~.UniformGridData` as a normal function.
+Suppose ``rho`` is a grid function. You can either use the bracket operator to
+find the value of ``rho`` corresponding to specific indices (``rho[i, j]``), or
+you can call ``rho`` with the coordinate where you want to evalue it
+(``rho(x)``).
 
 Some basic useful functions are :py:meth:`~.mean`, :py:meth:`~.integral`,
 :py:meth:`~.norm1`, or :py:meth:`~.norm2`. In general, there's a

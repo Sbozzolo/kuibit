@@ -877,9 +877,7 @@ class TestTimeseries(unittest.TestCase):
 
         # Test no common point
         with self.assertRaises(ValueError):
-            series.sample_common(
-            [ts_short1, ts_short2, ts_short3]
-        )
+            series.sample_common([ts_short1, ts_short2, ts_short3])
 
         times1 = np.linspace(0, 2 * np.pi, 5000)
         times2 = np.linspace(np.pi, 3 * np.pi, 5000)

@@ -333,7 +333,7 @@ class MultipoleAllDets:
         return list(self._dets.keys())
 
     def __str__(self):
-        ret = f"Radii avilable: {self.keys()}\n\n"
+        ret = f"Avilable radii: {self.keys()}\n\n"
         for d in sorted(self.keys()):
             ret += f"At radius {d}, {self._dets[d]}\n"
         return ret
@@ -353,13 +353,13 @@ class MultipolesDir:
     """
 
     def __init__(self, sd):
-        # self._vars is a dictionary. For _vars_txt, the keys are the
+        # self._vars is a dictionary. For _vars_ascii, the keys are the
         # variables  and the items are lists of tuples of the form
         # (multipole_l,  multipole_m, radius, filename) for text files.
         #
         # For _vars_h5 they are lists (since we have to read the content
         # to find the l and m)
-        self._vars_txt = {}
+        self._vars_ascii = {}
         self._vars_h5 = {}
 
         self.path = sd.path
@@ -378,7 +378,7 @@ class MultipolesDir:
         # 4. We match _r with any combination of numbers with possibly
         #    dots
         # 5. We possibly match a compression
-        rx_txt = re.compile(
+        rx_ascii = re.compile(
             r"""^
         mp_([a-zA-Z0-9\[\]_]+)
         _l(\d+)
@@ -396,18 +396,18 @@ class MultipolesDir:
         for f in sd.allfiles:
             filename = os.path.split(f)[1]
             matched_h5 = rx_h5.match(filename)
-            matched_txt = rx_txt.match(filename)
+            matched_ascii = rx_ascii.match(filename)
             if matched_h5 is not None:
                 variable_name = matched_h5.group(1).lower()
                 var_list = self._vars_h5.setdefault(variable_name, [])
                 # We are flagging that this h5
                 var_list.append(f)
-            elif matched_txt is not None:
-                variable_name = matched_txt.group(1).lower()
-                mult_l = int(matched_txt.group(2))
-                mult_m = int(matched_txt.group(3))
-                radius = float(matched_txt.group(4))
-                var_list = self._vars_txt.setdefault(variable_name, [])
+            elif matched_ascii is not None:
+                variable_name = matched_ascii.group(1).lower()
+                mult_l = int(matched_ascii.group(2))
+                mult_m = int(matched_ascii.group(3))
+                radius = float(matched_ascii.group(4))
+                var_list = self._vars_ascii.setdefault(variable_name, [])
                 var_list.append((mult_l, mult_m, radius, f))
 
         # What pythonize_name_dict does is to make the various variables
@@ -481,8 +481,8 @@ class MultipolesDir:
         if k in self._vars_h5:
             return self._multipoles_from_h5files(self._vars_h5[k])
 
-        if k in self._vars_txt:
-            return self._multipoles_from_textfiles(self._vars_txt[k])
+        if k in self._vars_ascii:
+            return self._multipoles_from_textfiles(self._vars_ascii[k])
 
         raise KeyError
 
@@ -495,7 +495,7 @@ class MultipolesDir:
         # To find the unique keys we use transofrm the keys in sets, and then
         # we unite them.
         return list(
-            set(self._vars_h5.keys()).union(set(self._vars_txt.keys()))
+            set(self._vars_h5.keys()).union(set(self._vars_ascii.keys()))
         )
 
     def __str__(self):
