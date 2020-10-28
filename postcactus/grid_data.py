@@ -931,6 +931,68 @@ class UniformGridData(BaseNumerical):
         """Remove ghost zones"""
         self._apply_to_self(self.ghost_zones_removed)
 
+    def dx_changed(self, new_dx, piecewise_constant=False):
+        """Return a new UniformGridData with the same grid extent, but with a new
+        spacing. This effectively up-samples or down-samples the grid.
+
+        Missing data is obtained with splines.
+
+        new_dx has to be an integer multiple of the current dx (or vice versa).
+
+        If piecewise_constant=True, the missing information is obtained with
+        from the nearest neighbors.
+        """
+        if not hasattr(new_dx, '__len__'):
+            raise TypeError(
+                f"dx has to be a list or an array. {new_dx} is not"
+            )
+
+        # First, we check that new_dx is and dx are compatible
+        if len(new_dx) != self.num_dimensions:
+            raise ValueError(
+                "Provided dx has not the correct number of dimensions"
+            )
+
+        # If we don't have to change dx, just return a copy
+        if np.allclose(new_dx, self.dx):
+            return self.copy()
+
+        for new, old in zip(new_dx, self.dx):
+            if not ((new / old).is_integer() or (old / new).is_integer()):
+                raise ValueError(
+                    "Provided dx is not an integer multiple or factor of current dx"
+                )
+
+        new_shape = ((self.x1 - self.x0) / new_dx + 1.5).astype(np.int64)
+        new_grid = UniformGrid(
+            new_shape,
+            x0=self.x0,
+            x1=self.x1,
+            ref_level=self.ref_level,
+            component=self.component,
+            num_ghost=self.num_ghost,
+            time=self.time,
+            iteration=self.iteration,
+        )
+
+        return self.resampled(new_grid, piecewise_constant=piecewise_constant)
+
+    def dx_change(self, new_dx, piecewise_constant=False):
+        """Return a new UniformGridData with the same grid extent, but with a new
+        spacing. This effectively up-samples or down-samples the grid.
+
+        Missing data is obtained with splines.
+
+        new_dx has to be an integer multiple of the current dx (or vice versa).
+
+        If piecewise_constant=True, the missing information is obtained with
+        from the nearest neighbors.
+        """
+
+        self._apply_to_self(
+            self.dx_changed, new_dx, piecewise_constant=piecewise_constant
+        )
+
     def copy(self):
         """Return a deep of self"""
         return type(self)(self.grid, self.data)
@@ -1310,39 +1372,11 @@ class HierarchicalGridData(BaseNumerical):
         }
 
     @staticmethod
-    def _try_merge_components(components):
-        """Try to merge a list of UniformGridData instances into one, assuming they all
-        have the same grid spacing and filling a regular grid completely.
+    def _fill_grid_with_components(grid, components):
+        """Given a grid, try to fill it with the components Return a UniformGridData
+        and the indices that actually were used in filling the grid
 
-        If the assumption is not verified, and some blank spaces are found, then
-        it returns the input untouched. This is because there are real cases in
-        which multiple components cannot be merged (if there are multiple
-        refinement levels).
         """
-
-        if len(components) == 1:
-            return components[0].ghost_zones_removed()
-
-        # TODO: Instead of throwing away the ghost zones, we should check them
-
-        # We remove all the ghost zones so that we can arrange all the grids one
-        # next to the other without having to worry about the overlapping
-        # regions
-        components_no_ghosts = [
-            comp.ghost_zones_removed() for comp in components
-        ]
-
-        # For convenience, we also order the components from the one with the
-        # smallest x0 to the largest, so that we can easily find the coordinates.
-        #
-        # We have to transform x.x0 in tuple because we cannot compare numpy
-        # arrays directly for sorting.
-        components_no_ghosts.sort(key=lambda x: tuple(x.x0))
-
-        # Next, we prepare the global grid
-        grid = merge_uniform_grids(
-            [comp.grid for comp in components_no_ghosts]
-        )
 
         # For filling the data, we prepare the array first, and we fill it with
         # the single components. We fill a second array which we use to keep
@@ -1350,7 +1384,7 @@ class HierarchicalGridData(BaseNumerical):
         data = np.zeros(grid.shape, dtype=components[0].data.dtype)
         indices_used = np.zeros(grid.shape, dtype=components[0].data.dtype)
 
-        for comp in components_no_ghosts:
+        for comp in components:
             # We find the index corresponding to x0 and x1 of the component
             index_x0 = ((comp.x0 - grid.x0) / grid.dx + 0.5).astype(np.int32)
             index_x1 = index_x0 + comp.shape
@@ -1361,8 +1395,50 @@ class HierarchicalGridData(BaseNumerical):
             data[slicer] = comp.data
             indices_used[slicer] = np.ones(comp.data.shape)
 
+        return UniformGridData(grid, data), indices_used
+
+    def _try_merge_components(self, components):
+        """Try to merge a list of UniformGridData instances into one, assuming
+        they all have the same grid spacing and filling a regular grid completely.
+
+        If the assumption is not verified, and some blank spaces are found, then
+        it returns the input untouched. This is because there are real cases in
+        which multiple components cannot be merged (if there are multiple
+        refinement levels).
+
+        """
+
+        if len(components) == 1:
+            return components[0].ghost_zones_removed()
+
+        # TODO: Instead of throwing away the ghost zones, we should check them
+
+        # We remove all the ghost zones so that we can arrange all the grids
+        # one next to the other without having to worry about the overlapping
+        # regions
+        components_no_ghosts = [
+            comp.ghost_zones_removed() for comp in components
+        ]
+
+        # For convenience, we also order the components from the one with the
+        # smallest x0 to the largest, so that we can easily find the
+        # coordinates.
+        #
+        # We have to transform x.x0 in tuple because we cannot compare numpy
+        # arrays directly for sorting.
+        components_no_ghosts.sort(key=lambda x: tuple(x.x0))
+
+        # Next, we prepare the global grid
+        grid = merge_uniform_grids(
+            [comp.grid for comp in components_no_ghosts]
+        )
+
+        merged_grid_data, indices_used = self._fill_grid_with_components(
+            grid, components_no_ghosts
+        )
+
         if np.amin(indices_used) == 1:
-            return UniformGridData(grid, data)
+            return merged_grid_data
 
         return components
 
@@ -1541,20 +1617,21 @@ class HierarchicalGridData(BaseNumerical):
         if points_arr.shape == (self.num_dimensions,):
             return self._evaluate_at_point(points)
 
+        # TODO: Vectorize this
+
         ret = np.atleast_1d([self._evaluate_at_point(x) for x in points])
         return ret if len(ret) > 1 else ret[0]
 
     def merge_refinement_levels(self, resample=False):
         """Combine all the available data and resample it on a provided
-        UniformGrid.
+        UniformGrid with resolution of the finest refinement level.
 
-        This function works by looping over all the available refinement levels
-        and components, intersecating the data of one with the data of the other
-        (in order of refinement level) over the provided grid. Optionally data
-        is resampled too (with a linear resampling)
+        Optionally data from coarser refinement levels is resampled too (with a
+        multilinear resampling)
+
+        Ghost zone information is discarded.
 
         """
-        pass
 
     def _apply_binary(self, other, function):
         """Apply a binary function to the data.
