@@ -971,9 +971,9 @@ class UniformGridData(BaseNumerical):
         :returns: The norm2 computed as volume-weighted sum.
         :rtype:   float (or complex if data is complex).
         """
-        return linalg.norm(
-            np.ravel(self.data), ord=order
-        ) * self.grid.dv ** (1 / order)
+        return linalg.norm(np.ravel(self.data), ord=order) * self.grid.dv ** (
+            1 / order
+        )
 
     def norm2(self):
         r"""Compute the norm over the whole volume of the grid.
