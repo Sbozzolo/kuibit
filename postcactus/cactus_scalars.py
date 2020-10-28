@@ -326,12 +326,15 @@ class AllScalars:
     """
 
     def __init__(self, allfiles, reduction_type):
-        """sd has to be a SimDir object, reduction_type has to be a reduction
-        or scalar.
+        """allfiles is a list of files, reduction_type has to be a reduction or
+        scalar.
 
-        allfiles is a list of files
         """
         self.reduction_type = str(reduction_type)
+
+        # TODO: Is it necessary to have the folder level?
+        # Probably not, so remove it
+
         # _vars is like _vars['variable']['folder'] -> CactusScalarASCII(f)
         # _vars['variable'] is a dictionary with as keys the folders where
         # to find the files associated to the variable and the reduction
@@ -344,7 +347,7 @@ class AllScalars:
                 if cactusascii_file.reduction_type == reduction_type:
                     for var in list(cactusascii_file.keys()):
                         # We add to the _vars dictionary the mapping:
-                        # [var][folder] to CactusScalarASCII(f)
+                        # [var][folder] to OneScalar(f)
                         folder = cactusascii_file.folder
                         self._vars.setdefault(var, {})[
                             folder

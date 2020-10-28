@@ -28,7 +28,12 @@ import os
 # which is quite new
 from functools import lru_cache
 
-from postcactus import cactus_multipoles, cactus_scalars, cactus_waves
+from postcactus import (
+    cactus_multipoles,
+    cactus_scalars,
+    cactus_waves,
+    cactus_grid_functions,
+)
 
 
 class SimDir:
@@ -203,12 +208,20 @@ class SimDir:
 
     emws = electromagneticwaves
 
+    @property
+    @lru_cache(1)
+    def gridfunctions(self):
+        return cactus_grid_functions.GridFunctionsDir(self)
+
+    gf = gridfunctions
+
     def __str__(self):
         header = f"Indexed {len(self.allfiles)} files"
         header += f"and {len(self.dirs)} subdirectories\n"
 
         ts_ret = f"{self.ts}"
         mp_ret = f"{self.multipoles}"
+        gf_ret = f"{self.gf}"
 
         if len(self.gravitationalwaves) > 0:
             gw_ret = "Available gravitational wave data"
@@ -216,4 +229,4 @@ class SimDir:
         if len(self.electromagneticwaves) > 0:
             em_ret = "Available electromagnetic wave data"
 
-        return header + ts_ret + mp_ret + gw_ret + em_ret
+        return header + ts_ret + mp_ret + gw_ret + em_ret + gf_ret

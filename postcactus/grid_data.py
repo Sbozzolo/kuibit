@@ -4,15 +4,12 @@
 uniform grids as well as for data on refined grid hirachies. Standard
 arithmetic operations are supported for those data grids, further methods
 to interpolate and resample. The number of dimensions is arbitrary.
-Rudimentary vector and matrix oprations are also supported, using
-Vectors of data grids (instead of grids of vectors).
 
 The important classes defined here are
  * :py:class:`~.UniformGrid`  represents the geometry of a uniform grid.
  * :py:class:`~.UniformGridData`  represents data on a uniform grid.
- * :py:class:`~.CompData`   represents data on a refined grid hirachy.
- * :py:class:`~.Vec`        represents a generic vector
- * :py:class:`~.Mat`        represents a generic matrix
+ * :py:class:`~.HierarchicalGridData` represents data on a refined grid
+hierachy.
 """
 
 import numpy as np
@@ -57,6 +54,7 @@ class UniformGrid:
     in each dimention. dx is the spacing (dx, dy, dz, ...). To fully
     describe a grid, one needs the origin, the shape, and x1 or dx.
 
+    This is the same convention that Carpet has.
 
     This class is supposed to be immutable.
 
@@ -287,7 +285,7 @@ class UniformGrid:
         """
         return point in self
 
-    def coordinates(self, as_meshgrid=False, as_shaped_array=False):
+    def coordinates(self, as_meshgrid=False, as_same_shape=False):
         """Return coordinates of the grid points.
 
         If as_meshgrid is True, the coordinates are returned as NumPy meshgrid.
@@ -295,22 +293,24 @@ class UniformGrid:
         1D arrays (schematically, [array for x coordinates, array for y
         coordinates, ...]).
 
-        If True as_shaped_array is True return the coordinates as an array
+        If True as_same_shape is True return the coordinates as an array
         with the same shape of self and with values the coordinates.
 
         :param as_meshgrid: If True, return the coordinates as meshgrid.
         :type as_meshgrid: bool
 
-        :param as_shaped_array: If True, return the coordinates as an array
-        with the same shape of self and with values the coordinates.
-        :type as_shaped_array: bool
+        :param as_same_shape: If True, return the coordinates as a list
+        or coordinates with the same shape of self and with values of a given
+        coordinate. For instance, if the self.num_dimension there will be
+        three lists with shape = self.shape.
+        :type as_same_shape: bool
 
         :returns:  A list of 1d arrays of coordinates
         along the different axes.
         :rtype:   list of numpy arrays with the same shape as grid
 
         """
-        if as_meshgrid and as_shaped_array:
+        if as_meshgrid and as_same_shape:
             raise ValueError("Cannot ask for both meshgrid and shaped array.")
 
         coordinates_1d = [
@@ -321,8 +321,15 @@ class UniformGrid:
         if as_meshgrid:
             return np.meshgrid(*coordinates_1d)
 
-        if as_shaped_array:
-            return np.moveaxis(np.meshgrid(*coordinates_1d), 0, -1)
+        if as_same_shape:
+            # np.indeces prepares an array in which each element has the value
+            # of its index
+            indices = np.indices(self.shape)
+            # Here we transform the index into coordinate, along each dimension
+            return [
+                indices[dim] * self.dx[dim] + self.x0[dim]
+                for dim in range(0, self.shape.size)
+            ]
 
         return coordinates_1d
 
@@ -489,7 +496,7 @@ def merge_uniform_grids(grids, component=-1):
     """
     # Let's check that grids is a list like objects
     if not hasattr(grids, "__len__"):
-        raise TypeError("common_bounding_box takes a list")
+        raise TypeError("merge_uniform_grids takes a list")
 
     if not all(isinstance(g, UniformGrid) for g in grids):
         raise TypeError("merge_uniform_grids works only UniformGrid")
@@ -548,7 +555,9 @@ class UniformGridData(BaseNumerical):
             raise TypeError("grid has to be a UniformGrid")
 
         if not np.array_equal(data.shape, grid.shape):
-            raise ValueError("grid and data shapes differ")
+            raise ValueError(
+                f"grid and data shapes differ {grid.shape} vs {data.shape}"
+            )
 
         self.grid = grid.copy()
         self.data = data.copy()
@@ -613,6 +622,89 @@ class UniformGridData(BaseNumerical):
             iteration=iteration,
         )
         return cls(geom, data)
+
+    def coordinates(self):
+        """Return coordinates of the grid points as list of UniformGridData.
+
+        This can be used for computations."""
+        return [
+            type(self)(self.grid, coord)
+            for coord in self.coordinates_from_grid(as_same_shape=True)
+        ]
+
+    def coordinates_from_grid(self, as_meshgrid=False, as_same_shape=False):
+        """Return coordinates of the grid points.
+
+        If as_meshgrid is True, the coordinates are returned as NumPy meshgrid.
+        Otherwise, return the coordinates of the grid points as
+        1D arrays (schematically, [array for x coordinates, array for y
+        coordinates, ...]).
+
+        If True as_same_shape is True return the coordinates as an array
+        with the same shape of self and with values the coordinates.
+
+        :param as_meshgrid: If True, return the coordinates as meshgrid.
+        :type as_meshgrid: bool
+
+        :param as_same_shape: If True, return the coordinates as an array
+        with the same shape of self and with values the coordinates.
+        :type as_same_shape: bool
+
+        :returns:  A list of 1d arrays of coordinates
+        along the different axes.
+        :rtype:   list of numpy arrays with the same shape as grid
+
+        """
+        return self.grid.coordinates(
+            as_meshgrid=as_meshgrid, as_same_shape=as_same_shape
+        )
+
+    @property
+    def x0(self):
+        return self.grid.x0
+
+    @property
+    def shape(self):
+        return self.grid.shape
+
+    @property
+    def x1(self):
+        return self.grid.x1
+
+    @property
+    def origin(self):
+        return self.x0
+
+    @property
+    def dx(self):
+        return self.grid.dx
+
+    @property
+    def delta(self):
+        return self.dx
+
+    @property
+    def num_ghost(self):
+        return self.grid.num_ghost
+
+    @property
+    def ref_level(self):
+        return self.grid.ref_level
+
+    @property
+    def component(self):
+        return self.grid.component
+
+    @property
+    def time(self):
+        return self.grid.time
+
+    @property
+    def iteration(self):
+        return self.grid.iteration
+
+    def __getitem__(self, key):
+        return self.data[key]
 
     def _make_spline(self, *args, k=1, **kwargs):
         """Private function to make spline representation of the data using
@@ -696,7 +788,11 @@ class UniformGridData(BaseNumerical):
                 self.spline_imag.bounds_error = False
 
         if isinstance(x, UniformGrid):
-            x = x.coordinates(as_shaped_array=True)
+            # The way we want the coordinates is like as an array with the same
+            # shape of the grid and with values the coordines (as arrays). This
+            # is similar to as_same_shape, but the coordinates have to be the
+            # value, and not the first index.
+            x = np.moveaxis(x.coordinates(as_same_shape=True), 0, -1)
 
         x = np.atleast_1d(np.array(x))
 
@@ -761,7 +857,7 @@ class UniformGridData(BaseNumerical):
             self._make_spline()
 
         old_method = self.spline_real.method
-        new_method = 'nearest' if piecewise_constant else 'linear'
+        new_method = "nearest" if piecewise_constant else "linear"
 
         self.spline_real.method = new_method
         if self.is_complex():
@@ -810,6 +906,30 @@ class UniformGridData(BaseNumerical):
     def flat_dimensions_remove(self):
         """Remove dimensions which are only one gridpoint large."""
         self._apply_to_self(self.flat_dimensions_removed)
+
+    def ghost_zones_removed(self):
+        """Return a new UniformGridData witho all the ghost zones removed.
+
+        :returns: New UniformGridData without ghostzones.
+        :rtype: :py:class:`UniformGridData`
+        """
+        if np.amax(self.num_ghost) == 0:
+            return self.copy()
+
+        new_grid = self.grid.ghost_zones_removed()
+        # We remove the borders from the data using the slicing operator
+        slicer = tuple(
+            [
+                slice(ghost_zones, -ghost_zones)
+                for ghost_zones in self.num_ghost
+            ]
+        )
+        new_data = self.data[slicer]
+        return type(self)(new_grid, new_data)
+
+    def ghost_zones_remove(self):
+        """Remove ghost zones"""
+        self._apply_to_self(self.ghost_zones_removed)
 
     def copy(self):
         """Return a deep of self"""
@@ -1082,14 +1202,35 @@ def sample_function_from_uniformgrid(function, grid):
     if not isinstance(grid, UniformGrid):
         raise TypeError("grid has to be a UniformGrid")
 
-    # TODO: Check the number of arguments taken by the function
+    # The try except block checks that the function supplied has the correct
+    # signature for the grid provided. If you try to pass a function that takes
+    # too many of too few arguments, you will get a TypeError
 
-    return UniformGridData(
-        grid, np.vectorize(function)(*grid.coordinates(as_meshgrid=True))
-    )
+    try:
+        ret = UniformGridData(
+            grid, np.vectorize(function)(*grid.coordinates(as_same_shape=True))
+        )
+    except TypeError as type_err:
+        # Too few arguments, type_err = missing N required positional arguments: ....
+        # Too many arguments, type_err = takes N positional arguments but M were given
+        ret = str(type_err)
+
+    # TODO: This is fragile way to do error parsing
+    if isinstance(ret, str):
+        if "missing" in ret:
+            raise TypeError(
+                "Provided function takes too few arguments for requested grid"
+            )
+        if "takes" in ret:
+            raise TypeError(
+                "Provided function takes too many arguments for requested grid"
+            )
+        raise TypeError(ret)
+
+    return ret
 
 
-def sample_function(function, x0, x1, shape):
+def sample_function(function, x0, x1, shape, *args, **kwargs):
     """Create a regular dataset by sampling a scalar function of the form
     f(x, y, z, ...) on a grid.
 
@@ -1106,52 +1247,344 @@ def sample_function(function, x0, x1, shape):
     :rtype:       :py:class:`~.UniformGridData`
 
     """
-    grid = UniformGrid(shape, x0=x0, x1=x1)
+    grid = UniformGrid(shape, x0=x0, x1=x1, *args, **kwargs)
     return sample_function_from_uniformgrid(function, grid)
 
 
-# class HierachicalGridData(BaseNumerical):
-#     """Data defined on mesh-refined grids, consisting of one or more regular
-#     datasets with different grid spacings, i.e. a mesh refinement hierachy. The
-#     grid spacings should differ by powers of two. Origins of the components are
-#     shifted relative to each other only by multiples of the finest spacing.
-#     Basic arithmetic operations are defined for this class, as well as
-#     interpolation and resampling. This class can be iterated over to get all the
-#     regular datasets, ordered by refinement level and componen number.
+class HierarchicalGridData(BaseNumerical):
+    """Data defined on mesh-refined grids, consisting of one or more regular
+    datasets with different grid spacings, i.e. a mesh refinement hierachy. The
+    grid spacings should differ by powers of two. Origins of the components
+    have to shifted relative to each other only by multiples of the finest
+    spacing. All the components are merged together, so there is one
+    UniformGridData per refinement level.
 
-#     """
+    Important: ghost zone information is discarded!
+    Important: If there overlapping patches, no sanity check is performed
 
-#     def __init__(self, data):
-#         """
-#         :param data: list of regular datasets
-#         :type adat:  list of :py:class:`~.UniformGridData` instances.
-#         """
-#         if len(data) == 0:
-#             raise ValueError("Cannot create an empty HierarchicalGridData")
+    TODO: Add more robust tests here!
 
-#         if not all(isinstance(d, UniformGridData) for d in data):
-#             raise TypeError(
-#                 "RefinedGridData are made by a list of UniformGridData"
-#             )
+    Basic arithmetic operations are defined for this class, as well as
+    interpolation and resampling. This class can be iterated over to get all
+    the regular datasets, ordered by refinement level.
 
-#         if len(set([d.num_dims for d in data])) != 1:
-#             raise ValueError("Dimensionality mismatch")
+    """
 
-#         # We sort by refinement level first, then by component
-#         self.__elements = sorted(
-#             data, key=lambda d: (-d.ref_level(), d.component())
-#         )
-#         self.__ref_levels = {}
-#         for e in self.__elements:
-#             self.__ref_levels.setdefault(e.ref_level(), []).append(e)
-#         self.__grid_at_level = {
-#             level: merge_uniform_grids(el)
-#             for level, el in self.__ref_levels.items()
-#         }
-#         self.__finest = max(self.__lvl.keys())
-#         self.__edims = self.__elements[0].dim_ext()
-#         self.__num_dims = self.__elements[0].num_dims()
-#         self.__origin, self.__x1 = common_bounding_box(self.__elements)
-#         self.time = self.__elements[0].time
-#         self.iteration = self.__elements[0].iteration
-#         # self.bricks           = BrickCoords(self.__elements)
+    def __init__(self, uniform_grid_data):
+        """
+        :param data: list of regular datasets
+        :type adat:  list of :py:class:`~.UniformGridData` instances.
+        """
+        if not hasattr(uniform_grid_data, "__len__"):
+            return TypeError(
+                f"{type(self).__name__} is built with list "
+                "of UniformGridData"
+            )
+
+        if len(uniform_grid_data) == 0:
+            raise ValueError(f"Cannot create an empty {type(self).__name__}")
+
+        if not all(isinstance(d, UniformGridData) for d in uniform_grid_data):
+            raise TypeError(
+                f"{type(self).__name__} requires a list of UniformGridData"
+            )
+
+        if len(set([d.num_dimensions for d in uniform_grid_data])) != 1:
+            raise ValueError("Dimensionality mismatch")
+
+        # This is a dictionary with keys the refinement level and values the
+        # components.
+        self.components = {}
+
+        # Let's sort as increasing refinement level and component
+        uniform_grid_data_sorted = sorted(
+            uniform_grid_data, key=lambda x: (x.ref_level, x.component)
+        )
+
+        for comp in uniform_grid_data_sorted:
+            self.components.setdefault(comp.ref_level, []).append(comp)
+
+        self.grid_data_dict = {
+            ref_level: self._try_merge_components(comps)
+            for ref_level, comps in self.components.items()
+        }
+
+    @staticmethod
+    def _try_merge_components(components):
+        """Try to merge a list of UniformGridData instances into one, assuming they all
+        have the same grid spacing and filling a regular grid completely.
+
+        If the assumption is not verified, and some blank spaces are found, then
+        it returns the input untouched. This is because there are real cases in
+        which multiple components cannot be merged (if there are multiple
+        refinement levels).
+        """
+
+        if len(components) == 1:
+            return components[0].ghost_zones_removed()
+
+        # We remove all the ghost zones so that we can arrange all the grids
+        # one next to the other without having to worry about the overlapping
+        # regions
+        components_no_ghosts = [
+            comp.ghost_zones_removed() for comp in components
+        ]
+
+        # For convenience, we also order the components from the one with the
+        # smallest x0 to the largest, so that we can easily find the coordinates.
+        #
+        # We have to transform x.x0 in tuple because we cannot compare numpy
+        # arrays directly for sorting.
+        components_no_ghosts.sort(key=lambda x: tuple(x.x0))
+
+        # Next, we prepare the global grid
+        grid = merge_uniform_grids(
+            [comp.grid for comp in components_no_ghosts]
+        )
+
+        # For filling the data, we prepare the array first, and we fill it with
+        # the single components. We fill a second array which we use to keep
+        # track of what indices have been filled with the input data.
+        data = np.zeros(grid.shape, dtype=components[0].data.dtype)
+        indices_used = np.zeros(grid.shape, dtype=components[0].data.dtype)
+
+        for comp in components_no_ghosts:
+            # We find the index corresponding to x0 and x1 of the component
+            index_x0 = ((comp.x0 - grid.x0) / grid.dx + 0.5).astype(np.int32)
+            index_x1 = index_x0 + comp.shape
+            slicer = tuple(
+                slice(index_j0, index_j1)
+                for index_j0, index_j1 in zip(index_x0, index_x1)
+            )
+            data[slicer] = comp.data
+            indices_used[slicer] = np.ones(comp.data.shape)
+
+        if np.amin(indices_used) == 1:
+            return UniformGridData(grid, data)
+
+        return components
+
+    def __getitem__(self, key):
+        return self.grid_data_dict[key]
+
+    def iter_level(self):
+        """Supports iterating over the regular elements, sorted by refinement level.
+        This can yield a UniformGridData or a list of UniformGridData when it
+        is not possible to merge the grids.
+
+        Use this when you know that the data you are working with have single
+        grids or grids that can be merged.
+
+        """
+        for data in self.grid_data:
+            yield data
+
+    def __iter__(self):
+        """Iterate across all the refinement levels and components."""
+        for ref_level, data in self.grid_data_dict.items():
+            # This is just one component
+            if not isinstance(data, list):
+                yield ref_level, -1, data
+            else:
+                # Multiple components
+                for comp_index, comp in enumerate(data):
+                    yield ref_level, comp_index, comp
+
+    def __len__(self):
+        return len(self.refinement_levels)
+
+    @property
+    def refinement_levels(self):
+        return list(self.grid_data_dict.keys())
+
+    @property
+    def grid_data(self):
+        return list(self.grid_data_dict.values())
+
+    @property
+    def finest_level(self):
+        return self.refinement_levels[-1]
+
+    @property
+    def max_refinement_level(self):
+        return self.finest_level
+
+    @property
+    def coarsest_level(self):
+        return self.refinement_levels[0]
+
+    @property
+    def x0(self):
+        if isinstance(self[0], list):
+            raise ValueError("Data does not have a well defined x0")
+        return self[0].x0
+
+    @property
+    def x1(self):
+        if isinstance(self[0], list):
+            raise ValueError("Data does not have a well defined x1")
+        return self[0].x1
+
+    def dx_at_level(self, level):
+        """Return the grid spacing at the specified refinement level"""
+        return self[level].dx
+
+    @property
+    def coarsest_dx(self):
+        """Return the coarsest dx"""
+        return self.dx_at_level(self.coarsest_level)
+
+    @property
+    def finest_dx(self):
+        """Return the finest dx"""
+        return self.dx_at_level(self.finest_level)
+
+    @property
+    def num_dimensions(self):
+        # next(iter(self)) returns either the first level, or the first component of
+        # the first level. This is general way that works for both cases.
+        # The return value is ref_level, component, data, so we take the second index.
+        return next(iter(self))[2].num_dimensions
+
+    @property
+    def num_extended_dimensions(self):
+        # next(self) returns either the first level, or the first component of
+        # the first level. This is general way that works for both cases.
+        # The return value is ref_level, component, data, so we take the second index.
+        return next(iter(self))[2].num_extended_dimensions
+
+    def copy(self):
+        """Return a deep copy.
+
+        :returns:  Deep copy of the HierarchicalGridData
+        :rtype:    :py:class:`~.HierarchicalGridData`
+        """
+        grid_data = []
+        for ref_level in self.refinement_levels:
+            grid_data.extend(self.components[ref_level])
+        return type(self)(grid_data)
+
+    def __eq__(self, other):
+        """Return a deep copy.
+
+        :returns:  Deep copy of the HierarchicalGridData
+        :rtype:    :py:class:`~.HierarchicalGridData`
+        """
+        if not isinstance(other, HierarchicalGridData):
+            return False
+        if self.refinement_levels != other.refinement_levels:
+            return False
+        return all(
+            [
+                data_self == data_other
+                for data_self, data_other in zip(
+                    self.grid_data, other.grid_data
+                )
+            ]
+        )
+
+    def finest_level_component_at_point(self, coordinate):
+        """Return the number and the component index of the most
+        refined level that contains the given coordinate.
+
+        If the grid has multiple patches, the component index is
+        returned, otherwise, only the finest level.
+
+        :param coordiante: point
+        :type coordinate: tuple or numpy array with the same dimension
+
+        :returns: Most refined levelt that contains the coordinate.
+        :rtype: int
+
+        """
+        if not hasattr(coordinate, "__len__"):
+            raise TypeError(f"{coordinate} is not a valid point")
+
+        if len(coordinate) != self.num_dimensions:
+            raise ValueError(
+                f"The input point has dimension {len(coordinate)}"
+                " but the data has dimension {self.num_dimensions}"
+            )
+        in_ref_level = [
+            (ref_level, comp)
+            for ref_level, comp, grid_data in self
+            if coordinate in grid_data.grid
+        ]
+        if len(in_ref_level) == 0:
+            raise ValueError(f"{coordinate} outside the grid")
+
+        finest_level_comp = max(in_ref_level)
+        if finest_level_comp[1] == -1:
+            return finest_level_comp[0]
+
+        return finest_level_comp
+
+    # def resample_to_uniform_grid(self, grid):
+    #     """Combine all the available data and resample it on a provided
+    #     UniformGrid.
+
+    #     This function works by looping over all the available refinement levels
+    #     and components, intersecating the data of one with the data of the other
+    #     (in order of refinement level) over the provided grid. Optionally data
+    #     is resampled too (with a linear resampling)
+
+    #     """
+    #     pass
+
+    def _apply_binary(self, other, function):
+        """Apply a binary function to the data.
+
+        :param function: Function to apply to all the data in the various
+        refinement levels
+        :type function: callable
+
+        :return: New HierarchicalGridData with function applied to the data
+        :rtype: :py:class:`~.HierarchicalGridData`
+
+        """
+        # We only know what how to h
+        if isinstance(other, (type(self), int, float, complex)):
+            if self.refinement_levels != other.refinement_levels:
+                raise ValueError("Refinement levels incompatible")
+            new_data = [
+                function(data_self, data_other)
+                for (_, _, data_self), (_, _, data_other) in zip(self, other)
+            ]
+            return type(self)(new_data)
+        # If we are here, it is because we cannot add the two objects
+        raise TypeError("I don't know how to combine these objects")
+
+    def _apply_reduction(self, reduction):
+        # Assume reduction is np.min, we want the real minimum, so we have to
+        # take the reduction of the reduction
+        return reduction(
+            np.array([data._apply_reduction(reduction) for _, _, data in self])
+        )
+
+    def _apply_unary(self, function):
+        """Apply a unary function to the data.
+
+        :param function: Function to apply to all the data in the various
+        refinement levels :type function: callable
+
+        :return: New HierarchicalGridData with function applied to the data
+        :rtype: :py:class:`~.HierarchicalGridData`
+
+        """
+        new_data = [function(data) for _, _, data in self]
+        return type(self)(new_data)
+
+    # def coordinates(self):
+    #     """Return coordiantes a list of HierarchicalGridData.
+
+    #     Useful for computations involving coordinates.
+    #     """
+    #     return [
+    #         type(self)(
+    #             [
+    #                 self[level].coordinates()[dim]
+    #                 for level in self.refinement_levels
+    #             ]
+    #         )
+    #         for dim in range(self.num_dimensions)
+    #     ]
