@@ -804,6 +804,47 @@ class TestUniformGridData(unittest.TestCase):
         # Check single number
         self.assertAlmostEqual(resampled_nearest((2, 2.5)), 9 * (1 + 1j))
 
+    def test_dx_change(self):
+
+        def product_complex(x, y):
+            return (1 + 1j) * x * (y + 2)
+
+        prod_data_complex = gd.sample_function(
+            product_complex, [0, 1], [3, 4], [301, 401]
+        )
+
+        prod_data_complex_copy = prod_data_complex.copy()
+
+        # Test invalid new dx
+        # Not a list
+        with self.assertRaises(TypeError):
+            prod_data_complex.dx_change(0)
+
+        # Not a with the correct dimensions
+        with self.assertRaises(ValueError):
+            prod_data_complex.dx_change([0])
+
+        # Not a integer multiple/factor
+        with self.assertRaises(ValueError):
+            prod_data_complex.dx_change(prod_data_complex.dx * np.pi)
+
+        # Same dx
+        self.assertEqual(prod_data_complex.dx_changed(prod_data_complex.dx),
+                         prod_data_complex)
+
+        # Half dx
+        prod_data_complex.dx_change(prod_data_complex.dx / 2)
+        self.assertCountEqual(prod_data_complex.dx,
+                              prod_data_complex_copy.dx / 2)
+        self.assertCountEqual(prod_data_complex.shape,
+                              prod_data_complex_copy.shape * 2 - 1)
+        # The data part should be tested with testing resample
+
+        # Twice of the dx, which will bring us back to same dx,
+        # so, same object we started with
+        prod_data_complex.dx_change(prod_data_complex.dx * 2)
+        self.assertEqual(prod_data_complex, prod_data_complex_copy)
+
     def test_coordinates(self):
         def square(x, y):
             return x * (y + 2)

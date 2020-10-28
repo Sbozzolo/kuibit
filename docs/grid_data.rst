@@ -181,6 +181,14 @@ default, :py:meth:`~.resampled` uses a multilinear interpolation, but you can
 force to use a piecewise constant interpolation with the nearest neighbors by
 setting ``piecewise_constant=True``.
 
+Another useful feature is to :py:meth:`~.dx_changed`, which can be used to
+return a new :py:class:`~.UniformGridData` with different grid spacing. The new
+grid spacing has to be an integer multiple or an integer factor of the old one.
+With this function you can upsample or downsample data. This is especially
+useful when dealing with refinement levels, which typically have spacing related
+by factors of 2. :py:meth:`~.dx_changed` takes an optional argument
+``piecewise_constant`` to prescribe how the resampling should be done.
+
 HierarchicalGridData
 --------------------
 
