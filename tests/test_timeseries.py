@@ -170,6 +170,10 @@ class TestTimeseries(unittest.TestCase):
         ts_log = ts.TimeSeries(times, self.values)
         self.assertFalse(ts_log.is_regularly_sampled())
 
+        # If the series is only one point long, an error should be raised
+        with self.assertRaises(RuntimeError):
+            ts.TimeSeries([1], [1]).is_regularly_sampled()
+
     def test_tmin_tmax_length_dt(self):
 
         # Testing methods of the base class
