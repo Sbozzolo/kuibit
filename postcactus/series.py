@@ -243,9 +243,17 @@ class BaseSeries(BaseNumerical):
     def is_regularly_sampled(self):
         """Return whether the series is regularly sampled.
 
+        If the series is only one point, an error is raised.
+
         :returns:  Is the series regularly sampled?
         :rtype:    bool
         """
+        if len(self) == 1:
+            raise RuntimeError(
+                "Series is only one point, "
+                "it does not make sense to compute dx"
+            )
+
         dx = self.x[1:] - self.x[:-1]
 
         return np.allclose(dx, dx[0], atol=1e-14)
