@@ -464,7 +464,7 @@ class FrequencySeries(BaseSeries):
             # Noises typically have Lorentian features, better to use a 0d
             # spline, so we enable piecewise_constant
             [res_self, res_other, *res_noises] = sample_common(
-                to_be_res_list, piecewise_constant=True
+                to_be_res_list, resample=True, piecewise_constant=True
             )
         else:
             [res_self, res_other, *res_noises] = to_be_res_list
