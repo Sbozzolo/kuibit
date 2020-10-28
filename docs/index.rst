@@ -2,10 +2,11 @@ Overview
 ========
 
 PostCactus is a set of tools to post-process simulations performed with the
-`Einstein Toolkit <https://einsteintoolkit.org/>`_. The code was originally
-developed by Wolfgang Kastaun. This is a fork with emphasis on documentation and
-testing.
+`Einstein Toolkit <https://einsteintoolkit.org/>`_.
 
+The goal of this package is to enable you to pursue your scientific goals
+without having to worry about computational details (e.g., handling simulation
+restarts, reading HDF5 files, ...).
 
 Features
 --------
@@ -14,12 +15,13 @@ Features currently implemented:
 
 - Read and organize simulation data (:py:mod:`~.simdir`). Checkpoints and
   restarts are handled transparantely.
-- Work with scalar data as produced by ``CarpetASCII`` (:py:mod:`~.cactus_scalars`).
+- Work with scalar data as produced by ``CarpetASCII``
+  (:py:mod:`~.cactus_scalars`).
 - Analyze the multipololar decompositions output by ``Multipoles``
   (:py:mod:`~.cactus_multipoles`).
 - Analyze gravitational waves extracted with the Newman-Penrose formalism
-  (:py:mod:`~.cactus_waves`) computing, among the other things, strains, overlaps,
-  energy lost.
+  (:py:mod:`~.cactus_waves`) computing, among the other things, strains,
+  overlaps, energy lost.
 - Work with the power spectral densities of known detectors
   (:py:mod:`~.sensitivity_curves`)
 - Represent and manipulate time series (:py:mod:`~.timeseries`). Examples of
@@ -30,7 +32,8 @@ Features currently implemented:
 - Manipulate and analyze gravitational-waves (:py:mod:`~.gw_utils`,
   :py:mod:`~.gw_mismatch`). For example, compute energies, mismatches, or
   extrapolate waves to infinity.
-- Work with grid functions (:py:mod:`~.grid_data`).
+- Work with grid functions (:py:mod:`~.grid_data`,
+  :py:mod:`~.cactus_grid_functions`) as output by ``CarpetIOHDF5``.
 - Handle unit conversion, in particular from geometrized to physical
   (:py:mod:`~.unitconv`).
 
@@ -50,7 +53,8 @@ If they are not already available, ``pip`` will install the following packages:
 
 The minimum version of Python required is 3.6.
 
-If you intend to extend/develop ``PostCactus``, follow the instruction on `GitHub <https://github.com/Sbozzolo/PostCactus>`_.
+If you intend to extend/develop ``PostCactus``, follow the instruction on
+`GitHub <https://github.com/Sbozzolo/PostCactus>`_.
 
 Usage
 -----
@@ -60,6 +64,7 @@ Usage
 
    simdir.rst
    series.rst
+   cactus_grid_functions.rst
    cactus_scalars.rst
    cactus_multipoles.rst
    cactus_waves.rst
@@ -90,6 +95,7 @@ Reference material (classes, functions, ...)
    series_ref.rst
    timeseries_ref.rst
    frequencyseries_ref.rst
+   cactus_grid_functions_ref.rst
    cactus_scalars_ref.rst
    cactus_multipoles_ref.rst
    cactus_waves_ref.rst
@@ -98,3 +104,9 @@ Reference material (classes, functions, ...)
    grid_data_ref.rst
    sensitivity_curves_ref.rst
    unitconv_ref.rst
+
+Credits
+-------
+
+The code was originally developed by Wolfgang Kastaun. This is a heavily
+modified fork with emphasis on documentation and testing.
