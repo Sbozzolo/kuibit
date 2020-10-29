@@ -29,7 +29,7 @@ grid function in Cactus formats.
 
 from postcactus import simdir
 
-# from postcactus import grid_data
+# from postcactus import grid_data, simdir
 # from postcactus.attr_dict import pythonize_name_dict
 
 
@@ -466,8 +466,7 @@ from postcactus import simdir
 #                     uniform_grid_data_components.append(unif_grid_data)
 
 #         return (
-#             # grid_data.HierachicalGridData(uniform_grid_data_components)
-#             uniform_grid_data_components
+#             grid_data.HierarchicalGridData(uniform_grid_data_components)
 #             if uniform_grid_data_components
 #             else None
 #         )
@@ -587,7 +586,7 @@ from postcactus import simdir
 #         return list(set(self._vars_h5.keys()).union(set(self._vars_h5.keys())))
 
 #     def __str__(self):
-#         ret = f"\nAvailable grid data of dimension {self.dimension}: "
+#         ret = "\nAvailable grid data of dimension {self.dimension}: "
 #         ret += f"\n{list(self.keys())}\n"
 #         return ret
 

@@ -537,14 +537,14 @@ class TestUniformGridData(unittest.TestCase):
         data = np.sin(np.linspace(0, 2 * np.pi, 100))
 
         self.assertEqual(
-            gd.sample_function(np.sin, 0, 2 * np.pi, 100),
+            gd.sample_function(np.sin, 100, 0, 2 * np.pi),
             gd.UniformGridData(geom, data),
         )
 
         # Test with additional arguments
         geom_ref_level = gd.UniformGrid(100, x0=0, x1=2 * np.pi, ref_level=0)
         self.assertEqual(
-            gd.sample_function(np.sin, 0, 2 * np.pi, 100, ref_level=0),
+            gd.sample_function(np.sin, 100, 0, 2 * np.pi, ref_level=0),
             gd.UniformGridData(geom_ref_level, data),
         )
 
@@ -569,7 +569,7 @@ class TestUniformGridData(unittest.TestCase):
         data2d = np.vectorize(square)(*geom2d.coordinates(as_same_shape=True))
 
         self.assertEqual(
-            gd.sample_function(square, [0, 1], [1, 2], [100, 200]),
+            gd.sample_function(square, [100, 200], [0, 1], [1, 2]),
             gd.UniformGridData(geom2d, data2d),
         )
 
@@ -581,7 +581,7 @@ class TestUniformGridData(unittest.TestCase):
     def test_splines(self):
 
         # Let's start with 1d.
-        sin_data = gd.sample_function(np.sin, 0, 2 * np.pi, 12000)
+        sin_data = gd.sample_function(np.sin, 12000, 0, 2 * np.pi)
         sin_data_complex = sin_data + 1j * sin_data
 
         # Test unknown ext
@@ -593,14 +593,14 @@ class TestUniformGridData(unittest.TestCase):
             sin_data._make_spline(k=3)
 
         self.assertAlmostEqual(
-            sin_data_complex.evaluate_with_spline(np.pi / 3),
+            sin_data_complex.evaluate_with_spline([np.pi / 3]),
             (1 + 1j) * np.sin(np.pi / 3),
         )
 
         # Test __call__
 
         self.assertAlmostEqual(
-            sin_data_complex(np.pi / 3),
+            sin_data_complex([np.pi / 3]),
             (1 + 1j) * np.sin(np.pi / 3),
         )
 
@@ -617,11 +617,14 @@ class TestUniformGridData(unittest.TestCase):
             )
         )
 
+        # Vector input in, vector input out
+        self.assertEqual(sin_data_complex([[1]]).shape, (1,))
+
         # Now 2d
         def product(x, y):
             return x * (y + 2)
 
-        prod_data = gd.sample_function(product, [0, 0], [3, 3], [101, 101])
+        prod_data = gd.sample_function(product, [101, 101], [0, 0], [3, 3])
         prod_data_complex = (1 + 1j) * prod_data
 
         self.assertAlmostEqual(
@@ -665,7 +668,7 @@ class TestUniformGridData(unittest.TestCase):
         self.assertTrue(prod_data_complex.spline_imag.bounds_error)
 
         # Test on a UniformGrid
-        sin_data = gd.sample_function(np.sin, 0, 2 * np.pi, 12000)
+        sin_data = gd.sample_function(np.sin, 12000, 0, 2 * np.pi)
         linspace = gd.UniformGrid(101, x0=0, x1=3)
         output = sin_data(linspace)
         self.assertTrue(
@@ -674,7 +677,7 @@ class TestUniformGridData(unittest.TestCase):
 
     def test_copy(self):
 
-        sin_data = gd.sample_function(np.sin, 0, 2 * np.pi, 1000)
+        sin_data = gd.sample_function(np.sin, 1000, 0, 2 * np.pi)
 
         sin_data2 = sin_data.copy()
 
@@ -686,7 +689,7 @@ class TestUniformGridData(unittest.TestCase):
 
         # There should be no reason why the histogram behaves differently for
         # different dimensions, so let's test it with 1d
-        sin_data = gd.sample_function(np.sin, 0, 2 * np.pi, 1000)
+        sin_data = gd.sample_function(np.sin, 1000, 0, 2 * np.pi)
         sin_data_complex = sin_data + 1j * sin_data
 
         # Test error weights
@@ -719,7 +722,7 @@ class TestUniformGridData(unittest.TestCase):
 
         # There should be no reason why the histogram behaves differently for
         # different dimensions, so let's test it with 1d
-        lin_data = gd.sample_function(lambda x: 1.0 * x, 0, 2 * np.pi, 1000)
+        lin_data = gd.sample_function(lambda x: 1.0 * x, 1000, 0, 2 * np.pi)
 
         # Scalar input
         self.assertAlmostEqual(lin_data.percentiles(0.5), np.pi)
@@ -765,9 +768,9 @@ class TestUniformGridData(unittest.TestCase):
         def product_complex(x, y):
             return (1 + 1j) * x * (y + 2)
 
-        prod_data = gd.sample_function(product, [0, 1], [3, 4], [101, 201])
+        prod_data = gd.sample_function(product, [101, 201], [0, 1], [3, 4])
         prod_data_complex = gd.sample_function(
-            product_complex, [0, 1], [3, 4], [3001, 2801]
+            product_complex, [3001, 2801], [0, 1], [3, 4]
         )
         # Check error
         with self.assertRaises(TypeError):
@@ -804,13 +807,18 @@ class TestUniformGridData(unittest.TestCase):
         # Check single number
         self.assertAlmostEqual(resampled_nearest((2, 2.5)), 9 * (1 + 1j))
 
-    def test_dx_change(self):
+        # Check with one point
+        prod_data_1 = gd.sample_function(product, [101, 1], [0, 1], [3, 1])
+        new_grid2 = gd.UniformGrid([51, 1], x0=[1, 1], x1=[2, 1])
+        resampled2 = prod_data_complex.resampled(new_grid2)
+        self.assertEqual(resampled2.grid, new_grid2)
 
+    def test_dx_change(self):
         def product_complex(x, y):
             return (1 + 1j) * x * (y + 2)
 
         prod_data_complex = gd.sample_function(
-            product_complex, [0, 1], [3, 4], [301, 401]
+            product_complex, [301, 401], [0, 1], [3, 4]
         )
 
         prod_data_complex_copy = prod_data_complex.copy()
@@ -829,15 +837,19 @@ class TestUniformGridData(unittest.TestCase):
             prod_data_complex.dx_change(prod_data_complex.dx * np.pi)
 
         # Same dx
-        self.assertEqual(prod_data_complex.dx_changed(prod_data_complex.dx),
-                         prod_data_complex)
+        self.assertEqual(
+            prod_data_complex.dx_changed(prod_data_complex.dx),
+            prod_data_complex,
+        )
 
         # Half dx
         prod_data_complex.dx_change(prod_data_complex.dx / 2)
-        self.assertCountEqual(prod_data_complex.dx,
-                              prod_data_complex_copy.dx / 2)
-        self.assertCountEqual(prod_data_complex.shape,
-                              prod_data_complex_copy.shape * 2 - 1)
+        self.assertCountEqual(
+            prod_data_complex.dx, prod_data_complex_copy.dx / 2
+        )
+        self.assertCountEqual(
+            prod_data_complex.shape, prod_data_complex_copy.shape * 2 - 1
+        )
         # The data part should be tested with testing resample
 
         # Twice of the dx, which will bring us back to same dx,
@@ -866,6 +878,13 @@ class TestUniformGridData(unittest.TestCase):
                 grids[dim](self.geom[2, 3]), self.geom[2, 3][dim]
             )
 
+        # Here we test coordiantes_meshgrid()
+        self.assertTrue(
+            np.allclose(
+                grid_data.coordinates_meshgrid()[0], self.geom.coordinates()[0]
+            )
+        )
+
     def test_properties(self):
         def square(x, y):
             return x * (y + 2)
@@ -889,7 +908,7 @@ class TestUniformGridData(unittest.TestCase):
             return x * (y + 2)
 
         # These are just integers
-        prod_data = gd.sample_function(square, [0, 10], [10, 30], [11, 21])
+        prod_data = gd.sample_function(square, [11, 21], [0, 10], [10, 30])
 
         self.assertAlmostEqual(prod_data[2, 2], 2 * 14)
 
@@ -959,8 +978,8 @@ class TestHierarchicalGridData(unittest.TestCase):
         def product2(x, y):
             return x * y
 
-        prod_data1 = gd.sample_function(product1, [0], [3], [101])
-        prod_data2 = gd.sample_function(product2, [0, 0], [3, 3], [101, 101])
+        prod_data1 = gd.sample_function(product1, [101], [0], [3])
+        prod_data2 = gd.sample_function(product2, [101, 101], [0, 0], [3, 3])
 
         with self.assertRaises(ValueError):
             gd.HierarchicalGridData([prod_data1, prod_data2])
@@ -1027,6 +1046,9 @@ class TestHierarchicalGridData(unittest.TestCase):
         # coarsest level
         self.assertEqual(hg.coarsest_level, 0)
 
+        # dtype
+        self.assertEqual(hg.dtype, np.float)
+
         # x0, x1
         self.assertCountEqual(hg.x0, self.expected_data.x0)
         self.assertCountEqual(hg.x1, self.expected_data.x1)
@@ -1039,12 +1061,17 @@ class TestHierarchicalGridData(unittest.TestCase):
 
         # dx_at_level, dx coarsest, fines
         self.assertCountEqual(hg.dx_at_level(0), [1, 1])
+        self.assertCountEqual(hg3.dx_at_level(0), [1, 1])
         self.assertCountEqual(hg.coarsest_dx, [1, 1])
         self.assertCountEqual(hg.finest_dx, [1, 1])
 
         # num dimensions
         self.assertEqual(hg.num_dimensions, 2)
         self.assertEqual(hg.num_extended_dimensions, 2)
+
+        # time and iteration
+        self.assertIs(hg.time, None)
+        self.assertIs(hg.iteration, None)
 
     def test__eq__(self):
 
@@ -1149,6 +1176,7 @@ class TestHierarchicalGridData(unittest.TestCase):
         hg2 = gd.HierarchicalGridData([neg_data])
 
         zero = hg1 + hg2
+        zero += 0
 
         # To check that zero is indeed zero we check that the abs max of the
         # data is 0
@@ -1204,14 +1232,16 @@ class TestHierarchicalGridData(unittest.TestCase):
 
         hg = gd.HierarchicalGridData(self.grid_data)
 
-        self.assertAlmostEqual(hg._evaluate_at_point((2, 3)), 10)
+        self.assertAlmostEqual(hg._evaluate_at_one_point((2, 3)), 10)
 
         # Test with multiple components
         hg3 = gd.HierarchicalGridData(self.grid_data_two_comp)
 
-        self.assertAlmostEqual(hg3._evaluate_at_point((2, 3)), 10)
+        self.assertAlmostEqual(hg3._evaluate_at_one_point((2, 3)), 10)
 
-    def test_call(self):
+    def test_call_evalute_with_spline(self):
+
+        # Teting call is the same as evalute_with_spline
 
         hg = gd.HierarchicalGridData(self.grid_data)
         # Test with multiple components
@@ -1221,6 +1251,9 @@ class TestHierarchicalGridData(unittest.TestCase):
         self.assertAlmostEqual(hg((2, 3)), 10)
         self.assertAlmostEqual(hg3((2, 3)), 10)
 
+        # Vector input in, vector input out
+        self.assertEqual(hg([(2, 3)]).shape, (1,))
+
         # Scalar input that pretends to be vector
         self.assertAlmostEqual(hg([(2, 3)]), 10)
         self.assertAlmostEqual(hg3([(2, 3)]), 10)
@@ -1229,8 +1262,67 @@ class TestHierarchicalGridData(unittest.TestCase):
         self.assertCountEqual(hg([(2, 3), (3, 2)]), [10, 12])
         self.assertCountEqual(hg3([(2, 3), (3, 2)]), [10, 12])
 
-    # def test_coordinates(self):
+        def product(x, y):
+            return x * (y + 2)
 
-    #     hg = gd.HierarchicalGridData(
-    #         self.grid_data + [self.expected_data_level2]
-    #     )
+        # Uniform grid as input
+        grid = gd.UniformGrid([3, 5], x0=[0, 1], x1=[2, 5])
+        grid_data = gd.sample_function_from_uniformgrid(product, grid)
+        self.assertTrue(np.allclose(hg3(grid), grid_data.data))
+
+    def test_merge_refinement_levels(self):
+        # This also tests to_UniformGrid
+
+        # We redefine this to be ref_level=1
+        grid1 = gd.UniformGrid([4, 5], x0=[0, 1], x1=[3, 5], ref_level=1)
+        grid2 = gd.UniformGrid([11, 21], x0=[4, 6], x1=[14, 26], ref_level=1)
+
+        grids = [grid1, grid2]
+
+        # Here we use the same data with another big refinement level sampled
+        # from the same function
+        big_grid = gd.UniformGrid(
+            [16, 26], x0=[0, 1], x1=[30, 51], ref_level=0
+        )
+
+        def product(x, y):
+            return x * (y + 2)
+
+        grid_data_two_comp = [
+            gd.sample_function_from_uniformgrid(product, g) for g in grids
+        ]
+
+        grid_data = gd.sample_function_from_uniformgrid(product, big_grid)
+        hg = gd.HierarchicalGridData(grid_data_two_comp + [grid_data])
+        # When I merge the data I should just get big_grid at the resolution
+        # of self.grid_data_two_comp
+        expected_grid = gd.UniformGrid(
+            [31, 51], x0=[0, 1], x1=[30, 51], ref_level=-1
+        )
+
+        expected_data = gd.sample_function_from_uniformgrid(
+            product, expected_grid
+        )
+        self.assertEqual(hg.merge_refinement_levels(), expected_data)
+
+    def test_coordinates(self):
+
+        hg_coord = gd.HierarchicalGridData(self.grid_data).coordinates()
+        # Test with multiple components
+        hg2_coord = gd.HierarchicalGridData(
+            self.grid_data_two_comp
+        ).coordinates()
+
+        self.assertAlmostEqual(hg_coord[0]((2, 3)), 2)
+        self.assertAlmostEqual(hg2_coord[0]((2, 3)), 2)
+        self.assertAlmostEqual(hg_coord[1]((2, 3)), 3)
+        self.assertAlmostEqual(hg2_coord[1]((2, 3)), 3)
+
+    def test_str(self):
+
+        hg = gd.HierarchicalGridData(self.grid_data_two_comp)
+        expected_str = "Available refinement levels (components):\n"
+        expected_str += "0 (2)\n"
+        expected_str += f"Spacing at coarsest level (0): [1. 1.]\n"
+        expected_str += f"Spacing at finest level (0): [1. 1.]"
+        self.assertEqual(expected_str, hg.__str__())

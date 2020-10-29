@@ -163,6 +163,9 @@ class BaseNumerical(ABC):
     def log(self):
         return self._apply_unary(np.log)
 
+    def log2(self):
+        return self._apply_unary(np.log2)
+
     def log10(self):
         return self._apply_unary(np.log10)
 

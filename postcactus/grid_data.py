@@ -12,6 +12,8 @@ The important classes defined here are
 hierachy.
 """
 
+import itertools
+
 import numpy as np
 from scipy import interpolate
 from scipy import linalg
@@ -75,8 +77,8 @@ class UniformGrid:
         self,
         shape,
         x0,
-        dx=None,
         x1=None,
+        dx=None,
         ref_level=-1,
         component=-1,
         num_ghost=None,
@@ -580,8 +582,8 @@ class UniformGridData(BaseNumerical):
         cls,
         data,
         x0,
-        dx=None,
         x1=None,
+        dx=None,
         ref_level=-1,
         component=-1,
         num_ghost=None,
@@ -613,8 +615,8 @@ class UniformGridData(BaseNumerical):
         geom = UniformGrid(
             data.shape,
             x0,
-            dx,
-            x1,
+            x1=x1,
+            dx=dx,
             ref_level=ref_level,
             component=component,
             num_ghost=num_ghost,
@@ -658,6 +660,11 @@ class UniformGridData(BaseNumerical):
         return self.grid.coordinates(
             as_meshgrid=as_meshgrid, as_same_shape=as_same_shape
         )
+
+    def coordinates_meshgrid(self):
+        """Return coordinates of the grid points as numpy meshgrid.
+        This is useful for plotting"""
+        return self.coordinates_from_grid(as_meshgrid=True)
 
     @property
     def x0(self):
@@ -748,7 +755,7 @@ class UniformGridData(BaseNumerical):
 
         self.invalid_spline = False
 
-    def evaluate_with_spline(self, x, ext=2):
+    def evaluate_with_spline(self, x, ext=2, piecewise_constant=False):
         """Evaluate the spline on the points x.
 
         Values outside the interval are set to 0 if ext=1, or a ValueError is
@@ -777,6 +784,18 @@ class UniformGridData(BaseNumerical):
 
         if self.invalid_spline:
             self._make_spline()
+
+        # To make sure we give what the user asks we temporarly change the
+        # method in the RegularGridInterpolator to 'nearest' (see documentation
+        # in SciPy), if piecewise_constant is True, or 'linear', if it is
+        # False.
+
+        old_method = self.spline_real.method
+        new_method = "nearest" if piecewise_constant else "linear"
+
+        self.spline_real.method = new_method
+        if self.is_complex():
+            self.spline_imag.method = new_method
 
         # ext = 1 is setting to 0. We set fill_value to 0, so this is the
         # default behavior. We change the bounds_error attribute in
@@ -808,13 +827,16 @@ class UniformGridData(BaseNumerical):
             if self.is_complex():
                 self.spline_imag.bounds_error = True
 
-        # When this method is called with a scalar input, at this point, ret
-        # would be a 0d numpy scalar array. What's that? - you may ask. I have
-        # no idea, but the user is expecting a scalar as output. Hence, we cast
-        # the 0d array into at "at_least_1d" array, then we can see its length
-        # and act consequently.
         ret = np.atleast_1d(ret)
-        return ret if len(ret) > 1 else ret[0]
+
+        # Restore the old method
+        self.spline_real.method = old_method
+        if self.is_complex():
+            self.spline_imag.method = old_method
+
+        # Was the input a single point? If yes we return a single value
+        input_one_point = x.shape == (self.num_dimensions,)
+        return ret[0] if input_one_point else ret
 
     def __call__(self, x):
         # TODO: Avoid splines when the data is already available
@@ -847,29 +869,11 @@ class UniformGridData(BaseNumerical):
         if self.grid == new_grid:
             return self.copy()
 
-        # To make sure we give what the user asks we temporarly change the
-        # method in the RegularGridInterpolator to 'nearest' (see documentation
-        # in SciPy), if piecewise_constant is True, or 'linear', if it is
-        # False.
-
-        # To change the method, we first must make sure we have splines.
-        if self.invalid_spline:
-            self._make_spline()
-
-        old_method = self.spline_real.method
-        new_method = "nearest" if piecewise_constant else "linear"
-
-        self.spline_real.method = new_method
-        if self.is_complex():
-            self.spline_imag.method = new_method
-
-        # Restore the old method
-        self.spline_real.method = old_method
-        if self.is_complex():
-            self.spline_imag.method = old_method
-
         return type(self)(
-            new_grid, self.evaluate_with_spline(new_grid, ext=ext)
+            new_grid,
+            self.evaluate_with_spline(
+                new_grid, ext=ext, piecewise_constant=piecewise_constant
+            ),
         )
 
     def is_complex(self):
@@ -880,6 +884,10 @@ class UniformGridData(BaseNumerical):
 
         """
         return issubclass(self.data.dtype.type, complex)
+
+    @property
+    def dtype(self):
+        return self.data.dtype
 
     def _apply_to_self(self, f, *args, **kwargs):
         """Apply the method f to self, modifying self.
@@ -942,7 +950,7 @@ class UniformGridData(BaseNumerical):
         If piecewise_constant=True, the missing information is obtained with
         from the nearest neighbors.
         """
-        if not hasattr(new_dx, '__len__'):
+        if not hasattr(new_dx, "__len__"):
             raise TypeError(
                 f"dx has to be a list or an array. {new_dx} is not"
             )
@@ -963,7 +971,13 @@ class UniformGridData(BaseNumerical):
                     "Provided dx is not an integer multiple or factor of current dx"
                 )
 
+        # new_dx can have zero entries, for which a shape of 1 should correspond.
+        # There can zero entries, we substitute them with -1, so that we
+        # can identify them as negative numbers
+        new_dx = np.array([dx if dx > 0 else -1 for dx in new_dx])
         new_shape = ((self.x1 - self.x0) / new_dx + 1.5).astype(np.int64)
+        new_shape = np.array([s if s > 0 else 1 for s in new_shape])
+
         new_grid = UniformGrid(
             new_shape,
             x0=self.x0,
@@ -1292,19 +1306,19 @@ def sample_function_from_uniformgrid(function, grid):
     return ret
 
 
-def sample_function(function, x0, x1, shape, *args, **kwargs):
+def sample_function(function, shape, x0, x1, *args, **kwargs):
     """Create a regular dataset by sampling a scalar function of the form
     f(x, y, z, ...) on a grid.
 
     :param function:  The function to sample.
     :type function:   A callable that takes as many arguments as the number
                       of dimensions (in shape).
+    :param shape: Number of sample points in each dimension.
+    :type shape:  1d numpy array or list of int
     :param x0:    Minimum corner of regular sample grid.
     :type x0:     1d numpy array or list of float
     :param x0:    Maximum corner of regular sample grid.
     :type x0:     1d numpy array or list of float
-    :param shape: Number of sample points in each dimension.
-    :type shape:  1d numpy array or list of int
     :returns:     Sampled data.
     :rtype:       :py:class:`~.UniformGridData`
 
@@ -1321,10 +1335,7 @@ class HierarchicalGridData(BaseNumerical):
     spacing. All the components are merged together, so there is one
     UniformGridData per refinement level.
 
-    Important: ghost zone information is discarded!
-    Important: If there overlapping patches, no sanity check is performed
-
-    TODO: Add more robust tests here!
+    Important: ghost zone information may be discarded!
 
     Basic arithmetic operations are defined for this class, as well as
     interpolation and resampling. This class can be iterated over to get all
@@ -1398,8 +1409,8 @@ class HierarchicalGridData(BaseNumerical):
         return UniformGridData(grid, data), indices_used
 
     def _try_merge_components(self, components):
-        """Try to merge a list of UniformGridData instances into one, assuming
-        they all have the same grid spacing and filling a regular grid completely.
+        """Try to merge a list of UniformGridData instances into one, assuming they all
+        have the same grid spacing and filling a regular grid completely.
 
         If the assumption is not verified, and some blank spaces are found, then
         it returns the input untouched. This is because there are real cases in
@@ -1492,6 +1503,10 @@ class HierarchicalGridData(BaseNumerical):
         return self.refinement_levels[0]
 
     @property
+    def dtype(self):
+        return (next(iter(self)))[2].dtype
+
+    @property
     def x0(self):
         if isinstance(self[0], list):
             raise ValueError("Data does not have a well defined x0")
@@ -1505,7 +1520,13 @@ class HierarchicalGridData(BaseNumerical):
 
     def dx_at_level(self, level):
         """Return the grid spacing at the specified refinement level"""
-        return self[level].dx
+        # If we have many components self[level] is a list, so we extract the
+        # dx from the first element. Otherwise, it is just a UniformGridData.
+        return (
+            self[level].dx
+            if not hasattr(self[level], "__len__")
+            else self[level][0].dx
+        )
 
     @property
     def coarsest_dx(self):
@@ -1519,17 +1540,37 @@ class HierarchicalGridData(BaseNumerical):
 
     @property
     def num_dimensions(self):
-        # next(iter(self)) returns either the first level, or the first component of
-        # the first level. This is general way that works for both cases.
-        # The return value is ref_level, component, data, so we take the second index.
+        # next(iter(self)) returns either the first level, or the first
+        # component of the first level. This is general way that works for both
+        # cases. The return value is ref_level, component, data, so we take the
+        # second index.
         return next(iter(self))[2].num_dimensions
 
     @property
     def num_extended_dimensions(self):
         # next(self) returns either the first level, or the first component of
-        # the first level. This is general way that works for both cases.
-        # The return value is ref_level, component, data, so we take the second index.
+        # the first level. This is general way that works for both cases. The
+        # return value is ref_level, component, data, so we take the second
+        # index.
         return next(iter(self))[2].num_extended_dimensions
+
+    @property
+    def time(self):
+        """The time of the coarsest refinement level"""
+        # next(self) returns either the first level, or the first component of
+        # the first level. This is general way that works for both cases. The
+        # return value is ref_level, component, data, so we take the second
+        # index.
+        return next(iter(self))[2].time
+
+    @property
+    def iteration(self):
+        """The iteration of the coarsest refinement level"""
+        # next(self) returns either the first level, or the first component of
+        # the first level. This is general way that works for both cases. The
+        # return value is ref_level, component, data, so we take the second
+        # index.
+        return next(iter(self))[2].time
 
     def copy(self):
         """Return a deep copy.
@@ -1577,7 +1618,7 @@ class HierarchicalGridData(BaseNumerical):
         if len(coordinate) != self.num_dimensions:
             raise ValueError(
                 f"The input point has dimension {len(coordinate)}"
-                " but the data has dimension {self.num_dimensions}"
+                f" but the data has dimension {self.num_dimensions}"
             )
         in_ref_level = [
             (ref_level, comp)
@@ -1593,7 +1634,7 @@ class HierarchicalGridData(BaseNumerical):
 
         return finest_level_comp
 
-    def _evaluate_at_point(self, point):
+    def _evaluate_at_one_point(self, point, ext=2, piecewise_constant=False):
 
         level_comp = self.finest_level_component_at_point(np.array(point))
 
@@ -1602,25 +1643,86 @@ class HierarchicalGridData(BaseNumerical):
 
         # We have only one component
         if not hasattr(level_comp, "__len__"):
-            return self[level_comp](point)
+            return self[level_comp].evaluate_with_spline(point, ext=ext)
 
         # We have multiple components
         level, comp = level_comp
 
-        return self[level][comp](point)
+        return self[level][comp].evaluate_with_spline(point, ext=ext)
 
-    def __call__(self, points):
+    def evaluate_with_spline(self, x, ext=2, piecewise_constant=False):
+        """Evaluate the spline on the points x.
+
+        Values outside the interval are set to 0 if ext=1, or a ValueError is
+        raised if ext=2.
+
+        This method is meant to be used only if you want to use a different ext
+        for a specific call, otherwise, just use __call__.
+
+        :param x: Array of x where to evaluate the series or single x
+        :type x: 1D numpy array of float, or UniformGrid
+
+        :param ext: How to deal values outside the bounaries. Values outside
+                    the interval are set to 0 if ext=1,
+                    or an error is raised if ext=2.
+        :type ext:  bool
+
+        :returns: Values of the series evaluated on the input x
+        :rtype:   1D numpy array or float
+
+        """
+
+        if isinstance(x, UniformGrid):
+            # The way we want the coordinates is like as an array with the same
+            # shape of the grid and with values the coordines (as arrays). This
+            # is similar to as_same_shape, but the coordinates have to be the
+            # value, and not the first index.
+            x = np.moveaxis(x.coordinates(as_same_shape=True), 0, -1)
+
         # If we consider the case that points is a single point
-        points_arr = np.array(points)
+        points_arr = np.array(x)
+
         # We check that points has exactly the dimensions of the
         # data
         if points_arr.shape == (self.num_dimensions,):
-            return self._evaluate_at_point(points)
+            return self._evaluate_at_one_point(
+                points_arr, ext=ext, piecewise_constant=piecewise_constant
+            )
 
         # TODO: Vectorize this
 
-        ret = np.atleast_1d([self._evaluate_at_point(x) for x in points])
-        return ret if len(ret) > 1 else ret[0]
+        # To make sure that the return shape is the same as the input one
+        # (important for uniformgriddata), we prepare a return array filled
+        # with zeros and we overwrite each element calling
+        # self._evaluate_at_point. We use itertools.product to loop over
+        # aribtary number of dimensions to get the multi-index. This is not an
+        # elegant solution.
+        ret = np.zeros(points_arr.shape[:-1], dtype=self.dtype)
+        for multi_index in itertools.product(
+            *(range(num_points) for num_points in ret.shape)
+        ):
+            ret[multi_index] = self._evaluate_at_one_point(
+                points_arr[multi_index],
+                ext=ext,
+                piecewise_constant=piecewise_constant,
+            )
+
+        # Was the input a single point? If yes we return a single value
+        input_one_point = points_arr.shape == (self.num_dimensions,)
+        return ret[0] if input_one_point else ret
+
+    def __call__(self, x):
+        return self.evaluate_with_spline(x)
+
+    def to_UniformGridData(self, grid, resample=False):
+        """Combine the refinement levels into a UniformGridData.
+
+        Optionally resample the data with a multilinear resampling.
+        """
+        return UniformGridData(
+            grid,
+            self.evaluate_with_spline(grid, piecewise_constant=(not resample)),
+        )
 
     def merge_refinement_levels(self, resample=False):
         """Combine all the available data and resample it on a provided
@@ -1629,9 +1731,24 @@ class HierarchicalGridData(BaseNumerical):
         Optionally data from coarser refinement levels is resampled too (with a
         multilinear resampling)
 
-        Ghost zone information is discarded.
+        This can be a very expensive operation!
 
         """
+        # finest_dx can have zero entries, for which a shape of 1 should
+        # correspond. There can zero entries, we substitute them with -1, so
+        # that we can identify them as negative numbers
+        new_dx = np.array([dx if dx > 0 else -1 for dx in self.finest_dx])
+        new_shape = ((self.x1 - self.x0) / new_dx + 1.5).astype(np.int64)
+        new_shape = np.array([s if s > 0 else 1 for s in new_shape])
+
+        new_grid = UniformGrid(
+            new_shape,
+            x0=self.x0,
+            x1=self.x1,
+            time=self.time,
+            iteration=self.iteration,
+        )
+        return self.to_UniformGridData(new_grid, resample=resample)
 
     def _apply_binary(self, other, function):
         """Apply a binary function to the data.
@@ -1645,7 +1762,7 @@ class HierarchicalGridData(BaseNumerical):
 
         """
         # We only know what how to h
-        if isinstance(other, (type(self), int, float, complex)):
+        if isinstance(other, type(self)):
             if self.refinement_levels != other.refinement_levels:
                 raise ValueError("Refinement levels incompatible")
             new_data = [
@@ -1653,6 +1770,13 @@ class HierarchicalGridData(BaseNumerical):
                 for (_, _, data_self), (_, _, data_other) in zip(self, other)
             ]
             return type(self)(new_data)
+
+        if isinstance(other, (int, float, complex)):
+            new_data = [
+                function(data_self, other) for (_, _, data_self) in self
+            ]
+            return type(self)(new_data)
+
         # If we are here, it is because we cannot add the two objects
         raise TypeError("I don't know how to combine these objects")
 
@@ -1679,17 +1803,29 @@ class HierarchicalGridData(BaseNumerical):
         new_data = [function(data) for _, _, data in self]
         return type(self)(new_data)
 
-    # def coordinates(self):
-    #     """Return coordiantes a list of HierarchicalGridData.
+    def coordinates(self):
+        """Return coordiantes a list of HierarchicalGridData.
 
-    #     Useful for computations involving coordinates.
-    #     """
-    #     return [
-    #         type(self)(
-    #             [
-    #                 self[level].coordinates()[dim]
-    #                 for level in self.refinement_levels
-    #             ]
-    #         )
-    #         for dim in range(self.num_dimensions)
-    #     ]
+        Useful for computations involving coordinates.
+
+        :rtype: list of :py:class:`~.HierarchicalGridData`
+        """
+        return [
+            type(self)([data.coordinates()[dim] for _, _, data in self])
+            for dim in range(self.num_dimensions)
+        ]
+
+    def __str__(self):
+        ret = "Available refinement levels (components):\n"
+        for ref_level in self.refinement_levels:
+            comp = (
+                len(self[ref_level])
+                if hasattr(self[ref_level], "__len__")
+                else 1
+            )
+            ret += f"{ref_level} ({comp})\n"
+        ret += f"Spacing at coarsest level ({self.coarsest_level}): {self.coarsest_dx}\n"
+        ret += (
+            f"Spacing at finest level ({self.finest_level}): {self.finest_dx}"
+        )
+        return ret
