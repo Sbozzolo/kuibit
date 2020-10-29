@@ -5,4 +5,4 @@ Einstein Toolkit.
 
 """
 
-__version__ = "3.0.0a5"
+__version__ = "3.0.0a6"

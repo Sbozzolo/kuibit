@@ -22,7 +22,7 @@ copyright = '2020, Gabriele Bozzola and Wolfgang Kastaun'
 author = 'Gabriele Bozzola and Wolfgang Kastaun'
 
 # The full version, including alpha/beta/rc tags
-release = '3.0.0a4'
+release = '3.0.0a6'
 
 
 # -- General configuration ---------------------------------------------------
