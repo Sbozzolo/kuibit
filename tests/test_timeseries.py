@@ -398,6 +398,7 @@ class TestTimeseries(unittest.TestCase):
             np.sqrt,
             np.exp,
             np.log,
+            np.log2,
             np.log10,
             np.conj,
             np.conjugate,
@@ -587,6 +588,10 @@ class TestTimeseries(unittest.TestCase):
         self.assertTrue(np.allclose(self.TS(other_times), other_values))
 
         self.assertTrue(np.allclose(self.TS(np.pi / 2), 1))
+
+        # Vector input in, vector input out
+        self.assertTrue(isinstance(self.TS([np.pi / 2]), np.ndarray))
+
         self.assertTrue(np.allclose(self.TS(self.TS.t[0]), self.TS.y[0]))
 
         # From data

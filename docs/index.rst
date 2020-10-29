@@ -14,7 +14,7 @@ Features
 Features currently implemented:
 
 - Read and organize simulation data (:py:mod:`~.simdir`). Checkpoints and
-  restarts are handled transparantely.
+  restarts are handled transparently.
 - Work with scalar data as produced by ``CarpetASCII``
   (:py:mod:`~.cactus_scalars`).
 - Analyze the multipololar decompositions output by ``Multipoles``
@@ -82,8 +82,8 @@ Examples
 
    examples/simdir.ipynb
    examples/timeseries.ipynb
+   examples/grid_data.ipynb
    examples/gravitational_waves.ipynb
-
 
 Reference material (classes, functions, ...)
 ---------------------------------------------

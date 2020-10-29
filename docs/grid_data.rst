@@ -218,4 +218,26 @@ represent the different patches. In this case, it is not convenient to work
 directly with the different :py:class:`~.UniformGridData`.
 
 As for :py:class:`~.UniformGridData`, :py:class:`~.HierarchicalGridData` are
-callable and splines are used to interpolate to the requested points.
+callable and splines are used to interpolate to the requested points. This
+operation can be expensive, especially for 3D grids with many points.
+
+Using splines, we can also combine the various refinement levels to obtain a
+:py:class:`~.UniformGridData`. This is often handy when plotting. The method
+:py:meth:`~.merge_refinement_levels` does exactly that. By default,
+:py:meth:`~.merge_refinement_levels` does not resample the data, but simply uses
+the values on the grid. If the argument ``resample`` is set to ``True``, the
+data is resampled with a multilinear interpolation. One can also specify what
+grid (as :py:class:`~.UniformGridData`) to merge the data on by calling the
+method :py:meth:`~.to_UniformGridData`. This is especially useful when
+resampling on smaller grids, because it drastically reduces the computation
+time.
+
+.. warning::
+
+   Operations that involve resampling can be very expensive and require a lot
+   of memory!
+
+Another useful method is the :py:meth:`~.coordinates`, which returns a list of
+:py:class:`~.HierarchicalGridData` with the same structure as the one in
+consideration but with values the various coordinates at the points. This is
+useful for computations that involve the coordinates.
