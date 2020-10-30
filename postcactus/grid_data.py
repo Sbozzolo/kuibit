@@ -1245,7 +1245,8 @@ class UniformGridData(BaseNumerical):
         for _num_deriv in range(order):
 
             ret_value = np.gradient(
-                ret_value, self.dx[direction], axis=direction
+                ret_value, self.dx[direction], axis=direction,
+                edge_order=2
             )
         return type(self)(self.grid, ret_value)
 

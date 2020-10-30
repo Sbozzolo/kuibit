@@ -468,7 +468,7 @@ class TestUniformGridData(unittest.TestCase):
 
     def test_partial_derive(self):
 
-        geom = gd.UniformGrid([4001, 3], x0=[0, 0], x1=[2 * np.pi, 1])
+        geom = gd.UniformGrid([8001, 3], x0=[0, 0], x1=[2 * np.pi, 1])
 
         sin_wave = gd.sample_function_from_uniformgrid(
             lambda x, y: np.sin(x), geom
@@ -1378,10 +1378,10 @@ class TestHierarchicalGridData(unittest.TestCase):
         # Here we are also testing _call_component_method
 
         geom = gd.UniformGrid(
-            [4001, 3], x0=[0, 0], x1=[2 * np.pi, 1], ref_level=0
+            [8001, 3], x0=[0, 0], x1=[2 * np.pi, 1], ref_level=0
         )
         geom2 = gd.UniformGrid(
-            [8001, 3], x0=[0, 0], x1=[2 * np.pi, 1], ref_level=1
+            [10001, 3], x0=[0, 0], x1=[2 * np.pi, 1], ref_level=1
         )
 
         sin_wave1 = gd.sample_function_from_uniformgrid(

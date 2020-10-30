@@ -167,9 +167,10 @@ Some basic useful functions are :py:meth:`~.mean`, :py:meth:`~.integral`,
 with :math:`\Delta v` being the volume of a cell.
 
 :py:class:`~.UniformGridData` can be derived along a direction with
-:py:meth:`~.derived`, or the gradient can be calculated with
-:py:meth:`~.gradient`. In both cases, the order of the derivative can be
-specified. The derivative are numerical with finite difference.
+:py:meth:`~.derived`, or the gradient can be calculated with meth:`~.gradient`.
+In both cases, the order of the derivative can be specified. The derivative
+are numerical with finite difference. Derivative are second order accurate
+everywhere.
 
 A convenient function is :py:meth:`~.sample_function`. This takes a multivariate
 function (e.g., :math:`sin(x + y)`) and returns a :py:class:`~.UniformGridData`
