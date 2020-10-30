@@ -86,6 +86,8 @@ for plotting. When ``as_same_shape=True`` the return value is a list of
 coordinates with the same shape of the grid itself, each element of this list is
 the value of that coordinate over the grid. This last one is the most useful way
 to do computations that involve the coordinates.
+You can obtained the coordinate as a list of coordinates along each direction
+also with the method :py:meth:`~.coordinates_1d`.
 
 To obtain a coordinate from a multidimensional index, just use the bracket
 operator (``box[i, j]``).

@@ -180,6 +180,10 @@ class TestUniformGrid(unittest.TestCase):
         x = np.linspace(1, 11, 11)
         y = np.linspace(2, 9, 15)
 
+        # Test coordinates_1d
+        self.assertTrue(np.allclose(geom4.coordinates_1d[0], x))
+        self.assertTrue(np.allclose(geom4.coordinates_1d[1], y))
+
         c0 = geom4.coordinates(as_meshgrid=True)
 
         X, Y = np.meshgrid(x, y)
