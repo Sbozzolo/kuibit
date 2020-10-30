@@ -232,6 +232,9 @@ directly with the different :py:class:`~.UniformGridData`.
 As for :py:class:`~.UniformGridData`, :py:class:`~.HierarchicalGridData` are
 callable and splines are used to interpolate to the requested points. This
 operation can be expensive, especially for 3D grids with many points.
+The way calling works is the following: we find the finest
+refinement level that contains the requested point, and we use the multilinear
+interpolation on that level (and component, if there are multiple components).
 
 Using splines, we can also combine the various refinement levels to obtain a
 :py:class:`~.UniformGridData`. This is often handy when plotting. The method
