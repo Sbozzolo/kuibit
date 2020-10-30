@@ -104,6 +104,12 @@ You return a new :py:class:`~.UniformGrid` with coordinates shifted with
 You can also print a :py:class:`~.UniformGrid` object to have a full overview
 of the properties of the grid.
 
+The functions :py:meth:`~.coordinates_to_indices` and
+:py:meth:`~.indices_to_coordiantes` can be used to convert from indices to
+coordinates for the considered grid. You can pass single points, or collection
+of points. If you provide coordinates, the returned indices will be those of the
+closest grid points.
+
 UniformGridData
 ---------------
 
