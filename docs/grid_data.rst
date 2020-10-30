@@ -163,7 +163,7 @@ with :math:`\Delta v` being the volume of a cell.
 :py:class:`~.UniformGridData` can be derived along a direction with
 :py:meth:`~.derived`, or the gradient can be calculated with
 :py:meth:`~.gradient`. In both cases, the order of the derivative can be
-:py:specified. The derivative are numerical with finite difference.
+specified. The derivative are numerical with finite difference.
 
 A convenient function is :py:meth:`~.sample_function`. This takes a multivariate
 function (e.g., :math:`sin(x + y)`) and returns a :py:class:`~.UniformGridData`
@@ -246,3 +246,11 @@ Another useful method is the :py:meth:`~.coordinates`, which returns a list of
 :py:class:`~.HierarchicalGridData` with the same structure as the one in
 consideration but with values the various coordinates at the points. This is
 useful for computations that involve the coordinates.
+
+As it is the case for :py:class:`~.UniformGridData`, also
+:py:class:`~.HierarchicalGridData` can be derived along a direction with
+:py:meth:`~.derived`, or the gradient can be calculated with
+:py:meth:`~.gradient`. In both cases, the order of the derivative can be
+specified. The derivative are numerical with finite difference. The result is
+a :py:class:`~.HierarchicalGridData` or a list of :py:class:`~.HierarchicalGridData`
+(for each direction).
