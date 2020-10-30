@@ -1062,6 +1062,9 @@ class TestHierarchicalGridData(unittest.TestCase):
             hg.grid_data, [self.expected_data, self.expected_data_level2]
         )
 
+        # first component
+        self.assertEqual(hg.first_component, hg[0])
+
         # finest level
         self.assertEqual(hg.finest_level, 2)
 
@@ -1351,3 +1354,52 @@ class TestHierarchicalGridData(unittest.TestCase):
         expected_str += "Spacing at coarsest level (0): [1. 1.]\n"
         expected_str += "Spacing at finest level (0): [1. 1.]"
         self.assertEqual(expected_str, hg.__str__())
+
+    def test_partial_derivated(self):
+        # Here we are also testing _call_component_method
+
+        geom = gd.UniformGrid(
+            [4001, 3], x0=[0, 0], x1=[2 * np.pi, 1], ref_level=0
+        )
+        geom2 = gd.UniformGrid(
+            [8001, 3], x0=[0, 0], x1=[2 * np.pi, 1], ref_level=1
+        )
+
+        sin_wave1 = gd.sample_function_from_uniformgrid(
+            lambda x, y: np.sin(x), geom
+        )
+        sin_wave2 = gd.sample_function_from_uniformgrid(
+            lambda x, y: np.sin(x), geom2
+        )
+        original_sin1 = sin_wave1.copy()
+        original_sin2 = sin_wave2.copy()
+
+        sin_wave = gd.HierarchicalGridData([sin_wave1] + [sin_wave2])
+        sin_copy = sin_wave.copy()
+
+        # Second derivative should still be a -sin
+        sin_wave.partial_derive(0, order=2)
+
+        self.assertTrue(
+            np.allclose(-sin_wave[0].data, original_sin1.data, atol=1e-3)
+        )
+        self.assertTrue(
+            np.allclose(-sin_wave[1].data, original_sin2.data, atol=1e-3)
+        )
+
+        # Test _call_component_method with non-string name
+        with self.assertRaises(TypeError):
+            sin_wave._call_component_method(sin_wave)
+
+        # Test _call_component_method with non existing method
+        with self.assertRaises(ValueError):
+            sin_wave._call_component_method("lol")
+
+        gradient = sin_copy.gradient(order=2)
+
+        self.assertTrue(
+            np.allclose(-gradient[0][0].data, original_sin1.data, atol=1e-3)
+        )
+        self.assertTrue(
+            np.allclose(-gradient[0][1].data, original_sin2.data, atol=1e-3)
+        )

@@ -1588,8 +1588,16 @@ class HierarchicalGridData(BaseNumerical):
         return self.refinement_levels[0]
 
     @property
+    def first_component(self):
+        # next(iter(self)) returns either the first level, or the first
+        # component of the first level. This is general way that works for both
+        # cases. The return value is ref_level, component, data, so we take the
+        # second index.
+        return (next(iter(self)))[2]
+
+    @property
     def dtype(self):
-        return (next(iter(self)))[2].dtype
+        return self.first_component.dtype
 
     @property
     def x0(self):
@@ -1625,37 +1633,21 @@ class HierarchicalGridData(BaseNumerical):
 
     @property
     def num_dimensions(self):
-        # next(iter(self)) returns either the first level, or the first
-        # component of the first level. This is general way that works for both
-        # cases. The return value is ref_level, component, data, so we take the
-        # second index.
-        return next(iter(self))[2].num_dimensions
+        return self.first_component.num_dimensions
 
     @property
     def num_extended_dimensions(self):
-        # next(self) returns either the first level, or the first component of
-        # the first level. This is general way that works for both cases. The
-        # return value is ref_level, component, data, so we take the second
-        # index.
-        return next(iter(self))[2].num_extended_dimensions
+        return self.first_component.num_extended_dimensions
 
     @property
     def time(self):
         """The time of the coarsest refinement level"""
-        # next(self) returns either the first level, or the first component of
-        # the first level. This is general way that works for both cases. The
-        # return value is ref_level, component, data, so we take the second
-        # index.
-        return next(iter(self))[2].time
+        return self.first_component.time
 
     @property
     def iteration(self):
         """The iteration of the coarsest refinement level"""
-        # next(self) returns either the first level, or the first component of
-        # the first level. This is general way that works for both cases. The
-        # return value is ref_level, component, data, so we take the second
-        # index.
-        return next(iter(self))[2].time
+        return self.first_component.time
 
     def copy(self):
         """Return a deep copy.
@@ -1835,6 +1827,18 @@ class HierarchicalGridData(BaseNumerical):
         )
         return self.to_UniformGridData(new_grid, resample=resample)
 
+    def _apply_to_self(self, f, *args, **kwargs):
+        """Apply the method f to self, modifying self.
+        This is used to transform the commands from returning an object
+        to modifying self.
+        The function has to return a new copy of the object (not a reference).
+        """
+        ret = f(*args, **kwargs)
+        self.components, self.grid_data_dict = (
+            ret.components,
+            ret.grid_data_dict,
+        )
+
     def _apply_binary(self, other, function):
         """Apply a binary function to the data.
 
@@ -1888,6 +1892,122 @@ class HierarchicalGridData(BaseNumerical):
         new_data = [function(data) for _, _, data in self]
         return type(self)(new_data)
 
+    def _call_component_method(
+        self, method_name, *args, method_returns_list=False, **kwargs
+    ):
+        """Call a method on each UniformGridData component and return
+        the result as a HierarchicalGridDatax
+
+        :param method_name: a string that identifies one of the methods in
+        :py:class:`~.UniformGridData`
+
+        :param method_returns_list: If True, the method is expected to return a
+        list, one UniformGridData per dimension (e.g, gradient, coordiantes)
+        :type method_returns_list: bool
+
+        :return: New HierarchicalGridData with function applied to the data
+        :rtype: :py:class:`~.HierarchicalGridData`
+
+        """
+        if not isinstance(method_name, str):
+            raise TypeError(
+                f"method_name has to be a string (but it is {method_name})"
+            )
+
+        if not hasattr(self.first_component, method_name):
+            raise ValueError(
+                f"UniformGridData does not have a method with name {method_name}"
+            )
+
+        # Here we get the method as a function with getattr(data, method_name),
+        # then we apply this function with arguments *args and **kwargs
+        new_data = [
+            getattr(data, method_name)(*args, **kwargs) for _, _, data in self
+        ]
+        # There are two possibilities: new data is a list of UniformGridData
+        # (when method_returns_list is False), alternatively it is a list of
+        # lists of UniformGridData
+
+        # First, the case in which the method returns a UniformGridData (and not
+        # a list of UniformGridData)
+        if not method_returns_list:
+            return type(self)(new_data)
+
+        # Second, we have a list of UniformGridData
+        return [
+            type(self)([data[dim] for data in new_data])
+            for dim in range(self.num_dimensions)
+        ]
+
+    def partial_derivated(self, direction, order=1):
+        """Return a HierarchicalGridData that is the numerical order-differentiation of
+        the present grid_data along a given direction. (order = number of
+        derivatives, ie order=2 is second derivative)
+
+        The derivative is calulated as centered differencing in the interior
+        and one-sided derivatives at the boundaries. Higher orders are computed
+        applying the same rule recursively.
+
+        The output has the same shape of self.
+
+        :param order: Order of derivative (e.g. 2 = second derivative)
+        :type order: int
+        :param direction: Direction of the partial derivative
+        :type direction: int
+
+        :returns:  New HierarchicalGridData with derivative
+        :rtype:    :py:class:`~.HierarchicalGridData`
+
+        """
+        return self._call_component_method(
+            "partial_derived", direction, order=order
+        )
+
+    def gradient(self, order=1):
+        """Return a list HierarchicalGridData that are the numerical
+        order-differentiation of the present grid_data along all the
+        directions. (order = number of derivatives, ie order=2 is second
+        derivative)
+
+        The derivative is calulated as centered differencing in the interior
+        and one-sided derivatives at the boundaries. Higher orders are computed
+        applying the same rule recursively.
+
+        The output has the same shape of self.
+
+        :param order: Order of derivative (e.g. 2 = second derivative)
+        :type order: int
+        :param direction: Direction of the partial derivative
+        :type direction: int
+
+        :returns:  list of HierarchicalGridData with partial derivative along
+        the directions
+        :rtype:    list of :py:class:`~.HierarchicalGridData`
+
+        """
+        return self._call_component_method(
+            "gradient", method_returns_list=True, order=order
+        )
+
+    def partial_derive(self, direction, order=1):
+        """Apply a numerical differentiatin along the specified direction.
+
+        The derivative is calulated as centered differencing in the interior
+        and one-sided derivatives at the boundaries. Higher orders are computed
+        applying the same rule recursively.
+
+        The output has the same shape of self.
+
+        :param order: Order of derivative (e.g. 2 = second derivative)
+        :type order: int
+        :param direction: Direction of the partial derivative
+        :type direction: int
+
+        """
+        return self._apply_to_self(
+            self.partial_derivated, direction, order=order
+        )
+
     def coordinates(self):
         """Return coordiantes a list of HierarchicalGridData.
 
@@ -1895,10 +2015,9 @@ class HierarchicalGridData(BaseNumerical):
 
         :rtype: list of :py:class:`~.HierarchicalGridData`
         """
-        return [
-            type(self)([data.coordinates()[dim] for _, _, data in self])
-            for dim in range(self.num_dimensions)
-        ]
+        return self._call_component_method(
+            "coordinates", method_returns_list=True
+        )
 
     def __str__(self):
         ret = "Available refinement levels (components):\n"
@@ -1909,7 +2028,8 @@ class HierarchicalGridData(BaseNumerical):
                 else 1
             )
             ret += f"{ref_level} ({comp})\n"
-        ret += f"Spacing at coarsest level ({self.coarsest_level}): {self.coarsest_dx}\n"
+        ret += f"Spacing at coarsest level ({self.coarsest_level}): "
+        ret += f"{self.coarsest_dx}\n"
         ret += (
             f"Spacing at finest level ({self.finest_level}): {self.finest_dx}"
         )
