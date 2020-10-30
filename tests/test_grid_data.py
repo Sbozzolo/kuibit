@@ -652,6 +652,13 @@ class TestUniformGridData(unittest.TestCase):
             (1 + 1j) * np.sin(np.pi / 3),
         )
 
+        # Test on a point of the grid
+        point = [sin_data.grid.coordinates_1d[0][2]]
+        self.assertAlmostEqual(
+            sin_data_complex(point),
+            (1 + 1j) * np.sin(point[0]),
+        )
+
         # Vector input
         self.assertTrue(
             np.allclose(

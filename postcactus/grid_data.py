@@ -819,6 +819,26 @@ class UniformGridData(BaseNumerical):
         # ext = 0 is extrapolation and ext = 3 is setting the boundary
         # value. We cannot do this with RegularGridInterpolator
 
+        # Check if we have the point on the grid, in that case return the
+        # value. At the moment, we do this only if x is one single point.
+        #
+        # Not a UniformGrid and only a single point
+        if not isinstance(x, UniformGrid) and np.array(x).shape == (
+            self.num_dimensions,
+        ):
+            # Either we have the point exactly, on the grid, or we
+            # are called with piecewise_constant=True
+            if piecewise_constant or all(  # On each dimension, we
+                [  # have it on the grid.
+                    x[dim] in self.grid.coordinates_1d[dim]
+                    for dim in range(self.num_dimensions)
+                ]
+            ):
+                return self.data[tuple(self.grid.coordinates_to_indices(x))]
+
+        # TODO: We can do better than this. If piecewise_constant is True
+        #       we can avoid using splines. We only have to handle the ext.
+
         if ext not in (1, 2):
             raise ValueError("Only ext=1 or ext=2 are available")
 
@@ -1784,12 +1804,16 @@ class HierarchicalGridData(BaseNumerical):
 
         # We have only one component
         if not hasattr(level_comp, "__len__"):
-            return self[level_comp].evaluate_with_spline(point, ext=ext)
+            return self[level_comp].evaluate_with_spline(
+                point, ext=ext, piecewise_constant=piecewise_constant
+            )
 
         # We have multiple components
         level, comp = level_comp
 
-        return self[level][comp].evaluate_with_spline(point, ext=ext)
+        return self[level][comp].evaluate_with_spline(
+            point, ext=ext, piecewise_constant=piecewise_constant
+        )
 
     def evaluate_with_spline(self, x, ext=2, piecewise_constant=False):
         """Evaluate the spline on the points x.
