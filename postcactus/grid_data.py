@@ -1245,8 +1245,7 @@ class UniformGridData(BaseNumerical):
         for _num_deriv in range(order):
 
             ret_value = np.gradient(
-                ret_value, self.dx[direction], axis=direction,
-                edge_order=2
+                ret_value, self.dx[direction], axis=direction, edge_order=2
             )
         return type(self)(self.grid, ret_value)
 
@@ -1572,6 +1571,8 @@ class HierarchicalGridData(BaseNumerical):
         This can yield a UniformGridData or a list of UniformGridData when it
         is not possible to merge the grids.
 
+        From the coarsest to the finest.
+
         Use this when you know that the data you are working with have single
         grids or grids that can be merged.
 
@@ -1579,8 +1580,29 @@ class HierarchicalGridData(BaseNumerical):
         for data in self.grid_data:
             yield data
 
+    def iter_from_finest(self):
+        """Supports iterating over the regular elements, sorted by refinement level.
+        This can yield a UniformGridData or a list of UniformGridData when it
+        is not possible to merge the grids.
+
+        From the finest to the coarsest.
+
+        Use this when you know that the data you are working with have single
+        grids or grids that can be merged.
+
+        """
+        for ref_level, data in reversed(list(self.grid_data_dict.items())):
+            # This is just one component
+            if not isinstance(data, list):
+                yield ref_level, -1, data
+            else:
+                # Multiple components
+                for comp_index, comp in enumerate(data):
+                    yield ref_level, comp_index, comp
+
     def __iter__(self):
-        """Iterate across all the refinement levels and components."""
+        """Iterate across all the refinement levels and components from the coarsest
+        to the finest."""
         for ref_level, data in self.grid_data_dict.items():
             # This is just one component
             if not isinstance(data, list):
@@ -1711,8 +1733,9 @@ class HierarchicalGridData(BaseNumerical):
         :param coordiante: point
         :type coordinate: tuple or numpy array with the same dimension
 
-        :returns: Most refined levelt that contains the coordinate.
-        :rtype: int
+        :returns: Most refined level (and component) that contains the coordinate.
+        :rtype: int if there's only one component, or tuple of ints if there are
+        multiple components.
 
         """
         if not hasattr(coordinate, "__len__"):
@@ -1723,19 +1746,20 @@ class HierarchicalGridData(BaseNumerical):
                 f"The input point has dimension {len(coordinate)}"
                 f" but the data has dimension {self.num_dimensions}"
             )
-        in_ref_level = [
-            (ref_level, comp)
-            for ref_level, comp, grid_data in self
-            if coordinate in grid_data.grid
-        ]
-        if len(in_ref_level) == 0:
-            raise ValueError(f"{coordinate} outside the grid")
+        # We walk from the finest level to the coarsest. If we find the point,
+        # re return it. If we find nothing, we raise error.
 
-        finest_level_comp = max(in_ref_level)
-        if finest_level_comp[1] == -1:
-            return finest_level_comp[0]
+        for ref_level, comp, grid_data in self.iter_from_finest():
+            if coordinate in grid_data.grid:
+                # This is the case in which we only have one component, so
+                # we want to return the ref_level only
+                if comp == -1:
+                    return ref_level
+                # This is the case in which we only have multiple components,
+                # so we want to return the ref_level and the component
+                return ref_level, comp
 
-        return finest_level_comp
+        raise ValueError(f"{coordinate} outside the grid")
 
     def _evaluate_at_one_point(self, point, ext=2, piecewise_constant=False):
 

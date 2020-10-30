@@ -1171,6 +1171,30 @@ class TestHierarchicalGridData(unittest.TestCase):
             self.assertTrue(isinstance(data, gd.UniformGridData))
             comp_index += 1
 
+        # Test from finest
+        geom = gd.UniformGrid(
+            [81, 3], x0=[0, 0], x1=[2 * np.pi, 1], ref_level=0
+        )
+        geom2 = gd.UniformGrid(
+            [11, 3], x0=[0, 0], x1=[2 * np.pi, 1], ref_level=1
+        )
+
+        sin_wave1 = gd.sample_function_from_uniformgrid(
+            lambda x, y: np.sin(x), geom
+        )
+        sin_wave2 = gd.sample_function_from_uniformgrid(
+            lambda x, y: np.sin(x), geom2
+        )
+
+        sin_wave = gd.HierarchicalGridData([sin_wave1] + [sin_wave2])
+
+        index = 1
+        for ref_level, comp, data in sin_wave.iter_from_finest():
+            self.assertEqual(ref_level, index)
+            self.assertEqual(comp, -1)
+            self.assertTrue(isinstance(data, gd.UniformGridData))
+            index -= 1
+
     def test__apply_reduction(self):
 
         hg1 = gd.HierarchicalGridData(self.grid_data)
