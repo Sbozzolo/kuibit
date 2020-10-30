@@ -223,6 +223,10 @@ class TestUniformGrid(unittest.TestCase):
 
         self.assertCountEqual(geom4[1, 3], [2, 2.5])
 
+        # Check index outside of the grid
+        with self.assertRaises(ValueError):
+            geom4[[500, 200]]
+
     def test_flat_dimensions_removed(self):
 
         geom = gd.UniformGrid(
