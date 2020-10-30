@@ -447,6 +447,31 @@ class TestUniformGridData(unittest.TestCase):
         # Check invalidation of spline
         self.assertTrue(ug_data.invalid_spline)
 
+    def test_partial_derive(self):
+
+        geom = gd.UniformGrid([4001, 3], x0=[0, 0], x1=[2 * np.pi, 1])
+
+        sin_wave = gd.sample_function_from_uniformgrid(
+            lambda x, y: np.sin(x), geom
+        )
+        original_sin = sin_wave.copy()
+
+        # Error dimension not found
+        with self.assertRaises(ValueError):
+            sin_wave.partial_derived(5)
+
+        # Second derivative should still be a -sin
+        sin_wave.partial_derive(0, order=2)
+
+        self.assertTrue(
+            np.allclose(-sin_wave.data, original_sin.data, atol=1e-3)
+        )
+
+        gradient = original_sin.gradient(order=2)
+        self.assertTrue(
+            np.allclose(-gradient[0].data, original_sin.data, atol=1e-3)
+        )
+
     def test_ghost_zones_remove(self):
 
         geom = gd.UniformGrid(
@@ -1323,6 +1348,6 @@ class TestHierarchicalGridData(unittest.TestCase):
         hg = gd.HierarchicalGridData(self.grid_data_two_comp)
         expected_str = "Available refinement levels (components):\n"
         expected_str += "0 (2)\n"
-        expected_str += f"Spacing at coarsest level (0): [1. 1.]\n"
-        expected_str += f"Spacing at finest level (0): [1. 1.]"
+        expected_str += "Spacing at coarsest level (0): [1. 1.]\n"
+        expected_str += "Spacing at finest level (0): [1. 1.]"
         self.assertEqual(expected_str, hg.__str__())
