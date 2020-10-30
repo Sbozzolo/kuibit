@@ -160,6 +160,11 @@ Some basic useful functions are :py:meth:`~.mean`, :py:meth:`~.integral`,
 
 with :math:`\Delta v` being the volume of a cell.
 
+:py:class:`~.UniformGridData` can be derived along a direction with
+:py:meth:`~.derived`, or the gradient can be calculated with
+:py:meth:`~.gradient`. In both cases, the order of the derivative can be
+:py:specified. The derivative are numerical with finite difference.
+
 A convenient function is :py:meth:`~.sample_function`. This takes a multivariate
 function (e.g., :math:`sin(x + y)`) and returns a :py:class:`~.UniformGridData`
 sampling that function. If you already have the grid structure, you can use

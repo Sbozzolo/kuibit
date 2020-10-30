@@ -70,7 +70,8 @@ class UniformGrid:
             )
         if len(var) != len(self.shape):
             raise ValueError(
-                f"The dimensions of this object are {self.shape.shape}, not {var.shape} in {name}."
+                f"The dimensions of this object are {self.shape.shape}, "
+                f"not {var.shape} in {name}."
             )
 
     def __init__(
@@ -1189,6 +1190,89 @@ class UniformGridData(BaseNumerical):
             return percentiles[0]
         return percentiles
 
+    def partial_derived(self, direction, order=1):
+        """Return a UniformGriDatad that is the numerical order-differentiation of the
+        present grid_data along a given direction. (order = number of
+        derivatives, ie order=2 is second derivative)
+
+        The derivative is calulated as centered differencing in the interior
+        and one-sided derivatives at the boundaries. Higher orders are computed
+        applying the same rule recursively.
+
+        The output has the same shape of self.
+
+        :param order: Order of derivative (e.g. 2 = second derivative)
+        :type order: int
+        :param direction: Direction of the partial derivative
+        :type direction: int
+
+        :returns:  New UniformGridData with derivative
+        :rtype:    :py:class:`~.UniformGridData`
+
+        """
+        if direction < 0 or direction >= self.num_dimensions:
+            raise ValueError(
+                f"Grid has {self.num_dimensions}, dimensions, "
+                f"{direction} is not available"
+            )
+
+        ret_value = self.data.copy()
+        for _num_deriv in range(order):
+
+            ret_value = np.gradient(
+                ret_value, self.dx[direction], axis=direction
+            )
+        return type(self)(self.grid, ret_value)
+
+    def gradient(self, order=1):
+        """Return a list UniformGriDatad that are the numerical
+        order-differentiation of the present grid_data along all the
+        directions. (order = number of derivatives, ie order=2 is second
+        derivative)
+
+        The derivative is calulated as centered differencing in the interior
+        and one-sided derivatives at the boundaries. Higher orders are computed
+        applying the same rule recursively.
+
+        The output has the same shape of self.
+
+        :param order: Order of derivative (e.g. 2 = second derivative)
+        :type order: int
+        :param direction: Direction of the partial derivative
+        :type direction: int
+
+        :returns:  list of UniformGridData with partial derivative along the
+        directions
+        :rtype:    list of :py:class:`~.UniformGridData`
+
+        """
+        return [
+            self.partial_derived(direction, order=order)
+            for direction in range(self.num_dimensions)
+        ]
+
+    def partial_derive(self, dimension, order=1):
+        """Return a UniformGriDatad that is the numerical order-differentiation of the
+        present grid_data along a given direction. (order = number of
+        derivatives, ie order=2 is second derivative)
+
+        The derivative is calulated as centered differencing in the interior
+        and one-sided derivatives at the boundaries. Higher orders are computed
+        applying the same rule recursively.
+
+        The output has the same shape of self.
+
+        :param order: Order of derivative (e.g. 2 = second derivative)
+        :type order: int
+        :param direction: Direction of the partial derivative
+        :type direction: int
+
+        :returns:  New UniformGridData with derivative
+        :rtype:    :py:class:`~.UniformGridData`
+
+        """
+        self._apply_to_self(self.partial_derived, dimension, order=order)
+
     def _apply_unary(self, function):
         """Apply a unary function to the data.
 
@@ -1336,6 +1420,7 @@ class HierarchicalGridData(BaseNumerical):
     UniformGridData per refinement level.
 
     Important: ghost zone information may be discarded!
+    TODO: Do not throw away ghost zones at the outer boundary
 
     Basic arithmetic operations are defined for this class, as well as
     interpolation and resampling. This class can be iterated over to get all
