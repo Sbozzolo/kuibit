@@ -729,28 +729,34 @@ class TestTimeseries(unittest.TestCase):
 
     def test_derive(self):
 
+        times = np.linspace(0, 2 * np.pi, 1000)
+        values = np.sin(times)
+
+        higher_res_TS = ts.TimeSeries(times, values)
+        higher_res_TS_c = ts.TimeSeries(times, values + 1j * values)
+
         self.assertTrue(
-            np.allclose(self.TS.derived().y, np.cos(self.times), atol=1e-3)
+            np.allclose(higher_res_TS.derived().y, np.cos(times), atol=1e-3)
         )
 
         self.assertTrue(
-            np.allclose(self.TS.derived(2).y, -np.sin(self.times), atol=5e-2)
+            np.allclose(higher_res_TS.derived(2).y, -np.sin(times), atol=5e-2)
         )
 
         self.assertTrue(
             np.allclose(
-                self.TS_c.derived().y,
-                np.cos(self.times) + 1j * np.cos(self.times),
+                higher_res_TS_c.derived().y,
+                np.cos(times) + 1j * np.cos(times),
                 atol=1e-3,
             )
         )
 
-        sins = self.TS.copy()
+        sins = higher_res_TS.copy()
         sins.derive()
 
-        self.assertTrue(np.allclose(sins.y, np.cos(self.times), atol=1e-3))
+        self.assertTrue(np.allclose(sins.y, np.cos(times), atol=1e-3))
 
-        sins = self.TS.copy()
+        sins = higher_res_TS.copy()
 
         with self.assertRaises(ValueError):
             sins.spline_derived(8)
@@ -758,27 +764,27 @@ class TestTimeseries(unittest.TestCase):
         # The boundaries are not accurate
         self.assertTrue(
             np.allclose(
-                self.TS.spline_derived().y, np.cos(self.times), atol=1e-3
+                higher_res_TS.spline_derived().y, np.cos(times), atol=1e-3
             )
         )
 
         self.assertTrue(
             np.allclose(
-                self.TS.spline_derived(2).y, -np.sin(self.times), atol=5e-2
+                higher_res_TS.spline_derived(2).y, -np.sin(times), atol=1e-3
             )
         )
 
         self.assertTrue(
             np.allclose(
-                self.TS_c.spline_derived().y,
-                np.cos(self.times) + 1j * np.cos(self.times),
+                higher_res_TS_c.spline_derived().y,
+                np.cos(times) + 1j * np.cos(times),
                 atol=1e-3,
             )
         )
 
         sins.spline_derive()
 
-        self.assertTrue(np.allclose(sins.y, np.cos(self.times), atol=1e-3))
+        self.assertTrue(np.allclose(sins.y, np.cos(times), atol=1e-3))
 
     def test_remove_duplicate_iters(self):
 

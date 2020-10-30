@@ -647,7 +647,7 @@ class BaseSeries(BaseNumerical):
         """
         ret_value = self.y
         for _num_deriv in range(order):
-            ret_value = np.gradient(ret_value, self.x)
+            ret_value = np.gradient(ret_value, self.x, edge_order=2)
         return type(self)(self.x, ret_value, True)
 
     def derive(self, order=1):
