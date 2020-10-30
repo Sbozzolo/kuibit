@@ -172,6 +172,10 @@ class UniformGrid:
         self.__time = None if time is None else float(time)
         self.__iteration = None if iteration is None else int(iteration)
 
+        # The coordinates are a widely requested property, so the first time the
+        # coordinates 1d are computed, we save them here.
+        self.__coordinates_1d = None
+
     @property
     def x0(self):
         return self.__x0
@@ -313,6 +317,21 @@ class UniformGrid:
         """
         return point in self
 
+    @property
+    def coordinates_1d(self):
+        """Return coordinates of the grid points.
+
+        The return value is a list with the coordinates along each direction
+
+        """
+
+        if self.__coordinates_1d is None:
+            self.__coordinates_1d = [
+                np.linspace(x0, x1, n)
+                for n, x0, x1 in zip(self.shape, self.x0, self.x1)
+            ]
+        return self.__coordinates_1d
+
     def coordinates(self, as_meshgrid=False, as_same_shape=False):
         """Return coordinates of the grid points.
 
@@ -341,13 +360,8 @@ class UniformGrid:
         if as_meshgrid and as_same_shape:
             raise ValueError("Cannot ask for both meshgrid and shaped array.")
 
-        coordinates_1d = [
-            np.linspace(x0, x1, n)
-            for n, x0, x1 in zip(self.shape, self.x0, self.x1)
-        ]
-
         if as_meshgrid:
-            return np.meshgrid(*coordinates_1d)
+            return np.meshgrid(*self.coordinates_1d)
 
         if as_same_shape:
             # np.indeces prepares an array in which each element has the value
@@ -359,7 +373,7 @@ class UniformGrid:
                 for dim in range(0, self.shape.size)
             ]
 
-        return coordinates_1d
+        return self.coordinates_1d
 
     def flat_dimensions_removed(self):
         """Return a new UniformGrid with dimensions which are only one gridpoint across
