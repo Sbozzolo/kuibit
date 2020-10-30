@@ -354,10 +354,10 @@ class MultipolesDir:
 
     def __init__(self, sd):
         # self._vars is a dictionary. For _vars_ascii, the keys are the
-        # variables  and the items are lists of tuples of the form
+        # variables  and the items are sets of tuples of the form
         # (multipole_l,  multipole_m, radius, filename) for text files.
         #
-        # For _vars_h5 they are lists (since we have to read the content
+        # For _vars_h5 they are sets (since we have to read the content
         # to find the l and m)
         self._vars_ascii = {}
         self._vars_h5 = {}
@@ -399,16 +399,16 @@ class MultipolesDir:
             matched_ascii = rx_ascii.match(filename)
             if matched_h5 is not None:
                 variable_name = matched_h5.group(1).lower()
-                var_list = self._vars_h5.setdefault(variable_name, [])
+                var_list = self._vars_h5.setdefault(variable_name, set())
                 # We are flagging that this h5
-                var_list.append(f)
+                var_list.add(f)
             elif matched_ascii is not None:
                 variable_name = matched_ascii.group(1).lower()
                 mult_l = int(matched_ascii.group(2))
                 mult_m = int(matched_ascii.group(3))
                 radius = float(matched_ascii.group(4))
-                var_list = self._vars_ascii.setdefault(variable_name, [])
-                var_list.append((mult_l, mult_m, radius, f))
+                var_list = self._vars_ascii.setdefault(variable_name, set())
+                var_list.add((mult_l, mult_m, radius, f))
 
         # What pythonize_name_dict does is to make the various variables
         # accessible as attributes, e.g. self.fields.rho
@@ -432,7 +432,7 @@ class MultipolesDir:
     @staticmethod
     def _multipoles_from_h5file(path):
         alldets = []
-        # This regexp matches : l(number)_m(-number)_r(number)
+        # This regex matches : l(number)_m(-number)_r(number)
         fieldname_pattern = re.compile(r"l(\d+)_m([-]?\d+)_r([0-9.]+)")
 
         with h5py.File(path, "r") as data:
