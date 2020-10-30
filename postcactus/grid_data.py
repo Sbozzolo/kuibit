@@ -251,6 +251,31 @@ class UniformGrid:
         """
         return sum(self.extended_dimensions)
 
+    def indices_to_coordinates(self, indices):
+        """Compute coordinate corresponding to one or more grid points.
+
+        :param indices: Grid indices
+        :type indices:  1d array or list of int.
+        :returns: The coordinate of grid points
+        :rtype:   1d numpy array of float
+        """
+        # TODO: Add dimensionality checks
+        return np.array(indices) * self.dx + self.x0
+
+    def coordinates_to_indices(self, coordinates):
+        """Find the indices corresponding to the
+        point nearest to the given coordinates.
+
+        :param coordinates: Coordinates.
+        :type coordinates:  1d numpy array or list of float
+        :returns: grid indidces of nearest point.
+        :rtype:   array of int
+        """
+        # TODO: Add dimensionality checks
+        return (((np.array(coordinates) - self.x0) / self.dx) + 0.5).astype(
+            np.int32
+        )
+
     def __getitem__(self, index):
         """Return the coordinates corresponding to a given (multi-dimensional)
         index.

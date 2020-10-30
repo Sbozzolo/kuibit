@@ -116,6 +116,25 @@ class TestUniformGrid(unittest.TestCase):
 
         self.assertEqual(geom5, geom6)
 
+    def test_coordinate_to_indices(self):
+        geom = gd.UniformGrid([101, 51], x0=[1, 2], dx=[1, 0.5])
+        # Scalar input
+        self.assertCountEqual(geom.indices_to_coordinates([1, 3]), [2, 3.5])
+        self.assertCountEqual(geom.coordinates_to_indices([2, 3.5]), [1, 3])
+        # Vector input
+        self.assertTrue(
+            np.allclose(
+                geom.indices_to_coordinates([[1, 3], [2, 4]]),
+                [[2, 3.5], [3, 4]],
+            )
+        )
+        self.assertTrue(
+            np.allclose(
+                geom.coordinates_to_indices([[2, 3.5], [3, 4]]),
+                [[1, 3], [2, 4]],
+            )
+        )
+
     def test__in__(self):
 
         # We test __in__ testing contains, which calls in
