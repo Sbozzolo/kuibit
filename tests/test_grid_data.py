@@ -1313,6 +1313,13 @@ class TestHierarchicalGridData(unittest.TestCase):
         self.assertCountEqual(
             hg3.finest_level_component_at_point([3, 4]), (0, 0)
         )
+        # Test on edge of the two components
+        self.assertCountEqual(
+            hg3.finest_level_component_at_point([3, 5]), (0, 0)
+        )
+        self.assertCountEqual(
+            hg3.finest_level_component_at_point([4, 6]), (0, 1)
+        )
 
     def test_evaluate_at_point(self):
 
@@ -1370,6 +1377,7 @@ class TestHierarchicalGridData(unittest.TestCase):
         big_grid = gd.UniformGrid(
             [16, 26], x0=[0, 1], x1=[30, 51], ref_level=0
         )
+        # Big grid has resolution 2 dx of grids
 
         def product(x, y):
             return x * (y + 2)
@@ -1378,8 +1386,8 @@ class TestHierarchicalGridData(unittest.TestCase):
             gd.sample_function_from_uniformgrid(product, g) for g in grids
         ]
 
-        grid_data = gd.sample_function_from_uniformgrid(product, big_grid)
-        hg = gd.HierarchicalGridData(grid_data_two_comp + [grid_data])
+        big_grid_data = gd.sample_function_from_uniformgrid(product, big_grid)
+        hg = gd.HierarchicalGridData(grid_data_two_comp + [big_grid_data])
         # When I merge the data I should just get big_grid at the resolution
         # of self.grid_data_two_comp
         expected_grid = gd.UniformGrid(
@@ -1389,7 +1397,17 @@ class TestHierarchicalGridData(unittest.TestCase):
         expected_data = gd.sample_function_from_uniformgrid(
             product, expected_grid
         )
-        self.assertEqual(hg.merge_refinement_levels(), expected_data)
+
+        # Test with resample
+        self.assertEqual(hg.merge_refinement_levels(resample=True), expected_data)
+
+        # If we don't resample there will be points that are "wrong" because we
+        # compute them with the nearest neighbors of the lowest resolution grid
+        # For example, the point with coordinate (5, 1) falls inside the lowest
+        # resolution grid, so its value will be the value of the closest point
+        # in big_grid (6, 1) -> 18.
+        self.assertEqual(hg.merge_refinement_levels()((5, 1)), 18)
+        self.assertEqual(hg.merge_refinement_levels().grid, expected_grid)
 
     def test_coordinates(self):
 

@@ -829,7 +829,7 @@ class UniformGridData(BaseNumerical):
         if not isinstance(x, UniformGrid) and np.array(x).shape == (
             self.num_dimensions,
         ):
-            # Either we have the point exactly, on the grid, or we
+            # Either we have the point exactly on the grid, or we
             # are called with piecewise_constant=True
             if piecewise_constant or all(  # On each dimension, we
                 [  # have it on the grid.
