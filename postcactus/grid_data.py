@@ -286,7 +286,10 @@ class UniformGrid:
         """
         index = np.array(index)
         self._check_dims(index, "index")
-        return index * self.dx + self.x0
+        coordinate = index * self.dx + self.x0
+        if coordinate not in self:
+            raise ValueError(f"{index} is not in on the grid")
+        return coordinate
 
     def __contains__(self, point):
         """Test if a coordinate is contained in the grid. The size of the
