@@ -221,15 +221,17 @@ If the provided components cover an entire grid, PostCactus will merge them. In
 doing this, all the ghost zone information is discarded. If PostCactus finds
 that the provided components do not cover a regular grid, then it will leave
 them untouched. This is the case when one has multiple refinement centers (for
-example in binary simulations). :py:class:`~.HierarchicalGridData` behave in
-slightly different ways for the former and the latter cases. In the former case,
-:py:class:`~.HierarchicalGridData` is essentially a dictionary that maps
-refinement level to a :py:class:`~.UniformGridData`. You can access the relative
-level using the bracket operator (e.g. ``rho[0]`` is ``rho`` on the coarsest
-level). In the latter case, :py:class:`~.HierarchicalGridData` is still a
-dictionary, but the value are not a list of :py:class:`~.UniformGridData` that
-represent the different patches. In this case, it is not convenient to work
-directly with the different :py:class:`~.UniformGridData`.
+example in binary simulations). :py:class:`~.HierarchicalGridData` is
+essentially a dictionary that maps refinement level lists of
+:py:class:`~.UniformGridData` that represent the different patches. In case
+PostCactus manages to combine all the patches, then the list will have only one
+element.
+
+You can access the relative level using the bracket operator (e.g. ``rho[0][0]``
+is ``rho`` on the coarsest level on the 0th patch, which could be the only one).
+In many cases, the grid structure is simple and there are no multiple refinement
+centers, so one can access the level with `:py:meth:~.get_ref_level`. This method
+will work only if there's a single component.
 
 As for :py:class:`~.UniformGridData`, :py:class:`~.HierarchicalGridData` are
 callable and splines are used to interpolate to the requested points. This

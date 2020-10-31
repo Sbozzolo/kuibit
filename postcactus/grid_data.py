@@ -118,6 +118,8 @@ class UniformGrid:
         self._check_dims(self.shape, "shape")
         self._check_dims(self.x0, "x0")
 
+        # Internally, what is important is shape, x0 and dx
+
         if dx is None:
             if x1 is None:
                 raise ValueError("Must provide one between x1 and dx")
@@ -175,6 +177,43 @@ class UniformGrid:
         # The coordinates are a widely requested property, so the first time the
         # coordinates 1d are computed, we save them here.
         self.__coordinates_1d = None
+        # Same with x1
+        self.__x1 = None
+
+        # The method __contains__ is called extremely often when dealing with
+        # HierachicalGridData (because it is used to find which subgrid
+        # contains a point). So, to make it faster, we save the values of the
+        # bottom and upper cell faces (we account for the fact that the grid
+        # is cell centered)
+        self.__lowest_vertex = None
+        self.__highest_vertex = None
+
+    def __hash__(self):
+        """UniformGrid is immutable, we can define an hash as the composition of
+        the hases of the members. This hash is quite slow to compute, so it
+        is not useful for caching small computations.
+        """
+        # We convert all the arrays in tuples (because they are hashable)
+        hash_shape = hash(tuple(self.shape))
+        hash_x0 = hash(tuple(self.x0))
+        hash_dx = hash(tuple(self.dx))
+        hash_num_ghost = hash(tuple(self.num_ghost))
+        hash_ref_level = hash(self.ref_level)
+        hash_component = hash(self.component)
+        hash_time = hash(self.time)
+        hash_iteration = hash(self.iteration)
+
+        # ^ = bitwise xor
+        return (
+            hash_shape
+            ^ hash_x0
+            ^ hash_dx
+            ^ hash_num_ghost
+            ^ hash_ref_level
+            ^ hash_component
+            ^ hash_time
+            ^ hash_iteration
+        )
 
     @property
     def x0(self):
@@ -186,7 +225,10 @@ class UniformGrid:
 
     @property
     def x1(self):
-        return self.x0 + (self.shape - 1) * self.dx
+        # We save x1 because it is computed a lot of times
+        if self.__x1 is None:
+            self.__x1 = self.x0 + (self.shape - 1) * self.dx
+        return self.__x1
 
     @property
     def origin(self):
@@ -255,6 +297,24 @@ class UniformGrid:
         """
         return sum(self.extended_dimensions)
 
+    @property
+    def lowest_vertex(self):
+        """Return the location of the lowest cell vertex (considering that
+        the grid is cell centered).
+        """
+        if self.__lowest_vertex is None:
+            self.__lowest_vertex = self.x0 - 0.5 * self.dx
+        return self.__lowest_vertex
+
+    @property
+    def highest_vertex(self):
+        """Return the location of the highest cell vertex (considering that
+        the grid is cell centered).
+        """
+        if self.__highest_vertex is None:
+            self.__highest_vertex = self.x1 + 0.5 * self.dx
+        return self.__highest_vertex
+
     def indices_to_coordinates(self, indices):
         """Compute coordinate corresponding to one or more grid points.
 
@@ -301,11 +361,26 @@ class UniformGrid:
         :returns:   If point is contained.
         :rtype:     bool
         """
-        point = np.array(point)
-        if not np.alltrue(point > (self.x0 - 0.5 * self.dx)):
-            return False
-        if not np.alltrue(point < (self.x1 + 0.5 * self.dx)):
-            return False
+
+        # A pythonic way to write this function is:
+        # if np.any(point < (self.__lower_edge)) or np.any(
+        #     point > (self.__upper_edge)
+        # ):
+        #     return False
+        # return True
+        #
+        # However, this happens to be not the fastest. This method is called a
+        # huge number of times when in HierarchicalGridData methods, because it
+        # is the main method to find which grid contains a given point.
+        # (method finest_level_component_at_point). So, it is better to have
+        # a less pythonic method that fails as soon as possible.
+        for dim in range(self.num_dimensions):
+            if not (
+                self.lowest_vertex[dim]
+                <= point[dim]
+                <= self.highest_vertex[dim]
+            ):
+                return False
         return True
 
     def contains(self, point):
@@ -327,7 +402,6 @@ class UniformGrid:
         The return value is a list with the coordinates along each direction
 
         """
-
         if self.__coordinates_1d is None:
             self.__coordinates_1d = [
                 np.linspace(x0, x1, n)
@@ -563,8 +637,8 @@ def merge_uniform_grids(grids, component=-1):
     # Find the bounding box
     x0, x1 = common_bounding_box(grids)
 
-    # We add a little bit more than 1 to ensure that we don't accidentally lose
-    # one point by rounding off (conversion to int always rounds down)
+    # The additional 1.5 and 0.5 factors are because the points are
+    # cell-centered, so the cells have size
 
     # dx here is a list of all the dx, we just want one (they are all the same)
     shape = ((x1 - x0) / dx[0] + 1.5).astype(np.int64)
@@ -708,6 +782,16 @@ class UniformGridData(BaseNumerical):
         """Return coordinates of the grid points as numpy meshgrid.
         This is useful for plotting"""
         return self.coordinates_from_grid(as_meshgrid=True)
+
+    # # TODO: Implement load and save methods
+    # def save(self, file_name, *args, **kwargs):
+    #     pass
+
+    # @classmethod
+    # def load(cls, file_name, *args, **kwargs):
+    #     """Load UniformGridData from saved instance
+    #     """
+    #     pass
 
     @property
     def x0(self):
@@ -1512,21 +1596,19 @@ class HierarchicalGridData(BaseNumerical):
         if len({d.num_dimensions for d in uniform_grid_data}) != 1:
             raise ValueError("Dimensionality mismatch")
 
-        # This is a dictionary with keys the refinement level and values the
-        # components.
-        self.components = {}
-
         # Let's sort as increasing refinement level and component
         uniform_grid_data_sorted = sorted(
             uniform_grid_data, key=lambda x: (x.ref_level, x.component)
         )
 
+        components = {}
+
         for comp in uniform_grid_data_sorted:
-            self.components.setdefault(comp.ref_level, []).append(comp)
+            components.setdefault(comp.ref_level, []).append(comp)
 
         self.grid_data_dict = {
             ref_level: self._try_merge_components(comps)
-            for ref_level, comps in self.components.items()
+            for ref_level, comps in components.items()
         }
 
     @staticmethod
@@ -1564,10 +1646,13 @@ class HierarchicalGridData(BaseNumerical):
         which multiple components cannot be merged (if there are multiple
         refinement levels).
 
+        This function always returns a list, even when the components are merged.
+        In that case, the return value is a [UniformGridData].
+
         """
 
         if len(components) == 1:
-            return components[0].ghost_zones_removed()
+            return [components[0].ghost_zones_removed()]
 
         # TODO: Instead of throwing away the ghost zones, we should check them
 
@@ -1596,26 +1681,20 @@ class HierarchicalGridData(BaseNumerical):
         )
 
         if np.amin(indices_used) == 1:
-            return merged_grid_data
+            return [merged_grid_data]
 
         return components
 
     def __getitem__(self, key):
         return self.grid_data_dict[key]
 
-    def iter_level(self):
-        """Supports iterating over the regular elements, sorted by refinement level.
-        This can yield a UniformGridData or a list of UniformGridData when it
-        is not possible to merge the grids.
-
-        From the coarsest to the finest.
-
-        Use this when you know that the data you are working with have single
-        grids or grids that can be merged.
-
-        """
-        for data in self.grid_data:
-            yield data
+    def get_level(self, ref_level):
+        if ref_level not in self.refinement_levels:
+            raise ValueError(f"Level {ref_level} not avilable")
+        if len(self[ref_level]) > 1:
+            raise ValueError(f"Level {ref_level} has multiple patches"
+                             " get_level works only when there is one")
+        return self[ref_level][0]
 
     def iter_from_finest(self):
         """Supports iterating over the regular elements, sorted by refinement level.
@@ -1629,25 +1708,15 @@ class HierarchicalGridData(BaseNumerical):
 
         """
         for ref_level, data in reversed(list(self.grid_data_dict.items())):
-            # This is just one component
-            if not isinstance(data, list):
-                yield ref_level, -1, data
-            else:
-                # Multiple components
-                for comp_index, comp in enumerate(data):
-                    yield ref_level, comp_index, comp
+            for comp_index, comp in enumerate(data):
+                yield ref_level, comp_index, comp
 
     def __iter__(self):
         """Iterate across all the refinement levels and components from the coarsest
         to the finest."""
-        for ref_level, data in self.grid_data_dict.items():
-            # This is just one component
-            if not isinstance(data, list):
-                yield ref_level, -1, data
-            else:
-                # Multiple components
-                for comp_index, comp in enumerate(data):
-                    yield ref_level, comp_index, comp
+        for ref_level, data in reversed(list(self.grid_data_dict.items())):
+            for comp_index, comp in enumerate(data):
+                yield ref_level, comp_index, comp
 
     def __len__(self):
         return len(self.refinement_levels)
@@ -1657,64 +1726,107 @@ class HierarchicalGridData(BaseNumerical):
         return list(self.grid_data_dict.keys())
 
     @property
-    def grid_data(self):
-        return list(self.grid_data_dict.values())
+    def all_components(self):
+        all_components = []
+        for comps in self.grid_data_dict.values():
+            all_components.extend(comps)
+        return all_components
 
     @property
-    def finest_level(self):
+    def num_finest_level(self):
+        """Return the number of the finest refinement level.
+
+        :returns: index of the finest level
+        :rtype: int
+        """
         return self.refinement_levels[-1]
 
     @property
-    def max_refinement_level(self):
-        return self.finest_level
+    def finest_level(self):
+        """Return the finest level, if it is a single grid.
+
+        :returns: finest level
+        :rtype: `:py:class:~UniformGridData`
+        """
+        return self.get_level(self.num_finest_level)
 
     @property
-    def coarsest_level(self):
+    def max_refinement_level(self):
+        return self.num_finest_level
+
+    @property
+    def num_coarsest_level(self):
+        """Return the number of the coarsest refinement level.
+
+        :returns: index of the coarsest level
+        :rtype: int
+        """
         return self.refinement_levels[0]
 
     @property
+    def coarsest_level(self):
+        """Return the coarsest level, if it is a single grid.
+
+        :returns: Coarsest level
+        :rtype: `:py:class:~UniformGridData`
+        """
+        return self.get_level(self.num_coarsest_level)
+
+    @property
     def first_component(self):
-        # next(iter(self)) returns either the first level, or the first
-        # component of the first level. This is general way that works for both
-        # cases. The return value is ref_level, component, data, so we take the
-        # second index.
-        return (next(iter(self)))[2]
+        """Return the first component of the coarsest refinement level
+
+        :returns: First component of coarsest level
+        :rtype: `:py:class:~UniformGridData`
+        """
+        return self[self.num_coarsest_level][0]
 
     @property
     def dtype(self):
         return self.first_component.dtype
 
     @property
+    def shape(self):
+        """Num components per each level.
+
+        Eg, if data has three levels, with 1 component in the first, 2 in the second,
+        and three in the fifth, shape will be {1: 1, 2: 2, 5: 3}
+
+        shape is useful for quick high level comparison between two HierachicalGridData
+
+        :rtype: dictionary
+        """
+        return {ref_level: len(comp) for ref_level, comp in self.grid_data_dict.items()}
+
+    @property
     def x0(self):
-        if isinstance(self[0], list):
-            raise ValueError("Data does not have a well defined x0")
-        return self[0].x0
+        # We have multiple patches
+        if len(self[self.num_coarsest_level]) != 1:
+            raise ValueError("Data does not have a well defined x0 "
+                             " (there are multiple patches)")
+        return self.first_component.x0
 
     @property
     def x1(self):
-        if isinstance(self[0], list):
-            raise ValueError("Data does not have a well defined x1")
-        return self[0].x1
+        # We have multiple patches
+        if len(self[self.num_coarsest_level]) != 1:
+            raise ValueError("Data does not have a well defined x1"
+                             " (there are multiple patches)")
+        return self.first_component.x1
 
     def dx_at_level(self, level):
         """Return the grid spacing at the specified refinement level"""
-        # If we have many components self[level] is a list, so we extract the
-        # dx from the first element. Otherwise, it is just a UniformGridData.
-        return (
-            self[level].dx
-            if not hasattr(self[level], "__len__")
-            else self[level][0].dx
-        )
+        return self[level][0].dx
 
     @property
     def coarsest_dx(self):
         """Return the coarsest dx"""
-        return self.dx_at_level(self.coarsest_level)
+        return self.dx_at_level(self.num_coarsest_level)
 
     @property
     def finest_dx(self):
         """Return the finest dx"""
-        return self.dx_at_level(self.finest_level)
+        return self.dx_at_level(self.num_finest_level)
 
     @property
     def num_dimensions(self):
@@ -1732,7 +1844,7 @@ class HierarchicalGridData(BaseNumerical):
     @property
     def iteration(self):
         """The iteration of the coarsest refinement level"""
-        return self.first_component.time
+        return self.first_component.iteration
 
     def copy(self):
         """Return a deep copy.
@@ -1740,10 +1852,7 @@ class HierarchicalGridData(BaseNumerical):
         :returns:  Deep copy of the HierarchicalGridData
         :rtype:    :py:class:`~.HierarchicalGridData`
         """
-        grid_data = []
-        for ref_level in self.refinement_levels:
-            grid_data.extend(self.components[ref_level])
-        return type(self)(grid_data)
+        return type(self)(self.all_components)
 
     def __eq__(self, other):
         """Return a deep copy.
@@ -1753,12 +1862,23 @@ class HierarchicalGridData(BaseNumerical):
         """
         if not isinstance(other, HierarchicalGridData):
             return False
-        if self.refinement_levels != other.refinement_levels:
+        if self.shape != other.shape:
             return False
-        return all(
-            data_self == data_other
-            for data_self, data_other in zip(self.grid_data, other.grid_data)
-        )
+
+        return self.all_components == other.all_components
+
+    def _finest_level_component_at_point_core(self, coordinate):
+        """Return the number and the component index of the most
+        refined level that contains the given coordinate assuming
+        a valid input coordinate.
+        """
+        # We walk from the finest level to the coarsest. If we find the point,
+        # re return it. If we find nothing, we raise error.
+        for ref_level, comp, grid_data in self.iter_from_finest():
+            if coordinate in grid_data.grid:
+                return ref_level, comp
+
+        raise ValueError(f"{coordinate} outside the grid")
 
     def finest_level_component_at_point(self, coordinate):
         """Return the number and the component index of the most
@@ -1783,36 +1903,12 @@ class HierarchicalGridData(BaseNumerical):
                 f"The input point has dimension {len(coordinate)}"
                 f" but the data has dimension {self.num_dimensions}"
             )
-        # We walk from the finest level to the coarsest. If we find the point,
-        # re return it. If we find nothing, we raise error.
 
-        for ref_level, comp, grid_data in self.iter_from_finest():
-            if coordinate in grid_data.grid:
-                # This is the case in which we only have one component, so
-                # we want to return the ref_level only
-                if comp == -1:
-                    return ref_level
-                # This is the case in which we only have multiple components,
-                # so we want to return the ref_level and the component
-                return ref_level, comp
-
-        raise ValueError(f"{coordinate} outside the grid")
+        return self._finest_level_component_at_point_core(coordinate)
 
     def _evaluate_at_one_point(self, point, ext=2, piecewise_constant=False):
 
-        level_comp = self.finest_level_component_at_point(np.array(point))
-
-        # If we have no components, level_comp will be just ref_level, if
-        # we have multiple components, it will be (ref_level, component)
-
-        # We have only one component
-        if not hasattr(level_comp, "__len__"):
-            return self[level_comp].evaluate_with_spline(
-                point, ext=ext, piecewise_constant=piecewise_constant
-            )
-
-        # We have multiple components
-        level, comp = level_comp
+        level, comp = self.finest_level_component_at_point(np.array(point))
 
         return self[level][comp].evaluate_with_spline(
             point, ext=ext, piecewise_constant=piecewise_constant
@@ -1925,10 +2021,7 @@ class HierarchicalGridData(BaseNumerical):
         The function has to return a new copy of the object (not a reference).
         """
         ret = f(*args, **kwargs)
-        self.components, self.grid_data_dict = (
-            ret.components,
-            ret.grid_data_dict,
-        )
+        self.grid_data_dict = ret.grid_data_dict
 
     def _apply_binary(self, other, function):
         """Apply a binary function to the data.
@@ -1947,13 +2040,13 @@ class HierarchicalGridData(BaseNumerical):
                 raise ValueError("Refinement levels incompatible")
             new_data = [
                 function(data_self, data_other)
-                for (_, _, data_self), (_, _, data_other) in zip(self, other)
+                for data_self, data_other in zip(self.all_components, other.all_components)
             ]
             return type(self)(new_data)
 
         if isinstance(other, (int, float, complex)):
             new_data = [
-                function(data_self, other) for (_, _, data_self) in self
+                function(data_self, other) for data_self in self.all_components
             ]
             return type(self)(new_data)
 
@@ -1967,7 +2060,7 @@ class HierarchicalGridData(BaseNumerical):
             # Here we are accessing _apply_reduction, which is a protected
             # member, so we ignore potential complaints.
             # skipcq: PYL-W0212
-            np.array([data._apply_reduction(reduction) for _, _, data in self])
+            np.array([data._apply_reduction(reduction) for data in self.all_components])
         )
 
     def _apply_unary(self, function):
@@ -1980,7 +2073,7 @@ class HierarchicalGridData(BaseNumerical):
         :rtype: :py:class:`~.HierarchicalGridData`
 
         """
-        new_data = [function(data) for _, _, data in self]
+        new_data = [function(data) for data in self.all_components]
         return type(self)(new_data)
 
     def _call_component_method(
@@ -2013,7 +2106,7 @@ class HierarchicalGridData(BaseNumerical):
         # Here we get the method as a function with getattr(data, method_name),
         # then we apply this function with arguments *args and **kwargs
         new_data = [
-            getattr(data, method_name)(*args, **kwargs) for _, _, data in self
+            getattr(data, method_name)(*args, **kwargs) for data in self.all_components
         ]
         # There are two possibilities: new data is a list of UniformGridData
         # (when method_returns_list is False), alternatively it is a list of
@@ -2113,15 +2206,10 @@ class HierarchicalGridData(BaseNumerical):
     def __str__(self):
         ret = "Available refinement levels (components):\n"
         for ref_level in self.refinement_levels:
-            comp = (
-                len(self[ref_level])
-                if hasattr(self[ref_level], "__len__")
-                else 1
-            )
-            ret += f"{ref_level} ({comp})\n"
-        ret += f"Spacing at coarsest level ({self.coarsest_level}): "
+            ret += f"{ref_level} ({len(self[ref_level])})\n"
+        ret += f"Spacing at coarsest level ({self.num_coarsest_level}): "
         ret += f"{self.coarsest_dx}\n"
         ret += (
-            f"Spacing at finest level ({self.finest_level}): {self.finest_dx}"
+            f"Spacing at finest level ({self.num_finest_level}): {self.finest_dx}"
         )
         return ret
