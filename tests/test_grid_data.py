@@ -104,17 +104,34 @@ class TestUniformGrid(unittest.TestCase):
         self.assertCountEqual(geom5.extended_dimensions, [True, True, False])
         self.assertEqual(geom5.num_extended_dimensions, 2)
 
+        # Test lowest and highest vertices
+        self.assertTrue(np.allclose(geom5.lowest_vertex, [0.5, 0.75, 0]))
+        self.assertTrue(np.allclose(geom5.highest_vertex, [101.5, 51.25, 0]))
+
         # Test case with shape with ones and given x1
         geom6 = gd.UniformGrid(
             [101, 101, 1],
             x0=[1, 1, 0],
-            x1=[101, 51, 1],
+            x1=[101, 51, 0],
             num_ghost=[3, 3, 3],
             time=1,
             iteration=1,
         )
 
         self.assertEqual(geom5, geom6)
+
+    def test_hash(self):
+
+        geom4 = gd.UniformGrid(
+            [101, 101],
+            x0=[1, 1],
+            dx=[1, 0.5],
+            num_ghost=[3, 3],
+            time=1,
+            iteration=1,
+        )
+        # Hopefully it is fine to hardcode the expected hash
+        self.assertEqual(hash(geom4), 3458957428635756327)
 
     def test_coordinate_to_indices(self):
         geom = gd.UniformGrid([101, 51], x0=[1, 2], dx=[1, 0.5])
@@ -1047,7 +1064,7 @@ class TestHierarchicalGridData(unittest.TestCase):
         one = gd.HierarchicalGridData([prod_data1])
         # Test content
         self.assertDictEqual(
-            one.grid_data_dict, {-1: prod_data1.ghost_zones_removed()}
+            one.grid_data_dict, {-1: [prod_data1.ghost_zones_removed()]}
         )
 
         grid = gd.UniformGrid([101], x0=[0], x1=[3], ref_level=2)
@@ -1058,15 +1075,15 @@ class TestHierarchicalGridData(unittest.TestCase):
         self.assertDictEqual(
             two.grid_data_dict,
             {
-                -1: prod_data1.ghost_zones_removed(),
-                2: prod_data1_level2.ghost_zones_removed(),
+                -1: [prod_data1.ghost_zones_removed()],
+                2: [prod_data1_level2.ghost_zones_removed()],
             },
         )
 
         # Test a good grid
         hg_many_components = gd.HierarchicalGridData(self.grid_data)
         self.assertEqual(
-            hg_many_components.grid_data_dict[0], self.expected_data
+            hg_many_components.grid_data_dict[0], [self.expected_data]
         )
 
         # Test a grid with two separate components
@@ -1074,8 +1091,32 @@ class TestHierarchicalGridData(unittest.TestCase):
         self.assertEqual(hg3.grid_data_dict[0], self.grid_data_two_comp)
 
     def test__getitem__(self):
-        hg_many_components = gd.HierarchicalGridData(self.grid_data)
-        self.assertEqual(hg_many_components[0], self.expected_data)
+
+        hg = gd.HierarchicalGridData(self.grid_data)
+        self.assertEqual(hg[0], [self.expected_data])
+
+    def test_get_level(self):
+
+        hg = gd.HierarchicalGridData(self.grid_data)
+        self.assertEqual(hg.get_level(0), self.expected_data)
+
+        # Level not available
+        with self.assertRaises(ValueError):
+            hg.get_level(10)
+
+        # Multiple patches will throw an error
+        hg3 = gd.HierarchicalGridData(self.grid_data_two_comp)
+        with self.assertRaises(ValueError):
+            hg3.get_level(0)
+
+    def test_shape(self):
+
+        hg = gd.HierarchicalGridData(self.grid_data)
+        self.assertCountEqual(hg.shape, {0: 1})
+
+        # Multiple patches will throw an error
+        hg3 = gd.HierarchicalGridData(self.grid_data_two_comp)
+        self.assertCountEqual(hg3.shape, {0: 2})
 
     def test_properties(self):
 
@@ -1085,28 +1126,25 @@ class TestHierarchicalGridData(unittest.TestCase):
         )
         self.assertEqual(len(hg), 2)
 
-        # iter_level
-        self.assertEqual(next(hg.iter_level()), self.expected_data)
-
         # refinement levels
         self.assertCountEqual(hg.refinement_levels, [0, 2])
 
         # grid_data
         self.assertCountEqual(
-            hg.grid_data, [self.expected_data, self.expected_data_level2]
+            hg.all_components, [self.expected_data, self.expected_data_level2]
         )
 
         # first component
-        self.assertEqual(hg.first_component, hg[0])
+        self.assertEqual(hg.first_component, hg[0][0])
 
         # finest level
-        self.assertEqual(hg.finest_level, 2)
+        self.assertEqual(hg.num_finest_level, 2)
 
         # max refinement_level
         self.assertEqual(hg.max_refinement_level, 2)
 
         # coarsest level
-        self.assertEqual(hg.coarsest_level, 0)
+        self.assertEqual(hg.num_coarsest_level, 0)
 
         # dtype
         self.assertEqual(hg.dtype, np.float)
@@ -1175,7 +1213,7 @@ class TestHierarchicalGridData(unittest.TestCase):
         for ref_level, comp, data in hg1:
             self.assertTrue(isinstance(data, gd.UniformGridData))
             self.assertEqual(ref_level, 0)
-            self.assertEqual(comp, -1)
+            self.assertEqual(comp, 0)
 
         hg3 = gd.HierarchicalGridData(self.grid_data_two_comp)
 
@@ -1206,9 +1244,29 @@ class TestHierarchicalGridData(unittest.TestCase):
         index = 1
         for ref_level, comp, data in sin_wave.iter_from_finest():
             self.assertEqual(ref_level, index)
-            self.assertEqual(comp, -1)
+            self.assertEqual(comp, 0)
             self.assertTrue(isinstance(data, gd.UniformGridData))
             index -= 1
+
+    def test_finest_coarsest_level(self):
+        geom = gd.UniformGrid(
+            [81, 3], x0=[0, 0], x1=[2 * np.pi, 1], ref_level=0
+        )
+        geom2 = gd.UniformGrid(
+            [11, 3], x0=[0, 0], x1=[2 * np.pi, 1], ref_level=1
+        )
+
+        sin_wave1 = gd.sample_function_from_uniformgrid(
+            lambda x, y: np.sin(x), geom
+        )
+        sin_wave2 = gd.sample_function_from_uniformgrid(
+            lambda x, y: np.sin(x), geom2
+        )
+
+        sin_wave = gd.HierarchicalGridData([sin_wave1] + [sin_wave2])
+
+        self.assertEqual(sin_wave.finest_level, sin_wave2)
+        self.assertEqual(sin_wave.coarsest_level, sin_wave1)
 
     def test__apply_reduction(self):
 
@@ -1266,7 +1324,7 @@ class TestHierarchicalGridData(unittest.TestCase):
 
         # To check that zero is indeed zero we check that the abs max of the
         # data is 0
-        self.assertEqual(np.amax(np.abs(zero[0].data)), 0)
+        self.assertEqual(np.amax(np.abs(zero[0][0].data)), 0)
 
         # Test incompatible refinement levels
 
@@ -1306,7 +1364,7 @@ class TestHierarchicalGridData(unittest.TestCase):
         with self.assertRaises(ValueError):
             hg.finest_level_component_at_point([1000, 200])
 
-        self.assertEqual(hg.finest_level_component_at_point([3, 4]), 2)
+        self.assertEqual(hg.finest_level_component_at_point([3, 4]), (2, 0))
 
         # Test with multiple components
         hg3 = gd.HierarchicalGridData(self.grid_data_two_comp)
@@ -1397,9 +1455,10 @@ class TestHierarchicalGridData(unittest.TestCase):
         expected_data = gd.sample_function_from_uniformgrid(
             product, expected_grid
         )
-
         # Test with resample
-        self.assertEqual(hg.merge_refinement_levels(resample=True), expected_data)
+        self.assertEqual(
+            hg.merge_refinement_levels(resample=True), expected_data
+        )
 
         # If we don't resample there will be points that are "wrong" because we
         # compute them with the nearest neighbors of the lowest resolution grid
@@ -1457,10 +1516,10 @@ class TestHierarchicalGridData(unittest.TestCase):
         sin_wave.partial_derive(0, order=2)
 
         self.assertTrue(
-            np.allclose(-sin_wave[0].data, original_sin1.data, atol=1e-3)
+            np.allclose(-sin_wave[0][0].data, original_sin1.data, atol=1e-3)
         )
         self.assertTrue(
-            np.allclose(-sin_wave[1].data, original_sin2.data, atol=1e-3)
+            np.allclose(-sin_wave[1][0].data, original_sin2.data, atol=1e-3)
         )
 
         # Test _call_component_method with non-string name
@@ -1472,10 +1531,13 @@ class TestHierarchicalGridData(unittest.TestCase):
             sin_wave._call_component_method("lol")
 
         gradient = sin_copy.gradient(order=2)
+        # Along the first direction (it's a HierarchicalGridData)
+        partial_x = gradient[0]
 
         self.assertTrue(
-            np.allclose(-gradient[0][0].data, original_sin1.data, atol=1e-3)
+            np.allclose(-partial_x[0][0].data, original_sin1.data, atol=1e-3)
         )
+        # First refinement_level
         self.assertTrue(
-            np.allclose(-gradient[0][1].data, original_sin2.data, atol=1e-3)
+            np.allclose(-partial_x[1][0].data, original_sin2.data, atol=1e-3)
         )

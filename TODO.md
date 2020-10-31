@@ -34,3 +34,4 @@ of knowledge of PostCactus or of Python required to complete the task.
   Also, at the moment, the three group of classes are structured in very
   different ways, they should be more uniform. [====]
 * Uniform `keys()` function to Python3 standard. [==]
+* Add support for `logging`. [===]
