@@ -1692,8 +1692,10 @@ class HierarchicalGridData(BaseNumerical):
         if ref_level not in self.refinement_levels:
             raise ValueError(f"Level {ref_level} not avilable")
         if len(self[ref_level]) > 1:
-            raise ValueError(f"Level {ref_level} has multiple patches"
-                             " get_level works only when there is one")
+            raise ValueError(
+                f"Level {ref_level} has multiple patches"
+                " get_level works only when there is one"
+            )
         return self[ref_level][0]
 
     def iter_from_finest(self):
@@ -1796,22 +1798,29 @@ class HierarchicalGridData(BaseNumerical):
 
         :rtype: dictionary
         """
-        return {ref_level: len(comp) for ref_level, comp in self.grid_data_dict.items()}
+        return {
+            ref_level: len(comp)
+            for ref_level, comp in self.grid_data_dict.items()
+        }
 
     @property
     def x0(self):
         # We have multiple patches
         if len(self[self.num_coarsest_level]) != 1:
-            raise ValueError("Data does not have a well defined x0 "
-                             " (there are multiple patches)")
+            raise ValueError(
+                "Data does not have a well defined x0 "
+                " (there are multiple patches)"
+            )
         return self.first_component.x0
 
     @property
     def x1(self):
         # We have multiple patches
         if len(self[self.num_coarsest_level]) != 1:
-            raise ValueError("Data does not have a well defined x1"
-                             " (there are multiple patches)")
+            raise ValueError(
+                "Data does not have a well defined x1"
+                " (there are multiple patches)"
+            )
         return self.first_component.x1
 
     def dx_at_level(self, level):
@@ -2040,7 +2049,9 @@ class HierarchicalGridData(BaseNumerical):
                 raise ValueError("Refinement levels incompatible")
             new_data = [
                 function(data_self, data_other)
-                for data_self, data_other in zip(self.all_components, other.all_components)
+                for data_self, data_other in zip(
+                    self.all_components, other.all_components
+                )
             ]
             return type(self)(new_data)
 
@@ -2060,7 +2071,12 @@ class HierarchicalGridData(BaseNumerical):
             # Here we are accessing _apply_reduction, which is a protected
             # member, so we ignore potential complaints.
             # skipcq: PYL-W0212
-            np.array([data._apply_reduction(reduction) for data in self.all_components])
+            np.array(
+                [
+                    data._apply_reduction(reduction)
+                    for data in self.all_components
+                ]
+            )
         )
 
     def _apply_unary(self, function):
@@ -2106,7 +2122,8 @@ class HierarchicalGridData(BaseNumerical):
         # Here we get the method as a function with getattr(data, method_name),
         # then we apply this function with arguments *args and **kwargs
         new_data = [
-            getattr(data, method_name)(*args, **kwargs) for data in self.all_components
+            getattr(data, method_name)(*args, **kwargs)
+            for data in self.all_components
         ]
         # There are two possibilities: new data is a list of UniformGridData
         # (when method_returns_list is False), alternatively it is a list of
@@ -2209,7 +2226,5 @@ class HierarchicalGridData(BaseNumerical):
             ret += f"{ref_level} ({len(self[ref_level])})\n"
         ret += f"Spacing at coarsest level ({self.num_coarsest_level}): "
         ret += f"{self.coarsest_dx}\n"
-        ret += (
-            f"Spacing at finest level ({self.num_finest_level}): {self.finest_dx}"
-        )
+        ret += f"Spacing at finest level ({self.num_finest_level}): {self.finest_dx}"
         return ret
