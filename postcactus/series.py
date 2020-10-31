@@ -551,7 +551,8 @@ class BaseSeries(BaseNumerical):
             )
         else:
             np.savetxt(
-                file_name, np.transpose((self.x, self.y), *args, **kwargs)
+                file_name,
+                np.transpose((self.x, self.y), *args, **kwargs),
             )
 
     def nans_removed(self):
