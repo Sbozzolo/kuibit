@@ -191,6 +191,8 @@ class UniformGrid:
         # is cell centered)
         self.__lowest_vertex = None
         self.__highest_vertex = None
+        # Same considerations for num_dimensions
+        self.__num_dimensions = len(self.shape)
 
     def __hash__(self):
         """UniformGrid is immutable, we can define an hash as the composition of
@@ -284,7 +286,7 @@ class UniformGrid:
 
     @property
     def num_dimensions(self):
-        return len(self.shape)
+        return self.__num_dimensions
 
     @property
     def extended_dimensions(self):
@@ -2035,7 +2037,8 @@ class HierarchicalGridData(BaseNumerical):
 
     def _evaluate_at_one_point(self, point, ext=2, piecewise_constant=False):
 
-        level, comp = self.finest_level_component_at_point(np.array(point))
+        # We assume that we have valid data here
+        level, comp = self._finest_level_component_at_point_core(point)
 
         return self[level][comp].evaluate_with_spline(
             point, ext=ext, piecewise_constant=piecewise_constant
@@ -2098,9 +2101,7 @@ class HierarchicalGridData(BaseNumerical):
                 piecewise_constant=piecewise_constant,
             )
 
-        # Was the input a single point? If yes we return a single value
-        input_one_point = points_arr.shape == (self.num_dimensions,)
-        return ret[0] if input_one_point else ret
+        return ret
 
     def __call__(self, x):
         return self.evaluate_with_spline(x)
