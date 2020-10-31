@@ -203,6 +203,15 @@ useful when dealing with refinement levels, which typically have spacing related
 by factors of 2. :py:meth:`~.dx_changed` takes an optional argument
 ``piecewise_constant`` to prescribe how the resampling should be done.
 
+Often, it is useful to save a :py:class:`~.UniformGridData` and read it later.
+:py:class:`~.UniformGridData` can be saved as ASCII files with the
+:py:meth:`save` method, which takes a path and writes an ASCII file to that
+destination. The file contains a header that specifies the grid information. The
+data is always saved as as 1D array (due to the limitations of the backend).
+These files can be read with the :py:meth:`~.load_UniformGridData` function. For
+large datasets, it is convinent to compress the file. To do this, just provide a
+file extension that is compressed (e.g., ``.dat.gz``).
+
 HierarchicalGridData
 --------------------
 
