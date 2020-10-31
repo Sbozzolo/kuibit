@@ -647,6 +647,36 @@ class TestUniformGridData(unittest.TestCase):
             gd.UniformGridData(geom2d, data2d),
         )
 
+    def test_save_load(self):
+
+        grid_file = "test_save_grid.dat"
+        grid_file_bz = "test_save_grid.dat.bz2"
+        grid_file_gz = "test_save_grid.dat.gz"
+
+        def square(x, y):
+            return x * y
+
+        grid_data = gd.sample_function(square, [100, 200], [0, 1], [1, 2])
+
+        # Test save uncompressed
+        grid_data.save(grid_file)
+
+        # Load it
+        loaded = gd.load_UniformGridData(grid_file)
+
+        self.assertEqual(loaded, grid_data)
+
+        # Test compressed
+        grid_data.save(grid_file_bz)
+        loaded_bz = gd.load_UniformGridData(grid_file_bz)
+
+        self.assertEqual(loaded_bz, grid_data)
+
+        grid_data.save(grid_file_gz)
+        loaded_gz = gd.load_UniformGridData(grid_file_gz)
+
+        self.assertEqual(loaded_gz, grid_data)
+
     def test_splines(self):
 
         # Let's start with 1d.
