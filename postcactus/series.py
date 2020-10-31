@@ -531,18 +531,18 @@ class BaseSeries(BaseNumerical):
         # We have to recompute the splines
         self.invalid_spline = True
 
-    def save(self, fname, *args, **kwargs):
+    def save(self, file_name, *args, **kwargs):
         """Saves into simple ASCII format with 2 columns (x, y)
         for real valued data and 3 columns (x, Re(y), Im(y))
         for complex valued data.
 
-        :param fname: Path (with extensiton) of the output file
-        :type fname: str
+        :param file_name: Path (with extensiton) of the output file
+        :type file_name: str
 
         """
         if self.is_complex():
             np.savetxt(
-                fname,
+                file_name,
                 np.transpose(
                     (self.x, self.y.real, self.y.imag),
                     *args,
@@ -550,7 +550,9 @@ class BaseSeries(BaseNumerical):
                 ),
             )
         else:
-            np.savetxt(fname, np.transpose((self.x, self.y), *args, **kwargs))
+            np.savetxt(
+                file_name, np.transpose((self.x, self.y), *args, **kwargs)
+            )
 
     def nans_removed(self):
         """Filter out nans/infinite values.
