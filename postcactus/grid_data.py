@@ -382,7 +382,7 @@ class UniformGrid:
             if not (
                 self.lowest_vertex[dim]
                 <= point[dim]
-                <= self.highest_vertex[dim]
+                < self.highest_vertex[dim]
             ):
                 return False
         return True

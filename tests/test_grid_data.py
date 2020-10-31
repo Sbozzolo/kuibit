@@ -170,6 +170,16 @@ class TestUniformGrid(unittest.TestCase):
         self.assertFalse(geom4.contains([102, 102]))
         self.assertFalse(geom4.contains([102, 51]))
 
+        # Edge cases
+        # The upper edge is not included
+        self.assertFalse(geom4.contains([101.5, 101.25]))
+        self.assertFalse(geom4.contains([101.5, 101]))
+        self.assertFalse(geom4.contains([101, 101.25]))
+        # The lower is
+        self.assertTrue(geom4.contains([0.5, 0.75]))
+        self.assertTrue(geom4.contains([0.5, 1]))
+        self.assertTrue(geom4.contains([1, 0.75]))
+
     def test__str(self):
 
         geom4 = gd.UniformGrid(
@@ -914,7 +924,6 @@ class TestUniformGridData(unittest.TestCase):
         self.assertAlmostEqual(resampled_nearest((2, 2.5)), 9 * (1 + 1j))
 
         # Check with one point
-        prod_data_1 = gd.sample_function(product, [101, 1], [0, 1], [3, 1])
         new_grid2 = gd.UniformGrid([51, 1], x0=[1, 1], x1=[2, 1])
         resampled2 = prod_data_complex.resampled(new_grid2)
         self.assertEqual(resampled2.grid, new_grid2)
