@@ -109,16 +109,15 @@ class TestUniformGrid(unittest.TestCase):
         self.assertTrue(np.allclose(geom5.highest_vertex, [101.5, 51.25, 0]))
 
         # Test case with shape with ones and given x1
-        geom6 = gd.UniformGrid(
-            [101, 101, 1],
-            x0=[1, 1, 0],
-            x1=[101, 51, 0],
-            num_ghost=[3, 3, 3],
-            time=1,
-            iteration=1,
-        )
-
-        self.assertEqual(geom5, geom6)
+        with self.assertRaises(ValueError):
+            gd.UniformGrid(
+                [101, 101, 1],
+                x0=[1, 1, 0],
+                x1=[101, 51, 0],
+                num_ghost=[3, 3, 3],
+                time=1,
+                iteration=1,
+            )
 
     def test_hash(self):
 
@@ -470,6 +469,7 @@ class TestUniformGridData(unittest.TestCase):
         # Test num_dimensions
         self.assertEqual(ug_data.num_dimensions, 2)
         self.assertEqual(ug_data.num_extended_dimensions, 2)
+        self.assertCountEqual(ug_data.extended_dimensions, [True, True])
 
     def test_is_complex(self):
 
@@ -485,7 +485,7 @@ class TestUniformGridData(unittest.TestCase):
 
     def test_flat_dimensions_remove(self):
 
-        geom = gd.UniformGrid([101, 1], x0=[0, 0], x1=[1, 0])
+        geom = gd.UniformGrid([101, 1], x0=[0, 0], dx=[0.01, 1])
 
         data = np.array([i * np.linspace(1, 5, 1) for i in range(101)])
         ug_data = gd.UniformGridData(geom, data)
@@ -500,6 +500,21 @@ class TestUniformGridData(unittest.TestCase):
 
         # Check invalidation of spline
         self.assertTrue(ug_data.invalid_spline)
+
+        # Test from 3D to 2D
+        grid_data3d = gd.sample_function_from_uniformgrid(
+            lambda x, y, z: x * (y + 2) * (z + 5),
+            gd.UniformGrid([10, 20, 1], x0=[0, 1, 0], dx=[1, 1, 1]),
+        )
+        grid_2d = gd.UniformGrid([10, 20], x0=[0, 1], dx=[1, 1])
+
+        expected_data2d = gd.sample_function_from_uniformgrid(
+            lambda x, y: x * (y + 2) * (0 + 5), grid_2d
+        )
+
+        self.assertEqual(
+            grid_data3d.flat_dimensions_removed(), expected_data2d
+        )
 
     def test_partial_derive(self):
 
@@ -578,7 +593,7 @@ class TestUniformGridData(unittest.TestCase):
 
         # Test incompatible grids
 
-        geom = gd.UniformGrid([101, 1], x0=[0, 0], x1=[1, 0])
+        geom = gd.UniformGrid([101, 1], x0=[0, 0], dx=[1, 1])
 
         data3 = np.array([i * np.linspace(1, 5, 1) for i in range(101)])
 
@@ -657,6 +672,43 @@ class TestUniformGridData(unittest.TestCase):
             gd.UniformGridData(geom2d, data2d),
         )
 
+    def test_slice(self):
+
+        grid_data = gd.sample_function_from_uniformgrid(
+            lambda x, y, z: x * (y + 2) * (z + 5),
+            gd.UniformGrid([10, 20, 30], x0=[0, 1, 2], dx=[1, 2, 0.1]),
+        )
+        grid_data_copied = grid_data.copy()
+
+        # Test cut is wrong dimension
+        with self.assertRaises(ValueError):
+            grid_data.slice([1, 2])
+
+        # Test no cut
+        grid_data.slice([None, None, None])
+        self.assertEqual(grid_data, grid_data_copied)
+
+        # Test cut point outside the grid
+        with self.assertRaises(ValueError):
+            grid_data.slice([1, 2, 1000])
+
+        # Test resample
+
+        # Test cut along one dimension
+        grid_data.slice([None, None, 3], resample=True)
+        expected_no_z = gd.sample_function_from_uniformgrid(
+            lambda x, y: x * (y + 2) * (3 + 5),
+            gd.UniformGrid([10, 20], x0=[0, 1], dx=[1, 2]),
+        )
+        self.assertEqual(grid_data, expected_no_z)
+
+        # Test no resample
+        #
+        # Reset grid data
+        grid_data = grid_data_copied.copy()
+        grid_data.slice([None, None, 3], resample=False)
+        self.assertEqual(grid_data, expected_no_z)
+
     def test_save_load(self):
 
         grid_file = "test_save_grid.dat"
@@ -718,6 +770,21 @@ class TestUniformGridData(unittest.TestCase):
         self.assertAlmostEqual(
             sin_data_complex(point),
             (1 + 1j) * np.sin(point[0]),
+        )
+
+        # Test on a point outside the grid with the lookup table
+        with self.assertRaises(ValueError):
+            sin_data_complex.evaluate_with_spline(
+                [1000], ext=2, piecewise_constant=True
+            ),
+
+        # Test on a point outside the grid with the lookup table and
+        # ext = 1
+        self.assertEqual(
+            sin_data_complex.evaluate_with_spline(
+                [1000], ext=1, piecewise_constant=True
+            ),
+            0,
         )
 
         # Vector input
@@ -790,6 +857,21 @@ class TestUniformGridData(unittest.TestCase):
         self.assertTrue(
             np.allclose(output.data, np.sin(linspace.coordinates()))
         )
+
+        # Incompatible dimensions
+        with self.assertRaises(ValueError):
+            sin_data(gd.UniformGrid([101, 201], x0=[0, 1], x1=[3, 4]))
+
+        # Test with grid that has a flat dimension
+        prod_data_flat = gd.sample_function_from_uniformgrid(
+            product, gd.UniformGrid([101, 1], x0=[0, 0], dx=[1, 3])
+        )
+
+        # y = 1 is in the flat cell, where y = 0, and here we are using nearest
+        # interpolation
+        self.assertAlmostEqual(prod_data_flat((1, 1)), 2)
+        # Vector
+        self.assertCountEqual(prod_data_flat([(1, 1), (2, 1)]), [2, 4])
 
     def test_copy(self):
 
@@ -924,9 +1006,27 @@ class TestUniformGridData(unittest.TestCase):
         self.assertAlmostEqual(resampled_nearest((2, 2.5)), 9 * (1 + 1j))
 
         # Check with one point
-        new_grid2 = gd.UniformGrid([51, 1], x0=[1, 1], x1=[2, 1])
+        new_grid2 = gd.UniformGrid([11, 1], x0=[1, 2], dx=[0.1, 1])
         resampled2 = prod_data_complex.resampled(new_grid2)
-        self.assertEqual(resampled2.grid, new_grid2)
+        prod_data_one_point = gd.sample_function_from_uniformgrid(
+            product_complex, new_grid2
+        )
+
+        self.assertEqual(resampled2, prod_data_one_point)
+
+        # Resample from 3d to 2d
+
+        grid_data3d = gd.sample_function_from_uniformgrid(
+            lambda x, y, z: x * (y + 2) * (z + 5),
+            gd.UniformGrid([10, 20, 11], x0=[0, 1, 0], dx=[1, 2, 0.1]),
+        )
+        grid_2d = gd.UniformGrid([10, 20, 1], [0, 1, 0], dx=[1, 2, 0.1])
+
+        expected_data2d = gd.sample_function_from_uniformgrid(
+            lambda x, y, z: x * (y + 2) * (z + 5), grid_2d
+        )
+
+        self.assertEqual(grid_data3d.resampled(grid_2d), expected_data2d)
 
     def test_dx_change(self):
         def product_complex(x, y):

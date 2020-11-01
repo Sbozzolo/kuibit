@@ -114,7 +114,7 @@ class OneScalar:
 
     def __init__(self, path):
         self.path = str(path)
-        # The _vars dictionary contains a mapping between the various variable
+        # The _vars dictionary contains a mapping between the various variables
         # and the column numbers in which they are stored.
         self._vars = {}
         self.folder, filename = os.path.split(self.path)
@@ -228,7 +228,9 @@ class OneScalar:
 
         with opener(self.path, mode=opener_mode) as fil:
             # Read the first 20 lines
-            header = [fil.readline() for i in range(self._header_line_number)]
+            header = [
+                fil.readline() for line in range(self._header_line_number)
+            ]
 
             # Column format is relevant only for scalar output, so we start
             # from that
