@@ -64,6 +64,10 @@ total volume,
 ``num_extended_dimensions`` returns how many dimensions are in the grid with
 more than one grid point.
 
+When you initialize a grid with a flat dimension, you must specify ``x0`` and ``dx``
+(you cannot do it by specifying ``x0`` and ``x1``, because there is no ``x1``!).
+In general, prefer providing ``x0`` and ``dx`` instead of ``x0`` and ``x1``.
+
 You can use the ``in`` operator to see if a coordinate is inside the grid.
 The operation considers the size of the cell, for example
 
@@ -146,6 +150,18 @@ that all the mathematical operations are defined, such as, adding two
 
 Mathematical operations are performed only if the two
 :py:class:`~.UniformGridData` have the same underlying grid structure.
+:py:class:`~.UniformGridData` also support N-dimensional Fourier transforms with
+the :py:meth:`~.fourier_transform` method.
+
+:py:class:`~.UniformGridData` can be sliced to lower dimensional
+:py:class:`~.UniformGridData`. To do this, use the meth:`~.slice` method. This
+function takes a ``cut`` paramter which is a list of the same lenght as the
+dimension of the data. The elements of ``cut`` are ``None`` for the dimensions you
+want to keep and are the coordinate of where you want to slice. For example, if you
+have 3D data and you want to only look at the line with ``x=1`` and ``y=2``, then,
+``cut`` has to be ``[1, 2, None]``. You can cut in arbitrary places and optionally
+enable the ``resample`` option to obtain the values with a multilinear interpolation
+instead of approximating the point with the closest available.
 
 As :py:class:`~.TimeSeries`, :py:class:`~.UniformGridData` can be represented as
 splines (constant or linear). This means that the objects can be resampled or
@@ -156,7 +172,9 @@ Splines allow you to use the :py:class:`~.UniformGridData` as a normal function.
 Suppose ``rho`` is a grid function. You can either use the bracket operator to
 find the value of ``rho`` corresponding to specific indices (``rho[i, j]``), or
 you can call ``rho`` with the coordinate where you want to evalue it
-(``rho(x)``).
+(``rho(x)``). When there are flat dimensions, the only possible splines are with
+nearest neighbors. You can use a multilinear interpolation on the extended by
+removing the flat dimensions with :py:meth:`~flat_dimensions_remove`.
 
 Some basic useful functions are :py:meth:`~.mean`, :py:meth:`~.integral`,
 :py:meth:`~.norm1`, or :py:meth:`~.norm2`. In general, there's a
@@ -211,6 +229,16 @@ data is always saved as as 1D array (due to the limitations of the backend).
 These files can be read with the :py:meth:`~.load_UniformGridData` function. For
 large datasets, it is convinent to compress the file. To do this, just provide a
 file extension that is compressed (e.g., ``.dat.gz``).
+
+To access the data (ie, for plotting), you can simply use `.data`. This is a
+standard numpy array.
+
+.. warning::
+
+   Arrays are stored row-first, so if you want to have a natural mapping between
+   coordinates and indices you have to transpose the data!
+   (See, `<this blog post> https://eli.thegreenplace.net/2014/meshgrids-and-disambiguating-rows-and-columns-from-cartesian-coordinates/`_ for an explanation.)
+
 
 HierarchicalGridData
 --------------------

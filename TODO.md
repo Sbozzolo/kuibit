@@ -35,3 +35,4 @@ of knowledge of PostCactus or of Python required to complete the task.
   different ways, they should be more uniform. [====]
 * Uniform `keys()` function to Python3 standard. [==]
 * Add support for `logging`. [===]
+* Refactor code to correctly use `np.array` or `np.asarray`.

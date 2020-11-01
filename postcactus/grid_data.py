@@ -138,22 +138,24 @@ class UniformGrid:
             #
             # If we want a dx of 1, we have need 5 points. Vice versa,
             # if we have n points, dx is (x1 - x0)/(n - 1).
-            x1_arr = np.atleast_1d(np.array(x1, dtype=float))
+            x1_arr = np.atleast_1d(x1)
             self._check_dims(x1_arr, "x1")
 
             if not all(self.x0 <= x1_arr):
                 raise ValueError(
                     f"x1 {x1_arr} should be the upper corner (x0 = {x0})"
                 )
-
-            # If shape has ones, then dx does not make sense, so we create a
-            # temporary temp_shape object where we substitute the ones with
-            # zeros, so dx ends up being negative where shape is 1. Then, we
-            # force the negative values to zero.
-            temp_shape = self.shape.copy()
-            temp_shape[temp_shape == 1] = 0
-            self.__dx = (x1_arr - self.x0) / (temp_shape - 1)
-            self.__dx[self.__dx < 0] = 0
+            # We have to deal with grid with only one point along one direction.
+            # When that happens, the only way to produce a grid that makes sense
+            # is to have x0 and dx, because for those grids x0 = x1 along the
+            # direction that has one single point.
+            if np.any(self.shape == 1):
+                raise ValueError(
+                    "Cannot initialize a grid with a dimension"
+                    " that has only one grid point by providing"
+                    " x0 and x1. You must provide dx"
+                )
+            self.__dx = (x1_arr - self.x0) / (self.shape - 1)
         else:
             # Here we assume dx is given, but if also x1 is given, that
             # would may lead to problems if the paramters do not agree. So, we
@@ -461,6 +463,9 @@ class UniformGrid:
     def flat_dimensions_removed(self):
         """Return a new UniformGrid with dimensions which are only one gridpoint across
         removed."""
+
+        # We need this infrastructure to slice GridData
+
         copied = self.copy()
 
         # We have to save this, otherwise it would be recomputed at every line,
@@ -489,7 +494,7 @@ class UniformGrid:
         """Return a new UniformGrid with coordinates shifted by some amount
 
         x -> x + shift."""
-        shift = np.array(shift)
+        shift = np.asarray(shift)
         self._check_dims(shift, "shift")
 
         copied = self.copy()
@@ -690,7 +695,7 @@ def load_UniformGridData(path, *args, **kwargs):
     #    (which means, if we find .gz or .bz2 we don't match that)
     # 2. (\.(gz|bz2))? matches if we have compression
     # 3. ^ $ means that we match the entire name
-    rx_filename = re.compile("^(.+?)(\.(gz|bz2))?$")
+    rx_filename = re.compile(r"^(.+?)(\.(gz|bz2))?$")
 
     filename_match = rx_filename.match(path)
 
@@ -719,6 +724,8 @@ def load_UniformGridData(path, *args, **kwargs):
     # # iteration: None
 
     for var, line in zip(metadata.keys(), header):
+        # TODO: Make this into a regex
+
         # We read what is after the colon (with space)
         var_data = line.split(": ")
 
@@ -1026,11 +1033,14 @@ class UniformGridData(BaseNumerical):
         # ext = 0 is extrapolation and ext = 3 is setting the boundary
         # value. We cannot do this with RegularGridInterpolator
 
+        if ext not in (1, 2):
+            raise ValueError("Only ext=1 or ext=2 are available")
+
         # Check if we have the point on the grid, in that case return the
         # value. At the moment, we do this only if x is one single point.
         #
         # Not a UniformGrid and only a single point
-        if not isinstance(x, UniformGrid) and np.array(x).shape == (
+        if not isinstance(x, UniformGrid) and np.asarray(x).shape == (
             self.num_dimensions,
         ):
             # Either we have the point exactly on the grid, or we
@@ -1041,28 +1051,62 @@ class UniformGridData(BaseNumerical):
                     for dim in range(self.num_dimensions)
                 ]
             ):
+                # ext == 1 means that we have to set the point to zero if it is
+                # outside the grid. ext = 2 means that we return error.
+                if x not in self.grid:
+                    if ext == 1:
+                        # We must keep the type consistent
+                        return (np.asarray(0, dtype=self.dtype)).item()
+                    if ext == 2:
+                        raise ValueError("Point outside the grid")
                 return self.data[tuple(self.grid.coordinates_to_indices(x))]
 
-        # TODO: We can do better than this. If piecewise_constant is True
-        #       we can avoid using splines. We only have to handle the ext.
+        if isinstance(x, UniformGrid):
+            if x.num_dimensions != self.num_dimensions:
+                raise ValueError(
+                    "Incompatible dimensions between input and self"
+                )
+            # The way we want the coordinates is like as an array with the same
+            # shape of the grid and with values the coordines (as arrays). This
+            # is similar to as_same_shape, but the coordinates have to be the
+            # value, and not the first index.
+            x = np.moveaxis(x.coordinates(as_same_shape=True), 0, -1)
 
-        if ext not in (1, 2):
-            raise ValueError("Only ext=1 or ext=2 are available")
+        x = np.atleast_1d(np.array(x))
+        # x is now a new copy
+
+        # Is the input a single point? If yes we return a single value
+        input_one_point = x.shape == (self.num_dimensions,)
+
+        # TODO: We can do better than this. If piecewise_constant is True
+        #       we can handle more points at the same time.
+
+        # If there are flat dimensions, we must use the nearest method
+        if piecewise_constant or (
+            self.num_dimensions != self.num_extended_dimensions
+        ):
+
+            # To loop over all the points we reshape x so that it has only one
+            # level
+            old_shape = x.shape
+            # np.prod(old_shape[:-1]) returns the total number of points
+            num_points = np.prod(old_shape[:-1], dtype=np.int)
+            # If we have only one point, we must transform it into a list that we
+            # loop over
+            new_shape = (num_points, old_shape[-1])
+            ret = np.zeros(num_points, dtype=self.dtype)
+            x = x.reshape(new_shape)
+            for index, point in enumerate(x):
+                ret[index] = self.evaluate_with_spline(
+                    point, ext=ext, piecewise_constant=True
+                )
+
+            return ret[0] if input_one_point else ret.reshape(old_shape[:-1])
+
+        # We are here only with method = linear
 
         if self.invalid_spline:
             self._make_spline()
-
-        # To make sure we give what the user asks we temporarly change the
-        # method in the RegularGridInterpolator to 'nearest' (see documentation
-        # in SciPy), if piecewise_constant is True, or 'linear', if it is
-        # False.
-
-        old_method = self.spline_real.method
-        new_method = "nearest" if piecewise_constant else "linear"
-
-        self.spline_real.method = new_method
-        if self.is_complex():
-            self.spline_imag.method = new_method
 
         # ext = 1 is setting to 0. We set fill_value to 0, so this is the
         # default behavior. We change the bounds_error attribute in
@@ -1072,15 +1116,6 @@ class UniformGridData(BaseNumerical):
             self.spline_real.bounds_error = False
             if self.is_complex():
                 self.spline_imag.bounds_error = False
-
-        if isinstance(x, UniformGrid):
-            # The way we want the coordinates is like as an array with the same
-            # shape of the grid and with values the coordines (as arrays). This
-            # is similar to as_same_shape, but the coordinates have to be the
-            # value, and not the first index.
-            x = np.moveaxis(x.coordinates(as_same_shape=True), 0, -1)
-
-        x = np.atleast_1d(np.array(x))
 
         y_real = self.spline_real(x)
         if self.is_complex():
@@ -1096,18 +1131,172 @@ class UniformGridData(BaseNumerical):
 
         ret = np.atleast_1d(ret)
 
-        # Restore the old method
-        self.spline_real.method = old_method
-        if self.is_complex():
-            self.spline_imag.method = old_method
-
-        # Was the input a single point? If yes we return a single value
-        input_one_point = x.shape == (self.num_dimensions,)
         return ret[0] if input_one_point else ret
 
     def __call__(self, x):
         # TODO: Avoid splines when the data is already available
         return self.evaluate_with_spline(x)
+
+    def sliced(self, cut, resample=False):
+        """Return a new UniformGridData obtained slicing the current one.
+
+        cut specifies how to slice the data. It has to be an array with
+        the same num of dimensions of the data. Where cut is None, that
+        dimension is kept, where it is a coordinate, the data is cut
+        fixing that coordinate.
+
+        Eg, for a 2D array, if cut is [None, 2], the cut will be with y = 2.
+
+        If resample is True, you can cut at any point and we will compute
+        the values with multilinear interpolation. If resample is False,
+        we will use the data already available.
+
+        In doing this, dimensions that are one grid point are lost.
+
+        :param cut: How to slice the array. None entries mean "keep that dimension"
+        :type cut:  array or list with dimension
+        :param resample: Whether to use multilinear interpolation to compute the
+        data or simply use the value of the closest point.
+        :type resample: bool
+
+        :returns: A sliced grid data
+        :rtype: :py:class:`~.UniformGridData`
+
+        """
+
+        # TODO: There is redundancy in how this function is written. It should be easy
+        #       to simplify it.
+
+        if np.asarray(cut).shape != (self.num_dimensions,):
+            raise ValueError(
+                f"{cut} has wrong dimension. Cut has to have the same"
+                " dimensions as the grid, and has to have None on the"
+                " dimension you want to keep"
+            )
+
+        # First we check that we actually have to resample and cut is not all
+        # None
+        if len(set(cut)) == 1 and cut[0] is None:
+            return self.copy()
+
+        # If we have to resample, we simply prepare a new UniformGrid with the
+        # coordiantes that we want. We are going to resample keeping the number
+        # of dimensions fixed, but setting shape of 1 grid point on those
+        # dimensions that have to be cut. Then, we flatten the UniformGridData
+        # (which removes dimensions with one grid point).
+
+        if resample:
+            new_shape = [
+                self.shape[dim] if cut[dim] is None else 1
+                for dim in range(self.num_dimensions)
+            ]
+            new_x0 = [
+                self.x0[dim] if cut[dim] is None else cut[dim]
+                for dim in range(self.num_dimensions)
+            ]
+            new_ghost = [
+                self.num_ghost[dim] if cut[dim] is None else 0
+                for dim in range(self.num_dimensions)
+            ]
+
+            new_grid = UniformGrid(
+                new_shape,
+                x0=new_x0,
+                dx=self.dx,
+                ref_level=self.ref_level,
+                component=self.component,
+                num_ghost=new_ghost,
+                time=self.time,
+                iteration=self.iteration,
+            )
+
+            # We used "resampled" to make a copy, then "flat_dimensions_remove"
+            # to modify that (so that we don't make a new copy)
+            sliced_data = self.resampled(new_grid)
+            sliced_data.flat_dimensions_remove()
+            return sliced_data
+
+        # TODO: Keep this code DRY. There is so much redundancy...!
+        new_shape = [
+            self.shape[dim]
+            for dim in range(self.num_dimensions)
+            if cut[dim] is None
+        ]
+        new_x0 = [
+            self.x0[dim]
+            for dim in range(self.num_dimensions)
+            if cut[dim] is None
+        ]
+        new_dx = [
+            self.dx[dim]
+            for dim in range(self.num_dimensions)
+            if cut[dim] is None
+        ]
+        new_ghost = [
+            self.num_ghost[dim]
+            for dim in range(self.num_dimensions)
+            if cut[dim] is None
+        ]
+
+        new_grid = UniformGrid(
+            new_shape,
+            x0=new_x0,
+            dx=new_dx,
+            ref_level=self.ref_level,
+            component=self.component,
+            num_ghost=new_ghost,
+            time=self.time,
+            iteration=self.iteration,
+        )
+
+        # Here we are not resampling, so we just have to properly cut the array.
+        # We prepare a slicer array which defines where to cut.
+        slicer = []
+        # We walk through all the dimensions, if some unreasonable cuts are
+        # requsted, we throw an error, otherwise we find the index of the
+        # data element where to cut.
+        for dim in range(self.num_dimensions):
+            if cut[dim] is None:
+                slicer.append(slice(None))
+            else:
+                if not (
+                    self.grid.lowest_vertex[dim]
+                    <= cut[dim]
+                    < self.grid.highest_vertex[dim]
+                ):
+                    raise ValueError("Cut point is outside the grid")
+                # Transform from coordinate to index
+                index = int((cut[dim] - self.x0[dim]) / self.dx[dim] + 0.5)
+                slicer.append(index)
+
+        slicer = tuple(slicer)
+        return type(self)(new_grid, self.data[slicer])
+
+    def slice(self, cut, resample=False):
+        """Slice the data along giev direction.
+
+        cut specifies how to slice the data. It has to be an array with
+        the same num of dimensions of the data. Where cut is None, that
+        dimension is kept, where it is a coordinate, the data is cut
+        fixing that coordinate.
+
+        Eg, for a 2D array, if cut is [None, 2], the cut will be with y = 2.
+
+        If resample is True, you can cut at any point and we will compute
+        the values with multilinear interpolation. If resample is False,
+        we will use the data already available.
+
+        :param cut: How to slice the array. None entries mean "keep that dimension"
+        :type cut:  array or list with dimension
+        :param resample: Whether to use multilinear interpolation to compute the
+        data or simply use the value of the closest point.
+        :type resample: bool
+
+        :returns: A sliced grid data
+        :rtype: :py:class:`~.UniformGridData`
+
+        """
+        self._apply_to_self(self.sliced, cut=cut, resample=resample)
 
     def resampled(self, new_grid, ext=2, piecewise_constant=False):
         """Return a new UniformGridData resampled from this to new_grid.
@@ -1161,6 +1350,9 @@ class UniformGridData(BaseNumerical):
         This is used to transform the commands from returning an object
         to modifying self.
         The function has to return a new copy of the object (not a reference).
+
+        This function is used to implement those methods that act on the object
+        starting from methods that return a new object.
         """
         ret = f(*args, **kwargs)
         self.grid, self.data = ret.grid, ret.data
@@ -1248,7 +1440,7 @@ class UniformGridData(BaseNumerical):
         new_grid = UniformGrid(
             new_shape,
             x0=self.x0,
-            x1=self.x1,
+            dx=new_dx,
             ref_level=self.ref_level,
             component=self.component,
             num_ghost=self.num_ghost,
@@ -1287,6 +1479,13 @@ class UniformGridData(BaseNumerical):
     def num_extended_dimensions(self):
         """Return the number of dimensions with more than one grid point."""
         return self.grid.num_extended_dimensions
+
+    @property
+    def extended_dimensions(self):
+        """Return an array of bools with whether a dimension has more than one
+        point or not.
+        """
+        return self.grid.extended_dimensions
 
     def integral(self):
         """Compute the integral over the whole volume of the grid.
@@ -1659,6 +1858,9 @@ def sample_function_from_uniformgrid(function, grid):
 def sample_function(function, shape, x0, x1, *args, **kwargs):
     """Create a regular dataset by sampling a scalar function of the form
     f(x, y, z, ...) on a grid.
+
+    You cannot use this function to initialize grids with flat dimensions
+    (dimensions with only one grid point).
 
     :param function:  The function to sample.
     :type function:   A callable that takes as many arguments as the number
@@ -2108,7 +2310,6 @@ class HierarchicalGridData(BaseNumerical):
 
     def to_UniformGridData(self, grid, resample=False):
         """Combine the refinement levels into a UniformGridData.
-
         Optionally resample the data with a multilinear resampling.
         """
         return UniformGridData(
@@ -2136,10 +2337,11 @@ class HierarchicalGridData(BaseNumerical):
         new_grid = UniformGrid(
             new_shape,
             x0=self.x0,
-            x1=self.x1,
+            dx=new_dx,
             time=self.time,
             iteration=self.iteration,
         )
+
         return self.to_UniformGridData(new_grid, resample=resample)
 
     def _apply_to_self(self, f, *args, **kwargs):
