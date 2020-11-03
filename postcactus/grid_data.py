@@ -723,7 +723,7 @@ def load_UniformGridData(path, *args, **kwargs):
     # # time: None
     # # iteration: None
 
-    for var, line in zip(metadata.keys(), header):
+    for line in header:
         # TODO: Make this into a regex
 
         # We read what is after the colon (with space)
@@ -967,7 +967,7 @@ class UniformGridData(BaseNumerical):
     def __getitem__(self, key):
         return self.data[key]
 
-    def _make_spline(self, *args, k=1, **kwargs):
+    def _make_spline(self, k=1):
         """Private function to make spline representation of the data using
         scipy.interpolate.RegularGridInterpolator.
 
@@ -1046,10 +1046,9 @@ class UniformGridData(BaseNumerical):
             # Either we have the point exactly on the grid, or we
             # are called with piecewise_constant=True
             if piecewise_constant or all(  # On each dimension, we
-                [  # have it on the grid.
+                  # have it on the grid.
                     x[dim] in self.grid.coordinates_1d[dim]
                     for dim in range(self.num_dimensions)
-                ]
             ):
                 # ext == 1 means that we have to set the point to zero if it is
                 # outside the grid. ext = 2 means that we return error.
@@ -2295,7 +2294,7 @@ class HierarchicalGridData(BaseNumerical):
         # elegant solution.
         ret = np.zeros(points_arr.shape[:-1], dtype=self.dtype)
         for multi_index in itertools.product(
-            *(range(num_points) for num_points in ret.shape)
+            *(range(num_points) for num_points in tuple(ret.shape))
         ):
             ret[multi_index] = self._evaluate_at_one_point(
                 points_arr[multi_index],
@@ -2391,9 +2390,9 @@ class HierarchicalGridData(BaseNumerical):
         return reduction(
             # Here we are accessing _apply_reduction, which is a protected
             # member, so we ignore potential complaints.
-            # skipcq: PYL-W0212
             np.array(
                 [
+                    # skipcq: PYL-W0212
                     data._apply_reduction(reduction)
                     for data in self.all_components
                 ]
