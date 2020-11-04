@@ -69,6 +69,12 @@ class BaseNumerical(ABC):
             raise ValueError("Cannot divide by zero")
         return self._apply_binary(other, np.divide)
 
+    def __rtruediv__(self, other):
+        # This self._apply_binary(other, np.divide)
+        # divives self by other, so, we reverse that
+        # with ** -1
+        return (self._apply_binary(other, np.divide))**-1
+
     def __pow__(self, other):
         return self._apply_binary(other, np.power)
 
