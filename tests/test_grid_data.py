@@ -1127,6 +1127,25 @@ class TestUniformGridData(unittest.TestCase):
 
         self.assertAlmostEqual(prod_data[2, 2], 2 * 14)
 
+    def test_fourier_transform(self):
+
+        prod_data_complex = gd.sample_function(
+            lambda x, y: (1 + 1j) * x * (y + 2), [11, 21], [0, 10], [10, 30]
+        )
+
+        dx = prod_data_complex.dx
+        fft_c = np.fft.fftshift(np.fft.fftn(prod_data_complex.data))
+        freqs_c = [
+            np.fft.fftshift(np.fft.fftfreq(11, d=dx[0])),
+            np.fft.fftshift(np.fft.fftfreq(21, d=dx[1])),
+        ]
+        f_min_c = [freqs_c[0][0], freqs_c[1][0]]
+        delta_f_c = [freqs_c[0][1] - freqs_c[0][0], freqs_c[1][1] - freqs_c[1][0]]
+
+        freq_grid_c = gd.UniformGrid(fft_c.shape, x0=f_min_c, dx=delta_f_c)
+        expected_c = gd.UniformGridData(freq_grid_c, fft_c)
+
+        self.assertEqual(expected_c, prod_data_complex.fourier_transform())
 
 class TestHierarchicalGridData(unittest.TestCase):
     def setUp(self):

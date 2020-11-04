@@ -1809,6 +1809,49 @@ class UniformGridData(BaseNumerical):
             and self.grid == other.grid
         )
 
+    def fourier_transform(self):
+        """Perform the multi-dimensional Fourier transform on the data.
+
+        We follow Numpy's conventions, with the exception that we normalize
+        the amplitude with dx.
+
+        If the signal is complex, we also shift the negative components to be in
+        the negative part of the signal.
+
+        :returns: Fourier transform
+        :rtype: :py:class:`~.UniformGridData`
+
+        """
+        fft_data = np.fft.fftshift(np.fft.fftn(self.data))
+        # We extract the frequencies along each direction
+        freqs = [
+            np.fft.fftshift(
+                np.fft.fftfreq(self.shape[dim], d=self.dx[dim])
+            )
+            for dim in range(self.num_dimensions)
+        ]
+
+        for dim in range(self.num_dimensions):
+            fft_data[dim] *= self.dx[dim]
+
+        lowest_freqs = [freqs[dim][0] for dim in range(self.num_dimensions)]
+        delta_freqs = [
+            freqs[dim][1] - freqs[dim][0] for dim in range(self.num_dimensions)
+        ]
+
+        grid = UniformGrid(
+            fft_data.shape,
+            x0=lowest_freqs,
+            dx=delta_freqs,
+            ref_level=self.ref_level,
+            component=self.component,
+            num_ghost=self.num_ghost,
+            time=self.time,
+            iteration=self.iteration,
+        )
+
+        return type(self)(grid, fft_data)
+
 
 def sample_function_from_uniformgrid(function, grid):
     """Create a regular dataset by sampling a scalar function of the form
