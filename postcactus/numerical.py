@@ -73,7 +73,7 @@ class BaseNumerical(ABC):
         # This self._apply_binary(other, np.divide)
         # divives self by other, so, we reverse that
         # with ** -1
-        return (self._apply_binary(other, np.divide))**-1
+        return (self._apply_binary(other, np.divide)) ** -1
 
     def __pow__(self, other):
         return self._apply_binary(other, np.power)
