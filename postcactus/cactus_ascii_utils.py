@@ -161,5 +161,5 @@ def scan_header(
             header, rx_data_columns
         )
         return time_column, columns_description
-    else:
-        return time_column, data_column
+    # This is not one file per group
+    return time_column, data_column
