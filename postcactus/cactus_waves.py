@@ -587,16 +587,21 @@ class WavesDir(mp.MultipoleAllDets):
         # is indexed by radius". However, it is the main point of access to GW
         # data, so we keep naming consistent and call it "Dir" and let it have
         # it interface with a SimDir.
-        psi4_mpalldets = sd.multipoles[var]
 
-        # Now we have to prepare the data for the constructor of the base class
-        # The data has format:
-        # (multipole_l, multipole_m, extraction_radius, timeseries)
         data = []
-        for radius, det in psi4_mpalldets._dets.items():
-            for mult_l, mult_m, tts in det:
-                if mult_l >= l_min:
-                    data.append((mult_l, mult_m, radius, tts))
+
+        # We have to collect data only if var is available
+        if var in sd.multipoles:
+
+            psi4_mpalldets = sd.multipoles[var]
+
+            # Now we have to prepare the data for the constructor of the base class
+            # The data has format:
+            # (multipole_l, multipole_m, extraction_radius, timeseries)
+            for radius, det in psi4_mpalldets._dets.items():
+                for mult_l, mult_m, tts in det:
+                    if mult_l >= l_min:
+                        data.append((mult_l, mult_m, radius, tts))
 
         super().__init__(data)
 
