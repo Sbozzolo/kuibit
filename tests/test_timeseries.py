@@ -324,7 +324,7 @@ class TestTimeseries(unittest.TestCase):
 
         # Test rtrudiv
         out = 1 / sins
-        self.assertTrue(np.allclose(out.y, 1/values))
+        self.assertTrue(np.allclose(out.y, 1 / values))
 
         # Scalar
         out = sins / 3
