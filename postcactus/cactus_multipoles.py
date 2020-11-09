@@ -276,7 +276,10 @@ class MultipoleAllDets:
             self.outermost = self._detectors[self.r_outer]
         #
         self.available_l = sorted({mult_l for mult_l, _ in self.available_lm})
-        self.l_max = max(self.available_l)
+        if self.available_l:
+            self.l_max = max(self.available_l)
+        else:
+            self.l_max = None
         self.available_m = sorted({mult_m for _, mult_m in self.available_lm})
 
         # Alias
