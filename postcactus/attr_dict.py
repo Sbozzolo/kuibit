@@ -70,6 +70,9 @@ class AttributeDictionary:
         # TODO: In Python 3 this should not be a list
         return list(self._elem.keys())
 
+    def __str__(self):
+        return f"Fields available:\n{self.keys()}"
+
 
 class TransformDictionary:
     """TransformDictionary is a wrapper around a dictionary that apply
