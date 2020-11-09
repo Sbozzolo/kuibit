@@ -31,6 +31,7 @@ class TestAttrDict(unittest.TestCase):
 
         self.assertEqual(attr_dict.first, "a")
         self.assertCountEqual(dir(attr_dict), ["first", "b"])
+        self.assertCountEqual(attr_dict.keys(), ["first", "b"])
 
     def test_TransformDictionary(self):
 

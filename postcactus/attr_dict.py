@@ -65,6 +65,11 @@ class AttributeDictionary:
         """Return the list of the attributes"""
         return list(self._elem.keys())
 
+    def keys(self):
+        """Return the list of the attributes"""
+        # TODO: In Python 3 this should not be a list
+        return list(self._elem.keys())
+
 
 class TransformDictionary:
     """TransformDictionary is a wrapper around a dictionary that apply
