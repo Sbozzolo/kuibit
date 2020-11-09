@@ -372,3 +372,9 @@ class TestCactusWaves(unittest.TestCase):
             order=0,
             extrapolate_amplitude_phase=True,
         )
+
+    def test_empty(self):
+
+        # Test with no wave information
+        empty_sim = sd.SimDir("postcactus")
+        self.assertIs(empty_sim.gws.l_max, None)
