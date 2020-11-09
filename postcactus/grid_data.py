@@ -1046,9 +1046,9 @@ class UniformGridData(BaseNumerical):
             # Either we have the point exactly on the grid, or we
             # are called with piecewise_constant=True
             if piecewise_constant or all(  # On each dimension, we
-                  # have it on the grid.
-                    x[dim] in self.grid.coordinates_1d[dim]
-                    for dim in range(self.num_dimensions)
+                # have it on the grid.
+                x[dim] in self.grid.coordinates_1d[dim]
+                for dim in range(self.num_dimensions)
             ):
                 # ext == 1 means that we have to set the point to zero if it is
                 # outside the grid. ext = 2 means that we return error.
@@ -1825,9 +1825,7 @@ class UniformGridData(BaseNumerical):
         fft_data = np.fft.fftshift(np.fft.fftn(self.data))
         # We extract the frequencies along each direction
         freqs = [
-            np.fft.fftshift(
-                np.fft.fftfreq(self.shape[dim], d=self.dx[dim])
-            )
+            np.fft.fftshift(np.fft.fftfreq(self.shape[dim], d=self.dx[dim]))
             for dim in range(self.num_dimensions)
         ]
 
