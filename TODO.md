@@ -3,18 +3,28 @@
 Here we collect ideas to improve and extend PostCactus. If you want to
 contribute to the project, this a good place where to start. The projects are
 sorted in no particular order. The number of [=] along with each idea indicates
-the expected difficulty. This parameter increases with the level
-of knowledge of PostCactus or of Python required to complete the task.
+the expected difficulty. This parameter increases with the level of knowledge of
+PostCactus or of Python required to complete the task.
 
 ## Features
 
-* Function to compute spectrogram of TimeSeries. [=]
+* Function to compute spectrogram of `TimeSeries`. [=]
 * The extrapolation to infinity function for gravitational waves has to be tested
   and can be extended to support generic strains (not only for fixed l, m). [==]
 * Improve algorithm for `__call__` in `Series` and `grid_data` to be more
   Pythonic and faster. [==]
 * Extend `Series` and `grid_data` to support array data instead of only scalar
   data. [====]
+* Correcly identify and merge refinement levels in `HierarchicalGridData` even
+  where there are multiple centers of refinement. [===]
+* Linear momentum lost by gravitational waves. [=]
+
+* Port `cactus_parfile` from `PostCactus2`. [==]
+* Port `cactus_timertree` from `PostCactus2`. [==]
+* Port support for grid data with reflection from `PostCactus2`. [==]
+* Add support for HDF5 for `AHFinderDirect` output. [==]
+
+* Add method to merge `AHFinderDirect` patches. [==]
 
 ## Infrastructure
 
@@ -33,6 +43,8 @@ of knowledge of PostCactus or of Python required to complete the task.
   common infrastrucutre. There should be a way to reduce code deduplication.
   Also, at the moment, the three group of classes are structured in very
   different ways, they should be more uniform. [====]
-* Uniform `keys()` function to Python3 standard. [==]
+* Uniform `keys()` function to Python3 standard, and implement other dictionary
+  functions (e.g., `items()`). [==]
 * Add support for `logging`. [===]
-* Refactor code to correctly use `np.array` or `np.asarray`.
+* Refactor code to correctly use `np.array` or `np.asarray` (not use `np.array`
+  when is not needed). [==]
