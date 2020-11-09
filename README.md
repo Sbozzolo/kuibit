@@ -65,7 +65,9 @@ Documentation is automatically generated after each commit by GitHub Actions.
 
 We use [nbsphinx](https://nbsphinx.readthedocs.io/) to translate Jupyter
 notebooks to the examples. The extension is required. Note: Jupyter notebooks
-have to be un-evaluated.
+have to be un-evaluated. `nbsphinx` requires [pandoc](https://pandoc.org/). If
+don't have `pandoc`, you should comment out `nbsphinx` in `docs/conf.py`, or
+compiling the documentation will fail.
 
 ## Tests
 
