@@ -225,8 +225,12 @@ class SimDir:
 
         if len(self.gravitationalwaves) > 0:
             gw_ret = "Available gravitational wave data"
+        else:
+            gw_ret = ""
 
         if len(self.electromagneticwaves) > 0:
             em_ret = "Available electromagnetic wave data"
+        else:
+            em_ret = ""
 
         return header + ts_ret + mp_ret + gw_ret + em_ret + gf_ret
