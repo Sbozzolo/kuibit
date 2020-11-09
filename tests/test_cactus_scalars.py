@@ -16,6 +16,7 @@
 # this program; if not, see <https://www.gnu.org/licenses/>.
 
 import os
+import re
 import unittest
 
 import numpy as np
@@ -23,6 +24,7 @@ import numpy as np
 from postcactus import cactus_scalars as cs
 from postcactus import simdir as sd
 from postcactus import timeseries as ts
+from postcactus import cactus_ascii_utils as cau
 
 
 class TestCactusScalar(unittest.TestCase):
@@ -84,27 +86,29 @@ class TestCactusScalar(unittest.TestCase):
 
     def test__scan_strings_for_columns(self):
 
-        path = "tests/tov/output-0000/static_tov/vel[0].maximum.asc"
-        asc = cs.OneScalar(path)
+        rx_columns = re.compile(r"^(\d+):(\w+(\[\d+\])?)$")
+        rx_data_columns = re.compile(r"^# data columns: (.+)$")
 
         # Not matching strings
         strings = ["bubu"]
         with self.assertRaises(RuntimeError):
-            asc._scan_strings_for_columns(strings, asc._rx_column_format)
+            cau._scan_strings_for_columns(strings, rx_columns)
 
         # Not matching columns
         strings = ["# data columns: bubu:press"]
         with self.assertRaises(RuntimeError):
-            asc._scan_strings_for_columns(strings, asc._rx_data_columns)
+            cau._scan_strings_for_columns(strings, rx_data_columns)
 
         # Good columns
         strings = ["# data columns: 3:press"]
         self.assertDictEqual(
-            asc._scan_strings_for_columns(strings, asc._rx_data_columns),
+            cau._scan_strings_for_columns(strings, rx_data_columns),
             {"press": 2},
         )
 
     def test__scan_header(self):
+        # This also tests the module scan_header
+
         # __init__ scans the header for some files, so to debug this it may be
         # useful to comment that section temporarily
 

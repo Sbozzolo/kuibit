@@ -34,6 +34,7 @@ import numpy as np
 from postcactus import simdir
 from postcactus import timeseries as ts
 from postcactus.attr_dict import pythonize_name_dict
+from postcactus.cactus_ascii_utils import scan_header
 
 
 class OneScalar:
@@ -46,6 +47,9 @@ class OneScalar:
     latter case, the header is inspected to understand the content of the file.
 
     Compressed files (gz and bz2) are supported.
+
+    OneScalar represents one scalar file, there can be multiple variables inside,
+    (if it was one_file_per_group).
 
     """
 
@@ -72,24 +76,7 @@ class OneScalar:
     \.asc
     (\.(gz|bz2))?$"""
 
-    # Example of data column:
-    # 1 2 3 are always: 1:iteration 2:time 3:data
-    # data columns: 3:kxx 4:kxy 5:kxz 6:kyy 7:kyz 8:kzz
-    _pattern_data_columns = r"^# data columns: (.+)$"
-
-    # Example of column format:
-    # column format: 1:it 2:tl 3:rl 4:c 5:ml 6:ix 7:iy 8:iz 9:time 10:x 11:y
-    # 12:z 13:data
-    _pattern_column_format = r"^# column format: (.+)$"
-
-    # Here we match (number):(word[number])
-    # We are matching expressions like 3:kxx
-    _pattern_columns = r"^(\d+):(\w+(\[\d+\])?)$"
-
     _rx_filename = re.compile(_pattern_filename, re.VERBOSE)
-    _rx_data_columns = re.compile(_pattern_data_columns)
-    _rx_column_format = re.compile(_pattern_column_format)
-    _rx_columns = re.compile(_pattern_columns)
 
     _reduction_types = {
         "minimum": "min",
@@ -100,9 +87,6 @@ class OneScalar:
         "average": "average",
         None: "scalar",
     }
-
-    # How many lines do we read as header?
-    _header_line_number = 20
 
     # What function to use to open the file?
     # What mode?
@@ -158,115 +142,29 @@ class OneScalar:
                 variable_name += index_in_brackets
             self._vars = {variable_name: None}
 
-    def _scan_strings_for_columns(self, strings, pattern):
-        """Match each string in strings against pattern and each matching
-        result against _pattern_columns. Then, return a dictionary that maps
-        variable to column number.
-
-        """
-
-        # We scan these lines and see if any matches with the regexp for the
-        # column format
-        for line in strings:
-            matched_pattern = pattern.match(line)
-            if matched_pattern is not None:
-                break
-        # Here we are using an else clause with a for loop. This else
-        # branch is reached only if the break in the for loop is never
-        # called. In this case, this happens if we never match the
-        # column format
-        else:
-            raise RuntimeError(f"Missing column information in {self.path}")
-
-        # Here we should have matched the column format. It should be
-        # like:
-        # column format: 1:it 2:tl 3:rl 4:c 5:ml 6:ix 7:iy 8:iz 9:time
-        # 10:x 11:y 12:z 13:data
-
-        # Let's make sure that this is the case.
-        #
-        # In matched_column_format.groups()[0] we have the matched
-        # expression (there is only one group). The different column
-        # meanings are separated by a space, so
-        # matched_column_format.groups()[0].split() is a list with the
-        # various subgroups. Each has to match against self.rx_columns.
-        # So, to check that they all match we apply rx_columns.match()
-        # to each element and see if they are all not None with the
-        # all() function
-
-        columns = list(
-            map(
-                self._rx_columns.match,
-                matched_pattern.groups()[0].split(),
-            )
-        )
-
-        are_real_columns = all(columns)
-
-        if not are_real_columns:
-            raise RuntimeError(f"Bad header in {self.path}")
-
-        # Columns are good. Let's create a dictionary to map the number
-        # to the description. Columns are indexed starting from 1.
-        columns_description = {
-            variable_name: int(column_number) - 1
-            for column_number, variable_name, _ in (
-                c.groups() for c in columns
-            )
-        }
-
-        return columns_description
-
     def _scan_header(self):
-        """Use regular expressions to understand the content of a file.
-        In particular, we look for column format and data columns.
-        """
+        # Call scan_header with the right argument
+
+        file_has_column_format = self.reduction_type == "scalar"
+
         # What method to we need to use to open the file?
         # opener can be open, gopen, or bopen depending on the extension
         # of the file
         opener, opener_mode = self._decompressor[self._compression_method]
 
-        with opener(self.path, mode=opener_mode) as fil:
-            # Read the first 20 lines
-            header = [
-                fil.readline() for line in range(self._header_line_number)
-            ]
+        self._time_column, columns_info = scan_header(
+            self.path,
+            self._is_one_file_per_group,
+            file_has_column_format,
+            opener=opener,
+            opener_mode=opener_mode,
+        )
 
-            # Column format is relevant only for scalar output, so we start
-            # from that
-            if self.reduction_type == "scalar":
-                columns_description = self._scan_strings_for_columns(
-                    header, self._rx_column_format
-                )
-
-                time_column = columns_description.get("time", None)
-
-                if time_column is None:
-                    raise RuntimeError(f"Missing time column in {self.path}")
-
-                data_column = columns_description.get("data", None)
-
-                if data_column is None:
-                    raise RuntimeError(f"Missing data column in {self.path}")
-
-                self._time_column = time_column
-            else:
-                # The reductions have always the same form:
-                # 1:iteration 2:time 3:data
-                self._time_column = 1
-                data_column = 2
-
-            # When we have one file per group we have many data columns
-            # Se update _vars to add all the new ones
-            if self._is_one_file_per_group:
-                columns_description = self._scan_strings_for_columns(
-                    header, self._rx_data_columns
-                )
-
-                self._vars.update(columns_description)
-            else:
-                # There is only one data_column
-                self._vars = {list(self._vars.keys())[0]: data_column}
+        if self._is_one_file_per_group:
+            self._vars.update(columns_info)
+        else:
+            # There is only one data_column
+            self._vars = {list(self._vars.keys())[0]: columns_info}
 
         self._was_header_scanned = True
 
