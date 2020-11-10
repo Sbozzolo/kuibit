@@ -32,8 +32,9 @@ Features currently implemented:
 - Manipulate and analyze gravitational-waves (:py:mod:`~.gw_utils`,
   :py:mod:`~.gw_mismatch`). For example, compute energies, mismatches, or
   extrapolate waves to infinity.
-- Work with grid functions (:py:mod:`~.grid_data`,
-  :py:mod:`~.cactus_grid_functions`) as output by ``CarpetIOHDF5``.
+- Work with 1D, 2D, and 3D grid functions (:py:mod:`~.grid_data`,
+  :py:mod:`~.cactus_grid_functions`) as output by ``CarpetIOHDF5`` or
+      ``CarpetIOASCII``.
 - Handle unit conversion, in particular from geometrized to physical
   (:py:mod:`~.unitconv`).
 
@@ -64,7 +65,6 @@ Usage
 
    simdir.rst
    series.rst
-   cactus_grid_functions.rst
    cactus_scalars.rst
    cactus_multipoles.rst
    cactus_waves.rst
@@ -83,6 +83,7 @@ Examples
    examples/simdir.ipynb
    examples/timeseries.ipynb
    examples/grid_data.ipynb
+   examples/cactus_grid_functions.ipynb
    examples/gravitational_waves.ipynb
 
 Reference material (classes, functions, ...)
@@ -108,5 +109,6 @@ Reference material (classes, functions, ...)
 Credits
 -------
 
-The code was originally developed by Wolfgang Kastaun. This is a heavily
-modified fork with emphasis on documentation and testing.
+The code was originally developed by Wolfgang Kastaun. This fork completely
+rewrites the original code, adding emphasis on documentation, testing, and
+extensibility.

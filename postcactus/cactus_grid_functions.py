@@ -704,7 +704,7 @@ class OneGridFunctionH5(BaseOneGridFunction):
                     component,
                 ) = matched.groups()
 
-                if var_name is not self.var_name:
+                if var_name != self.var_name:
                     continue
 
                 time_level = int(time_level)
