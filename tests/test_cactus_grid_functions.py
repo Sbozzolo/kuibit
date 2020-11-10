@@ -239,7 +239,7 @@ class TestOneGridFunction(unittest.TestCase):
 
         abs_base = cg.BaseOneGridFunction("", "")
         abs_base._parse_file("")
-        abs_base._read_component_as_uniform_grid_data("")
+        abs_base._read_component_as_uniform_grid_data("", 0, 0, 0)
         abs_base.time_at_iteration("")
 
     def test__properties_in_file(self):
@@ -341,6 +341,7 @@ class TestOneGridFunction(unittest.TestCase):
             num_ghost=[3, 3],
             time=0,
             iteration=0,
+            component=0,
         )
 
         with h5py.File(self.P_file, "r") as fil:
