@@ -23,6 +23,19 @@ optional = false
 python-versions = "*"
 
 [[package]]
+name = "apptools"
+version = "4.5.0"
+description = "application tools"
+category = "dev"
+optional = false
+python-versions = "*"
+
+[package.dependencies]
+configobj = "*"
+six = "*"
+traitsui = "*"
+
+[[package]]
 name = "argon2-cffi"
 version = "20.1.0"
 description = "The secure Argon2 password hashing algorithm."
@@ -191,6 +204,17 @@ optional = false
 python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*, !=3.4.*"
 
 [[package]]
+name = "configobj"
+version = "5.0.6"
+description = "Config file reading, writing and validation."
+category = "dev"
+optional = false
+python-versions = "*"
+
+[package.dependencies]
+six = "*"
+
+[[package]]
 name = "coverage"
 version = "5.3"
 description = "Code coverage measurement for Python"
@@ -289,6 +313,19 @@ description = "Discover and load entry points from installed packages."
 category = "dev"
 optional = false
 python-versions = ">=2.7"
+
+[[package]]
+name = "envisage"
+version = "4.9.2"
+description = "Extensible application framework"
+category = "dev"
+optional = false
+python-versions = ">=2.7,!=3.0.*,!=3.1.*,!=3.2.*,!=3.3.*,!=3.4.*"
+
+[package.dependencies]
+apptools = "*"
+six = "*"
+traits = "*"
 
 [[package]]
 name = "gwdatafind"
@@ -659,6 +696,27 @@ pyparsing = ">=2.0.3,<2.0.4 || >2.0.4,<2.1.2 || >2.1.2,<2.1.6 || >2.1.6"
 python-dateutil = ">=2.1"
 
 [[package]]
+name = "mayavi"
+version = "4.7.2"
+description = "3D scientific data visualization library and application"
+category = "dev"
+optional = false
+python-versions = "*"
+
+[package.dependencies]
+apptools = "*"
+envisage = "*"
+numpy = "*"
+pyface = ">=6.1.1"
+pygments = "*"
+traits = ">=6.0.0"
+traitsui = ">=7.0.0"
+vtk = "*"
+
+[package.extras]
+app = ["envisage"]
+
+[[package]]
 name = "mistune"
 version = "0.8.4"
 description = "The fastest markdown parser in pure Python"
@@ -972,6 +1030,25 @@ description = "C parser in Python"
 category = "dev"
 optional = false
 python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*"
+
+[[package]]
+name = "pyface"
+version = "7.1.0"
+description = "traits-capable windowing framework"
+category = "dev"
+optional = false
+python-versions = "*"
+
+[package.dependencies]
+traits = ">=6"
+
+[package.extras]
+pyqt = ["pyqt (>=4.10)", "pygments"]
+pyqt5 = ["pyqt5", "pygments"]
+pyside = ["pyside (>=1.2)", "pygments"]
+pyside2 = ["pyside2", "shiboken2", "pygments"]
+test = ["packaging"]
+wx = ["wxpython (>=4)", "numpy"]
 
 [[package]]
 name = "pygments"
@@ -1325,6 +1402,39 @@ six = "*"
 test = ["pytest", "mock"]
 
 [[package]]
+name = "traits"
+version = "6.1.1"
+description = "Observable typed attributes for Python classes"
+category = "dev"
+optional = false
+python-versions = ">=3.5"
+
+[package.extras]
+test = ["cython", "numpy", "pyface", "pyside2", "setuptools", "sphinx", "traitsui"]
+
+[[package]]
+name = "traitsui"
+version = "7.1.0"
+description = "traitsui: traits-capable user interfaces"
+category = "dev"
+optional = false
+python-versions = "*"
+
+[package.dependencies]
+pyface = ">=7.1.0"
+traits = ">=6.0.0"
+
+[package.extras]
+demo = ["configobj", "docutils"]
+editors = ["numpy", "pandas"]
+examples = ["apptools", "chaco", "h5py", "numpy", "pandas", "tables"]
+pyqt = ["pyqt (>=4.10)", "pygments"]
+pyqt5 = ["pyqt5", "pygments"]
+pyside2 = ["pyside2", "shiboken2", "pygments"]
+test = ["packaging"]
+wx = ["wxpython (>=4)", "numpy"]
+
+[[package]]
 name = "typed-ast"
 version = "1.4.1"
 description = "a fork of Python 2 and 3 ast modules with type comment support"
@@ -1352,6 +1462,17 @@ python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*, !=3.4.*, <4"
 brotli = ["brotlipy (>=0.6.0)"]
 secure = ["pyOpenSSL (>=0.14)", "cryptography (>=1.3.4)", "idna (>=2.0.0)", "certifi", "ipaddress"]
 socks = ["PySocks (>=1.5.6,<1.5.7 || >1.5.7,<2.0)"]
+
+[[package]]
+name = "vtk"
+version = "9.0.1"
+description = "VTK is an open-source toolkit for 3D computer graphics, image processing, and visualization"
+category = "dev"
+optional = false
+python-versions = "*"
+
+[package.extras]
+numpy = ["numpy (>=1.9)"]
 
 [[package]]
 name = "wcwidth"
@@ -1395,7 +1516,7 @@ testing = ["pytest (>=3.5,<3.7.3 || >3.7.3)", "pytest-checkdocs (>=1.2.3)", "pyt
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.6"
-content-hash = "1bdd602e310e793ba588e3d8641cf7bfba03059f321de88fb404c759a907850c"
+content-hash = "aa69d1d3ac457b70c2d95acf9daafd6ffd19bc1a1db53e4bd9eaebf0294ae935"
 
 [metadata.files]
 alabaster = [
@@ -1409,6 +1530,9 @@ appdirs = [
 appnope = [
     {file = "appnope-0.1.0-py2.py3-none-any.whl", hash = "sha256:5b26757dc6f79a3b7dc9fab95359328d5747fcb2409d331ea66d0272b90ab2a0"},
     {file = "appnope-0.1.0.tar.gz", hash = "sha256:8b995ffe925347a2138d7ac0fe77155e4311a0ea6d6da4f5128fe4b3cbe5ed71"},
+]
+apptools = [
+    {file = "apptools-4.5.0.tar.gz", hash = "sha256:260ae0e2a86cb2df2fede631ab6ac8ece694a58a1def78cd015c890c57140582"},
 ]
 argon2-cffi = [
     {file = "argon2-cffi-20.1.0.tar.gz", hash = "sha256:d8029b2d3e4b4cea770e9e5a0104dd8fa185c1724a0f01528ae4826a6d25f97d"},
@@ -1527,6 +1651,9 @@ click = [
 colorama = [
     {file = "colorama-0.4.4-py2.py3-none-any.whl", hash = "sha256:9f47eda37229f68eee03b24b9748937c7dc3868f906e8ba69fbcbdd3bc5dc3e2"},
     {file = "colorama-0.4.4.tar.gz", hash = "sha256:5941b2b48a20143d2267e95b1c2a7603ce057ee39fd88e7329b0c292aa16869b"},
+]
+configobj = [
+    {file = "configobj-5.0.6.tar.gz", hash = "sha256:a2f5650770e1c87fb335af19a9b7eb73fc05ccf22144eb68db7d00cd2bcb0902"},
 ]
 coverage = [
     {file = "coverage-5.3-cp27-cp27m-macosx_10_13_intel.whl", hash = "sha256:bd3166bb3b111e76a4f8e2980fa1addf2920a4ca9b2b8ca36a3bc3dedc618270"},
@@ -1649,6 +1776,9 @@ emcee = [
 entrypoints = [
     {file = "entrypoints-0.3-py2.py3-none-any.whl", hash = "sha256:589f874b313739ad35be6e0cd7efde2a4e9b6fea91edcc34e58ecbb8dbe56d19"},
     {file = "entrypoints-0.3.tar.gz", hash = "sha256:c70dd71abe5a8c85e55e12c19bd91ccfeec11a6e99044204511f9ed547d48451"},
+]
+envisage = [
+    {file = "envisage-4.9.2.tar.gz", hash = "sha256:ed9580ac6ea17b333f1cce5b94656aed584798d56d8bd364f996a06fe1ac32eb"},
 ]
 gwdatafind = [
     {file = "gwdatafind-1.0.4-py2.py3-none-any.whl", hash = "sha256:5ab0fb818b22a9f10064cfa072967727a8072d7f7d0a3b96c83907e8ce7bd5b6"},
@@ -1877,6 +2007,9 @@ matplotlib = [
     {file = "matplotlib-3.3.2-pp36-pypy36_pp73-manylinux2010_x86_64.whl", hash = "sha256:2f5eefc17dc2a71318d5a3496313be5c351c0731e8c4c6182c9ac3782cfc4076"},
     {file = "matplotlib-3.3.2.tar.gz", hash = "sha256:3d2edbf59367f03cd9daf42939ca06383a7d7803e3993eb5ff1bee8e8a3fbb6b"},
 ]
+mayavi = [
+    {file = "mayavi-4.7.2.tar.gz", hash = "sha256:a207290757495c0eccab7f451d75b87792481cd417498ec4d2c49eb1593cb373"},
+]
 mistune = [
     {file = "mistune-0.8.4-py2.py3-none-any.whl", hash = "sha256:88a1051873018da288eee8538d476dffe1262495144b33ecb586c4ab266bb8d4"},
     {file = "mistune-0.8.4.tar.gz", hash = "sha256:59a3429db53c50b5c6bcc8a07f8848cb00d7dc8bdb431a4ab41920d201d4756e"},
@@ -2058,6 +2191,9 @@ pycbc = [
 pycparser = [
     {file = "pycparser-2.20-py2.py3-none-any.whl", hash = "sha256:7582ad22678f0fcd81102833f60ef8d0e57288b6b5fb00323d101be910e35705"},
     {file = "pycparser-2.20.tar.gz", hash = "sha256:2d475327684562c3a96cc71adf7dc8c4f0565175cf86b6d7a404ff4c771f15f0"},
+]
+pyface = [
+    {file = "pyface-7.1.0.tar.gz", hash = "sha256:a3e22a4d31429f0d5b9ff50aaac3fb47e4f7da678b6b0439a7b91ef40675f88d"},
 ]
 pygments = [
     {file = "Pygments-2.7.2-py3-none-any.whl", hash = "sha256:88a0bbcd659fcb9573703957c6b9cff9fab7295e6e76db54c9d00ae42df32773"},
@@ -2329,6 +2465,12 @@ traitlets = [
     {file = "traitlets-4.3.3-py2.py3-none-any.whl", hash = "sha256:70b4c6a1d9019d7b4f6846832288f86998aa3b9207c6821f3578a6a6a467fe44"},
     {file = "traitlets-4.3.3.tar.gz", hash = "sha256:d023ee369ddd2763310e4c3eae1ff649689440d4ae59d7485eb4cfbbe3e359f7"},
 ]
+traits = [
+    {file = "traits-6.1.1.tar.gz", hash = "sha256:807da52ee0d4fc1241c8f8a04d274a28d4b23d3a5f942152497d19405482d04f"},
+]
+traitsui = [
+    {file = "traitsui-7.1.0.tar.gz", hash = "sha256:b699aeea588b55723860ddc6b2bd9b5013c4a72e18d1bbf51c6689cc7c6a562a"},
+]
 typed-ast = [
     {file = "typed_ast-1.4.1-cp35-cp35m-manylinux1_i686.whl", hash = "sha256:73d785a950fc82dd2a25897d525d003f6378d1cb23ab305578394694202a58c3"},
     {file = "typed_ast-1.4.1-cp35-cp35m-manylinux1_x86_64.whl", hash = "sha256:aaee9905aee35ba5905cfb3c62f3e83b3bec7b39413f0a7f19be4e547ea01ebb"},
@@ -2360,6 +2502,19 @@ typing-extensions = [
 urllib3 = [
     {file = "urllib3-1.25.11-py2.py3-none-any.whl", hash = "sha256:f5321fbe4bf3fefa0efd0bfe7fb14e90909eb62a48ccda331726b4319897dd5e"},
     {file = "urllib3-1.25.11.tar.gz", hash = "sha256:8d7eaa5a82a1cac232164990f04874c594c9453ec55eef02eab885aa02fc17a2"},
+]
+vtk = [
+    {file = "vtk-9.0.1-cp35-cp35m-macosx_10_9_x86_64.whl", hash = "sha256:424d7e6f8a216b7af82c672ebae82bc6e268582f802c7b32684ae9a90ef4c19e"},
+    {file = "vtk-9.0.1-cp35-cp35m-win_amd64.whl", hash = "sha256:3b0873e79365268b3b7d2acb238d2333f73209c27f54b76dc0cdd85483afa82e"},
+    {file = "vtk-9.0.1-cp36-cp36m-macosx_10_9_x86_64.whl", hash = "sha256:bd6efb3d3a6ead36e42ab938806364fa7dc858228a1c81e321556e43ff899d89"},
+    {file = "vtk-9.0.1-cp36-cp36m-manylinux2010_x86_64.whl", hash = "sha256:b9d3827bf84ca11a669cf798d2a205d4ca19ed66e15e93ab2ab747f9dbe9edbe"},
+    {file = "vtk-9.0.1-cp36-cp36m-win_amd64.whl", hash = "sha256:cbf17bc5ab7ccbda79458cf241cad8bc790a228dfa15066c50648bfb5d7abeb1"},
+    {file = "vtk-9.0.1-cp37-cp37m-macosx_10_9_x86_64.whl", hash = "sha256:4092bf85e1d02a76ea878bb9b822eb57ec7b73c8826e3ec29f1c8cbddcb312e3"},
+    {file = "vtk-9.0.1-cp37-cp37m-manylinux2010_x86_64.whl", hash = "sha256:11c7b05e2a35ff5724b5c88a90ffaa1de84347ddc8293c1b74158c721db31573"},
+    {file = "vtk-9.0.1-cp37-cp37m-win_amd64.whl", hash = "sha256:e6bfc40f4cdc02f8b869b0c2023b73c6aad86fdb39fcb1823b1f4f5efd1a0001"},
+    {file = "vtk-9.0.1-cp38-cp38-macosx_10_9_x86_64.whl", hash = "sha256:bd4a066dbb4fb35d329278538976ad4440aeb0e5c839cc12310567238211971c"},
+    {file = "vtk-9.0.1-cp38-cp38-manylinux2010_x86_64.whl", hash = "sha256:e2ce620b2691ee8770bd9bfc0ae2ca99c0263ded20559c389a10b9b78e7750b2"},
+    {file = "vtk-9.0.1-cp38-cp38-win_amd64.whl", hash = "sha256:cdc7d6d556cf520e6c3c76299125a71d7be5895744ba949e2560d9332e607b50"},
 ]
 wcwidth = [
     {file = "wcwidth-0.2.5-py2.py3-none-any.whl", hash = "sha256:beb4802a9cebb9144e99086eff703a642a13d6a0052920003a230f3294bbe784"},
