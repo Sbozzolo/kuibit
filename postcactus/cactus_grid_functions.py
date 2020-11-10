@@ -454,6 +454,61 @@ class OneGridFunctionASCII(BaseOneGridFunction):
         # straightforward to implement. If you are reading this comment and you
         # want to improve this, feel free to do it.
 
+        def current_data_to_UniformGridData(
+            current_x,
+            current_y,
+            current_z,
+            current_data,
+            current_time,
+            current_iteration,
+            current_component,
+            current_ref_level,
+        ):
+            # First, we compute x0 and x1
+            x0_3d = np.array(
+                [
+                    np.amin(current_x),
+                    np.amin(current_y),
+                    np.amin(current_z),
+                ]
+            )
+            x1_3d = np.array(
+                [
+                    np.amax(current_x),
+                    np.amax(current_y),
+                    np.amax(current_z),
+                ]
+            )
+
+            # Now we find the interesting dimensions
+            dimensions_in_data = x0_3d != x1_3d
+
+            # With unique we find the real data
+            shape_3d = [
+                len(np.unique(current_x)),
+                len(np.unique(current_y)),
+                len(np.unique(current_z)),
+            ]
+
+            shape = np.asarray(shape_3d)[dimensions_in_data]
+            x0 = np.asarray(x0_3d)[dimensions_in_data]
+            x1 = np.asarray(x1_3d)[dimensions_in_data]
+
+            var_data = np.array(current_data).reshape(tuple(shape[::-1]))
+
+            grid = grid_data.UniformGrid(
+                shape,
+                x0=x0,
+                x1=x1,
+                num_ghost=self.num_ghost,
+                component=current_component,
+                ref_level=current_ref_level,
+                time=current_time,
+                iteration=current_iteration,
+            )
+
+            return grid_data.UniformGridData(grid, np.transpose(var_data))
+
         # We are going to assume that the iteration column is the first
         with opener(path, opener_mode) as fil:
             # We use these variables as local variables. We are going to aggregate
@@ -499,58 +554,21 @@ class OneGridFunctionASCII(BaseOneGridFunction):
                         int(current_ref_level), {}
                     )
 
-                    # First, we compute x0 and x1
-                    x0_3d = np.array(
-                        [
-                            np.amin(current_x),
-                            np.amin(current_y),
-                            np.amin(current_z),
-                        ]
-                    )
-                    x1_3d = np.array(
-                        [
-                            np.amax(current_x),
-                            np.amax(current_y),
-                            np.amax(current_z),
-                        ]
-                    )
-
-                    # Now we find the interesting dimensions
-                    dimensions_in_data = x0_3d != x1_3d
-
-                    # With unique we find the real data
-                    shape_3d = [
-                        len(np.unique(current_x)),
-                        len(np.unique(current_y)),
-                        len(np.unique(current_z)),
-                    ]
-
-                    shape = np.asarray(shape_3d)[dimensions_in_data]
-                    x0 = np.asarray(x0_3d)[dimensions_in_data]
-                    x1 = np.asarray(x1_3d)[dimensions_in_data]
-
-                    var_data = np.array(current_data).reshape(
-                        tuple(shape[::-1])
-                    )
-
                     current_time = line_data[8]
 
-                    grid = grid_data.UniformGrid(
-                        shape,
-                        x0=x0,
-                        x1=x1,
-                        num_ghost=self.num_ghost,
-                        component=current_component,
-                        ref_level=current_ref_level,
-                        time=current_time,
-                        iteration=current_iteration,
+                    uniform_grid_data = current_data_to_UniformGridData(
+                        current_x,
+                        current_y,
+                        current_z,
+                        current_data,
+                        current_time,
+                        current_iteration,
+                        current_component,
+                        current_ref_level,
                     )
 
                     alldata_ref_level.setdefault(
-                        int(current_component),
-                        grid_data.UniformGridData(
-                            grid, np.transpose(var_data)
-                        ),
+                        int(current_component), uniform_grid_data
                     )
 
                     # Write iterations_to_time
@@ -581,6 +599,7 @@ class OneGridFunctionASCII(BaseOneGridFunction):
             # Here we take care of the last piece of data
             if len(current_data) > 0:
                 if current_iteration not in self._iterations_to_times:
+                    current_time = line_data[8]
                     self._iterations_to_times[current_iteration] = current_time
 
                 alldata_file = self.alldata.setdefault(path, {})
@@ -590,7 +609,21 @@ class OneGridFunctionASCII(BaseOneGridFunction):
                 alldata_ref_level = alldata_iteration.setdefault(
                     int(current_ref_level), {}
                 )
-                alldata_ref_level.setdefault(int(current_component), None)
+
+                uniform_grid_data = current_data_to_UniformGridData(
+                    current_x,
+                    current_y,
+                    current_z,
+                    current_data,
+                    current_time,
+                    current_iteration,
+                    current_component,
+                    current_ref_level,
+                )
+
+                alldata_ref_level.setdefault(
+                    int(current_component), uniform_grid_data
+                )
 
     def _read_component_as_uniform_grid_data(
         self, path, iteration, ref_level, component
