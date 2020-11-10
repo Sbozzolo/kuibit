@@ -1140,12 +1140,16 @@ class TestUniformGridData(unittest.TestCase):
             np.fft.fftshift(np.fft.fftfreq(21, d=dx[1])),
         ]
         f_min_c = [freqs_c[0][0], freqs_c[1][0]]
-        delta_f_c = [freqs_c[0][1] - freqs_c[0][0], freqs_c[1][1] - freqs_c[1][0]]
+        delta_f_c = [
+            freqs_c[0][1] - freqs_c[0][0],
+            freqs_c[1][1] - freqs_c[1][0],
+        ]
 
         freq_grid_c = gd.UniformGrid(fft_c.shape, x0=f_min_c, dx=delta_f_c)
         expected_c = gd.UniformGridData(freq_grid_c, fft_c)
 
         self.assertEqual(expected_c, prod_data_complex.fourier_transform())
+
 
 class TestHierarchicalGridData(unittest.TestCase):
     def setUp(self):

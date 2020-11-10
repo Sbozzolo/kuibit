@@ -10,7 +10,8 @@ that we use to represent grid function is the
 multiple refinement levels. On each level, data is represented as
 :py:class:`~.UniformGridData`. While you will likely never initialize these
 objects directly, it is useful to be aware of what they are and what they can
-do.
+do. If you want to know how to read data into ``PostCactus``, jump to the second
+half of this page.
 
 UniformGrid
 ---------------
@@ -305,3 +306,173 @@ As it is the case for :py:class:`~.UniformGridData`, also
 specified. The derivative are numerical with finite difference. The result is
 a :py:class:`~.HierarchicalGridData` or a list of :py:class:`~.HierarchicalGridData`
 (for each direction).
+
+Reading data
+------------
+
+So far, we have discussed how grid functions are represented in ``PostCactus``.
+In this section, we discuss how to read the output data from simulations as
+:py:class:`~.HierarchicalGridData` or :py:class:`~.UniformGridData`.
+
+At the moment, ``PostCactus`` fully support reading HDF5 files of any dimension
+(1D, 2D, and 3D). ``PostCactus`` can also read ASCII files, but the interface is
+less robus and not as well-tested.
+
+.. warning::
+
+   ``PostCactus`` works better with HDF5 data. In general, reading and parsing
+   HDF5 is orders of magnitude faster than ASCII data. ``PostCactus`` can read
+   one iteration at the time in HDF5 data, but has to read the entire content of
+   all the files when the data is ASCII. This can take a long time. HDF5 are
+   also much more storage-efficient and contain metadata that can be used to
+   better interpret the data (e.g., the number of ghost zones). For these
+   reasons, we strongly recommend using HDF5 files.
+
+.. warning::
+
+   The ASCII reader should be considered experimental. If reads the files line
+   by line and will likely not fail if the data is not exactly in the format
+   that the reader expect. You may find unexpected results. If you use the ASCII
+   reader, make sure to test it!
+
+.. warning::
+
+   The ASCII reader works by scanning all the files line by line. This can take an
+   extremely long time if you have many files with a lot of iterations. If you want
+   to speed up the process, consider isolating the files you are interested in
+   working with in a separate directory, and run ``SimDir`` in that folder.
+
+From SimDir
+^^^^^^^^^^^
+
+The easiest way to access grid data is from :py:class:`~.SimDir`.
+:py:class:`~.SimDir` objects contain an overview of the entire data content of a
+directory. For more information about :py:class:`~.SimDir`, read
+:ref:`simdir:Getting started with SimDir`.
+
+Assuming ``sim`` is a :py:class:`~.SimDir`, the access point to grid functions is
+in `sim.gf` or ``sim.grid_functions``. You can find all the available variables just
+by printing this object
+
+.. code-block:: python
+
+    print(sim.gf)
+
+    # The output will look like
+    #
+    # Available grid data of dimension (0,):
+    # ['P', 'rho', 'rho_star', 'vz', 'Bz', 'By', 'vx', 'rho_b', 'vy', 'Bx']
+    #
+    # ... and so on ...
+
+`sim.gf` is an object of type :py:class:`~.GridFunctionsDir`. The main role of
+this class is to organize the available files depending on their dimensions. So,
+from :py:class:`~.GridFunctionsDir` you can specify what dimensions you are
+interested in. You can do this in two ways, as a dictionary call, or via an
+attribute. For example, if you are interested in 2D data on the xy plane:
+
+.. code-block:: python
+
+    # All these methods are equivalent
+    data2d = sim.gf.xy
+    data2d = sim.gf['xy']
+    data2d = sim.gf[(0, 1)]
+
+In case you want a lower dimensional cut (say, you want only the y axis and you
+have the xy data), you can always look at higher-dimensional data and slice it
+to your liking, as described in the above sections.
+
+Once you selected the data you are interested in, you will be working with a
+:py:class:`~.AllGridFunctions` object. This is a dictionary-like object that
+organizes all the variables available for the requested dimensions. You can
+access the variables using the bracket operator of looking in the ``fields``
+attribute. In case a variable is available as HDF5 file and as ASCII file, the
+HDF5 representation is preferred.
+
+.. code-block:: python
+
+    # These methods are equivalent
+    rho = sim.gf.xy.rho
+    rho = sim.gf.xy.fields.rho
+
+In case you are reading an ASCII file, you have to set the correct number of
+ghost zones. The simplest way to do this is to set the :py:meth:`~.num_ghost`
+attribute. If the output does not contain ghost zones, set them to zero.
+
+.. code-block:: python
+
+    # If rho_star is from an ASCII file, we want to set num_ghost before
+    # reading it
+    ASCII_reader = sim.gf.xy
+    ASCII_reader.num_ghost = (3, 3)
+    rho_star = ASCII_reader.rho_star
+
+:py:meth:`~.num_ghost` has to be a tuple or a list with the same number of entries
+as the dimensionality of the grid: each entry is the number of ghost zones along
+a direction.
+
+.. warning::
+
+   ASCII files do not have information about how many ghost zones are in the
+   data, so we will assume that there are none. This can lead to imperfect
+   results in the regions of overlap between two grid patches. In the future, we
+   will try to read this value from the parameter file.
+
+
+Finally, once you selected the variable, you will have a
+:py:class:`~.OneGridFunctionH5` or :py:class:`~.OneGridFunctionASCII` object.
+These are derived from the same base class :py:class:`~.OneGridFunctionBase` and
+share the interface. The main difference is how files are read (which justifies
+why we need to different classes). These objects are certainly the most
+interesting ones and the ones you will deal with most of the time.
+
+At first level, :py:class:`~.OneGridFunctionH5` (we will consider this for
+definiteness, but the most of what said here holds true for
+:py:class:`~.OneGridFunctionASCII`) is another dictionary-like object. The keys
+of this class are the various iterations available in the files. Hence, to read
+some data at a given iteration ``iteration``, you can simply use the bracket
+operator. Alternatively, you can use the :py:meth:`~.get_iteration` method:
+
+.. code-block:: python
+
+    # These methods are equivalent
+    rho0 = sim.gf.xy.rho[0]
+    rho0 = sim.gf.xy.rho.get_iteration(0)
+
+You can find what iterations are available with the
+:py:meth:`~.available_iterations` attribute. Similarly, you can find what times
+are available with :py:meth:`~.available_times`. You can read a time instead of
+a iteration with the method :py:meth:`~.get_time`. You can convert between time
+and iteration with the methods :py:meth:`~.time_at_iteration` and
+:py:meth:`~.iteration_at_time`.
+
+These methods return a :py:class:`~.HierarchicalGridData` object with all the
+available data for the requested iteration. If HDF5 files are being read, the
+correct ghost zone information is being used. In case you want to work with a
+specific subgrid with uniform spacing, you can use the :py:meth:`~.read_on_grid`
+method. This will return a :py:class:`~.UniformGridData` object instead, with
+grid the grid you specify. The grid is specified by passing a
+:py:class:`~UniformGrid` object. For example
+
+.. code-block:: python
+
+    from postcactus.grid_data import UniformGrid
+
+    grid = UniformGrid([100, 100], x0=[0, 0], x1=[2,2])
+    rho0_center = sim.gf.xy.rho.read_on_grid(0, # iteration
+                                             grid)
+
+This method works by reading the entire grid structure and resampling onto the
+requested :py:class:`~.UniformGridData`, so it may be slow for large 3D data.
+
+Similarly, you can read a chunk of evolution from ``min_iteration`` to
+``max_iteration`` on a specified grid with the method
+:py:meth:`~.read_evolution_on_grid`. This returns a
+:py:class:`~.UniformGridData` that has as first dimension the time, and as other
+dimensions the specified grid. So, this is a "spacetime"
+:py:class:`~.UniformGridData`. With this function you can evaluate grid data on
+specific spacetime points with multilinear interpolation in space and time. This
+can also be used to generate additional time frames between two outputs.
+
+:py:class:`~.OneGridFunctionH5` objects are iterable: you can loop over all
+the available iterations by iterating over the object.

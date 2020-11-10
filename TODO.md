@@ -19,12 +19,15 @@ PostCactus or of Python required to complete the task.
   where there are multiple centers of refinement. [===]
 * Linear momentum lost by gravitational waves. [=]
 
+* Add layer in class hierarchy in `cactus_grid_functions` to save the work done in
+  reading ASCII files containing multiple variables. [==]
 * Port `cactus_parfile` from `PostCactus2`. [==]
 * Port `cactus_timertree` from `PostCactus2`. [==]
 * Port support for grid data with reflection from `PostCactus2`. [==]
+* Port support for locating bounding boxes from `PostCactus2`. [==]
 * Add support for HDF5 for `AHFinderDirect` output. [==]
-
 * Add method to merge `AHFinderDirect` patches. [==]
+* Hunt for TODOs in the codebase and implement them. [=?=]
 
 ## Infrastructure
 

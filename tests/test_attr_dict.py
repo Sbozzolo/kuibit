@@ -32,9 +32,7 @@ class TestAttrDict(unittest.TestCase):
         self.assertEqual(attr_dict.first, "a")
         self.assertCountEqual(dir(attr_dict), ["first", "b"])
         self.assertCountEqual(attr_dict.keys(), ["first", "b"])
-        self.assertEqual("Fields available:\n['first', 'b']",
-                         str(attr_dict))
-
+        self.assertEqual("Fields available:\n['first', 'b']", str(attr_dict))
 
     def test_TransformDictionary(self):
 
