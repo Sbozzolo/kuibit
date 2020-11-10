@@ -19,7 +19,7 @@
 """
 
 import re
-
+import os
 
 def _scan_strings_for_columns(strings, pattern):
     """Match each string in strings against pattern and each matching result
@@ -163,3 +163,23 @@ def scan_header(
         return time_column, columns_description
     # This is not one file per group
     return time_column, data_column
+
+
+def total_filesize(allfiles, unit="MB"):
+    """Return the total size of the given files.
+    Available units B, KB, MB and GB
+
+    :param allfiles: list of the full paths of the files
+    :type allfiles: list
+
+    :returns: Total size of the given files.
+    :rtype: float
+
+    """
+
+    # This function is here, but it could be anywhere, it doesn't really
+    # apply only to ASCII files, nor only to CACTUS files...
+    units = {"B": 1, "KB": 1024, "MB": 1024 ** 2, "GB": 1024 ** 3}
+    if unit not in units.keys():
+        raise ValueError(f"Invalid unit: expected one of {list(units.keys())}")
+    return sum(os.path.getsize(path) for path in set(allfiles)) / units[unit]
