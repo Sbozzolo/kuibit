@@ -21,6 +21,7 @@
 import re
 import os
 
+
 def _scan_strings_for_columns(strings, pattern):
     """Match each string in strings against pattern and each matching result
     against _pattern_columns, which match expressions like 3:kxx. Then, return

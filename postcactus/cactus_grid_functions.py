@@ -91,7 +91,9 @@ class BaseOneGridFunction(ABC):
         pass
 
     @abstractmethod
-    def _read_component_as_uniform_grid_data(self, path, iteration, ref_level, component):
+    def _read_component_as_uniform_grid_data(
+        self, path, iteration, ref_level, component
+    ):
         pass
 
     @abstractmethod
