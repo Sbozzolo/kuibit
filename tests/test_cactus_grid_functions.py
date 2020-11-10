@@ -210,7 +210,7 @@ class TestAllGridFunctions(unittest.TestCase):
     def test__str(self):
 
         self.assertIn("vz", str(self.gf))
-        self.assertIn("Available grid data of dimension (0, 1)", str(self.gf))
+        self.assertIn("Available grid data of dimension 2D (xy)", str(self.gf))
 
 
 class TestOneGridFunction(unittest.TestCase):

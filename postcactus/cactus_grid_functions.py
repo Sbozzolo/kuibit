@@ -877,6 +877,16 @@ class AllGridFunctions:
         (0, 1, 2): r"(.xyz)?(.file_[\d]+)?(.xyz)?",
     }
 
+    _dim_names = {
+        (0,): "x",
+        (1,): "y",
+        (2,): "z",
+        (0, 1): "xy",
+        (0, 2): "xz",
+        (1, 2): "yz",
+        (0, 1, 2): "xyz",
+    }
+
     def __init__(self, allfiles, dimension, num_ghost=None):
         """allfiles is a list of files, dimension has to a tuple.
 
@@ -1078,7 +1088,8 @@ class AllGridFunctions:
         )
 
     def __str__(self):
-        ret = f"\nAvailable grid data of dimension {self.dimension}: "
+        ret = "\nAvailable grid data of dimension "
+        ret += f"{len(self.dimension)}D ({self._dim_names[self.dimension]}): "
         ret += f"\n{list(self.keys())}\n"
         return ret
 

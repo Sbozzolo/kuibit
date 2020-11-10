@@ -360,7 +360,7 @@ by printing this object
 
     # The output will look like
     #
-    # Available grid data of dimension (0,):
+    # Available grid data of dimension 1D (x):
     # ['P', 'rho', 'rho_star', 'vz', 'Bz', 'By', 'vx', 'rho_b', 'vy', 'Bx']
     #
     # ... and so on ...
