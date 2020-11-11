@@ -830,7 +830,8 @@ class OneGridFunctionH5(BaseOneGridFunction):
 
         return self.alldata[path][iteration][ref_level][component]
 
-    def _are_ghostzones_in_file(self, path):
+    @staticmethod
+    def _are_ghostzones_in_file(path):
         """"""
         # This is a tricky and important function to stitch together all the
         # different components. Carpet has an option (technically two) to output
