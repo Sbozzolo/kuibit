@@ -32,7 +32,7 @@ from postcactus.timeseries import TimeSeries, combine_ts
 
 
 class OneHorizon:
-    """This class represents properties of an apparent horizon
+    r"""This class represents properties of an apparent horizon
     computed from the quasi-isolated horizon formalism.
 
     The following variables are provided as :py:class:`~.TimeSeries`:
@@ -99,7 +99,7 @@ class OneHorizon:
         if self.shape_available:
             # We sort the iterations
             self.shape_iterations = np.array(
-                sorted([s for s in self._shape_files.keys()])
+                sorted(s for s in self._shape_files)
             )
 
             self.shape_iteration_min = self.shape_iterations[0]
@@ -189,7 +189,7 @@ class OneHorizon:
 
         # TODO: Add an option to merge all the patches while keeping an order.
 
-        patches, origin = self._patches_at_iteration(iteration)
+        patches, _ = self._patches_at_iteration(iteration)
 
         # Patches is dictionary, each patch is a list of three coordiantes for
         # all the points along the two angular directions.
@@ -199,7 +199,8 @@ class OneHorizon:
 
         return coord_x, coord_y, coord_z
 
-    def _load_patches(self, path):
+    @staticmethod
+    def _load_patches(path):
         """AHFinderDirect uses a system of multipatches to avoid coordinates
         singularities. Each patch covers a portion around an axis (e.g., +z
         axis). We will load this data.
@@ -362,11 +363,11 @@ class HorizonsDir:
 
         # Here we align the ah_vars and shape_files so that they have the same
         # keys. We add an empty {} to the missing values.
-        for ah_index in self._ah_vars.keys():
+        for ah_index in self._ah_vars:
             if ah_index not in self._shape_files:
                 self._shape_files[ah_index] = {}
 
-        for ah_index in self._shape_files.keys():
+        for ah_index in self._shape_files:
             if ah_index not in self._ah_vars:
                 self._ah_vars[ah_index] = {}
 
