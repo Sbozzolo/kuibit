@@ -22,4 +22,4 @@ from postcactus import __version__
 
 class TestPostCactus(unittest.TestCase):
     def test_version(self):
-        self.assertEqual(__version__, "3.0.0a7")
+        self.assertEqual(__version__, "3.0.0a8")
