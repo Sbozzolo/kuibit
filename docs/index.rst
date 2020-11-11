@@ -92,6 +92,7 @@ Examples
    examples/timeseries.ipynb
    examples/grid_data.ipynb
    examples/cactus_grid_functions.ipynb
+   examples/cactus_horizons.ipynb
    examples/gravitational_waves.ipynb
 
 Reference material (classes, functions, ...)
