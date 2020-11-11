@@ -89,6 +89,10 @@ class TestGridFunctionsDir(unittest.TestCase):
         filesize_MB = filesize_B / (1024 ** 2)
         self.assertEqual(filesize_MB, self.gd.total_filesize())
 
+        # Test invalid unit
+        with self.assertRaises(ValueError):
+            self.gd.total_filesize("bob")
+
 
 class TestAllGridFunctions(unittest.TestCase):
     def setUp(self):

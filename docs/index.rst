@@ -1,17 +1,19 @@
 Overview
 ========
 
-PostCactus is a set of tools to post-process simulations performed with the
+``PostCactus`` is a set of tools to post-process simulations performed with the
 `Einstein Toolkit <https://einsteintoolkit.org/>`_.
 
 The goal of this package is to enable you to pursue your scientific goals
 without having to worry about computational details (e.g., handling simulation
-restarts, reading HDF5 files, ...).
+restarts, reading HDF5 files, ...). ``PostCactus`` represent simulation data in
+a high-level and intuitive way, and provides some commonly used routines in
+numerical-relativity (e.g., computing the strain of gravitational waves).
 
-Features
---------
+Summary of Features
+-------------------
 
-Features currently implemented:
+For a full list of available features, see the :doc:`features page <features>`.
 
 - Read and organize simulation data (:py:mod:`~.simdir`). Checkpoints and
   restarts are handled transparently.
@@ -23,7 +25,7 @@ Features currently implemented:
   (:py:mod:`~.cactus_waves`) computing, among the other things, strains,
   overlaps, energy lost.
 - Work with the power spectral densities of known detectors
-  (:py:mod:`~.sensitivity_curves`)
+  (:py:mod:`~.sensitivity_curves`).
 - Represent and manipulate time series (:py:mod:`~.timeseries`). Examples of
   functions available for time series: ``integrate``, ``derive``, ``resample``,
   ``to_FrequencySeries`` (Fourier transform).
@@ -35,6 +37,8 @@ Features currently implemented:
 - Work with 1D, 2D, and 3D grid functions (:py:mod:`~.grid_data`,
   :py:mod:`~.cactus_grid_functions`) as output by ``CarpetIOHDF5`` or
       ``CarpetIOASCII``.
+- Work with horizon data from (:py:mod:`~.cactus_horizons`) as output by
+      ``QuasiLocalMeasures`` and ``AHFinderDirect``.
 - Handle unit conversion, in particular from geometrized to physical
   (:py:mod:`~.unitconv`).
 
@@ -49,8 +53,11 @@ Installation
 
 If they are not already available, ``pip`` will install the following packages:
 - ``numpy``,
+
 - ``numba``,
+
 - ``h5py``,
+
 - ``scipy``.
 
 The minimum version of Python required is 3.6.

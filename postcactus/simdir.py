@@ -33,6 +33,7 @@ from postcactus import (
     cactus_scalars,
     cactus_waves,
     cactus_grid_functions,
+    cactus_horizons,
 )
 
 
@@ -52,22 +53,18 @@ class SimDir:
     :ivar errfiles:       The location of all error log files (.err).
     :ivar ts:             Scalar data of various type, see
                           :py:class:`~.ScalarsDir`
-    :ivar grid:           Access to grid function data, see
-                          :py:class:`~.GridOmniDir`.
+    :ivar gf:              Access to grid function data, see
+                          :py:class:`~.GridFunctionsDir`.
     :ivar gws:            GW signal from the Weyl scalar multipole
                           decomposition, see
                           :py:class:`~.GravitationalWavesDir`.
     :ivar emws:           EM signal from the Weyl scalar multipole
                           decomposition, see
                           :py:class:`~.ElectromagneticWavesDir`.
-    :ivar ahoriz:         Apparent horizon information, see
-                          :py:class:`~.CactusAH`.
+    :ivar horizons:       Apparent horizon information, see
+                          :py:class:`~.HorizonsDir`.
     :ivar multipoles:     Multipole components, see
                           :py:class:`~.CactusMultipoleDir`.
-    :ivar metadata:       This allows augmenting the simulation folder
-                          with metadata, see :py:class:`~.MetaDataFolder`.
-    :ivar timertree:      Access TimerTree data, see
-                          :py:class:`~.TimerTree`.
     """
 
     def _sanitize_path(self, path):
@@ -215,6 +212,11 @@ class SimDir:
 
     gf = gridfunctions
 
+    @property
+    @lru_cache(1)
+    def horizons(self):
+        return cactus_horizons.HorizonsDir(self)
+
     def __str__(self):
         header = f"Indexed {len(self.allfiles)} files"
         header += f"and {len(self.dirs)} subdirectories\n"
@@ -233,4 +235,6 @@ class SimDir:
         else:
             em_ret = ""
 
-        return header + ts_ret + mp_ret + gw_ret + em_ret + gf_ret
+        hor_ret = f"{self.horizons}"
+
+        return header + ts_ret + mp_ret + gw_ret + em_ret + gf_ret + hor_ret

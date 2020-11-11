@@ -2112,7 +2112,7 @@ class HierarchicalGridData(BaseNumerical):
         """Return the finest level, if it is a single grid.
 
         :returns: finest level
-        :rtype: `:py:class:~UniformGridData`
+        :rtype: :py:class:`~UniformGridData`
         """
         return self.get_level(self.num_finest_level)
 
@@ -2134,7 +2134,7 @@ class HierarchicalGridData(BaseNumerical):
         """Return the coarsest level, if it is a single grid.
 
         :returns: Coarsest level
-        :rtype: `:py:class:~UniformGridData`
+        :rtype: :py:class:`~UniformGridData`
         """
         return self.get_level(self.num_coarsest_level)
 
@@ -2573,7 +2573,7 @@ class HierarchicalGridData(BaseNumerical):
         )
 
     def coordinates(self):
-        """Return coordiantes a list of HierarchicalGridData.
+        """Return coordinates as a list of HierarchicalGridData.
 
         Useful for computations involving coordinates.
 
