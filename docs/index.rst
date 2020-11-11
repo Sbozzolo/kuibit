@@ -108,6 +108,7 @@ Reference material (classes, functions, ...)
    cactus_scalars_ref.rst
    cactus_multipoles_ref.rst
    cactus_waves_ref.rst
+   cactus_horizons.rst
    gw_utils_ref.rst
    gw_mismatch_ref.rst
    grid_data_ref.rst
