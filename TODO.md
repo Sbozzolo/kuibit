@@ -27,6 +27,9 @@ PostCactus or of Python required to complete the task.
 * Port support for locating bounding boxes from `PostCactus2`. [==]
 * Add support for HDF5 for `AHFinderDirect` output. [==]
 * Add method to merge `AHFinderDirect` patches. [==]
+* Perform interpolation in shapes of `AHFinderDirect` to better find shapes when
+  the cut is not on a major direction. [==]
+
 * Hunt for TODOs in the codebase and implement them. [=?=]
 
 ## Infrastructure

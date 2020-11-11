@@ -120,10 +120,12 @@ class OneHorizon:
                 self.shape_time_min = self.shape_times[0]
                 self.shape_time_max = self.shape_times[-1]
             else:
-                warnings.warn("AH data not found, so it is impossible to convert"
-                              " between iteration number to time.\nManually set"
-                              " shape_times or methods involving shape and time"
-                              " will not work")
+                warnings.warn(
+                    "AH data not found, so it is impossible to convert"
+                    " between iteration number to time.\nManually set"
+                    " shape_times or methods involving shape and time"
+                    " will not work"
+                )
                 self.shape_times = None
                 self.shape_time_min = None
                 self.shape_time_max = None
@@ -150,7 +152,7 @@ class OneHorizon:
         if self._ah_vars:
             ret += f"Formation time: {self.formation_time:.4f}\n"
         if self.shape_available:
-            ret += "Shape available"
+            ret += "Shape available\n"
         if self._qlm_vars:
             ret += f"Final Mass = {self.mass_final:.3e}\n"
             ret += f"Final Angular Momentum = {self.spin_final:.3e}\n"
@@ -305,6 +307,127 @@ class OneHorizon:
             for p, d in patches.items()
         }
         return patches, origin
+
+    def shape_outline_at_iteration(self, iteration, cut):
+        """Return the cut of the 3D shape on a specified plane.
+
+        cut has to be a 3D tuple or list with None on the dimensions
+        you want to keep, and the value of the other coordinates. For
+        example, if you want the outline at z = 3 on the xy plane,
+        cut has to be (None, None, 3).
+
+        No interpolation is performed, so results are not accurate when the cut
+        is not along one of the major directions centered in the origin of the
+        horizon.
+
+        :returns:    Coordinates of AH outline.
+        :rtype:      tuple of two 1D numpy arrays.
+
+        """
+        # TODO: Add interpolation for off-axis cuts
+
+        if iteration not in self.shape_iterations:
+            raise ValueError(f"Shape not available for iteration {iteration}")
+
+        if not isinstance(cut, (tuple, list)):
+            raise TypeError(
+                f"Cut has to be a list or a tuple, not a {type(cut)}"
+            )
+
+        if len(cut) != 3:
+            raise ValueError("Cut has to be three-dimensional")
+
+        patches, origin = self._patches_at_iteration(iteration)
+
+        # If cut is three None, we return the entire shape.
+        # TODO: Merge patches here
+        if cut.count(None) == 3:  # all None
+            return self.shape_at_iteration(iteration)
+
+        # There is at least one that is not None
+
+        # If they are all not None, that's a point, so we cannot return anything
+        # meaningful
+        if cut.count(None) == 0:
+            raise ValueError("Cut must has some entries set to None")
+
+        # There is at least one that is None, but not all
+        #
+        # This can be 1D or 2D.
+
+        # On what dimension(s) do we have to look at?
+        dims = [index for index, value in enumerate(cut) if value is None]
+
+        # Let's first consider the 1D case
+        if cut.count(None) == 1:
+            # Here we just have to find those points with the specified
+            # coordinates
+
+            # Here dim is the axis we are looking at, dim0 and dim1 the other
+            # two
+            dim = dims[0]
+            (dim0, dim1) = [index for index in range(3) if index not in dims]
+
+            # Here we collect the result
+            points = []
+
+            # We closest points up to tolerance of 0.1%, unless the cut is
+            # outside the horizon
+            for patch in patches.values():
+                coords, coords0, coords1 = patch[dim], patch[dim0], patch[dim1]
+                # We check we are inside the horizon
+                if not (
+                    np.min(coords0) <= cut[dim0] <= np.max(coords0)
+                    and np.min(coords1) <= cut[dim1] <= np.max(coords1)
+                ):
+                    continue
+
+                size0 = np.max(coords0) - np.min(coords0)
+                size1 = np.max(coords1) - np.min(coords1)
+                points_around_cut0 = abs(coords0 - cut[dim0]) < 1e-3 * size0
+                points_around_cut1 = abs(coords1 - cut[dim1]) < 1e-3 * size1
+
+                selected_points = np.logical_and(
+                    points_around_cut0, points_around_cut1
+                )
+                points.append(coords[selected_points])
+
+            return points
+
+        # Finally the 2D case
+        #
+        # The catch here is that we want to merge the patches and make sure
+        # that they are in order.
+        if cut.count(None) == 2:
+            (dim0, dim1) = dims
+            # dim is the normal direction to the plane where we want the outline
+            dim = [index for index in range(3) if index not in dims][0]
+            # In points0 and points1 we collect the points on the dimensions 0
+            # an 1, below we also use 0 and 1 to refer to these two dimensions.
+            points0, points1 = [], []
+
+            # We closest points up to tolerance of 0.1%, unless the cut is
+            # outside the horizon
+            for patch in patches.values():
+                coords, coords0, coords1 = patch[dim], patch[dim0], patch[dim1]
+                if not (np.min(coords) <= cut[dim] <= np.max(coords)):
+                    continue
+                size = np.max(coords) - np.min(coords)
+                points_around_cut = abs(coords - cut[dim]) < 1e-3 * size
+                points0.append(coords0[points_around_cut])
+                points1.append(coords1[points_around_cut])
+
+            if len(points0) == 0:
+                return None
+
+            points0 = np.hstack(points0)
+            points1 = np.hstack(points1)
+            # We compute angle to properly order the points
+            phi = np.angle(
+                points0 - origin[dim0] + 1j * (points1 - origin[dim1])
+            )
+            ordering = np.argsort(phi)
+            return points0[ordering], points1[ordering]
 
 
 class HorizonsDir:

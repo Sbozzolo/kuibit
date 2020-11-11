@@ -263,7 +263,7 @@ class TestOneHorizon(unittest.TestCase):
 
         # Test shape
         exp_iterations = [0, 128, 256, 384, 512, 640, 768, 896, 1024]
-        exp_times = [0.,  0.8, 1.6, 2.4, 3.2, 4.,  4.8, 5.6, 6.4]
+        exp_times = [0.0, 0.8, 1.6, 2.4, 3.2, 4.0, 4.8, 5.6, 6.4]
         self.assertCountEqual(self.ho.shape_iterations, exp_iterations)
         self.assertCountEqual(self.ho.shape_times, exp_times)
 
@@ -276,13 +276,15 @@ class TestOneHorizon(unittest.TestCase):
 
         # Test key not available
         with self.assertRaises(KeyError):
-            self.ho['hey']
+            self.ho["hey"]
 
-        self.assertEqual(self.ho['mass'], self.ho._qlm_vars['mass'])
+        self.assertEqual(self.ho["mass"], self.ho._qlm_vars["mass"])
 
     def test_ah_property(self):
 
-        self.assertEqual(self.ho.get_ah_property('area'), self.ho._ah_vars['area'])
+        self.assertEqual(
+            self.ho.get_ah_property("area"), self.ho._ah_vars["area"]
+        )
 
     def test__str(self):
 
@@ -311,14 +313,15 @@ class TestOneHorizon(unittest.TestCase):
 
         # Here we test all the infrastructure for loading the patches
         #
-        self.assertCountEqual(self.ho.ah_origin_at_iteration(0),
-                              (5.35384615385, 0, 0))
+        self.assertCountEqual(
+            self.ho.ah_origin_at_iteration(0), (5.35384615385, 0, 0)
+        )
 
         patches, _ = self.ho._patches_at_iteration(0)
 
         # We test that we have the expected components with the expected
         # length
-        patches_names = ['+z', '-z', '+x', '-x', '+y', '-y']
+        patches_names = ["+z", "-z", "+x", "-x", "+y", "-y"]
         self.assertCountEqual(patches_names, list(patches.keys()))
         for patch in patches_names:
             with self.subTest(patch=patch):
@@ -330,4 +333,51 @@ class TestOneHorizon(unittest.TestCase):
         for patch in patches:
             expected_x.append(patches[patch][0])
 
-        self.assertTrue(np.allclose(expected_x, self.ho.shape_at_iteration(0)[0]))
+        self.assertTrue(
+            np.allclose(expected_x, self.ho.shape_at_iteration(0)[0])
+        )
+
+    def test_shape_outline_at_iteration(self):
+
+        # Iteration not present
+        with self.assertRaises(ValueError):
+            self.ho.shape_outline_at_iteration(10465, [0, 2, 3])
+
+        # Cut not a list
+        with self.assertRaises(TypeError):
+            self.ho.shape_outline_at_iteration(0, 3)
+
+        # Cut not a list with three elements
+        with self.assertRaises(ValueError):
+            self.ho.shape_outline_at_iteration(0, [0, 1])
+
+        # Three Nones
+        self.assertTrue(
+            np.allclose(
+                self.ho.shape_outline_at_iteration(0, [None, None, None]),
+                self.ho.shape_at_iteration(0),
+            ),
+        )
+
+        # Three non-Nones
+        with self.assertRaises(ValueError):
+            self.ho.shape_outline_at_iteration(0, [1, 2, 3])
+
+        # 1D cut
+        self.assertTrue(
+            np.allclose(
+                self.ho.shape_outline_at_iteration(0, [None, 0, 0]),
+                [np.array([5.61956723]), np.array([5.08838347])],
+            )
+        )
+
+        # 2D cut with no points
+        self.assertIs(
+            self.ho.shape_outline_at_iteration(0, [None, None, 10]), None
+        )
+
+        # 2D cut with points
+        # We check the length
+        self.assertEqual(
+            len(self.ho.shape_outline_at_iteration(0, [None, None, 0])[0]), 76
+        )

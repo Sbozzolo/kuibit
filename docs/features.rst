@@ -139,4 +139,4 @@ Horizons
 
 - Read and represent the ASCII output from ``QuasiLocalMeasures`` and ``AHFinderDirect``.
 - Work with the shape of the horizons and their properties (as timeseries).
-- Cut the 3D shape into any 2D projection.
+- Cut the 3D shape into 2D projection along the axes centered in the origin of the horizon.
