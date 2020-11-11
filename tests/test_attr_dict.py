@@ -34,6 +34,10 @@ class TestAttrDict(unittest.TestCase):
         self.assertCountEqual(attr_dict.keys(), ["first", "b"])
         self.assertEqual("Fields available:\n['first', 'b']", str(attr_dict))
 
+        # Test attribute not available
+        with self.assertRaises(AttributeError):
+            attr_dict.hey
+
     def test_TransformDictionary(self):
 
         dictionary = {

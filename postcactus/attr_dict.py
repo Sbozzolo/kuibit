@@ -59,6 +59,8 @@ class AttributeDictionary:
         :returns: Value of _elemn[name]
 
         """
+        if name not in self._elem:
+            raise AttributeError(f"Object has no attribute {name}")
         return self._elem[name]
 
     def __dir__(self):
