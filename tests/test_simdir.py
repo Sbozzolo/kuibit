@@ -79,3 +79,8 @@ class TestSimDir(unittest.TestCase):
         #
         self.assertIn(self.sim.ts.__str__(), self.sim.__str__())
         self.assertIn(self.sim.multipoles.__str__(), self.sim.__str__())
+
+        # Test for a simdir with no information
+        # This is a fake folder
+        empty_sim = sd.SimDir("postcactus")
+        self.assertIn("No horizon found", empty_sim.__str__())
