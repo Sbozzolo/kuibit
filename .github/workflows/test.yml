@@ -13,36 +13,30 @@ jobs:
           fetch-depth: 1
 
       - name: Set up Python 3.7
-        uses: actions/setup-python@v1
+        uses: actions/setup-python@v2
         with:
           python-version: 3.7
 
       - name: Install Poetry
-        uses: dschep/install-poetry-action@v1.2
+        uses: snok/install-poetry@v1.1.0
 
-      - name: Cache Poetry virtualenv
+      - name: Load cached Poetry virtualenv
         uses: actions/cache@v1
-        id: cache
+        id: cached-poetry-dependencies
         with:
-          path: ~/.virtualenvs
-          key: poetry-${{ hashFiles('**/poetry.lock') }}
-          restore-keys: |
-            poetry-${{ hashFiles('**/poetry.lock') }}
-
-      - name: Set Poetry config
-        run: |
-          poetry config virtualenvs.in-project false
-          poetry config virtualenvs.path ~/.virtualenvs
+          path: .venv
+          key: venv-${{ runner.os }}-${{ hashFiles('**/poetry.lock') }}
 
       - name: Install Dependencies
         run: poetry install
-        if: steps.cache.outputs.cache-hit != 'true'
+        if: steps.cached-poetry-dependencies.outputs.cache-hit != 'true'
 
       - name: Code Quality
         continue-on-error: true
         run: poetry run black . --check
 
-      - name: Produce coverage
+      - name: Tests and produce coverage
+        continue-on-error: true
         run: |
           poetry run coverage run -m unittest discover
           poetry run coverage xml
@@ -54,3 +48,31 @@ jobs:
           flags: unittests
           env_vars: OS,PYTHON
           fail_ci_if_error: true
+
+      - name: Produce documentation
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y pandoc
+          sudo apt-get install -y xvfb
+          cd docs/
+          xvfb-run poetry run make html
+          cd ..
+
+      - name: Commit documentation changes
+        run: |
+          git clone https://github.com/ammaraskar/sphinx-action-test.git --branch gh-pages --single-branch gh-pages
+          cp -r docs/_build/html/* gh-pages/
+          cd gh-pages
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git add .
+          git commit -m "Update documentation" -a || true
+          # The above command will fail if no changes were present, so we ignore
+          # the return code.
+      - name: Push changes
+        uses: ad-m/github-push-action@master
+        with:
+          branch: gh-pages
+          force: true
+          directory: gh-pages
+          github_token: ${{ secrets.GITHUB_TOKEN }}

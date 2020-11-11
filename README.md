@@ -1,8 +1,7 @@
 ![PostCactus-logo](https://github.com/Sbozzolo/PostCactus/raw/master/logo.png)
 
 [![codecov](https://codecov.io/gh/Sbozzolo/PostCactus/branch/master/graph/badge.svg)](https://codecov.io/gh/Sbozzolo/PostCactus)
-![Tests](https://github.com/Sbozzolo/PostCactus/workflows/Tests/badge.svg)
-![Docs](https://github.com/Sbozzolo/PostCactus/workflows/Docs/badge.svg)
+![Tests and documentation](https://github.com/Sbozzolo/PostCactus/workflows/Tests/badge.svg)
 [![GPLv3
 license](https://img.shields.io/badge/License-GPLv3-blue.svg)](http://perso.crans.org/besson/LICENSE.html)
 [![DeepSource](https://static.deepsource.io/deepsource-badge-light-mini.svg)](https://deepsource.io/gh/Sbozzolo/PostCactus/?ref=repository-badge)
