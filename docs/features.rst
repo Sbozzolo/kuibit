@@ -12,6 +12,13 @@ example, if an objects smells like a dictionary, you should be able to ask for
 
 Here we review all the available features as of version ``3.0.0b1`.
 
+General
+-------
+
+- ``PostCactus`` is documented, thoroughly commented, provides examples, and has
+  a large test suite.
+- ``PostCactus`` is available as wheel and can be installed with ``pip``.
+
 SimDir
 ------
 
