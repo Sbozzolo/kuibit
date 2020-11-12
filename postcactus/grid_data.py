@@ -407,7 +407,7 @@ class UniformGrid:
     def coordinates_1d(self):
         """Return coordinates of the grid points.
 
-        The return value is a list with the coordinates along each direction
+        The return value is a list with the coordinates along each direction.
 
         """
         if self.__coordinates_1d is None:
@@ -883,6 +883,10 @@ class UniformGridData(BaseNumerical):
         """Return coordinates of the grid points as numpy meshgrid.
         This is useful for plotting"""
         return self.coordinates_from_grid(as_meshgrid=True)
+
+    @property
+    def data_xyz(self):
+        return np.transpose(self.data)
 
     def save(self, file_name, *args, **kwargs):
         """Saves into data and grid information in ASCII file.

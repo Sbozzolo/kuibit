@@ -1117,6 +1117,7 @@ class TestUniformGridData(unittest.TestCase):
         self.assertEqual(grid_data.component, self.geom.component)
         self.assertEqual(grid_data.time, self.geom.time)
         self.assertEqual(grid_data.iteration, self.geom.iteration)
+        self.assertTrue(np.allclose(grid_data.data_xyz, grid_data.data.T))
 
     def test__getitem__(self):
         def square(x, y):

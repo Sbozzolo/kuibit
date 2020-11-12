@@ -231,14 +231,18 @@ These files can be read with the :py:meth:`~.load_UniformGridData` function. For
 large datasets, it is convinent to compress the file. To do this, just provide a
 file extension that is compressed (e.g., ``.dat.gz``).
 
-To access the data (ie, for plotting), you can simply use `.data`. This is a
-standard numpy array.
+To access the data (ie, for plotting), you can simply use ``.data``. This is a
+standard numpy array. Alternatively, you can use the ``.data_xyz`` attribute,
+which swaps rows and columns (``.data_xyz`` is coordinates-indexed, ``.data`` is
+matrix-indexed).
 
 .. warning::
 
-   Arrays are stored row-first, so if you want to have a natural mapping between
-   coordinates and indices you have to transpose the data!
-   (See, `<this blog post> https://eli.thegreenplace.net/2014/meshgrids-and-disambiguating-rows-and-columns-from-cartesian-coordinates/`_ for an explanation.)
+   Arrays are stored row-first, so if you want to use ``.data``, to have a
+   natural mapping between coordinates and indices you have to transpose the
+   data! (See, `<this blog post>
+   https://eli.thegreenplace.net/2014/meshgrids-and-disambiguating-rows-and-columns-from-cartesian-coordinates/`_
+   for an explanation.)
 
 
 HierarchicalGridData
