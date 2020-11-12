@@ -2373,6 +2373,11 @@ class HierarchicalGridData(BaseNumerical):
         This can be a very expensive operation!
 
         """
+        # If we have only one refinement level, with one component, we should
+        # just return that.
+        if len(self.all_components) == 1:
+            return self.first_component.copy()
+
         # finest_dx can have zero entries, for which a shape of 1 should
         # correspond. There can zero entries, we substitute them with -1, so
         # that we can identify them as negative numbers

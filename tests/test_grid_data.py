@@ -1631,6 +1631,10 @@ class TestHierarchicalGridData(unittest.TestCase):
         self.assertEqual(hg.merge_refinement_levels()((5, 1)), 18)
         self.assertEqual(hg.merge_refinement_levels().grid, expected_grid)
 
+        # Test a case with only one refinement level, so just returning a copy
+        hg_one = gd.HierarchicalGridData([big_grid_data])
+        self.assertEqual(hg_one.merge_refinement_levels(), big_grid_data)
+
     def test_coordinates(self):
 
         hg_coord = gd.HierarchicalGridData(self.grid_data).coordinates()
