@@ -1,77 +1,121 @@
+---
+title: 'kuibit: Analyzing Einstein Toolkit simulations with Python'
+tags:
+  - Python
+  - Einstein Toolkit
+  - Cactus
+  - numerical relativity
+  - astrophysics
+authors:
+  - name: Gabriele Bozzola
+    orcid: 0000-0003-3696-6408
+    affiliation: "1"
+affiliations:
+ - name: Steward Observatory and Astronomy Department, University of Arizona
+   index: 1
+date: 1 January 2021
+bibliography: paper.bib
+---
+
 # Summary
 
-The forces on stars, galaxies, and dark matter under external gravitational
-fields lead to the dynamical evolution of structures in the universe. The orbits
-of these bodies are therefore key to understanding the formation, history, and
-future state of galaxies. The field of "galactic dynamics," which aims to model
-the gravitating components of galaxies to study their structure and evolution,
-is now well-established, commonly taught, and frequently used in astronomy.
-Aside from toy problems and demonstrations, the majority of problems require
-efficient numerical tools, many of which require the same base code (e.g., for
-performing numerical orbit integration).
+`kuibit` [^0][^3] is a Python library for analyzing simulations performed with
+the `Einstein Toolkit`[^1] [@einsteintoolkit, @einsteintoolkit2], a free and
+open-source code for numerical relativity and relativistic astrophysics. Over
+the past years, numerical simulations like the ones enabled by the `Einstein
+Toolkit` have become a critical tool in modeling, predicting, and understanding
+several astrophysical phenomena, including binary black hole or neutron star
+mergers. As a result of the recent detections of gravitational waves by the
+LIGO-Virgo collaboration, these studies are at the forefront of scientific
+research. The package presented in this paper, `kuibit`, provides an intuitive
+infrastructure to read and represent the output of the `Einstein Toolkit`. This
+simplifies analyzing simulations and significantly lowers the barrier in
+learning how to use the tool.
 
 # Statement of need
 
-`Gala` is an Astropy-affiliated Python package for galactic dynamics. Python
-enables wrapping low-level languages (e.g., C) for speed without losing
-flexibility or ease-of-use in the user-interface. The API for `Gala` was
-designed to provide a class-based and user-friendly interface to fast (C or
-Cython-optimized) implementations of common operations such as gravitational
-potential and force evaluation, orbit integration, dynamical transformations,
-and chaos indicators for nonlinear dynamics. `Gala` also relies heavily on and
-interfaces well with the implementations of physical units and astronomical
-coordinate systems in the `Astropy` package [@astropy] (`astropy.units` and
-`astropy.coordinates`).
+The `Einstein Toolkit` is a software for numerical simulations based on the
+`Cactus` computational framework and designed to be accessible for both users
+and developers. Numerical-relativity simulations require large and complex
+codes, which have to run on the world’s largest supercomputers. `Einstein
+Toolkit` significantly reduces this complexity and improves accessibility by
+splitting infrastructure code from physics one. On one side, there is memory
+management, parallelization, grid operations, and all the other low-level
+details that are needed to successfully perform a simulation but do not strictly
+depend on the physical system under consideration. On the other, there are the
+physics modules, which implement the scientific aspects of the simulation. Codes
+are developed by domain-experts and researchers can focus on their goals without
+having to worry about the technical details of the implementation. This makes
+`Einstein Toolkit` easier to use and extend.
 
-`Gala` was designed to be used by both astronomical researchers and by
-students in courses on gravitational dynamics or astronomy. It has already been
-used in a number of scientific publications [@Pearson:2017] and has also been
-used in graduate courses on Galactic dynamics to, e.g., provide interactive
-visualizations of textbook material [@Binney:2008]. The combination of speed,
-design, and support for Astropy functionality in `Gala` will enable exciting
-scientific explorations of forthcoming data releases from the *Gaia* mission
-[@gaia] by students and experts alike.
+Despite the advancements made by `Einstein Toolkit`, there is still a big leap
+between running a simulation and obtaining scientific results. The output from
+the `Einstein Toolkit` is a collection of files with different formats and
+structures, with data that is typically spread across multiple files (one or
+more for each MPI process) in various directories (one per checkpoint). Reading
+the simulation output and properly combining all the data is a challenging task.
+Even once the output is read, traditional data structures are not a good
+representation of the physical quantities. For instance, representing variables
+defined on an adaptive-mesh-refined grid as simple arrays completely ignores all
+the information on the grid structure, making some operations impractical or
+impossible to perform. The lack of suitable interfaces introduces significant
+friction in exploring the scientific content of a simulation. `kuibit` takes
+care of both the aspects of reading the simulation data and of providing
+high-level representations of the data that closely follows what researchers are
+used to. In addition to this, `kuibit` also includes a set of routines that are
+commonly used in the field: for example, it handles unit conversion (including
+from geometrized units to physical), it has the noise curves of known detectors,
+or it computes gravitational-waves from simulation data.
 
-# Mathematics
+`kuibit` is based on the same design (and in various cases, implementation
+details too) of a pre-existing package named `PostCactus` [^4]. Like
+`PostCactus`, `kuibit` has two groups of modules. The first is to define custom
+data-types for time series, Fourier spectra, multipolar decompositions, and grid
+data (both on uniform grids and mesh-refined ones). The second group consists of
+the readers, which are a collection of tools to scan the simulation output and
+organize it. The main reader is a class `SimDir` which provides the interface to
+access all the data in the simulation. For instance, the `timeseries` attribute
+in `SimDir` is a dictionary-like object that contains all the time series in the
+output. When reading data, `kuibit` takes care of all the low-level details,
+like handling transparently simulation restarts, or merging grid data stored in
+different files. Therefore, users can easily access the data regardless of how
+complicated the structure of the output is.
 
-Single dollars ($) are required for inline mathematics e.g. $f(x) = e^{\pi/x}$
+`kuibit` embraces the core principles of the `Einstein Toolkit`: On one side,
+`kuibit` solves the engineering problems of reading and representing `Einstein
+Toolkit` data, so that researchers can directly pursue their scientific goals
+without having to worry about how the data is stored. With `kuibit`, the entry
+barrier into using the `Einstein Toolkit` is the lowest it has ever been, and
+students and researchers can inspect and visualize simulations in just a few
+lines of code. On the other side, `kuibit` is designed to be a code for the
+community: it is free and does not require any proprietary software to run [^2],
+it is openly developed with an emphasis on readability and maintainability, and
+it encourages contributions.
 
-Double dollars make self-standing equations:
+# Acknowledgments
 
-$$\Theta(x) = \left\{\begin{array}{l}
-0\textrm{ if } x < 0\cr
-1\textrm{ else}
-\end{array}\right.$$
-
-You can also use plain \LaTeX for equations
-\begin{equation}\label{eq:fourier}
-\hat f(\omega) = \int_{-\infty}^{\infty} f(x) e^{i\omega x} dx
-\end{equation}
-and refer to \autoref{eq:fourier} from text.
-
-# Citations
-
-Citations to entries in paper.bib should be in
-[rMarkdown](http://rmarkdown.rstudio.com/authoring_bibliographies_and_citations.html)
-format.
-
-If you want to cite a software repository URL (e.g. something on GitHub without a preferred
-citation) then you can do it with the example BibTeX entry below for @fidgit.
-
-For a quick reference, the following citation commands can be used:
-- `@author:2001`  ->  "Author et al. (2001)"
-- `[@author:2001]` -> "(Author et al., 2001)"
-- `[@author1:2001; @author2:2001]` -> "(Author1 et al., 2001; Author2 et al., 2002)"
-
-# Figures
-
-Figures can be included like this:
-![Caption for example figure.\label{fig:example}](figure.png)
-and referenced from text using \autoref{fig:example}.
-
-# Acknowledgements
-
-We acknowledge contributions from Brigitta Sipocz, Syrtis Major, and Semyeong
-Oh, and support from Kathryn Johnston during the genesis of this project.
+Gabriele Bozzola is supported by the Frontera Fellowship by the Frontera
+Fellowship by the Texas Advanced Computing Center (TACC). Frontera is founded by
+NSF grant OAC-1818253. Gabriele Bozzola wishes to thank Wolfgang Kastaun for
+publicly releasing his `PostCactus` package [^4] without which, `kuibit` would
+not exist.
 
 # References
+
+[^0]: A kuibit (harvest pole) is the tool traditionally used by the Tohono
+O'odham people to reach the fruit of the Saguaro cacti during the harvesting
+season.
+
+[^1]: While `kuibit` is designed for the `Einstein Toolkit`, most of its
+capabilities will work also for all the other codes based on `Cactus`. For
+instance, it is known that `kuibit` can be used to analyze `Illinois GRMHD`
+[@illinoisgrmhd] simulations.
+
+[^2]: Capabilities similar to those of `kuibit` are offered by `SimulationTools`
+[@simulationtools], which is a Wolfram Mathematica package.
+
+[^3]: [https://github.com/Sbozzolo/kuibit](https://github.com/Sbozzolo/kuibit)
+
+[^4]: [https://github.com/wokast/PyCactus](https://github.com/wokast/PyCactus)
+
+
