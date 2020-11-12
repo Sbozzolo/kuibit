@@ -101,6 +101,7 @@ Reference material (classes, functions, ...)
 .. toctree::
    :maxdepth: 1
 
+   features.rst
    simdir_ref.rst
    series_ref.rst
    timeseries_ref.rst
