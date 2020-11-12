@@ -8,21 +8,12 @@ license](https://img.shields.io/badge/License-GPLv3-blue.svg)](http://perso.cran
 
 # PostCactus
 
-[PostCactus](https://github.com/wokast/PyCactus/tree/master/PostCactus) is a set
-of tools to post-process simulations performed with the Einstein Toolkit
-originally developed by Wolfgang Kastaun. This repository contains a fork of
-PostCactus with the following differences:
-1. We use Python 3 instead of Python 2
-2. We drop support to some features, but add others (see documentation for a
-   list of the available features)
-3. We test and document all the code
-
-The goal of this fork is to make PostCactus more robust and developer-friendly,
-hence the emphasis on documentation and testing. We try to make the code easy to
-understand and extend.
-
-Documentation is found at the following link:
-[sbozzolo.github.io/PostCactus](https://sbozzolo.github.io/PostCactus).
+PostCactus is a Python library to analyze simulations performed with the
+Einstein Toolkit [originally developed by Wolfgang
+Kastaun](https://github.com/wokast/PyCactus/tree/master/PostCactus). PostCactus
+can read simulation data and represent it with high-level classes. For a list of
+features available, look at the [official
+documentation](https://sbozzolo.github.io/PostCactus).
 
 ## Installation
 
