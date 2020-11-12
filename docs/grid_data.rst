@@ -396,7 +396,7 @@ HDF5 representation is preferred.
 .. code-block:: python
 
     # These methods are equivalent
-    rho = sim.gf.xy.rho
+    rho = sim.gf.xy['rho']
     rho = sim.gf.xy.fields.rho
 
 In case you are reading an ASCII file, you have to set the correct number of
