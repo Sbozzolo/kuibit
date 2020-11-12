@@ -516,10 +516,10 @@ class OneGridFunctionASCII(BaseOneGridFunction):
             current_iteration = None
             current_ref_level = None
             current_component = None
-            current_x = np.array([], dtype=np.float)
-            current_y = np.array([], dtype=np.float)
-            current_z = np.array([], dtype=np.float)
-            current_data = np.array([], dtype=np.float)
+            current_x = []
+            current_y = []
+            current_z = []
+            current_data = []
             # We scan the entire file line by line
             for line in fil:
                 # Skip header
@@ -581,20 +581,18 @@ class OneGridFunctionASCII(BaseOneGridFunction):
                     current_iteration = line_data[0]
                     current_ref_level = line_data[2]
                     current_component = line_data[3]
-                    current_x = np.array([], dtype=np.float)
-                    current_y = np.array([], dtype=np.float)
-                    current_z = np.array([], dtype=np.float)
-                    current_data = np.array([], dtype=np.float)
+                    current_x = []
+                    current_y = []
+                    current_z = []
+                    current_data = []
 
                 # We still have to read the data on this line even if we
                 # "are done with a group"
-                current_x = np.append(current_x, line_data[9])
-                current_y = np.append(current_y, line_data[10])
-                current_z = np.append(current_z, line_data[11])
+                current_x.append(line_data[9])
+                current_y.append(line_data[10])
+                current_z.append(line_data[11])
 
-                current_data = np.append(
-                    current_data, line_data[column_description]
-                )
+                current_data.append(line_data[column_description])
 
             # Here we take care of the last piece of data
             if len(current_data) > 0:
