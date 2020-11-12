@@ -390,7 +390,7 @@ access the variables using the bracket operator of looking in the <code class="d
 attribute. In case a variable is available as HDF5 file and as ASCII file, the
 HDF5 representation is preferred.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># These methods are equivalent</span>
-<span class="n">rho</span> <span class="o">=</span> <span class="n">sim</span><span class="o">.</span><span class="n">gf</span><span class="o">.</span><span class="n">xy</span><span class="o">.</span><span class="n">rho</span>
+<span class="n">rho</span> <span class="o">=</span> <span class="n">sim</span><span class="o">.</span><span class="n">gf</span><span class="o">.</span><span class="n">xy</span><span class="p">[</span><span class="s1">&#39;rho&#39;</span><span class="p">]</span>
 <span class="n">rho</span> <span class="o">=</span> <span class="n">sim</span><span class="o">.</span><span class="n">gf</span><span class="o">.</span><span class="n">xy</span><span class="o">.</span><span class="n">fields</span><span class="o">.</span><span class="n">rho</span>
 </pre></div>
 </div>
@@ -433,10 +433,14 @@ operator. Alternatively, you can use the <code class="xref py py-meth docutils l
 </div>
 <p>You can find what iterations are available with the
 <a class="reference internal" href="cactus_grid_functions_ref.html#postcactus.cactus_grid_functions.BaseOneGridFunction.available_iterations" title="postcactus.cactus_grid_functions.BaseOneGridFunction.available_iterations"><code class="xref py py-meth docutils literal notranslate"><span class="pre">available_iterations()</span></code></a> attribute. Similarly, you can find what times
-are available with <a class="reference internal" href="cactus_grid_functions_ref.html#postcactus.cactus_grid_functions.BaseOneGridFunction.available_times" title="postcactus.cactus_grid_functions.BaseOneGridFunction.available_times"><code class="xref py py-meth docutils literal notranslate"><span class="pre">available_times()</span></code></a>. You can read a time instead of
-a iteration with the method <code class="xref py py-meth docutils literal notranslate"><span class="pre">get_time()</span></code>. You can convert between time
-and iteration with the methods <a class="reference internal" href="cactus_grid_functions_ref.html#postcactus.cactus_grid_functions.OneGridFunctionH5.time_at_iteration" title="postcactus.cactus_grid_functions.OneGridFunctionH5.time_at_iteration"><code class="xref py py-meth docutils literal notranslate"><span class="pre">time_at_iteration()</span></code></a> and
-<a class="reference internal" href="cactus_grid_functions_ref.html#postcactus.cactus_grid_functions.BaseOneGridFunction.iteration_at_time" title="postcactus.cactus_grid_functions.BaseOneGridFunction.iteration_at_time"><code class="xref py py-meth docutils literal notranslate"><span class="pre">iteration_at_time()</span></code></a>.</p>
+are available with <a class="reference internal" href="cactus_grid_functions_ref.html#postcactus.cactus_grid_functions.BaseOneGridFunction.available_times" title="postcactus.cactus_grid_functions.BaseOneGridFunction.available_times"><code class="xref py py-meth docutils literal notranslate"><span class="pre">available_times()</span></code></a>:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="n">sim</span><span class="o">.</span><span class="n">gf</span><span class="o">.</span><span class="n">xy</span><span class="o">.</span><span class="n">rho</span><span class="o">.</span><span class="n">available_iterations</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">sim</span><span class="o">.</span><span class="n">gf</span><span class="o">.</span><span class="n">xy</span><span class="o">.</span><span class="n">rho</span><span class="o">.</span><span class="n">available_times</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>You can read a time instead of a iteration with the method
+<code class="xref py py-meth docutils literal notranslate"><span class="pre">get_time()</span></code>. You can convert between time and iteration with the
+methods <a class="reference internal" href="cactus_grid_functions_ref.html#postcactus.cactus_grid_functions.OneGridFunctionH5.time_at_iteration" title="postcactus.cactus_grid_functions.OneGridFunctionH5.time_at_iteration"><code class="xref py py-meth docutils literal notranslate"><span class="pre">time_at_iteration()</span></code></a> and <a class="reference internal" href="cactus_grid_functions_ref.html#postcactus.cactus_grid_functions.BaseOneGridFunction.iteration_at_time" title="postcactus.cactus_grid_functions.BaseOneGridFunction.iteration_at_time"><code class="xref py py-meth docutils literal notranslate"><span class="pre">iteration_at_time()</span></code></a>.</p>
 <p>These methods return a <a class="reference internal" href="grid_data_ref.html#postcactus.grid_data.HierarchicalGridData" title="postcactus.grid_data.HierarchicalGridData"><code class="xref py py-class docutils literal notranslate"><span class="pre">HierarchicalGridData</span></code></a> object with all the
 available data for the requested iteration. If HDF5 files are being read, the
 correct ghost zone information is being used. In case you want to work with a
