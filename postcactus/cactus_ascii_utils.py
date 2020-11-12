@@ -22,10 +22,12 @@ import re
 import os
 
 
-def _scan_strings_for_columns(strings, pattern):
+def _scan_strings_for_columns(strings, pattern, path=None):
     """Match each string in strings against pattern and each matching result
     against _pattern_columns, which match expressions like 3:kxx. Then, return
     a dictionary that maps variable to column number.
+
+    path here is given only for the error message
 
     """
 
@@ -43,9 +45,9 @@ def _scan_strings_for_columns(strings, pattern):
     # Here we are using an else clause with a for loop. This else
     # branch is reached only if the break in the for loop is never
     # called. In this case, this happens if we never match the
-    # column format
+    # given pattern
     else:
-        raise RuntimeError("Missing column information in file")
+        raise RuntimeError(f"Unrecognized header in file {path}")
 
     # Here we should have matched the column format. It should be
     # like:
@@ -136,7 +138,7 @@ def scan_header(
 
         if file_has_column_format:
             columns_description = _scan_strings_for_columns(
-                header, rx_column_format
+                header, rx_column_format, path=path
             )
 
             time_column = columns_description.get("time", None)
@@ -159,7 +161,7 @@ def scan_header(
     # Se update _vars to add all the new ones
     if one_file_per_group:
         columns_description = _scan_strings_for_columns(
-            header, rx_data_columns
+            header, rx_data_columns, path=path
         )
         return time_column, columns_description
     # This is not one file per group
