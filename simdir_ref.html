@@ -1,0 +1,170 @@
+
+
+<!doctype html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Reference on postcactus.simdir &#8212; PostCactus 3.0.0a9 documentation</title>
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="_static/bizstyle.css" type="text/css" />
+    
+    <script id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/doctools.js"></script>
+    <script src="_static/language_data.js"></script>
+    <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script type="text/x-mathjax-config">MathJax.Hub.Config({"tex2jax": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true, "ignoreClass": "document", "processClass": "math|output_area"}})</script>
+    <script src="_static/bizstyle.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Reference on postcactus.series" href="series_ref.html" />
+    <link rel="prev" title="Working with gravitational waves" href="examples/gravitational_waves.html" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0" />
+    <!--[if lt IE 9]>
+    <script src="_static/css3-mediaqueries.js"></script>
+    <![endif]-->
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="series_ref.html" title="Reference on postcactus.series"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="examples/gravitational_waves.html" title="Working with gravitational waves"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">PostCactus 3.0.0a9 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">Reference on postcactus.simdir</a></li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="module-postcactus.simdir">
+<span id="reference-on-postcactus-simdir"></span><h1>Reference on postcactus.simdir<a class="headerlink" href="#module-postcactus.simdir" title="Permalink to this headline">¶</a></h1>
+<p>This module provides easy access to CACTUS data files.</p>
+<p>A simulation directory is represented by an instance of the
+<a class="reference internal" href="#postcactus.simdir.SimDir" title="postcactus.simdir.SimDir"><code class="xref py py-class docutils literal notranslate"><span class="pre">SimDir</span></code></a> class, which provides access to all supported
+data types.</p>
+<dl class="py class">
+<dt id="postcactus.simdir.SimDir">
+<em class="property">class </em><code class="sig-prename descclassname">postcactus.simdir.</code><code class="sig-name descname">SimDir</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">path</span></em>, <em class="sig-param"><span class="n">max_depth</span><span class="o">=</span><span class="default_value">8</span></em>, <em class="sig-param"><span class="n">ignore</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#postcactus.simdir.SimDir" title="Permalink to this definition">¶</a></dt>
+<dd><p>This class represents a CACTUS simulation directory.</p>
+<p>Data is searched recursively in all subfolders. No particular folder
+structure (e.g. SimFactory style) is assumed. The following attributes
+allow access to the supported data types:</p>
+<dl class="field-list simple">
+<dt class="field-odd">Variables</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>path</strong> – Top level path of simulation directory.</p></li>
+<li><p><strong>dirs</strong> – All directories in which data is searched.</p></li>
+<li><p><strong>parfiles</strong> – The locations of all parameter files.</p></li>
+<li><p><strong>initial_params</strong> – Simulation parameters, see
+<code class="xref py py-class docutils literal notranslate"><span class="pre">Parfile</span></code>.</p></li>
+<li><p><strong>logfiles</strong> – The locations of all log files (.out).</p></li>
+<li><p><strong>errfiles</strong> – The location of all error log files (.err).</p></li>
+<li><p><strong>ts</strong> – Scalar data of various type, see
+<a class="reference internal" href="cactus_scalars_ref.html#postcactus.cactus_scalars.ScalarsDir" title="postcactus.cactus_scalars.ScalarsDir"><code class="xref py py-class docutils literal notranslate"><span class="pre">ScalarsDir</span></code></a></p></li>
+<li><p><strong>gf</strong> – Access to grid function data, see
+<a class="reference internal" href="cactus_grid_functions_ref.html#postcactus.cactus_grid_functions.GridFunctionsDir" title="postcactus.cactus_grid_functions.GridFunctionsDir"><code class="xref py py-class docutils literal notranslate"><span class="pre">GridFunctionsDir</span></code></a>.</p></li>
+<li><p><strong>gws</strong> – GW signal from the Weyl scalar multipole
+decomposition, see
+<a class="reference internal" href="cactus_waves_ref.html#postcactus.cactus_waves.GravitationalWavesDir" title="postcactus.cactus_waves.GravitationalWavesDir"><code class="xref py py-class docutils literal notranslate"><span class="pre">GravitationalWavesDir</span></code></a>.</p></li>
+<li><p><strong>emws</strong> – EM signal from the Weyl scalar multipole
+decomposition, see
+<a class="reference internal" href="cactus_waves_ref.html#postcactus.cactus_waves.ElectromagneticWavesDir" title="postcactus.cactus_waves.ElectromagneticWavesDir"><code class="xref py py-class docutils literal notranslate"><span class="pre">ElectromagneticWavesDir</span></code></a>.</p></li>
+<li><p><strong>horizons</strong> – Apparent horizon information, see
+<code class="xref py py-class docutils literal notranslate"><span class="pre">HorizonsDir</span></code>.</p></li>
+<li><p><strong>multipoles</strong> – Multipole components, see
+<code class="xref py py-class docutils literal notranslate"><span class="pre">CactusMultipoleDir</span></code>.</p></li>
+</ul>
+</dd>
+</dl>
+<p>Constructor.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>path</strong> (<em>string</em>) – Path to simulation directory.</p></li>
+<li><p><strong>max_depth</strong> (<em>int</em>) – Maximum recursion depth for subfolders.</p></li>
+<li><p><strong>ignore</strong> (<em>set</em>) – Folders to ignore</p></li>
+</ul>
+</dd>
+</dl>
+<p>Parfiles (<em>.par) will be searched in all data directories and the
+top-level SIMFACTORY/par folder, if it exists. The parfile in the
+latter folder, if available, or else the oldest parfile in any of
+the data directories, will be used to extract the simulation
+parameters. Logfiles (</em>.out) and errorfiles (<a href="#id1"><span class="problematic" id="id2">*</span></a>.err) will be
+searched for in all data directories.</p>
+</dd></dl>
+
+</div>
+
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="index.html">
+              <img class="logo" src="_static/logo.png" alt="Logo"/>
+            </a></p>
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="examples/gravitational_waves.html"
+                        title="previous chapter">Working with gravitational waves</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="series_ref.html"
+                        title="next chapter">Reference on postcactus.series</a></p>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="series_ref.html" title="Reference on postcactus.series"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="examples/gravitational_waves.html" title="Working with gravitational waves"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">PostCactus 3.0.0a9 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">Reference on postcactus.simdir</a></li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2020, Gabriele Bozzola and Wolfgang Kastaun.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 3.3.0.
+    </div>
+  </body>
+</html>

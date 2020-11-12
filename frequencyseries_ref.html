@@ -1,0 +1,979 @@
+
+
+<!doctype html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Reference on postcactus.frequencyseries &#8212; PostCactus 3.0.0a9 documentation</title>
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="_static/bizstyle.css" type="text/css" />
+    
+    <script id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/doctools.js"></script>
+    <script src="_static/language_data.js"></script>
+    <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script type="text/x-mathjax-config">MathJax.Hub.Config({"tex2jax": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true, "ignoreClass": "document", "processClass": "math|output_area"}})</script>
+    <script src="_static/bizstyle.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Reference on postcactus.cactus_grid_functions" href="cactus_grid_functions_ref.html" />
+    <link rel="prev" title="Reference on postcactus.timeseries" href="timeseries_ref.html" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0" />
+    <!--[if lt IE 9]>
+    <script src="_static/css3-mediaqueries.js"></script>
+    <![endif]-->
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="cactus_grid_functions_ref.html" title="Reference on postcactus.cactus_grid_functions"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="timeseries_ref.html" title="Reference on postcactus.timeseries"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">PostCactus 3.0.0a9 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">Reference on postcactus.frequencyseries</a></li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="module-postcactus.frequencyseries">
+<span id="reference-on-postcactus-frequencyseries"></span><h1>Reference on postcactus.frequencyseries<a class="headerlink" href="#module-postcactus.frequencyseries" title="Permalink to this headline">¶</a></h1>
+<p>The <a class="reference internal" href="#module-postcactus.frequencyseries" title="postcactus.frequencyseries"><code class="xref py py-mod docutils literal notranslate"><span class="pre">frequencyseries</span></code></a> module provides a representation of
+frequency series.</p>
+<dl class="py class">
+<dt id="postcactus.frequencyseries.FrequencySeries">
+<em class="property">class </em><code class="sig-prename descclassname">postcactus.frequencyseries.</code><code class="sig-name descname">FrequencySeries</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">f</span></em>, <em class="sig-param"><span class="n">fft</span></em>, <em class="sig-param"><span class="n">guarantee_f_is_monotonic</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="headerlink" href="#postcactus.frequencyseries.FrequencySeries" title="Permalink to this definition">¶</a></dt>
+<dd><p>Class representing a Fourier spectrum.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Variables</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>f</strong> (<em>1D numpy array</em><em> or </em><em>float</em>) – Frequency</p></li>
+<li><p><strong>fft</strong> (<em>1D numpy array</em><em> or </em><em>float</em>) – Fourier transform</p></li>
+</ul>
+</dd>
+</dl>
+<p>Create a FrequencySeries providing frequencies and the
+value at those frequencies.</p>
+<p>It is your duty to make sure everything makes sense!</p>
+<p>When guarantee_f_is_monotonic is True no checks will be perform to make
+sure that f is monotonically increasing (increasing performance). This
+should is used internally whenever a new series is returned from self
+(since we have already checked that f is good.) or in performance
+critical routines.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>f</strong> (<em>1D numpy array</em><em> or </em><em>float</em>) – Frequencies</p></li>
+<li><p><strong>fft</strong> (<em>1D numpy array</em><em> or </em><em>float</em>) – Fourier transform</p></li>
+<li><p><strong>guarantee_f_is_monotonic</strong> – The codw will assume that f is</p></li>
+</ul>
+</dd>
+</dl>
+<p>monotonically incresasing
+:type guarantee_f_is_monotonic: bool</p>
+<dl class="py method">
+<dt id="postcactus.frequencyseries.FrequencySeries.abs_max">
+<code class="sig-name descname">abs_max</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#postcactus.frequencyseries.FrequencySeries.abs_max" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the maximum of the absolute value</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="postcactus.frequencyseries.FrequencySeries.abs_min">
+<code class="sig-name descname">abs_min</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#postcactus.frequencyseries.FrequencySeries.abs_min" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the minimum of the absolute value</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="postcactus.frequencyseries.FrequencySeries.amp">
+<em class="property">property </em><code class="sig-name descname">amp</code><a class="headerlink" href="#postcactus.frequencyseries.FrequencySeries.amp" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the amplitude of frequencies.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Range of the frequencyseries</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>1d numpy array of float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="postcactus.frequencyseries.FrequencySeries.amplitude">
+<em class="property">property </em><code class="sig-name descname">amplitude</code><a class="headerlink" href="#postcactus.frequencyseries.FrequencySeries.amplitude" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the amplitude of frequencies.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Range of the frequencyseries</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>1d numpy array of float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="postcactus.frequencyseries.FrequencySeries.band_pass">
+<code class="sig-name descname">band_pass</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">fmin</span></em>, <em class="sig-param"><span class="n">fmax</span></em><span class="sig-paren">)</span><a class="headerlink" href="#postcactus.frequencyseries.FrequencySeries.band_pass" title="Permalink to this definition">¶</a></dt>
+<dd><p>Remove all the frequencies below fmin and above fmax</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>fmin</strong> (<em>float</em>) – Minimum frequency</p></li>
+<li><p><strong>fmax</strong> (<em>float</em>) – Maximum frequency</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="postcactus.frequencyseries.FrequencySeries.band_passed">
+<code class="sig-name descname">band_passed</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">fmin</span></em>, <em class="sig-param"><span class="n">fmax</span></em><span class="sig-paren">)</span><a class="headerlink" href="#postcactus.frequencyseries.FrequencySeries.band_passed" title="Permalink to this definition">¶</a></dt>
+<dd><p>Remove frequencies outside the range fmin, fmax</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>fmin</strong> – </p></li>
+<li><p><strong>fmax</strong> – </p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="postcactus.frequencyseries.FrequencySeries.clip">
+<code class="sig-name descname">clip</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">init</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">end</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#postcactus.frequencyseries.FrequencySeries.clip" title="Permalink to this definition">¶</a></dt>
+<dd><p>Remove data outside the intarval [init, end]. If init or end
+are not specified or None, it does not remove anything from this side.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>init</strong> (<em>float</em>) – New minimum x</p></li>
+<li><p><strong>end</strong> (<em>float</em>) – New maximum x</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="postcactus.frequencyseries.FrequencySeries.clipped">
+<code class="sig-name descname">clipped</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">init</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">end</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#postcactus.frequencyseries.FrequencySeries.clipped" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a series with data removed outside the intarval
+[init, end]. If init or end are not specified or None, it does not
+remove anything from this side.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>init</strong> (<em>float</em>) – New minimum x</p></li>
+<li><p><strong>end</strong> (<em>float</em>) – New maximum x</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Series with enforced minimum and maximum</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="series_ref.html#postcactus.series.BaseSeries" title="postcactus.series.BaseSeries"><code class="xref py py-class docutils literal notranslate"><span class="pre">BaseSeries</span></code></a> or derived class</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="postcactus.frequencyseries.FrequencySeries.copy">
+<code class="sig-name descname">copy</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#postcactus.frequencyseries.FrequencySeries.copy" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a deep copy.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Deep copy of the series</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><a class="reference internal" href="series_ref.html#postcactus.series.BaseSeries" title="postcactus.series.BaseSeries"><code class="xref py py-class docutils literal notranslate"><span class="pre">BaseSeries</span></code></a> or derived class</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="postcactus.frequencyseries.FrequencySeries.crop">
+<code class="sig-name descname">crop</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">init</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">end</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#postcactus.frequencyseries.FrequencySeries.crop" title="Permalink to this definition">¶</a></dt>
+<dd><p>Remove data outside the intarval [init, end]. If init or end
+are not specified or None, it does not remove anything from this side.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>init</strong> (<em>float</em>) – New minimum x</p></li>
+<li><p><strong>end</strong> (<em>float</em>) – New maximum x</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="postcactus.frequencyseries.FrequencySeries.cropped">
+<code class="sig-name descname">cropped</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">init</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">end</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#postcactus.frequencyseries.FrequencySeries.cropped" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a series with data removed outside the intarval
+[init, end]. If init or end are not specified or None, it does not
+remove anything from this side.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>init</strong> (<em>float</em>) – New minimum x</p></li>
+<li><p><strong>end</strong> (<em>float</em>) – New maximum x</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Series with enforced minimum and maximum</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="series_ref.html#postcactus.series.BaseSeries" title="postcactus.series.BaseSeries"><code class="xref py py-class docutils literal notranslate"><span class="pre">BaseSeries</span></code></a> or derived class</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="postcactus.frequencyseries.FrequencySeries.derive">
+<code class="sig-name descname">derive</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">order</span><span class="o">=</span><span class="default_value">1</span></em><span class="sig-paren">)</span><a class="headerlink" href="#postcactus.frequencyseries.FrequencySeries.derive" title="Permalink to this definition">¶</a></dt>
+<dd><p>Derive with the numerical order-differentiation. (order = number of
+derivatives, ie order=2 is second derivative)</p>
+<p>The derivative is calulated as centered differencing in the interior
+and one-sided derivatives at the boundaries. Higher orders are computed
+applying the same rule recursively.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>order</strong> (<em>int</em>) – Order of derivative (e.g. 2 = second derivative)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="postcactus.frequencyseries.FrequencySeries.derived">
+<code class="sig-name descname">derived</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">order</span><span class="o">=</span><span class="default_value">1</span></em><span class="sig-paren">)</span><a class="headerlink" href="#postcactus.frequencyseries.FrequencySeries.derived" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a series that is the numerical order-differentiation of
+the present series. (order = number of derivatives, ie order=2 is
+second derivative)</p>
+<p>The derivative is calulated as centered differencing in the interior
+and one-sided derivatives at the boundaries. Higher orders are computed
+applying the same rule recursively.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>order</strong> (<em>int</em>) – Order of derivative (e.g. 2 = second derivative)</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>New series with derivative</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="series_ref.html#postcactus.series.BaseSeries" title="postcactus.series.BaseSeries"><code class="xref py py-class docutils literal notranslate"><span class="pre">BaseSeries</span></code></a> or derived class</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="postcactus.frequencyseries.FrequencySeries.df">
+<em class="property">property </em><code class="sig-name descname">df</code><a class="headerlink" href="#postcactus.frequencyseries.FrequencySeries.df" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the delta f if the series is regularly sampled,
+otherwise raise error.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Delta t</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="postcactus.frequencyseries.FrequencySeries.evaluate_with_spline">
+<code class="sig-name descname">evaluate_with_spline</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">x</span></em>, <em class="sig-param"><span class="n">ext</span><span class="o">=</span><span class="default_value">2</span></em><span class="sig-paren">)</span><a class="headerlink" href="#postcactus.frequencyseries.FrequencySeries.evaluate_with_spline" title="Permalink to this definition">¶</a></dt>
+<dd><p>Evaluate the spline on the points x.</p>
+<p>Values outside the interval are extrapolated if ext=0, set to 0 if
+ext=1, raise a ValueError if ext=2, or if ext=3, return the boundary
+value.</p>
+<p>This method is meant to be used only if you want to use a different ext
+for a specific call, otherwise, just use __call__.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>x</strong> (<em>1D numpy array of float</em>) – Array of x where to evaluate the series or single x</p></li>
+<li><p><strong>ext</strong> (<em>bool</em>) – How to deal values outside the bounaries. Values outside
+the interval are extrapolated if ext=0, set to 0 if ext=1,
+raise a ValueError if ext=2, or if ext=3, return the
+boundary value.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Values of the series evaluated on the input x</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>1D numpy array or float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="postcactus.frequencyseries.FrequencySeries.fmax">
+<em class="property">property </em><code class="sig-name descname">fmax</code><a class="headerlink" href="#postcactus.frequencyseries.FrequencySeries.fmax" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the maximum frequency.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Maximum frequency of the frequencyseries</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="postcactus.frequencyseries.FrequencySeries.fmin">
+<em class="property">property </em><code class="sig-name descname">fmin</code><a class="headerlink" href="#postcactus.frequencyseries.FrequencySeries.fmin" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the minimum frequency.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Minimum frequency of the frequencyseries</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="postcactus.frequencyseries.FrequencySeries.frange">
+<em class="property">property </em><code class="sig-name descname">frange</code><a class="headerlink" href="#postcactus.frequencyseries.FrequencySeries.frange" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the range of frequencies.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Range of the frequencyseries</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="postcactus.frequencyseries.FrequencySeries.high_pass">
+<code class="sig-name descname">high_pass</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">f</span></em><span class="sig-paren">)</span><a class="headerlink" href="#postcactus.frequencyseries.FrequencySeries.high_pass" title="Permalink to this definition">¶</a></dt>
+<dd><p>Remove all the frequencies smaller than f</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>f</strong> (<em>float</em>) – </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="postcactus.frequencyseries.FrequencySeries.high_passed">
+<code class="sig-name descname">high_passed</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">f</span></em><span class="sig-paren">)</span><a class="headerlink" href="#postcactus.frequencyseries.FrequencySeries.high_passed" title="Permalink to this definition">¶</a></dt>
+<dd><p>Remove frequencies lower or equal than f</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>f</strong> (<em>float</em>) – Frequency below which series will be zeroed</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>High passed frequencyeseries</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><code class="xref py py-mod docutils literal notranslate"><span class="pre">FrequencySeries</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="postcactus.frequencyseries.FrequencySeries.index">
+<em class="property">property </em><code class="sig-name descname">index</code><a class="headerlink" href="#postcactus.frequencyseries.FrequencySeries.index" title="Permalink to this definition">¶</a></dt>
+<dd><p>Fake pandas properties, to make Series objects plottable by
+matplotlib.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="postcactus.frequencyseries.FrequencySeries.inner_product">
+<code class="sig-name descname">inner_product</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">other</span></em>, <em class="sig-param"><span class="n">fmin</span><span class="o">=</span><span class="default_value">0</span></em>, <em class="sig-param"><span class="n">fmax</span><span class="o">=</span><span class="default_value">inf</span></em>, <em class="sig-param"><span class="n">noises</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">same_domain</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="headerlink" href="#postcactus.frequencyseries.FrequencySeries.inner_product" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compute the (network) inner product.</p>
+<p><span class="math notranslate nohighlight">\((h_1, h_2) = 4 \Re \int_{f_min}^{f_max} \frac{h_1 h_2^*}{S_n}\)</span></p>
+<p>In case multiple noise curves are supplied, compute</p>
+<p><span class="math notranslate nohighlight">\((h_1, h_2) = \sum_detectors
+4 \Re \int_{f_min}^{f_max} \frac{h_1 h_2^*}{S_n}\)</span></p>
+<p>This is the network inner product. To compute this quantity, provide a
+list of noises.</p>
+<p>We assume that the frequencyseries are zero outside of the interval of
+definition, so if fmax (fmin) is larger (smaller) than the one
+available, it is effectively set to the one available.</p>
+<p>Fourier transform explode at fmin = 0, so the result of the integration
+is highly sensitive. One should avoid the region with fmin = 0.</p>
+<p>Same_domian If True, it is assumed that all the frequency series
+involved are defined over the same frequencies. Turning this on speeds
+up computations, but it will result in incorrect results if the
+assumption is violated. If it is False, the domain of definition of the
+series is checked, if it is not the same for all the series, then they
+will be resampled.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>other</strong> (<a class="reference internal" href="#postcactus.frequencyseries.FrequencySeries" title="postcactus.frequencyseries.FrequencySeries"><code class="xref py py-class docutils literal notranslate"><span class="pre">FrequencySeries</span></code></a>) – Second frequency series in the inner product</p></li>
+<li><p><strong>fmin</strong> (<em>float</em>) – Remove frequencies below fmin</p></li>
+<li><p><strong>fmax</strong> (<em>float</em>) – Remove frequencies above fmin</p></li>
+<li><p><strong>noise</strong> (<a class="reference internal" href="#postcactus.frequencyseries.FrequencySeries" title="postcactus.frequencyseries.FrequencySeries"><code class="xref py py-class docutils literal notranslate"><span class="pre">FrequencySeries</span></code></a>, list
+of <a class="reference internal" href="#postcactus.frequencyseries.FrequencySeries" title="postcactus.frequencyseries.FrequencySeries"><code class="xref py py-class docutils literal notranslate"><span class="pre">FrequencySeries</span></code></a> or None) – If None, no weight is applied</p></li>
+<li><p><strong>same_domain</strong> – Whether to assume that the frequencyseries are</p></li>
+</ul>
+</dd>
+</dl>
+<p>defined over the same frequencies. If you can guarantee this, the
+computation will be faster.
+:type same_domain: bool</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Inner product between self and other</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="postcactus.frequencyseries.FrequencySeries.integrate">
+<code class="sig-name descname">integrate</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#postcactus.frequencyseries.FrequencySeries.integrate" title="Permalink to this definition">¶</a></dt>
+<dd><p>Integrate series with method of the trapeziod.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="postcactus.frequencyseries.FrequencySeries.integrated">
+<code class="sig-name descname">integrated</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">dx</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#postcactus.frequencyseries.FrequencySeries.integrated" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a series that is the integral computed with method of
+the rectangles.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>dx</strong> – Delta x in the independent variable. If provided, it</p>
+</dd>
+</dl>
+<p>will be used. This is especially convenient for evely spaced
+series, as computations will be faster
+:type dx: float</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>New series cumulative integral</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><a class="reference internal" href="series_ref.html#postcactus.series.BaseSeries" title="postcactus.series.BaseSeries"><code class="xref py py-class docutils literal notranslate"><span class="pre">BaseSeries</span></code></a> or derived class</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="postcactus.frequencyseries.FrequencySeries.is_complex">
+<code class="sig-name descname">is_complex</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#postcactus.frequencyseries.FrequencySeries.is_complex" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return whether the data is complex.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>True if the data is complex, false if it is not</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="postcactus.frequencyseries.FrequencySeries.is_regularly_sampled">
+<code class="sig-name descname">is_regularly_sampled</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#postcactus.frequencyseries.FrequencySeries.is_regularly_sampled" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return whether the series is regularly sampled.</p>
+<p>If the series is only one point, an error is raised.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Is the series regularly sampled?</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="postcactus.frequencyseries.FrequencySeries.low_pass">
+<code class="sig-name descname">low_pass</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">f</span></em><span class="sig-paren">)</span><a class="headerlink" href="#postcactus.frequencyseries.FrequencySeries.low_pass" title="Permalink to this definition">¶</a></dt>
+<dd><p>Remove frequencies higher or equal than f (absolute value).</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="postcactus.frequencyseries.FrequencySeries.low_passed">
+<code class="sig-name descname">low_passed</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">f</span></em><span class="sig-paren">)</span><a class="headerlink" href="#postcactus.frequencyseries.FrequencySeries.low_passed" title="Permalink to this definition">¶</a></dt>
+<dd><p>FIXME</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>f</strong> (<em>float</em>) – Frequency above which series will be zeroed</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>High passed frequencyeseries</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><code class="xref py py-mod docutils literal notranslate"><span class="pre">FrequencySeries</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="postcactus.frequencyseries.FrequencySeries.nans_remove">
+<code class="sig-name descname">nans_remove</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#postcactus.frequencyseries.FrequencySeries.nans_remove" title="Permalink to this definition">¶</a></dt>
+<dd><p>Filter out nans/infinite values.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="postcactus.frequencyseries.FrequencySeries.nans_removed">
+<code class="sig-name descname">nans_removed</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#postcactus.frequencyseries.FrequencySeries.nans_removed" title="Permalink to this definition">¶</a></dt>
+<dd><p>Filter out nans/infinite values.
+Return a new series with finite values only.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>A new series with only finite values</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><a class="reference internal" href="series_ref.html#postcactus.series.BaseSeries" title="postcactus.series.BaseSeries"><code class="xref py py-class docutils literal notranslate"><span class="pre">BaseSeries</span></code></a> or derived class</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="postcactus.frequencyseries.FrequencySeries.negative_frequencies_remove">
+<code class="sig-name descname">negative_frequencies_remove</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#postcactus.frequencyseries.FrequencySeries.negative_frequencies_remove" title="Permalink to this definition">¶</a></dt>
+<dd><p>Remove all the frequencies smaller than 0</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="postcactus.frequencyseries.FrequencySeries.negative_frequencies_removed">
+<code class="sig-name descname">negative_frequencies_removed</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#postcactus.frequencyseries.FrequencySeries.negative_frequencies_removed" title="Permalink to this definition">¶</a></dt>
+<dd><p>Remove frequencies lower than 0</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Frequencyeseries with only positive frequencies</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><code class="xref py py-mod docutils literal notranslate"><span class="pre">FrequencySeries</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="postcactus.frequencyseries.FrequencySeries.normalize">
+<code class="sig-name descname">normalize</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#postcactus.frequencyseries.FrequencySeries.normalize" title="Permalink to this definition">¶</a></dt>
+<dd><p>Scale values so that the maximum of the amplitude is 1.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="postcactus.frequencyseries.FrequencySeries.normalized">
+<code class="sig-name descname">normalized</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#postcactus.frequencyseries.FrequencySeries.normalized" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a new frequencyseries with maximum amplitude of 1.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Normalized frequency series.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><code class="xref py py-mod docutils literal notranslate"><span class="pre">FrequencySeries</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="postcactus.frequencyseries.FrequencySeries.overlap">
+<code class="sig-name descname">overlap</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">other</span></em>, <em class="sig-param"><span class="n">fmin</span><span class="o">=</span><span class="default_value">0</span></em>, <em class="sig-param"><span class="n">fmax</span><span class="o">=</span><span class="default_value">inf</span></em>, <em class="sig-param"><span class="n">noises</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">same_domain</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="headerlink" href="#postcactus.frequencyseries.FrequencySeries.overlap" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compute the (network) overlap.</p>
+<p><span class="math notranslate nohighlight">\(\textrm{overlap} = (h_1, h_2) / \sqrt{(h_1, h_1)(h_2, h_2)}\)</span></p>
+<p>We assume that the frequencyseries are zero outside of the interval of
+definition, so if fmax (fmin) is larger (smaller) than the one
+available, it is effectively set to the one available.</p>
+<p>Same_domian If True, it is assumed that all the frequency series
+involved are defined over the same frequencies. Turning this on speeds
+up computations, but it will result in incorrect results if the
+assumption is violated. If it is False, the domain of definition of the
+series is checked, if it is not the same for all the series, then they
+will be resampled.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>other</strong> (<a class="reference internal" href="#postcactus.frequencyseries.FrequencySeries" title="postcactus.frequencyseries.FrequencySeries"><code class="xref py py-class docutils literal notranslate"><span class="pre">FrequencySeries</span></code></a>) – Second frequency series in the overlap</p></li>
+<li><p><strong>fmin</strong> (<em>float</em>) – Remove frequencies below fmin</p></li>
+<li><p><strong>fmax</strong> (<em>float</em>) – Remove frequencies above fmin</p></li>
+<li><p><strong>noise</strong> ((list of) <a class="reference internal" href="#postcactus.frequencyseries.FrequencySeries" title="postcactus.frequencyseries.FrequencySeries"><code class="xref py py-class docutils literal notranslate"><span class="pre">FrequencySeries</span></code></a> or None) – If None, no weight is applied. If it is a list,
+the netowrk overlap is computed.</p></li>
+<li><p><strong>same_domain</strong> – Whether to assume that the frequencyseries are</p></li>
+</ul>
+</dd>
+</dl>
+<p>defined over the same frequencies. If you can guarantee this, the
+computation will be faster.
+:type same_domain: bool</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Overlap between self and other</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="postcactus.frequencyseries.FrequencySeries.peaks">
+<code class="sig-name descname">peaks</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">amp_threshold</span><span class="o">=</span><span class="default_value">0.0</span></em><span class="sig-paren">)</span><a class="headerlink" href="#postcactus.frequencyseries.FrequencySeries.peaks" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the location and amplitue of the peaks of the amplitue.</p>
+<p>Peaks at the boundaries are not considered.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>amp_threshold</strong> (<em>float</em>) – Ignore peaks smaller than this value</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Peaks of the amplitude</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>List of tuples of three elements: frequency of the bin in which
+the peak is, fitted frequency of the maximum with parabolic
+approximation, amplitude of the peak</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="postcactus.frequencyseries.FrequencySeries.peaks_frequencies">
+<code class="sig-name descname">peaks_frequencies</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">amp_threshold</span><span class="o">=</span><span class="default_value">0.0</span></em><span class="sig-paren">)</span><a class="headerlink" href="#postcactus.frequencyseries.FrequencySeries.peaks_frequencies" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the frequencies of the peaks of the amplitude larger
+than amp_threshold.</p>
+<p>The frequency is computed with a quadratic fit using the left and right
+neighbours.</p>
+<p>Peaks at the boundaries are not considered.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>amp_threshold</strong> (<em>float</em>) – Ignore peaks smaller than this value</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Fitted frequencies of the peaks of the amplitude</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>1d numpy array</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="postcactus.frequencyseries.FrequencySeries.resample">
+<code class="sig-name descname">resample</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">new_x</span></em>, <em class="sig-param"><span class="n">ext</span><span class="o">=</span><span class="default_value">2</span></em>, <em class="sig-param"><span class="n">piecewise_constant</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="headerlink" href="#postcactus.frequencyseries.FrequencySeries.resample" title="Permalink to this definition">¶</a></dt>
+<dd><p>Resample the series to new independent variable new_x.</p>
+<p>If you want to resample without using the spline, and you want a nearest
+neighbor resampling, pass the keyword piecewise_constant=True.
+This may be a good choice for data with large discontinuities, where the
+splines are ineffective.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>new_x</strong> (<em>1D numpy array</em><em> or </em><em>list of float</em>) – New independent variable</p></li>
+<li><p><strong>ext</strong> (<em>0 for extrapolation</em><em>, </em><em>1 for returning zero</em><em>, </em><em>2 for ValueError</em><em>,
+</em><em>3 for extending the boundary</em>) – How to handle points outside the interval</p></li>
+<li><p><strong>piecewise_constant</strong> (<em>bool</em>) – Do not use splines, use the nearest neighbors.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="postcactus.frequencyseries.FrequencySeries.resampled">
+<code class="sig-name descname">resampled</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">new_x</span></em>, <em class="sig-param"><span class="n">ext</span><span class="o">=</span><span class="default_value">2</span></em>, <em class="sig-param"><span class="n">piecewise_constant</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="headerlink" href="#postcactus.frequencyseries.FrequencySeries.resampled" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a new series resampled from this to new_x.</p>
+<p>You can specify the details of the spline with the method make_spline.</p>
+<p>If you want to resample without using the spline, and you want a nearest
+neighbor resampling, pass the keyword piecewise_constant=True.
+This may be a good choice for data with large discontinuities, where the
+splines are ineffective.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>new_x</strong> (<em>1D numpy array</em><em> or </em><em>list of float</em>) – New independent variable</p></li>
+<li><p><strong>ext</strong> (<em>0 for extrapolation</em><em>, </em><em>1 for returning zero</em><em>, </em><em>2 for ValueError</em><em>,
+</em><em>3 for extending the boundary</em>) – How to handle points outside the data interval</p></li>
+<li><p><strong>piecewise_constant</strong> (<em>bool</em>) – Do not use splines, use the nearest neighbors.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Resampled series.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="series_ref.html#postcactus.series.BaseSeries" title="postcactus.series.BaseSeries"><code class="xref py py-class docutils literal notranslate"><span class="pre">BaseSeries</span></code></a> or derived class</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="postcactus.frequencyseries.FrequencySeries.save">
+<code class="sig-name descname">save</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">file_name</span></em>, <em class="sig-param"><span class="o">*</span><span class="n">args</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="headerlink" href="#postcactus.frequencyseries.FrequencySeries.save" title="Permalink to this definition">¶</a></dt>
+<dd><p>Saves into simple ASCII format with 2 columns (x, y)
+for real valued data and 3 columns (x, Re(y), Im(y))
+for complex valued data.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>file_name</strong> (<em>str</em>) – Path (with extensiton) of the output file</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="postcactus.frequencyseries.FrequencySeries.savgol_smooth">
+<code class="sig-name descname">savgol_smooth</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">window_size</span></em>, <em class="sig-param"><span class="n">order</span><span class="o">=</span><span class="default_value">3</span></em><span class="sig-paren">)</span><a class="headerlink" href="#postcactus.frequencyseries.FrequencySeries.savgol_smooth" title="Permalink to this definition">¶</a></dt>
+<dd><p>Smooth the series with a Savitzky-Golay filter with window of
+size WINDOW-SIZE and order ORDER.</p>
+<p>This is just like a regular “Moving average” filter, but instead of
+just calculating the average, a polynomial (usually 2nd or 4th order)
+fit is made for every point, and only the “middle” point is chosen.
+Since 2nd (or 4th) order information is concerned at every point, the
+bias introduced in “moving average” approach at local maxima or minima,
+is circumvented.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>window_size</strong> (<em>int</em>) – Number of points of the smoothing window (need to
+be odd)</p></li>
+<li><p><strong>order</strong> (<em>int</em>) – Order of the filter</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="postcactus.frequencyseries.FrequencySeries.savgol_smoothed">
+<code class="sig-name descname">savgol_smoothed</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">window_size</span></em>, <em class="sig-param"><span class="n">order</span><span class="o">=</span><span class="default_value">3</span></em><span class="sig-paren">)</span><a class="headerlink" href="#postcactus.frequencyseries.FrequencySeries.savgol_smoothed" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a smoothed series with a Savitzky-Golay filter with
+window of size WINDOW-SIZE and order ORDER.</p>
+<p>This is just like a regular “Moving average” filter, but instead of
+just calculating the average, a polynomial (usually 2nd or 4th order)
+fit is made for every point, and only the “middle” point is chosen.
+Since 2nd (or 4th) order information is concerned at every point, the
+bias introduced in “moving average” approach at local maxima or minima,
+is circumvented.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>window_size</strong> (<em>int</em>) – Number of points of the smoothing window (need to
+be odd)</p></li>
+<li><p><strong>order</strong> (<em>int</em>) – Order of the filter</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>New smoothed series</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="series_ref.html#postcactus.series.BaseSeries" title="postcactus.series.BaseSeries"><code class="xref py py-class docutils literal notranslate"><span class="pre">BaseSeries</span></code></a> or derived class</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="postcactus.frequencyseries.FrequencySeries.spline_derive">
+<code class="sig-name descname">spline_derive</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">order</span><span class="o">=</span><span class="default_value">1</span></em><span class="sig-paren">)</span><a class="headerlink" href="#postcactus.frequencyseries.FrequencySeries.spline_derive" title="Permalink to this definition">¶</a></dt>
+<dd><p>Derive the series current one using the spline interpolation.
+To keep the series of the same size as the original one, the value
+of the derivative at the boundaries is set to zero. Don’t trust it!</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>order</strong> (<em>int</em>) – Order of derivative (e.g. 2 = second derivative)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="postcactus.frequencyseries.FrequencySeries.spline_derived">
+<code class="sig-name descname">spline_derived</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">order</span><span class="o">=</span><span class="default_value">1</span></em><span class="sig-paren">)</span><a class="headerlink" href="#postcactus.frequencyseries.FrequencySeries.spline_derived" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a series that is the derivative of the current one using
+the spline interpolation. You shouldn’t trust the values at the
+boundaries too much, you may want to crop it out.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>order</strong> (<em>int</em>) – Order of derivative (e.g. 2 = second derivative)</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>New series with derivative</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="series_ref.html#postcactus.series.BaseSeries" title="postcactus.series.BaseSeries"><code class="xref py py-class docutils literal notranslate"><span class="pre">BaseSeries</span></code></a> or derived class</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="postcactus.frequencyseries.FrequencySeries.to_TimeSeries">
+<code class="sig-name descname">to_TimeSeries</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#postcactus.frequencyseries.FrequencySeries.to_TimeSeries" title="Permalink to this definition">¶</a></dt>
+<dd><p>FIXME! briefly describe function</p>
+<p>If only positive frequencies are found, we will assume that the
+original signal was real.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p></p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><a class="reference internal" href="timeseries_ref.html#postcactus.timeseries.TimeSeries" title="postcactus.timeseries.TimeSeries"><code class="xref py py-class docutils literal notranslate"><span class="pre">TimeSeries</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="postcactus.frequencyseries.FrequencySeries.values">
+<em class="property">property </em><code class="sig-name descname">values</code><a class="headerlink" href="#postcactus.frequencyseries.FrequencySeries.values" title="Permalink to this definition">¶</a></dt>
+<dd><p>Fake pandas properties, to make Series objects plottable by
+matplotlib.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="postcactus.frequencyseries.FrequencySeries.x_at_abs_maximum_y">
+<code class="sig-name descname">x_at_abs_maximum_y</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#postcactus.frequencyseries.FrequencySeries.x_at_abs_maximum_y" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the value of x when abs(y) is maximum.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="postcactus.frequencyseries.FrequencySeries.x_at_abs_minimum_y">
+<code class="sig-name descname">x_at_abs_minimum_y</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#postcactus.frequencyseries.FrequencySeries.x_at_abs_minimum_y" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the value of x when abs(y) is minimum.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="postcactus.frequencyseries.FrequencySeries.xmax">
+<em class="property">property </em><code class="sig-name descname">xmax</code><a class="headerlink" href="#postcactus.frequencyseries.FrequencySeries.xmax" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the max of the independent variable x</p>
+<dl class="field-list simple">
+<dt class="field-odd">Rvalue</dt>
+<dd class="field-odd"><p>Max of x</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="postcactus.frequencyseries.FrequencySeries.xmin">
+<em class="property">property </em><code class="sig-name descname">xmin</code><a class="headerlink" href="#postcactus.frequencyseries.FrequencySeries.xmin" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the min of the independent variable x</p>
+<dl class="field-list simple">
+<dt class="field-odd">Rvalue</dt>
+<dd class="field-odd"><p>Min of x</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt id="postcactus.frequencyseries.load_FrequencySeries">
+<code class="sig-prename descclassname">postcactus.frequencyseries.</code><code class="sig-name descname">load_FrequencySeries</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">path</span></em>, <em class="sig-param"><span class="o">*</span><span class="n">args</span></em>, <em class="sig-param"><span class="n">complex_on_two_columns</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="headerlink" href="#postcactus.frequencyseries.load_FrequencySeries" title="Permalink to this definition">¶</a></dt>
+<dd><p>Load a text file as a FrequencySeries.</p>
+<p>The backend is np.loadtxt, so you can pass args or kwargs (for example to
+specify the columns).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>path</strong> (<em>str</em>) – Path of the file to be loaded</p></li>
+<li><p><strong>complex_on_two_columns</strong> (<em>bool</em>) – When true, it is assumed that the real and
+the imaginary parts of the frequency series
+are on two columns. Otherwise, on one.
+This has to be False to load real data
+(e.g., noise curves).</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Loaded Frequencyseries</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><code class="xref py py-mod docutils literal notranslate"><span class="pre">FrequencySeries</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="postcactus.frequencyseries.load_noise_curve">
+<code class="sig-prename descclassname">postcactus.frequencyseries.</code><code class="sig-name descname">load_noise_curve</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">path</span></em>, <em class="sig-param"><span class="o">*</span><span class="n">args</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="headerlink" href="#postcactus.frequencyseries.load_noise_curve" title="Permalink to this definition">¶</a></dt>
+<dd><p>Load a noise curve as a FrequencySeries.</p>
+<p>This is syntatic sugar for the function load_FrequencySeries.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>path</strong> (<em>str</em>) – Path of the file to be loaded</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Loaded Frequencyseries</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><code class="xref py py-mod docutils literal notranslate"><span class="pre">FrequencySeries</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="index.html">
+              <img class="logo" src="_static/logo.png" alt="Logo"/>
+            </a></p>
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="timeseries_ref.html"
+                        title="previous chapter">Reference on postcactus.timeseries</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="cactus_grid_functions_ref.html"
+                        title="next chapter">Reference on postcactus.cactus_grid_functions</a></p>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="cactus_grid_functions_ref.html" title="Reference on postcactus.cactus_grid_functions"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="timeseries_ref.html" title="Reference on postcactus.timeseries"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">PostCactus 3.0.0a9 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">Reference on postcactus.frequencyseries</a></li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2020, Gabriele Bozzola and Wolfgang Kastaun.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 3.3.0.
+    </div>
+  </body>
+</html>

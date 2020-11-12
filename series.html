@@ -1,0 +1,579 @@
+
+
+<!doctype html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Time and frequency series &#8212; PostCactus 3.0.0a9 documentation</title>
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="_static/bizstyle.css" type="text/css" />
+    
+    <script id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/doctools.js"></script>
+    <script src="_static/language_data.js"></script>
+    <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script type="text/x-mathjax-config">MathJax.Hub.Config({"tex2jax": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true, "ignoreClass": "document", "processClass": "math|output_area"}})</script>
+    <script src="_static/bizstyle.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Scalar data" href="cactus_scalars.html" />
+    <link rel="prev" title="Getting started with SimDir" href="simdir.html" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0" />
+    <!--[if lt IE 9]>
+    <script src="_static/css3-mediaqueries.js"></script>
+    <![endif]-->
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="cactus_scalars.html" title="Scalar data"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="simdir.html" title="Getting started with SimDir"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">PostCactus 3.0.0a9 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">Time and frequency series</a></li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="time-and-frequency-series">
+<h1>Time and frequency series<a class="headerlink" href="#time-and-frequency-series" title="Permalink to this headline">¶</a></h1>
+<p>Time and frequency series are fundamental objects in most simulations.
+<code class="docutils literal notranslate"><span class="pre">PostCactus</span></code> supports them through the <code class="docutils literal notranslate"><span class="pre">timeseries</span></code> and <code class="docutils literal notranslate"><span class="pre">frequencyseries</span></code>
+modules, which define the <code class="docutils literal notranslate"><span class="pre">TimeSeries</span></code> (<a class="reference internal" href="timeseries_ref.html#module-postcactus.timeseries"><span class="std std-ref">Reference on postcactus.timeseries</span></a>) and <code class="docutils literal notranslate"><span class="pre">FrequencySeries</span></code>
+(<a class="reference internal" href="frequencyseries_ref.html#module-postcactus.frequencyseries"><span class="std std-ref">Reference on postcactus.frequencyseries</span></a>) object
+types. Both the classes are derived from a base class <code class="docutils literal notranslate"><span class="pre">BaseSeries`</span>
+<span class="pre">(:ref:`series_ref:Reference</span> <span class="pre">on</span> <span class="pre">postcactus.series`)</span> <span class="pre">which</span> <span class="pre">defines</span> <span class="pre">common</span> <span class="pre">methods</span>
+<span class="pre">and</span> <span class="pre">features,</span> <span class="pre">so</span> <span class="pre">``TimeSeries</span></code> and <code class="docutils literal notranslate"><span class="pre">FrequencySeries</span></code> share a lot of
+functionalities.</p>
+<div class="section" id="the-timeseries-and-frequencyseries-objects">
+<h2>The TimeSeries and FrequencySeries objects<a class="headerlink" href="#the-timeseries-and-frequencyseries-objects" title="Permalink to this headline">¶</a></h2>
+<p>Here we describe some common feature for  <code class="docutils literal notranslate"><span class="pre">TimeSeries</span></code> and
+<code class="docutils literal notranslate"><span class="pre">FrequencySeries</span></code>, and we leave for later sections to go into detail about
+either. For clarity, we specifically talk about <code class="docutils literal notranslate"><span class="pre">TimeSeries</span></code>, but everything
+we discuss here applies to <code class="docutils literal notranslate"><span class="pre">FrequencySeries</span></code> as well.</p>
+<p>Defining time series is easy:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">postcactus.timeseries</span> <span class="k">as</span> <span class="nn">ts</span>
+<span class="c1"># or import postcactus.frequencyseries as fs</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
+<span class="n">t</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">,</span> <span class="mi">100</span><span class="p">)</span>
+<span class="n">sin_wave</span> <span class="o">=</span> <span class="n">ts</span><span class="o">.</span><span class="n">TimeSeries</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">t</span><span class="p">))</span>
+</pre></div>
+</div>
+<p>The object <code class="docutils literal notranslate"><span class="pre">sin_wave</span></code> has a number of useful features.</p>
+<p>You can add, multiply, and divide two <code class="docutils literal notranslate"><span class="pre">TimeSeries</span></code> (<code class="docutils literal notranslate"><span class="pre">FrequencySeries</span></code>) with
+the same times (frequencies) and scalars. For instance</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">cos_wave</span> <span class="o">=</span> <span class="n">ts</span><span class="o">.</span><span class="n">TimeSeries</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">t</span><span class="p">))</span>
+<span class="n">tan_wave</span> <span class="o">=</span> <span class="n">sin_wave</span> <span class="o">/</span> <span class="n">cos_wave</span>
+</pre></div>
+</div>
+<p>The operations currently implemented are sum, subtraction, multiplication,
+division, power, absolute value, negative.</p>
+<p><code class="docutils literal notranslate"><span class="pre">TimeSeries</span></code> and <code class="docutils literal notranslate"><span class="pre">FrequencySeries</span></code> objects are extremely powerful: they try
+to behave like <code class="docutils literal notranslate"><span class="pre">numpy</span></code> arrays. For example, many of the mathematical functions
+from <code class="docutils literal notranslate"><span class="pre">numpy</span></code> can be applied directly:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">ones</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arctan</span><span class="p">(</span><span class="n">tan_wave</span><span class="p">)</span>
+<span class="n">complicated_expr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">tanh</span><span class="p">(</span><span class="n">sin_wave</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">cos_wave</span><span class="p">))</span>
+</pre></div>
+</div>
+<p>Both the Series are callable objects, so they behave like normal functions. If
+<code class="docutils literal notranslate"><span class="pre">t0</span></code> is any arbitrary time (or frequency), you can call <code class="docutils literal notranslate"><span class="pre">sin_wave(t0)</span></code> to
+get the value of <code class="docutils literal notranslate"><span class="pre">sin_wave</span></code> at <cite>t0</cite>. To do this, <code class="docutils literal notranslate"><span class="pre">BaseSeries</span></code> uses spline
+representation. For more information, read the documentation on splines.
+Moreover, series are natively plottable by <code class="docutils literal notranslate"><span class="pre">Matplotlib</span></code>: you can simply do:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">cos_wave</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>This is equivalent to <code class="docutils literal notranslate"><span class="pre">plt.plot(cos_wave.t,</span> <span class="pre">cos_wave.y)</span></code>.</p>
+<p><code class="docutils literal notranslate"><span class="pre">TimeSeries</span></code> and <code class="docutils literal notranslate"><span class="pre">FrequencySeries</span></code> objects have multiple useful functions.
+We follow this convention: methods with an name that is an imperative (e.g.,
+<code class="docutils literal notranslate"><span class="pre">zero_pad</span></code>) modify the object does not return anything, methods with name that
+is a past-tense verb (e.g., <code class="docutils literal notranslate"><span class="pre">zero_padded</span></code>) return a new object with the
+modification applied.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Every mathematical operation between different series will perform a check
+that the two series are compatible (ie, they have the same <cite>t</cite> or <cite>f</cite>). This
+can be expensive, so if you are writing performance-critical routines, you
+should handle the data directly. See <a class="reference internal" href="frequencyseries_ref.html#postcactus.frequencyseries.FrequencySeries.inner_product" title="postcactus.frequencyseries.FrequencySeries.inner_product"><code class="xref py py-meth docutils literal notranslate"><span class="pre">inner_product()</span></code></a> for an
+example.</p>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>For performance-critical routines where you have to initialize many series
+and you can guarantee that the <code class="docutils literal notranslate"><span class="pre">x</span></code> is monotonically increasing you can pass
+an additional paramter to the <code class="docutils literal notranslate"><span class="pre">init</span></code> to speed up the initalization. See
+reference.</p>
+</div>
+<div class="section" id="splines">
+<h3>splines<a class="headerlink" href="#splines" title="Permalink to this headline">¶</a></h3>
+<p>One of the most powerful features of <code class="docutils literal notranslate"><span class="pre">TimeSeries</span></code> (<code class="docutils literal notranslate"><span class="pre">FrequencySeries</span></code>) is
+that they are callable objects and they can evaluate the data at any arbitrary
+time. This is done using splines. When you first call a <code class="docutils literal notranslate"><span class="pre">TimeSeries</span></code>
+(<code class="docutils literal notranslate"><span class="pre">FrequencySeries</span></code>) a cubic spline representation with no smoothing (the
+spline evaluates exactly to the data) is computed. This is cached into the
+attributes <code class="docutils literal notranslate"><span class="pre">self.spline_real</span></code> (and <code class="docutils literal notranslate"><span class="pre">self.spline_imag</span></code> if the data is
+complex).</p>
+<p>Every time you modify the series (e.g., <code class="docutils literal notranslate"><span class="pre">integrate</span></code>), the spline is updated.</p>
+<p>This representation allows you to call the <code class="docutils literal notranslate"><span class="pre">Series</span></code> directly, but if you do it
+outside the range of definition, you will get a <code class="docutils literal notranslate"><span class="pre">ValueError</span></code>. You can change
+the behavior of how to treat external data by calling directly
+<code class="docutils literal notranslate"><span class="pre">evaluate_with_spline</span></code>. This takes a keyword argument <code class="docutils literal notranslate"><span class="pre">ext</span></code>. Values outside
+the interval are extrapolated if <code class="docutils literal notranslate"><span class="pre">ext=0</span></code>, set to 0 if <code class="docutils literal notranslate"><span class="pre">ext=1</span></code>, a ValueError
+is raised if <code class="docutils literal notranslate"><span class="pre">ext=2</span></code>, or if <code class="docutils literal notranslate"><span class="pre">ext=3</span></code>, the boundary value is returned.</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>Splines are good continuous representation of data, but they are not perfect,
+and they are especially unfit for discontinuous data. Be sure to understand
+the limitations, and use splines only when you know that the representation
+is good.</p>
+</div>
+</div>
+<div class="section" id="integrate">
+<h3>integrate<a class="headerlink" href="#integrate" title="Permalink to this headline">¶</a></h3>
+<p>Integrate the <code class="docutils literal notranslate"><span class="pre">TimeSeries</span></code> (<code class="docutils literal notranslate"><span class="pre">FrequencySeries</span></code>) as a cumulative sum weighted
+on the time intervals (trapezoid). The result is a new <code class="docutils literal notranslate"><span class="pre">Series</span></code> with the
+integral as a function of time. Optinally, one can provide <code class="docutils literal notranslate"><span class="pre">dx</span></code>, which is the
+spacing in the independent variable. If provided, it will be used. This is
+especially convenient for evely spaced series, as computations will be faster</p>
+</div>
+<div class="section" id="derive-spline-derive">
+<h3>derive, spline_derive<a class="headerlink" href="#derive-spline-derive" title="Permalink to this headline">¶</a></h3>
+<p>The method <code class="docutils literal notranslate"><span class="pre">derive</span></code> derives <code class="docutils literal notranslate"><span class="pre">Series(order)</span></code> with a centered difference
+method in the interior and a one-sided difference on the boundary. The operation
+is applied <code class="docutils literal notranslate"><span class="pre">order</span></code> times to obtain a high-order derivative. On the other hand,
+<code class="docutils literal notranslate"><span class="pre">spline_derive</span></code> uses the spline representation to achieve the same task.
+<code class="docutils literal notranslate"><span class="pre">spline_derive</span></code> is typically and better behaved for nice enough timeseries.
+You should not trust the values at the boundaries too much, you may want to crop
+it out.</p>
+</div>
+<div class="section" id="save">
+<h3>save<a class="headerlink" href="#save" title="Permalink to this headline">¶</a></h3>
+<p>Save the <code class="docutils literal notranslate"><span class="pre">Series</span></code> as an ASCII file with 2 columns <span class="math notranslate nohighlight">\((t, y)\)</span> for real
+valued data and 3 columns <span class="math notranslate nohighlight">\((t, \Re (y), \Im (y))\)</span> for complex-valued ones.
+The back-end is <code class="docutils literal notranslate"><span class="pre">np.savetxt</span></code>, so you can provide additional arguments, like an
+header.</p>
+</div>
+<div class="section" id="crop">
+<h3>crop<a class="headerlink" href="#crop" title="Permalink to this headline">¶</a></h3>
+<p>You can specify the initial and final values of the series with the <code class="docutils literal notranslate"><span class="pre">crop</span></code>
+method, which takes two keyword paramters <code class="docutils literal notranslate"><span class="pre">init</span></code> and <code class="docutils literal notranslate"><span class="pre">end</span></code></p>
+</div>
+<div class="section" id="savgol-smooth">
+<h3>savgol_smooth<a class="headerlink" href="#savgol-smooth" title="Permalink to this headline">¶</a></h3>
+<p><code class="docutils literal notranslate"><span class="pre">savgol_smooth(window_size,</span> <span class="pre">order)</span></code> smooths the series with a Savitzky-Golay
+filter with window of size <code class="docutils literal notranslate"><span class="pre">window_size</span></code> and order <code class="docutils literal notranslate"><span class="pre">order</span></code>. This is just
+like a regular “Moving average” filter, but instead of just calculating the
+average, a polynomial (usually 2nd or 4th order) fit is made for every point,
+and only the “middle” point is chosen. Since 2nd (or 4th) order information is
+concerned at every point, the bias introduced in “moving average” approach at
+local maxima or minima, is circumvented. At the moment, this is the preferred
+way to smooth series.</p>
+</div>
+<div class="section" id="iter">
+<h3>iter<a class="headerlink" href="#iter" title="Permalink to this headline">¶</a></h3>
+<p>Series are iterable, so you can do</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">for</span> <span class="n">t</span><span class="p">,</span> <span class="n">y</span> <span class="ow">in</span> <span class="n">timeseries</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="min-max-abs-min-abs-max">
+<h3>min, max, abs_min, abs_max<a class="headerlink" href="#min-max-abs-min-abs-max" title="Permalink to this headline">¶</a></h3>
+<p>These methods return the minimum or maximum of the series. With a prefix
+<code class="docutils literal notranslate"><span class="pre">abs</span></code>, they return the minimum or maximum of the absolute value of the series.</p>
+</div>
+<div class="section" id="sample-common">
+<h3>sample_common<a class="headerlink" href="#sample-common" title="Permalink to this headline">¶</a></h3>
+<p><code class="docutils literal notranslate"><span class="pre">sample_common</span></code> has two possible uses: (1) takes a list of <code class="docutils literal notranslate"><span class="pre">Series</span></code> and
+remove all the points that are not shared by all the <code class="docutils literal notranslate"><span class="pre">Series</span></code> in the list,
+or (2) resamples all of them to the largest time interval covered by all series,
+using regularly spaced time. In this second case, the number of sample points is
+the minimum over all time series. Optinally, it takes a parameter
+<code class="docutils literal notranslate"><span class="pre">piecewise_constant</span></code>. If this is turned <code class="docutils literal notranslate"><span class="pre">True</span></code>, instead of using splines the
+resampling is done using the nearest neighbors. This is useful when data is
+discontinuous, so splines do not behave well.</p>
+<p>To choose between the two different behaviors, pass the <code class="docutils literal notranslate"><span class="pre">resample</span></code>
+keyword. Number (1) is for example useful to study convergence.</p>
+</div>
+</div>
+<div class="section" id="the-timeseries-methods">
+<h2>The TimeSeries methods<a class="headerlink" href="#the-timeseries-methods" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="mean-remove-nans-remove">
+<h3>mean_remove, nans_remove<a class="headerlink" href="#mean-remove-nans-remove" title="Permalink to this headline">¶</a></h3>
+<p><code class="docutils literal notranslate"><span class="pre">mean_remove</span></code>, as the name suggests removes the mean value from the
+<code class="docutils literal notranslate"><span class="pre">TimeSeries</span></code>. Similarly, <code class="docutils literal notranslate"><span class="pre">nans_remove</span></code> filters out those data points with
+infinitive or NaN values. The resulting <code class="docutils literal notranslate"><span class="pre">TimeSeries</span></code> has different number of
+points.</p>
+</div>
+<div class="section" id="time-unit-change-redshift">
+<h3>time_unit_change, redshift<a class="headerlink" href="#time-unit-change-redshift" title="Permalink to this headline">¶</a></h3>
+<p><code class="docutils literal notranslate"><span class="pre">time_unit_change(T,</span> <span class="pre">inverse=False)</span></code> rescales the time so that what was
+previously <code class="docutils literal notranslate"><span class="pre">T</span></code> units of time now are 1. For example, if initially the units
+where seconds, with <code class="docutils literal notranslate"><span class="pre">T=1e-3</span></code> the new units will be milliseconds. The keyword
+argument <code class="docutils literal notranslate"><span class="pre">inverse</span></code> changes the direction: when <code class="docutils literal notranslate"><span class="pre">inverse=True</span></code>, 1 unit of old
+time becomes <code class="docutils literal notranslate"><span class="pre">T</span></code> units in the new time. This is useful to move from
+computational units to physical units using the <code class="docutils literal notranslate"><span class="pre">unitconv</span></code> module.</p>
+<p>The method <code class="docutils literal notranslate"><span class="pre">redshift(z)</span></code> uses <code class="docutils literal notranslate"><span class="pre">time_unit_change</span></code> to redshift the data by a
+factor of <span class="math notranslate nohighlight">\(1+z\)</span>.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">postcactus.unitconv</span> <span class="k">as</span> <span class="nn">uc</span>
+
+<span class="c1"># Gravitational waves in geometrized units</span>
+<span class="n">gw_cu</span> <span class="o">=</span> <span class="n">TimeSeries</span><span class="p">(</span><span class="o">...</span><span class="p">)</span>
+
+<span class="c1"># Gravitational waves in seconds, assuming a mass of 1 M_sun</span>
+<span class="n">CU</span> <span class="o">=</span> <span class="n">uc</span><span class="o">.</span><span class="n">geom_umass_msun</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+<span class="n">gw_s</span> <span class="o">=</span> <span class="n">gw_cu</span><span class="o">.</span><span class="n">time_unit_changed</span><span class="p">(</span><span class="n">CU</span><span class="o">.</span><span class="n">time</span><span class="p">,</span> <span class="n">inverse</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="resample-regular-resample-fixed-frequency-resample-fixed-timestep-resample">
+<h3>resample, regular_resample, fixed_frequency_resample, fixed_timestep_resample<a class="headerlink" href="#resample-regular-resample-fixed-frequency-resample-fixed-timestep-resample" title="Permalink to this headline">¶</a></h3>
+<p><code class="docutils literal notranslate"><span class="pre">resample</span></code> is a generic method to use splines to resample the <code class="docutils literal notranslate"><span class="pre">TimeSeries</span></code>
+to new times. Typical use-cases of <code class="docutils literal notranslate"><span class="pre">resample</span></code> have their of methods:
+<code class="docutils literal notranslate"><span class="pre">regular_resample</span></code> resamples to linearly space times,
+<code class="docutils literal notranslate"><span class="pre">fixed_frequency_resample</span></code> and <code class="docutils literal notranslate"><span class="pre">fixed_frequency_resample</span></code> resample the
+timeseries with a provided timestep or frequency starting at <code class="docutils literal notranslate"><span class="pre">tmin</span></code> and ending
+at a <code class="docutils literal notranslate"><span class="pre">tmax</span></code> that is an integer multiple of the timestep (or reciprocal of the
+frequency).</p>
+<p>Before using these methods, read the warning in <code class="docutils literal notranslate"><span class="pre">make_spline</span></code>!</p>
+<p>Then using <code class="docutils literal notranslate"><span class="pre">resample</span></code>, you can optionally pass the keyword
+<code class="docutils literal notranslate"><span class="pre">piecewise_constant</span></code>. In this case, splines will not be used, and the new
+points will be evaluated using the nearest neighbor. This is useful for those
+cases in which splines are inaccurate.</p>
+</div>
+<div class="section" id="fourier-transform-to-frequencyseries">
+<h3>Fourier transform (to_FrequencySeries)<a class="headerlink" href="#fourier-transform-to-frequencyseries" title="Permalink to this headline">¶</a></h3>
+<p>You can compute the discrete Fourier transform of a <code class="docutils literal notranslate"><span class="pre">TimeSeries</span></code> with the
+<code class="docutils literal notranslate"><span class="pre">to_FrequencySeries</span></code> method. This uses NumPy’s <code class="docutils literal notranslate"><span class="pre">fft</span></code> module, so the
+conventions are the same, except that we normalize the results. That is, instead
+of computing</p>
+<p>we compute</p>
+<p>Intuitively, this amounts to adding the measure of integration to obtain a
+“true” Fourier transform.</p>
+<p>If the timeseries real, negative frequencies are
+discarded.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>You are responsible of pre-processing the data (removing mean, windowing,
+etc.)</p>
+</div>
+</div>
+<div class="section" id="unfolded-phase-phase-angular-velocity-phase-frequency">
+<h3>unfolded_phase, phase_angular_velocity, phase_frequency<a class="headerlink" href="#unfolded-phase-phase-angular-velocity-phase-frequency" title="Permalink to this headline">¶</a></h3>
+<p><code class="docutils literal notranslate"><span class="pre">unfolded_phase</span></code> returns a new <code class="docutils literal notranslate"><span class="pre">TimeSeries</span></code> with the (complex) unfolded
+phase of the signal. If the signal is real, the unfolded phase is zero.
+<code class="docutils literal notranslate"><span class="pre">phase_angular_velocity</span></code> returns the derivative of the <code class="docutils literal notranslate"><span class="pre">unfolded_phase</span></code>. The
+derivative can be compute with finite difference by setting
+<code class="docutils literal notranslate"><span class="pre">use_splines=False</span></code>, otherwise it is computed with the splines. Optionally,
+the output can be smoothed over timescales of <code class="docutils literal notranslate"><span class="pre">tsmooth</span></code> with the
+<code class="docutils literal notranslate"><span class="pre">savgol_smooth_time</span></code> method. In this case, the <code class="docutils literal notranslate"><span class="pre">TimeSeries</span></code> is resampled to
+regular timesteps. <code class="docutils literal notranslate"><span class="pre">phase_frequency</span></code> is just <code class="docutils literal notranslate"><span class="pre">phase_angular_velocity</span></code>
+divided by <span class="math notranslate nohighlight">\(2\pi\)</span>, which is the angular frequency of the phase.</p>
+</div>
+<div class="section" id="savgol-smooth-time">
+<h3>savgol_smooth_time<a class="headerlink" href="#savgol-smooth-time" title="Permalink to this headline">¶</a></h3>
+<p>Often, one knows the smoothing length in units of time as opposed to number of
+points (e.g., I want to smooth over timescales of one second).
+<code class="docutils literal notranslate"><span class="pre">savgol_smooth_time</span></code> takes smoothing timescale as opposed to the window size.
+To ensure consistency, <code class="docutils literal notranslate"><span class="pre">savgol_smooth_time</span></code> resamples the timescale to uniform
+timesteps. When you have a regularly sampled timeseries, this function is more
+direct than <code class="docutils literal notranslate"><span class="pre">savgol_smooth</span></code>. However, when the sampling is very irregular in
+time, the smoothing length changes throughout the timeseries (which is probably
+something you do not want).</p>
+</div>
+<div class="section" id="windowed-tukey-windowed-hamming-window-blackman-window">
+<h3>windowed, tukey_windowed, hamming_window, blackman_window<a class="headerlink" href="#windowed-tukey-windowed-hamming-window-blackman-window" title="Permalink to this headline">¶</a></h3>
+<p><code class="docutils literal notranslate"><span class="pre">window(window_function)</span></code> applies window_function to the timeseries.
+<code class="docutils literal notranslate"><span class="pre">window_function</span></code> has to be a function that takes as first argument the number
+of points of the signal. <code class="docutils literal notranslate"><span class="pre">window_function</span></code> can take additional arguments as
+passed by <code class="docutils literal notranslate"><span class="pre">windowed</span></code>. Alternatively, <code class="docutils literal notranslate"><span class="pre">window_function</span></code> can be a string that
+idenfity one of the window functions that are already available
+(<code class="docutils literal notranslate"><span class="pre">tukey</span></code>, <code class="docutils literal notranslate"><span class="pre">hamming</span></code>, <code class="docutils literal notranslate"><span class="pre">blackman</span></code>).</p>
+<p>You can apply directly one of those windows with the methods
+<code class="docutils literal notranslate"><span class="pre">tukey_window</span></code>, <code class="docutils literal notranslate"><span class="pre">hamming_window</span></code>, <code class="docutils literal notranslate"><span class="pre">blackman_window</span></code>.</p>
+</div>
+<div class="section" id="zero-pad">
+<h3>zero_pad<a class="headerlink" href="#zero-pad" title="Permalink to this headline">¶</a></h3>
+<p><code class="docutils literal notranslate"><span class="pre">zero_pad(N)</span></code> pads the <code class="docutils literal notranslate"><span class="pre">Timeseries</span></code> with zeros so that it has a total of N
+points. If <code class="docutils literal notranslate"><span class="pre">N</span></code> is smaller than the number of points in the <code class="docutils literal notranslate"><span class="pre">Timeseries</span></code>, or
+if the <code class="docutils literal notranslate"><span class="pre">Timeseries</span></code> is not equispaced in time, the operation will fail.</p>
+</div>
+<div class="section" id="initial-time-remove-final-time-remove">
+<h3>initial_time_remove, final_time_remove<a class="headerlink" href="#initial-time-remove-final-time-remove" title="Permalink to this headline">¶</a></h3>
+<p>With these methods you can remove a portion of the signal at the beginning or at
+the end of the timeseries. This is different from cropping, because tmin may not
+be 0 (when you crop, you specify what is the new tmin). Here, you specify the
+amount that you want to remove.</p>
+</div>
+</div>
+<div class="section" id="the-frequencyseries-methods">
+<h2>The FrequencySeries methods<a class="headerlink" href="#the-frequencyseries-methods" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="normalize">
+<h3>normalize<a class="headerlink" href="#normalize" title="Permalink to this headline">¶</a></h3>
+<p>Normalize the <code class="docutils literal notranslate"><span class="pre">FrequencySeries</span></code> so that it maximum amplitude is one.</p>
+</div>
+<div class="section" id="low-pass-high-pass-band-pass">
+<h3>low_pass, high_pass, band_pass<a class="headerlink" href="#low-pass-high-pass-band-pass" title="Permalink to this headline">¶</a></h3>
+<p><code class="docutils literal notranslate"><span class="pre">low_pass</span></code>, <code class="docutils literal notranslate"><span class="pre">high_pass</span></code>, and <code class="docutils literal notranslate"><span class="pre">band_pass</span></code> apply standard filters to remove
+some frequencies. In case the signal is complex, both positive and negative
+frequencies are removed (e.g., <code class="docutils literal notranslate"><span class="pre">high_pass(fmin)</span></code> removes frequencies <code class="docutils literal notranslate"><span class="pre">f</span></code>
+so that <code class="docutils literal notranslate"><span class="pre">abs(f)</span> <span class="pre">&lt;=</span> <span class="pre">f</span></code>).</p>
+</div>
+<div class="section" id="peaks-peaks-frequencies">
+<h3>peaks, peaks_frequencies<a class="headerlink" href="#peaks-peaks-frequencies" title="Permalink to this headline">¶</a></h3>
+<p><code class="docutils literal notranslate"><span class="pre">peaks(amp_threshold)</span></code> detects the peaks (local maxima) in the amplitude of
+the spectrum that are larger than <code class="docutils literal notranslate"><span class="pre">amp_threshold</span></code>. It returns a list of
+tuples. The first element of the tuple is the frequency bin in which the maximum
+is found, the second is a estimate obtained using a quadratic fit, and the third
+is the actual value of the amplitude. <code class="docutils literal notranslate"><span class="pre">peaks_frequencies(amp_threshold)</span></code> is
+like <code class="docutils literal notranslate"><span class="pre">peaks(amp_threshold)</span></code> but returns only the fitted frequencies.</p>
+<p>Often, it is better to normalize the series, so that <code class="docutils literal notranslate"><span class="pre">amp_threshold</span></code> becomes a
+percentual value of the the maximum peak.</p>
+</div>
+<div class="section" id="inverse-fourier-transform-to-timeseries">
+<h3>Inverse Fourier transform (to_TimeSeries)<a class="headerlink" href="#inverse-fourier-transform-to-timeseries" title="Permalink to this headline">¶</a></h3>
+<p>Using NumPy’s <code class="docutils literal notranslate"><span class="pre">fft</span></code>, return a <code class="docutils literal notranslate"><span class="pre">TimeSeries</span></code> that is the inverse Fourier
+transform. It is that <code class="docutils literal notranslate"><span class="pre">to_TimeSeries()</span></code> composed with <code class="docutils literal notranslate"><span class="pre">to_FrequencySeries()</span></code>
+is the identity with the exception of the domain of definition. The time domain
+is from <span class="math notranslate nohighlight">\(-1\slash (2 * \Delta f)\)</span> to <span class="math notranslate nohighlight">\(1\slash (2 * \Delta f)\)</span>.</p>
+<p>If only positive frequencies are found, we will assume that the original signal
+was real.</p>
+<p>Occasionally signals that are supposed to be real are turned into complex with
+imaginary part that is zero to machine precision.</p>
+<p>This uses NumPy’s <code class="docutils literal notranslate"><span class="pre">fft</span></code> module, so the
+conventions are the same, except that we normalize the results. That is, instead
+of computing</p>
+<p>we compute</p>
+<p>Intuitively, this amounts to adding the measure of integration to obtain a
+“true” Fourier transform.</p>
+</div>
+<div class="section" id="inner-product-and-overlap">
+<h3>inner_product, and overlap<a class="headerlink" href="#inner-product-and-overlap" title="Permalink to this headline">¶</a></h3>
+<p>Given <span class="math notranslate nohighlight">\(h1, h2\)</span> frequency series and <span class="math notranslate nohighlight">\(S_n\)</span> spectral noise density,
+the inner product is typically defined as
+.. :math:</p>
+<blockquote>
+<div><p><cite>(h_1, h_2) = 4 Re int_{f_min}^{f_max} frac{h_1 h_2^*}{S_n}</cite>.</p>
+</div></blockquote>
+<p>The method <a class="reference internal" href="frequencyseries_ref.html#postcactus.frequencyseries.FrequencySeries.inner_product" title="postcactus.frequencyseries.FrequencySeries.inner_product"><code class="xref py py-meth docutils literal notranslate"><span class="pre">inner_product()</span></code></a> computes this quantity, possibly for a
+network of detectors. If the noise is not provided, <code class="docutils literal notranslate"><span class="pre">S_n</span></code> will be fixed to
+one. Alternatively, if the noise is a <a class="reference internal" href="frequencyseries_ref.html#postcactus.frequencyseries.FrequencySeries" title="postcactus.frequencyseries.FrequencySeries"><code class="xref py py-class docutils literal notranslate"><span class="pre">FrequencySeries</span></code></a>, the inner
+product for that weighted with that noise will be computed. Alternatively, if
+<code class="docutils literal notranslate"><span class="pre">noises</span></code> is a list of <a class="reference internal" href="frequencyseries_ref.html#postcactus.frequencyseries.FrequencySeries" title="postcactus.frequencyseries.FrequencySeries"><code class="xref py py-class docutils literal notranslate"><span class="pre">FrequencySeries</span></code></a>, then we will assume that
+the user wants to compute the network inner product:</p>
+<p>where each detector has its own noise curve. Internally, <code class="docutils literal notranslate"><span class="pre">h_1</span></code>, <code class="docutils literal notranslate"><span class="pre">h_2</span></code>, and
+<code class="docutils literal notranslate"><span class="pre">S_n</span></code> will be resampled to a common frequency interval with the number of
+points of the series with fewest points. Hence, the accuracy of the computation
+is determined by the accuracy of the series with fewest points.</p>
+<p>The series are assumed to be zero outside the range of definition. So, if
+<code class="docutils literal notranslate"><span class="pre">f_min</span></code> or <code class="docutils literal notranslate"><span class="pre">f_max</span></code> are too large or too small, the effective parameter will
+be determined by the series. By default, <code class="docutils literal notranslate"><span class="pre">f_min=0</span></code> and <code class="docutils literal notranslate"><span class="pre">f_max=inf</span></code>.</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>Results with the defaults limits are very unstable (for example, Fourier
+transform typically diverge around zero, so the result of the integration is
+not accurate). Hence, one should always use physical limits.</p>
+</div>
+<p>With the inner product, one compute the overlap between two series:</p>
+<p>Again, this can be unweighted, or noise-weighted, or for a network of
+detectors (if a list of noises is provided).</p>
+<p>If you can guarantee that all the series have the same domain (including the noise),
+then you can set <code class="docutils literal notranslate"><span class="pre">same_domain</span></code> to <code class="docutils literal notranslate"><span class="pre">True</span></code> to speed up computations.</p>
+</div>
+<div class="section" id="load-frequencyseries">
+<h3>load_FrequencySeries<a class="headerlink" href="#load-frequencyseries" title="Permalink to this headline">¶</a></h3>
+<p>This function can be used to load a file as a <code class="xref py py-mod docutils literal notranslate"><span class="pre">FrequencySeries</span></code>. This
+is particularly useful for noise curves. Internally, this function uses Numpy’s
+<code class="docutils literal notranslate"><span class="pre">loadtxt</span></code> so, additional arguments can be passed directly to that method.</p>
+<p>For noise curves, you can use <code class="xref py py-meth docutils literal notranslate"><span class="pre">load_noise_curve()</span></code> with the path of the
+file. (This internally uses <code class="xref py py-meth docutils literal notranslate"><span class="pre">load_FrequencySeries()</span></code>).</p>
+</div>
+</div>
+<div class="section" id="additional-functions-in-timeseries">
+<h2>Additional functions in <a class="reference internal" href="timeseries_ref.html#module-postcactus.timeseries" title="postcactus.timeseries"><code class="xref py py-mod docutils literal notranslate"><span class="pre">timeseries</span></code></a><a class="headerlink" href="#additional-functions-in-timeseries" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference internal" href="timeseries_ref.html#module-postcactus.timeseries" title="postcactus.timeseries"><code class="xref py py-mod docutils literal notranslate"><span class="pre">timeseries</span></code></a> has also some additional useful functions, described
+here.</p>
+<div class="section" id="combine-ts">
+<h3>combine_ts<a class="headerlink" href="#combine-ts" title="Permalink to this headline">¶</a></h3>
+<p><code class="docutils literal notranslate"><span class="pre">combine_ts</span></code> takes a list of <code class="docutils literal notranslate"><span class="pre">TimeSeries</span></code> as input and combine them in a
+single new <code class="docutils literal notranslate"><span class="pre">TimeSeries</span></code> with monotonically increasing time. <code class="docutils literal notranslate"><span class="pre">combine_ts</span></code> can
+be called with <code class="docutils literal notranslate"><span class="pre">prefer_late=True</span></code> (default) or not. The difference between the
+two is that when <code class="docutils literal notranslate"><span class="pre">prefer_late=False</span></code> data from the <code class="docutils literal notranslate"><span class="pre">TimeSeries</span></code> with smaller
+<code class="docutils literal notranslate"><span class="pre">tmin</span></code> (i.e., the previous checkpoint) is preferred, and the opposite is true
+for <code class="docutils literal notranslate"><span class="pre">prefer_late=True</span></code> (i.e., the later checkpoint is used).</p>
+</div>
+<div class="section" id="time-at-maximum-time-at-minimum">
+<h3>time_at_maximum, time_at_minimum<a class="headerlink" href="#time-at-maximum-time-at-minimum" title="Permalink to this headline">¶</a></h3>
+<p>Often it is useful to know where is the peak of a signal (for example, for
+gravitational waves). These methods return the time at which the absolute value of
+the signal is maximum and minimum respectively.</p>
+</div>
+<div class="section" id="time-shift-phase-shift">
+<h3>time_shift, phase_shift<a class="headerlink" href="#time-shift-phase-shift" title="Permalink to this headline">¶</a></h3>
+<p>These methods apply common “shift” operations to the data. With <code class="docutils literal notranslate"><span class="pre">time_shift</span></code>,
+you can add a constant offset to the times of the series, whereas with
+<code class="docutils literal notranslate"><span class="pre">phase_shift</span></code> you can apply an offest in the complex phase of the form:
+<span class="math notranslate nohighlight">\(\exp(i \phi)\)</span>. When you apply a phase shift, if the signal is real it
+will be turned into complex.</p>
+<p>Common operations like time-shifting a series so that the absolute maximum (or
+minimum) is at <code class="docutils literal notranslate"><span class="pre">t=0</span></code> have specialized methods (for convenience):
+<code class="docutils literal notranslate"><span class="pre">align_at_maximum</span></code> and <code class="docutils literal notranslate"><span class="pre">align_at_minimum</span></code>.</p>
+</div>
+<div class="section" id="remove-duplicate-iters">
+<h3>remove_duplicate_iters<a class="headerlink" href="#remove-duplicate-iters" title="Permalink to this headline">¶</a></h3>
+<p>This function takes two arrays <code class="docutils literal notranslate"><span class="pre">t</span></code> and <code class="docutils literal notranslate"><span class="pre">y</span></code> and remove overlapping segments
+of time (such as, from checkpointing) returning a <code class="docutils literal notranslate"><span class="pre">TimeSeries</span></code> with
+monotonically increasing times.</p>
+</div>
+<div class="section" id="unfold-phase">
+<h3>unfold_phase<a class="headerlink" href="#unfold-phase" title="Permalink to this headline">¶</a></h3>
+<p>In gravitational-wave astronomy the phase of a wave is typically unfolded so
+that instead of going from <span class="math notranslate nohighlight">\(0\)</span> to <span class="math notranslate nohighlight">\(2\pi\)</span>, it is free to assume any
+value so that the number of periodicities can be counted. <code class="docutils literal notranslate"><span class="pre">unfold_phase</span></code> takes
+a signal and removes all the jumps of <span class="math notranslate nohighlight">\(2\pi\)</span>. Optionally, provide a time
+<code class="docutils literal notranslate"><span class="pre">t_of_zero_phase</span></code>, the value of the phase is offset so that it is zero when
+the time is <code class="docutils literal notranslate"><span class="pre">t_of_zero_phase</span></code>.</p>
+</div>
+</div>
+<div class="section" id="basenumerical-object">
+<h2>BaseNumerical object<a class="headerlink" href="#basenumerical-object" title="Permalink to this headline">¶</a></h2>
+<p>The <a class="reference internal" href="series_ref.html#postcactus.series.BaseSeries" title="postcactus.series.BaseSeries"><code class="xref py py-class docutils literal notranslate"><span class="pre">BaseSeries</span></code></a> class is derived from a even more abstract one,
+<code class="xref py py-class docutils literal notranslate"><span class="pre">BaseNumerical</span></code>. This class represent anything for which it
+makes sense to do calculations with. <code class="xref py py-class docutils literal notranslate"><span class="pre">BaseNumerical</span></code> implements
+all the infrastrcture needed to overload the mathematical operations. To do
+this, derived class must define three functions:
+- <code class="docutils literal notranslate"><span class="pre">_apply_unary</span></code>, that describes the output of applying a function to <code class="docutils literal notranslate"><span class="pre">self</span></code>
+(e.g., <code class="docutils literal notranslate"><span class="pre">sin(self)</span></code>).
+- <code class="docutils literal notranslate"><span class="pre">_apply_binary</span></code>, that describes the output of applying a function to <code class="docutils literal notranslate"><span class="pre">self</span></code>
+and <code class="docutils literal notranslate"><span class="pre">other</span></code> (e.g., <code class="docutils literal notranslate"><span class="pre">self</span> <span class="pre">+</span> <span class="pre">other</span></code>).
+- <code class="docutils literal notranslate"><span class="pre">_apply_reduction</span></code>, that describes the output of applying a function to
+<code class="docutils literal notranslate"><span class="pre">self</span></code> that returns a float (e.g., <code class="docutils literal notranslate"><span class="pre">min(self)</span></code>).</p>
+<p>This infrastrcture is also used by grid functions in <code class="docutils literal notranslate"><span class="pre">PostCactus</span></code>.</p>
+</div>
+</div>
+
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="index.html">
+              <img class="logo" src="_static/logo.png" alt="Logo"/>
+            </a></p>
+  <h3><a href="index.html">Table of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Time and frequency series</a><ul>
+<li><a class="reference internal" href="#the-timeseries-and-frequencyseries-objects">The TimeSeries and FrequencySeries objects</a><ul>
+<li><a class="reference internal" href="#splines">splines</a></li>
+<li><a class="reference internal" href="#integrate">integrate</a></li>
+<li><a class="reference internal" href="#derive-spline-derive">derive, spline_derive</a></li>
+<li><a class="reference internal" href="#save">save</a></li>
+<li><a class="reference internal" href="#crop">crop</a></li>
+<li><a class="reference internal" href="#savgol-smooth">savgol_smooth</a></li>
+<li><a class="reference internal" href="#iter">iter</a></li>
+<li><a class="reference internal" href="#min-max-abs-min-abs-max">min, max, abs_min, abs_max</a></li>
+<li><a class="reference internal" href="#sample-common">sample_common</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#the-timeseries-methods">The TimeSeries methods</a><ul>
+<li><a class="reference internal" href="#mean-remove-nans-remove">mean_remove, nans_remove</a></li>
+<li><a class="reference internal" href="#time-unit-change-redshift">time_unit_change, redshift</a></li>
+<li><a class="reference internal" href="#resample-regular-resample-fixed-frequency-resample-fixed-timestep-resample">resample, regular_resample, fixed_frequency_resample, fixed_timestep_resample</a></li>
+<li><a class="reference internal" href="#fourier-transform-to-frequencyseries">Fourier transform (to_FrequencySeries)</a></li>
+<li><a class="reference internal" href="#unfolded-phase-phase-angular-velocity-phase-frequency">unfolded_phase, phase_angular_velocity, phase_frequency</a></li>
+<li><a class="reference internal" href="#savgol-smooth-time">savgol_smooth_time</a></li>
+<li><a class="reference internal" href="#windowed-tukey-windowed-hamming-window-blackman-window">windowed, tukey_windowed, hamming_window, blackman_window</a></li>
+<li><a class="reference internal" href="#zero-pad">zero_pad</a></li>
+<li><a class="reference internal" href="#initial-time-remove-final-time-remove">initial_time_remove, final_time_remove</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#the-frequencyseries-methods">The FrequencySeries methods</a><ul>
+<li><a class="reference internal" href="#normalize">normalize</a></li>
+<li><a class="reference internal" href="#low-pass-high-pass-band-pass">low_pass, high_pass, band_pass</a></li>
+<li><a class="reference internal" href="#peaks-peaks-frequencies">peaks, peaks_frequencies</a></li>
+<li><a class="reference internal" href="#inverse-fourier-transform-to-timeseries">Inverse Fourier transform (to_TimeSeries)</a></li>
+<li><a class="reference internal" href="#inner-product-and-overlap">inner_product, and overlap</a></li>
+<li><a class="reference internal" href="#load-frequencyseries">load_FrequencySeries</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#additional-functions-in-timeseries">Additional functions in <code class="xref py py-mod docutils literal notranslate"><span class="pre">timeseries</span></code></a><ul>
+<li><a class="reference internal" href="#combine-ts">combine_ts</a></li>
+<li><a class="reference internal" href="#time-at-maximum-time-at-minimum">time_at_maximum, time_at_minimum</a></li>
+<li><a class="reference internal" href="#time-shift-phase-shift">time_shift, phase_shift</a></li>
+<li><a class="reference internal" href="#remove-duplicate-iters">remove_duplicate_iters</a></li>
+<li><a class="reference internal" href="#unfold-phase">unfold_phase</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#basenumerical-object">BaseNumerical object</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="simdir.html"
+                        title="previous chapter">Getting started with SimDir</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="cactus_scalars.html"
+                        title="next chapter">Scalar data</a></p>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="cactus_scalars.html" title="Scalar data"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="simdir.html" title="Getting started with SimDir"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">PostCactus 3.0.0a9 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">Time and frequency series</a></li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2020, Gabriele Bozzola and Wolfgang Kastaun.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 3.3.0.
+    </div>
+  </body>
+</html>

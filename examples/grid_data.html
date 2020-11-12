@@ -1,0 +1,732 @@
+
+
+<!doctype html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>&lt;no title&gt; &#8212; PostCactus 3.0.0a9 documentation</title>
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/bizstyle.css" type="text/css" />
+    
+    <script id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <script src="../_static/language_data.js"></script>
+    <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script type="text/x-mathjax-config">MathJax.Hub.Config({"tex2jax": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true, "ignoreClass": "document", "processClass": "math|output_area"}})</script>
+    <script src="../_static/bizstyle.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Working with Cactus grid functions" href="cactus_grid_functions.html" />
+    <link rel="prev" title="Working with time series, frequency series, and unit conversion" href="timeseries.html" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0" />
+    <!--[if lt IE 9]>
+    <script src="_static/css3-mediaqueries.js"></script>
+    <![endif]-->
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="cactus_grid_functions.html" title="Working with Cactus grid functions"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="timeseries.html" title="Working with time series, frequency series, and unit conversion"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">PostCactus 3.0.0a9 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">&lt;no title&gt;</a></li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <dl>
+<dt>{</dt><dd><dl>
+<dt>“cells”: [</dt><dd><dl>
+<dt>{</dt><dd><p>“cell_type”: “markdown”,
+“metadata”: {},
+“source”: [</p>
+<blockquote>
+<div><p>“# Working with grid datan”,
+“n”,
+“In this notebook, we show some of the most useful features of the [grid_data](../grid_data.rst) module. n”,
+“n”,
+“There are three important objects in [grid_data](../grid_data.rst):n”,
+“- <cite>UniformGrid</cite> represents Cartesian grids,n”,
+“- <cite>UniformGridData</cite> represents data on <cite>UniformGrid</cite>,n”,
+“- <cite>HierarchicalGridData</cite> represents data on multiple grids with different spacings (a mesh-refined grid).n”,
+“n”,
+“In most cases you will not define these objects directly, but it is important to know how they work.n”,
+“To learn how to read the simulation data, see [working with grid funcitons](cactus_grid_functions.ipynb).n”,
+“n”,
+“(This notebook is meant to be converted in Sphinx documentation and not used directly.)”</p>
+</div></blockquote>
+<p>]</p>
+</dd>
+</dl>
+<p>},
+{</p>
+<blockquote>
+<div><p>“cell_type”: “code”,
+“execution_count”: null,
+“metadata”: {},
+“outputs”: [],
+“source”: [</p>
+<blockquote>
+<div><p>“import matplotlib.pyplot as pltn”,
+“import numpy as npn”,
+“from postcactus import grid_data as gdn”,
+“from postcactus import seriesn”,
+“n”,
+“%matplotlib inline”</p>
+</div></blockquote>
+<p>]</p>
+</div></blockquote>
+<p>},
+{</p>
+<blockquote>
+<div><p>“cell_type”: “markdown”,
+“metadata”: {},
+“source”: [</p>
+<blockquote>
+<div><p>“To generate data, we start from preparing a grid. <cite>PostCactus</cite> follows the conventions in <cite>Carpet</cite> and identifies a grid with (1) the number of points along each direction, (2) the coordinate of left bottom cell, (3) the spacing or the coordinate of the top right cell.n”,
+“In addition, <cite>UniformGrid</cite> can contain additional information, like the number of refinement level, or the time. These grids are always cell-centered.n”,
+“n”,
+“Let us create a 2D grid: “</p>
+</div></blockquote>
+<p>]</p>
+</div></blockquote>
+<p>},
+{</p>
+<blockquote>
+<div><p>“cell_type”: “code”,
+“execution_count”: null,
+“metadata”: {},
+“outputs”: [],
+“source”: [</p>
+<blockquote>
+<div><p>“grid = gd.UniformGrid([201, 201], # Number of pointsn”,
+”                      x0=[-100, -100], # originn”,
+”                      x1=[100, 100] # other cornern”,
+”                      )”</p>
+</div></blockquote>
+<p>]</p>
+</div></blockquote>
+<p>},
+{</p>
+<blockquote>
+<div><p>“cell_type”: “markdown”,
+“metadata”: {},
+“source”: [</p>
+<blockquote>
+<div><p>“<cite>UniformGrid</cite> are meant to be immutable objects, and indeed there is not much that we can do with them. If we print them, we will find some interesting information.”</p>
+</div></blockquote>
+<p>]</p>
+</div></blockquote>
+<p>},
+{</p>
+<blockquote>
+<div><p>“cell_type”: “code”,
+“execution_count”: null,
+“metadata”: {},
+“outputs”: [],
+“source”: [</p>
+<blockquote>
+<div><p>“print(grid)”</p>
+</div></blockquote>
+<p>]</p>
+</div></blockquote>
+<p>},
+{</p>
+<blockquote>
+<div><p>“cell_type”: “markdown”,
+“metadata”: {},
+“source”: [</p>
+<blockquote>
+<div><p>“We can obtain this (and other information) directly from <cite>grid</cite>, for example.”</p>
+</div></blockquote>
+<p>]</p>
+</div></blockquote>
+<p>},
+{</p>
+<blockquote>
+<div><p>“cell_type”: “code”,
+“execution_count”: null,
+“metadata”: {},
+“outputs”: [],
+“source”: [</p>
+<blockquote>
+<div><p>“print(f&quot;Unit volume {grid.dv}, number of dimensions {grid.num_dimensions}&quot;)”</p>
+</div></blockquote>
+<p>]</p>
+</div></blockquote>
+<p>},
+{</p>
+<blockquote>
+<div><p>“cell_type”: “markdown”,
+“metadata”: {},
+“source”: [</p>
+<blockquote>
+<div><p>“<cite>UniformGrid</cite> objects can be indexed and support the <cite>in</cite> operator, which are quite convinent. “</p>
+</div></blockquote>
+<p>]</p>
+</div></blockquote>
+<p>},
+{</p>
+<blockquote>
+<div><p>“cell_type”: “code”,
+“execution_count”: null,
+“metadata”: {},
+“outputs”: [],
+“source”: [</p>
+<blockquote>
+<div><p>“print(f&quot;The coordinate cooresponding to the index 1, 2 is {grid[1,2]}&quot;)n”,
+“print(f&quot;Is [-140, 50] in the grid?: {[-140, 50] in grid}&quot;)”</p>
+</div></blockquote>
+<p>]</p>
+</div></blockquote>
+<p>},
+{</p>
+<blockquote>
+<div><p>“cell_type”: “markdown”,
+“metadata”: {},
+“source”: [</p>
+<blockquote>
+<div><p>“Finally, one can get explicitly the coordinates with the <cite>coordinates</cite> method.n”,
+“This can return arrays with the coordinates along each direction (default), or can return the coordinates as a numpy meshgrid n”,
+“(if <cite>as_meshgrid=True</cite>), or can return a list of arrays with the same shape of the grid and the values of the coordinates (if <cite>as_same_shape=True</cite>).n”,
+“Let’s see one example.”</p>
+</div></blockquote>
+<p>]</p>
+</div></blockquote>
+<p>},
+{</p>
+<blockquote>
+<div><p>“cell_type”: “code”,
+“execution_count”: null,
+“metadata”: {},
+“outputs”: [],
+“source”: [</p>
+<blockquote>
+<div><p>“print(grid.coordinates()[0])”</p>
+</div></blockquote>
+<p>]</p>
+</div></blockquote>
+<p>},
+{</p>
+<blockquote>
+<div><p>“cell_type”: “markdown”,
+“metadata”: {},
+“source”: [</p>
+<blockquote>
+<div><p>“<cite>UniformGridData</cite> are much more interesting. <cite>UniformGridData</cite> packages an”,
+“<cite>UniformGrid</cite> and some data in the same object and provides many usefuln”,
+“functionalities.n”,
+“n”,
+“Let us create some fake data to explore the capabilities. A simple way ton”,
+“generate a <cite>UniformGridData</cite> from a function is with <cite>sample_function</cite>.”</p>
+</div></blockquote>
+<p>]</p>
+</div></blockquote>
+<p>},
+{</p>
+<blockquote>
+<div><p>“cell_type”: “code”,
+“execution_count”: null,
+“metadata”: {},
+“outputs”: [],
+“source”: [</p>
+<blockquote>
+<div><p>“grid_data = gd.sample_function(lambda x, y: x * y,n”,
+”                          [101, 201], # shapen”,
+”                          [0, 0], # originn”,
+”                          [10, 10] # other cornern”,
+”                          )”</p>
+</div></blockquote>
+<p>]</p>
+</div></blockquote>
+<p>},
+{</p>
+<blockquote>
+<div><p>“cell_type”: “markdown”,
+“metadata”: {},
+“source”: [</p>
+<blockquote>
+<div><p>“We can visualize this data with matplotlib <cite>contourf</cite>. n”,
+“To do this, we need the coordinates as meshgrid, and we need the actual data.n”,
+“To get the first, we use the <cite>coordinates_meshgrid</cite> method, for the second, wen”,
+“access directly the data with the <cite>data</cite> attribute. This is stored as a numpy n”,
+“array. Often, we want to plot these objects. Using <cite>data</cite> directly would lead to n”,
+“transposing the actual physical quantity, because <cite>data</cite> is a matrix stored by rows, n”,
+“so, the first index does not label the x coordiante, but the y. n”,
+“We provide the aliaxs <cite>data_xyz</cite>, which is the the tranposed of <cite>data</cite>. This is ready to be plotted. n”,</p>
+</div></blockquote>
+<p>]</p>
+</div></blockquote>
+<p>},
+{</p>
+<blockquote>
+<div><p>“cell_type”: “code”,
+“execution_count”: null,
+“metadata”: {},
+“outputs”: [],
+“source”: [</p>
+<blockquote>
+<div><p>“cf = plt.contourf(<a href="#id1"><span class="problematic" id="id2">*</span></a>grid_data.coordinates_meshgrid(), # The star is to unpack the listn”,
+”                  grid_data.data_xyz) n”,
+“plt.colorbar(cf)”</p>
+</div></blockquote>
+<p>]</p>
+</div></blockquote>
+<p>},
+{</p>
+<blockquote>
+<div><p>“cell_type”: “markdown”,
+“metadata”: {},
+“source”: [</p>
+<blockquote>
+<div><p>“<cite>UniformGridData</cite> support all the mathematical operations we may want, for instance.”</p>
+</div></blockquote>
+<p>]</p>
+</div></blockquote>
+<p>},
+{</p>
+<blockquote>
+<div><p>“cell_type”: “code”,
+“execution_count”: null,
+“metadata”: {},
+“outputs”: [],
+“source”: [</p>
+<blockquote>
+<div><p>“funky_data = np.sqrt(grid_data) + grid_data**2 * np.tanh(grid_data)n”,
+“cf = plt.contourf(<a href="#id3"><span class="problematic" id="id4">*</span></a>funky_data.coordinates_meshgrid(), funky_data.data_xyz)n”,
+“plt.colorbar(cf)”</p>
+</div></blockquote>
+<p>]</p>
+</div></blockquote>
+<p>},
+{</p>
+<blockquote>
+<div><p>“cell_type”: “markdown”,
+“metadata”: {},
+“source”: [</p>
+<blockquote>
+<div><p>“<cite>UniformGridData</cite> can be interpolated with splines to evalute data everywhere, even where there was no data. With this, we can make <cite>UniformGridData</cite> callable objects:”</p>
+</div></blockquote>
+<p>]</p>
+</div></blockquote>
+<p>},
+{</p>
+<blockquote>
+<div><p>“cell_type”: “code”,
+“execution_count”: null,
+“metadata”: {},
+“outputs”: [],
+“source”: [</p>
+<blockquote>
+<div><p>“print(f&quot;The value of funky_data at (2, 3) is {funky_data((2,3)):.3f}&quot;)”</p>
+</div></blockquote>
+<p>]</p>
+</div></blockquote>
+<p>},
+{</p>
+<blockquote>
+<div><p>“cell_type”: “markdown”,
+“metadata”: {},
+“source”: [</p>
+<blockquote>
+<div><p>“<cite>UniformGridData</cite> have built-in a collection of useful functions, for example:”</p>
+</div></blockquote>
+<p>]</p>
+</div></blockquote>
+<p>},
+{</p>
+<blockquote>
+<div><p>“cell_type”: “code”,
+“execution_count”: null,
+“metadata”: {},
+“outputs”: [],
+“source”: [</p>
+<blockquote>
+<div><p>“print(f&quot;The mean of funky_data is {funky_data.mean():.3f}&quot;)n”,
+“print(f&quot;The integral of funky_data is {funky_data.integral():.3f}&quot;)n”,
+“print(f&quot;The norm2 of funky_data is {funky_data.norm2():.3f}&quot;)n”,
+“n”,
+“bins, hist = funky_data.histogram(num_bins=20)n”,
+“plt.ylabel(&quot;count&quot;)n”,
+“plt.xlabel(&quot;value&quot;)n”,
+“plt.plot(bins, hist[:-1])”</p>
+</div></blockquote>
+<p>]</p>
+</div></blockquote>
+<p>},
+{</p>
+<blockquote>
+<div><p>“cell_type”: “markdown”,
+“metadata”: {},
+“source”: [</p>
+<blockquote>
+<div><p>“It is not possible to combine directly two <cite>UniformGridData</cite> with different associated grids, n”,
+“but it is always possible to resample the objects so that they have a common grid.n”,
+“n”,
+“Pay attention: resampling operations can be very expensive with large grids or high dimensions! “</p>
+</div></blockquote>
+<p>]</p>
+</div></blockquote>
+<p>},
+{</p>
+<blockquote>
+<div><p>“cell_type”: “code”,
+“execution_count”: null,
+“metadata”: {},
+“outputs”: [],
+“source”: [</p>
+<blockquote>
+<div><p>“new_grid = gd.UniformGrid([201, 301], x0=[1, 1], x1=[2, 10])n”,
+“resampled_funky = funky_data.resampled(new_grid)n”,
+“cf = plt.contourf(<a href="#id5"><span class="problematic" id="id6">*</span></a>resampled_funky.coordinates_meshgrid(), resampled_funky.data_xyz)n”,
+“plt.colorbar(cf)”</p>
+</div></blockquote>
+<p>]</p>
+</div></blockquote>
+<p>},
+{</p>
+<blockquote>
+<div><p>“cell_type”: “markdown”,
+“metadata”: {},
+“source”: [</p>
+<blockquote>
+<div><p>“Being able to resample <cite>UniformGridData</cite> means that even if it is not possible to directlyn”,
+“combine objects with different grids, you can always resample them to a common grid, and thenn”,
+“perform the operation.n”,
+“n”,
+“Now that we have some familiarity with <cite>UniformGridData</cite>, we can move to the most importantn”,
+“object, <cite>HierarchicalGridData</cite>. The relevance of this class is due to the fact that simulationn”,
+“data is represented with <cite>HierarchicalGridData</cite> objects.n”,
+“n”,
+“A <cite>HierarchicalGridData</cite> is a collection of <cite>UniformGridData</cite>, or (or more) for each refinementn”,
+“level.n”,
+“n”,
+“Let us prepare some fake data.”</p>
+</div></blockquote>
+<p>]</p>
+</div></blockquote>
+<p>},
+{</p>
+<blockquote>
+<div><p>“cell_type”: “code”,
+“execution_count”: null,
+“metadata”: {},
+“outputs”: [],
+“source”: [</p>
+<blockquote>
+<div><p>“# 3 refinement levelsn”,
+“data = []n”,
+“for ref_level in range(3):n”,
+”    resolution = (1 + ref_level) * 20 + 1n”,
+”    data.append(gd.sample_function(lambda x, y: x*y + 5,n”,
+”                                   [resolution, resolution],n”,
+”                                   [-10, -10], n”,
+”                                   [10, 10],n”,
+”                                   ref_level=ref_leveln”,
+”                                   ))n”,
+“hg = gd.HierarchicalGridData(data)n”,
+“print(hg)”</p>
+</div></blockquote>
+<p>]</p>
+</div></blockquote>
+<p>},
+{</p>
+<blockquote>
+<div><p>“cell_type”: “markdown”,
+“metadata”: {},
+“source”: [</p>
+<blockquote>
+<div><p>“&quot;Components&quot; are essentially patches of grid. In some cases,n”,
+“components are a result of running the code on multiple processes.n”,
+“In this case, PostCactus will try to merge them in a single grid.n”,
+“In other instances, when there are multiple centers of refinement,n”,
+“the components are real. Here, PostCactus will do nothing and willn”,
+“keep all the components around.n”,
+“n”,
+“To access a specific refinement level, we can use the backet operator.n”,
+“This will return a list of all the components at that level. Often,n”,
+“there will be only one element because PostCactus successfully mergedn”,
+“the various patches. In this case, one can use the <cite>get_level</cite> methodn”,
+“to get directly the data on that level.”</p>
+</div></blockquote>
+<p>]</p>
+</div></blockquote>
+<p>},
+{</p>
+<blockquote>
+<div><p>“cell_type”: “code”,
+“execution_count”: null,
+“metadata”: {},
+“outputs”: [],
+“source”: [</p>
+<blockquote>
+<div><p>“level2 = hg.get_level(2)”</p>
+</div></blockquote>
+<p>]</p>
+</div></blockquote>
+<p>},
+{</p>
+<blockquote>
+<div><p>“cell_type”: “code”,
+“execution_count”: null,
+“metadata”: {},
+“outputs”: [],
+“source”: [</p>
+<blockquote>
+<div><p>“type(level2)”</p>
+</div></blockquote>
+<p>]</p>
+</div></blockquote>
+<p>},
+{</p>
+<blockquote>
+<div><p>“cell_type”: “markdown”,
+“metadata”: {},
+“source”: [</p>
+<blockquote>
+<div><p>“As we see, this is just a <cite>UniformGridData</cite>, so everything we can operaten”,
+“on single levels exactly in the same way we work on <cite>UniformGridData</cite>.n”,
+“If the  <cite>HierarchicalGridData</cite> has multiple disconnected components, n”,
+“<cite>hg[2]</cite> will instead return a list of <cite>UniformGridData</cite>.n”,
+“n”,
+” <cite>HierarchicalGridData</cite> fully support mathematical operations. (Binary operationsn”,
+” are performed only if the two objects have the same grids and components.)”</p>
+</div></blockquote>
+<p>]</p>
+</div></blockquote>
+<p>},
+{</p>
+<blockquote>
+<div><p>“cell_type”: “code”,
+“execution_count”: null,
+“metadata”: {},
+“outputs”: [],
+“source”: [</p>
+<blockquote>
+<div><p>“more_funk = (abs(hg) + 2).log() # For some reasons np.log(hg) doesn’t work… n”,
+“n”,
+“# We can also call the HierarchicalGridDatan”,
+“print(f&quot;more_funk of (2, 3) is {more_funk((2,3)):.3f}&quot;)”</p>
+</div></blockquote>
+<p>]</p>
+</div></blockquote>
+<p>},
+{</p>
+<blockquote>
+<div><p>“cell_type”: “markdown”,
+“metadata”: {},
+“source”: [</p>
+<blockquote>
+<div><p>“We cannot plot directly this object, because it is a complicated object. To plot it, we have to merge the refinement levels to a single <cite>UniformGridData</cite>. We can do this with <cite>merge_refinement_levels()</cite>. “</p>
+</div></blockquote>
+<p>]</p>
+</div></blockquote>
+<p>},
+{</p>
+<blockquote>
+<div><p>“cell_type”: “code”,
+“execution_count”: null,
+“metadata”: {},
+“outputs”: [],
+“source”: [</p>
+<blockquote>
+<div><p>“merged = more_funk.merge_refinement_levels(resample=True)n”,
+“cf = plt.contourf(<a href="#id7"><span class="problematic" id="id8">*</span></a>merged.coordinates_meshgrid(), merged.data_xyz)n”,
+“plt.colorbar(cf)”</p>
+</div></blockquote>
+<p>]</p>
+</div></blockquote>
+<p>},
+{</p>
+<blockquote>
+<div><p>“cell_type”: “markdown”,
+“metadata”: {},
+“source”: [</p>
+<blockquote>
+<div><p>“As you noticed, we enabled the <cite>resample</cite> option. With this option the coarser refinement levels are interpolated to the new finer grid using multilinear interpolation.n”,
+“n”,
+“When working with large grids, many refinement levels, and/or 3D data, merging the various refinement levels can be a very expensive operation. However, often we don’t need the entire grid, but we want to look at a portion. <cite>HierachicalGridData</cite> objects have a method to merge the refinement levels on a specified grid.”</p>
+</div></blockquote>
+<p>]</p>
+</div></blockquote>
+<p>},
+{</p>
+<blockquote>
+<div><p>“cell_type”: “code”,
+“execution_count”: null,
+“metadata”: {},
+“outputs”: [],
+“source”: [</p>
+<blockquote>
+<div><p>“small_grid = gd.UniformGrid([20, 20], x0=[-1, -1], x1=[1, 1])n”,
+“small_funk = more_funk.to_UniformGridData(small_grid, resample=False)n”,
+“cf = plt.contourf(<a href="#id9"><span class="problematic" id="id10">*</span></a>small_funk.coordinates_meshgrid(), small_funk.data_xyz)n”,
+“plt.colorbar(cf)”</p>
+</div></blockquote>
+<p>]</p>
+</div></blockquote>
+<p>},
+{</p>
+<blockquote>
+<div><p>“cell_type”: “markdown”,
+“metadata”: {},
+“source”: [</p>
+<blockquote>
+<div><p>“<cite>HierachicalGridData</cite> objects have a lot of information that is accessible as a property.”</p>
+</div></blockquote>
+<p>]</p>
+</div></blockquote>
+<p>},
+{</p>
+<blockquote>
+<div><p>“cell_type”: “code”,
+“execution_count”: null,
+“metadata”: {},
+“outputs”: [],
+“source”: [</p>
+<blockquote>
+<div><p>“print(f&quot;Available refinement levels: {hg.refinement_levels}&quot;)n”,
+“print(f&quot;Spacing of the coarsest: {hg.coarsest_dx}&quot;)n”,
+“print(f&quot;Spacing of the finest: {hg.finest_dx}&quot;)n”,
+“print(f&quot;Finest level: {hg.finest_level}&quot;)”</p>
+</div></blockquote>
+<p>]</p>
+</div></blockquote>
+<p>},
+{</p>
+<blockquote>
+<div><p>“cell_type”: “markdown”,
+“metadata”: {},
+“source”: [</p>
+<blockquote>
+<div><p>“Often, we want to look at a specific cut of the data. <cite>UniformGridData</cite> can be sliced easily. Just prepare a <cite>cut</cite> array with <cite>None</cite> where you want to keep the dimension, and the coordiante of where you want to slice. For example, here we extract the line with <cite>y=0.7</cite>.”</p>
+</div></blockquote>
+<p>]</p>
+</div></blockquote>
+<p>},
+{</p>
+<blockquote>
+<div><p>“cell_type”: “code”,
+“execution_count”: null,
+“metadata”: {},
+“outputs”: [],
+“source”: [</p>
+<blockquote>
+<div><p>“along_y = small_funk.sliced([None,0.7])n”,
+“print(along_y.grid)n”,
+“plt.plot(<a href="#id11"><span class="problematic" id="id12">*</span></a>along_y.coordinates_meshgrid(), along_y.data)”</p>
+</div></blockquote>
+<p>]</p>
+</div></blockquote>
+<p>}</p>
+</dd>
+</dl>
+<p>],
+“metadata”: {</p>
+<blockquote>
+<div><dl class="simple">
+<dt>“kernelspec”: {</dt><dd><p>“display_name”: “Python 3”,
+“language”: “python”,
+“name”: “python3”</p>
+</dd>
+</dl>
+<p>},
+“language_info”: {</p>
+<blockquote>
+<div><dl class="simple">
+<dt>“codemirror_mode”: {</dt><dd><p>“name”: “ipython”,
+“version”: 3</p>
+</dd>
+</dl>
+<p>},
+“file_extension”: “.py”,
+“mimetype”: “text/x-python”,
+“name”: “python”,
+“nbconvert_exporter”: “python”,
+“pygments_lexer”: “ipython3”,
+“version”: “3.7.8”</p>
+</div></blockquote>
+<p>},
+“name”: “grid_data.ipynb”</p>
+</div></blockquote>
+<p>},
+“nbformat”: 4,
+“nbformat_minor”: 4</p>
+</dd>
+</dl>
+<p>}</p>
+
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="../index.html">
+              <img class="logo" src="../_static/logo.png" alt="Logo"/>
+            </a></p>
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="timeseries.html"
+                        title="previous chapter">Working with time series, frequency series, and unit conversion</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="cactus_grid_functions.html"
+                        title="next chapter">Working with Cactus grid functions</a></p>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="cactus_grid_functions.html" title="Working with Cactus grid functions"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="timeseries.html" title="Working with time series, frequency series, and unit conversion"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">PostCactus 3.0.0a9 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">&lt;no title&gt;</a></li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2020, Gabriele Bozzola and Wolfgang Kastaun.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 3.3.0.
+    </div>
+  </body>
+</html>

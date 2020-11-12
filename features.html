@@ -1,0 +1,251 @@
+
+
+<!doctype html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>List of features implemented in PostCactus &#8212; PostCactus 3.0.0a9 documentation</title>
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="_static/bizstyle.css" type="text/css" />
+    
+    <script id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/doctools.js"></script>
+    <script src="_static/language_data.js"></script>
+    <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script type="text/x-mathjax-config">MathJax.Hub.Config({"tex2jax": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true, "ignoreClass": "document", "processClass": "math|output_area"}})</script>
+    <script src="_static/bizstyle.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0" />
+    <!--[if lt IE 9]>
+    <script src="_static/css3-mediaqueries.js"></script>
+    <![endif]-->
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">PostCactus 3.0.0a9 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">List of features implemented in PostCactus</a></li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="list-of-features-implemented-in-postcactus">
+<h1>List of features implemented in PostCactus<a class="headerlink" href="#list-of-features-implemented-in-postcactus" title="Permalink to this headline">¶</a></h1>
+<p><code class="docutils literal notranslate"><span class="pre">PostCactus</span></code> implements a large collection of features. In general, the spirit
+of the package is to provide high-level interfaces to simulation data, hiding
+all the computation complexity behind it. In doing this, <code class="docutils literal notranslate"><span class="pre">PostCactus</span></code> tries to
+be Pythonic: many custom objects behave either like dictionaries, or like
+callable. These objects behave as you expect (or at least, they should). For
+example, if an objects smells like a dictionary, you should be able to ask for
+<code class="docutils literal notranslate"><span class="pre">keys()</span></code>, or iteratate over it, or see if an element is contained with the
+<code class="docutils literal notranslate"><span class="pre">in</span></code> keyword.</p>
+<p>Here we review all the available features as of version <a href="#id1"><span class="problematic" id="id2">``</span></a>3.0.0b1`.</p>
+<div class="section" id="general">
+<h2>General<a class="headerlink" href="#general" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">PostCactus</span></code> is documented, thoroughly commented, provides examples, and has
+a large test suite.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">PostCactus</span></code> is available as wheel and can be installed with <code class="docutils literal notranslate"><span class="pre">pip</span></code>.</p></li>
+</ul>
+</div>
+<div class="section" id="simdir">
+<h2>SimDir<a class="headerlink" href="#simdir" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li><p>Scan and organize all the files in a directory up to a specified depth.</p></li>
+<li><p>Print out an overview of what is available in the simulation.</p></li>
+<li><p>Individuate all the par, log, out, and err files.</p></li>
+<li><p>Easily access all the data that <code class="docutils literal notranslate"><span class="pre">PostCactus</span></code> can represent.</p></li>
+<li><p>Transparently handle all the restarts with any directory structure.</p></li>
+</ul>
+</div>
+<div class="section" id="series">
+<h2>Series<a class="headerlink" href="#series" title="Permalink to this headline">¶</a></h2>
+<p>Time and frequency series are represented in an intuitive way. They
+- can be real or complex;
+- can be unevenly spaced;
+- support all the mathematical operations (e.g., you can sum two timeseries);
+- can be interpolated with arbitrary (up to quintic) splines;
+- can be called returning interpolated values where no data is available
+- support reductions (maximum/minimum, absolute maximum/minimum, location of the maximum/minimum, location of the absolute maximum/minimum);
+- are compatible with NumPy’s operations (e.g., you can all <code class="docutils literal notranslate"><span class="pre">np.log(rho)</span></code>);
+- are compatible with matplotlib <code class="docutils literal notranslate"><span class="pre">plot</span></code> (you can plot with <code class="docutils literal notranslate"><span class="pre">plt.plot(rho)</span></code>);
+- can be resampled using nearest neighors or splines on new times/frequencies;
+- can be writted to disk in a human-readable way (with <code class="docutils literal notranslate"><span class="pre">save</span></code>);
+- can be clean from <code class="docutils literal notranslate"><span class="pre">nans</span></code>;
+- can be integrated with the trapezional method (cumulative integral);
+- can be derived from splines, or with second-order finite differencing;
+- can be smoothed with the Savitzky-Golay filter;
+- can be cropped;
+- can be resampled to the points common points with other series.</p>
+<p>Specifically timeseries, also support:
+- computing the unfolded phase and phase velocity;
+- computing duration, time intervals;
+- shifting time/phase, aligning at (absolute) maximum/minimum;
+- resampling evenly, even with a fixed frequency or delta time;
+- zero-paddeding;
+- removing mean;
+- removing initial/final portion of the signal;
+- changing time units;
+- redshifting for a given redshift;
+- window functions (Tukey, Hamming, Blackman, or arbitrary);
+- Fourier Transform (real and complex).</p>
+<p>Frequencyseries support:
+- loading from file (e.g., noise curves);
+- normalization;
+- low/high pass filters;
+- removing negative frequencies;
+- locating peaks (with also a quadratic approximation);
+- Inverse Fourier Transform;
+- computing the inner product between two frequencyseries, also with multiple noises;
+- computing the overlap, also with multiple noises.</p>
+</div>
+<div class="section" id="scalar-data">
+<h2>Scalar data<a class="headerlink" href="#scalar-data" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li><p>Read data from <code class="docutils literal notranslate"><span class="pre">CarpetASCII</span></code> (max, min, norm, …) as timeseries (both <code class="docutils literal notranslate"><span class="pre">one_file_per_group</span></code> or <code class="docutils literal notranslate"><span class="pre">one_variable_per_group</span></code> options).</p></li>
+<li><p>Combine all the different files from multiple checkpoints in a single timeseries.</p></li>
+<li><p>Read data transparently compressed with gzip or bzip2.</p></li>
+</ul>
+</div>
+<div class="section" id="multipoles-and-waves">
+<h2>Multipoles and waves<a class="headerlink" href="#multipoles-and-waves" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li><p>Read ASCII and HDF5 data from <code class="docutils literal notranslate"><span class="pre">Multipoles</span></code>.</p></li>
+<li><p>Represent multipoles with objects that can be accessed with the multipole numbers.</p></li>
+<li><p>Use the fixed frequency integration method to compute from <code class="docutils literal notranslate"><span class="pre">Psi4</span></code>:
+- strains at given multipole number,
+- strains at a given point (accounting for the spin-weigthed spherical harmonics),
+- strain as observed by LIGO/Virgo (considering the antenna patterns),
+- power/energy lost via gravitational waves (one or multiple modes),
+- torque/angular momentum along the z axis lost via gravitational waves (one or multiple modes),
+- Compute the last two for electromagnetic waves from <code class="docutils literal notranslate"><span class="pre">Phi2</span></code>.</p></li>
+<li><p>Extrapolate waves at infinity with polynomial expansion in real/imaginary parts or amplitude and phase.</p></li>
+<li><p>Compute spin-weigthed spherical harmonics.</p></li>
+<li><p>Convert from RA and Dec to spherical coordiantes.</p></li>
+<li><p>Compute antenna responses.</p></li>
+<li><p>Compute signal to noise ratio from strain.</p></li>
+<li><p>Compute redshift from luminosity distance.</p></li>
+<li><p>Compute mismatch between the 2,2 modes of two waves for multiple detectors.</p></li>
+<li><p>Access sensitivity curves of known detectors (e.g., LISA, or Cosmic Explorer).</p></li>
+</ul>
+</div>
+<div class="section" id="units">
+<h2>Units<a class="headerlink" href="#units" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li><p>Convert from geometrized units (given mass, length, or mass in solar masses) to physical and vice versa.</p></li>
+<li><p>Implement some basic constants of Nature.</p></li>
+</ul>
+</div>
+<div class="section" id="grid-data">
+<h2>Grid Data<a class="headerlink" href="#grid-data" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li><p>Read 1D, 2D, and 3D ASCII and HDF5 files as <code class="docutils literal notranslate"><span class="pre">HierarchicalGridData</span></code>, which supports:
+- working with multiple components and refinement levels;
+- handling ghost-zones;
+- merging multiple patches that logically represent a single grid (e.g., due to domain decomposition);
+- real or complex data;
+- all the mathematical operations (e.g., you can sum two timeseries);
+- interpolation with multilinear interpolation;
+- being called returning interpolated values where no data is available;
+- reductions (maximum/minimum, absolute maximum/minimum, location of the maximum/minimum, location of the absolute maximum/minimum);
+- NumPy’s operations (e.g., you can all <code class="docutils literal notranslate"><span class="pre">np.log(rho)</span></code>);
+- resampling using nearest neighors or splines on new grids;
+- Second-order finite-differencing along any dimension;
+- being resampled to <code class="docutils literal notranslate"><span class="pre">UniformGridData</span></code> (unigrid);
+- abitrarily slicing with lower-dimensional cuts (e.g., equatorial plane from 3D data).</p></li>
+<li><p>In addition to above <code class="docutils literal notranslate"><span class="pre">UniformGridData</span></code> support:
+- being saved on disk;
+- histogram and percentiles;
+- additonal reductions (e.g., norm2, mean, norm-p, integral);
+- changing grid spacing (up/down sampling);
+- Fourier Transform;
+- computing grid coordiantes (for plotting or operations involving the coordinates);</p></li>
+<li><p>Read multiple iterations as spacetime <code class="docutils literal notranslate"><span class="pre">HierarchicalGridData</span></code> (to take advantage of multilinear interpolation in space and time).</p></li>
+<li><p>Transparently handle multiple restarts/output from different MPI processes.</p></li>
+<li><p>Computing the total size of the files associated to a variable/dimension.</p></li>
+</ul>
+</div>
+<div class="section" id="horizons">
+<h2>Horizons<a class="headerlink" href="#horizons" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li><p>Read and represent the ASCII output from <code class="docutils literal notranslate"><span class="pre">QuasiLocalMeasures</span></code> and <code class="docutils literal notranslate"><span class="pre">AHFinderDirect</span></code>.</p></li>
+<li><p>Work with the shape of the horizons and their properties (as timeseries).</p></li>
+<li><p>Cut the 3D shape into 2D projection along the axes centered in the origin of the horizon.</p></li>
+</ul>
+</div>
+</div>
+
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="index.html">
+              <img class="logo" src="_static/logo.png" alt="Logo"/>
+            </a></p>
+  <h3><a href="index.html">Table of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">List of features implemented in PostCactus</a><ul>
+<li><a class="reference internal" href="#general">General</a></li>
+<li><a class="reference internal" href="#simdir">SimDir</a></li>
+<li><a class="reference internal" href="#series">Series</a></li>
+<li><a class="reference internal" href="#scalar-data">Scalar data</a></li>
+<li><a class="reference internal" href="#multipoles-and-waves">Multipoles and waves</a></li>
+<li><a class="reference internal" href="#units">Units</a></li>
+<li><a class="reference internal" href="#grid-data">Grid Data</a></li>
+<li><a class="reference internal" href="#horizons">Horizons</a></li>
+</ul>
+</li>
+</ul>
+
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">PostCactus 3.0.0a9 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">List of features implemented in PostCactus</a></li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2020, Gabriele Bozzola and Wolfgang Kastaun.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 3.3.0.
+    </div>
+  </body>
+</html>

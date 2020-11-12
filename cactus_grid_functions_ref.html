@@ -1,0 +1,292 @@
+
+
+<!doctype html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Reference on postcactus.cactus_grid_functions &#8212; PostCactus 3.0.0a9 documentation</title>
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="_static/bizstyle.css" type="text/css" />
+    
+    <script id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/doctools.js"></script>
+    <script src="_static/language_data.js"></script>
+    <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script type="text/x-mathjax-config">MathJax.Hub.Config({"tex2jax": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true, "ignoreClass": "document", "processClass": "math|output_area"}})</script>
+    <script src="_static/bizstyle.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Reference on postcactus.cactus_scalars" href="cactus_scalars_ref.html" />
+    <link rel="prev" title="Reference on postcactus.frequencyseries" href="frequencyseries_ref.html" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0" />
+    <!--[if lt IE 9]>
+    <script src="_static/css3-mediaqueries.js"></script>
+    <![endif]-->
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="cactus_scalars_ref.html" title="Reference on postcactus.cactus_scalars"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="frequencyseries_ref.html" title="Reference on postcactus.frequencyseries"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">PostCactus 3.0.0a9 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">Reference on postcactus.cactus_grid_functions</a></li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="module-postcactus.cactus_grid_functions">
+<span id="reference-on-postcactus-cactus-grid-functions"></span><h1>Reference on postcactus.cactus_grid_functions<a class="headerlink" href="#module-postcactus.cactus_grid_functions" title="Permalink to this headline">¶</a></h1>
+<p>The <code class="xref py py-mod docutils literal notranslate"><span class="pre">cactus_grid</span></code> module provides functions to load
+grid function in Cactus formats.</p>
+<dl class="py class">
+<dt id="postcactus.cactus_grid_functions.AllGridFunctions">
+<em class="property">class </em><code class="sig-prename descclassname">postcactus.cactus_grid_functions.</code><code class="sig-name descname">AllGridFunctions</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">allfiles</span></em>, <em class="sig-param"><span class="n">dimension</span></em>, <em class="sig-param"><span class="n">num_ghost</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#postcactus.cactus_grid_functions.AllGridFunctions" title="Permalink to this definition">¶</a></dt>
+<dd><p>Helper class to read various types of grid data in a list of files and
+properly order them. The core of this object is the _vars dictionary which
+contains the location of all the files for a specific variable and
+reduction.</p>
+<p>AllGridFunction is a dictionary-like object.</p>
+<p>Not intended for direct iniitalization.</p>
+<p>allfiles is a list of files, dimension has to a tuple.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>num_ghost</strong> (<em>list</em><em> or </em><em>tuple of the same length as the number of dimension</em>) – Number of ghost zones in the data for each dimension.
+This is used only for ASCII data.</p>
+</dd>
+</dl>
+<dl class="py method">
+<dt id="postcactus.cactus_grid_functions.AllGridFunctions.allfiles">
+<em class="property">property </em><code class="sig-name descname">allfiles</code><a class="headerlink" href="#postcactus.cactus_grid_functions.AllGridFunctions.allfiles" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a set of all the files that have variables of the
+given dimension</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Collection of all the unique files with variales of</p>
+</dd>
+</dl>
+<p>this dimension
+:rtype: set</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="postcactus.cactus_grid_functions.AllGridFunctions.total_filesize">
+<code class="sig-name descname">total_filesize</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">unit</span><span class="o">=</span><span class="default_value">'MB'</span></em><span class="sig-paren">)</span><a class="headerlink" href="#postcactus.cactus_grid_functions.AllGridFunctions.total_filesize" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the total size of the files with this dimension.
+Available units B, KB, MB and GB</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Total size of all the files associated with this dimension.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt id="postcactus.cactus_grid_functions.BaseOneGridFunction">
+<em class="property">class </em><code class="sig-prename descclassname">postcactus.cactus_grid_functions.</code><code class="sig-name descname">BaseOneGridFunction</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">allfiles</span></em>, <em class="sig-param"><span class="n">var_name</span></em><span class="sig-paren">)</span><a class="headerlink" href="#postcactus.cactus_grid_functions.BaseOneGridFunction" title="Permalink to this definition">¶</a></dt>
+<dd><p>Abstract class that implements capabilities to handle grid functions.</p>
+<p>Using the [] notation you can access values with as HierarchicalGridFunction.</p>
+<dl class="py method">
+<dt id="postcactus.cactus_grid_functions.BaseOneGridFunction.available_iterations">
+<em class="property">property </em><code class="sig-name descname">available_iterations</code><a class="headerlink" href="#postcactus.cactus_grid_functions.BaseOneGridFunction.available_iterations" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the available iterations.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="postcactus.cactus_grid_functions.BaseOneGridFunction.available_times">
+<em class="property">property </em><code class="sig-name descname">available_times</code><a class="headerlink" href="#postcactus.cactus_grid_functions.BaseOneGridFunction.available_times" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the available times.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="postcactus.cactus_grid_functions.BaseOneGridFunction.get_restarts">
+<code class="sig-name descname">get_restarts</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#postcactus.cactus_grid_functions.BaseOneGridFunction.get_restarts" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a list of tuples (iteration_min, iteration_max, paths)
+with the minimum iterations and maximum iterations in each file
+associated to this variable. (Restarts and checkpoints)
+paths is a list of all the files with same min_iteration and
+max_iteration (as when we have 3d xyz_file files)</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="postcactus.cactus_grid_functions.BaseOneGridFunction.iteration_at_time">
+<code class="sig-name descname">iteration_at_time</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">time</span></em><span class="sig-paren">)</span><a class="headerlink" href="#postcactus.cactus_grid_functions.BaseOneGridFunction.iteration_at_time" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the iteration that corresponds to the given time.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="postcactus.cactus_grid_functions.BaseOneGridFunction.iterations">
+<em class="property">property </em><code class="sig-name descname">iterations</code><a class="headerlink" href="#postcactus.cactus_grid_functions.BaseOneGridFunction.iterations" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the available iterations.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="postcactus.cactus_grid_functions.BaseOneGridFunction.max_iteration">
+<em class="property">property </em><code class="sig-name descname">max_iteration</code><a class="headerlink" href="#postcactus.cactus_grid_functions.BaseOneGridFunction.max_iteration" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the maximum available iteration.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="postcactus.cactus_grid_functions.BaseOneGridFunction.min_iteration">
+<em class="property">property </em><code class="sig-name descname">min_iteration</code><a class="headerlink" href="#postcactus.cactus_grid_functions.BaseOneGridFunction.min_iteration" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the minimum available iteration.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="postcactus.cactus_grid_functions.BaseOneGridFunction.read_on_grid">
+<code class="sig-name descname">read_on_grid</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">iteration</span></em>, <em class="sig-param"><span class="n">grid</span></em><span class="sig-paren">)</span><a class="headerlink" href="#postcactus.cactus_grid_functions.BaseOneGridFunction.read_on_grid" title="Permalink to this definition">¶</a></dt>
+<dd><p>Read an iteration and resamples the output on the specified grid.</p>
+<p>Warning: this can be computationally expensive!</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>iteration</strong> (<em>time</em>) – requested iteration</p></li>
+<li><p><strong>grid</strong> (<a class="reference internal" href="grid_data_ref.html#postcactus.grid_data.UniformGrid" title="postcactus.grid_data.UniformGrid"><em>UniformGrid</em></a>) – </p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="postcactus.cactus_grid_functions.BaseOneGridFunction.times">
+<em class="property">property </em><code class="sig-name descname">times</code><a class="headerlink" href="#postcactus.cactus_grid_functions.BaseOneGridFunction.times" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the available times.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="postcactus.cactus_grid_functions.BaseOneGridFunction.total_filesize">
+<code class="sig-name descname">total_filesize</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">unit</span><span class="o">=</span><span class="default_value">'MB'</span></em><span class="sig-paren">)</span><a class="headerlink" href="#postcactus.cactus_grid_functions.BaseOneGridFunction.total_filesize" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the total size of the files with this variable.
+Available units B, KB, MB and GB</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt id="postcactus.cactus_grid_functions.GridFunctionsDir">
+<em class="property">class </em><code class="sig-prename descclassname">postcactus.cactus_grid_functions.</code><code class="sig-name descname">GridFunctionsDir</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">sd</span></em><span class="sig-paren">)</span><a class="headerlink" href="#postcactus.cactus_grid_functions.GridFunctionsDir" title="Permalink to this definition">¶</a></dt>
+<dd><p>This class provides access to all grid data.</p>
+<p>This includes 1D-3D data in hdf5 format as well. Data of the required
+dimensionality is read from any format available (hdf5 preferred over
+ascii). If you need lower dimensional data, read the higher dimensional one
+and slice the data.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Variables</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>x</strong> – Access to 1D data along x-axis.</p></li>
+<li><p><strong>y</strong> – Access to 1D data along y-axis.</p></li>
+<li><p><strong>z</strong> – Access to 1D data along z-axis.</p></li>
+<li><p><strong>xy</strong> – Access to 2D data along xy-plane.</p></li>
+<li><p><strong>xz</strong> – Access to 2D data along xz-plane.</p></li>
+<li><p><strong>yz</strong> – Access to 2D data along yz-plane.</p></li>
+<li><p><strong>xyz</strong> – Access to 3D data.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt id="postcactus.cactus_grid_functions.GridFunctionsDir.total_filesize">
+<code class="sig-name descname">total_filesize</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">unit</span><span class="o">=</span><span class="default_value">'MB'</span></em><span class="sig-paren">)</span><a class="headerlink" href="#postcactus.cactus_grid_functions.GridFunctionsDir.total_filesize" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the total size of the files with this variable.
+Available units B, KB, MB and GB</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt id="postcactus.cactus_grid_functions.OneGridFunctionASCII">
+<em class="property">class </em><code class="sig-prename descclassname">postcactus.cactus_grid_functions.</code><code class="sig-name descname">OneGridFunctionASCII</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">allfiles</span></em>, <em class="sig-param"><span class="n">var_name</span></em>, <em class="sig-param"><span class="n">num_ghost</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#postcactus.cactus_grid_functions.OneGridFunctionASCII" title="Permalink to this definition">¶</a></dt>
+<dd><p>Read grid data produced by CarpetASCII.</p>
+</dd></dl>
+
+<dl class="py class">
+<dt id="postcactus.cactus_grid_functions.OneGridFunctionH5">
+<em class="property">class </em><code class="sig-prename descclassname">postcactus.cactus_grid_functions.</code><code class="sig-name descname">OneGridFunctionH5</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">allfiles</span></em>, <em class="sig-param"><span class="n">var_name</span></em><span class="sig-paren">)</span><a class="headerlink" href="#postcactus.cactus_grid_functions.OneGridFunctionH5" title="Permalink to this definition">¶</a></dt>
+<dd><p>Read grid data produced by CarpetHDF5 files.</p>
+<dl class="py method">
+<dt id="postcactus.cactus_grid_functions.OneGridFunctionH5.time_at_iteration">
+<code class="sig-name descname">time_at_iteration</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">iteration</span></em><span class="sig-paren">)</span><a class="headerlink" href="#postcactus.cactus_grid_functions.OneGridFunctionH5.time_at_iteration" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the time corresponding to the provided iteration</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="index.html">
+              <img class="logo" src="_static/logo.png" alt="Logo"/>
+            </a></p>
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="frequencyseries_ref.html"
+                        title="previous chapter">Reference on postcactus.frequencyseries</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="cactus_scalars_ref.html"
+                        title="next chapter">Reference on postcactus.cactus_scalars</a></p>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="cactus_scalars_ref.html" title="Reference on postcactus.cactus_scalars"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="frequencyseries_ref.html" title="Reference on postcactus.frequencyseries"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">PostCactus 3.0.0a9 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">Reference on postcactus.cactus_grid_functions</a></li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2020, Gabriele Bozzola and Wolfgang Kastaun.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 3.3.0.
+    </div>
+  </body>
+</html>

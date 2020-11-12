@@ -1,0 +1,1360 @@
+
+
+<!doctype html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Reference on postcactus.grid_data &#8212; PostCactus 3.0.0a9 documentation</title>
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="_static/bizstyle.css" type="text/css" />
+    
+    <script id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/doctools.js"></script>
+    <script src="_static/language_data.js"></script>
+    <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script type="text/x-mathjax-config">MathJax.Hub.Config({"tex2jax": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true, "ignoreClass": "document", "processClass": "math|output_area"}})</script>
+    <script src="_static/bizstyle.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Reference on postcactus.sensitivity_curves" href="sensitivity_curves_ref.html" />
+    <link rel="prev" title="Reference on postcactus.gw_mismatch" href="gw_mismatch_ref.html" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0" />
+    <!--[if lt IE 9]>
+    <script src="_static/css3-mediaqueries.js"></script>
+    <![endif]-->
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="sensitivity_curves_ref.html" title="Reference on postcactus.sensitivity_curves"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="gw_mismatch_ref.html" title="Reference on postcactus.gw_mismatch"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">PostCactus 3.0.0a9 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">Reference on postcactus.grid_data</a></li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="module-postcactus.grid_data">
+<span id="reference-on-postcactus-grid-data"></span><h1>Reference on postcactus.grid_data<a class="headerlink" href="#module-postcactus.grid_data" title="Permalink to this headline">¶</a></h1>
+<p>The <a class="reference internal" href="#module-postcactus.grid_data" title="postcactus.grid_data"><code class="xref py py-mod docutils literal notranslate"><span class="pre">grid_data</span></code></a> module provides representations of data on
+uniform grids as well as for data on refined grid hirachies. Standard
+arithmetic operations are supported for those data grids, further methods
+to interpolate and resample. The number of dimensions is arbitrary.</p>
+<dl class="simple">
+<dt>The important classes defined here are</dt><dd><ul class="simple">
+<li><p><a class="reference internal" href="#postcactus.grid_data.UniformGrid" title="postcactus.grid_data.UniformGrid"><code class="xref py py-class docutils literal notranslate"><span class="pre">UniformGrid</span></code></a>  represents the geometry of a uniform grid.</p></li>
+<li><p><a class="reference internal" href="#postcactus.grid_data.UniformGridData" title="postcactus.grid_data.UniformGridData"><code class="xref py py-class docutils literal notranslate"><span class="pre">UniformGridData</span></code></a>  represents data on a uniform grid.</p></li>
+<li><p><a class="reference internal" href="#postcactus.grid_data.HierarchicalGridData" title="postcactus.grid_data.HierarchicalGridData"><code class="xref py py-class docutils literal notranslate"><span class="pre">HierarchicalGridData</span></code></a> represents data on a refined grid</p></li>
+</ul>
+</dd>
+</dl>
+<p>hierachy.</p>
+<dl class="py class">
+<dt id="postcactus.grid_data.HierarchicalGridData">
+<em class="property">class </em><code class="sig-prename descclassname">postcactus.grid_data.</code><code class="sig-name descname">HierarchicalGridData</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">uniform_grid_data</span></em><span class="sig-paren">)</span><a class="headerlink" href="#postcactus.grid_data.HierarchicalGridData" title="Permalink to this definition">¶</a></dt>
+<dd><p>Data defined on mesh-refined grids, consisting of one or more regular
+datasets with different grid spacings, i.e. a mesh refinement hierachy. The
+grid spacings should differ by powers of two. Origins of the components
+have to shifted relative to each other only by multiples of the finest
+spacing. All the components are merged together, so there is one
+UniformGridData per refinement level.</p>
+<p>Important: ghost zone information may be discarded!
+TODO: Do not throw away ghost zones at the outer boundary</p>
+<p>Basic arithmetic operations are defined for this class, as well as
+interpolation and resampling. This class can be iterated over to get all
+the regular datasets, ordered by refinement level.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>data</strong> – list of regular datasets</p>
+</dd>
+</dl>
+<dl class="py method">
+<dt id="postcactus.grid_data.HierarchicalGridData.abs_max">
+<code class="sig-name descname">abs_max</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#postcactus.grid_data.HierarchicalGridData.abs_max" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the maximum of the absolute value</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="postcactus.grid_data.HierarchicalGridData.abs_min">
+<code class="sig-name descname">abs_min</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#postcactus.grid_data.HierarchicalGridData.abs_min" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the minimum of the absolute value</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="postcactus.grid_data.HierarchicalGridData.coarsest_dx">
+<em class="property">property </em><code class="sig-name descname">coarsest_dx</code><a class="headerlink" href="#postcactus.grid_data.HierarchicalGridData.coarsest_dx" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the coarsest dx</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="postcactus.grid_data.HierarchicalGridData.coarsest_level">
+<em class="property">property </em><code class="sig-name descname">coarsest_level</code><a class="headerlink" href="#postcactus.grid_data.HierarchicalGridData.coarsest_level" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the coarsest level, if it is a single grid.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Coarsest level</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><a class="reference internal" href="#postcactus.grid_data.UniformGridData" title="postcactus.grid_data.UniformGridData"><code class="xref py py-class docutils literal notranslate"><span class="pre">UniformGridData</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="postcactus.grid_data.HierarchicalGridData.coordinates">
+<code class="sig-name descname">coordinates</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#postcactus.grid_data.HierarchicalGridData.coordinates" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return coordinates as a list of HierarchicalGridData.</p>
+<p>Useful for computations involving coordinates.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>list of <a class="reference internal" href="#postcactus.grid_data.HierarchicalGridData" title="postcactus.grid_data.HierarchicalGridData"><code class="xref py py-class docutils literal notranslate"><span class="pre">HierarchicalGridData</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="postcactus.grid_data.HierarchicalGridData.copy">
+<code class="sig-name descname">copy</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#postcactus.grid_data.HierarchicalGridData.copy" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a deep copy.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Deep copy of the HierarchicalGridData</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><a class="reference internal" href="#postcactus.grid_data.HierarchicalGridData" title="postcactus.grid_data.HierarchicalGridData"><code class="xref py py-class docutils literal notranslate"><span class="pre">HierarchicalGridData</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="postcactus.grid_data.HierarchicalGridData.dx_at_level">
+<code class="sig-name descname">dx_at_level</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">level</span></em><span class="sig-paren">)</span><a class="headerlink" href="#postcactus.grid_data.HierarchicalGridData.dx_at_level" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the grid spacing at the specified refinement level</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="postcactus.grid_data.HierarchicalGridData.evaluate_with_spline">
+<code class="sig-name descname">evaluate_with_spline</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">x</span></em>, <em class="sig-param"><span class="n">ext</span><span class="o">=</span><span class="default_value">2</span></em>, <em class="sig-param"><span class="n">piecewise_constant</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="headerlink" href="#postcactus.grid_data.HierarchicalGridData.evaluate_with_spline" title="Permalink to this definition">¶</a></dt>
+<dd><p>Evaluate the spline on the points x.</p>
+<p>Values outside the interval are set to 0 if ext=1, or a ValueError is
+raised if ext=2.</p>
+<p>This method is meant to be used only if you want to use a different ext
+for a specific call, otherwise, just use __call__.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>x</strong> (<em>1D numpy array of float</em><em>, or </em><a class="reference internal" href="#postcactus.grid_data.UniformGrid" title="postcactus.grid_data.UniformGrid"><em>UniformGrid</em></a>) – Array of x where to evaluate the series or single x</p></li>
+<li><p><strong>ext</strong> (<em>bool</em>) – How to deal values outside the bounaries. Values outside
+the interval are set to 0 if ext=1,
+or an error is raised if ext=2.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Values of the series evaluated on the input x</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>1D numpy array or float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="postcactus.grid_data.HierarchicalGridData.finest_dx">
+<em class="property">property </em><code class="sig-name descname">finest_dx</code><a class="headerlink" href="#postcactus.grid_data.HierarchicalGridData.finest_dx" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the finest dx</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="postcactus.grid_data.HierarchicalGridData.finest_level">
+<em class="property">property </em><code class="sig-name descname">finest_level</code><a class="headerlink" href="#postcactus.grid_data.HierarchicalGridData.finest_level" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the finest level, if it is a single grid.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>finest level</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><a class="reference internal" href="#postcactus.grid_data.UniformGridData" title="postcactus.grid_data.UniformGridData"><code class="xref py py-class docutils literal notranslate"><span class="pre">UniformGridData</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="postcactus.grid_data.HierarchicalGridData.finest_level_component_at_point">
+<code class="sig-name descname">finest_level_component_at_point</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">coordinate</span></em><span class="sig-paren">)</span><a class="headerlink" href="#postcactus.grid_data.HierarchicalGridData.finest_level_component_at_point" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the number and the component index of the most
+refined level that contains the given coordinate.</p>
+<p>If the grid has multiple patches, the component index is
+returned, otherwise, only the finest level.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>coordiante</strong> – point</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Most refined level (and component) that contains the coordinate.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>int if there’s only one component, or tuple of ints if there are</p>
+</dd>
+</dl>
+<p>multiple components.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="postcactus.grid_data.HierarchicalGridData.first_component">
+<em class="property">property </em><code class="sig-name descname">first_component</code><a class="headerlink" href="#postcactus.grid_data.HierarchicalGridData.first_component" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the first component of the coarsest refinement level</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>First component of coarsest level</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><cite>:py:class:~UniformGridData</cite></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="postcactus.grid_data.HierarchicalGridData.gradient">
+<code class="sig-name descname">gradient</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">order</span><span class="o">=</span><span class="default_value">1</span></em><span class="sig-paren">)</span><a class="headerlink" href="#postcactus.grid_data.HierarchicalGridData.gradient" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a list HierarchicalGridData that are the numerical
+order-differentiation of the present grid_data along all the
+directions. (order = number of derivatives, ie order=2 is second
+derivative)</p>
+<p>The derivative is calulated as centered differencing in the interior
+and one-sided derivatives at the boundaries. Higher orders are computed
+applying the same rule recursively.</p>
+<p>The output has the same shape of self.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>order</strong> (<em>int</em>) – Order of derivative (e.g. 2 = second derivative)</p></li>
+<li><p><strong>direction</strong> (<em>int</em>) – Direction of the partial derivative</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>list of HierarchicalGridData with partial derivative along</p>
+</dd>
+</dl>
+<p>the directions
+:rtype:    list of <a class="reference internal" href="#postcactus.grid_data.HierarchicalGridData" title="postcactus.grid_data.HierarchicalGridData"><code class="xref py py-class docutils literal notranslate"><span class="pre">HierarchicalGridData</span></code></a></p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="postcactus.grid_data.HierarchicalGridData.iter_from_finest">
+<code class="sig-name descname">iter_from_finest</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#postcactus.grid_data.HierarchicalGridData.iter_from_finest" title="Permalink to this definition">¶</a></dt>
+<dd><p>Supports iterating over the regular elements, sorted by refinement level.
+This can yield a UniformGridData or a list of UniformGridData when it
+is not possible to merge the grids.</p>
+<p>From the finest to the coarsest.</p>
+<p>Use this when you know that the data you are working with have single
+grids or grids that can be merged.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="postcactus.grid_data.HierarchicalGridData.iteration">
+<em class="property">property </em><code class="sig-name descname">iteration</code><a class="headerlink" href="#postcactus.grid_data.HierarchicalGridData.iteration" title="Permalink to this definition">¶</a></dt>
+<dd><p>The iteration of the coarsest refinement level</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="postcactus.grid_data.HierarchicalGridData.merge_refinement_levels">
+<code class="sig-name descname">merge_refinement_levels</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">resample</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="headerlink" href="#postcactus.grid_data.HierarchicalGridData.merge_refinement_levels" title="Permalink to this definition">¶</a></dt>
+<dd><p>Combine all the available data and resample it on a provided
+UniformGrid with resolution of the finest refinement level.</p>
+<p>Optionally data from coarser refinement levels is resampled too (with a
+multilinear resampling)</p>
+<p>This can be a very expensive operation!</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="postcactus.grid_data.HierarchicalGridData.num_coarsest_level">
+<em class="property">property </em><code class="sig-name descname">num_coarsest_level</code><a class="headerlink" href="#postcactus.grid_data.HierarchicalGridData.num_coarsest_level" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the number of the coarsest refinement level.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>index of the coarsest level</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="postcactus.grid_data.HierarchicalGridData.num_finest_level">
+<em class="property">property </em><code class="sig-name descname">num_finest_level</code><a class="headerlink" href="#postcactus.grid_data.HierarchicalGridData.num_finest_level" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the number of the finest refinement level.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>index of the finest level</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="postcactus.grid_data.HierarchicalGridData.partial_derivated">
+<code class="sig-name descname">partial_derivated</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">direction</span></em>, <em class="sig-param"><span class="n">order</span><span class="o">=</span><span class="default_value">1</span></em><span class="sig-paren">)</span><a class="headerlink" href="#postcactus.grid_data.HierarchicalGridData.partial_derivated" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a HierarchicalGridData that is the numerical order-differentiation of
+the present grid_data along a given direction. (order = number of
+derivatives, ie order=2 is second derivative)</p>
+<p>The derivative is calulated as centered differencing in the interior
+and one-sided derivatives at the boundaries. Higher orders are computed
+applying the same rule recursively.</p>
+<p>The output has the same shape of self.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>order</strong> (<em>int</em>) – Order of derivative (e.g. 2 = second derivative)</p></li>
+<li><p><strong>direction</strong> (<em>int</em>) – Direction of the partial derivative</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>New HierarchicalGridData with derivative</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="#postcactus.grid_data.HierarchicalGridData" title="postcactus.grid_data.HierarchicalGridData"><code class="xref py py-class docutils literal notranslate"><span class="pre">HierarchicalGridData</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="postcactus.grid_data.HierarchicalGridData.partial_derive">
+<code class="sig-name descname">partial_derive</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">direction</span></em>, <em class="sig-param"><span class="n">order</span><span class="o">=</span><span class="default_value">1</span></em><span class="sig-paren">)</span><a class="headerlink" href="#postcactus.grid_data.HierarchicalGridData.partial_derive" title="Permalink to this definition">¶</a></dt>
+<dd><p>Apply a numerical differentiatin along the specified direction.</p>
+<p>The derivative is calulated as centered differencing in the interior
+and one-sided derivatives at the boundaries. Higher orders are computed
+applying the same rule recursively.</p>
+<p>The output has the same shape of self.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>order</strong> (<em>int</em>) – Order of derivative (e.g. 2 = second derivative)</p></li>
+<li><p><strong>direction</strong> (<em>int</em>) – Direction of the partial derivative</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="postcactus.grid_data.HierarchicalGridData.shape">
+<em class="property">property </em><code class="sig-name descname">shape</code><a class="headerlink" href="#postcactus.grid_data.HierarchicalGridData.shape" title="Permalink to this definition">¶</a></dt>
+<dd><p>Num components per each level.</p>
+<p>Eg, if data has three levels, with 1 component in the first, 2 in the second,
+and three in the fifth, shape will be {1: 1, 2: 2, 5: 3}</p>
+<p>shape is useful for quick high level comparison between two HierachicalGridData</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>dictionary</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="postcactus.grid_data.HierarchicalGridData.time">
+<em class="property">property </em><code class="sig-name descname">time</code><a class="headerlink" href="#postcactus.grid_data.HierarchicalGridData.time" title="Permalink to this definition">¶</a></dt>
+<dd><p>The time of the coarsest refinement level</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="postcactus.grid_data.HierarchicalGridData.to_UniformGridData">
+<code class="sig-name descname">to_UniformGridData</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">grid</span></em>, <em class="sig-param"><span class="n">resample</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="headerlink" href="#postcactus.grid_data.HierarchicalGridData.to_UniformGridData" title="Permalink to this definition">¶</a></dt>
+<dd><p>Combine the refinement levels into a UniformGridData.
+Optionally resample the data with a multilinear resampling.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt id="postcactus.grid_data.UniformGrid">
+<em class="property">class </em><code class="sig-prename descclassname">postcactus.grid_data.</code><code class="sig-name descname">UniformGrid</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">shape</span></em>, <em class="sig-param"><span class="n">x0</span></em>, <em class="sig-param"><span class="n">x1</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">dx</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">ref_level</span><span class="o">=</span><span class="default_value">- 1</span></em>, <em class="sig-param"><span class="n">component</span><span class="o">=</span><span class="default_value">- 1</span></em>, <em class="sig-param"><span class="n">num_ghost</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">time</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">iteration</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#postcactus.grid_data.UniformGrid" title="Permalink to this definition">¶</a></dt>
+<dd><p>Describes the geometry of a regular rectangular dataset, as well as
+information needed if part of refined grid hierachy, namely component
+number and refinement level. In practice, this a fixed refinement level.</p>
+<p>Also stores the number of ghost zones, which is however not used anywhere
+in this class.</p>
+<p>This is a standard Cartesian grid that we will describe with the language
+of computer graphics. To make things clear, let’s consider a 2D grid (see
+schematics below). We call the lower left corner “origin” or <cite>x0</cite>. We call
+the top right corner “x1”. The grid is cell-centered (see Fig 2).</p>
+<p>Fig 1</p>
+<blockquote>
+<div><p>o———x1
+|          |
+|          |
+|          |
+|          |</p>
+</div></blockquote>
+<p>x0———-o</p>
+<p>Fig 2, the point sits in the center of a cell.</p>
+<blockquote>
+<div><div class="line-block">
+<div class="line-block">
+<div class="line"><a href="#id1"><span class="problematic" id="id2">|</span></a></div>
+</div>
+<div class="line">x0  |</div>
+<div class="line-block">
+<div class="line"><a href="#id3"><span class="problematic" id="id4">|</span></a></div>
+</div>
+</div>
+</div></blockquote>
+<p>The concept of shape is the same as NumPy shape: it’s the number of points
+in each dimention. dx is the spacing (dx, dy, dz, …). To fully
+describe a grid, one needs the origin, the shape, and x1 or dx.</p>
+<p>This is the same convention that Carpet has.</p>
+<p>This class is supposed to be immutable.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>shape</strong> (<em>1d numpy arrary</em><em> or </em><em>list of int.</em>) – Number of points in each dimension.</p></li>
+<li><p><strong>x0</strong> (<em>1d numpy array</em><em> or </em><em>list of float.</em>) – Position of cell center with lowest coordinate.</p></li>
+<li><p><strong>dx</strong> (<em>1d numpy array</em><em> or </em><em>list of float.</em>) – If not None, specifies grid spacing, else grid
+spacing is computed from x0, x1, and shape.</p></li>
+<li><p><strong>x1</strong> (<em>1d numpy array</em><em> or </em><em>list of float.</em>) – If grid spacing is None, this specifies the
+position of the cell center with largest
+coordinates.</p></li>
+<li><p><strong>ref_level</strong> (<em>int</em>) – Refinement level if this belongs to a hierachy,
+else -1.</p></li>
+<li><p><strong>component</strong> (<em>int</em>) – Component number if this belongs to a hierachy,
+else -1.</p></li>
+<li><p><strong>num_ghost</strong> (<em>1d numpy arrary</em><em> or </em><em>list of int.</em>) – Number of ghost zones (default=0)</p></li>
+<li><p><strong>time</strong> (<em>float</em><em> or </em><em>None</em>) – Time if that makes sense, else None.</p></li>
+<li><p><strong>iteration</strong> (<em>float</em><em> or </em><em>None</em>) – Iteration if that makes sense, else None.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt id="postcactus.grid_data.UniformGrid.contains">
+<code class="sig-name descname">contains</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">point</span></em><span class="sig-paren">)</span><a class="headerlink" href="#postcactus.grid_data.UniformGrid.contains" title="Permalink to this definition">¶</a></dt>
+<dd><p>Test if a coordinate is contained in the grid. The size of the
+grid cells is taken into account, resulting in a cube larger by
+dx/2 on each side compared to the one given by x0, x1.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>point</strong> (<em>1d numpy array</em><em> or </em><em>list of float.</em>) – Coordinate to test.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>If point is contained.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="postcactus.grid_data.UniformGrid.coordinates">
+<code class="sig-name descname">coordinates</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">as_meshgrid</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">as_same_shape</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="headerlink" href="#postcactus.grid_data.UniformGrid.coordinates" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return coordinates of the grid points.</p>
+<p>If as_meshgrid is True, the coordinates are returned as NumPy meshgrid.
+Otherwise, return the coordinates of the grid points as
+1D arrays (schematically, [array for x coordinates, array for y
+coordinates, …]).</p>
+<p>If True as_same_shape is True return the coordinates as an array
+with the same shape of self and with values the coordinates.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>as_meshgrid</strong> (<em>bool</em>) – If True, return the coordinates as meshgrid.</p></li>
+<li><p><strong>as_same_shape</strong> – If True, return the coordinates as a list</p></li>
+</ul>
+</dd>
+</dl>
+<p>or coordinates with the same shape of self and with values of a given
+coordinate. For instance, if the self.num_dimension there will be
+three lists with shape = self.shape.
+:type as_same_shape: bool</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>A list of 1d arrays of coordinates</p>
+</dd>
+</dl>
+<p>along the different axes.
+:rtype:   list of numpy arrays with the same shape as grid</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="postcactus.grid_data.UniformGrid.coordinates_1d">
+<em class="property">property </em><code class="sig-name descname">coordinates_1d</code><a class="headerlink" href="#postcactus.grid_data.UniformGrid.coordinates_1d" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return coordinates of the grid points.</p>
+<p>The return value is a list with the coordinates along each direction.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="postcactus.grid_data.UniformGrid.coordinates_to_indices">
+<code class="sig-name descname">coordinates_to_indices</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">coordinates</span></em><span class="sig-paren">)</span><a class="headerlink" href="#postcactus.grid_data.UniformGrid.coordinates_to_indices" title="Permalink to this definition">¶</a></dt>
+<dd><p>Find the indices corresponding to the
+point nearest to the given coordinates.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>coordinates</strong> (<em>1d numpy array</em><em> or </em><em>list of float</em>) – Coordinates.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>grid indidces of nearest point.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>array of int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="postcactus.grid_data.UniformGrid.copy">
+<code class="sig-name descname">copy</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#postcactus.grid_data.UniformGrid.copy" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a deep copy.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Deep copy of the UniformGrid</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><a class="reference internal" href="#postcactus.grid_data.UniformGrid" title="postcactus.grid_data.UniformGrid"><code class="xref py py-class docutils literal notranslate"><span class="pre">UniformGrid</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="postcactus.grid_data.UniformGrid.dv">
+<em class="property">property </em><code class="sig-name descname">dv</code><a class="headerlink" href="#postcactus.grid_data.UniformGrid.dv" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Volume of a grid cell.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="postcactus.grid_data.UniformGrid.extended_dimensions">
+<em class="property">property </em><code class="sig-name descname">extended_dimensions</code><a class="headerlink" href="#postcactus.grid_data.UniformGrid.extended_dimensions" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return an array of bools with whether a dimension has more than one
+point or not.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="postcactus.grid_data.UniformGrid.flat_dimensions_removed">
+<code class="sig-name descname">flat_dimensions_removed</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#postcactus.grid_data.UniformGrid.flat_dimensions_removed" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a new UniformGrid with dimensions which are only one gridpoint across
+removed.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="postcactus.grid_data.UniformGrid.ghost_zones_removed">
+<code class="sig-name descname">ghost_zones_removed</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#postcactus.grid_data.UniformGrid.ghost_zones_removed" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a new UniformGrid with ghostzones removed</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="postcactus.grid_data.UniformGrid.highest_vertex">
+<em class="property">property </em><code class="sig-name descname">highest_vertex</code><a class="headerlink" href="#postcactus.grid_data.UniformGrid.highest_vertex" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the location of the highest cell vertex (considering that
+the grid is cell centered).</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="postcactus.grid_data.UniformGrid.indices_to_coordinates">
+<code class="sig-name descname">indices_to_coordinates</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">indices</span></em><span class="sig-paren">)</span><a class="headerlink" href="#postcactus.grid_data.UniformGrid.indices_to_coordinates" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compute coordinate corresponding to one or more grid points.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>indices</strong> (<em>1d array</em><em> or </em><em>list of int.</em>) – Grid indices</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>The coordinate of grid points</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>1d numpy array of float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="postcactus.grid_data.UniformGrid.lowest_vertex">
+<em class="property">property </em><code class="sig-name descname">lowest_vertex</code><a class="headerlink" href="#postcactus.grid_data.UniformGrid.lowest_vertex" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the location of the lowest cell vertex (considering that
+the grid is cell centered).</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="postcactus.grid_data.UniformGrid.num_extended_dimensions">
+<em class="property">property </em><code class="sig-name descname">num_extended_dimensions</code><a class="headerlink" href="#postcactus.grid_data.UniformGrid.num_extended_dimensions" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>The number of dimensions with size larger than one gridpoint.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="postcactus.grid_data.UniformGrid.shifted">
+<code class="sig-name descname">shifted</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">shift</span></em><span class="sig-paren">)</span><a class="headerlink" href="#postcactus.grid_data.UniformGrid.shifted" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a new UniformGrid with coordinates shifted by some amount</p>
+<p>x -&gt; x + shift.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="postcactus.grid_data.UniformGrid.volume">
+<em class="property">property </em><code class="sig-name descname">volume</code><a class="headerlink" href="#postcactus.grid_data.UniformGrid.volume" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Volume of the whole grid.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt id="postcactus.grid_data.UniformGridData">
+<em class="property">class </em><code class="sig-prename descclassname">postcactus.grid_data.</code><code class="sig-name descname">UniformGridData</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">grid</span></em>, <em class="sig-param"><span class="n">data</span></em><span class="sig-paren">)</span><a class="headerlink" href="#postcactus.grid_data.UniformGridData" title="Permalink to this definition">¶</a></dt>
+<dd><p>Represents a rectangular data grid with coordinates, supporting
+common arithmetic operations.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Variables</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>grid</strong> – Uniform grid over which the data is defined.</p></li>
+<li><p><strong>data</strong> – The actual data (numpy array).</p></li>
+</ul>
+</dd>
+<dt class="field-even">Parameters</dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>grid</strong> (<a class="reference internal" href="#postcactus.grid_data.UniformGrid" title="postcactus.grid_data.UniformGrid"><code class="xref py py-class docutils literal notranslate"><span class="pre">UniformGrid</span></code></a>) – Uniform grid over which the data is defined</p></li>
+<li><p><strong>data</strong> (<em>A numpy array.</em>) – The data.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt id="postcactus.grid_data.UniformGridData.abs_max">
+<code class="sig-name descname">abs_max</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#postcactus.grid_data.UniformGridData.abs_max" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the maximum of the absolute value</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="postcactus.grid_data.UniformGridData.abs_min">
+<code class="sig-name descname">abs_min</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#postcactus.grid_data.UniformGridData.abs_min" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the minimum of the absolute value</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="postcactus.grid_data.UniformGridData.average">
+<code class="sig-name descname">average</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#postcactus.grid_data.UniformGridData.average" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compute the mean of the data over the whole volume of the grid.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Arithmetic mean of the data.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>float (or complex if data is complex)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="postcactus.grid_data.UniformGridData.coordinates">
+<code class="sig-name descname">coordinates</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#postcactus.grid_data.UniformGridData.coordinates" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return coordinates of the grid points as list of UniformGridData.</p>
+<p>This can be used for computations.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="postcactus.grid_data.UniformGridData.coordinates_from_grid">
+<code class="sig-name descname">coordinates_from_grid</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">as_meshgrid</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">as_same_shape</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="headerlink" href="#postcactus.grid_data.UniformGridData.coordinates_from_grid" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return coordinates of the grid points.</p>
+<p>If as_meshgrid is True, the coordinates are returned as NumPy meshgrid.
+Otherwise, return the coordinates of the grid points as
+1D arrays (schematically, [array for x coordinates, array for y
+coordinates, …]).</p>
+<p>If True as_same_shape is True return the coordinates as an array
+with the same shape of self and with values the coordinates.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>as_meshgrid</strong> (<em>bool</em>) – If True, return the coordinates as meshgrid.</p></li>
+<li><p><strong>as_same_shape</strong> – If True, return the coordinates as an array</p></li>
+</ul>
+</dd>
+</dl>
+<p>with the same shape of self and with values the coordinates.
+:type as_same_shape: bool</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>A list of 1d arrays of coordinates</p>
+</dd>
+</dl>
+<p>along the different axes.
+:rtype:   list of numpy arrays with the same shape as grid</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="postcactus.grid_data.UniformGridData.coordinates_meshgrid">
+<code class="sig-name descname">coordinates_meshgrid</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#postcactus.grid_data.UniformGridData.coordinates_meshgrid" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return coordinates of the grid points as numpy meshgrid.
+This is useful for plotting</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="postcactus.grid_data.UniformGridData.copy">
+<code class="sig-name descname">copy</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#postcactus.grid_data.UniformGridData.copy" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a deep of self</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="postcactus.grid_data.UniformGridData.dx_change">
+<code class="sig-name descname">dx_change</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">new_dx</span></em>, <em class="sig-param"><span class="n">piecewise_constant</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="headerlink" href="#postcactus.grid_data.UniformGridData.dx_change" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a new UniformGridData with the same grid extent, but with a new
+spacing. This effectively up-samples or down-samples the grid.</p>
+<p>Missing data is obtained with splines.</p>
+<p>new_dx has to be an integer multiple of the current dx (or vice versa).</p>
+<p>If piecewise_constant=True, the missing information is obtained with
+from the nearest neighbors.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="postcactus.grid_data.UniformGridData.dx_changed">
+<code class="sig-name descname">dx_changed</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">new_dx</span></em>, <em class="sig-param"><span class="n">piecewise_constant</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="headerlink" href="#postcactus.grid_data.UniformGridData.dx_changed" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a new UniformGridData with the same grid extent, but with a new
+spacing. This effectively up-samples or down-samples the grid.</p>
+<p>Missing data is obtained with splines.</p>
+<p>new_dx has to be an integer multiple of the current dx (or vice versa).</p>
+<p>If piecewise_constant=True, the missing information is obtained with
+from the nearest neighbors.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="postcactus.grid_data.UniformGridData.evaluate_with_spline">
+<code class="sig-name descname">evaluate_with_spline</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">x</span></em>, <em class="sig-param"><span class="n">ext</span><span class="o">=</span><span class="default_value">2</span></em>, <em class="sig-param"><span class="n">piecewise_constant</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="headerlink" href="#postcactus.grid_data.UniformGridData.evaluate_with_spline" title="Permalink to this definition">¶</a></dt>
+<dd><p>Evaluate the spline on the points x.</p>
+<p>Values outside the interval are set to 0 if ext=1, or a ValueError is
+raised if ext=2.</p>
+<p>This method is meant to be used only if you want to use a different ext
+for a specific call, otherwise, just use __call__.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>x</strong> (<em>1D numpy array of float</em><em>, or </em><a class="reference internal" href="#postcactus.grid_data.UniformGrid" title="postcactus.grid_data.UniformGrid"><em>UniformGrid</em></a>) – Array of x where to evaluate the series or single x</p></li>
+<li><p><strong>ext</strong> (<em>bool</em>) – How to deal values outside the bounaries. Values outside
+the interval are set to 0 if ext=1,
+or an error is raised if ext=2.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Values of the series evaluated on the input x</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>1D numpy array or float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="postcactus.grid_data.UniformGridData.extended_dimensions">
+<em class="property">property </em><code class="sig-name descname">extended_dimensions</code><a class="headerlink" href="#postcactus.grid_data.UniformGridData.extended_dimensions" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return an array of bools with whether a dimension has more than one
+point or not.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="postcactus.grid_data.UniformGridData.flat_dimensions_remove">
+<code class="sig-name descname">flat_dimensions_remove</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#postcactus.grid_data.UniformGridData.flat_dimensions_remove" title="Permalink to this definition">¶</a></dt>
+<dd><p>Remove dimensions which are only one gridpoint large.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="postcactus.grid_data.UniformGridData.flat_dimensions_removed">
+<code class="sig-name descname">flat_dimensions_removed</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#postcactus.grid_data.UniformGridData.flat_dimensions_removed" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a new UniformGridData with dimensions of one grid
+point removed.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>New UniformGridData without flat dimensions.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><a class="reference internal" href="#postcactus.grid_data.UniformGridData" title="postcactus.grid_data.UniformGridData"><code class="xref py py-class docutils literal notranslate"><span class="pre">UniformGridData</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="postcactus.grid_data.UniformGridData.fourier_transform">
+<code class="sig-name descname">fourier_transform</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#postcactus.grid_data.UniformGridData.fourier_transform" title="Permalink to this definition">¶</a></dt>
+<dd><p>Perform the multi-dimensional Fourier transform on the data.</p>
+<p>We follow Numpy’s conventions, with the exception that we normalize
+the amplitude with dx.</p>
+<p>If the signal is complex, we also shift the negative components to be in
+the negative part of the signal.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Fourier transform</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><a class="reference internal" href="#postcactus.grid_data.UniformGridData" title="postcactus.grid_data.UniformGridData"><code class="xref py py-class docutils literal notranslate"><span class="pre">UniformGridData</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="postcactus.grid_data.UniformGridData.from_grid_structure">
+<em class="property">classmethod </em><code class="sig-name descname">from_grid_structure</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">data</span></em>, <em class="sig-param"><span class="n">x0</span></em>, <em class="sig-param"><span class="n">x1</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">dx</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">ref_level</span><span class="o">=</span><span class="default_value">- 1</span></em>, <em class="sig-param"><span class="n">component</span><span class="o">=</span><span class="default_value">- 1</span></em>, <em class="sig-param"><span class="n">num_ghost</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">time</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">iteration</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#postcactus.grid_data.UniformGridData.from_grid_structure" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>x0</strong> (<em>1d numpy array</em><em> or </em><em>list of float.</em>) – Position of cell center with lowest coordinate.</p></li>
+<li><p><strong>dx</strong> (<em>1d numpy array</em><em> or </em><em>list of float.</em>) – If not None, specifies grid spacing, else grid
+spacing is computed from x0, x1, and shape.</p></li>
+<li><p><strong>data</strong> (<em>A numpy array.</em>) – The data.</p></li>
+<li><p><strong>ref_level</strong> (<em>int</em>) – Refinement level if this belongs to a hierachy,
+else -1.</p></li>
+<li><p><strong>component</strong> (<em>int</em>) – Component number if this belongs to a hierachy,
+else -1.</p></li>
+<li><p><strong>num_ghost</strong> (<em>1d numpy arrary</em><em> or </em><em>list of int.</em>) – Number of ghost zones (default=0)</p></li>
+<li><p><strong>time</strong> (<em>float</em><em> or </em><em>None</em>) – Time if that makes sense, else None.</p></li>
+<li><p><strong>iteration</strong> (<em>float</em><em> or </em><em>None</em>) – Iteration if that makes sense, else None.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="postcactus.grid_data.UniformGridData.ghost_zones_remove">
+<code class="sig-name descname">ghost_zones_remove</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#postcactus.grid_data.UniformGridData.ghost_zones_remove" title="Permalink to this definition">¶</a></dt>
+<dd><p>Remove ghost zones</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="postcactus.grid_data.UniformGridData.ghost_zones_removed">
+<code class="sig-name descname">ghost_zones_removed</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#postcactus.grid_data.UniformGridData.ghost_zones_removed" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a new UniformGridData witho all the ghost zones removed.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>New UniformGridData without ghostzones.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><a class="reference internal" href="#postcactus.grid_data.UniformGridData" title="postcactus.grid_data.UniformGridData"><code class="xref py py-class docutils literal notranslate"><span class="pre">UniformGridData</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="postcactus.grid_data.UniformGridData.gradient">
+<code class="sig-name descname">gradient</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">order</span><span class="o">=</span><span class="default_value">1</span></em><span class="sig-paren">)</span><a class="headerlink" href="#postcactus.grid_data.UniformGridData.gradient" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a list UniformGriDatad that are the numerical
+order-differentiation of the present grid_data along all the
+directions. (order = number of derivatives, ie order=2 is second
+derivative)</p>
+<p>The derivative is calulated as centered differencing in the interior
+and one-sided derivatives at the boundaries. Higher orders are computed
+applying the same rule recursively.</p>
+<p>The output has the same shape of self.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>order</strong> (<em>int</em>) – Order of derivative (e.g. 2 = second derivative)</p></li>
+<li><p><strong>direction</strong> (<em>int</em>) – Direction of the partial derivative</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>list of UniformGridData with partial derivative along the</p>
+</dd>
+</dl>
+<p>directions
+:rtype:    list of <a class="reference internal" href="#postcactus.grid_data.UniformGridData" title="postcactus.grid_data.UniformGridData"><code class="xref py py-class docutils literal notranslate"><span class="pre">UniformGridData</span></code></a></p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="postcactus.grid_data.UniformGridData.histogram">
+<code class="sig-name descname">histogram</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">weights</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">min_value</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">max_value</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">num_bins</span><span class="o">=</span><span class="default_value">400</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="headerlink" href="#postcactus.grid_data.UniformGridData.histogram" title="Permalink to this definition">¶</a></dt>
+<dd><p>1D Histogram of the data.
+:param weights:    the weight for each cell. Default is one.
+:type weights:     RegData or numpy array of same shape or None.
+:param min_value: Lower bound of data to consider. Default is data range.
+:type min_value: float or None
+:param max_value: Upper bound of data to consider. Default is data range.
+:type max_value: float or None
+:param num_bins:      Number of bins to create.
+:type num_bins:       integer &gt; 1</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>the positions of the data bins and the distribution.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>tuple of two 1D numpy arrays.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="postcactus.grid_data.UniformGridData.integral">
+<code class="sig-name descname">integral</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#postcactus.grid_data.UniformGridData.integral" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compute the integral over the whole volume of the grid.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>The integral computed as volume-weighted sum.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>float (or complex if data is complex)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="postcactus.grid_data.UniformGridData.is_complex">
+<code class="sig-name descname">is_complex</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#postcactus.grid_data.UniformGridData.is_complex" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return whether the data is complex.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>True if the data is complex, false if it is not.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="postcactus.grid_data.UniformGridData.mean">
+<code class="sig-name descname">mean</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#postcactus.grid_data.UniformGridData.mean" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compute the mean of the data over the whole volume of the grid.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Arithmetic mean of the data.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>float (or complex if data is complex)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="postcactus.grid_data.UniformGridData.norm1">
+<code class="sig-name descname">norm1</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#postcactus.grid_data.UniformGridData.norm1" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compute the norm over the whole volume of the grid.</p>
+<p>|u|_1 = sum |u| dv</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>The norm2 computed as volume-weighted sum.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>float (or complex if data is complex)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="postcactus.grid_data.UniformGridData.norm2">
+<code class="sig-name descname">norm2</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#postcactus.grid_data.UniformGridData.norm2" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compute the norm over the whole volume of the grid.</p>
+<p>|u|_2 = (sum |u|^2 dv)^1/2</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>The norm2 computed as volume-weighted sum.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>float (or complex if data is complex)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="postcactus.grid_data.UniformGridData.norm_p">
+<code class="sig-name descname">norm_p</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">order</span></em><span class="sig-paren">)</span><a class="headerlink" href="#postcactus.grid_data.UniformGridData.norm_p" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compute the norm over the whole volume of the grid.</p>
+<p>|u|_p = (sum |u|^p dv)^1/p</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>The norm2 computed as volume-weighted sum.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>float (or complex if data is complex)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="postcactus.grid_data.UniformGridData.num_dimensions">
+<em class="property">property </em><code class="sig-name descname">num_dimensions</code><a class="headerlink" href="#postcactus.grid_data.UniformGridData.num_dimensions" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the number of dimensions.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="postcactus.grid_data.UniformGridData.num_extended_dimensions">
+<em class="property">property </em><code class="sig-name descname">num_extended_dimensions</code><a class="headerlink" href="#postcactus.grid_data.UniformGridData.num_extended_dimensions" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the number of dimensions with more than one grid point.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="postcactus.grid_data.UniformGridData.partial_derive">
+<code class="sig-name descname">partial_derive</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">dimension</span></em>, <em class="sig-param"><span class="n">order</span><span class="o">=</span><span class="default_value">1</span></em><span class="sig-paren">)</span><a class="headerlink" href="#postcactus.grid_data.UniformGridData.partial_derive" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a UniformGriDatad that is the numerical order-differentiation of the
+present grid_data along a given direction. (order = number of
+derivatives, ie order=2 is second derivative)</p>
+<p>The derivative is calulated as centered differencing in the interior
+and one-sided derivatives at the boundaries. Higher orders are computed
+applying the same rule recursively.</p>
+<p>The output has the same shape of self.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>order</strong> (<em>int</em>) – Order of derivative (e.g. 2 = second derivative)</p></li>
+<li><p><strong>direction</strong> (<em>int</em>) – Direction of the partial derivative</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>New UniformGridData with derivative</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="#postcactus.grid_data.UniformGridData" title="postcactus.grid_data.UniformGridData"><code class="xref py py-class docutils literal notranslate"><span class="pre">UniformGridData</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="postcactus.grid_data.UniformGridData.partial_derived">
+<code class="sig-name descname">partial_derived</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">direction</span></em>, <em class="sig-param"><span class="n">order</span><span class="o">=</span><span class="default_value">1</span></em><span class="sig-paren">)</span><a class="headerlink" href="#postcactus.grid_data.UniformGridData.partial_derived" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a UniformGridData that is the numerical order-differentiation of the
+present grid_data along a given direction. (order = number of
+derivatives, ie order=2 is second derivative)</p>
+<p>The derivative is calulated as centered differencing in the interior
+and one-sided derivatives at the boundaries. Higher orders are computed
+applying the same rule recursively.</p>
+<p>The output has the same shape of self.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>order</strong> (<em>int</em>) – Order of derivative (e.g. 2 = second derivative)</p></li>
+<li><p><strong>direction</strong> (<em>int</em>) – Direction of the partial derivative</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>New UniformGridData with derivative</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="#postcactus.grid_data.UniformGridData" title="postcactus.grid_data.UniformGridData"><code class="xref py py-class docutils literal notranslate"><span class="pre">UniformGridData</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="postcactus.grid_data.UniformGridData.percentiles">
+<code class="sig-name descname">percentiles</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">fractions</span></em>, <em class="sig-param"><span class="n">weights</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">relative</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">min_value</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">max_value</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">num_bins</span><span class="o">=</span><span class="default_value">400</span></em><span class="sig-paren">)</span><a class="headerlink" href="#postcactus.grid_data.UniformGridData.percentiles" title="Permalink to this definition">¶</a></dt>
+<dd><p>Find values for which a given fraction(s) of the data is smaller.</p>
+<p>Optionally, the cells can have an optional weight, and absolute counts
+can be used insted of fraction.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>fractions</strong> (<em>list</em><em> or </em><em>array of floats</em>) – list of fraction/absolute values</p></li>
+<li><p><strong>weights</strong> (<a class="reference internal" href="#postcactus.grid_data.UniformGridData" title="postcactus.grid_data.UniformGridData"><em>UniformGridData</em></a><em> or </em><em>numpy array of same shape</em><em> or </em><em>None.</em>) – the weight for each cell. Default is one.</p></li>
+<li><p><strong>relative</strong> (<em>bool</em>) – whether fractions refer to relative or absolute count.</p></li>
+<li><p><strong>min_value</strong> (<em>float</em><em> or </em><em>None</em>) – Lower bound of data to consider. Default is data range.</p></li>
+<li><p><strong>max_value</strong> (<em>float</em><em> or </em><em>None</em>) – Upper bound of data to consider. Default is data range.</p></li>
+<li><p><strong>num_bins</strong> (<em>integer &gt; 1</em>) – Number of bins to create.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>data values corresponding to the given fractions.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>1D numpy array</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="postcactus.grid_data.UniformGridData.resampled">
+<code class="sig-name descname">resampled</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">new_grid</span></em>, <em class="sig-param"><span class="n">ext</span><span class="o">=</span><span class="default_value">2</span></em>, <em class="sig-param"><span class="n">piecewise_constant</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="headerlink" href="#postcactus.grid_data.UniformGridData.resampled" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a new UniformGridData resampled from this to new_grid.</p>
+<p>You can specify the details of the spline with the method make_spline.</p>
+<p>If you want to resample without using the spline, and you want a nearest
+neighbor resampling, pass the keyword piecewise_constant=True.
+This may be a good choice for data with large discontinuities, where the
+splines are ineffective.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>new_grid</strong> (<em>1D numpy array</em><em> or </em><em>list of float</em>) – New independent variable</p></li>
+<li><p><strong>ext</strong> (<em>1 for returning zero</em><em>, </em><em>2 for ValueError</em><em>,</em>) – How to handle points outside the data interval</p></li>
+<li><p><strong>piecewise_constant</strong> (<em>bool</em>) – Do not use splines, use the nearest neighbors.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Resampled series.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="#postcactus.grid_data.UniformGridData" title="postcactus.grid_data.UniformGridData"><code class="xref py py-class docutils literal notranslate"><span class="pre">UniformGridData</span></code></a> or derived class</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="postcactus.grid_data.UniformGridData.save">
+<code class="sig-name descname">save</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">file_name</span></em>, <em class="sig-param"><span class="o">*</span><span class="n">args</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="headerlink" href="#postcactus.grid_data.UniformGridData.save" title="Permalink to this definition">¶</a></dt>
+<dd><p>Saves into data and grid information in ASCII file.</p>
+<p>This method supports (and encourages) compression of the data. To enable
+compression, just append bz or gz to the extension.</p>
+<p>The backend used by the method does not support writing 3D or larger
+arrays to disk as ASCII, all the arrays reshaped to 1D.</p>
+<p>The file output with this method can be read with the
+load_UniformGridData function.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>file_name</strong> (<em>str</em>) – Path (with extensiton) of the output file</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="postcactus.grid_data.UniformGridData.slice">
+<code class="sig-name descname">slice</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">cut</span></em>, <em class="sig-param"><span class="n">resample</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="headerlink" href="#postcactus.grid_data.UniformGridData.slice" title="Permalink to this definition">¶</a></dt>
+<dd><p>Slice the data along giev direction.</p>
+<p>cut specifies how to slice the data. It has to be an array with
+the same num of dimensions of the data. Where cut is None, that
+dimension is kept, where it is a coordinate, the data is cut
+fixing that coordinate.</p>
+<p>Eg, for a 2D array, if cut is [None, 2], the cut will be with y = 2.</p>
+<p>If resample is True, you can cut at any point and we will compute
+the values with multilinear interpolation. If resample is False,
+we will use the data already available.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>cut</strong> (<em>array</em><em> or </em><em>list with dimension</em>) – How to slice the array. None entries mean “keep that dimension”</p></li>
+<li><p><strong>resample</strong> – Whether to use multilinear interpolation to compute the</p></li>
+</ul>
+</dd>
+</dl>
+<p>data or simply use the value of the closest point.
+:type resample: bool</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>A sliced grid data</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><a class="reference internal" href="#postcactus.grid_data.UniformGridData" title="postcactus.grid_data.UniformGridData"><code class="xref py py-class docutils literal notranslate"><span class="pre">UniformGridData</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="postcactus.grid_data.UniformGridData.sliced">
+<code class="sig-name descname">sliced</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">cut</span></em>, <em class="sig-param"><span class="n">resample</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="headerlink" href="#postcactus.grid_data.UniformGridData.sliced" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a new UniformGridData obtained slicing the current one.</p>
+<p>cut specifies how to slice the data. It has to be an array with
+the same num of dimensions of the data. Where cut is None, that
+dimension is kept, where it is a coordinate, the data is cut
+fixing that coordinate.</p>
+<p>Eg, for a 2D array, if cut is [None, 2], the cut will be with y = 2.</p>
+<p>If resample is True, you can cut at any point and we will compute
+the values with multilinear interpolation. If resample is False,
+we will use the data already available.</p>
+<p>In doing this, dimensions that are one grid point are lost.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>cut</strong> (<em>array</em><em> or </em><em>list with dimension</em>) – How to slice the array. None entries mean “keep that dimension”</p></li>
+<li><p><strong>resample</strong> – Whether to use multilinear interpolation to compute the</p></li>
+</ul>
+</dd>
+</dl>
+<p>data or simply use the value of the closest point.
+:type resample: bool</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>A sliced grid data</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><a class="reference internal" href="#postcactus.grid_data.UniformGridData" title="postcactus.grid_data.UniformGridData"><code class="xref py py-class docutils literal notranslate"><span class="pre">UniformGridData</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt id="postcactus.grid_data.common_bounding_box">
+<code class="sig-prename descclassname">postcactus.grid_data.</code><code class="sig-name descname">common_bounding_box</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">grids</span></em><span class="sig-paren">)</span><a class="headerlink" href="#postcactus.grid_data.common_bounding_box" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return corners of smallest common bounding box of regular grids.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>geoms</strong> (list of <a class="reference internal" href="#postcactus.grid_data.UniformGrid" title="postcactus.grid_data.UniformGrid"><code class="xref py py-class docutils literal notranslate"><span class="pre">UniformGrid</span></code></a>) – list of grid geometries.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>the common bounding box of a list of geometries</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>tuple of coordinates (x0 and x1)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="postcactus.grid_data.load_UniformGridData">
+<code class="sig-prename descclassname">postcactus.grid_data.</code><code class="sig-name descname">load_UniformGridData</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">path</span></em>, <em class="sig-param"><span class="o">*</span><span class="n">args</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="headerlink" href="#postcactus.grid_data.load_UniformGridData" title="Permalink to this definition">¶</a></dt>
+<dd><p>Load file to UniformGridData.</p>
+<p>The file has to start with the following pattern:
+# shape: {shape}
+# x0: {x0}
+# dx: {dx}
+# ref_level: {ref_level}
+# component: {component}
+# num_ghost: {num_ghost}
+# time: {time}
+# iteration: {iteration}
+where the curly parentheses contain the actual data.
+This metadata is essential to reconstruct the grid information.
+Files like this are generated by the save() method.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="postcactus.grid_data.merge_uniform_grids">
+<code class="sig-prename descclassname">postcactus.grid_data.</code><code class="sig-name descname">merge_uniform_grids</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">grids</span></em>, <em class="sig-param"><span class="n">component</span><span class="o">=</span><span class="default_value">- 1</span></em><span class="sig-paren">)</span><a class="headerlink" href="#postcactus.grid_data.merge_uniform_grids" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compute a regular grid covering the bounding box of a list of grid
+geometries, with the same grid spacing. All geometries must belong to the
+same refinement level and have the same dx. In practice, we return a new
+grid that covers all the grids in the list.</p>
+<p>dx is kept constant, but the number of points will change.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>geoms</strong> (list of <a class="reference internal" href="#postcactus.grid_data.UniformGrid" title="postcactus.grid_data.UniformGrid"><code class="xref py py-class docutils literal notranslate"><span class="pre">UniformGrid</span></code></a>) – list of grid geometries.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Grid geometry covering all input grids.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="#postcactus.grid_data.UniformGrid" title="postcactus.grid_data.UniformGrid"><code class="xref py py-class docutils literal notranslate"><span class="pre">UniformGrid</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="postcactus.grid_data.sample_function">
+<code class="sig-prename descclassname">postcactus.grid_data.</code><code class="sig-name descname">sample_function</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">function</span></em>, <em class="sig-param"><span class="n">shape</span></em>, <em class="sig-param"><span class="n">x0</span></em>, <em class="sig-param"><span class="n">x1</span></em>, <em class="sig-param"><span class="o">*</span><span class="n">args</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="headerlink" href="#postcactus.grid_data.sample_function" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create a regular dataset by sampling a scalar function of the form
+f(x, y, z, …) on a grid.</p>
+<p>You cannot use this function to initialize grids with flat dimensions
+(dimensions with only one grid point).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>function</strong> (<em>A callable that takes as many arguments as the number
+of dimensions</em><em> (</em><em>in shape</em><em>)</em><em></em>) – The function to sample.</p></li>
+<li><p><strong>shape</strong> (<em>1d numpy array</em><em> or </em><em>list of int</em>) – Number of sample points in each dimension.</p></li>
+<li><p><strong>x0</strong> (<em>1d numpy array</em><em> or </em><em>list of float</em>) – Minimum corner of regular sample grid.</p></li>
+<li><p><strong>x0</strong> – Maximum corner of regular sample grid.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Sampled data.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="#postcactus.grid_data.UniformGridData" title="postcactus.grid_data.UniformGridData"><code class="xref py py-class docutils literal notranslate"><span class="pre">UniformGridData</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="postcactus.grid_data.sample_function_from_uniformgrid">
+<code class="sig-prename descclassname">postcactus.grid_data.</code><code class="sig-name descname">sample_function_from_uniformgrid</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">function</span></em>, <em class="sig-param"><span class="n">grid</span></em><span class="sig-paren">)</span><a class="headerlink" href="#postcactus.grid_data.sample_function_from_uniformgrid" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create a regular dataset by sampling a scalar function of the form
+f(x, y, z, …) on a grid.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>function</strong> (<em>A callable that takes as many arguments as the number
+of dimensions</em><em> (</em><em>in shape</em><em>)</em><em></em>) – The function to sample.</p></li>
+<li><p><strong>grid</strong> (<a class="reference internal" href="#postcactus.grid_data.UniformGrid" title="postcactus.grid_data.UniformGrid"><code class="xref py py-class docutils literal notranslate"><span class="pre">UniformGrid</span></code></a>) – Grid over which to sample the function.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Sampled data.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="#postcactus.grid_data.UniformGridData" title="postcactus.grid_data.UniformGridData"><code class="xref py py-class docutils literal notranslate"><span class="pre">UniformGridData</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="index.html">
+              <img class="logo" src="_static/logo.png" alt="Logo"/>
+            </a></p>
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="gw_mismatch_ref.html"
+                        title="previous chapter">Reference on postcactus.gw_mismatch</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="sensitivity_curves_ref.html"
+                        title="next chapter">Reference on postcactus.sensitivity_curves</a></p>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="sensitivity_curves_ref.html" title="Reference on postcactus.sensitivity_curves"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="gw_mismatch_ref.html" title="Reference on postcactus.gw_mismatch"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">PostCactus 3.0.0a9 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">Reference on postcactus.grid_data</a></li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2020, Gabriele Bozzola and Wolfgang Kastaun.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 3.3.0.
+    </div>
+  </body>
+</html>

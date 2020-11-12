@@ -1,0 +1,262 @@
+
+
+<!doctype html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Reference on postcactus.cactus_scalars &#8212; PostCactus 3.0.0a9 documentation</title>
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="_static/bizstyle.css" type="text/css" />
+    
+    <script id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/doctools.js"></script>
+    <script src="_static/language_data.js"></script>
+    <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script type="text/x-mathjax-config">MathJax.Hub.Config({"tex2jax": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true, "ignoreClass": "document", "processClass": "math|output_area"}})</script>
+    <script src="_static/bizstyle.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Reference on postcactus.cactus_multipoles" href="cactus_multipoles_ref.html" />
+    <link rel="prev" title="Reference on postcactus.cactus_grid_functions" href="cactus_grid_functions_ref.html" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0" />
+    <!--[if lt IE 9]>
+    <script src="_static/css3-mediaqueries.js"></script>
+    <![endif]-->
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="cactus_multipoles_ref.html" title="Reference on postcactus.cactus_multipoles"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="cactus_grid_functions_ref.html" title="Reference on postcactus.cactus_grid_functions"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">PostCactus 3.0.0a9 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">Reference on postcactus.cactus_scalars</a></li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="module-postcactus.cactus_scalars">
+<span id="reference-on-postcactus-cactus-scalars"></span><h1>Reference on postcactus.cactus_scalars<a class="headerlink" href="#module-postcactus.cactus_scalars" title="Permalink to this headline">¶</a></h1>
+<p>The <a class="reference internal" href="#module-postcactus.cactus_scalars" title="postcactus.cactus_scalars"><code class="xref py py-mod docutils literal notranslate"><span class="pre">cactus_scalars</span></code></a> module provides functions to load
+timeseries in Cactus formats and a class <a class="reference internal" href="#postcactus.cactus_scalars.ScalarsDir" title="postcactus.cactus_scalars.ScalarsDir"><code class="xref py py-class docutils literal notranslate"><span class="pre">ScalarsDir</span></code></a> for easy
+access to all timeseries in a Cactus simulation directory. This module
+is normally not used directly, but from the <a class="reference internal" href="simdir_ref.html#module-postcactus.simdir" title="postcactus.simdir"><code class="xref py py-mod docutils literal notranslate"><span class="pre">simdir</span></code></a> module.
+The data loaded by this module is represented as
+<a class="reference internal" href="timeseries_ref.html#postcactus.timeseries.TimeSeries" title="postcactus.timeseries.TimeSeries"><code class="xref py py-class docutils literal notranslate"><span class="pre">TimeSeries</span></code></a> objects.</p>
+<dl class="py class">
+<dt id="postcactus.cactus_scalars.AllScalars">
+<em class="property">class </em><code class="sig-prename descclassname">postcactus.cactus_scalars.</code><code class="sig-name descname">AllScalars</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">allfiles</span></em>, <em class="sig-param"><span class="n">reduction_type</span></em><span class="sig-paren">)</span><a class="headerlink" href="#postcactus.cactus_scalars.AllScalars" title="Permalink to this definition">¶</a></dt>
+<dd><p>Helper class to read various types of scalar data in a list of files and
+properly order them. The core of this object is the _vars dictionary which
+contains the location of all the files for a specific variable and
+reduction.</p>
+<p>AllScalars is a dictionary-like object.</p>
+<p>Using the [] notation you can access values with as TimeSeries.</p>
+<p>Not intended for direct use.</p>
+<p>allfiles is a list of files, reduction_type has to be a reduction or
+scalar.</p>
+<dl class="py method">
+<dt id="postcactus.cactus_scalars.AllScalars.get">
+<code class="sig-name descname">get</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">key</span></em>, <em class="sig-param"><span class="n">default</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#postcactus.cactus_scalars.AllScalars.get" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return variable if available, else return the default value.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>key</strong> (<em>str</em>) – Requested variable</p></li>
+<li><p><strong>default</strong> (<em>any</em>) – Returned value if variable is not available</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Timeseries of the requested variable</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="timeseries_ref.html#postcactus.timeseries.TimeSeries" title="postcactus.timeseries.TimeSeries"><code class="xref py py-class docutils literal notranslate"><span class="pre">TimeSeries</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="postcactus.cactus_scalars.AllScalars.keys">
+<code class="sig-name descname">keys</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#postcactus.cactus_scalars.AllScalars.keys" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the list of available variables corresponding to the given
+reduction.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>List of variables with given reduction</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>list</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt id="postcactus.cactus_scalars.OneScalar">
+<em class="property">class </em><code class="sig-prename descclassname">postcactus.cactus_scalars.</code><code class="sig-name descname">OneScalar</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">path</span></em><span class="sig-paren">)</span><a class="headerlink" href="#postcactus.cactus_scalars.OneScalar" title="Permalink to this definition">¶</a></dt>
+<dd><p>Read scalar data produced by CarpetASCII.</p>
+<p>CactusScalarASCII is a dictionary-like object: it has keys() and you can
+TimeSeries using the [‘key’] syntax.</p>
+<p>Single variable per file or single file per group are supported. In the
+latter case, the header is inspected to understand the content of the file.</p>
+<p>Compressed files (gz and bz2) are supported.</p>
+<p>OneScalar represents one scalar file, there can be multiple variables inside,
+(if it was one_file_per_group).</p>
+<dl class="py method">
+<dt id="postcactus.cactus_scalars.OneScalar.keys">
+<code class="sig-name descname">keys</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#postcactus.cactus_scalars.OneScalar.keys" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the list of variables available.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>List of variables in the file</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>list</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="postcactus.cactus_scalars.OneScalar.load">
+<code class="sig-name descname">load</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">variable</span></em><span class="sig-paren">)</span><a class="headerlink" href="#postcactus.cactus_scalars.OneScalar.load" title="Permalink to this definition">¶</a></dt>
+<dd><p>Read file and return a TimeSeries with the requested variable.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>variable</strong> (<em>str</em>) – Requested variable</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>TimeSeries with requested variable as read from file</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="timeseries_ref.html#postcactus.timeseries.TimeSeries" title="postcactus.timeseries.TimeSeries"><code class="xref py py-class docutils literal notranslate"><span class="pre">TimeSeries</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt id="postcactus.cactus_scalars.ScalarsDir">
+<em class="property">class </em><code class="sig-prename descclassname">postcactus.cactus_scalars.</code><code class="sig-name descname">ScalarsDir</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">sd</span></em><span class="sig-paren">)</span><a class="headerlink" href="#postcactus.cactus_scalars.ScalarsDir" title="Permalink to this definition">¶</a></dt>
+<dd><p>This class provides acces to various types of scalar data in a given
+simulation directory. Typically used from simdir instance. The different
+scalars are available as attributes:</p>
+<dl class="field-list simple">
+<dt class="field-odd">Variables</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>scalar</strong> – access to grid scalars.</p></li>
+<li><p><strong>minimum</strong> – access to minimum reduction.</p></li>
+<li><p><strong>maximum</strong> – access to maximum reduction.</p></li>
+<li><p><a class="reference internal" href="grid_data_ref.html#postcactus.grid_data.UniformGridData.norm1" title="postcactus.grid_data.UniformGridData.norm1"><strong>norm1</strong></a> – access to norm1 reduction.</p></li>
+<li><p><a class="reference internal" href="grid_data_ref.html#postcactus.grid_data.UniformGridData.norm2" title="postcactus.grid_data.UniformGridData.norm2"><strong>norm2</strong></a> – access to norm2 reduction.</p></li>
+<li><p><a class="reference internal" href="grid_data_ref.html#postcactus.grid_data.UniformGridData.average" title="postcactus.grid_data.UniformGridData.average"><strong>average</strong></a> – access to average reduction.</p></li>
+<li><p><strong>infnorm</strong> – access to inf-norm reduction.</p></li>
+</ul>
+</dd>
+</dl>
+<p>Each of those works as a dictionary mapping variable names to
+<a class="reference internal" href="timeseries_ref.html#postcactus.timeseries.TimeSeries" title="postcactus.timeseries.TimeSeries"><code class="xref py py-class docutils literal notranslate"><span class="pre">TimeSeries</span></code></a> instances.</p>
+<p>The constructor is not intended for direct use.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>sd</strong> (<a class="reference internal" href="simdir_ref.html#postcactus.simdir.SimDir" title="postcactus.simdir.SimDir"><code class="xref py py-class docutils literal notranslate"><span class="pre">SimDir</span></code></a> instance.) – Simulation directory</p>
+</dd>
+</dl>
+<dl class="py method">
+<dt id="postcactus.cactus_scalars.ScalarsDir.get">
+<code class="sig-name descname">get</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">key</span></em>, <em class="sig-param"><span class="n">default</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#postcactus.cactus_scalars.ScalarsDir.get" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a reduction if available, else return the default value.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>key</strong> (<em>str</em>) – Requested reduction</p></li>
+<li><p><strong>default</strong> (<em>any</em>) – Returned value if reduction is not available</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Timeseries of the requested variable</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="#postcactus.cactus_scalars.AllScalars" title="postcactus.cactus_scalars.AllScalars"><code class="xref py py-class docutils literal notranslate"><span class="pre">AllScalars</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="index.html">
+              <img class="logo" src="_static/logo.png" alt="Logo"/>
+            </a></p>
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="cactus_grid_functions_ref.html"
+                        title="previous chapter">Reference on postcactus.cactus_grid_functions</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="cactus_multipoles_ref.html"
+                        title="next chapter">Reference on postcactus.cactus_multipoles</a></p>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="cactus_multipoles_ref.html" title="Reference on postcactus.cactus_multipoles"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="cactus_grid_functions_ref.html" title="Reference on postcactus.cactus_grid_functions"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">PostCactus 3.0.0a9 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">Reference on postcactus.cactus_scalars</a></li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2020, Gabriele Bozzola and Wolfgang Kastaun.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 3.3.0.
+    </div>
+  </body>
+</html>

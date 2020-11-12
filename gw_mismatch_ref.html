@@ -1,0 +1,509 @@
+
+
+<!doctype html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Reference on postcactus.gw_mismatch &#8212; PostCactus 3.0.0a9 documentation</title>
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="_static/bizstyle.css" type="text/css" />
+    
+    <script id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/doctools.js"></script>
+    <script src="_static/language_data.js"></script>
+    <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script type="text/x-mathjax-config">MathJax.Hub.Config({"tex2jax": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true, "ignoreClass": "document", "processClass": "math|output_area"}})</script>
+    <script src="_static/bizstyle.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Reference on postcactus.grid_data" href="grid_data_ref.html" />
+    <link rel="prev" title="Reference on postcactus.gw_utils" href="gw_utils_ref.html" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0" />
+    <!--[if lt IE 9]>
+    <script src="_static/css3-mediaqueries.js"></script>
+    <![endif]-->
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="grid_data_ref.html" title="Reference on postcactus.grid_data"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="gw_utils_ref.html" title="Reference on postcactus.gw_utils"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">PostCactus 3.0.0a9 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">Reference on postcactus.gw_mismatch</a></li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="module-postcactus.gw_mismatch">
+<span id="reference-on-postcactus-gw-mismatch"></span><h1>Reference on postcactus.gw_mismatch<a class="headerlink" href="#module-postcactus.gw_mismatch" title="Permalink to this headline">¶</a></h1>
+<p>The <a class="reference internal" href="#module-postcactus.gw_mismatch" title="postcactus.gw_mismatch"><code class="xref py py-mod docutils literal notranslate"><span class="pre">gw_mismatch</span></code></a> module functions to compute the mismatch between
+two waves.</p>
+<p>The two main interfaces are network_mismatch_from_psi4 (when computing the
+network mismatch starting from psi4 and the sky localization) and
+mismatch_from_strains (when computing the mismatch from the strains).</p>
+<dl class="py function">
+<dt id="postcactus.gw_mismatch.mismatch_from_strains">
+<code class="sig-prename descclassname">postcactus.gw_mismatch.</code><code class="sig-name descname">mismatch_from_strains</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">h1</span></em>, <em class="sig-param"><span class="n">h2</span></em>, <em class="sig-param"><span class="n">fmin</span><span class="o">=</span><span class="default_value">0</span></em>, <em class="sig-param"><span class="n">fmax</span><span class="o">=</span><span class="default_value">inf</span></em>, <em class="sig-param"><span class="n">noises</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">antenna_patterns</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">num_polarization_shifts</span><span class="o">=</span><span class="default_value">100</span></em>, <em class="sig-param"><span class="n">num_time_shifts</span><span class="o">=</span><span class="default_value">100</span></em>, <em class="sig-param"><span class="n">time_shift_start</span><span class="o">=</span><span class="default_value">- 5</span></em>, <em class="sig-param"><span class="n">time_shift_end</span><span class="o">=</span><span class="default_value">5</span></em>, <em class="sig-param"><span class="n">force_numba</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="headerlink" href="#postcactus.gw_mismatch.mismatch_from_strains" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compute the netowrk-mismatch between h1 and h2 by maximising the
+overlap over time and polarization shifts.</p>
+<p>Network here means that the inner product is computed for N detectors, as
+provided by the lists antenna_patterns and noises. Noises and antenna
+patterns have to be properly ordered: noises[i] has to correspond to
+antenna_pattern[i].</p>
+<p>See <a class="reference internal" href="gw_mismatch.html#overlap-and-mismatch"><span class="std std-ref">Overlap and mismatch</span></a> for formulas and details.</p>
+<p>The mismatch is computed by maximizing over time and polarization shifts.
+Polarization shifts and are around the 2pi, time shifts are specified by
+time_shift_start and time_shift_end. If num_time_shifts is 1, then no time
+shift is performed. For times, we make sure that we always have to zero
+timeshift. All the transformations are done in h2.</p>
+<p>This computation is a maximisation, which is very expensive. So, we have a
+very fast core function called _mismatch_core_numerical to do all the hard
+work. This function is compiled to native code by numba, resulting to
+enormous speed-up.There is an overhead in calling numba. Hence, by default
+we do not always use numba. We use it only when the number
+num_polarization_shifts * num_time_shifts is greater than 500*500. You can
+force using numba passing the keyword argument force_numba=True.</p>
+<p>We do not perform phase shifts here, so this function makes sense only
+for the (2,2) mode.</p>
+<p>h1 and h2 have to be already pre-processed for Fourier transform, so you
+should window them and zero pad as needed.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>h1</strong> (<a class="reference internal" href="timeseries_ref.html#postcactus.timeseries.TimeSeries" title="postcactus.timeseries.TimeSeries"><code class="xref py py-class docutils literal notranslate"><span class="pre">TimeSeries</span></code></a>) – First strain.</p></li>
+<li><p><strong>h2</strong> (<a class="reference internal" href="timeseries_ref.html#postcactus.timeseries.TimeSeries" title="postcactus.timeseries.TimeSeries"><code class="xref py py-class docutils literal notranslate"><span class="pre">TimeSeries</span></code></a>) – Second strain (the one that will be modified).</p></li>
+<li><p><strong>fmin</strong> (<em>float</em>) – Lower limit of the integration.</p></li>
+<li><p><strong>fmax</strong> (<em>float</em>) – Higher limit of the integration.</p></li>
+<li><p><strong>noises</strong> – Power spectral density of the noise for all the detectors.</p></li>
+</ul>
+</dd>
+</dl>
+<p>If None, a uniform noise is applied.
+:type noises: list of <a class="reference internal" href="frequencyseries_ref.html#postcactus.frequencyseries.FrequencySeries" title="postcactus.frequencyseries.FrequencySeries"><code class="xref py py-class docutils literal notranslate"><span class="pre">FrequencySeries</span></code></a>, or None</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>antenna_patterns</strong> – Fc, Fp for all the detectors. It has to be ordered</p>
+</dd>
+</dl>
+<p>in the same way as noises. If None, a uniform antenna pattern is applied.
+:type antenna_patterns: list of tuples, or None</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>num_polarization_shifts</strong> – How many points to divide the range</p>
+</dd>
+</dl>
+<p>(0, 2 pi) in the polarization shift.
+:type num_polarization_shifts: int</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>num_time_shifts</strong> – How many points to divide the range</p>
+</dd>
+</dl>
+<p>(time_shift_start, time_shift_end) in the time shift.
+:type num_time_shifts: int</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>time_shift_start</strong> – Minimum time shift applied. Search will be done</p>
+</dd>
+</dl>
+<p>linearly up to time_shift_end.
+:type time_shift_start: float</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>time_shift_end</strong> (<em>float</em>) – Largest value of time shift applied.</p></li>
+<li><p><strong>force_numba</strong> (<em>bool</em>) – Use numba irrespectively of the size of the input.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="postcactus.gw_mismatch.network_mismatch">
+<code class="sig-prename descclassname">postcactus.gw_mismatch.</code><code class="sig-name descname">network_mismatch</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">h1</span></em>, <em class="sig-param"><span class="n">h2</span></em>, <em class="sig-param"><span class="n">right_ascension</span></em>, <em class="sig-param"><span class="n">declination</span></em>, <em class="sig-param"><span class="n">time_utc</span></em>, <em class="sig-param"><span class="n">fmin</span><span class="o">=</span><span class="default_value">0</span></em>, <em class="sig-param"><span class="n">fmax</span><span class="o">=</span><span class="default_value">inf</span></em>, <em class="sig-param"><span class="n">noises</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">num_polarization_shifts</span><span class="o">=</span><span class="default_value">200</span></em>, <em class="sig-param"><span class="n">num_time_shifts</span><span class="o">=</span><span class="default_value">1000</span></em>, <em class="sig-param"><span class="n">time_shift_start</span><span class="o">=</span><span class="default_value">- 20</span></em>, <em class="sig-param"><span class="n">time_shift_end</span><span class="o">=</span><span class="default_value">20</span></em>, <em class="sig-param"><span class="n">force_numba</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="headerlink" href="#postcactus.gw_mismatch.network_mismatch" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compute network mismatch between strains h1 and h2.</p>
+<p>This is a wrapper around <code class="xref py py-meth docutils literal notranslate"><span class="pre">mismatch_from_strains()</span></code> (read the
+docstring for more information) that prepares the correct antenna patterns
+from the sky localization of the event. Moreover, it makes sure that noises
+(that has to be a gw_utils.Detectors object, or None) is correctly ordered.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>h1</strong> (<a class="reference internal" href="timeseries_ref.html#postcactus.timeseries.TimeSeries" title="postcactus.timeseries.TimeSeries"><code class="xref py py-class docutils literal notranslate"><span class="pre">TimeSeries</span></code></a>) – First strain.</p></li>
+<li><p><strong>h2</strong> (<a class="reference internal" href="timeseries_ref.html#postcactus.timeseries.TimeSeries" title="postcactus.timeseries.TimeSeries"><code class="xref py py-class docutils literal notranslate"><span class="pre">TimeSeries</span></code></a>) – Second strain (the one that will be modified).</p></li>
+<li><p><strong>right_ascension</strong> (<em>float</em>) – Right ascension of the source in the sky.</p></li>
+<li><p><strong>declination</strong> (<em>float</em>) – Declination of the source in the sky.</p></li>
+<li><p><strong>time_utc</strong> (<em>float</em>) – Time UTC of the event.</p></li>
+<li><p><strong>fmin</strong> (<em>float</em>) – Lower limit of the integration.</p></li>
+<li><p><strong>fmax</strong> (<em>float</em>) – Higher limit of the integration.</p></li>
+<li><p><strong>noises</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">Detector</span></code>, or None) – Power spectral density of the noise for all the detectors.</p></li>
+<li><p><strong>num_polarization_shifts</strong> – How many points to divide the range</p></li>
+</ul>
+</dd>
+</dl>
+<p>(0, 2 pi) in the polarization shift.
+:type num_polarization_shifts: int</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>num_time_shifts</strong> – How many points to divide the range</p>
+</dd>
+</dl>
+<p>(time_shift_start, time_shift_end) in the time shift.
+:type num_time_shifts: int</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>time_shift_start</strong> – Minimum time shift applied. Search will be done</p>
+</dd>
+</dl>
+<p>linearly up to time_shift_end.
+:type time_shift_start: float</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>time_shift_end</strong> (<em>float</em>) – Largest value of time shift applied.</p></li>
+<li><p><strong>force_numba</strong> (<em>bool</em>) – Use numba irrespectively of the size of the input.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="postcactus.gw_mismatch.network_mismatch_from_psi4">
+<code class="sig-prename descclassname">postcactus.gw_mismatch.</code><code class="sig-name descname">network_mismatch_from_psi4</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">psi1</span></em>, <em class="sig-param"><span class="n">psi2</span></em>, <em class="sig-param"><span class="n">right_ascension</span></em>, <em class="sig-param"><span class="n">declination</span></em>, <em class="sig-param"><span class="n">time_utc</span></em>, <em class="sig-param"><span class="n">pcut1</span></em>, <em class="sig-param"><span class="n">pcut2</span></em>, <em class="sig-param"><span class="o">*</span><span class="n">args</span></em>, <em class="sig-param"><span class="n">window_function</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">align_at_peak</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">trim_ends</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">mass_scale1_msun</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">mass_scale2_msun</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">distance1</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">distance2</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">fmin</span><span class="o">=</span><span class="default_value">0</span></em>, <em class="sig-param"><span class="n">fmax</span><span class="o">=</span><span class="default_value">inf</span></em>, <em class="sig-param"><span class="n">noises</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">num_zero_pad</span><span class="o">=</span><span class="default_value">16384</span></em>, <em class="sig-param"><span class="n">num_time_shifts</span><span class="o">=</span><span class="default_value">100</span></em>, <em class="sig-param"><span class="n">num_polarization_shifts</span><span class="o">=</span><span class="default_value">100</span></em>, <em class="sig-param"><span class="n">time_shift_start</span><span class="o">=</span><span class="default_value">- 50</span></em>, <em class="sig-param"><span class="n">time_shift_end</span><span class="o">=</span><span class="default_value">50</span></em>, <em class="sig-param"><span class="n">force_numba</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">time_to_keep_after_max</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">time_removed_beginning</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="headerlink" href="#postcactus.gw_mismatch.network_mismatch_from_psi4" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compute the mismatch between strains from psi1 and psi2.</p>
+<p>This function is complex, read <a class="reference internal" href="gw_mismatch.html#overlap-and-mismatch"><span class="std std-ref">Overlap and mismatch</span></a> for
+formulas and details.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>psi1</strong> (<a class="reference internal" href="cactus_waves_ref.html#postcactus.cactus_waves.GravitationalWavesOneDet" title="postcactus.cactus_waves.GravitationalWavesOneDet"><code class="xref py py-class docutils literal notranslate"><span class="pre">GravitationalWavesOneDet</span></code></a>) – <span class="math notranslate nohighlight">\(\Psi_4\)</span> for the first wave.</p></li>
+<li><p><strong>psi2</strong> (<a class="reference internal" href="cactus_waves_ref.html#postcactus.cactus_waves.GravitationalWavesOneDet" title="postcactus.cactus_waves.GravitationalWavesOneDet"><code class="xref py py-class docutils literal notranslate"><span class="pre">GravitationalWavesOneDet</span></code></a>) – <span class="math notranslate nohighlight">\(\Psi_4\)</span> for the second wave (the one that will be
+modified).</p></li>
+<li><p><strong>right_ascension</strong> (<em>float</em>) – Right ascension of the source in the sky.</p></li>
+<li><p><strong>declination</strong> (<em>float</em>) – Declination of the source in the sky.</p></li>
+<li><p><strong>mass_scale1_msun</strong> – If not None, the signal h1 is converted from</p></li>
+</ul>
+</dd>
+</dl>
+<p>computational units to physical units assuming that
+M = mass_scale1_msun.
+:type mass_scale1_msun: float or None</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>mass_scale2_msun</strong> – If not None, the signal h2 is converted from</p>
+</dd>
+</dl>
+<p>computational units to physical units assuming that
+M = mass_scale2_msun.
+:type mass_scale2_msun: float or None</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>time_utc</strong> (<em>float</em>) – Time UTC of the event.</p></li>
+<li><p><strong>pcut1</strong> (<em>float</em>) – Period associated with the threshold frequency
+<code class="docutils literal notranslate"><span class="pre">omega_0</span> <span class="pre">=</span> <span class="pre">2</span> <span class="pre">*</span> <span class="pre">pi</span> <span class="pre">/</span> <span class="pre">pcut</span></code> for the fixed frequency
+integration of <span class="math notranslate nohighlight">\(\Psi_4\)</span></p></li>
+<li><p><strong>pcut2</strong> (<em>float</em>) – Period associated with the threshold frequency
+<code class="docutils literal notranslate"><span class="pre">omega_0</span> <span class="pre">=</span> <span class="pre">2</span> <span class="pre">*</span> <span class="pre">pi</span> <span class="pre">/</span> <span class="pre">pcut</span></code> for the fixed frequency
+integration of <span class="math notranslate nohighlight">\(\Psi_4\)</span></p></li>
+<li><p><strong>window_function</strong> – If not None, apply window_function to the</p></li>
+</ul>
+</dd>
+</dl>
+<p>series before computing the strain.
+:type window_function: callable, str, or None</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>trim_ends</strong> – If True, a portion of the resulting strain is removed</p>
+</dd>
+</dl>
+<p>at both the initial and final times. The amount removed is equal to
+pcut.
+:type trim_ends: bool</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>align_at_peak</strong> – Time-shifts the strain so that they have both the</p>
+</dd>
+</dl>
+<p>maximum amplitude at t=0.
+:type align_at_peak: bool</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>fmin</strong> (<em>float</em>) – Lower limit of the integration.</p></li>
+<li><p><strong>fmax</strong> (<em>float</em>) – Higher limit of the integration.</p></li>
+<li><p><strong>noises</strong> – Power spectral density of the noise for all the</p></li>
+</ul>
+</dd>
+</dl>
+<p>detectors. If None, a uniform noise is applied.
+:type noises: <a class="reference internal" href="gw_utils_ref.html#postcactus.gw_utils.Detectors" title="postcactus.gw_utils.Detectors"><code class="xref py py-class docutils literal notranslate"><span class="pre">Detectors</span></code></a>, or None</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>num_zero_pad</strong> – How many points do the timeseries have to have</p>
+</dd>
+</dl>
+<p>before Fourier transforms are taken? This is not the number of zeros
+added (at the end) of the timeseries, this is the total number. If the
+series already have that length, no zeros will be added.
+:type num_zero_pad: int</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>num_polarization_shifts</strong> – How many points to divide the range</p>
+</dd>
+</dl>
+<p>(0, 2 pi) in the polarization shift.
+:type num_polarization_shifts: int</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>num_time_shifts</strong> – How many points to divide the range</p>
+</dd>
+</dl>
+<p>(time_shift_start, time_shift_end) in the time shift.
+:type num_time_shifts: int</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>time_shift_start</strong> – Minimum time shift applied. Search will be</p>
+</dd>
+</dl>
+<p>done linearly up to time_shift_end.
+:type time_shift_start: float</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>time_shift_end</strong> (<em>float</em>) – Largest value of time shift applied.</p></li>
+<li><p><strong>time_removed_beginning</strong> – Remove this amount from the beginning</p></li>
+</ul>
+</dd>
+</dl>
+<p>of the strain signals before computing the mismatch. If None, nothing
+is removed.
+:type time_removed_beginning: float or None</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>time_to_keep_after_max</strong> – If not None, remove all the signal that</p>
+</dd>
+</dl>
+<p>comes after t_max + time_to_keep_after_max, where t_max is the time at
+which the signal peaks.
+:type time_to_keep_after_max: float or None</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>force_numba</strong> (<em>bool</em>) – Use numba irrespectively of the size of the input.</p></li>
+<li><p><strong>*args</strong> – <p>All the other arguments are passed to the window
+function.</p>
+</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="postcactus.gw_mismatch.one_detector_mismatch_from_psi4">
+<code class="sig-prename descclassname">postcactus.gw_mismatch.</code><code class="sig-name descname">one_detector_mismatch_from_psi4</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">psi1</span></em>, <em class="sig-param"><span class="n">psi2</span></em>, <em class="sig-param"><span class="n">pcut1</span></em>, <em class="sig-param"><span class="n">pcut2</span></em>, <em class="sig-param"><span class="o">*</span><span class="n">args</span></em>, <em class="sig-param"><span class="n">window_function</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">align_at_peak</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">trim_ends</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">mass_scale1_msun</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">mass_scale2_msun</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">distance1</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">distance2</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">fmin</span><span class="o">=</span><span class="default_value">0</span></em>, <em class="sig-param"><span class="n">fmax</span><span class="o">=</span><span class="default_value">inf</span></em>, <em class="sig-param"><span class="n">noise</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">num_zero_pad</span><span class="o">=</span><span class="default_value">16384</span></em>, <em class="sig-param"><span class="n">num_time_shifts</span><span class="o">=</span><span class="default_value">100</span></em>, <em class="sig-param"><span class="n">num_polarization_shifts</span><span class="o">=</span><span class="default_value">100</span></em>, <em class="sig-param"><span class="n">time_shift_start</span><span class="o">=</span><span class="default_value">- 50</span></em>, <em class="sig-param"><span class="n">time_shift_end</span><span class="o">=</span><span class="default_value">50</span></em>, <em class="sig-param"><span class="n">force_numba</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">time_to_keep_after_max</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">time_removed_beginning</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="headerlink" href="#postcactus.gw_mismatch.one_detector_mismatch_from_psi4" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compute the mismatch between strains from psi1 and psi2.</p>
+<p>This function is complex, read <a class="reference internal" href="gw_mismatch.html#overlap-and-mismatch"><span class="std std-ref">Overlap and mismatch</span></a> for
+formulas and details.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>psi1</strong> (<a class="reference internal" href="cactus_waves_ref.html#postcactus.cactus_waves.GravitationalWavesOneDet" title="postcactus.cactus_waves.GravitationalWavesOneDet"><code class="xref py py-class docutils literal notranslate"><span class="pre">GravitationalWavesOneDet</span></code></a>) – <span class="math notranslate nohighlight">\(\Psi_4\)</span> for the first wave.</p></li>
+<li><p><strong>psi2</strong> (<a class="reference internal" href="cactus_waves_ref.html#postcactus.cactus_waves.GravitationalWavesOneDet" title="postcactus.cactus_waves.GravitationalWavesOneDet"><code class="xref py py-class docutils literal notranslate"><span class="pre">GravitationalWavesOneDet</span></code></a>) – <span class="math notranslate nohighlight">\(\Psi_4\)</span> for the second wave (the one that will be
+modified).</p></li>
+<li><p><strong>right_ascension</strong> (<em>float</em>) – Right ascension of the source in the sky.</p></li>
+<li><p><strong>declination</strong> (<em>float</em>) – Declination of the source in the sky.</p></li>
+<li><p><strong>mass_scale1_msun</strong> – If not None, the signal h1 is converted from</p></li>
+</ul>
+</dd>
+</dl>
+<p>computational units to physical units assuming that
+M = mass_scale1_msun.
+:type mass_scale1_msun: float or None</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>mass_scale2_msun</strong> – If not None, the signal h2 is converted from</p>
+</dd>
+</dl>
+<p>computational units to physical units assuming that
+M = mass_scale2_msun.
+:type mass_scale2_msun: float or None</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>time_utc</strong> (<em>float</em>) – Time UTC of the event.</p></li>
+<li><p><strong>pcut1</strong> (<em>float</em>) – Period associated with the threshold frequency
+<code class="docutils literal notranslate"><span class="pre">omega_0</span> <span class="pre">=</span> <span class="pre">2</span> <span class="pre">*</span> <span class="pre">pi</span> <span class="pre">/</span> <span class="pre">pcut</span></code> for the fixed frequency
+integration of <span class="math notranslate nohighlight">\(\Psi_4\)</span></p></li>
+<li><p><strong>pcut2</strong> (<em>float</em>) – Period associated with the threshold frequency
+<code class="docutils literal notranslate"><span class="pre">omega_0</span> <span class="pre">=</span> <span class="pre">2</span> <span class="pre">*</span> <span class="pre">pi</span> <span class="pre">/</span> <span class="pre">pcut</span></code> for the fixed frequency
+integration of <span class="math notranslate nohighlight">\(\Psi_4\)</span></p></li>
+<li><p><strong>window_function</strong> – If not None, apply window_function to the</p></li>
+</ul>
+</dd>
+</dl>
+<p>series before computing the strain.
+:type window_function: callable, str, or None</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>trim_ends</strong> – If True, a portion of the resulting strain is removed</p>
+</dd>
+</dl>
+<p>at both the initial and final times. The amount removed is equal to
+pcut.
+:type trim_ends: bool</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>align_at_peak</strong> – Time-shifts the strain so that they have both the</p>
+</dd>
+</dl>
+<p>maximum amplitude at t=0.
+:type align_at_peak: bool</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>fmin</strong> (<em>float</em>) – Lower limit of the integration.</p></li>
+<li><p><strong>fmax</strong> (<em>float</em>) – Higher limit of the integration.</p></li>
+<li><p><strong>noises</strong> – Power spectral density of the noise for all the</p></li>
+</ul>
+</dd>
+</dl>
+<p>detectors. If None, a uniform noise is applied.
+:type noises: <a class="reference internal" href="gw_utils_ref.html#postcactus.gw_utils.Detectors" title="postcactus.gw_utils.Detectors"><code class="xref py py-class docutils literal notranslate"><span class="pre">Detectors</span></code></a>, or None</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>num_zero_pad</strong> – How many points do the timeseries have to have</p>
+</dd>
+</dl>
+<p>before Fourier transforms are taken? This is not the number of zeros
+added (at the end) of the timeseries, this is the total number. If the
+series already have that length, no zeros will be added.
+:type num_zero_pad: int</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>num_polarization_shifts</strong> – How many points to divide the range</p>
+</dd>
+</dl>
+<p>(0, 2 pi) in the polarization shift.
+:type num_polarization_shifts: int</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>num_time_shifts</strong> – How many points to divide the range</p>
+</dd>
+</dl>
+<p>(time_shift_start, time_shift_end) in the time shift.
+:type num_time_shifts: int</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>time_shift_start</strong> – Minimum time shift applied. Search will be</p>
+</dd>
+</dl>
+<p>done linearly up to time_shift_end.
+:type time_shift_start: float</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>time_shift_end</strong> (<em>float</em>) – Largest value of time shift applied.</p></li>
+<li><p><strong>time_removed_beginning</strong> – Remove this amount from the beginning</p></li>
+</ul>
+</dd>
+</dl>
+<p>of the strain signals before computing the mismatch. If None, nothing
+is removed.
+:type time_removed_beginning: float or None</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>time_to_keep_after_max</strong> – If not None, remove all the signal that</p>
+</dd>
+</dl>
+<p>comes after t_max + time_to_keep_after_max, where t_max is the time at
+which the signal peaks.
+:type time_to_keep_after_max: float or None</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>force_numba</strong> (<em>bool</em>) – Use numba irrespectively of the size of the input.</p></li>
+<li><p><strong>*args</strong> – <p>All the other arguments are passed to the window
+function.</p>
+</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="index.html">
+              <img class="logo" src="_static/logo.png" alt="Logo"/>
+            </a></p>
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="gw_utils_ref.html"
+                        title="previous chapter">Reference on postcactus.gw_utils</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="grid_data_ref.html"
+                        title="next chapter">Reference on postcactus.grid_data</a></p>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="grid_data_ref.html" title="Reference on postcactus.grid_data"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="gw_utils_ref.html" title="Reference on postcactus.gw_utils"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">PostCactus 3.0.0a9 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">Reference on postcactus.gw_mismatch</a></li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2020, Gabriele Bozzola and Wolfgang Kastaun.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 3.3.0.
+    </div>
+  </body>
+</html>

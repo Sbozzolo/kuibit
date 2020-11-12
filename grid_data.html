@@ -1,0 +1,538 @@
+
+
+<!doctype html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Grid functions &#8212; PostCactus 3.0.0a9 documentation</title>
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="_static/bizstyle.css" type="text/css" />
+    
+    <script id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/doctools.js"></script>
+    <script src="_static/language_data.js"></script>
+    <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script type="text/x-mathjax-config">MathJax.Hub.Config({"tex2jax": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true, "ignoreClass": "document", "processClass": "math|output_area"}})</script>
+    <script src="_static/bizstyle.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Sensitivity (power spectral noise) curves of known detectors" href="sensitivity_curves.html" />
+    <link rel="prev" title="Mismatch between gravitational waves" href="gw_mismatch.html" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0" />
+    <!--[if lt IE 9]>
+    <script src="_static/css3-mediaqueries.js"></script>
+    <![endif]-->
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="sensitivity_curves.html" title="Sensitivity (power spectral noise) curves of known detectors"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="gw_mismatch.html" title="Mismatch between gravitational waves"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">PostCactus 3.0.0a9 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">Grid functions</a></li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="grid-functions">
+<h1>Grid functions<a class="headerlink" href="#grid-functions" title="Permalink to this headline">¶</a></h1>
+<p>Other than series (time and frequency), grid functions are probably the other
+most important quantity that we extract from simulations with the Einstein
+Toolkit. In this page, we describe how to use <code class="docutils literal notranslate"><span class="pre">PostCactus</span></code> to handle grids.
+(<span class="xref std std-ref">frequencyseries_ref:Reference on postcactus.grid_data</span>). The main object
+that we use to represent grid function is the
+<a class="reference internal" href="grid_data_ref.html#postcactus.grid_data.HierarchicalGridData" title="postcactus.grid_data.HierarchicalGridData"><code class="xref py py-class docutils literal notranslate"><span class="pre">HierarchicalGridData</span></code></a>. This represents data defined on a grid with
+multiple refinement levels. On each level, data is represented as
+<a class="reference internal" href="grid_data_ref.html#postcactus.grid_data.UniformGridData" title="postcactus.grid_data.UniformGridData"><code class="xref py py-class docutils literal notranslate"><span class="pre">UniformGridData</span></code></a>. While you will likely never initialize these
+objects directly, it is useful to be aware of what they are and what they can
+do. If you want to know how to read data into <code class="docutils literal notranslate"><span class="pre">PostCactus</span></code>, jump to the second
+half of this page.</p>
+<div class="section" id="uniformgrid">
+<h2>UniformGrid<a class="headerlink" href="#uniformgrid" title="Permalink to this headline">¶</a></h2>
+<p>The most basic concept that we need to work with grid function is the concept of
+<a class="reference internal" href="grid_data_ref.html#postcactus.grid_data.UniformGrid" title="postcactus.grid_data.UniformGrid"><code class="xref py py-class docutils literal notranslate"><span class="pre">UniformGrid</span></code></a>, which represents an uniform cell-centered Cartesian
+grid in arbitrary number of dimensions. An object of type
+<a class="reference internal" href="grid_data_ref.html#postcactus.grid_data.UniformGrid" title="postcactus.grid_data.UniformGrid"><code class="xref py py-class docutils literal notranslate"><span class="pre">UniformGrid</span></code></a> is immutable and is defined by the location of the
+origin of the grid, by the number of points along each dimension, and by either
+the opposite corner or the spacing. <a class="reference internal" href="grid_data_ref.html#postcactus.grid_data.UniformGrid" title="postcactus.grid_data.UniformGrid"><code class="xref py py-class docutils literal notranslate"><span class="pre">UniformGrid</span></code></a> are important
+because they are are the building blocks of grids with refinement levels and
+because they are the most natural grid to plot.</p>
+<p>Let’s see how to define a <a class="reference internal" href="grid_data_ref.html#postcactus.grid_data.UniformGrid" title="postcactus.grid_data.UniformGrid"><code class="xref py py-class docutils literal notranslate"><span class="pre">UniformGrid</span></code></a>:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">postcactus.grid_data</span> <span class="k">as</span> <span class="nn">gd</span>
+
+<span class="n">box</span> <span class="o">=</span> <span class="n">gd</span><span class="o">.</span><span class="n">UniformGrid</span><span class="p">(</span>
+            <span class="p">[</span><span class="mi">101</span><span class="p">,</span> <span class="mi">201</span><span class="p">],</span>  <span class="c1"># shape: 101 (201) points along the x (y) direction,</span>
+            <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span>  <span class="c1"># origin, at 0, 0 (cell-centered)</span>
+            <span class="n">x1</span><span class="o">=</span><span class="p">[</span><span class="mi">10</span><span class="p">,</span> <span class="mi">20</span><span class="p">]</span>  <span class="c1"># other corner, at (10, 20)</span>
+            <span class="p">)</span>
+</pre></div>
+</div>
+<p>This is a two dimensional grid where the bottom left corner is (0, 0), and the
+top right one is (10, 20). There are 101 points on the x direction and 201 on
+the y. The grid is cell-centered, so the coordinates of the points will be the
+integers. Instead of specifying the other corner with respect to the origin, you
+can specify the size of each cell by providing the <code class="docutils literal notranslate"><span class="pre">dx</span></code> parameter.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">box</span> <span class="o">=</span> <span class="n">gd</span><span class="o">.</span><span class="n">UniformGrid</span><span class="p">(</span>
+            <span class="p">[</span><span class="mi">101</span><span class="p">,</span> <span class="mi">201</span><span class="p">],</span>  <span class="c1"># shape: 101 (201) points along the x (y) direction,</span>
+            <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span>  <span class="c1"># origin, at 0, 0 (cell-centered)</span>
+            <span class="n">dx</span><span class="o">=</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span>  <span class="c1"># cell size</span>
+            <span class="p">)</span>
+</pre></div>
+</div>
+<p><a class="reference internal" href="grid_data_ref.html#postcactus.grid_data.UniformGrid" title="postcactus.grid_data.UniformGrid"><code class="xref py py-class docutils literal notranslate"><span class="pre">UniformGrid</span></code></a> are used as part of grids with refinement levels, so
+they can house additional information, like <code class="docutils literal notranslate"><span class="pre">time</span></code>, <code class="docutils literal notranslate"><span class="pre">num_ghost</span></code>,
+<code class="docutils literal notranslate"><span class="pre">ref_level</span></code>. In most cases, it is not necessary to work directly with these
+quantities.</p>
+<p>Some useful attributes to know about <a class="reference internal" href="grid_data_ref.html#postcactus.grid_data.UniformGrid" title="postcactus.grid_data.UniformGrid"><code class="xref py py-class docutils literal notranslate"><span class="pre">UniformGrid</span></code></a> are:
+- <code class="docutils literal notranslate"><span class="pre">x0</span></code> and <code class="docutils literal notranslate"><span class="pre">x1</span></code> return the two corners of the grid,
+- <code class="docutils literal notranslate"><span class="pre">dx</span></code> or <code class="docutils literal notranslate"><span class="pre">delta</span></code> return the cell size,
+- <code class="docutils literal notranslate"><span class="pre">dv</span></code> returns the volume of a cell, and <code class="docutils literal notranslate"><span class="pre">volume</span></code> returns the
+total volume,
+- <code class="docutils literal notranslate"><span class="pre">num_dimensions</span></code> returns how many dimensions are in the grid,
+<code class="docutils literal notranslate"><span class="pre">num_extended_dimensions</span></code> returns how many dimensions are in the grid with
+more than one grid point.</p>
+<p>When you initialize a grid with a flat dimension, you must specify <code class="docutils literal notranslate"><span class="pre">x0</span></code> and <code class="docutils literal notranslate"><span class="pre">dx</span></code>
+(you cannot do it by specifying <code class="docutils literal notranslate"><span class="pre">x0</span></code> and <code class="docutils literal notranslate"><span class="pre">x1</span></code>, because there is no <code class="docutils literal notranslate"><span class="pre">x1</span></code>!).
+In general, prefer providing <code class="docutils literal notranslate"><span class="pre">x0</span></code> and <code class="docutils literal notranslate"><span class="pre">dx</span></code> instead of <code class="docutils literal notranslate"><span class="pre">x0</span></code> and <code class="docutils literal notranslate"><span class="pre">x1</span></code>.</p>
+<p>You can use the <code class="docutils literal notranslate"><span class="pre">in</span></code> operator to see if a coordinate is inside the grid.
+The operation considers the size of the cell, for example</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">box</span> <span class="o">=</span> <span class="n">gd</span><span class="o">.</span><span class="n">UniformGrid</span><span class="p">([</span><span class="mi">101</span><span class="p">,</span> <span class="mi">201</span><span class="p">],</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">delta</span><span class="o">=</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span>
+
+<span class="p">[</span><span class="mi">5</span><span class="p">,</span> <span class="mi">5</span><span class="p">]</span> <span class="ow">in</span> <span class="n">box</span>  <span class="c1"># True</span>
+<span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">]</span> <span class="ow">in</span> <span class="n">box</span>  <span class="c1"># False</span>
+</pre></div>
+</div>
+<p>The <a class="reference internal" href="grid_data_ref.html#postcactus.grid_data.UniformGrid.contains" title="postcactus.grid_data.UniformGrid.contains"><code class="xref py py-meth docutils literal notranslate"><span class="pre">contains()</span></code></a> is syntactic sugar for the same operation.</p>
+<p>To obtain all the coordinates in the grid, you can use the
+<a class="reference internal" href="grid_data_ref.html#postcactus.grid_data.HierarchicalGridData.coordinates" title="postcactus.grid_data.HierarchicalGridData.coordinates"><code class="xref py py-meth docutils literal notranslate"><span class="pre">coordinates()</span></code></a> method. This can be used in thre different ways. When
+called with no arguments, the output is a list of 1D arrays. Each of these
+arrays contains the coordinates along a fixed axis. For example, for the 2D
+grid, the first array will be the x coordinates, the second the y. Finally, with
+<code class="docutils literal notranslate"><span class="pre">as_meshgrid=True</span></code>, the return value will be a NumPy meshgrid. This is useful
+for plotting. When <code class="docutils literal notranslate"><span class="pre">as_same_shape=True</span></code> the return value is a list of
+coordinates with the same shape of the grid itself, each element of this list is
+the value of that coordinate over the grid. This last one is the most useful way
+to do computations that involve the coordinates.
+You can obtained the coordinate as a list of coordinates along each direction
+also with the method <a class="reference internal" href="grid_data_ref.html#postcactus.grid_data.UniformGrid.coordinates_1d" title="postcactus.grid_data.UniformGrid.coordinates_1d"><code class="xref py py-meth docutils literal notranslate"><span class="pre">coordinates_1d()</span></code></a>.</p>
+<p>To obtain a coordinate from a multidimensional index, just use the bracket
+operator (<code class="docutils literal notranslate"><span class="pre">box[i,</span> <span class="pre">j]</span></code>).</p>
+<p><a class="reference internal" href="grid_data_ref.html#postcactus.grid_data.UniformGrid" title="postcactus.grid_data.UniformGrid"><code class="xref py py-class docutils literal notranslate"><span class="pre">UniformGrid</span></code></a> may have dimensions that are only one point (e.g.,
+when simulating a plane). We call <code class="docutils literal notranslate"><span class="pre">extended_dimensions</span></code> those that have more
+than one grid point. You can return a new <a class="reference internal" href="grid_data_ref.html#postcactus.grid_data.UniformGrid" title="postcactus.grid_data.UniformGrid"><code class="xref py py-class docutils literal notranslate"><span class="pre">UniformGrid</span></code></a> with removed
+all the dimensions that are not extended using the method
+<code class="docutils literal notranslate"><span class="pre">flat_dimensions_removed</span></code>.</p>
+<p>You return a new <a class="reference internal" href="grid_data_ref.html#postcactus.grid_data.UniformGrid" title="postcactus.grid_data.UniformGrid"><code class="xref py py-class docutils literal notranslate"><span class="pre">UniformGrid</span></code></a> with coordinates shifted with
+<a class="reference internal" href="grid_data_ref.html#postcactus.grid_data.UniformGrid.shifted" title="postcactus.grid_data.UniformGrid.shifted"><code class="xref py py-meth docutils literal notranslate"><span class="pre">shifted()</span></code></a>. You can also remove the ghost zones with
+<a class="reference internal" href="grid_data_ref.html#postcactus.grid_data.UniformGrid.ghost_zones_removed" title="postcactus.grid_data.UniformGrid.ghost_zones_removed"><code class="xref py py-meth docutils literal notranslate"><span class="pre">ghost_zones_removed()</span></code></a>. This will return a new
+<a class="reference internal" href="grid_data_ref.html#postcactus.grid_data.UniformGrid" title="postcactus.grid_data.UniformGrid"><code class="xref py py-class docutils literal notranslate"><span class="pre">UniformGrid</span></code></a> with no ghost zones.</p>
+<p>You can also print a <a class="reference internal" href="grid_data_ref.html#postcactus.grid_data.UniformGrid" title="postcactus.grid_data.UniformGrid"><code class="xref py py-class docutils literal notranslate"><span class="pre">UniformGrid</span></code></a> object to have a full overview
+of the properties of the grid.</p>
+<p>The functions <a class="reference internal" href="grid_data_ref.html#postcactus.grid_data.UniformGrid.coordinates_to_indices" title="postcactus.grid_data.UniformGrid.coordinates_to_indices"><code class="xref py py-meth docutils literal notranslate"><span class="pre">coordinates_to_indices()</span></code></a> and
+<code class="xref py py-meth docutils literal notranslate"><span class="pre">indices_to_coordiantes()</span></code> can be used to convert from indices to
+coordinates for the considered grid. You can pass single points, or collection
+of points. If you provide coordinates, the returned indices will be those of the
+closest grid points.</p>
+</div>
+<div class="section" id="uniformgriddata">
+<h2>UniformGridData<a class="headerlink" href="#uniformgriddata" title="Permalink to this headline">¶</a></h2>
+<p>Once we have a grid, we can define data on it. <a class="reference internal" href="grid_data_ref.html#postcactus.grid_data.UniformGridData" title="postcactus.grid_data.UniformGridData"><code class="xref py py-class docutils literal notranslate"><span class="pre">UniformGridData</span></code></a>
+packs together a <a class="reference internal" href="grid_data_ref.html#postcactus.grid_data.UniformGrid" title="postcactus.grid_data.UniformGrid"><code class="xref py py-class docutils literal notranslate"><span class="pre">UniformGrid</span></code></a> and data defined on it. This is the
+most basic form of a grid function. There are two ways to define
+<a class="reference internal" href="grid_data_ref.html#postcactus.grid_data.UniformGridData" title="postcactus.grid_data.UniformGridData"><code class="xref py py-class docutils literal notranslate"><span class="pre">UniformGridData</span></code></a>, first from a <a class="reference internal" href="grid_data_ref.html#postcactus.grid_data.UniformGrid" title="postcactus.grid_data.UniformGrid"><code class="xref py py-class docutils literal notranslate"><span class="pre">UniformGrid</span></code></a> and a
+NumPy array with matching shape, or from the details of the grid along with
+the data (again, as a NumPy array with matching shape):</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">box</span> <span class="o">=</span> <span class="n">gd</span><span class="o">.</span><span class="n">UniformGrid</span><span class="p">([</span><span class="mi">101</span><span class="p">,</span> <span class="mi">201</span><span class="p">],</span> <span class="n">x0</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">delta</span><span class="o">=</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span>
+
+<span class="n">data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">i</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">201</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">101</span><span class="p">)])</span>
+
+<span class="c1"># First way</span>
+<span class="n">ug_data1</span> <span class="o">=</span> <span class="n">gd</span><span class="o">.</span><span class="n">UniformGridData</span><span class="p">(</span><span class="n">box</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span>
+
+<span class="c1"># Second way</span>
+<span class="n">ug_data2</span> <span class="o">=</span> <span class="n">gd</span><span class="o">.</span><span class="n">from_grid_structure</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">x0</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">delta</span><span class="o">=</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span>
+</pre></div>
+</div>
+<p><a class="reference internal" href="grid_data_ref.html#postcactus.grid_data.UniformGridData" title="postcactus.grid_data.UniformGridData"><code class="xref py py-class docutils literal notranslate"><span class="pre">UniformGridData</span></code></a> shares the same basic infrastructure as the
+classes <a class="reference internal" href="timeseries_ref.html#postcactus.timeseries.TimeSeries" title="postcactus.timeseries.TimeSeries"><code class="xref py py-class docutils literal notranslate"><span class="pre">TimeSeries</span></code></a> and <a class="reference internal" href="frequencyseries_ref.html#postcactus.frequencyseries.FrequencySeries" title="postcactus.frequencyseries.FrequencySeries"><code class="xref py py-class docutils literal notranslate"><span class="pre">FrequencySeries</span></code></a> (they are
+derived from the same abstract class <code class="xref py py-class docutils literal notranslate"><span class="pre">BaseNumerical</span></code>). This means
+that all the mathematical operations are defined, such as, adding two
+<a class="reference internal" href="grid_data_ref.html#postcactus.grid_data.UniformGridData" title="postcactus.grid_data.UniformGridData"><code class="xref py py-class docutils literal notranslate"><span class="pre">UniformGridData</span></code></a>, or taking the exponential with <code class="docutils literal notranslate"><span class="pre">np.exp</span></code>.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">ug_data3</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">ug_data1</span><span class="p">)</span> <span class="o">/</span> <span class="n">ug_data2</span>
+</pre></div>
+</div>
+<p>Mathematical operations are performed only if the two
+<a class="reference internal" href="grid_data_ref.html#postcactus.grid_data.UniformGridData" title="postcactus.grid_data.UniformGridData"><code class="xref py py-class docutils literal notranslate"><span class="pre">UniformGridData</span></code></a> have the same underlying grid structure.
+<a class="reference internal" href="grid_data_ref.html#postcactus.grid_data.UniformGridData" title="postcactus.grid_data.UniformGridData"><code class="xref py py-class docutils literal notranslate"><span class="pre">UniformGridData</span></code></a> also support N-dimensional Fourier transforms with
+the <a class="reference internal" href="grid_data_ref.html#postcactus.grid_data.UniformGridData.fourier_transform" title="postcactus.grid_data.UniformGridData.fourier_transform"><code class="xref py py-meth docutils literal notranslate"><span class="pre">fourier_transform()</span></code></a> method.</p>
+<p><a class="reference internal" href="grid_data_ref.html#postcactus.grid_data.UniformGridData" title="postcactus.grid_data.UniformGridData"><code class="xref py py-class docutils literal notranslate"><span class="pre">UniformGridData</span></code></a> can be sliced to lower dimensional
+<a class="reference internal" href="grid_data_ref.html#postcactus.grid_data.UniformGridData" title="postcactus.grid_data.UniformGridData"><code class="xref py py-class docutils literal notranslate"><span class="pre">UniformGridData</span></code></a>. To do this, use the meth:<cite>~.slice</cite> method. This
+function takes a <code class="docutils literal notranslate"><span class="pre">cut</span></code> paramter which is a list of the same lenght as the
+dimension of the data. The elements of <code class="docutils literal notranslate"><span class="pre">cut</span></code> are <code class="docutils literal notranslate"><span class="pre">None</span></code> for the dimensions you
+want to keep and are the coordinate of where you want to slice. For example, if you
+have 3D data and you want to only look at the line with <code class="docutils literal notranslate"><span class="pre">x=1</span></code> and <code class="docutils literal notranslate"><span class="pre">y=2</span></code>, then,
+<code class="docutils literal notranslate"><span class="pre">cut</span></code> has to be <code class="docutils literal notranslate"><span class="pre">[1,</span> <span class="pre">2,</span> <span class="pre">None]</span></code>. You can cut in arbitrary places and optionally
+enable the <code class="docutils literal notranslate"><span class="pre">resample</span></code> option to obtain the values with a multilinear interpolation
+instead of approximating the point with the closest available.</p>
+<p>As <a class="reference internal" href="timeseries_ref.html#postcactus.timeseries.TimeSeries" title="postcactus.timeseries.TimeSeries"><code class="xref py py-class docutils literal notranslate"><span class="pre">TimeSeries</span></code></a>, <a class="reference internal" href="grid_data_ref.html#postcactus.grid_data.UniformGridData" title="postcactus.grid_data.UniformGridData"><code class="xref py py-class docutils literal notranslate"><span class="pre">UniformGridData</span></code></a> can be represented as
+splines (constant or linear). This means that the objects can be resampled or
+can be called as normal functions. Computing splines is an expensive operation
+that can take several seconds if the grid have thousands of points.</p>
+<p>Splines allow you to use the <a class="reference internal" href="grid_data_ref.html#postcactus.grid_data.UniformGridData" title="postcactus.grid_data.UniformGridData"><code class="xref py py-class docutils literal notranslate"><span class="pre">UniformGridData</span></code></a> as a normal function.
+Suppose <code class="docutils literal notranslate"><span class="pre">rho</span></code> is a grid function. You can either use the bracket operator to
+find the value of <code class="docutils literal notranslate"><span class="pre">rho</span></code> corresponding to specific indices (<code class="docutils literal notranslate"><span class="pre">rho[i,</span> <span class="pre">j]</span></code>), or
+you can call <code class="docutils literal notranslate"><span class="pre">rho</span></code> with the coordinate where you want to evalue it
+(<code class="docutils literal notranslate"><span class="pre">rho(x)</span></code>). When there are flat dimensions, the only possible splines are with
+nearest neighbors. You can use a multilinear interpolation on the extended by
+removing the flat dimensions with <code class="xref py py-meth docutils literal notranslate"><span class="pre">flat_dimensions_remove()</span></code>.</p>
+<p>Some basic useful functions are <a class="reference internal" href="grid_data_ref.html#postcactus.grid_data.UniformGridData.mean" title="postcactus.grid_data.UniformGridData.mean"><code class="xref py py-meth docutils literal notranslate"><span class="pre">mean()</span></code></a>, <a class="reference internal" href="grid_data_ref.html#postcactus.grid_data.UniformGridData.integral" title="postcactus.grid_data.UniformGridData.integral"><code class="xref py py-meth docutils literal notranslate"><span class="pre">integral()</span></code></a>,
+<a class="reference internal" href="grid_data_ref.html#postcactus.grid_data.UniformGridData.norm1" title="postcactus.grid_data.UniformGridData.norm1"><code class="xref py py-meth docutils literal notranslate"><span class="pre">norm1()</span></code></a>, or <a class="reference internal" href="grid_data_ref.html#postcactus.grid_data.UniformGridData.norm2" title="postcactus.grid_data.UniformGridData.norm2"><code class="xref py py-meth docutils literal notranslate"><span class="pre">norm2()</span></code></a>. In general, there’s a
+<a class="reference internal" href="grid_data_ref.html#postcactus.grid_data.UniformGridData.norm_p" title="postcactus.grid_data.UniformGridData.norm_p"><code class="xref py py-meth docutils literal notranslate"><span class="pre">norm_p()</span></code></a>, computed as</p>
+<p>with <span class="math notranslate nohighlight">\(\Delta v\)</span> being the volume of a cell.</p>
+<p><a class="reference internal" href="grid_data_ref.html#postcactus.grid_data.UniformGridData" title="postcactus.grid_data.UniformGridData"><code class="xref py py-class docutils literal notranslate"><span class="pre">UniformGridData</span></code></a> can be derived along a direction with
+<a class="reference internal" href="frequencyseries_ref.html#postcactus.frequencyseries.FrequencySeries.derived" title="postcactus.frequencyseries.FrequencySeries.derived"><code class="xref py py-meth docutils literal notranslate"><span class="pre">derived()</span></code></a>, or the gradient can be calculated with meth:<cite>~.gradient</cite>.
+In both cases, the order of the derivative can be specified. The derivative
+are numerical with finite difference. Derivative are second order accurate
+everywhere.</p>
+<p>A convenient function is <code class="xref py py-meth docutils literal notranslate"><span class="pre">sample_function()</span></code>. This takes a multivariate
+function (e.g., <span class="math notranslate nohighlight">\(sin(x + y)\)</span>) and returns a <a class="reference internal" href="grid_data_ref.html#postcactus.grid_data.UniformGridData" title="postcactus.grid_data.UniformGridData"><code class="xref py py-class docutils literal notranslate"><span class="pre">UniformGridData</span></code></a>
+sampling that function. If you already have the grid structure, you can use
+<code class="xref py py-meth docutils literal notranslate"><span class="pre">sample_function_from_uniformgrid()</span></code>.</p>
+<p>Another useful function is <a class="reference internal" href="grid_data_ref.html#postcactus.grid_data.UniformGridData.histogram" title="postcactus.grid_data.UniformGridData.histogram"><code class="xref py py-meth docutils literal notranslate"><span class="pre">histogram()</span></code></a>, which can be used to compute
+histograms of <a class="reference internal" href="grid_data_ref.html#postcactus.grid_data.UniformGridData" title="postcactus.grid_data.UniformGridData"><code class="xref py py-class docutils literal notranslate"><span class="pre">UniformGridData</span></code></a> with weights or without. Similarly,
+one can compute percentiles with <a class="reference internal" href="grid_data_ref.html#postcactus.grid_data.UniformGridData.percentiles" title="postcactus.grid_data.UniformGridData.percentiles"><code class="xref py py-meth docutils literal notranslate"><span class="pre">percentiles()</span></code></a>. The input of this
+function can either be relative (percentuals, as 0.01, 0.5, or so, if you enable
+<code class="docutils literal notranslate"><span class="pre">relative=True</span></code>), or the actual number of points.</p>
+<p>You can resample the data to a new grid using the function
+<a class="reference internal" href="frequencyseries_ref.html#postcactus.frequencyseries.FrequencySeries.resampled" title="postcactus.frequencyseries.FrequencySeries.resampled"><code class="xref py py-meth docutils literal notranslate"><span class="pre">resampled()</span></code></a>, which takes as input a <a class="reference internal" href="grid_data_ref.html#postcactus.grid_data.UniformGrid" title="postcactus.grid_data.UniformGrid"><code class="xref py py-class docutils literal notranslate"><span class="pre">UniformGrid</span></code></a> and
+returns a new <a class="reference internal" href="grid_data_ref.html#postcactus.grid_data.UniformGridData" title="postcactus.grid_data.UniformGridData"><code class="xref py py-class docutils literal notranslate"><span class="pre">UniformGridData</span></code></a> resampled on the new grid. If the
+new grid is outside the old one, you can either raise an error, of fill the
+points outside with zeros. This behavior is controlled by the flag <code class="docutils literal notranslate"><span class="pre">ext</span></code>. When
+<code class="docutils literal notranslate"><span class="pre">ext=1</span></code>, zeros are returned, when it is 2, <code class="docutils literal notranslate"><span class="pre">ValueError</span></code> is raised. By
+default, <a class="reference internal" href="frequencyseries_ref.html#postcactus.frequencyseries.FrequencySeries.resampled" title="postcactus.frequencyseries.FrequencySeries.resampled"><code class="xref py py-meth docutils literal notranslate"><span class="pre">resampled()</span></code></a> uses a multilinear interpolation, but you can
+force to use a piecewise constant interpolation with the nearest neighbors by
+setting <code class="docutils literal notranslate"><span class="pre">piecewise_constant=True</span></code>.</p>
+<p>Another useful feature is to <a class="reference internal" href="grid_data_ref.html#postcactus.grid_data.UniformGridData.dx_changed" title="postcactus.grid_data.UniformGridData.dx_changed"><code class="xref py py-meth docutils literal notranslate"><span class="pre">dx_changed()</span></code></a>, which can be used to
+return a new <a class="reference internal" href="grid_data_ref.html#postcactus.grid_data.UniformGridData" title="postcactus.grid_data.UniformGridData"><code class="xref py py-class docutils literal notranslate"><span class="pre">UniformGridData</span></code></a> with different grid spacing. The new
+grid spacing has to be an integer multiple or an integer factor of the old one.
+With this function you can upsample or downsample data. This is especially
+useful when dealing with refinement levels, which typically have spacing related
+by factors of 2. <a class="reference internal" href="grid_data_ref.html#postcactus.grid_data.UniformGridData.dx_changed" title="postcactus.grid_data.UniformGridData.dx_changed"><code class="xref py py-meth docutils literal notranslate"><span class="pre">dx_changed()</span></code></a> takes an optional argument
+<code class="docutils literal notranslate"><span class="pre">piecewise_constant</span></code> to prescribe how the resampling should be done.</p>
+<p>Often, it is useful to save a <a class="reference internal" href="grid_data_ref.html#postcactus.grid_data.UniformGridData" title="postcactus.grid_data.UniformGridData"><code class="xref py py-class docutils literal notranslate"><span class="pre">UniformGridData</span></code></a> and read it later.
+<a class="reference internal" href="grid_data_ref.html#postcactus.grid_data.UniformGridData" title="postcactus.grid_data.UniformGridData"><code class="xref py py-class docutils literal notranslate"><span class="pre">UniformGridData</span></code></a> can be saved as ASCII files with the
+<code class="xref py py-meth docutils literal notranslate"><span class="pre">save()</span></code> method, which takes a path and writes an ASCII file to that
+destination. The file contains a header that specifies the grid information. The
+data is always saved as as 1D array (due to the limitations of the backend).
+These files can be read with the <code class="xref py py-meth docutils literal notranslate"><span class="pre">load_UniformGridData()</span></code> function. For
+large datasets, it is convinent to compress the file. To do this, just provide a
+file extension that is compressed (e.g., <code class="docutils literal notranslate"><span class="pre">.dat.gz</span></code>).</p>
+<p>To access the data (ie, for plotting), you can simply use <code class="docutils literal notranslate"><span class="pre">.data</span></code>. This is a
+standard numpy array. Alternatively, you can use the <code class="docutils literal notranslate"><span class="pre">.data_xyz</span></code> attribute,
+which swaps rows and columns (<code class="docutils literal notranslate"><span class="pre">.data_xyz</span></code> is coordinates-indexed, <code class="docutils literal notranslate"><span class="pre">.data</span></code> is
+matrix-indexed).</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>Arrays are stored row-first, so if you want to use <code class="docutils literal notranslate"><span class="pre">.data</span></code>, to have a
+natural mapping between coordinates and indices you have to transpose the
+data! (See, <a href="#id1"><span class="problematic" id="id2">`&lt;this blog post&gt;
+https://eli.thegreenplace.net/2014/meshgrids-and-disambiguating-rows-and-columns-from-cartesian-coordinates/`_</span></a>
+for an explanation.)</p>
+</div>
+</div>
+<div class="section" id="hierarchicalgriddata">
+<h2>HierarchicalGridData<a class="headerlink" href="#hierarchicalgriddata" title="Permalink to this headline">¶</a></h2>
+<p>A <a class="reference internal" href="grid_data_ref.html#postcactus.grid_data.HierarchicalGridData" title="postcactus.grid_data.HierarchicalGridData"><code class="xref py py-class docutils literal notranslate"><span class="pre">HierarchicalGridData</span></code></a> represent data defined on a mesh-refined
+grid. In practice, this is a collection of <a class="reference internal" href="grid_data_ref.html#postcactus.grid_data.UniformGridData" title="postcactus.grid_data.UniformGridData"><code class="xref py py-class docutils literal notranslate"><span class="pre">UniformGridData</span></code></a>,
+roughly one per level. You can work directly with the
+<a class="reference internal" href="grid_data_ref.html#postcactus.grid_data.UniformGridData" title="postcactus.grid_data.UniformGridData"><code class="xref py py-class docutils literal notranslate"><span class="pre">UniformGridData</span></code></a> on the different levels using the brackets
+operator. As for <a class="reference internal" href="grid_data_ref.html#postcactus.grid_data.UniformGridData" title="postcactus.grid_data.UniformGridData"><code class="xref py py-class docutils literal notranslate"><span class="pre">UniformGridData</span></code></a> supports all the mathematical
+operations.</p>
+<p>In many cases, one works with a nested series of refinement levels, with a
+domain that is split in multiple patches. Hence, the output data will also be in
+multiple chunks. When initializing an <a class="reference internal" href="grid_data_ref.html#postcactus.grid_data.HierarchicalGridData" title="postcactus.grid_data.HierarchicalGridData"><code class="xref py py-class docutils literal notranslate"><span class="pre">HierarchicalGridData</span></code></a>,
+PostCactus will make an effort to put all the different patches back together.
+If the provided components cover an entire grid, PostCactus will merge them. In
+doing this, all the ghost zone information is discarded. If PostCactus finds
+that the provided components do not cover a regular grid, then it will leave
+them untouched. This is the case when one has multiple refinement centers (for
+example in binary simulations). <a class="reference internal" href="grid_data_ref.html#postcactus.grid_data.HierarchicalGridData" title="postcactus.grid_data.HierarchicalGridData"><code class="xref py py-class docutils literal notranslate"><span class="pre">HierarchicalGridData</span></code></a> is
+essentially a dictionary that maps refinement level lists of
+<a class="reference internal" href="grid_data_ref.html#postcactus.grid_data.UniformGridData" title="postcactus.grid_data.UniformGridData"><code class="xref py py-class docutils literal notranslate"><span class="pre">UniformGridData</span></code></a> that represent the different patches. In case
+PostCactus manages to combine all the patches, then the list will have only one
+element.</p>
+<p>You can access the relative level using the bracket operator (e.g. <code class="docutils literal notranslate"><span class="pre">rho[0][0]</span></code>
+is <code class="docutils literal notranslate"><span class="pre">rho</span></code> on the coarsest level on the 0th patch, which could be the only one).
+In many cases, the grid structure is simple and there are no multiple refinement
+centers, so one can access the level with <cite>:py:meth:~.get_ref_level</cite>. This method
+will work only if there’s a single component.</p>
+<p>As for <a class="reference internal" href="grid_data_ref.html#postcactus.grid_data.UniformGridData" title="postcactus.grid_data.UniformGridData"><code class="xref py py-class docutils literal notranslate"><span class="pre">UniformGridData</span></code></a>, <a class="reference internal" href="grid_data_ref.html#postcactus.grid_data.HierarchicalGridData" title="postcactus.grid_data.HierarchicalGridData"><code class="xref py py-class docutils literal notranslate"><span class="pre">HierarchicalGridData</span></code></a> are
+callable and splines are used to interpolate to the requested points. This
+operation can be expensive, especially for 3D grids with many points.
+The way calling works is the following: we find the finest
+refinement level that contains the requested point, and we use the multilinear
+interpolation on that level (and component, if there are multiple components).</p>
+<p>Using splines, we can also combine the various refinement levels to obtain a
+<a class="reference internal" href="grid_data_ref.html#postcactus.grid_data.UniformGridData" title="postcactus.grid_data.UniformGridData"><code class="xref py py-class docutils literal notranslate"><span class="pre">UniformGridData</span></code></a>. This is often handy when plotting. The method
+<a class="reference internal" href="grid_data_ref.html#postcactus.grid_data.HierarchicalGridData.merge_refinement_levels" title="postcactus.grid_data.HierarchicalGridData.merge_refinement_levels"><code class="xref py py-meth docutils literal notranslate"><span class="pre">merge_refinement_levels()</span></code></a> does exactly that. By default,
+<a class="reference internal" href="grid_data_ref.html#postcactus.grid_data.HierarchicalGridData.merge_refinement_levels" title="postcactus.grid_data.HierarchicalGridData.merge_refinement_levels"><code class="xref py py-meth docutils literal notranslate"><span class="pre">merge_refinement_levels()</span></code></a> does not resample the data, but simply uses
+the values on the grid. If the argument <code class="docutils literal notranslate"><span class="pre">resample</span></code> is set to <code class="docutils literal notranslate"><span class="pre">True</span></code>, the
+data is resampled with a multilinear interpolation. One can also specify what
+grid (as <a class="reference internal" href="grid_data_ref.html#postcactus.grid_data.UniformGridData" title="postcactus.grid_data.UniformGridData"><code class="xref py py-class docutils literal notranslate"><span class="pre">UniformGridData</span></code></a>) to merge the data on by calling the
+method <a class="reference internal" href="grid_data_ref.html#postcactus.grid_data.HierarchicalGridData.to_UniformGridData" title="postcactus.grid_data.HierarchicalGridData.to_UniformGridData"><code class="xref py py-meth docutils literal notranslate"><span class="pre">to_UniformGridData()</span></code></a>. This is especially useful when
+resampling on smaller grids, because it drastically reduces the computation
+time.</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>Operations that involve resampling can be very expensive and require a lot
+of memory!</p>
+</div>
+<p>Another useful method is the <a class="reference internal" href="grid_data_ref.html#postcactus.grid_data.HierarchicalGridData.coordinates" title="postcactus.grid_data.HierarchicalGridData.coordinates"><code class="xref py py-meth docutils literal notranslate"><span class="pre">coordinates()</span></code></a>, which returns a list of
+<a class="reference internal" href="grid_data_ref.html#postcactus.grid_data.HierarchicalGridData" title="postcactus.grid_data.HierarchicalGridData"><code class="xref py py-class docutils literal notranslate"><span class="pre">HierarchicalGridData</span></code></a> with the same structure as the one in
+consideration but with values the various coordinates at the points. This is
+useful for computations that involve the coordinates.</p>
+<p>As it is the case for <a class="reference internal" href="grid_data_ref.html#postcactus.grid_data.UniformGridData" title="postcactus.grid_data.UniformGridData"><code class="xref py py-class docutils literal notranslate"><span class="pre">UniformGridData</span></code></a>, also
+<a class="reference internal" href="grid_data_ref.html#postcactus.grid_data.HierarchicalGridData" title="postcactus.grid_data.HierarchicalGridData"><code class="xref py py-class docutils literal notranslate"><span class="pre">HierarchicalGridData</span></code></a> can be derived along a direction with
+<a class="reference internal" href="frequencyseries_ref.html#postcactus.frequencyseries.FrequencySeries.derived" title="postcactus.frequencyseries.FrequencySeries.derived"><code class="xref py py-meth docutils literal notranslate"><span class="pre">derived()</span></code></a>, or the gradient can be calculated with
+<a class="reference internal" href="grid_data_ref.html#postcactus.grid_data.HierarchicalGridData.gradient" title="postcactus.grid_data.HierarchicalGridData.gradient"><code class="xref py py-meth docutils literal notranslate"><span class="pre">gradient()</span></code></a>. In both cases, the order of the derivative can be
+specified. The derivative are numerical with finite difference. The result is
+a <a class="reference internal" href="grid_data_ref.html#postcactus.grid_data.HierarchicalGridData" title="postcactus.grid_data.HierarchicalGridData"><code class="xref py py-class docutils literal notranslate"><span class="pre">HierarchicalGridData</span></code></a> or a list of <a class="reference internal" href="grid_data_ref.html#postcactus.grid_data.HierarchicalGridData" title="postcactus.grid_data.HierarchicalGridData"><code class="xref py py-class docutils literal notranslate"><span class="pre">HierarchicalGridData</span></code></a>
+(for each direction).</p>
+</div>
+<div class="section" id="reading-data">
+<h2>Reading data<a class="headerlink" href="#reading-data" title="Permalink to this headline">¶</a></h2>
+<p>So far, we have discussed how grid functions are represented in <code class="docutils literal notranslate"><span class="pre">PostCactus</span></code>.
+In this section, we discuss how to read the output data from simulations as
+<a class="reference internal" href="grid_data_ref.html#postcactus.grid_data.HierarchicalGridData" title="postcactus.grid_data.HierarchicalGridData"><code class="xref py py-class docutils literal notranslate"><span class="pre">HierarchicalGridData</span></code></a> or <a class="reference internal" href="grid_data_ref.html#postcactus.grid_data.UniformGridData" title="postcactus.grid_data.UniformGridData"><code class="xref py py-class docutils literal notranslate"><span class="pre">UniformGridData</span></code></a>.</p>
+<p>At the moment, <code class="docutils literal notranslate"><span class="pre">PostCactus</span></code> fully support reading HDF5 files of any dimension
+(1D, 2D, and 3D). <code class="docutils literal notranslate"><span class="pre">PostCactus</span></code> can also read ASCII files, but the interface is
+less robus and not as well-tested.</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p><code class="docutils literal notranslate"><span class="pre">PostCactus</span></code> works better with HDF5 data. In general, reading and parsing
+HDF5 is orders of magnitude faster than ASCII data. <code class="docutils literal notranslate"><span class="pre">PostCactus</span></code> can read
+one iteration at the time in HDF5 data, but has to read the entire content of
+all the files when the data is ASCII. This can take a long time. HDF5 are
+also much more storage-efficient and contain metadata that can be used to
+better interpret the data (e.g., the number of ghost zones). For these
+reasons, we strongly recommend using HDF5 files.</p>
+</div>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>The ASCII reader should be considered experimental. If reads the files line
+by line and will likely not fail if the data is not exactly in the format
+that the reader expect. You may find unexpected results. If you use the ASCII
+reader, make sure to test it!</p>
+</div>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>The ASCII reader works by scanning all the files line by line. This can take an
+extremely long time if you have many files with a lot of iterations. If you want
+to speed up the process, consider isolating the files you are interested in
+working with in a separate directory, and run <code class="docutils literal notranslate"><span class="pre">SimDir</span></code> in that folder.</p>
+</div>
+<div class="section" id="from-simdir">
+<h3>From SimDir<a class="headerlink" href="#from-simdir" title="Permalink to this headline">¶</a></h3>
+<p>The easiest way to access grid data is from <a class="reference internal" href="simdir_ref.html#postcactus.simdir.SimDir" title="postcactus.simdir.SimDir"><code class="xref py py-class docutils literal notranslate"><span class="pre">SimDir</span></code></a>.
+<a class="reference internal" href="simdir_ref.html#postcactus.simdir.SimDir" title="postcactus.simdir.SimDir"><code class="xref py py-class docutils literal notranslate"><span class="pre">SimDir</span></code></a> objects contain an overview of the entire data content of a
+directory. For more information about <a class="reference internal" href="simdir_ref.html#postcactus.simdir.SimDir" title="postcactus.simdir.SimDir"><code class="xref py py-class docutils literal notranslate"><span class="pre">SimDir</span></code></a>, read
+<a class="reference internal" href="simdir.html#getting-started-with-simdir"><span class="std std-ref">Getting started with SimDir</span></a>.</p>
+<p>Assuming <code class="docutils literal notranslate"><span class="pre">sim</span></code> is a <a class="reference internal" href="simdir_ref.html#postcactus.simdir.SimDir" title="postcactus.simdir.SimDir"><code class="xref py py-class docutils literal notranslate"><span class="pre">SimDir</span></code></a>, the access point to grid functions is
+in <cite>sim.gf</cite> or <code class="docutils literal notranslate"><span class="pre">sim.grid_functions</span></code>. You can find all the available variables just
+by printing this object</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="n">sim</span><span class="o">.</span><span class="n">gf</span><span class="p">)</span>
+
+<span class="c1"># The output will look like</span>
+<span class="c1">#</span>
+<span class="c1"># Available grid data of dimension 1D (x):</span>
+<span class="c1"># [&#39;P&#39;, &#39;rho&#39;, &#39;rho_star&#39;, &#39;vz&#39;, &#39;Bz&#39;, &#39;By&#39;, &#39;vx&#39;, &#39;rho_b&#39;, &#39;vy&#39;, &#39;Bx&#39;]</span>
+<span class="c1">#</span>
+<span class="c1"># ... and so on ...</span>
+</pre></div>
+</div>
+<p><cite>sim.gf</cite> is an object of type <a class="reference internal" href="cactus_grid_functions_ref.html#postcactus.cactus_grid_functions.GridFunctionsDir" title="postcactus.cactus_grid_functions.GridFunctionsDir"><code class="xref py py-class docutils literal notranslate"><span class="pre">GridFunctionsDir</span></code></a>. The main role of
+this class is to organize the available files depending on their dimensions. So,
+from <a class="reference internal" href="cactus_grid_functions_ref.html#postcactus.cactus_grid_functions.GridFunctionsDir" title="postcactus.cactus_grid_functions.GridFunctionsDir"><code class="xref py py-class docutils literal notranslate"><span class="pre">GridFunctionsDir</span></code></a> you can specify what dimensions you are
+interested in. You can do this in two ways, as a dictionary call, or via an
+attribute. For example, if you are interested in 2D data on the xy plane:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># All these methods are equivalent</span>
+<span class="n">data2d</span> <span class="o">=</span> <span class="n">sim</span><span class="o">.</span><span class="n">gf</span><span class="o">.</span><span class="n">xy</span>
+<span class="n">data2d</span> <span class="o">=</span> <span class="n">sim</span><span class="o">.</span><span class="n">gf</span><span class="p">[</span><span class="s1">&#39;xy&#39;</span><span class="p">]</span>
+<span class="n">data2d</span> <span class="o">=</span> <span class="n">sim</span><span class="o">.</span><span class="n">gf</span><span class="p">[(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">)]</span>
+</pre></div>
+</div>
+<p>In case you want a lower dimensional cut (say, you want only the y axis and you
+have the xy data), you can always look at higher-dimensional data and slice it
+to your liking, as described in the above sections.</p>
+<p>Once you selected the data you are interested in, you will be working with a
+<a class="reference internal" href="cactus_grid_functions_ref.html#postcactus.cactus_grid_functions.AllGridFunctions" title="postcactus.cactus_grid_functions.AllGridFunctions"><code class="xref py py-class docutils literal notranslate"><span class="pre">AllGridFunctions</span></code></a> object. This is a dictionary-like object that
+organizes all the variables available for the requested dimensions. You can
+access the variables using the bracket operator of looking in the <code class="docutils literal notranslate"><span class="pre">fields</span></code>
+attribute. In case a variable is available as HDF5 file and as ASCII file, the
+HDF5 representation is preferred.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># These methods are equivalent</span>
+<span class="n">rho</span> <span class="o">=</span> <span class="n">sim</span><span class="o">.</span><span class="n">gf</span><span class="o">.</span><span class="n">xy</span><span class="o">.</span><span class="n">rho</span>
+<span class="n">rho</span> <span class="o">=</span> <span class="n">sim</span><span class="o">.</span><span class="n">gf</span><span class="o">.</span><span class="n">xy</span><span class="o">.</span><span class="n">fields</span><span class="o">.</span><span class="n">rho</span>
+</pre></div>
+</div>
+<p>In case you are reading an ASCII file, you have to set the correct number of
+ghost zones. The simplest way to do this is to set the <code class="xref py py-meth docutils literal notranslate"><span class="pre">num_ghost()</span></code>
+attribute. If the output does not contain ghost zones, set them to zero.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># If rho_star is from an ASCII file, we want to set num_ghost before</span>
+<span class="c1"># reading it</span>
+<span class="n">ASCII_reader</span> <span class="o">=</span> <span class="n">sim</span><span class="o">.</span><span class="n">gf</span><span class="o">.</span><span class="n">xy</span>
+<span class="n">ASCII_reader</span><span class="o">.</span><span class="n">num_ghost</span> <span class="o">=</span> <span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>
+<span class="n">rho_star</span> <span class="o">=</span> <span class="n">ASCII_reader</span><span class="o">.</span><span class="n">rho_star</span>
+</pre></div>
+</div>
+<p><code class="xref py py-meth docutils literal notranslate"><span class="pre">num_ghost()</span></code> has to be a tuple or a list with the same number of entries
+as the dimensionality of the grid: each entry is the number of ghost zones along
+a direction.</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>ASCII files do not have information about how many ghost zones are in the
+data, so we will assume that there are none. This can lead to imperfect
+results in the regions of overlap between two grid patches. In the future, we
+will try to read this value from the parameter file.</p>
+</div>
+<p>Finally, once you selected the variable, you will have a
+<a class="reference internal" href="cactus_grid_functions_ref.html#postcactus.cactus_grid_functions.OneGridFunctionH5" title="postcactus.cactus_grid_functions.OneGridFunctionH5"><code class="xref py py-class docutils literal notranslate"><span class="pre">OneGridFunctionH5</span></code></a> or <a class="reference internal" href="cactus_grid_functions_ref.html#postcactus.cactus_grid_functions.OneGridFunctionASCII" title="postcactus.cactus_grid_functions.OneGridFunctionASCII"><code class="xref py py-class docutils literal notranslate"><span class="pre">OneGridFunctionASCII</span></code></a> object.
+These are derived from the same base class <code class="xref py py-class docutils literal notranslate"><span class="pre">OneGridFunctionBase</span></code> and
+share the interface. The main difference is how files are read (which justifies
+why we need to different classes). These objects are certainly the most
+interesting ones and the ones you will deal with most of the time.</p>
+<p>At first level, <a class="reference internal" href="cactus_grid_functions_ref.html#postcactus.cactus_grid_functions.OneGridFunctionH5" title="postcactus.cactus_grid_functions.OneGridFunctionH5"><code class="xref py py-class docutils literal notranslate"><span class="pre">OneGridFunctionH5</span></code></a> (we will consider this for
+definiteness, but the most of what said here holds true for
+<a class="reference internal" href="cactus_grid_functions_ref.html#postcactus.cactus_grid_functions.OneGridFunctionASCII" title="postcactus.cactus_grid_functions.OneGridFunctionASCII"><code class="xref py py-class docutils literal notranslate"><span class="pre">OneGridFunctionASCII</span></code></a>) is another dictionary-like object. The keys
+of this class are the various iterations available in the files. Hence, to read
+some data at a given iteration <code class="docutils literal notranslate"><span class="pre">iteration</span></code>, you can simply use the bracket
+operator. Alternatively, you can use the <code class="xref py py-meth docutils literal notranslate"><span class="pre">get_iteration()</span></code> method:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># These methods are equivalent</span>
+<span class="n">rho0</span> <span class="o">=</span> <span class="n">sim</span><span class="o">.</span><span class="n">gf</span><span class="o">.</span><span class="n">xy</span><span class="o">.</span><span class="n">rho</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+<span class="n">rho0</span> <span class="o">=</span> <span class="n">sim</span><span class="o">.</span><span class="n">gf</span><span class="o">.</span><span class="n">xy</span><span class="o">.</span><span class="n">rho</span><span class="o">.</span><span class="n">get_iteration</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>You can find what iterations are available with the
+<a class="reference internal" href="cactus_grid_functions_ref.html#postcactus.cactus_grid_functions.BaseOneGridFunction.available_iterations" title="postcactus.cactus_grid_functions.BaseOneGridFunction.available_iterations"><code class="xref py py-meth docutils literal notranslate"><span class="pre">available_iterations()</span></code></a> attribute. Similarly, you can find what times
+are available with <a class="reference internal" href="cactus_grid_functions_ref.html#postcactus.cactus_grid_functions.BaseOneGridFunction.available_times" title="postcactus.cactus_grid_functions.BaseOneGridFunction.available_times"><code class="xref py py-meth docutils literal notranslate"><span class="pre">available_times()</span></code></a>. You can read a time instead of
+a iteration with the method <code class="xref py py-meth docutils literal notranslate"><span class="pre">get_time()</span></code>. You can convert between time
+and iteration with the methods <a class="reference internal" href="cactus_grid_functions_ref.html#postcactus.cactus_grid_functions.OneGridFunctionH5.time_at_iteration" title="postcactus.cactus_grid_functions.OneGridFunctionH5.time_at_iteration"><code class="xref py py-meth docutils literal notranslate"><span class="pre">time_at_iteration()</span></code></a> and
+<a class="reference internal" href="cactus_grid_functions_ref.html#postcactus.cactus_grid_functions.BaseOneGridFunction.iteration_at_time" title="postcactus.cactus_grid_functions.BaseOneGridFunction.iteration_at_time"><code class="xref py py-meth docutils literal notranslate"><span class="pre">iteration_at_time()</span></code></a>.</p>
+<p>These methods return a <a class="reference internal" href="grid_data_ref.html#postcactus.grid_data.HierarchicalGridData" title="postcactus.grid_data.HierarchicalGridData"><code class="xref py py-class docutils literal notranslate"><span class="pre">HierarchicalGridData</span></code></a> object with all the
+available data for the requested iteration. If HDF5 files are being read, the
+correct ghost zone information is being used. In case you want to work with a
+specific subgrid with uniform spacing, you can use the <a class="reference internal" href="cactus_grid_functions_ref.html#postcactus.cactus_grid_functions.BaseOneGridFunction.read_on_grid" title="postcactus.cactus_grid_functions.BaseOneGridFunction.read_on_grid"><code class="xref py py-meth docutils literal notranslate"><span class="pre">read_on_grid()</span></code></a>
+method. This will return a <a class="reference internal" href="grid_data_ref.html#postcactus.grid_data.UniformGridData" title="postcactus.grid_data.UniformGridData"><code class="xref py py-class docutils literal notranslate"><span class="pre">UniformGridData</span></code></a> object instead, with
+grid the grid you specify. The grid is specified by passing a
+<code class="xref py py-class docutils literal notranslate"><span class="pre">UniformGrid</span></code> object. For example</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">postcactus.grid_data</span> <span class="kn">import</span> <span class="n">UniformGrid</span>
+
+<span class="n">grid</span> <span class="o">=</span> <span class="n">UniformGrid</span><span class="p">([</span><span class="mi">100</span><span class="p">,</span> <span class="mi">100</span><span class="p">],</span> <span class="n">x0</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">x1</span><span class="o">=</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span><span class="mi">2</span><span class="p">])</span>
+<span class="n">rho0_center</span> <span class="o">=</span> <span class="n">sim</span><span class="o">.</span><span class="n">gf</span><span class="o">.</span><span class="n">xy</span><span class="o">.</span><span class="n">rho</span><span class="o">.</span><span class="n">read_on_grid</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="c1"># iteration</span>
+                                         <span class="n">grid</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>This method works by reading the entire grid structure and resampling onto the
+requested <a class="reference internal" href="grid_data_ref.html#postcactus.grid_data.UniformGridData" title="postcactus.grid_data.UniformGridData"><code class="xref py py-class docutils literal notranslate"><span class="pre">UniformGridData</span></code></a>, so it may be slow for large 3D data.</p>
+<p>Similarly, you can read a chunk of evolution from <code class="docutils literal notranslate"><span class="pre">min_iteration</span></code> to
+<code class="docutils literal notranslate"><span class="pre">max_iteration</span></code> on a specified grid with the method
+<code class="xref py py-meth docutils literal notranslate"><span class="pre">read_evolution_on_grid()</span></code>. This returns a
+<a class="reference internal" href="grid_data_ref.html#postcactus.grid_data.UniformGridData" title="postcactus.grid_data.UniformGridData"><code class="xref py py-class docutils literal notranslate"><span class="pre">UniformGridData</span></code></a> that has as first dimension the time, and as other
+dimensions the specified grid. So, this is a “spacetime”
+<a class="reference internal" href="grid_data_ref.html#postcactus.grid_data.UniformGridData" title="postcactus.grid_data.UniformGridData"><code class="xref py py-class docutils literal notranslate"><span class="pre">UniformGridData</span></code></a>. With this function you can evaluate grid data on
+specific spacetime points with multilinear interpolation in space and time. This
+can also be used to generate additional time frames between two outputs.</p>
+<p><a class="reference internal" href="cactus_grid_functions_ref.html#postcactus.cactus_grid_functions.OneGridFunctionH5" title="postcactus.cactus_grid_functions.OneGridFunctionH5"><code class="xref py py-class docutils literal notranslate"><span class="pre">OneGridFunctionH5</span></code></a> objects are iterable: you can loop over all
+the available iterations by iterating over the object.</p>
+</div>
+</div>
+</div>
+
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="index.html">
+              <img class="logo" src="_static/logo.png" alt="Logo"/>
+            </a></p>
+  <h3><a href="index.html">Table of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Grid functions</a><ul>
+<li><a class="reference internal" href="#uniformgrid">UniformGrid</a></li>
+<li><a class="reference internal" href="#uniformgriddata">UniformGridData</a></li>
+<li><a class="reference internal" href="#hierarchicalgriddata">HierarchicalGridData</a></li>
+<li><a class="reference internal" href="#reading-data">Reading data</a><ul>
+<li><a class="reference internal" href="#from-simdir">From SimDir</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="gw_mismatch.html"
+                        title="previous chapter">Mismatch between gravitational waves</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="sensitivity_curves.html"
+                        title="next chapter">Sensitivity (power spectral noise) curves of known detectors</a></p>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="sensitivity_curves.html" title="Sensitivity (power spectral noise) curves of known detectors"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="gw_mismatch.html" title="Mismatch between gravitational waves"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">PostCactus 3.0.0a9 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">Grid functions</a></li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2020, Gabriele Bozzola and Wolfgang Kastaun.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 3.3.0.
+    </div>
+  </body>
+</html>

@@ -1,0 +1,453 @@
+{
+ "cells": [
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "# Working with grid data\n",
+    "\n",
+    "In this notebook, we show some of the most useful features of the [grid_data](../grid_data.rst) module. \n",
+    "\n",
+    "There are three important objects in [grid_data](../grid_data.rst):\n",
+    "- `UniformGrid` represents Cartesian grids,\n",
+    "- `UniformGridData` represents data on `UniformGrid`,\n",
+    "- `HierarchicalGridData` represents data on multiple grids with different spacings (a mesh-refined grid).\n",
+    "\n",
+    "In most cases you will not define these objects directly, but it is important to know how they work.\n",
+    "To learn how to read the simulation data, see [working with grid funcitons](cactus_grid_functions.ipynb).\n",
+    "\n",
+    "(This notebook is meant to be converted in Sphinx documentation and not used directly.)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "import matplotlib.pyplot as plt\n",
+    "import numpy as np\n",
+    "from postcactus import grid_data as gd\n",
+    "from postcactus import series\n",
+    "\n",
+    "%matplotlib inline"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "To generate data, we start from preparing a grid. `PostCactus` follows the conventions in `Carpet` and identifies a grid with (1) the number of points along each direction, (2) the coordinate of left bottom cell, (3) the spacing or the coordinate of the top right cell.\n",
+    "In addition, `UniformGrid` can contain additional information, like the number of refinement level, or the time. These grids are always cell-centered.\n",
+    "\n",
+    "Let us create a 2D grid: "
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "grid = gd.UniformGrid([201, 201], # Number of points\n",
+    "                      x0=[-100, -100], # origin\n",
+    "                      x1=[100, 100] # other corner\n",
+    "                      )"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "`UniformGrid` are meant to be immutable objects, and indeed there is not much that we can do with them. If we print them, we will find some interesting information."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "print(grid)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "We can obtain this (and other information) directly from `grid`, for example."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "print(f\"Unit volume {grid.dv}, number of dimensions {grid.num_dimensions}\")"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "`UniformGrid` objects can be indexed and support the `in` operator, which are quite convinent. "
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "print(f\"The coordinate cooresponding to the index 1, 2 is {grid[1,2]}\")\n",
+    "print(f\"Is [-140, 50] in the grid?: {[-140, 50] in grid}\")"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "Finally, one can get explicitly the coordinates with the `coordinates` method.\n",
+    "This can return arrays with the coordinates along each direction (default), or can return the coordinates as a numpy meshgrid \n",
+    "(if `as_meshgrid=True`), or can return a list of arrays with the same shape of the grid and the values of the coordinates (if `as_same_shape=True`).\n",
+    "Let's see one example."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "print(grid.coordinates()[0])"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "`UniformGridData` are much more interesting. `UniformGridData` packages a\n",
+    "`UniformGrid` and some data in the same object and provides many useful\n",
+    "functionalities.\n",
+    "\n",
+    "Let us create some fake data to explore the capabilities. A simple way to\n",
+    "generate a `UniformGridData` from a function is with `sample_function`."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "grid_data = gd.sample_function(lambda x, y: x * y,\n",
+    "                          [101, 201], # shape\n",
+    "                          [0, 0], # origin\n",
+    "                          [10, 10] # other corner\n",
+    "                          )"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "We can visualize this data with matplotlib `contourf`. \n",
+    "To do this, we need the coordinates as meshgrid, and we need the actual data.\n",
+    "To get the first, we use the `coordinates_meshgrid` method, for the second, we\n",
+    "access directly the data with the `data` attribute. This is stored as a numpy \n",
+    "array. Often, we want to plot these objects. Using `data` directly would lead to \n",
+    "transposing the actual physical quantity, because `data` is a matrix stored by rows, \n",
+    "so, the first index does not label the x coordiante, but the y. \n",
+    "We provide the aliaxs `data_xyz`, which is the the tranposed of `data`. This is ready to be plotted. \n",
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "cf = plt.contourf(*grid_data.coordinates_meshgrid(), # The star is to unpack the list\n",
+    "                  grid_data.data_xyz) \n",
+    "plt.colorbar(cf)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "`UniformGridData` support all the mathematical operations we may want, for instance."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "funky_data = np.sqrt(grid_data) + grid_data**2 * np.tanh(grid_data)\n",
+    "cf = plt.contourf(*funky_data.coordinates_meshgrid(), funky_data.data_xyz)\n",
+    "plt.colorbar(cf)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "`UniformGridData` can be interpolated with splines to evalute data everywhere, even where there was no data. With this, we can make `UniformGridData` callable objects:"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "print(f\"The value of funky_data at (2, 3) is {funky_data((2,3)):.3f}\")"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "`UniformGridData` have built-in a collection of useful functions, for example:"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "print(f\"The mean of funky_data is {funky_data.mean():.3f}\")\n",
+    "print(f\"The integral of funky_data is {funky_data.integral():.3f}\")\n",
+    "print(f\"The norm2 of funky_data is {funky_data.norm2():.3f}\")\n",
+    "\n",
+    "bins, hist = funky_data.histogram(num_bins=20)\n",
+    "plt.ylabel(\"count\")\n",
+    "plt.xlabel(\"value\")\n",
+    "plt.plot(bins, hist[:-1])"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "It is not possible to combine directly two `UniformGridData` with different associated grids, \n",
+    "but it is always possible to resample the objects so that they have a common grid.\n",
+    "\n",
+    "Pay attention: resampling operations can be very expensive with large grids or high dimensions! "
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "new_grid = gd.UniformGrid([201, 301], x0=[1, 1], x1=[2, 10])\n",
+    "resampled_funky = funky_data.resampled(new_grid)\n",
+    "cf = plt.contourf(*resampled_funky.coordinates_meshgrid(), resampled_funky.data_xyz)\n",
+    "plt.colorbar(cf)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "Being able to resample `UniformGridData` means that even if it is not possible to directly\n",
+    "combine objects with different grids, you can always resample them to a common grid, and then\n",
+    "perform the operation.\n",
+    "\n",
+    "Now that we have some familiarity with `UniformGridData`, we can move to the most important\n",
+    "object, `HierarchicalGridData`. The relevance of this class is due to the fact that simulation\n",
+    "data is represented with `HierarchicalGridData` objects.\n",
+    "\n",
+    "A `HierarchicalGridData` is a collection of `UniformGridData`, or (or more) for each refinement\n",
+    "level.\n",
+    "\n",
+    "Let us prepare some fake data."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "# 3 refinement levels\n",
+    "data = []\n",
+    "for ref_level in range(3):\n",
+    "    resolution = (1 + ref_level) * 20 + 1\n",
+    "    data.append(gd.sample_function(lambda x, y: x*y + 5,\n",
+    "                                   [resolution, resolution],\n",
+    "                                   [-10, -10], \n",
+    "                                   [10, 10],\n",
+    "                                   ref_level=ref_level\n",
+    "                                   ))\n",
+    "hg = gd.HierarchicalGridData(data)\n",
+    "print(hg)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "\"Components\" are essentially patches of grid. In some cases,\n",
+    "components are a result of running the code on multiple processes.\n",
+    "In this case, PostCactus will try to merge them in a single grid.\n",
+    "In other instances, when there are multiple centers of refinement,\n",
+    "the components are real. Here, PostCactus will do nothing and will\n",
+    "keep all the components around.\n",
+    "\n",
+    "To access a specific refinement level, we can use the backet operator.\n",
+    "This will return a list of all the components at that level. Often,\n",
+    "there will be only one element because PostCactus successfully merged\n",
+    "the various patches. In this case, one can use the `get_level` method\n",
+    "to get directly the data on that level."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "level2 = hg.get_level(2)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "type(level2)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "As we see, this is just a `UniformGridData`, so everything we can operate\n",
+    "on single levels exactly in the same way we work on `UniformGridData`.\n",
+    "If the  `HierarchicalGridData` has multiple disconnected components, \n",
+    "`hg[2]` will instead return a list of `UniformGridData`.\n",
+    "\n",
+    " `HierarchicalGridData` fully support mathematical operations. (Binary operations\n",
+    " are performed only if the two objects have the same grids and components.)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "more_funk = (abs(hg) + 2).log() # For some reasons np.log(hg) doesn't work... \n",
+    "\n",
+    "# We can also call the HierarchicalGridData\n",
+    "print(f\"more_funk of (2, 3) is {more_funk((2,3)):.3f}\")"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "We cannot plot directly this object, because it is a complicated object. To plot it, we have to merge the refinement levels to a single `UniformGridData`. We can do this with `merge_refinement_levels()`. "
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "merged = more_funk.merge_refinement_levels(resample=True)\n",
+    "cf = plt.contourf(*merged.coordinates_meshgrid(), merged.data_xyz)\n",
+    "plt.colorbar(cf)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "As you noticed, we enabled the `resample` option. With this option the coarser refinement levels are interpolated to the new finer grid using multilinear interpolation.\n",
+    "\n",
+    "When working with large grids, many refinement levels, and/or 3D data, merging the various refinement levels can be a very expensive operation. However, often we don't need the entire grid, but we want to look at a portion. `HierachicalGridData` objects have a method to merge the refinement levels on a specified grid."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "small_grid = gd.UniformGrid([20, 20], x0=[-1, -1], x1=[1, 1])\n",
+    "small_funk = more_funk.to_UniformGridData(small_grid, resample=False)\n",
+    "cf = plt.contourf(*small_funk.coordinates_meshgrid(), small_funk.data_xyz)\n",
+    "plt.colorbar(cf)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "`HierachicalGridData` objects have a lot of information that is accessible as a property."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "print(f\"Available refinement levels: {hg.refinement_levels}\")\n",
+    "print(f\"Spacing of the coarsest: {hg.coarsest_dx}\")\n",
+    "print(f\"Spacing of the finest: {hg.finest_dx}\")\n",
+    "print(f\"Finest level: {hg.finest_level}\")"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "Often, we want to look at a specific cut of the data. `UniformGridData` can be sliced easily. Just prepare a `cut` array with `None` where you want to keep the dimension, and the coordiante of where you want to slice. For example, here we extract the line with `y=0.7`."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "along_y = small_funk.sliced([None,0.7])\n",
+    "print(along_y.grid)\n",
+    "plt.plot(*along_y.coordinates_meshgrid(), along_y.data)"
+   ]
+  }
+ ],
+ "metadata": {
+  "kernelspec": {
+   "display_name": "Python 3",
+   "language": "python",
+   "name": "python3"
+  },
+  "language_info": {
+   "codemirror_mode": {
+    "name": "ipython",
+    "version": 3
+   },
+   "file_extension": ".py",
+   "mimetype": "text/x-python",
+   "name": "python",
+   "nbconvert_exporter": "python",
+   "pygments_lexer": "ipython3",
+   "version": "3.7.8"
+  },
+  "name": "grid_data.ipynb"
+ },
+ "nbformat": 4,
+ "nbformat_minor": 4
+}
