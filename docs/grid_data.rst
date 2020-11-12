@@ -445,10 +445,16 @@ operator. Alternatively, you can use the :py:meth:`~.get_iteration` method:
 
 You can find what iterations are available with the
 :py:meth:`~.available_iterations` attribute. Similarly, you can find what times
-are available with :py:meth:`~.available_times`. You can read a time instead of
-a iteration with the method :py:meth:`~.get_time`. You can convert between time
-and iteration with the methods :py:meth:`~.time_at_iteration` and
-:py:meth:`~.iteration_at_time`.
+are available with :py:meth:`~.available_times`:
+
+.. code-block:: python
+
+    print(sim.gf.xy.rho.available_iterations)
+    print(sim.gf.xy.rho.available_times)
+
+You can read a time instead of a iteration with the method
+:py:meth:`~.get_time`. You can convert between time and iteration with the
+methods :py:meth:`~.time_at_iteration` and :py:meth:`~.iteration_at_time`.
 
 These methods return a :py:class:`~.HierarchicalGridData` object with all the
 available data for the requested iteration. If HDF5 files are being read, the
