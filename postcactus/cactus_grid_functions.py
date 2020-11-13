@@ -465,7 +465,7 @@ class OneGridFunctionASCII(BaseOneGridFunction):
             current_ref_level,
         ):
             # First, we compute x0 and x1
-            x0_3d = np.array(
+            x0_3d = np.asarray(
                 [
                     np.amin(current_x),
                     np.amin(current_y),
