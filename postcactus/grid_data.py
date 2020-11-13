@@ -2076,6 +2076,7 @@ class HierarchicalGridData(BaseNumerical):
         grids or grids that can be merged.
 
         """
+        # TODO: In Python 3.8 we can reverse without transformint into a list first
         for ref_level, data in reversed(list(self.grid_data_dict.items())):
             for comp_index, comp in enumerate(data):
                 yield ref_level, comp_index, comp
@@ -2083,7 +2084,7 @@ class HierarchicalGridData(BaseNumerical):
     def __iter__(self):
         """Iterate across all the refinement levels and components from the coarsest
         to the finest."""
-        for ref_level, data in reversed(list(self.grid_data_dict.items())):
+        for ref_level, data in self.grid_data_dict.items():
             for comp_index, comp in enumerate(data):
                 yield ref_level, comp_index, comp
 
