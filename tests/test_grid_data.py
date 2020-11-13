@@ -18,8 +18,8 @@
 """Tests for postcactus.grid_data
 """
 
-import unittest
 import os
+import unittest
 
 import numpy as np
 

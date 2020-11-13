@@ -21,11 +21,11 @@ grid function in Cactus formats.
 import os
 import re
 import warnings
+from abc import ABC, abstractmethod
+from bz2 import open as bopen
 from contextlib import contextmanager
 from functools import lru_cache
-from bz2 import open as bopen
 from gzip import open as gopen
-from abc import ABC, abstractmethod
 
 import h5py
 import numpy as np

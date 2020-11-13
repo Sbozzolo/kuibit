@@ -29,11 +29,11 @@ import os
 from functools import lru_cache
 
 from postcactus import (
+    cactus_grid_functions,
+    cactus_horizons,
     cactus_multipoles,
     cactus_scalars,
     cactus_waves,
-    cactus_grid_functions,
-    cactus_horizons,
 )
 
 

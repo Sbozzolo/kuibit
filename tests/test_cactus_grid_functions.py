@@ -19,8 +19,8 @@ import os
 import unittest
 from unittest import mock
 
-import numpy as np
 import h5py
+import numpy as np
 
 from postcactus import cactus_grid_functions as cg
 from postcactus import grid_data
