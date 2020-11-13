@@ -19,6 +19,7 @@
 """
 
 import unittest
+import os
 
 import numpy as np
 
@@ -728,16 +729,25 @@ class TestUniformGridData(unittest.TestCase):
 
         self.assertEqual(loaded, grid_data)
 
+        # Clean up file
+        os.remove(grid_file)
+
         # Test compressed
         grid_data.save(grid_file_bz)
         loaded_bz = gd.load_UniformGridData(grid_file_bz)
 
         self.assertEqual(loaded_bz, grid_data)
 
+        # Clean up file
+        os.remove(grid_file_bz)
+
         grid_data.save(grid_file_gz)
         loaded_gz = gd.load_UniformGridData(grid_file_gz)
 
         self.assertEqual(loaded_gz, grid_data)
+
+        # Clean up file
+        os.remove(grid_file_gz)
 
     def test_splines(self):
 
