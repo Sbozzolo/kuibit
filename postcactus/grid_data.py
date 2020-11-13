@@ -331,7 +331,7 @@ class UniformGrid:
         :rtype:   1d numpy array of float
         """
         # TODO: Add dimensionality checks
-        return np.array(indices) * self.dx + self.x0
+        return np.asarray(indices) * self.dx + self.x0
 
     def coordinates_to_indices(self, coordinates):
         """Find the indices corresponding to the
@@ -343,7 +343,7 @@ class UniformGrid:
         :rtype:   array of int
         """
         # TODO: Add dimensionality checks
-        return (((np.array(coordinates) - self.x0) / self.dx) + 0.5).astype(
+        return (((np.asarray(coordinates) - self.x0) / self.dx) + 0.5).astype(
             np.int32
         )
 
