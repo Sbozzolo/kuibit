@@ -16,8 +16,8 @@
 # this program; if not, see <https://www.gnu.org/licenses/>.
 
 
-import unittest
 import os
+import unittest
 
 import numpy as np
 

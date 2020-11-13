@@ -19,8 +19,7 @@ from bz2 import open as bopen
 from gzip import open as gopen
 
 import numpy as np
-from scipy import interpolate
-from scipy import linalg
+from scipy import interpolate, linalg
 
 from postcactus.numerical import BaseNumerical
 

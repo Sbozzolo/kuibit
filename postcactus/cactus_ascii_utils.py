@@ -18,8 +18,8 @@
 """ This module provides helper functions to read Cactus ASCII files.
 """
 
-import re
 import os
+import re
 
 
 def _scan_strings_for_columns(strings, pattern, path=None):

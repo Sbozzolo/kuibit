@@ -28,8 +28,8 @@ from collections import namedtuple
 import numpy as np
 from scipy import integrate, optimize
 
-import postcactus.unitconv as uc
 import postcactus.timeseries as ts
+import postcactus.unitconv as uc
 
 # This is just a convenience to avoid having to remember the order of
 # the output (and for easy of extension)
