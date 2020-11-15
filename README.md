@@ -21,11 +21,7 @@ documentation](https://sbozzolo.github.io/PostCactus).
 ``` bash
    pip3 install --index-url https://test.pypi.org/simple/ postcactus
 ```
-If they are not already available, `pip` will install the following packages:
-- `numpy`
-- `numba`
-- `h5py`
-- `scipy`.
+If they are not already available, `pip` will install all the necessary dependencies.
 
 The minimum version of Python required is 3.6.
 

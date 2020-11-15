@@ -36,29 +36,23 @@ For a full list of available features, see the :doc:`features page <features>`.
   extrapolate waves to infinity.
 - Work with 1D, 2D, and 3D grid functions (:py:mod:`~.grid_data`,
   :py:mod:`~.cactus_grid_functions`) as output by ``CarpetIOHDF5`` or
-      ``CarpetIOASCII``.
+  ``CarpetIOASCII``.
 - Work with horizon data from (:py:mod:`~.cactus_horizons`) as output by
-      ``QuasiLocalMeasures`` and ``AHFinderDirect``.
+  ``QuasiLocalMeasures`` and ``AHFinderDirect``.
 - Handle unit conversion, in particular from geometrized to physical
   (:py:mod:`~.unitconv`).
 
 Installation
 ------------
 
-`PostCactus` is available in TestPyPI. To install it with `pip`
+``PostCactus`` is available in TestPyPI. To install it with `pip`
 
 .. code-block:: bash
 
    pip3 install --index-url https://test.pypi.org/simple/ postcactus
 
-If they are not already available, ``pip`` will install the following packages:
-- ``numpy``,
-
-- ``numba``,
-
-- ``h5py``,
-
-- ``scipy``.
+If they are not already available, ``pip`` will install all the necessary
+dependencies.
 
 The minimum version of Python required is 3.6.
 

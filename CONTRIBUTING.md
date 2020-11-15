@@ -38,6 +38,8 @@ descriptive names are preferred over short ones.
 
 We apply `black -l 79` to all the files before commiting them.
 
+Modules that work directly with Cactus/Carpet objects have start with `cactus`
+in their name (e.g., `cactus_grid_functions` vs `grid_data`).
 
 ## Notes
 

@@ -10,7 +10,7 @@ example, if an objects smells like a dictionary, you should be able to ask for
 ``keys()``, or iteratate over it, or see if an element is contained with the
 ``in`` keyword.
 
-Here we review all the available features as of version ``3.0.0b1`.
+Here we review all the available features as of version ``3.0.0b1``.
 
 General
 -------
@@ -32,6 +32,7 @@ Series
 ------
 
 Time and frequency series are represented in an intuitive way. They
+
 - can be real or complex;
 - can be unevenly spaced;
 - support all the mathematical operations (e.g., you can sum two timeseries);
@@ -41,7 +42,7 @@ Time and frequency series are represented in an intuitive way. They
 - are compatible with NumPy's operations (e.g., you can all ``np.log(rho)``);
 - are compatible with matplotlib ``plot`` (you can plot with ``plt.plot(rho)``);
 - can be resampled using nearest neighors or splines on new times/frequencies;
-- can be writted to disk in a human-readable way (with ``save``);
+- can be written to disk in a human-readable way (with ``save``);
 - can be clean from ``nans``;
 - can be integrated with the trapezional method (cumulative integral);
 - can be derived from splines, or with second-order finite differencing;
@@ -50,6 +51,7 @@ Time and frequency series are represented in an intuitive way. They
 - can be resampled to the points common points with other series.
 
 Specifically timeseries, also support:
+
 - computing the unfolded phase and phase velocity;
 - computing duration, time intervals;
 - shifting time/phase, aligning at (absolute) maximum/minimum;
@@ -63,6 +65,7 @@ Specifically timeseries, also support:
 - Fourier Transform (real and complex).
 
 Frequencyseries support:
+
 - loading from file (e.g., noise curves);
 - normalization;
 - low/high pass filters;
@@ -85,12 +88,14 @@ Multipoles and waves
 - Read ASCII and HDF5 data from ``Multipoles``.
 - Represent multipoles with objects that can be accessed with the multipole numbers.
 - Use the fixed frequency integration method to compute from ``Psi4``:
+
   - strains at given multipole number,
   - strains at a given point (accounting for the spin-weigthed spherical harmonics),
   - strain as observed by LIGO/Virgo (considering the antenna patterns),
   - power/energy lost via gravitational waves (one or multiple modes),
   - torque/angular momentum along the z axis lost via gravitational waves (one or multiple modes),
   - Compute the last two for electromagnetic waves from ``Phi2``.
+
 - Extrapolate waves at infinity with polynomial expansion in real/imaginary parts or amplitude and phase.
 - Compute spin-weigthed spherical harmonics.
 - Convert from RA and Dec to spherical coordiantes.
@@ -110,6 +115,7 @@ Grid Data
 ---------
 
 - Read 1D, 2D, and 3D ASCII and HDF5 files as ``HierarchicalGridData``, which supports:
+
   - working with multiple components and refinement levels;
   - handling ghost-zones;
   - merging multiple patches that logically represent a single grid (e.g., due to domain decomposition);
@@ -123,13 +129,16 @@ Grid Data
   - Second-order finite-differencing along any dimension;
   - being resampled to ``UniformGridData`` (unigrid);
   - abitrarily slicing with lower-dimensional cuts (e.g., equatorial plane from 3D data).
+
 - In addition to above ``UniformGridData`` support:
+
   - being saved on disk;
   - histogram and percentiles;
   - additonal reductions (e.g., norm2, mean, norm-p, integral);
   - changing grid spacing (up/down sampling);
   - Fourier Transform;
   - computing grid coordiantes (for plotting or operations involving the coordinates);
+
 - Read multiple iterations as spacetime ``HierarchicalGridData`` (to take advantage of multilinear interpolation in space and time).
 - Transparently handle multiple restarts/output from different MPI processes.
 - Computing the total size of the files associated to a variable/dimension.
