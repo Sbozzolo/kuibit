@@ -1277,7 +1277,7 @@ class UniformGridData(BaseNumerical):
         return type(self)(new_grid, self.data[slicer])
 
     def slice(self, cut, resample=False):
-        """Slice the data along giev direction.
+        """Slice the data along given direction.
 
         cut specifies how to slice the data. It has to be an array with
         the same num of dimensions of the data. Where cut is None, that
