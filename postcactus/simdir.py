@@ -219,7 +219,7 @@ class SimDir:
 
     def __str__(self):
         header = f"Indexed {len(self.allfiles)} files"
-        header += f"and {len(self.dirs)} subdirectories\n"
+        header += f" and {len(self.dirs)} subdirectories\n"
 
         ts_ret = f"{self.ts}"
         mp_ret = f"{self.multipoles}"
