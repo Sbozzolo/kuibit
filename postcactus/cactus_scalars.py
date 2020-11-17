@@ -61,18 +61,21 @@ class OneScalar:
     # 3: Matched - with followed by 4: any word
     # 5: Matches brackets with a number inside
     # In between match a dot (\.)
-    # 6: (minimum|maximum|norm1|norm2|norm_inf|average)? optionally match one
+    # 6: (minimum|maximum|norm1|norm2|norm_inf|average|scalars)? optionally match one
     #    of those
     # In between match .asc (\.asc)
     # 7: (\.(gz|bz2))? optionally match .gz or .bz2
 
     # We want to match file names like hydrobase-press.maximum.asc or
     # hydrobase-vel[0].maximum.asc
+    #
+    # The .scalars. file is the one generated with the option
+    # all_reductions_in_one_file
 
     _pattern_filename = r"""
     ^(\w+)
     ((-(\w+))|(\[\d+\]))?
-    \.(minimum|maximum|norm1|norm2|norm_inf|average)?
+    \.(minimum|maximum|norm1|norm2|norm_inf|average|scalars)?
     \.asc
     (\.(gz|bz2))?$"""
 

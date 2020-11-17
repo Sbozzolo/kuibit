@@ -30,6 +30,8 @@ PostCactus or of Python required to complete the task.
 * Perform interpolation in shapes of `AHFinderDirect` to better find shapes when
   the cut is not on a major direction. [==]
 
+* Add support for `all_reductions_in_one_file` to `cactus_scalars`. [==]
+
 * Hunt for TODOs in the codebase and implement them. [=?=]
 
 ## Infrastructure
