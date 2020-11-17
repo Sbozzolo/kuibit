@@ -21,13 +21,9 @@ Accessing data
 
 One typically does not use directly :py:class:`~.OneScalar`, but
 :py:class:`~.ScalarsDir`. This class takes as input a :py:class:`~.SimDir` and
-organizes the various type of scalar data available.
-
-.. note::
-
-   :py:class:`~.SimDir` internally organizes its scalar data as
-   :py:class:`~.ScalarsDir`, so this documentation is of interest to the scalars
-   :py:in :py:class:`~.SimDir`.
+organizes the various type of scalar data available. :py:class:`~.SimDir`
+internally organizes its scalar data as :py:class:`~.ScalarsDir`, so this
+documentation is of interest to the scalars in :py:class:`~.SimDir`.
 
 You can also print the content of a :py:class:`~.ScalarsDir`:
 

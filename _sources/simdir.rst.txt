@@ -2,10 +2,10 @@ Getting started with SimDir
 ==============================
 
 The :py:class:`~.SimDir` class provide easy access to simulation data. Most data
-analysis start by using this object. `SimDir`` takes as input the top level
+analysis start by using this object. ``SimDir`` takes as input the top level
 directory containing simulation data, and read and organizes the content.
 ``SimDir`` contains the index of all the information that is possible to extract
-from the ASCII and hdf5 files. If there are restarts, ``SimDir`` will handle
+from the ASCII and HDF5 files. If there are restarts, ``SimDir`` will handle
 them transparently.
 
 Defining a SimDir object
@@ -40,7 +40,7 @@ can use
     timeseries = sd.ts
     # or timeseries = sd.timeseries
 
-The resulting object is a :py:class:`~.ScalarDirs`. The page
+The resulting object is a :py:class:`~.ScalarsDir`. The page
 :ref:`cactus_scalars:Scalar data` contains a lot of information on how to use
 these.
 

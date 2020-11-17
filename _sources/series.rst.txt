@@ -6,7 +6,7 @@ Time and frequency series are fundamental objects in most simulations.
 modules, which define the ``TimeSeries`` (:ref:`timeseries_ref:Reference on
 postcactus.timeseries`) and ``FrequencySeries``
 (:ref:`frequencyseries_ref:Reference on postcactus.frequencyseries`) object
-types. Both the classes are derived from a base class ``BaseSeries`
+types. Both the classes are derived from a base class ``BaseSeries``
 (:ref:`series_ref:Reference on postcactus.series`) which defines common methods
 and features, so ``TimeSeries`` and ``FrequencySeries`` share a lot of
 functionalities.
@@ -381,7 +381,6 @@ This uses NumPy's ``fft`` module, so the
 conventions are the same, except that we normalize the results. That is, instead
 of computing
 
-
 .. :math:
 
    `a_m = \frac{1}{n} \Sum_k^{n-1} A_k \extp(2\pi i \frac{mk}{n})`
@@ -400,6 +399,7 @@ inner_product, and overlap
 
 Given :math:`h1, h2` frequency series and :math:`S_n` spectral noise density,
 the inner product is typically defined as
+
 .. :math:
 
    `(h_1, h_2) = 4 \Re \int_{f_min}^{f_max} \frac{h_1 h_2^*}{S_n}`.
