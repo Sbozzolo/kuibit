@@ -52,8 +52,8 @@ class TestSimDir(unittest.TestCase):
         self.assertEqual(len(self.sim.dirs), 5)
 
         # find . -type f | grep -v "SIMFACTORY" | grep -v "NODES" | wc -l
-        # 445
-        self.assertEqual(len(self.sim.allfiles), 445)
+        # 446
+        self.assertEqual(len(self.sim.allfiles), 446)
 
         # Checking max_depth
         sim_max_depth = sd.SimDir("tests/tov", max_depth=2)
