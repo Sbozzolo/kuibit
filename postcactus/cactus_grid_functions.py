@@ -1041,10 +1041,26 @@ class AllGridFunctions:
                     # header, for this we use the scan_header function in
                     # cactus_scalars.
                     #
+                    # Here we have to pay attention to the output of the Thorns
+                    # VolumeIntegralsGRMHD and VolumeIntegralsVacuum as they
+                    # produce output files with names:
+                    # volume_integrals-vacuum and volume_integrals-GRMHD.
+                    #
+                    # These would be matched here, so we will exclude the case in
+                    # which the thorn name is volume_integrals and the var name
+                    # is vacuum or GRMHD.
+                    thorn_name = matched_ascii.group(2)
+                    var_name = matched_ascii.group(3)
+                    if thorn_name == "volume_integrals" and (
+                        var_name == "GRMHD" or var_name == "vacuum"
+                    ):
+                        continue
+
                     # TODO: Here we scan the headers, we should not do this
                     #       work again when we deal with the single variables
                     #
-                    # The last group is where compression information is
+                    # The last group is where compression information is. It
+                    # could be None.
                     compression_method = matched_ascii.groups()[-1]
                     opener, opener_mode = OneGridFunctionASCII._decompressor[
                         compression_method
