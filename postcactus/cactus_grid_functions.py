@@ -318,7 +318,7 @@ class BaseOneGridFunction(ABC):
 
         return self._read_iteration_as_HierarchicalGridData(iteration)
 
-    def read_on_grid(self, iteration, grid):
+    def read_on_grid(self, iteration, grid, resample=False):
         """Read an iteration and resamples the output on the specified grid.
 
         Warning: this can be computationally expensive!
@@ -327,8 +327,12 @@ class BaseOneGridFunction(ABC):
         :type iteration: time
         :param grid:
         :type grid: UniformGrid
+        :param resample: Whether to use multilinear interpolation
+        :type resample: bool
         """
-        return self[iteration].to_UniformGridData(grid)
+        return self[iteration].to_UniformGridData_from_grid(
+            grid, resample=False
+        )
 
     # def read_evolution_on_grid(
     #     self,

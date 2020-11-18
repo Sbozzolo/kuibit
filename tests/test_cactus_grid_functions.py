@@ -405,7 +405,7 @@ class TestOneGridFunction(unittest.TestCase):
 
         self.assertEqual(
             self.P.read_on_grid(0, new_grid),
-            expected_hgd.to_UniformGridData(new_grid),
+            expected_hgd.to_UniformGridData_from_grid(new_grid),
         )
 
         # Here we test the details of the ASCII reader
