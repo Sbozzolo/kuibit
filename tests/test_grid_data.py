@@ -1595,7 +1595,7 @@ class TestHierarchicalGridData(unittest.TestCase):
         self.assertTrue(np.allclose(hg3(grid), grid_data.data))
 
     def test_merge_refinement_levels(self):
-        # This also tests to_UniformGrid
+        # This also tests to_UniformGridData
 
         # We redefine this to be ref_level=1
         grid1 = gd.UniformGrid([4, 5], x0=[0, 1], x1=[3, 5], ref_level=1)

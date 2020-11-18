@@ -2354,7 +2354,7 @@ class HierarchicalGridData(BaseNumerical):
     def __call__(self, x):
         return self.evaluate_with_spline(x)
 
-    def to_UniformGridData(self, grid, resample=False):
+    def to_UniformGridData_from_grid(self, grid, resample=False):
         """Combine the refinement levels into a UniformGridData.
         Optionally resample the data with a multilinear resampling.
         """
@@ -2363,6 +2363,17 @@ class HierarchicalGridData(BaseNumerical):
             self.evaluate_with_spline(grid, piecewise_constant=(not resample)),
         )
 
+    def to_UniformGridData(
+        self, shape, x0, x1=None, dx=None, resample=False, **kwargs
+    ):
+        """Combine the refinement levels into a UniformGridData specified by the
+        given shape, x0, and dx or x1. Additiona arguments are sent to UniformGrid.
+        Optionally resample the data with a multilinear resampling.
+        """
+        grid = UniformGrid(shape, x0, x1, dx, **kwargs)
+
+        return self.to_UniformGridData_from_grid(grid, resample=resample)
+
     def merge_refinement_levels(self, resample=False):
         """Combine all the available data and resample it on a provided
         UniformGrid with resolution of the finest refinement level.
@@ -2370,7 +2381,9 @@ class HierarchicalGridData(BaseNumerical):
         Optionally data from coarser refinement levels is resampled too (with a
         multilinear resampling)
 
-        This can be a very expensive operation!
+        For most practical purposes, using this function is an overkill.
+        This can be a very expensive operation and require a lot of memory.
+        Prefer to_UniformGridData when possible.
 
         """
         # If we have only one refinement level, with one component, we should
@@ -2385,15 +2398,15 @@ class HierarchicalGridData(BaseNumerical):
         new_shape = ((self.x1 - self.x0) / new_dx + 1.5).astype(np.int64)
         new_shape = np.array([s if s > 0 else 1 for s in new_shape])
 
-        new_grid = UniformGrid(
+        return self.to_UniformGridData(
             new_shape,
-            x0=self.x0,
+            self.x0,
+            x1=None,
             dx=new_dx,
             time=self.time,
             iteration=self.iteration,
+            resample=resample,
         )
-
-        return self.to_UniformGridData(new_grid, resample=resample)
 
     def _apply_to_self(self, f, *args, **kwargs):
         """Apply the method f to self, modifying self.
