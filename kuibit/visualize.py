@@ -127,6 +127,7 @@ def _preprocess_plot_grid(func):
                 raise TypeError(
                     "Data has multiple iterations, specify what do you want to plot"
                 )
+
             # Overwrite data with HierarchicalGridData
             data = data[kwargs["iteration"]]
 
@@ -208,7 +209,9 @@ def _preprocess_plot_grid(func):
 
 # All the difficult stuff is in _preprocess_plot_grid
 @_preprocess_plot_grid
-def plot_contourf(data, axis=None, coordinates=None, **kwargs):
+def plot_contourf(
+    data, axis=None, coordinates=None, xlabel=None, ylabel=None, **kwargs
+):
     """Plot 2D grid from numpy array, UniformGridData, HierarhicalGridData,
     or OneGridFunction.
 
@@ -221,5 +224,9 @@ def plot_contourf(data, axis=None, coordinates=None, **kwargs):
         cf = axis.imshow(data, **kwargs)
     else:
         cf = axis.contourf(*coordinates, data, **kwargs)
+    if xlabel is not None:
+        axis.set_xlabel(xlabel)
+    if ylabel is not None:
+        axis.set_ylabel(ylabel)
     plt.draw()
     return cf

@@ -19,6 +19,7 @@ import unittest
 
 # We use the agg backend because it should work everywhere
 import matplotlib
+
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import numpy as np
@@ -121,12 +122,16 @@ class TestVisualize(unittest.TestCase):
             dec_func_grid(data=cactus_ascii)
 
         # Check coordinates (which checks the resampling)
-        ret3 = dec_func_grid(data=cactus_ascii, iteration=0, shape=ugd.shape)
+        ret3 = dec_func_grid(
+            data=cactus_ascii, iteration=0, shape=ugd.shape, xlabel="x"
+        )
         self.assertTrue(
             np.allclose(
                 ret3[1]["coordinates"][0], ugd.coordinates_from_grid()[0]
             )
         )
+        # Test xlabel and ylabel
+        self.assertEqual(ret3[1]["xlabel"], "x")
 
     def test_plot_contourf(self):
 

@@ -151,6 +151,11 @@ Horizons
 - Work with the shape of the horizons and their properties (as timeseries).
 - Cut the 3D shape into 2D projection along the axes centered in the origin of the horizon.
 
+Visualize
+---------
+
+- Visualize grid data.
+
 Utilities
 ------------
 

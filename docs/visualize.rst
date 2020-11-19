@@ -24,7 +24,8 @@ The main way to visualize grid data is with the function
 - :py:class:`~.BaseOneGridFunction`: same as :py:class:`~.HierarchicalGridData`,
   but you also have to provide the iteration with the ``iteration`` keyword.
 
-``shape``, ``x0``, ``x1`` are all 2D lists or tuples.
+``shape``, ``x0``, ``x1`` are all 2D lists or tuples. The function also takes
+``xlabel`` and ``ylabel`` to customize the labels.
 
 Implementation details
 ----------------------
