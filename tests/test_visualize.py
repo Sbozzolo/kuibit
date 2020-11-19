@@ -73,7 +73,7 @@ class TestVisualize(unittest.TestCase):
         # Check with UniformGridData
 
         # 2D
-        ugd = gd.sample_function(lambda x, y: x + y, [100, 20], [0, 1], [2, 5])
+        ugd = gd.sample_function(lambda x, y: x + y, [10, 20], [0, 1], [2, 5])
         # Passing coordinates
         with self.assertWarns(Warning):
             ret = dec_func_grid(
@@ -133,13 +133,24 @@ class TestVisualize(unittest.TestCase):
         # Test xlabel and ylabel
         self.assertEqual(ret3[1]["xlabel"], "x")
 
+        # Test with resample=True
+        ret5 = dec_func_grid(
+            data=cactus_ascii,
+            iteration=0,
+            shape=ugd.shape,
+            xlabel="x",
+            ylabel="y",
+            resample=True,
+        )
+
     def test_plot_contourf(self):
 
         ugd = gd.sample_function(lambda x, y: x + y, [100, 20], [0, 1], [2, 5])
 
         self.assertTrue(
             isinstance(
-                viz.plot_contourf(ugd), matplotlib.contour.QuadContourSet
+                viz.plot_contourf(ugd, xlabel="x", ylabel="y"),
+                matplotlib.contour.QuadContourSet,
             )
         )
         self.assertTrue(

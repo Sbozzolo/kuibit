@@ -148,8 +148,15 @@ def _preprocess_plot_grid(func):
             else:
                 x1 = kwargs["x1"]
 
+            if not_in_kwargs_or_None("resample"):
+                resample = False
+            else:
+                resample = kwargs["resample"]
+
             # Overwrite data with UniformGridData
-            data = data.to_UniformGridData(shape=kwargs["shape"], x0=x0, x1=x1)
+            data = data.to_UniformGridData(
+                shape=kwargs["shape"], x0=x0, x1=x1, resample=resample
+            )
 
         if isinstance(data, gd.UniformGridData):
             # We check if the user has passed coordinates too.
@@ -201,7 +208,8 @@ def _preprocess_plot_grid(func):
             del kwargs["x1"]
         if "iteration" in kwargs:
             del kwargs["iteration"]
-
+        if "resample" in kwargs:
+            del kwargs["resample"]
         return func(data, *args, **kwargs)
 
     return inner
