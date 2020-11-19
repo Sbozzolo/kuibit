@@ -1,0 +1,156 @@
+
+
+<!doctype html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Visualizing data &#8212; PostCactus 3.0.0a9 documentation</title>
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="_static/bizstyle.css" type="text/css" />
+    
+    <script id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/doctools.js"></script>
+    <script src="_static/language_data.js"></script>
+    <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script type="text/x-mathjax-config">MathJax.Hub.Config({"tex2jax": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true, "ignoreClass": "document", "processClass": "math|output_area"}})</script>
+    <script src="_static/bizstyle.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Working with Simulation Directories" href="examples/simdir.html" />
+    <link rel="prev" title="Unit conversion and constants" href="unitconv.html" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0" />
+    <!--[if lt IE 9]>
+    <script src="_static/css3-mediaqueries.js"></script>
+    <![endif]-->
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="examples/simdir.html" title="Working with Simulation Directories"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="unitconv.html" title="Unit conversion and constants"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">PostCactus 3.0.0a9 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">Visualizing data</a></li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="visualizing-data">
+<h1>Visualizing data<a class="headerlink" href="#visualizing-data" title="Permalink to this headline">¶</a></h1>
+<p>The module <a class="reference internal" href="visualize_ref.html#module-postcactus.visualize" title="postcactus.visualize"><code class="xref py py-mod docutils literal notranslate"><span class="pre">visualize</span></code></a> contains functions to immediately visualize
+Einstein Toolkit data. (<span class="xref std std-ref">unitconv_ref:Reference on postcactus.visualize</span>)</p>
+<div class="section" id="grid-functions">
+<h2>Grid functions<a class="headerlink" href="#grid-functions" title="Permalink to this headline">¶</a></h2>
+<p>The main way to visualize grid data is with the function
+<code class="xref py py-mod docutils literal notranslate"><span class="pre">plot_contourf</span></code>. This method support a large variety of inputs:</p>
+<ul class="simple">
+<li><p>NumPy array: it will be plotted with <code class="docutils literal notranslate"><span class="pre">imshow</span></code>, unless the keyword
+<code class="docutils literal notranslate"><span class="pre">coordinates</span></code> is provided, in which case they will be plotted as
+<code class="docutils literal notranslate"><span class="pre">contourf</span></code></p></li>
+<li><p><a class="reference internal" href="grid_data_ref.html#postcactus.grid_data.UniformGridData" title="postcactus.grid_data.UniformGridData"><code class="xref py py-class docutils literal notranslate"><span class="pre">UniformGridData</span></code></a>: it will be plotted over the entire domain,
+unless the keywords <code class="docutils literal notranslate"><span class="pre">x0</span></code>, <code class="docutils literal notranslate"><span class="pre">x1</span></code> and <code class="docutils literal notranslate"><span class="pre">shape</span></code> are provided. These
+specify the extent of the grid to be plotted. <code class="docutils literal notranslate"><span class="pre">shape</span></code> is essentially the
+resolution of the plot. See documentation on grid data for details.</p></li>
+<li><p><a class="reference internal" href="grid_data_ref.html#postcactus.grid_data.HierarchicalGridData" title="postcactus.grid_data.HierarchicalGridData"><code class="xref py py-class docutils literal notranslate"><span class="pre">HierarchicalGridData</span></code></a>: it will be plotted over the entire domain,
+with resolution provided by <code class="docutils literal notranslate"><span class="pre">shape</span></code>. The keywords <code class="docutils literal notranslate"><span class="pre">x0</span></code>, <code class="docutils literal notranslate"><span class="pre">x1</span></code> can change
+the grid extent.</p></li>
+<li><p><a class="reference internal" href="cactus_grid_functions_ref.html#postcactus.cactus_grid_functions.BaseOneGridFunction" title="postcactus.cactus_grid_functions.BaseOneGridFunction"><code class="xref py py-class docutils literal notranslate"><span class="pre">BaseOneGridFunction</span></code></a>: same as <a class="reference internal" href="grid_data_ref.html#postcactus.grid_data.HierarchicalGridData" title="postcactus.grid_data.HierarchicalGridData"><code class="xref py py-class docutils literal notranslate"><span class="pre">HierarchicalGridData</span></code></a>,
+but you also have to provide the iteration with the <code class="docutils literal notranslate"><span class="pre">iteration</span></code> keyword.</p></li>
+</ul>
+<p><code class="docutils literal notranslate"><span class="pre">shape</span></code>, <code class="docutils literal notranslate"><span class="pre">x0</span></code>, <code class="docutils literal notranslate"><span class="pre">x1</span></code> are all 2D lists or tuples.</p>
+</div>
+<div class="section" id="implementation-details">
+<h2>Implementation details<a class="headerlink" href="#implementation-details" title="Permalink to this headline">¶</a></h2>
+<p>In <a class="reference internal" href="visualize_ref.html#module-postcactus.visualize" title="postcactus.visualize"><code class="xref py py-mod docutils literal notranslate"><span class="pre">visualize</span></code></a>, we embrace duck-typing. Ideally, we want to be able to
+plot what the user wants to plot, taking care of the nuisances. This includes:
+numpy arrays, <a class="reference internal" href="grid_data_ref.html#postcactus.grid_data.UniformGridData" title="postcactus.grid_data.UniformGridData"><code class="xref py py-class docutils literal notranslate"><span class="pre">UniformGridData</span></code></a>, <a class="reference internal" href="grid_data_ref.html#postcactus.grid_data.HierarchicalGridData" title="postcactus.grid_data.HierarchicalGridData"><code class="xref py py-class docutils literal notranslate"><span class="pre">HierarchicalGridData</span></code></a>,
+and so on. To abstract away the details of how to handle all the different
+types, we have decorators. For example, with the decorator
+<code class="xref py py-class docutils literal notranslate"><span class="pre">_preprocess_plot_grid</span></code>, we give support to handling all the
+differnt types to any function that takes <code class="docutils literal notranslate"><span class="pre">data</span></code> and and <code class="docutils literal notranslate"><span class="pre">coordiantes</span></code> as
+arguments. This can be used for other functions too.</p>
+</div>
+</div>
+
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="index.html">
+              <img class="logo" src="_static/logo.png" alt="Logo"/>
+            </a></p>
+  <h3><a href="index.html">Table of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Visualizing data</a><ul>
+<li><a class="reference internal" href="#grid-functions">Grid functions</a></li>
+<li><a class="reference internal" href="#implementation-details">Implementation details</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="unitconv.html"
+                        title="previous chapter">Unit conversion and constants</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="examples/simdir.html"
+                        title="next chapter">Working with Simulation Directories</a></p>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="examples/simdir.html" title="Working with Simulation Directories"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="unitconv.html" title="Unit conversion and constants"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">PostCactus 3.0.0a9 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">Visualizing data</a></li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2020, Gabriele Bozzola and Wolfgang Kastaun.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 3.3.1.
+    </div>
+  </body>
+</html>

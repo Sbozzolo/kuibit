@@ -289,7 +289,8 @@ Using splines, we can also combine the various refinement levels to obtain a
 the values on the grid. If the argument ``resample`` is set to ``True``, the
 data is resampled with a multilinear interpolation. One can also specify what
 grid (as :py:class:`~.UniformGridData`) to merge the data on by calling the
-method :py:meth:`~.to_UniformGridData`. This is especially useful when
+method :py:meth:`~.to_UniformGridData` or
+:py:meth:`~.to_UniformGridData_from_grid`. This is especially useful when
 resampling on smaller grids, because it drastically reduces the computation
 time.
 
