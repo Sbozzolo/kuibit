@@ -6,6 +6,8 @@ If you find a bug, an un-helpful error message, or an expected result, please
 report it. If you can provide precise steps to reproduce the problem, that would
 lead certainly speed-up the resolution of the bug.
 
+You can also join us in the [Telegram channel](t.me/postcactus) for help.
+
 ## New features/improvements
 
 We always welcome new features of general improvements in the code. If you have
