@@ -1,4 +1,4 @@
-![PostCactus-logo](https://github.com/Sbozzolo/PostCactus/raw/master/logo.png)
+![PostCactus-logo](https://github.com/Sbozzolo/PostCactus/raw/master/logo.png | width=300)
 
 [![codecov](https://codecov.io/gh/Sbozzolo/PostCactus/branch/master/graph/badge.svg)](https://codecov.io/gh/Sbozzolo/PostCactus)
 ![Tests and documentation](https://github.com/Sbozzolo/PostCactus/workflows/Tests/badge.svg)
@@ -70,3 +70,10 @@ coverage html
 ```
 This will produce a directory with the html files containing the analysis of
 the coverage of the tests.
+
+## Credits
+
+The code was originally developed by Wolfgang Kastaun. This fork completely
+rewrites the original code, adding emphasis on documentation, testing, and
+extensibility. The icon in the logo was designed by [freepik.com](freepik.com).
+
