@@ -1,4 +1,6 @@
-![PostCactus-logo](https://github.com/Sbozzolo/PostCactus/raw/master/logo.png | width=300)
+<p align="center">
+<img src="https://github.com/Sbozzolo/PostCactus/raw/master/logo.png" width="435" height="200">
+</p>
 
 [![codecov](https://codecov.io/gh/Sbozzolo/PostCactus/branch/master/graph/badge.svg)](https://codecov.io/gh/Sbozzolo/PostCactus)
 ![Tests and documentation](https://github.com/Sbozzolo/PostCactus/workflows/Tests/badge.svg)
