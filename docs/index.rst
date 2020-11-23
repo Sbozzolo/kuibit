@@ -46,6 +46,8 @@ For a full list of available features, see the :doc:`features page <features>`.
   ``QuasiLocalMeasures`` and ``AHFinderDirect``.
 - Handle unit conversion, in particular from geometrized to physical
   (:py:mod:`~.unitconv`).
+- [EXPERIMENTAL] Write command-line scripts (:py:mod:`~.argparse_helper`).
+
 
 Installation
 ------------
@@ -98,9 +100,12 @@ Usage
    grid_data.rst
    sensitivity_curves.rst
    unitconv.rst
+   argparse_helper.rst
 
 Tutorials
 ---------
+
+You can additional examples in the folder ``example_bins``.
 
 .. toctree::
    :maxdepth: 1
@@ -143,6 +148,7 @@ Reference material (classes, functions, ...)
    grid_data_ref.rst
    sensitivity_curves_ref.rst
    unitconv_ref.rst
+   argparse_helper_ref.rst
 
 What is a kuibit?
 -----------------
@@ -152,10 +158,8 @@ by the Tohono O'odham people to reach the fruit of the Saguaro cacti during the
 harvesting season. In the same way, this package is a tool that you can use to
 collect the fruit of your ``Cactus`` simulations.
 
-
 Credits
 -------
-
 
 ``kuibit`` follows the same design and part of the implementation details of
 ``PostCactus``, code developed by Wolfgang Kastaun. This fork completely
