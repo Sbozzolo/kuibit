@@ -331,7 +331,7 @@ class BaseOneGridFunction(ABC):
         :type resample: bool
         """
         return self[iteration].to_UniformGridData_from_grid(
-            grid, resample=False
+            grid, resample=resample
         )
 
     # def read_evolution_on_grid(
@@ -1056,7 +1056,7 @@ class AllGridFunctions:
                     thorn_name = matched_ascii.group(2)
                     var_name = matched_ascii.group(3)
                     if thorn_name == "volume_integrals" and (
-                        var_name == "GRMHD" or var_name == "vacuum"
+                        var_name in ("GRMHD", "vacuum")
                     ):
                         continue
 
