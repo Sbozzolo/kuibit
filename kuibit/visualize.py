@@ -48,6 +48,8 @@ def setup_matplotlib():
             "xtick.labelsize": 13,
             "ytick.labelsize": 13,
             "axes.formatter.limits": [-3, 3],
+            "xtick.minor.visible": True,
+            "ytick.minor.visible": True,
         }
     )
 
