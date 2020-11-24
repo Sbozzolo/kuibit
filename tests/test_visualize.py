@@ -156,6 +156,7 @@ class TestVisualize(unittest.TestCase):
         )
         self.assertTrue(
             isinstance(
-                viz.plot_contourf(ugd.data_xyz), matplotlib.image.AxesImage
+                viz.plot_contourf(ugd.data_xyz, logscale=True),
+                matplotlib.image.AxesImage,
             )
         )

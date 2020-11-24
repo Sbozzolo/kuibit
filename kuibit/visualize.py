@@ -220,8 +220,15 @@ def _preprocess_plot_grid(func):
 # All the difficult stuff is in _preprocess_plot_grid
 @_preprocess_plot_grid
 def plot_contourf(
-        data, axis=None, coordinates=None, xlabel=None, ylabel=None, colorbar=False,
-        label=None, **kwargs
+    data,
+    axis=None,
+    coordinates=None,
+    xlabel=None,
+    ylabel=None,
+    colorbar=False,
+    label=None,
+    logscale=False,
+    **kwargs
 ):
     """Plot 2D grid from numpy array, UniformGridData, HierarhicalGridData,
     or OneGridFunction.
@@ -231,6 +238,10 @@ def plot_contourf(
 
     # Considering all the effort put in _preprocess_plot_grid, we we can plot
     # as we were plotting normal numpy arrays.
+    if (logscale):
+        # We mask the values that are smaller or equal than 0
+        data = np.ma.log10(data)
+
     if coordinates is None:
         cf = axis.imshow(data, **kwargs)
     else:
