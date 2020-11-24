@@ -1144,11 +1144,7 @@ class UniformGridData(BaseNumerical):
             if self.is_complex():
                 self.spline_imag.bounds_error = False
 
-        try:
-            y_real = self.spline_real(x)
-        except:
-            print(x)
-            print(self.grid)
+        y_real = self.spline_real(x)
         if self.is_complex():
             y_imag = self.spline_imag(x)
             ret = y_real + 1j * y_imag
