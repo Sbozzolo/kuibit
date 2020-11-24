@@ -20,8 +20,8 @@ import unittest
 
 from postcactus import argparse_helper as pah
 
-class TestArgparseHelper(unittest.TestCase):
 
+class TestArgparseHelper(unittest.TestCase):
     def setUp(self):
         self.parser = pah.init_argparse()
 
@@ -54,3 +54,11 @@ class TestArgparseHelper(unittest.TestCase):
         self.assertEqual(args.plane, "xy")
         self.assertCountEqual(args.origin, [0, 0])
         self.assertCountEqual(args.corner, [1, 1])
+
+    def test_add_figure_to_parser(self):
+
+        pah.add_figure_to_parser(self.parser, default_figname='figure')
+        # The [] essentially means "use defaults"
+        args = pah.get_args(self.parser, [])
+
+        self.assertEqual(args.figname, 'figure')

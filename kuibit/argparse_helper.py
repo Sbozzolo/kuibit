@@ -72,7 +72,7 @@ def add_grid_to_parser(parser):
 
     This function edits parser in place.
 
-    :parameter parser: Argparse parser
+    :param parser: Argparse parser
     :type parser: configargparse.ArgumentParser
 
     """
@@ -105,4 +105,23 @@ def add_grid_to_parser(parser):
         type=float,
         nargs=2,
         default=[1, 1],
+    )
+
+
+def add_figure_to_parser(parser, default_figname=None):
+    """Add parameters that have to do with a figure as output to a given parser.
+
+    This function edits parser in place.
+
+    :param default_figname: Default name of the output figure.
+    :type default_figname: str
+    :param parser: Argparse parser (generated with init_argparse())
+    :type parser: configargparse.ArgumentParser
+
+    """
+    parser.add_argument(
+        "--figname",
+        type=str,
+        default=default_figname,
+        help="Name of the output figure.",
     )
