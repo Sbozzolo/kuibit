@@ -768,6 +768,23 @@ class TestUniformGridData(unittest.TestCase):
             (1 + 1j) * np.sin(np.pi / 3),
         )
 
+        # Test with point in cell but outside boundary, in
+
+        # We change the boundary values to be different from 0
+        sin_data_complex_plus_one = sin_data_complex + 1 + 1j
+
+        dx = sin_data_complex.dx[0]
+        # At the boundary, we do a constant extrapolation, so the value should
+        # be the boundary value
+        self.assertAlmostEqual(
+            sin_data_complex_plus_one.evaluate_with_spline([0 - 0.25 * dx]),
+            (1 + 1j),
+        )
+        self.assertAlmostEqual(
+            sin_data_complex_plus_one.evaluate_with_spline([2 * np.pi + 0.25 * dx]),
+            (1 + 1j),
+        )
+
         # Test __call__
 
         self.assertAlmostEqual(
