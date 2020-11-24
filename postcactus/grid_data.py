@@ -993,18 +993,41 @@ class UniformGridData(BaseNumerical):
         # Here k is 0 or 1
         method = "nearest" if k == 0 else "linear"
 
+        # Our grid is cell-centered, so it is perfecly valid to evaluate a point
+        # that it is outside coords, as long as it is within 0.5 * dx. For
+        # example, if the grid is linear from 0 to 10 with dx = 1, the pint
+        # -0.25 is in the grid. To account for this in splines (to avoid that
+        # they throw an error), we add another point at the two boundaries. This
+        # point as the same value as the last point (which is equivalent to a
+        # 0th order interpolation at the very last half cell).
+
+        # With this, the grid has uneven spacing.
+        # Add an element at the beginning and end
+        for index, coord in enumerate(coords):
+            coords[index] = np.concatenate(
+                (
+                    [coord[0] - 0.5 * self.dx[index]],
+                    coord,
+                    [coord[-1] + 0.5 * self.dx[index]],
+                )
+            )
+
+        # Add the border
+        data_real = np.pad(self.data.real, pad_width=1, mode="edge")
+
         self.spline_real = interpolate.RegularGridInterpolator(
             coords,
-            self.data.real,
+            data_real,
             method=method,
             fill_value=0,
             bounds_error=True,
         )
 
         if self.is_complex():
+            data_imag = np.pad(self.data.imag, pad_width=1, mode="edge")
             self.spline_imag = interpolate.RegularGridInterpolator(
                 coords,
-                self.data.imag,
+                data_imag,
                 method=method,
                 fill_value=0,
                 bounds_error=True,
@@ -1121,7 +1144,11 @@ class UniformGridData(BaseNumerical):
             if self.is_complex():
                 self.spline_imag.bounds_error = False
 
-        y_real = self.spline_real(x)
+        try:
+            y_real = self.spline_real(x)
+        except:
+            print(x)
+            print(self.grid)
         if self.is_complex():
             y_imag = self.spline_imag(x)
             ret = y_real + 1j * y_imag
