@@ -50,6 +50,7 @@ def setup_matplotlib():
             "axes.formatter.limits": [-3, 3],
             "xtick.minor.visible": True,
             "ytick.minor.visible": True,
+            "image.cmap": "inferno",
         }
     )
 
@@ -217,6 +218,26 @@ def _preprocess_plot_grid(func):
     return inner
 
 
+def _vmin_vmax_extend(data, vmin=None, vmax=None):
+
+    colorbar_extend = "neither"
+
+    if vmin is None:
+        vmin = data.min()
+    else:
+        colorbar_extend = "min"
+
+    if vmax is None:
+        vmax = data.max()
+    else:
+        if colorbar_extend == "min":
+            colorbar_extend = "both"
+        else:
+            colorbar_extend = "max"
+
+    return vmin, vmax, colorbar_extend
+
+
 # All the difficult stuff is in _preprocess_plot_grid
 @_preprocess_plot_grid
 def plot_contourf(
@@ -228,24 +249,37 @@ def plot_contourf(
     colorbar=False,
     label=None,
     logscale=False,
+    vmin=None,
+    vmax=None,
     **kwargs
 ):
     """Plot 2D grid from numpy array, UniformGridData, HierarhicalGridData,
     or OneGridFunction.
 
     Read the full documentation to see how to use this function.
+
+    If logscale is True, vmin and vmax are the log10 of the variable.
     """
 
     # Considering all the effort put in _preprocess_plot_grid, we we can plot
     # as we were plotting normal numpy arrays.
-    if (logscale):
+    if logscale:
         # We mask the values that are smaller or equal than 0
         data = np.ma.log10(data)
+
+    vmin, vmax, colorbar_extend = _vmin_vmax_extend(data, vmin=vmin, vmax=vmax)
+
+    # To implement vmin and vmax, we clamp the data to vmin and vmax instead of
+    # using the options in matplotlib. This greatly simplifies handling things
+    # like colormaps.
+    data = np.clip(data, vmin, vmax)
 
     if coordinates is None:
         cf = axis.imshow(data, **kwargs)
     else:
-        cf = axis.contourf(*coordinates, data, **kwargs)
+        cf = axis.contourf(
+            *coordinates, data, extend=colorbar_extend, **kwargs
+        )
     if xlabel is not None:
         axis.set_xlabel(xlabel)
     if ylabel is not None:

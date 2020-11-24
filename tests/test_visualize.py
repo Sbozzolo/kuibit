@@ -143,6 +143,28 @@ class TestVisualize(unittest.TestCase):
             resample=True,
         )
 
+    def test_vmin_vmax_extend(self):
+
+        data = np.array([1, 2])
+
+        # Test vmin, vmax None
+        self.assertCountEqual(viz._vmin_vmax_extend(data), (1, 2, "neither"))
+
+        # Test vmin None, vmax 1.5
+        self.assertCountEqual(
+            viz._vmin_vmax_extend(data, vmax=1.5), (1, 1.5, "max")
+        )
+
+        # Test vmin 0.5, vmax 1.5
+        self.assertCountEqual(
+            viz._vmin_vmax_extend(data, vmin=0.5, vmax=1.5), (0.5, 1.5, "both")
+        )
+
+        # Test vmin 0.5, vmax None
+        self.assertCountEqual(
+            viz._vmin_vmax_extend(data, vmin=0.5), (0.5, 2, "min")
+        )
+
     def test_plot_contourf(self):
 
         ugd = gd.sample_function(lambda x, y: x + y, [100, 20], [0, 1], [2, 5])
