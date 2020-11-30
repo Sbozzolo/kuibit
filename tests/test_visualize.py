@@ -182,3 +182,16 @@ class TestVisualize(unittest.TestCase):
                 matplotlib.image.AxesImage,
             )
         )
+
+    def test_plot_colorbar(self):
+
+        ugd = gd.sample_function(lambda x, y: x + y, [100, 20], [0, 1], [2, 5])
+
+        cf = viz.plot_contourf(ugd, xlabel="x", ylabel="y", colorbar=False)
+
+        self.assertTrue(
+            isinstance(
+                viz.plot_colorbar(cf, label="test"),
+                matplotlib.colorbar.Colorbar,
+            )
+        )

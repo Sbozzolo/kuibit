@@ -252,7 +252,7 @@ def plot_contourf(
     logscale=False,
     vmin=None,
     vmax=None,
-    aspect_ratio='equal',
+    aspect_ratio="equal",
     **kwargs
 ):
     """Plot 2D grid from numpy array, UniformGridData, HierarhicalGridData,
@@ -289,11 +289,18 @@ def plot_contourf(
     if ylabel is not None:
         axis.set_ylabel(ylabel)
     if colorbar:
-        # The next two lines guarantee that the colorbar is the same size as the
-        # plot. From https://stackoverflow.com/a/18195921
-        divider = make_axes_locatable(axis)
-        cax = divider.append_axes("right", size="5%", pad=0.25)
-        cb = plt.colorbar(cf, cax=cax)
-        if label is not None:
-            cb.set_label(label)
+        plot_colorbar(cf, axis=axis, label=label)
     return cf
+
+
+@_preprocess_plot
+def plot_colorbar(mpl_artist, axis=None, label=None):
+    """Add a colorbar to an existing image (as produced by plot_contourf)."""
+    # The next two lines guarantee that the colorbar is the same size as
+    # the plot. From https://stackoverflow.com/a/18195921
+    divider = make_axes_locatable(axis)
+    cax = divider.append_axes("right", size="5%", pad=0.25)
+    cb = plt.colorbar(mpl_artist, cax=cax)
+    if label is not None:
+        cb.set_label(label)
+    return cb
