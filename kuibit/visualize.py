@@ -24,6 +24,7 @@ import warnings
 import matplotlib
 import matplotlib.pyplot as plt
 import numpy as np
+from mpl_toolkits.axes_grid1 import make_axes_locatable
 
 from postcactus import grid_data as gd
 from postcactus.cactus_grid_functions import BaseOneGridFunction
@@ -251,6 +252,7 @@ def plot_contourf(
     logscale=False,
     vmin=None,
     vmax=None,
+    aspect_ratio='equal',
     **kwargs
 ):
     """Plot 2D grid from numpy array, UniformGridData, HierarhicalGridData,
@@ -274,6 +276,8 @@ def plot_contourf(
     # like colormaps.
     data = np.clip(data, vmin, vmax)
 
+    axis.set_aspect(aspect_ratio)
+
     if coordinates is None:
         cf = axis.imshow(data, **kwargs)
     else:
@@ -285,7 +289,11 @@ def plot_contourf(
     if ylabel is not None:
         axis.set_ylabel(ylabel)
     if colorbar:
-        cb = plt.colorbar(cf, ax=axis)
+        # The next two lines guarantee that the colorbar is the same size as the
+        # plot. From https://stackoverflow.com/a/18195921
+        divider = make_axes_locatable(axis)
+        cax = divider.append_axes("right", size="5%", pad=0.25)
+        cb = plt.colorbar(cf, cax=cax)
         if label is not None:
             cb.set_label(label)
     return cf
