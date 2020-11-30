@@ -72,15 +72,19 @@ def _preprocess_plot(func):
 
     1. It handles the axis keyword setting it to plt.gca() if it was not
        provided.
+    2. It handles the figure keyword setting it to plt.gcf() if it was not
+       provided.
 
     func has to take as keyword arguments:
     1. 'axis=None', where the plot will be plot, or plt.gca() if None
+    2. 'figure=None', where the plot will be plot, or plt.gcf() if None
 
     """
 
     def inner(data, *args, **kwargs):
         # Setdetault addes the key if it is not already there
         kwargs.setdefault("axis", plt.gca())
+        kwargs.setdefault("figure", plt.gcf())
         return func(data, *args, **kwargs)
 
     return inner
@@ -243,6 +247,7 @@ def _vmin_vmax_extend(data, vmin=None, vmax=None):
 @_preprocess_plot_grid
 def plot_contourf(
     data,
+    figure=None,
     axis=None,
     coordinates=None,
     xlabel=None,
@@ -294,13 +299,27 @@ def plot_contourf(
 
 
 @_preprocess_plot
-def plot_colorbar(mpl_artist, axis=None, label=None):
+def plot_colorbar(mpl_artist, figure=None, axis=None, label=None, **kwargs):
     """Add a colorbar to an existing image (as produced by plot_contourf)."""
     # The next two lines guarantee that the colorbar is the same size as
     # the plot. From https://stackoverflow.com/a/18195921
     divider = make_axes_locatable(axis)
     cax = divider.append_axes("right", size="5%", pad=0.25)
-    cb = plt.colorbar(mpl_artist, cax=cax)
+    cb = plt.colorbar(mpl_artist, cax=cax, **kwargs)
     if label is not None:
         cb.set_label(label)
     return cb
+
+
+@_preprocess_plot
+def add_text_to_figure_corner(text, figure=None, axis=None):
+    """Add text to the bottom right corner of a figure."""
+
+    return axis.text(
+        0.98,
+        0.02,
+        text,
+        horizontalalignment="right",
+        verticalalignment="bottom",
+        transform=figure.transFigure,
+    )

@@ -52,6 +52,11 @@ class TestVisualize(unittest.TestCase):
         # Passing axis
         self.assertIs(dec_func("", axis=self.ax2)[1]["axis"], self.ax2)
 
+        # Default
+        self.assertIs(dec_func("")[1]["figure"], plt.gcf())
+        # Passing figure
+        self.assertIs(dec_func("", figure=self.fig)[1]["figure"], self.fig)
+
         dec_func_grid = viz._preprocess_plot_grid(func)
 
         # Check data not provided
@@ -193,5 +198,14 @@ class TestVisualize(unittest.TestCase):
             isinstance(
                 viz.plot_colorbar(cf, label="test"),
                 matplotlib.colorbar.Colorbar,
+            )
+        )
+
+    def test_add_text_to_figure_corner(self):
+
+        self.assertTrue(
+            isinstance(
+                viz.add_text_to_figure_corner("test"),
+                matplotlib.text.Text,
             )
         )
