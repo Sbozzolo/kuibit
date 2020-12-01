@@ -348,6 +348,10 @@ class ScalarsDir:
         self.average = AllScalars(sd.allfiles, "average")
         self.infnorm = AllScalars(sd.allfiles, "infnorm")
 
+        # Aliases
+        self.max = self.maximum
+        self.min = self.minimum
+
     def __getitem__(self, reduction):
         return getattr(self, reduction)
 
