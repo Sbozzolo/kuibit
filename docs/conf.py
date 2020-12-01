@@ -65,3 +65,7 @@ html_static_path = ['_static']
 html_logo = '../logo.png'
 
 html_show_sourcelink = False
+
+html_theme_options = {
+    "maincolor": "#228B22",
+}
