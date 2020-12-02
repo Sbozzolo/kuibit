@@ -1,10 +1,10 @@
 Sensitivity (power spectral noise) curves of known detectors
 ============================================================
 
-The module :py:mod:`~.sensitivity_curves` (:ref:`series_ref:Reference on
-postcactus.sensitivity_curves`) contains functions that return
-:py:class:`~.FrequencySeries` with known detector noise curves on given
-frequencies.
+The module :py:mod:`~.sensitivity_curves`
+(:ref:`sensitivity_curves_ref:Reference on postcactus.sensitivity_curves`)
+contains functions that return :py:class:`~.FrequencySeries` with known detector
+noise curves on given frequencies.
 
 The routines are named ``Sn_*``, with ``*`` being a detector name (for example,
 ``Sn_LISA``) and take a ordered numpy array with the frequencies where the noise

@@ -8,16 +8,14 @@ gravitational waves are typically studied in a multipolar decomposition and they
 are functions evolving with time. For this reason, you should familiarize
 yourself with the objects in ``PostCactus`` that represent those quantities:
 :ref:`series:Time and frequency series` and
-:ref:`cacuts_multipoles:Working with multipolar decompositions`.
+:ref:`cactus_multipoles:Working with multipolar decompositions`.
 
 The main two objects to work with gravitational waves are
 :py:class:`~.GravitationalWavesOneDet` and :py:class:`~.GravitationalWavesDir`.
 The first described waves as seen by one specific detector (fixed radius), the
 second collects :py:class:`~.GravitationalWavesOneDet` for all the available
 detectors. These classes inherit several features from the base version in the
-:py:mod:`~.cactus_multipoles` module.
-
-(:ref:`cactus_waves:Reference on postcactus.cactus_waves`)
+:py:mod:`~.cactus_multipoles` module (:ref:`cactus_waves_ref:Reference on postcactus.cactus_waves`).
 
 .. note::
 
@@ -140,10 +138,10 @@ ___________________________
 :py:class:`~.GravitationalWavesOneDet` (and
 :py:class:`~.ElectromagneticWavesOneDet`) implements methods to compute the
 instantaneous power and torque along the z axis. To compute these quantities for
-a specific mode, just use :py:meth:`~.get_power_lm` or
-:py::py:meth:`~.get_torque_z_lm`. You can also compute these quantities for all
+a specific mode, just use :py:meth:`~.GravitationalWavesOneDet.get_power_lm` or
+:py:meth:`~.get_torque_z_lm`. You can also compute these quantities for all
 the available multipoles up to a given ``l_max`` using the methods
-:py::py:meth:`~.get_total_power` or :py:meth:`~.get_total_torque.` The
+:py:meth:`~.GravitationalWavesOneDet.get_total_power` or :py:meth:`~.get_total_torque.` The
 integrated (cumulative) versions are also available. These are the energy and
 angular momentum in gravitational waves. The methods have similar names with
 ``energy`` instead of ``power`` and ``angular_momentum`` instead of ``torque_z``.

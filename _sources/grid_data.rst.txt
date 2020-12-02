@@ -4,7 +4,7 @@ Grid functions
 Other than series (time and frequency), grid functions are probably the other
 most important quantity that we extract from simulations with the Einstein
 Toolkit. In this page, we describe how to use ``PostCactus`` to handle grids.
-(:ref:`frequencyseries_ref:Reference on postcactus.grid_data`). The main object
+(:ref:`grid_data_ref:Reference on postcactus.grid_data`). The main object
 that we use to represent grid function is the
 :py:class:`~.HierarchicalGridData`. This represents data defined on a grid with
 multiple refinement levels. On each level, data is represented as
@@ -82,7 +82,7 @@ The operation considers the size of the cell, for example
 The :py:meth:`~.contains` is syntactic sugar for the same operation.
 
 To obtain all the coordinates in the grid, you can use the
-:py:meth:`~.coordinates` method. This can be used in thre different ways. When
+:py:meth:`~.grid_data.UnfiromGrid.coordinates` method. This can be used in thre different ways. When
 called with no arguments, the output is a list of 1D arrays. Each of these
 arrays contains the coordinates along a fixed axis. For example, for the 2D
 grid, the first array will be the x coordinates, the second the y. Finally, with
@@ -105,7 +105,7 @@ all the dimensions that are not extended using the method
 
 You return a new :py:class:`~.UniformGrid` with coordinates shifted with
 :py:meth:`~.shifted`. You can also remove the ghost zones with
-:py:meth:`~.ghost_zones_removed`. This will return a new
+:py:meth:`~.grid_data.UnfiromGrid.ghost_zones_removed`. This will return a new
 :py:class:`~.UniformGrid` with no ghost zones.
 
 You can also print a :py:class:`~.UniformGrid` object to have a full overview
@@ -188,7 +188,7 @@ Some basic useful functions are :py:meth:`~.mean`, :py:meth:`~.integral`,
 with :math:`\Delta v` being the volume of a cell.
 
 :py:class:`~.UniformGridData` can be derived along a direction with
-:py:meth:`~.derived`, or the gradient can be calculated with meth:`~.gradient`.
+:py:meth:`~.grid_data.UnfiromGridData.partial_derived`, or the gradient can be calculated with meth:`~.grid_data.UnfiromGridData.gradient`.
 In both cases, the order of the derivative can be specified. The derivative
 are numerical with finite difference. Derivative are second order accurate
 everywhere.
@@ -205,12 +205,12 @@ function can either be relative (percentuals, as 0.01, 0.5, or so, if you enable
 ``relative=True``), or the actual number of points.
 
 You can resample the data to a new grid using the function
-:py:meth:`~.resampled`, which takes as input a :py:class:`~.UniformGrid` and
+:py:meth:`~.grid_data.UniformGridData.resampled`, which takes as input a :py:class:`~.UniformGrid` and
 returns a new :py:class:`~.UniformGridData` resampled on the new grid. If the
 new grid is outside the old one, you can either raise an error, of fill the
 points outside with zeros. This behavior is controlled by the flag ``ext``. When
 ``ext=1``, zeros are returned, when it is 2, ``ValueError`` is raised. By
-default, :py:meth:`~.resampled` uses a multilinear interpolation, but you can
+default, :py:meth:`~.grid_data.UniformGridData.resampled` uses a multilinear interpolation, but you can
 force to use a piecewise constant interpolation with the nearest neighbors by
 setting ``piecewise_constant=True``.
 
@@ -240,8 +240,8 @@ matrix-indexed).
 
    Arrays are stored row-first, so if you want to use ``.data``, to have a
    natural mapping between coordinates and indices you have to transpose the
-   data! (See, `<this blog post>
-   https://eli.thegreenplace.net/2014/meshgrids-and-disambiguating-rows-and-columns-from-cartesian-coordinates/`_
+   data! (See, `this blog post
+   <https://eli.thegreenplace.net/2014/meshgrids-and-disambiguating-rows-and-columns-from-cartesian-coordinates/>`_
    for an explanation.)
 
 
@@ -299,15 +299,15 @@ time.
    Operations that involve resampling can be very expensive and require a lot
    of memory!
 
-Another useful method is the :py:meth:`~.coordinates`, which returns a list of
+Another useful method is the :py:meth:`~.grid_data.HierarchicalGridData.coordinates`, which returns a list of
 :py:class:`~.HierarchicalGridData` with the same structure as the one in
 consideration but with values the various coordinates at the points. This is
 useful for computations that involve the coordinates.
 
 As it is the case for :py:class:`~.UniformGridData`, also
 :py:class:`~.HierarchicalGridData` can be derived along a direction with
-:py:meth:`~.derived`, or the gradient can be calculated with
-:py:meth:`~.gradient`. In both cases, the order of the derivative can be
+:py:meth:`~.grid_data.HierarchicalGridData.partial_derived`, or the gradient can be calculated with
+:py:meth:`~.grid_data.HierarchicalGridData.gradient`. In both cases, the order of the derivative can be
 specified. The derivative are numerical with finite difference. The result is
 a :py:class:`~.HierarchicalGridData` or a list of :py:class:`~.HierarchicalGridData`
 (for each direction).

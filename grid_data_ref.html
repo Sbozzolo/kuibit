@@ -15,9 +15,7 @@
     <script src="_static/underscore.js"></script>
     <script src="_static/doctools.js"></script>
     <script src="_static/language_data.js"></script>
-    <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
     <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
-    <script type="text/x-mathjax-config">MathJax.Hub.Config({"tex2jax": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true, "ignoreClass": "document", "processClass": "math|output_area"}})</script>
     <script src="_static/bizstyle.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
@@ -212,10 +210,10 @@ returned, otherwise, only the finest level.</p>
 <dd class="field-even"><p>Most refined level (and component) that contains the coordinate.</p>
 </dd>
 <dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>int if there’s only one component, or tuple of ints if there are</p>
+<dd class="field-odd"><p>int if there’s only one component, or tuple of ints if there are
+multiple components.</p>
 </dd>
 </dl>
-<p>multiple components.</p>
 </dd></dl>
 
 <dl class="py method">
@@ -251,11 +249,13 @@ applying the same rule recursively.</p>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
-<dd class="field-even"><p>list of HierarchicalGridData with partial derivative along</p>
+<dd class="field-even"><p>list of HierarchicalGridData with partial derivative along
+the directions</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>list of <a class="reference internal" href="#postcactus.grid_data.HierarchicalGridData" title="postcactus.grid_data.HierarchicalGridData"><code class="xref py py-class docutils literal notranslate"><span class="pre">HierarchicalGridData</span></code></a></p>
 </dd>
 </dl>
-<p>the directions
-:rtype:    list of <a class="reference internal" href="#postcactus.grid_data.HierarchicalGridData" title="postcactus.grid_data.HierarchicalGridData"><code class="xref py py-class docutils literal notranslate"><span class="pre">HierarchicalGridData</span></code></a></p>
 </dd></dl>
 
 <dl class="py method">
@@ -316,8 +316,26 @@ Prefer to_UniformGridData when possible.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt id="postcactus.grid_data.HierarchicalGridData.partial_derivated">
-<code class="sig-name descname">partial_derivated</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">direction</span></em>, <em class="sig-param"><span class="n">order</span><span class="o">=</span><span class="default_value">1</span></em><span class="sig-paren">)</span><a class="headerlink" href="#postcactus.grid_data.HierarchicalGridData.partial_derivated" title="Permalink to this definition">¶</a></dt>
+<dt id="postcactus.grid_data.HierarchicalGridData.partial_derive">
+<code class="sig-name descname">partial_derive</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">direction</span></em>, <em class="sig-param"><span class="n">order</span><span class="o">=</span><span class="default_value">1</span></em><span class="sig-paren">)</span><a class="headerlink" href="#postcactus.grid_data.HierarchicalGridData.partial_derive" title="Permalink to this definition">¶</a></dt>
+<dd><p>Apply a numerical differentiatin along the specified direction.</p>
+<p>The derivative is calulated as centered differencing in the interior
+and one-sided derivatives at the boundaries. Higher orders are computed
+applying the same rule recursively.</p>
+<p>The output has the same shape of self.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>order</strong> (<em>int</em>) – Order of derivative (e.g. 2 = second derivative)</p></li>
+<li><p><strong>direction</strong> (<em>int</em>) – Direction of the partial derivative</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="postcactus.grid_data.HierarchicalGridData.partial_derived">
+<code class="sig-name descname">partial_derived</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">direction</span></em>, <em class="sig-param"><span class="n">order</span><span class="o">=</span><span class="default_value">1</span></em><span class="sig-paren">)</span><a class="headerlink" href="#postcactus.grid_data.HierarchicalGridData.partial_derived" title="Permalink to this definition">¶</a></dt>
 <dd><p>Return a HierarchicalGridData that is the numerical order-differentiation of
 the present grid_data along a given direction. (order = number of
 derivatives, ie order=2 is second derivative)</p>
@@ -337,24 +355,6 @@ applying the same rule recursively.</p>
 </dd>
 <dt class="field-odd">Return type</dt>
 <dd class="field-odd"><p><a class="reference internal" href="#postcactus.grid_data.HierarchicalGridData" title="postcactus.grid_data.HierarchicalGridData"><code class="xref py py-class docutils literal notranslate"><span class="pre">HierarchicalGridData</span></code></a></p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt id="postcactus.grid_data.HierarchicalGridData.partial_derive">
-<code class="sig-name descname">partial_derive</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">direction</span></em>, <em class="sig-param"><span class="n">order</span><span class="o">=</span><span class="default_value">1</span></em><span class="sig-paren">)</span><a class="headerlink" href="#postcactus.grid_data.HierarchicalGridData.partial_derive" title="Permalink to this definition">¶</a></dt>
-<dd><p>Apply a numerical differentiatin along the specified direction.</p>
-<p>The derivative is calulated as centered differencing in the interior
-and one-sided derivatives at the boundaries. Higher orders are computed
-applying the same rule recursively.</p>
-<p>The output has the same shape of self.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>order</strong> (<em>int</em>) – Order of derivative (e.g. 2 = second derivative)</p></li>
-<li><p><strong>direction</strong> (<em>int</em>) – Direction of the partial derivative</p></li>
-</ul>
 </dd>
 </dl>
 </dd></dl>
@@ -487,21 +487,20 @@ with the same shape of self and with values the coordinates.</p>
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>as_meshgrid</strong> (<em>bool</em>) – If True, return the coordinates as meshgrid.</p></li>
-<li><p><strong>as_same_shape</strong> – If True, return the coordinates as a list</p></li>
+<li><p><strong>as_same_shape</strong> (<em>bool</em>) – If True, return the coordinates as a list
+or coordinates with the same shape of self
+and with values of a given coordinate.
+For instance, if the self.num_dimension there
+will be three lists with shape = self.shape.</p></li>
 </ul>
 </dd>
-</dl>
-<p>or coordinates with the same shape of self and with values of a given
-coordinate. For instance, if the self.num_dimension there will be
-three lists with shape = self.shape.
-:type as_same_shape: bool</p>
-<dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p>A list of 1d arrays of coordinates</p>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>A list of 1d arrays of coordinates along the different axes.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>list of numpy arrays with the same shape as grid</p>
 </dd>
 </dl>
-<p>along the different axes.
-:rtype:   list of numpy arrays with the same shape as grid</p>
 </dd></dl>
 
 <dl class="py method">
@@ -708,19 +707,19 @@ with the same shape of self and with values the coordinates.</p>
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>as_meshgrid</strong> (<em>bool</em>) – If True, return the coordinates as meshgrid.</p></li>
-<li><p><strong>as_same_shape</strong> – If True, return the coordinates as an array</p></li>
+<li><p><strong>as_same_shape</strong> (<em>bool</em>) – If True, return the coordinates as an array
+with the same shape of self and with values
+the coordinates.</p></li>
 </ul>
 </dd>
-</dl>
-<p>with the same shape of self and with values the coordinates.
-:type as_same_shape: bool</p>
-<dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p>A list of 1d arrays of coordinates</p>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>A list of 1d arrays of coordinates
+along the different axes.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>list of numpy arrays with the same shape as grid</p>
 </dd>
 </dl>
-<p>along the different axes.
-:rtype:   list of numpy arrays with the same shape as grid</p>
 </dd></dl>
 
 <dl class="py method">
