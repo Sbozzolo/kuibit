@@ -230,8 +230,8 @@ class TestCactusScalar(unittest.TestCase):
         self.assertEqual(scaldir.get("infnorm").reduction_type, "infnorm")
         self.assertIsNone(scaldir.get("bubu", default=None))
 
-        self.assertIs(scaldir['maximum'], scaldir['max'])
-        self.assertIs(scaldir['minimum'], scaldir['min'])
+        self.assertIs(scaldir["maximum"], scaldir["max"])
+        self.assertIs(scaldir["minimum"], scaldir["min"])
 
         # Check string representation
         # (this is a very weak check...)

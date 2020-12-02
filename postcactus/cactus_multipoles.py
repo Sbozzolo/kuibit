@@ -165,7 +165,7 @@ class MultipoleOneDet:
         ``total_function_on_available_lm`` will call function with the
         following arguments:
 
-        function(timeseries, mult_l, mult_m, dist, *args, **kwargs)
+        ``function(timeseries, mult_l, mult_m, dist, *args, **kwargs)``
 
         If function does not need some paramters, it should use take
         the ``*args`` argument to ignore the additional paramters that

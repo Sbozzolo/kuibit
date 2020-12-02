@@ -781,7 +781,9 @@ class TestUniformGridData(unittest.TestCase):
             (1 + 1j),
         )
         self.assertAlmostEqual(
-            sin_data_complex_plus_one.evaluate_with_spline([2 * np.pi + 0.25 * dx]),
+            sin_data_complex_plus_one.evaluate_with_spline(
+                [2 * np.pi + 0.25 * dx]
+            ),
             (1 + 1j),
         )
 

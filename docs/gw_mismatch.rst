@@ -126,7 +126,7 @@ An important quantity you may want to provide is the noise curve associated to
 the detectors. For this :py:meth:`~.network_mismatch_from_psi4` takes a
 paramters, ``noises``. This can be None, in which case the mismatch will be
 computed with no noise. If ``noises`` is not None, then, it has to be a
-``Detectors`` object (:ref:`gw_utils.ref:Detectors`) with each entry being a
+``Detectors`` object (:ref:`gw_utils:Detectors`) with each entry being a
 :py:class:`~.FrequencySeries` with the noise power spectral densities. At the
 moment, ``Detectors`` are set to work with the LIGO and Virgo interferometers.
 In case you want to disable one of the detectors, set the entry to -1 (see

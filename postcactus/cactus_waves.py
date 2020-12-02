@@ -193,14 +193,14 @@ class GravitationalWavesOneDet(mp.MultipoleOneDet):
         :param mult_m: Multipolar component m
         :type mult_m: int
         :param pcut: Period that enters the fixed-frequency integration.
-        Typically, the longest physical period in the signal.
+                     Typically, the longest physical period in the signal.
         :type pcut: float
         :param window_function: If not None, apply window_function to the
-        series before computing the strain.
+                                series before computing the strain.
         :type window_function: callable, str, or None
         :param trim_ends: If True, a portion of the resulting strain is removed
-        at both the initial and final times. The amount removed is equal to
-        pcut.
+                          at both the initial and final times. The amount removed
+                          is equal to pcut.
         :type trim_ends: bool
 
         :returns: :math:`r (h^+ - i rh^\times)`
@@ -265,14 +265,14 @@ class GravitationalWavesOneDet(mp.MultipoleOneDet):
         :param phi: Azimuthal observation angle
         :type phi: float
         :param pcut: Period that enters the fixed-frequency integration.
-        Typically, the longest physical period in the signal.
+                     Typically, the longest physical period in the signal.
         :type pcut: float
         :param window_function: If not None, apply window_function to the
-        series before computing the strain.
+                                series before computing the strain.
         :type window_function: callable, str, or None
         :param trim_ends: If True, a portion of the resulting strain is removed
-        at both the initial and final times. The amount removed is equal to
-        pcut.
+                          at both the initial and final times. The amount removed
+                          is equal to pcut.
         :type trim_ends: bool
         :param l_max: Ingore multipoles with l > l_max
         :type l_max: int
@@ -344,18 +344,19 @@ class GravitationalWavesOneDet(mp.MultipoleOneDet):
         :param time_utc: UTC time of the event
         :type declination: str
         :param theta_gw, phi_gw: Spherical coordinates of the observer
-        from the binary's frame, taking the angular momentum of the binary to
-        point along the z-axis.
+                                 from the binary's frame, taking the angular
+                                 momentum of the binary to
+                                 point along the z-axis.
         :type theta_gw, phi_gw: floats
         :param pcut: Period that enters the fixed-frequency integration.
-        Typically, the longest physical period in the signal.
+                     Typically, the longest physical period in the signal.
         :type pcut: float
         :param window_function: If not None, apply window_function to the
-        series before computing the strain.
+                                series before computing the strain.
         :type window_function: callable, str, or None
         :param trim_ends: If True, a portion of the resulting strain is removed
-        at both the initial and final times. The amount removed is equal to
-        pcut.
+                          at both the initial and final times. The amount removed
+                          is equal to pcut.
         :type trim_ends: bool
         :param l_max: Ingore multipoles with l > l_max
         :type l_max: int
@@ -405,7 +406,7 @@ class GravitationalWavesOneDet(mp.MultipoleOneDet):
         \psi^{lm}_4(\theta, \phi, r, t)
 
         :param pcut: Period that enters the fixed-frequency integration.
-        Typically, the longest physical period in the signal.
+                     Typically, the longest physical period in the signal.
         :type pcut: float
         """
         psi4_int = self._fixed_frequency_integrated(
@@ -421,7 +422,7 @@ class GravitationalWavesOneDet(mp.MultipoleOneDet):
         :param mult_m: l multipole moment.
         :type mult_m: int
         :param pcut: Period that enters the fixed-frequency integration.
-        Typically, the longest physical period in the signal.
+                     Typically, the longest physical period in the signal.
         :type pcut: float
         """
         return self.get_power_lm(mult_l, mult_m, pcut).integrated()
@@ -430,7 +431,7 @@ class GravitationalWavesOneDet(mp.MultipoleOneDet):
         """Return the total power in all the modes up to l_max.
 
         :param pcut: Period that enters the fixed-frequency integration.
-        Typically, the longest physical period in the signal.
+                     Typically, the longest physical period in the signal.
         :type pcut: float
         :param l_max: Ingore multipoles with l > l_max
         :type l_max: int
@@ -445,7 +446,7 @@ class GravitationalWavesOneDet(mp.MultipoleOneDet):
         """Return the cumulative energy lost in all the modes up to l_max.
 
         :param pcut: Period that enters the fixed-frequency integration.
-        Typically, the longest physical period in the signal.
+                     Typically, the longest physical period in the signal.
         :type pcut: float
         :param l_max: Ingore multipoles with l > l_max
         :type l_max: int
@@ -495,7 +496,7 @@ class GravitationalWavesOneDet(mp.MultipoleOneDet):
         """Return the total torque z in all the modes up to l_max.
 
         :param pcut: Period that enters the fixed-frequency integration.
-        Typically, the longest physical period in the signal.
+                     Typically, the longest physical period in the signal.
         :type pcut: float
         :param l_max: Ingore multipoles with l > l_max
         :type l_max: int
@@ -511,7 +512,7 @@ class GravitationalWavesOneDet(mp.MultipoleOneDet):
         l_max.
 
         :param pcut: Period that enters the fixed-frequency integration.
-        Typically, the longest physical period in the signal.
+                     Typically, the longest physical period in the signal.
         :type pcut: float
         :param l_max: Ingore multipoles with l > l_max
         :type l_max: int

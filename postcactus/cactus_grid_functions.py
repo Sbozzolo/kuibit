@@ -1150,8 +1150,8 @@ class AllGridFunctions:
         """Return a set of all the files that have variables of the
         given dimension
 
-        :returns: Collection of all the unique files with variales of
-        this dimension
+        :return: Collection of all the unique files with variales of
+                 this dimension
         :rtype: set
         """
         allfiles = set()

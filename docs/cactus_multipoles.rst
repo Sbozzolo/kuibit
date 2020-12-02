@@ -52,10 +52,10 @@ can loop over the available multipoles:
 multipole component and accumulate all the results. This is a convenient way to
 "loop over all the monopoles" performing some operation. This is how, for
 example, :py:meth:`~.get_strain` is computed. This method,
-:py:meth:`~.total_function_on_available_lm` takes as input a function. This
+:py:meth:`~.MultipoleOneDet.total_function_on_available_lm` takes as input a function. This
 function will be called with ``function(mp_timeseries, mult_l, mult_m,
 mult_r)``, plus all the additional arguments and keyword arguments that are
-passed to :py:meth:`~.total_function_on_available_lm`. Hence, the function has
+passed to :py:meth:`~.MultipoleOneDet.total_function_on_available_lm`. Hence, the function has
 to have a compatible signature. In case some of the quantities passed are not
 used, you can always add a ``*args*`` to the argument of your function to
 capture them.
