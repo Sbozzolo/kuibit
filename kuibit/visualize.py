@@ -229,12 +229,14 @@ def _vmin_vmax_extend(data, vmin=None, vmax=None):
 
     if vmin is None:
         vmin = data.min()
-    else:
+
+    if data.min() < vmin:
         colorbar_extend = "min"
 
     if vmax is None:
         vmax = data.max()
-    else:
+
+    if data.max() > vmax:
         if colorbar_extend == "min":
             colorbar_extend = "both"
         else:

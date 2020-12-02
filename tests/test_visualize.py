@@ -160,14 +160,24 @@ class TestVisualize(unittest.TestCase):
             viz._vmin_vmax_extend(data, vmax=1.5), (1, 1.5, "max")
         )
 
-        # Test vmin 0.5, vmax 1.5
+        # Test vmin 0.5 (< 1), vmax 1.5
         self.assertCountEqual(
-            viz._vmin_vmax_extend(data, vmin=0.5, vmax=1.5), (0.5, 1.5, "both")
+            viz._vmin_vmax_extend(data, vmin=0.5, vmax=1.5), (0.5, 1.5, "max")
+        )
+
+        # Test vmin 1.2 (> 1), vmax 1.5
+        self.assertCountEqual(
+            viz._vmin_vmax_extend(data, vmin=1.2, vmax=1.5), (1.2, 1.5, "both")
         )
 
         # Test vmin 0.5, vmax None
         self.assertCountEqual(
-            viz._vmin_vmax_extend(data, vmin=0.5), (0.5, 2, "min")
+            viz._vmin_vmax_extend(data, vmin=0.5), (0.5, 2, "neither")
+        )
+
+        # Test vmin 1.2, vmax None
+        self.assertCountEqual(
+            viz._vmin_vmax_extend(data, vmin=1.2), (1.2, 2, "min")
         )
 
     def test_plot_contourf(self):
