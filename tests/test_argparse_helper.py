@@ -61,4 +61,6 @@ class TestArgparseHelper(unittest.TestCase):
         # The [] essentially means "use defaults"
         args = pah.get_args(self.parser, [])
 
-        self.assertEqual(args.figname, 'figure')
+        self.assertEqual(args.figname, "figure")
+        self.assertEqual(args.fig_extension, "png")
+        self.assertFalse(args.as_tikz)

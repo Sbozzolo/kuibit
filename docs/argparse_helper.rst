@@ -62,4 +62,4 @@ can be achieved with the method ``add_argument``, as in the following example:
    args = pah.get_args(parser)
 
 Most of the scripts in ``example_bins`` are built for this kind of workflow, so
-you can use them as examples.
+you can use them as examples (or you can directly use them).
