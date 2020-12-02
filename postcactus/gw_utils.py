@@ -208,8 +208,7 @@ def ra_dec_to_theta_phi(right_ascension, declination, time_utc):
     :param time_utc: UTC time of the event
     :type declination: str
 
-    :rvalue spherical coordinates: Theta, phi for the different
-    detectors
+    :rvalue spherical coordinates: Theta, phi for the different detectors
     :rtype: namedtuple with fields hanford, livingston, and virgo
 
     """
@@ -332,7 +331,7 @@ def antenna_responses(theta, phi, polarization=0):
     :param phi: Azimuthal angle
     :type phi: float
     :param polarization: Polarization angle of the wave (cross and plus,
-    in this order)
+                         in this order)
     :type polarization: float
 
     """
@@ -357,7 +356,7 @@ def antenna_responses_from_sky_localization(
     See,
     http://research.physics.illinois.edu/cta/movies/bhbh_sim/wavestrain.html.
 
-    utc_time has to have the following formatting: %Y-%m-%d %H:%M,
+    utc_time has to have the following formatting: ``%Y-%m-%d %H:%M``,
     eg 2015-09-14 09:50:45
 
     Return values are plus and cross responses for Hanford, Livingston, and
@@ -373,7 +372,7 @@ def antenna_responses_from_sky_localization(
     :type polarization: float
 
     :rvalue antenna_pattern: Cross and plus antenna pattern for the different
-    interferometers
+                             interferometers
     :rtype: namedtuple with fields hanford, livingston, and virgo
 
     """
@@ -471,21 +470,21 @@ def signal_to_noise_ratio_from_strain(
     r"""Return the signal to noise ratio given a strain and a power spectal density
     distribution for a detector.
 
-        The SNR is computed as sqrt of 4 \int_fmin^fmax |\tilde{h} f|^2 / Sn(f) d f
+    The SNR is computed as :math:`sqrt of 4 \int_fmin^fmax |\tilde{h} f|^2 / Sn(f) d f`
 
-        Using equation from 1408.0740
+    Using equation from 1408.0740
 
-        :param h: Strain
-        :type h: :py:class:`~.TimeSeries`
-        :param noise: Power spectral density of the noise of the detector
-        :type noise: :py:class:`~.FrequencySeries`
-        :param fmin: Minimum frequency over which to compute the SNR.
-        :type fmin: float
-        :param fmax: Maximum frequency over which to compute the SNR.
-        :type fmax: float
-        :param window_function: If not None, apply window_function to the
-                                series before computing the strain.
-        :type window_function: callable, str, or None
+    :param h: Strain
+    :type h: :py:class:`~.TimeSeries`
+    :param noise: Power spectral density of the noise of the detector
+    :type noise: :py:class:`~.FrequencySeries`
+    :param fmin: Minimum frequency over which to compute the SNR.
+    :type fmin: float
+    :param fmax: Maximum frequency over which to compute the SNR.
+    :type fmax: float
+    :param window_function: If not None, apply window_function to the
+                            series before computing the strain.
+    :type window_function: callable, str, or None
 
     """
     if not isinstance(h, ts.TimeSeries):

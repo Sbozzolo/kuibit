@@ -228,8 +228,8 @@ class TimeSeries(BaseSeries):
         :param y: Data samples, can be real or complex valued
         :type y:  1D numpy array or list
 
-        :param guarantee_t_is_monotonic: The codw will assume that t is
-        monotonically incresasing
+        :param guarantee_t_is_monotonic: The code will assume that t is
+                                         monotonically incresasing
         :type guarantee_t_is_monotonic: bool
 
         """

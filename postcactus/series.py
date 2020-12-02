@@ -68,15 +68,14 @@ class BaseSeries(BaseNumerical):
         This is called when with ``.t = something``. Once these are defined,
         the derived classes should use their getters and setters.
 
-    :ivar data_x:   x
+    :ivar data_x: x
     :vartype data_x: 1D numpy array or float
-    :ivar y:   y
+    :ivar y: y
     :vartype y: 1D numpy array or float
 
     :ivar spline_real: Coefficients for a spline represent of the real part
                        of y
     :vartype spline_real: Tuple
-
     :ivar spline_imag: Coefficients for a spline represent of the real part
                        of y
     :vartype spline_imag: Tuple

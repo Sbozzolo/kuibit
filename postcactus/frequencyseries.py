@@ -100,8 +100,8 @@ class FrequencySeries(BaseSeries):
         :param fft:   Fourier transform
         :type fft: 1D numpy array or float
 
-        :param guarantee_f_is_monotonic: The codw will assume that f is
-        monotonically incresasing
+        :param guarantee_f_is_monotonic: The code will assume that f is
+                                         monotonically incresasing
         :type guarantee_f_is_monotonic: bool
 
         """

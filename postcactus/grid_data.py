@@ -9,7 +9,7 @@ The important classes defined here are
  * :py:class:`~.UniformGrid`  represents the geometry of a uniform grid.
  * :py:class:`~.UniformGridData`  represents data on a uniform grid.
  * :py:class:`~.HierarchicalGridData` represents data on a refined grid
-hierachy.
+   hierachy (AMR).
 """
 
 import ast  # To read metadata in ASCII files
@@ -37,22 +37,26 @@ class UniformGrid:
     schematics below). We call the lower left corner "origin" or `x0`. We call
     the top right corner "x1". The grid is cell-centered (see Fig 2).
 
-    Fig 1
+    ..code-block::
 
-     o---------x1
-     |          |
-     |          |
-     |          |
-     |          |
-    x0----------o
+        Fig 1
 
-    Fig 2, the point sits in the center of a cell.
+         o---------x1
+         |          |
+         |          |
+         |          |
+         |          |
+        x0----------o
 
-     --------
-     |      |
-     |  x0  |
-     |      |
-     --------
+    ..code-block::
+
+         Fig 2, the point sits in the center of a cell.
+
+          --------
+          |      |
+          |  x0  |
+          |      |
+          --------
 
     The concept of shape is the same as NumPy shape: it's the number of points
     in each dimention. dx is the spacing (dx, dy, dz, ...). To fully
@@ -61,6 +65,30 @@ class UniformGrid:
     This is the same convention that Carpet has.
 
     This class is supposed to be immutable.
+
+    :ivar shape:     Number of points in each dimension.
+    :type shape:      1d numpy arrary or list of int.
+    :ivar x0:    Position of cell center with lowest coordinate.
+    :type x0:     1d numpy array or list of float.
+    :ivar dx:     If not None, specifies grid spacing, else grid
+                      spacing is computed from x0, x1, and shape.
+    :type dx:      1d numpy array or list of float.
+    :ivar x1:        If grid spacing is None, this specifies the
+                      position of the cell center with largest
+                      coordinates.
+    :type x1:         1d numpy array or list of float.
+    :ivar ref_level:  Refinement level if this belongs to a hierachy,
+                      else -1.
+    :type ref_level:   int
+    :ivar component: Component number if this belongs to a hierachy,
+                      else -1.
+    :type component:  int
+    :ivar num_ghost:    Number of ghost zones (default=0)
+    :type num_ghost:     1d numpy arrary or list of int.
+    :ivar time:      Time if that makes sense, else None.
+    :type time:       float or None
+    :ivar iteration: Iteration if that makes sense, else None.
+    :type iteration:  float or None
 
     """
 
@@ -88,32 +116,6 @@ class UniformGrid:
         time=None,
         iteration=None,
     ):
-        """
-        :param shape:     Number of points in each dimension.
-        :type shape:      1d numpy arrary or list of int.
-        :param x0:    Position of cell center with lowest coordinate.
-        :type x0:     1d numpy array or list of float.
-        :param dx:     If not None, specifies grid spacing, else grid
-                          spacing is computed from x0, x1, and shape.
-        :type dx:      1d numpy array or list of float.
-        :param x1:        If grid spacing is None, this specifies the
-                          position of the cell center with largest
-                          coordinates.
-        :type x1:         1d numpy array or list of float.
-        :param ref_level:  Refinement level if this belongs to a hierachy,
-                          else -1.
-        :type ref_level:   int
-        :param component: Component number if this belongs to a hierachy,
-                          else -1.
-        :type component:  int
-        :param num_ghost:    Number of ghost zones (default=0)
-        :type num_ghost:     1d numpy arrary or list of int.
-        :param time:      Time if that makes sense, else None.
-        :type time:       float or None
-        :param iteration: Iteration if that makes sense, else None.
-        :type iteration:  float or None
-
-        """
         self.__shape = np.atleast_1d(np.array(shape, dtype=int))
         self.__x0 = np.atleast_1d(np.array(x0, dtype=float))
 
@@ -1178,7 +1180,7 @@ class UniformGridData(BaseNumerical):
         :param cut: How to slice the array. None entries mean "keep that dimension"
         :type cut:  array or list with dimension
         :param resample: Whether to use multilinear interpolation to compute the
-        data or simply use the value of the closest point.
+                         data or simply use the value of the closest point.
         :type resample: bool
 
         :returns: A sliced grid data
@@ -1311,7 +1313,7 @@ class UniformGridData(BaseNumerical):
         :param cut: How to slice the array. None entries mean "keep that dimension"
         :type cut:  array or list with dimension
         :param resample: Whether to use multilinear interpolation to compute the
-        data or simply use the value of the closest point.
+                         data or simply use the value of the closest point.
         :type resample: bool
 
         :returns: A sliced grid data
@@ -1712,7 +1714,7 @@ class UniformGridData(BaseNumerical):
         return type(self)(self.grid, ret_value)
 
     def gradient(self, order=1):
-        """Return a list UniformGriDatad that are the numerical
+        """Return a list UniformGridDatad that are the numerical
         order-differentiation of the present grid_data along all the
         directions. (order = number of derivatives, ie order=2 is second
         derivative)
@@ -1727,9 +1729,8 @@ class UniformGridData(BaseNumerical):
         :type order: int
         :param direction: Direction of the partial derivative
         :type direction: int
-
         :returns:  list of UniformGridData with partial derivative along the
-        directions
+                   directions
         :rtype:    list of :py:class:`~.UniformGridData`
 
         """
@@ -1739,7 +1740,7 @@ class UniformGridData(BaseNumerical):
         ]
 
     def partial_derive(self, dimension, order=1):
-        """Return a UniformGriDatad that is the numerical order-differentiation of the
+        """Return a UniformGridDatad that is the numerical order-differentiation of the
         present grid_data along a given direction. (order = number of
         derivatives, ie order=2 is second derivative)
 
@@ -2505,7 +2506,8 @@ class HierarchicalGridData(BaseNumerical):
         :py:class:`~.UniformGridData`
 
         :param method_returns_list: If True, the method is expected to return a
-        list, one UniformGridData per dimension (e.g, gradient, coordiantes)
+                                    list, one UniformGridData per dimension
+                                    (e.g, gradient, coordiantes)
         :type method_returns_list: bool
 
         :return: New HierarchicalGridData with function applied to the data

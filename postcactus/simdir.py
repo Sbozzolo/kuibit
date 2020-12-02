@@ -161,11 +161,11 @@ class SimDir:
         :param ignore: Folders to ignore
         :type ignore:  set
 
-        Parfiles (*.par) will be searched in all data directories and the
+        Parfiles (``*.par``) will be searched in all data directories and the
         top-level SIMFACTORY/par folder, if it exists. The parfile in the
         latter folder, if available, or else the oldest parfile in any of
         the data directories, will be used to extract the simulation
-        parameters. Logfiles (*.out) and errorfiles (*.err) will be
+        parameters. Logfiles (``*.out``) and errorfiles (``*.err``) will be
         searched for in all data directories.
         """
         if ignore is None:
