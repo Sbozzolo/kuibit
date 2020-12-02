@@ -15,6 +15,7 @@
 # You should have received a copy of the GNU General Public License along with
 # this program; if not, see <https://www.gnu.org/licenses/>.
 
+import os
 import unittest
 
 # We use the agg backend because it should work everywhere
@@ -219,3 +220,16 @@ class TestVisualize(unittest.TestCase):
                 matplotlib.text.Text,
             )
         )
+
+    def test_save(self):
+
+        plt.plot([1, 1], [2, 2])
+        # Test matplotlib
+        viz.save("test", "pdf")
+        self.assertTrue(os.path.exists("test.pdf"))
+        os.remove("test.pdf")
+
+        # Test tikzplotlib
+        viz.save("test", "pdf", as_tikz=True)
+        self.assertTrue(os.path.exists("test.tikz"))
+        os.remove("test.tikz")

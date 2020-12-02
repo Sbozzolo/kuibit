@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-# Copyright (C) 2020 Gabriele Bozzola
+# Copyright (C) 2020 Gabriele Bozzola, Wolfgang Kastaun
 #
 # This program is free software; you can redistribute it and/or modify it under
 # the terms of the GNU General Public License as published by the Free Software
@@ -24,6 +24,7 @@ import warnings
 import matplotlib
 import matplotlib.pyplot as plt
 import numpy as np
+import tikzplotlib
 from mpl_toolkits.axes_grid1 import make_axes_locatable
 
 from postcactus import grid_data as gd
@@ -325,3 +326,36 @@ def add_text_to_figure_corner(text, figure=None, axis=None):
         verticalalignment="bottom",
         transform=figure.transFigure,
     )
+
+
+@_preprocess_plot
+def save(
+    outputpath,
+    figure_extension,
+    as_tikz=False,
+    figure=None,
+    axis=None,
+    **kwargs
+):
+    """Save figure to outputpath.
+
+    If as_tikz is True, save it as TikZ file.
+
+    :param outputpath:  Output path without extension.
+    :type outputpath:  str
+    :param figure_extension: Extension of the figure to save.
+                             This is ignored when as_tikz=True.
+    :type figure_extension:  str
+    :param as_tikz: Save figure with tikzplotlib instead of
+                    matplotlib. Output will have extension .tikz
+    :type as_tikz:  bool
+
+
+    """
+
+    if as_tikz:
+        figurepath = f"{outputpath}.tikz"
+        tikzplotlib.save(figurepath, **kwargs)
+    else:
+        figurepath = f"{outputpath}.{figure_extension}"
+        plt.savefig(figurepath, **kwargs)
