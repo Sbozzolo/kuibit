@@ -46,7 +46,6 @@ class UniformGrid:
      |          |
     x0----------o
 
-
     Fig 2, the point sits in the center of a cell.
 
      --------
@@ -429,15 +428,13 @@ class UniformGrid:
 
         :param as_meshgrid: If True, return the coordinates as meshgrid.
         :type as_meshgrid: bool
-
         :param as_same_shape: If True, return the coordinates as a list
-        or coordinates with the same shape of self and with values of a given
-        coordinate. For instance, if the self.num_dimension there will be
-        three lists with shape = self.shape.
+                              or coordinates with the same shape of self
+                              and with values of a given coordinate.
+                              For instance, if the self.num_dimension there
+                              will be three lists with shape = self.shape.
         :type as_same_shape: bool
-
-        :returns:  A list of 1d arrays of coordinates
-        along the different axes.
+        :returns:  A list of 1d arrays of coordinates along the different axes.
         :rtype:   list of numpy arrays with the same shape as grid
 
         """
@@ -754,7 +751,6 @@ class UniformGridData(BaseNumerical):
 
     :ivar grid: Uniform grid over which the data is defined.
     :type grid: :py:class:`~.UniformGrid`
-
     :ivar data: The actual data (numpy array).
 
     """
@@ -864,13 +860,12 @@ class UniformGridData(BaseNumerical):
 
         :param as_meshgrid: If True, return the coordinates as meshgrid.
         :type as_meshgrid: bool
-
         :param as_same_shape: If True, return the coordinates as an array
-        with the same shape of self and with values the coordinates.
+                              with the same shape of self and with values
+                              the coordinates.
         :type as_same_shape: bool
-
         :returns:  A list of 1d arrays of coordinates
-        along the different axes.
+                   along the different axes.
         :rtype:   list of numpy arrays with the same shape as grid
 
         """
@@ -2292,7 +2287,7 @@ class HierarchicalGridData(BaseNumerical):
 
         :returns: Most refined level (and component) that contains the coordinate.
         :rtype: int if there's only one component, or tuple of ints if there are
-        multiple components.
+                multiple components.
 
         """
         if not hasattr(coordinate, "__len__"):
@@ -2548,7 +2543,7 @@ class HierarchicalGridData(BaseNumerical):
             for dim in range(self.num_dimensions)
         ]
 
-    def partial_derivated(self, direction, order=1):
+    def partial_derived(self, direction, order=1):
         """Return a HierarchicalGridData that is the numerical order-differentiation of
         the present grid_data along a given direction. (order = number of
         derivatives, ie order=2 is second derivative)
@@ -2588,9 +2583,8 @@ class HierarchicalGridData(BaseNumerical):
         :type order: int
         :param direction: Direction of the partial derivative
         :type direction: int
-
-        :returns:  list of HierarchicalGridData with partial derivative along
-        the directions
+        :returns: list of HierarchicalGridData with partial derivative along
+                  the directions
         :rtype:    list of :py:class:`~.HierarchicalGridData`
 
         """
@@ -2614,7 +2608,7 @@ class HierarchicalGridData(BaseNumerical):
 
         """
         return self._apply_to_self(
-            self.partial_derivated, direction, order=order
+            self.partial_derived, direction, order=order
         )
 
     def coordinates(self):

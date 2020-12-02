@@ -574,10 +574,8 @@ class BaseSeries(BaseNumerical):
         the rectangles.
 
         :param dx: Delta x in the independent variable. If provided, it
-        will be used. This is especially convenient for evely spaced
-        series, as computations will be faster
+                   will be used. This is especially convenient for evely spaced series, as computations will be faster
         :type dx: float
-
         :returns:  New series cumulative integral
         :rtype:    :py:class:`~.BaseSeries` or derived class
 
@@ -810,16 +808,14 @@ def sample_common(series, resample=False, piecewise_constant=False):
 
     :param series: The series to resample or redefine on the common points
     :type series:  list of :py:class:`~.Series`
-
     :param resample: Whether to resample the series, or just find the common
-    points.
+                     points.
     :type resample: bool
-
     :param piecewise_constant: Whether to use the nearest neighbor resampling
-    method instead of splines. If piecewise_constant=True, the approximant
-    used for resampling is a piecewise constant function.
+                               method instead of splines.
+                               If piecewise_constant=True, the approximant used
+                               for resampling is a piecewise constant function.
     :type piecewise_constant: bool
-
     :returns:  Resampled series so that they are all defined in
                the same interval
     :rtype:    list of :py:class:`~.Series`

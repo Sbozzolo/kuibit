@@ -419,8 +419,8 @@ class FrequencySeries(BaseSeries):
         :type noise: :py:class:`.FrequencySeries`, list
                      of :py:class:`.FrequencySeries` or None
         :param same_domain: Whether to assume that the frequencyseries are
-        defined over the same frequencies. If you can guarantee this, the
-        computation will be faster.
+                            defined over the same frequencies. If you can
+                            guarantee this, the computation will be faster.
         :type same_domain: bool
 
         :returns: Inner product between self and other
@@ -520,8 +520,8 @@ class FrequencySeries(BaseSeries):
                       the netowrk overlap is computed.
         :type noise: (list of) :py:class:`.FrequencySeries` or None
         :param same_domain: Whether to assume that the frequencyseries are
-        defined over the same frequencies. If you can guarantee this, the
-        computation will be faster.
+                            defined over the same frequencies. If you can
+                            guarantee this, the computation will be faster.
         :type same_domain: bool
 
         :returns: Overlap between self and other

@@ -198,15 +198,13 @@ class TimeSeries(BaseSeries):
     TimeSeries have methods for smoothing, windowing, extracting phase and
     more.
 
-    :ivar t:   Times
+    :ivar t: Times
     :vartype t: 1D numpy array or float
-    :ivar y:   Values
+    :ivar y: Values
     :vartype y: 1D numpy array or float
-
     :ivar spline_real: Coefficients for a spline represent of the real part
                        of y
     :vartype spline_real: Tuple
-
     :ivar spline_imag: Coefficients for a spline represent of the real part
                        of y
     :vartype spline_imag: Tuple

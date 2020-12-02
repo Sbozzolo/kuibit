@@ -46,9 +46,6 @@ class SimDir:
 
     :ivar path:           Top level path of simulation directory.
     :ivar dirs:           All directories in which data is searched.
-    :ivar parfiles:       The locations of all parameter files.
-    :ivar initial_params: Simulation parameters, see
-                          :py:class:`~.Parfile`.
     :ivar logfiles:       The locations of all log files (.out).
     :ivar errfiles:       The location of all error log files (.err).
     :ivar ts:             Scalar data of various type, see

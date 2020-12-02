@@ -229,38 +229,30 @@ def mismatch_from_strains(
 
     :param h1: First strain.
     :type h1: :py:class:`~.TimeSeries`
-
     :param h2: Second strain (the one that will be modified).
     :type h2: :py:class:`~.TimeSeries`
-
     :param fmin: Lower limit of the integration.
     :type fmin: float
     :param fmax: Higher limit of the integration.
     :type fmax: float
-
     :param noises: Power spectral density of the noise for all the detectors.
-    If None, a uniform noise is applied.
+                   If None, a uniform noise is applied.
     :type noises: list of :py:class:`~.FrequencySeries`, or None
-
     :param antenna_patterns: Fc, Fp for all the detectors. It has to be ordered
-    in the same way as noises. If None, a uniform antenna pattern is applied.
+                             in the same way as noises. If None, a uniform antenna
+                             pattern is applied.
     :type antenna_patterns: list of tuples, or None
-
     :param num_polarization_shifts: How many points to divide the range
-    (0, 2 pi) in the polarization shift.
+                                    (0, 2 pi) in the polarization shift.
     :type num_polarization_shifts: int
-
     :param num_time_shifts: How many points to divide the range
-    (time_shift_start, time_shift_end) in the time shift.
+                            (time_shift_start, time_shift_end) in the time shift.
     :type num_time_shifts: int
-
     :param time_shift_start: Minimum time shift applied. Search will be done
-    linearly up to time_shift_end.
+                             linearly up to time_shift_end.
     :type time_shift_start: float
-
     :param time_shift_end: Largest value of time shift applied.
     :type time_shift_end: float
-
     :param force_numba: Use numba irrespectively of the size of the input.
     :type force_numba: bool
 
@@ -532,39 +524,30 @@ def network_mismatch(
     :type h1: :py:class:`~.TimeSeries`
     :param h2: Second strain (the one that will be modified).
     :type h2: :py:class:`~.TimeSeries`
-
     :param right_ascension: Right ascension of the source in the sky.
     :type right_ascension: float
-
     :param declination: Declination of the source in the sky.
     :type declination: float
-
     :param time_utc: Time UTC of the event.
     :type time_utc: float
-
     :param fmin: Lower limit of the integration.
     :type fmin: float
     :param fmax: Higher limit of the integration.
     :type fmax: float
-
     :param noises: Power spectral density of the noise for all the detectors.
     :type noises: :py:class:`~.Detector`, or None
-
     :param num_polarization_shifts: How many points to divide the range
-    (0, 2 pi) in the polarization shift.
+                                    (0, 2 pi) in the polarization shift.
     :type num_polarization_shifts: int
-
     :param num_time_shifts: How many points to divide the range
-    (time_shift_start, time_shift_end) in the time shift.
+                            (time_shift_start, time_shift_end) in the
+                            time shift.
     :type num_time_shifts: int
-
     :param time_shift_start: Minimum time shift applied. Search will be done
-    linearly up to time_shift_end.
+                             linearly up to time_shift_end.
     :type time_shift_start: float
-
     :param time_shift_end: Largest value of time shift applied.
     :type time_shift_end: float
-
     :param force_numba: Use numba irrespectively of the size of the input.
     :type force_numba: bool
 
@@ -810,94 +793,76 @@ def one_detector_mismatch_from_psi4(
     :param psi2: :math:`\Psi_4` for the second wave (the one that will be
                  modified).
     :type psi2: :py:class:`~.GravitationalWavesOneDet`
-
     :param right_ascension: Right ascension of the source in the sky.
     :type right_ascension: float
-
     :param declination: Declination of the source in the sky.
     :type declination: float
-
     :param mass_scale1_msun: If not None, the signal h1 is converted from
-    computational units to physical units assuming that
-    M = mass_scale1_msun.
+                             computational units to physical units assuming that
+                             M = mass_scale1_msun.
     :type mass_scale1_msun: float or None
-
     :param mass_scale2_msun: If not None, the signal h2 is converted from
-    computational units to physical units assuming that
-    M = mass_scale2_msun.
+                             computational units to physical units assuming that
+                             M = mass_scale2_msun.
     :type mass_scale2_msun: float or None
-
     :param time_utc: Time UTC of the event.
     :type time_utc: float
-
     :param pcut1: Period associated with the threshold frequency
                  ``omega_0 = 2 * pi / pcut`` for the fixed frequency
                  integration of :math:`\Psi_4`
     :type pcut1: float
-
     :param pcut2: Period associated with the threshold frequency
                  ``omega_0 = 2 * pi / pcut`` for the fixed frequency
                  integration of :math:`\Psi_4`
     :type pcut2: float
-
     :param window_function: If not None, apply window_function to the
-    series before computing the strain.
+                            series before computing the strain.
     :type window_function: callable, str, or None
-
     :param trim_ends: If True, a portion of the resulting strain is removed
-    at both the initial and final times. The amount removed is equal to
-    pcut.
+                      at both the initial and final times. The amount removed
+                      is equal to pcut.
     :type trim_ends: bool
-
     :param align_at_peak: Time-shifts the strain so that they have both the
-    maximum amplitude at t=0.
+                          maximum amplitude at ``t=0``.
     :type align_at_peak: bool
-
     :param fmin: Lower limit of the integration.
     :type fmin: float
     :param fmax: Higher limit of the integration.
     :type fmax: float
-
     :param noises: Power spectral density of the noise for all the
-    detectors. If None, a uniform noise is applied.
+                   detectors. If None, a uniform noise is applied.
     :type noises: :py:class:`~.Detectors`, or None
-
     :param num_zero_pad: How many points do the timeseries have to have
-    before Fourier transforms are taken? This is not the number of zeros
-    added (at the end) of the timeseries, this is the total number. If the
-    series already have that length, no zeros will be added.
+                         before Fourier transforms are taken? This is not the
+                         number of zeros added (at the end) of the timeseries,
+                         this is the total number. If the series already have
+                         that length, no zeros will be added.
     :type num_zero_pad: int
-
     :param num_polarization_shifts: How many points to divide the range
-    (0, 2 pi) in the polarization shift.
+                                    (0, 2 pi) in the polarization shift.
     :type num_polarization_shifts: int
 
     :param num_time_shifts: How many points to divide the range
-    (time_shift_start, time_shift_end) in the time shift.
+                            (time_shift_start, time_shift_end) in the time shift.
     :type num_time_shifts: int
-
     :param time_shift_start: Minimum time shift applied. Search will be
-    done linearly up to time_shift_end.
+                             done linearly up to time_shift_end.
     :type time_shift_start: float
-
     :param time_shift_end: Largest value of time shift applied.
     :type time_shift_end: float
-
     :param time_removed_beginning: Remove this amount from the beginning
-    of the strain signals before computing the mismatch. If None, nothing
-    is removed.
+                                   of the strain signals before computing
+                                   the mismatch. If None, nothing is removed.
     :type time_removed_beginning: float or None
-
     :param time_to_keep_after_max: If not None, remove all the signal that
-    comes after t_max + time_to_keep_after_max, where t_max is the time at
-    which the signal peaks.
+                                   comes after t_max + time_to_keep_after_max,
+                                   where t_max is the time at which the signal
+                                   peaks.
     :type time_to_keep_after_max: float or None
-
     :param force_numba: Use numba irrespectively of the size of the input.
     :type force_numba: bool
-
     :param *args: All the other arguments are passed to the window
-     function.
+                  function.
     :type *args: anything
 
     """
@@ -974,94 +939,74 @@ def network_mismatch_from_psi4(
     :param psi2: :math:`\Psi_4` for the second wave (the one that will be
                  modified).
     :type psi2: :py:class:`~.GravitationalWavesOneDet`
-
     :param right_ascension: Right ascension of the source in the sky.
     :type right_ascension: float
-
     :param declination: Declination of the source in the sky.
     :type declination: float
-
     :param mass_scale1_msun: If not None, the signal h1 is converted from
-    computational units to physical units assuming that
-    M = mass_scale1_msun.
+                             computational units to physical units assuming that
+                             M = mass_scale1_msun.
     :type mass_scale1_msun: float or None
-
     :param mass_scale2_msun: If not None, the signal h2 is converted from
-    computational units to physical units assuming that
-    M = mass_scale2_msun.
+                             computational units to physical units assuming that
+                             M = mass_scale2_msun.
     :type mass_scale2_msun: float or None
-
     :param time_utc: Time UTC of the event.
     :type time_utc: float
-
     :param pcut1: Period associated with the threshold frequency
                  ``omega_0 = 2 * pi / pcut`` for the fixed frequency
                  integration of :math:`\Psi_4`
     :type pcut1: float
-
     :param pcut2: Period associated with the threshold frequency
                  ``omega_0 = 2 * pi / pcut`` for the fixed frequency
                  integration of :math:`\Psi_4`
     :type pcut2: float
-
     :param window_function: If not None, apply window_function to the
-    series before computing the strain.
+                            series before computing the strain.
     :type window_function: callable, str, or None
-
     :param trim_ends: If True, a portion of the resulting strain is removed
-    at both the initial and final times. The amount removed is equal to
-    pcut.
+                      at both the initial and final times. The amount
+                      removed is equal to pcut.
     :type trim_ends: bool
-
     :param align_at_peak: Time-shifts the strain so that they have both the
-    maximum amplitude at t=0.
+                          maximum amplitude at ``t=0``.
     :type align_at_peak: bool
-
     :param fmin: Lower limit of the integration.
     :type fmin: float
     :param fmax: Higher limit of the integration.
     :type fmax: float
-
     :param noises: Power spectral density of the noise for all the
-    detectors. If None, a uniform noise is applied.
+                   detectors. If None, a uniform noise is applied.
     :type noises: :py:class:`~.Detectors`, or None
-
     :param num_zero_pad: How many points do the timeseries have to have
-    before Fourier transforms are taken? This is not the number of zeros
-    added (at the end) of the timeseries, this is the total number. If the
-    series already have that length, no zeros will be added.
+                         before Fourier transforms are taken? This is not
+                         the number of zeros added (at the end) of the timeseries,
+                         this is the total number. If the series already have that
+                         length, no zeros will be added.
     :type num_zero_pad: int
-
     :param num_polarization_shifts: How many points to divide the range
-    (0, 2 pi) in the polarization shift.
+                                    (0, 2 pi) in the polarization shift.
     :type num_polarization_shifts: int
-
     :param num_time_shifts: How many points to divide the range
-    (time_shift_start, time_shift_end) in the time shift.
+                            (time_shift_start, time_shift_end) in the time shift.
     :type num_time_shifts: int
-
     :param time_shift_start: Minimum time shift applied. Search will be
-    done linearly up to time_shift_end.
+                             done linearly up to time_shift_end.
     :type time_shift_start: float
-
     :param time_shift_end: Largest value of time shift applied.
     :type time_shift_end: float
-
     :param time_removed_beginning: Remove this amount from the beginning
-    of the strain signals before computing the mismatch. If None, nothing
-    is removed.
+                                   of the strain signals before computing the
+                                   mismatch. If None, nothing is removed.
     :type time_removed_beginning: float or None
-
     :param time_to_keep_after_max: If not None, remove all the signal that
-    comes after t_max + time_to_keep_after_max, where t_max is the time at
-    which the signal peaks.
+                                   comes after t_max + time_to_keep_after_max,
+                                   where t_max is the time at which the signal peaks.
     :type time_to_keep_after_max: float or None
-
     :param force_numba: Use numba irrespectively of the size of the input.
     :type force_numba: bool
-
     :param *args: All the other arguments are passed to the window
-     function.
+                  function.
     :type *args: anything
 
     """

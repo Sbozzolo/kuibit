@@ -3,7 +3,7 @@ Scalar data
 
 Scalar output are common in several simulations, with the most notable example
 being reductions (max, min, average, ...). The module :py:mod:`~.cactus_scalars`
-(:ref:`series_ref:Reference on postcactus.cactus_scalars`) handles these
+(:ref:`cactus_scalars_ref:Reference on postcactus.cactus_scalars`) handles these
 quantities. Data is loaded lazily.
 
 What data can be read?

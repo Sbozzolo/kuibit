@@ -475,16 +475,16 @@ def signal_to_noise_ratio_from_strain(
 
         Using equation from 1408.0740
 
-          :param h: Strain
-          :type h: :py:class:`~.TimeSeries`
-          :param noise: Power spectral density of the noise of the detector
-          :type noise: :py:class:`~.FrequencySeries`
-          :param fmin: Minimum frequency over which to compute the SNR.
-          :type fmin: float
-          :param fmax: Maximum frequency over which to compute the SNR.
-          :type fmax: float
+        :param h: Strain
+        :type h: :py:class:`~.TimeSeries`
+        :param noise: Power spectral density of the noise of the detector
+        :type noise: :py:class:`~.FrequencySeries`
+        :param fmin: Minimum frequency over which to compute the SNR.
+        :type fmin: float
+        :param fmax: Maximum frequency over which to compute the SNR.
+        :type fmax: float
         :param window_function: If not None, apply window_function to the
-        series before computing the strain.
+                                series before computing the strain.
         :type window_function: callable, str, or None
 
     """
