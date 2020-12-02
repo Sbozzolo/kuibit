@@ -110,12 +110,11 @@ with the arms on the x and y directions.</p>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>theta</strong> (<em>float</em>) – Meridional angle</p></li>
 <li><p><strong>phi</strong> (<em>float</em>) – Azimuthal angle</p></li>
-<li><p><strong>polarization</strong> – Polarization angle of the wave (cross and plus,</p></li>
+<li><p><strong>polarization</strong> (<em>float</em>) – Polarization angle of the wave (cross and plus,
+in this order)</p></li>
 </ul>
 </dd>
 </dl>
-<p>in this order)
-:type polarization: float</p>
 </dd></dl>
 
 <dl class="py function">
@@ -125,7 +124,7 @@ with the arms on the x and y directions.</p>
 given source.</p>
 <p>See,
 <a class="reference external" href="http://research.physics.illinois.edu/cta/movies/bhbh_sim/wavestrain.html">http://research.physics.illinois.edu/cta/movies/bhbh_sim/wavestrain.html</a>.</p>
-<p>utc_time has to have the following formatting: %Y-%m-%d %H:%M,
+<p>utc_time has to have the following formatting: <code class="docutils literal notranslate"><span class="pre">%Y-%m-%d</span> <span class="pre">%H:%M</span></code>,
 eg 2015-09-14 09:50:45</p>
 <p>Return values are plus and cross responses for Hanford, Livingston, and
 Virgo.</p>
@@ -139,11 +138,13 @@ Virgo.</p>
 </ul>
 </dd>
 <dt class="field-even">Rvalue antenna_pattern</dt>
-<dd class="field-even"><p>Cross and plus antenna pattern for the different</p>
+<dd class="field-even"><p>Cross and plus antenna pattern for the different
+interferometers</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>namedtuple with fields hanford, livingston, and virgo</p>
 </dd>
 </dl>
-<p>interferometers
-:rtype: namedtuple with fields hanford, livingston, and virgo</p>
 </dd></dl>
 
 <dl class="py function">
@@ -224,11 +225,12 @@ eg 2015-09-14 09:50:45</p>
 </ul>
 </dd>
 <dt class="field-even">Rvalue spherical coordinates</dt>
-<dd class="field-even"><p>Theta, phi for the different</p>
+<dd class="field-even"><p>Theta, phi for the different detectors</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>namedtuple with fields hanford, livingston, and virgo</p>
 </dd>
 </dl>
-<p>detectors
-:rtype: namedtuple with fields hanford, livingston, and virgo</p>
 </dd></dl>
 
 <dl class="py function">
@@ -293,43 +295,20 @@ are computed with t = u + r_tortoise(rex).</p>
 <code class="sig-prename descclassname">postcactus.gw_utils.</code><code class="sig-name descname">signal_to_noise_ratio_from_strain</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">h</span></em>, <em class="sig-param"><span class="o">*</span><span class="n">args</span></em>, <em class="sig-param"><span class="n">noise</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">fmin</span><span class="o">=</span><span class="default_value">0</span></em>, <em class="sig-param"><span class="n">fmax</span><span class="o">=</span><span class="default_value">inf</span></em>, <em class="sig-param"><span class="n">window_function</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="headerlink" href="#postcactus.gw_utils.signal_to_noise_ratio_from_strain" title="Permalink to this definition">¶</a></dt>
 <dd><p>Return the signal to noise ratio given a strain and a power spectal density
 distribution for a detector.</p>
-<blockquote>
-<div><p>The SNR is computed as sqrt of 4 int_fmin^fmax <a href="#id1"><span class="problematic" id="id2">|</span></a>tilde{h} f|^2 / Sn(f) d f</p>
+<p>The SNR is computed as <span class="math notranslate nohighlight">\(sqrt of 4 \int_fmin^fmax |\tilde{h} f|^2 / Sn(f) d f\)</span></p>
 <p>Using equation from 1408.0740</p>
 <dl class="field-list simple">
-<dt class="field-odd">param h</dt>
-<dd class="field-odd"><p>Strain</p>
-</dd>
-<dt class="field-even">type h</dt>
-<dd class="field-even"><p><a class="reference internal" href="timeseries_ref.html#postcactus.timeseries.TimeSeries" title="postcactus.timeseries.TimeSeries"><code class="xref py py-class docutils literal notranslate"><span class="pre">TimeSeries</span></code></a></p>
-</dd>
-<dt class="field-odd">param noise</dt>
-<dd class="field-odd"><p>Power spectral density of the noise of the detector</p>
-</dd>
-<dt class="field-even">type noise</dt>
-<dd class="field-even"><p><a class="reference internal" href="frequencyseries_ref.html#postcactus.frequencyseries.FrequencySeries" title="postcactus.frequencyseries.FrequencySeries"><code class="xref py py-class docutils literal notranslate"><span class="pre">FrequencySeries</span></code></a></p>
-</dd>
-<dt class="field-odd">param fmin</dt>
-<dd class="field-odd"><p>Minimum frequency over which to compute the SNR.</p>
-</dd>
-<dt class="field-even">type fmin</dt>
-<dd class="field-even"><p>float</p>
-</dd>
-<dt class="field-odd">param fmax</dt>
-<dd class="field-odd"><p>Maximum frequency over which to compute the SNR.</p>
-</dd>
-<dt class="field-even">type fmax</dt>
-<dd class="field-even"><p>float</p>
-</dd>
-<dt class="field-odd">param window_function</dt>
-<dd class="field-odd"><p>If not None, apply window_function to the
-series before computing the strain.</p>
-</dd>
-<dt class="field-even">type window_function</dt>
-<dd class="field-even"><p>callable, str, or None</p>
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>h</strong> (<a class="reference internal" href="timeseries_ref.html#postcactus.timeseries.TimeSeries" title="postcactus.timeseries.TimeSeries"><code class="xref py py-class docutils literal notranslate"><span class="pre">TimeSeries</span></code></a>) – Strain</p></li>
+<li><p><strong>noise</strong> (<a class="reference internal" href="frequencyseries_ref.html#postcactus.frequencyseries.FrequencySeries" title="postcactus.frequencyseries.FrequencySeries"><code class="xref py py-class docutils literal notranslate"><span class="pre">FrequencySeries</span></code></a>) – Power spectral density of the noise of the detector</p></li>
+<li><p><strong>fmin</strong> (<em>float</em>) – Minimum frequency over which to compute the SNR.</p></li>
+<li><p><strong>fmax</strong> (<em>float</em>) – Maximum frequency over which to compute the SNR.</p></li>
+<li><p><strong>window_function</strong> (<em>callable</em><em>, </em><em>str</em><em>, or </em><em>None</em>) – If not None, apply window_function to the
+series before computing the strain.</p></li>
+</ul>
 </dd>
 </dl>
-</div></blockquote>
 </dd></dl>
 
 </div>
