@@ -861,9 +861,9 @@ def one_detector_mismatch_from_psi4(
     :type time_to_keep_after_max: float or None
     :param force_numba: Use numba irrespectively of the size of the input.
     :type force_numba: bool
-    :param *args: All the other arguments are passed to the window
+    :param args: All the other arguments are passed to the window
                   function.
-    :type *args: anything
+    :type args: anything
 
     """
     h1, h2 = _strains_from_psi4(
@@ -954,12 +954,12 @@ def network_mismatch_from_psi4(
     :param time_utc: Time UTC of the event.
     :type time_utc: float
     :param pcut1: Period associated with the threshold frequency
-                 ``omega_0 = 2 * pi / pcut`` for the fixed frequency
-                 integration of :math:`\Psi_4`
+                  ``omega_0 = 2 * pi / pcut`` for the fixed frequency
+                  integration of :math:`\Psi_4`
     :type pcut1: float
     :param pcut2: Period associated with the threshold frequency
-                 ``omega_0 = 2 * pi / pcut`` for the fixed frequency
-                 integration of :math:`\Psi_4`
+                  ``omega_0 = 2 * pi / pcut`` for the fixed frequency
+                  integration of :math:`\Psi_4`
     :type pcut2: float
     :param window_function: If not None, apply window_function to the
                             series before computing the strain.
@@ -1005,9 +1005,9 @@ def network_mismatch_from_psi4(
     :type time_to_keep_after_max: float or None
     :param force_numba: Use numba irrespectively of the size of the input.
     :type force_numba: bool
-    :param *args: All the other arguments are passed to the window
+    :param args: All the other arguments are passed to the window
                   function.
-    :type *args: anything
+    :type args: anything
 
     """
     h1, h2 = _strains_from_psi4(
