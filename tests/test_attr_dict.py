@@ -29,7 +29,11 @@ class TestAttrDict(unittest.TestCase):
         with self.assertRaises(RuntimeError):
             attr_dict.b = 3
 
+        with self.assertRaises(RuntimeError):
+            attr_dict["b"] = 3
+
         self.assertEqual(attr_dict.first, "a")
+        self.assertEqual(attr_dict["first"], "a")
         self.assertCountEqual(dir(attr_dict), ["first", "b"])
         self.assertCountEqual(attr_dict.keys(), ["first", "b"])
         self.assertEqual("Fields available:\n['first', 'b']", str(attr_dict))

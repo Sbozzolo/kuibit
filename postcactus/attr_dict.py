@@ -56,11 +56,24 @@ class AttributeDictionary:
         """Read _elem and return the value associated to the key name.
 
         :param name: Key in the dictionary _elem
-        :returns: Value of _elemn[name]
+        :returns: Value of _elem[name]
 
         """
         if name not in self._elem:
             raise AttributeError(f"Object has no attribute {name}")
+        return self._elem[name]
+
+    def __setitem__(self, name, value):
+        # We prevent writing directly the values of the dictionary
+        raise RuntimeError("Attributes are immutable")
+
+    def __getitem__(self, name):
+        """Read _elem and return the value associated to the key name.
+
+        :param name: Key in the dictionary _elem
+        :returns: Value of _elem[name]
+
+        """
         return self._elem[name]
 
     def __dir__(self):
