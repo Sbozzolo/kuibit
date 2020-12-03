@@ -7,7 +7,7 @@ consists in writing command-line executables to perform specific tasks. For
 example, it is useful to have a script ``plot_grid.py`` that takes a simulation
 folder and a variable name and plots a 2D snapshot of such variable. The module
 :py:mod:`~.argparse_helper` contains functions to make writing such scripts
-easier (:ref:`unitconv_ref:Reference on postcactus.argparse_helper`).
+easier (:ref:`argparse_helper_ref:Reference on postcactus.argparse_helper`).
 
 Argparse and argparse_helper
 ----------------------------
