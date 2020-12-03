@@ -15,10 +15,11 @@
 # You should have received a copy of the GNU General Public License along with
 # this program; if not, see <https://www.gnu.org/licenses/>.
 
-"""The :py:mod:`~.cactus_ah` module provides classes to access the
-information about apparent horizons from various thorns. The main class
-is :py:class:`~.CactusAH` which collects all available data from a
+"""The :py:mod:`~.cactus_ah` module provides classes to access the information
+about apparent horizons from various thorns. The main class is
+:py:class:`~.cactus_horizons` which collects all available data from a
 simulation.
+
 """
 
 import os
@@ -186,7 +187,7 @@ class OneHorizon:
 
         :returns:
         :rtype: three lists of 2D numpy arrays, one for each
-        coordinate. The list is over the different patches
+                coordinate. The list is over the different patches
         """
 
         # TODO: Add an option to merge all the patches while keeping an order.

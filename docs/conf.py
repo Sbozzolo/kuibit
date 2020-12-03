@@ -34,7 +34,7 @@ release = '3.0.0a10'
 extensions = ['sphinx.ext.autodoc',
               'sphinx.ext.autosectionlabel',
               'sphinx.ext.mathjax',
-              # 'nbsphinx'
+              'nbsphinx'
               ]
 
 autosectionlabel_prefix_document = True
