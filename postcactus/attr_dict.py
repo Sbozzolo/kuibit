@@ -20,7 +20,10 @@ access dictionary as attributes. That is, to be able to do something like
 object.attribute instead of object['attribute'] with attribute dynamically
 determined.
 
-Then, we have TransformDictionary
+This module is widely used in `PostCactus`, for example in the ``fields``
+attributes. The class :py:class:`~.AttributeDictionary` is used in conjuction
+with :py:class:`~.TransformDictionary`, which we use to invoke ``_getitem__``
+of the parent class.
 
 """
 
@@ -36,9 +39,10 @@ class AttributeDictionary:
     """
 
     def __init__(self, elements):
-        """Store elements in _elem
+        """Store elements in self._elem.
 
-        :param elements: Dictionary that has to be converted in collections of attributes
+        :param elements: Dictionary that has to be converted in collections of
+                         attributesn
         :type elements: dict
 
         """
@@ -56,6 +60,7 @@ class AttributeDictionary:
         """Read _elem and return the value associated to the key name.
 
         :param name: Key in the dictionary _elem
+        :type name: str
         :returns: Value of _elem[name]
 
         """
@@ -100,11 +105,24 @@ class TransformDictionary:
     are left untouched. Everything is then stored in the attribute _elem.
 
     Let's see an example:
-    elem = {'first': 'value',
-            'second': {'nested': 'dictionary'} }
+    ``elem = {'first': 'value', 'second': {'nested': 'dictionary'} }``
 
-    _elem will be a dictionary {'first': 'value', 'second': td}, where td is
-    TransformDictionary with td._elem = {'nested': 'dictionary'}.
+    _elem will be a dictionary ``{'first': 'value', 'second': td}``, where td
+    is :py:class:``~.TransformDictionary`` with
+    ``td._elem = {'nested': 'dictionary'}``.
+
+    In the most simple case, a dictionary is mapped into a new dictionary-like
+    object with the same keys and values.
+
+    The way we are going to use this is different. Consider a class Vars that
+    contains a set of variables. To access this variables you can call
+    Vars['varname']. If we initialize :py:class:``~.TransformDictionary`` with
+    a dictionary of the form ``{varname: varname}`` and
+    ``transform = Vars.__getitem__`` what happens is that calling the
+    internal dictionary ``self._elem`` will just be  ``{varname: varname}``,
+    but every time we call it, we first have to apply the transform function,
+    so what we end up calling is ``Vars.__getitem__(varname)``.
+
     """
 
     def __init__(self, elem, transform=lambda x: x):
