@@ -71,6 +71,7 @@ Usage
    series.rst
    cactus_scalars.rst
    cactus_multipoles.rst
+   cactus_horizons.rst
    cactus_waves.rst
    gw_utils.rst
    gw_mismatch.rst
@@ -110,7 +111,7 @@ Reference material (classes, functions, ...)
    cactus_scalars_ref.rst
    cactus_multipoles_ref.rst
    cactus_waves_ref.rst
-   cactus_horizons.rst
+   cactus_horizons_ref.rst
    gw_utils_ref.rst
    gw_mismatch_ref.rst
    grid_data_ref.rst
