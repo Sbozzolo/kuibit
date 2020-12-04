@@ -181,9 +181,13 @@ class TestVisualize(unittest.TestCase):
             viz._vmin_vmax_extend(data, vmin=1.2), (1.2, 2, "min")
         )
 
-    def test_plot_contourf(self):
+    def test_plot_grid(self):
 
         ugd = gd.sample_function(lambda x, y: x + y, [100, 20], [0, 1], [2, 5])
+
+        # Unknown plot type
+        with self.assertRaises(ValueError):
+            viz._plot_grid(ugd, plot_type="bubu")
 
         self.assertTrue(
             isinstance(
@@ -192,9 +196,27 @@ class TestVisualize(unittest.TestCase):
                 matplotlib.contour.QuadContourSet,
             )
         )
+
+        # Here we are not providing the coordinates
+        with self.assertRaises(ValueError):
+            viz.plot_contourf(ugd.data_xyz, logscale=True)
+
+        # Plot_color
         self.assertTrue(
             isinstance(
-                viz.plot_contourf(ugd.data_xyz, logscale=True),
+                viz.plot_color(
+                    ugd, xlabel="x", ylabel="y", colorbar=True, label="test"
+                ),
+                matplotlib.image.AxesImage,
+            )
+        )
+
+        # Plot color, grid = None
+        self.assertTrue(
+            isinstance(
+                viz.plot_color(
+                    ugd.data_xyz,
+                ),
                 matplotlib.image.AxesImage,
             )
         )

@@ -248,8 +248,9 @@ def _vmin_vmax_extend(data, vmin=None, vmax=None):
 
 # All the difficult stuff is in _preprocess_plot_grid
 @_preprocess_plot_grid
-def plot_contourf(
+def _plot_grid(
     data,
+    plot_type="color",
     figure=None,
     axis=None,
     coordinates=None,
@@ -264,12 +265,28 @@ def plot_contourf(
     **kwargs
 ):
     """Plot 2D grid from numpy array, UniformGridData, HierarhicalGridData,
-    or OneGridFunction.
+    or OneGridFunction with different types of plots.
+
+    The type of plot is specified by the variable plot_type.
+
+    plot_type can be 'color', 'contourf'
+
+    When type = color you can provide an interpolation parameter.
+
+    It is preferable not to use this function directly, but to define more
+    intuitive interfaces.
 
     Read the full documentation to see how to use this function.
 
     If logscale is True, vmin and vmax are the log10 of the variable.
     """
+
+    known_plot_types = ["color", "contourf"]
+
+    if plot_type not in known_plot_types:
+        raise ValueError(
+            f"Unknown plot_type {plot_type} (Options available {known_plot_types})"
+        )
 
     # Considering all the effort put in _preprocess_plot_grid, we we can plot
     # as we were plotting normal numpy arrays.
@@ -286,19 +303,50 @@ def plot_contourf(
 
     axis.set_aspect(aspect_ratio)
 
-    if coordinates is None:
-        cf = axis.imshow(data, **kwargs)
-    else:
-        cf = axis.contourf(
-            *coordinates, data, extend=colorbar_extend, **kwargs
-        )
     if xlabel is not None:
         axis.set_xlabel(xlabel)
     if ylabel is not None:
         axis.set_ylabel(ylabel)
+
+    if plot_type == "color":
+        if coordinates is None:
+            grid = None
+        else:
+            # TODO: Not very pythonic way to write this...
+            dx = coordinates[0][1] - coordinates[0][0]
+            dy = coordinates[1][1] - coordinates[1][0]
+            grid = [
+                coordinates[0][0] - 0.5 * dx,
+                coordinates[0][-1] + 0.5 * dx,
+                coordinates[1][0] - 0.5 * dy,
+                coordinates[1][-1] + 0.5 * dy,
+            ]
+
+        image = axis.imshow(
+            data, vmin=vmin, vmax=vmax, origin="lower", extent=grid, **kwargs
+        )
+    elif plot_type == "contourf":
+        if coordinates is None:
+            raise ValueError(
+                "You must provide the coordiantes with plot_type = contourf"
+            )
+        image = axis.contourf(
+            *coordinates, data, extend=colorbar_extend, **kwargs
+        )
+
     if colorbar:
-        plot_colorbar(cf, axis=axis, label=label)
-    return cf
+        plot_colorbar(image, axis=axis, label=label)
+    return image
+
+
+def plot_contourf(data, **kwargs):
+    # This function is a convinence function around _plot_grid.
+    return _plot_grid(data, plot_type="contourf", **kwargs)
+
+
+def plot_color(data, **kwargs):
+    # This function is a convinence function around _plot_grid.
+    return _plot_grid(data, plot_type="color", **kwargs)
 
 
 @_preprocess_plot
