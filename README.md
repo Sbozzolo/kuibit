@@ -21,7 +21,7 @@ documentation](https://sbozzolo.github.io/PostCactus).
 
 ``PostCactus`` is available in TestPyPI. To install it with `pip`
 ``` bash
-   pip3 install --index-url https://test.pypi.org/simple/ postcactus
+pip3 install --index-url https://test.pypi.org/simple/ postcactus
 ```
 If they are not already available, `pip` will install all the necessary dependencies.
 
@@ -36,7 +36,7 @@ dependency management, building, and publishing the package.
 
 To install `PostCactus` with poetry, clone this repo, move into the folder, and run:
 ``` sh
-   poetry install
+poetry install
 ```
 This will download all the needed dependencies in a sandboxed environment. When
 you want to use ``PostCactus``, just run ``poetry shell``. This will drop you in
