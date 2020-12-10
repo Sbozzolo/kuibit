@@ -59,12 +59,10 @@
 Einstein Toolkit data. (<a class="reference internal" href="visualize_ref.html#module-postcactus.visualize"><span class="std std-ref">Reference on postcactus.visualize</span></a>)</p>
 <div class="section" id="grid-functions">
 <h2>Grid functions<a class="headerlink" href="#grid-functions" title="Permalink to this headline">¶</a></h2>
-<p>The main way to visualize grid data is with the function
-<code class="xref py py-mod docutils literal notranslate"><span class="pre">plot_contourf</span></code>. This method support a large variety of inputs:</p>
+<p>The main way to visualize grid data is with the functions <code class="xref py py-mod docutils literal notranslate"><span class="pre">plot_color</span></code>
+and <code class="xref py py-mod docutils literal notranslate"><span class="pre">plot_contourf</span></code>. These method support a large variety of inputs:</p>
 <ul class="simple">
-<li><p>NumPy array: it will be plotted with <code class="docutils literal notranslate"><span class="pre">imshow</span></code>, unless the keyword
-<code class="docutils literal notranslate"><span class="pre">coordinates</span></code> is provided, in which case they will be plotted as
-<code class="docutils literal notranslate"><span class="pre">contourf</span></code></p></li>
+<li><p>NumPy arrays, with coordintes specified by the <code class="docutils literal notranslate"><span class="pre">coordinates</span></code> keyword.</p></li>
 <li><p><a class="reference internal" href="grid_data_ref.html#postcactus.grid_data.UniformGridData" title="postcactus.grid_data.UniformGridData"><code class="xref py py-class docutils literal notranslate"><span class="pre">UniformGridData</span></code></a>: it will be plotted over the entire domain,
 unless the keywords <code class="docutils literal notranslate"><span class="pre">x0</span></code>, <code class="docutils literal notranslate"><span class="pre">x1</span></code> and <code class="docutils literal notranslate"><span class="pre">shape</span></code> are provided. These
 specify the extent of the grid to be plotted. <code class="docutils literal notranslate"><span class="pre">shape</span></code> is essentially the
@@ -77,6 +75,9 @@ but you also have to provide the iteration with the <code class="docutils litera
 </ul>
 <p><code class="docutils literal notranslate"><span class="pre">shape</span></code>, <code class="docutils literal notranslate"><span class="pre">x0</span></code>, <code class="docutils literal notranslate"><span class="pre">x1</span></code> are all 2D lists or tuples. The function also takes
 <code class="docutils literal notranslate"><span class="pre">xlabel</span></code> and <code class="docutils literal notranslate"><span class="pre">ylabel</span></code> to customize the labels.</p>
+<p>Plots can be enanched by adding a colorbar with <code class="xref py py-mod docutils literal notranslate"><span class="pre">plot_colorbar</span></code> or by
+adding text in the bottom right corner with
+<code class="xref py py-mod docutils literal notranslate"><span class="pre">add_text_to_figure_corner</span></code> (for example the time).</p>
 </div>
 <div class="section" id="implementation-details">
 <h2>Implementation details<a class="headerlink" href="#implementation-details" title="Permalink to this headline">¶</a></h2>
@@ -88,6 +89,9 @@ types, we have decorators. For example, with the decorator
 <code class="xref py py-class docutils literal notranslate"><span class="pre">_preprocess_plot_grid</span></code>, we give support to handling all the
 differnt types to any function that takes <code class="docutils literal notranslate"><span class="pre">data</span></code> and and <code class="docutils literal notranslate"><span class="pre">coordiantes</span></code> as
 arguments. This can be used for other functions too.</p>
+<p>The methods <code class="xref py py-mod docutils literal notranslate"><span class="pre">plot_color</span></code> and <code class="xref py py-mod docutils literal notranslate"><span class="pre">plot_contourf</span></code> call a
+primitive <code class="xref py py-mod docutils literal notranslate"><span class="pre">_plot_grid</span></code> which implements all the different types of
+plots avoiding code duplication.</p>
 </div>
 </div>
 
