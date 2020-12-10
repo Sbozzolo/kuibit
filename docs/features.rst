@@ -154,6 +154,8 @@ Horizons
 Visualize
 ---------
 
+Experimental features may change in the future.
+
 - Visualize grid data.
 
 Utilities
