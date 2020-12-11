@@ -153,5 +153,7 @@ Horizons
 Experimental
 ------------
 
+Experimental fetures may change in the future.
+
 - Visualize grid data.
 - Build command-line scripts with common options.
