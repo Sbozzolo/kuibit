@@ -759,6 +759,7 @@ def load_UniformGridData(path, *args, **kwargs):
     del metadata["x0"]
 
     data = np.loadtxt(path).reshape(shape)
+    # skipcq PYL-E1124
     return UniformGridData.from_grid_structure(data, x0, **metadata)
 
 

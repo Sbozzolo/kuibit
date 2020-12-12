@@ -229,59 +229,63 @@ class TestFrequencySeries(unittest.TestCase):
         f1_series = ts.TimeSeries(times, values1).to_FrequencySeries()
         f2_series = ts.TimeSeries(times, values2).to_FrequencySeries()
 
-        # Test with PyCBC
-        fmin = 5
-        fmax = 15
+        try:
 
-        # PyCBC raises some benign warnings. We ignore them.
-        with warnings.catch_warnings():
-            warnings.simplefilter("ignore")
+            # Test with PyCBC
+            fmin = 5
+            fmax = 15
 
-            from pycbc.types import timeseries as pycbcts
-            from pycbc.types import frequencyseries as pycbcfs
-            from pycbc.filter import overlap
+            # PyCBC raises some benign warnings. We ignore them.
+            with warnings.catch_warnings():
+                warnings.simplefilter("ignore")
 
-        ts1_pcbc = pycbcts.TimeSeries(values1, delta_t=times[1] - times[0])
-        ts2_pcbc = pycbcts.TimeSeries(values2, delta_t=times[1] - times[0])
+                from pycbc.types import timeseries as pycbcts
+                from pycbc.types import frequencyseries as pycbcfs
+                from pycbc.filter import overlap
 
-        ov = overlap(
-            ts1_pcbc,
-            ts2_pcbc,
-            psd=None,
-            low_frequency_cutoff=fmin,
-            high_frequency_cutoff=fmax,
-        )
+            ts1_pcbc = pycbcts.TimeSeries(values1, delta_t=times[1] - times[0])
+            ts2_pcbc = pycbcts.TimeSeries(values2, delta_t=times[1] - times[0])
 
-        self.assertAlmostEqual(
-            f1_series.overlap(f2_series, fmin=fmin, fmax=fmax, noises=None),
-            ov,
-            places=4,
-        )
+            ov = overlap(
+                ts1_pcbc,
+                ts2_pcbc,
+                psd=None,
+                low_frequency_cutoff=fmin,
+                high_frequency_cutoff=fmax,
+            )
 
-        # Test with non trivial noise
-        # PyCBC requires the noise to be defined on the same frequencies as the
-        # data
-        df_noise = ts1_pcbc.to_frequencyseries().delta_f
-        f_noise = np.array([i * df_noise for i in range(num_times // 2 + 1)])
+            self.assertAlmostEqual(
+                f1_series.overlap(f2_series, fmin=fmin, fmax=fmax, noises=None),
+                ov,
+                places=4,
+            )
 
-        # Funky looking noise
-        psd_noise = np.abs(np.sin(50 * f_noise) + 0.1)
-        noise_pycbc = pycbcfs.FrequencySeries(psd_noise, delta_f=df_noise)
-        noise2 = fs.FrequencySeries(f_noise, psd_noise)
+            # Test with non trivial noise
+            # PyCBC requires the noise to be defined on the same frequencies as the
+            # data
+            df_noise = ts1_pcbc.to_frequencyseries().delta_f
+            f_noise = np.array([i * df_noise for i in range(num_times // 2 + 1)])
 
-        ov_noise = overlap(
-            ts1_pcbc,
-            ts2_pcbc,
-            psd=noise_pycbc,
-            low_frequency_cutoff=fmin,
-            high_frequency_cutoff=fmax,
-        )
+            # Funky looking noise
+            psd_noise = np.abs(np.sin(50 * f_noise) + 0.1)
+            noise_pycbc = pycbcfs.FrequencySeries(psd_noise, delta_f=df_noise)
+            noise2 = fs.FrequencySeries(f_noise, psd_noise)
 
-        self.assertAlmostEqual(
-            f1_series.overlap(f2_series, fmin=fmin, fmax=fmax, noises=noise2),
-            ov_noise,
-            places=5,
-        )
+            ov_noise = overlap(
+                ts1_pcbc,
+                ts2_pcbc,
+                psd=noise_pycbc,
+                low_frequency_cutoff=fmin,
+                high_frequency_cutoff=fmax,
+            )
+
+            self.assertAlmostEqual(
+                f1_series.overlap(f2_series, fmin=fmin, fmax=fmax, noises=noise2),
+                ov_noise,
+                places=5,
+            )
+        except ImportError:  # pragma: no cover
+            pass
 
     def test_load_FrequencySeries(self):
 
