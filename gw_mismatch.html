@@ -127,7 +127,8 @@ bounds to make sure that you are localizing the absolute maximum.</p>
 <p><code class="docutils literal notranslate"><span class="pre">PostCactus</span></code> has no way to determine if the maximum found is the absolute
 one. It is your job to set the limits of the search in a meaningful way.</p>
 </div>
-<p>To make up for the algorithmic inefficiency, <code class="docutils literal notranslate"><span class="pre">PostCactus</span></code> uses <a class="reference external" href="https://numba.pydata.org/">numba</a> to speed up the search. Using numba enables
+<p>To make up for the algorithmic inefficiency, <code class="docutils literal notranslate"><span class="pre">PostCactus</span></code> optionally uses
+<a class="reference external" href="https://numba.pydata.org/">numba</a> to speed up the search. Using numba enables
 high-resolution searches that would not be possible otherwise. Numba compiles
 the main mismatch function (<code class="xref py py-meth docutils literal notranslate"><span class="pre">_mismatch_core_numerical()</span></code>) to machine
 code to achieve native performances. Numba requires a substantial overhead to do
@@ -135,7 +136,8 @@ this, so for small searches it is not convenient to use it. Therefore,
 <code class="docutils literal notranslate"><span class="pre">PostCactus</span></code> activates numba only when the size of the parameter space is
 larger than 2500 elements. If you want to use numba with fewer elements, you can
 set <code class="docutils literal notranslate"><span class="pre">force_numba</span></code> to <code class="docutils literal notranslate"><span class="pre">True</span></code>. This may be faster in some cases (for example,
-for very long arrays).</p>
+for very long arrays). To use numba, make sure that the package is available (it
+is installed among the <code class="docutils literal notranslate"><span class="pre">extras</span></code>).</p>
 <p>The limits of the serach are specified by the paramters <code class="docutils literal notranslate"><span class="pre">time_shift_start</span></code> and
 <code class="docutils literal notranslate"><span class="pre">time_shift_end</span></code> for time shifts, and they are always from 0 to <span class="math notranslate nohighlight">\(2 \pi\)</span>
 for polarization shifts. The number of points inspected is <code class="docutils literal notranslate"><span class="pre">num_time_shifts</span></code>
