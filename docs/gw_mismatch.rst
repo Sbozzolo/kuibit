@@ -90,8 +90,8 @@ bounds to make sure that you are localizing the absolute maximum.
    ``PostCactus`` has no way to determine if the maximum found is the absolute
    one. It is your job to set the limits of the search in a meaningful way.
 
-To make up for the algorithmic inefficiency, ``PostCactus`` uses `numba
-<https://numba.pydata.org/>`_ to speed up the search. Using numba enables
+To make up for the algorithmic inefficiency, ``PostCactus`` optionally uses
+`numba <https://numba.pydata.org/>`_ to speed up the search. Using numba enables
 high-resolution searches that would not be possible otherwise. Numba compiles
 the main mismatch function (:py:meth:`~_mismatch_core_numerical`) to machine
 code to achieve native performances. Numba requires a substantial overhead to do
@@ -99,7 +99,9 @@ this, so for small searches it is not convenient to use it. Therefore,
 ``PostCactus`` activates numba only when the size of the parameter space is
 larger than 2500 elements. If you want to use numba with fewer elements, you can
 set ``force_numba`` to ``True``. This may be faster in some cases (for example,
-for very long arrays).
+for very long arrays). To use numba, make sure that the package is available (it
+is installed among the ``extras``).
+
 
 The limits of the serach are specified by the paramters ``time_shift_start`` and
 ``time_shift_end`` for time shifts, and they are always from 0 to :math:`2 \pi`

@@ -36,12 +36,13 @@ dependency management, building, and publishing the package.
 
 To install `PostCactus` with poetry, clone this repo, move into the folder, and run:
 ``` sh
-poetry install
+poetry install -E full
 ```
-This will download all the needed dependencies in a sandboxed environment. When
-you want to use ``PostCactus``, just run ``poetry shell``. This will drop you in
-a shell in which you have full access to ``PostCactus`` in "development" version,
-and its dependencies (also the one needed only for development).
+This will download all the needed dependencies in a sandboxed environment (the
+`-E full` flag is for the optional dependencies). When you want to use
+``PostCactus``, just run ``poetry shell``. This will drop you in a shell in
+which you have full access to ``PostCactus`` in "development" version, and its
+dependencies (also the one needed only for development).
 
 ## Documentation
 

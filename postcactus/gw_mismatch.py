@@ -23,17 +23,28 @@ network mismatch starting from psi4 and the sky localization) and
 mismatch_from_strains (when computing the mismatch from the strains).
 
 """
+from contextlib import contextmanager
 from warnings import warn
 
 import numpy as np
-
 # What is this? This is numba!
-# numba is a JITter (JIT = Just In Time). The following code is compiled at
-# runtime. The compiled code is instead, and it is much faster.
 #
-# At the moment, fft is not supported, so the full power of numba cannot be
-# achived.
-from numba import njit, objmode
+# numba is a JITter (JIT = Just In Time). The following code is
+# compiled at runtime. The compiled code is instead, and it is much
+# faster.
+#
+# At the moment, fft is not supported, so the full power of numba
+# cannot be achived.
+
+# TODO: Look at me if numba has support for FFTs
+
+# We have to put this here. See numba issue #4456
+# We always try to import numba because we need objtmode
+try:
+    from numba import njit
+    from numba import objmode as numba_objmode
+except ImportError: # pragma: no cover
+    pass
 
 from postcactus import frequencyseries as fs
 from postcactus import gw_utils as gwu
@@ -136,7 +147,7 @@ def _mismatch_core_numerical(
         # Numba does not support fft yet, so we have to go to object mode
         # This context manager does not affect anything when we run without
         # numba
-        with objmode(
+        with objmode( # skipcq PYL-E0602
             h2_p_fft_pshifted="complex128[:]",
             h2_c_fft_pshifted="complex128[:]",
         ):
@@ -419,9 +430,29 @@ def mismatch_from_strains(
         force_numba or num_polarization_shifts * num_time_shifts >= 500 * 500
     )
 
+    if use_numba and "njit" not in globals():
+        if force_numba:
+            warn("numba not available, ignoring force_numba")
+        use_numba = False
+
     if use_numba:
+        globals()['objmode'] = numba_objmode
         _core_function = njit(_mismatch_core_numerical)
     else:
+        # HACK: Now we have to do something dirty. _mismatch_core_numerical
+        #       calls numba.objmode to perform FFTs, but when numba is not
+        #       available, objmode is unkown. Hence, we have to provide a dummy
+        #       objmode that does nothing. As long as numba doesn't support
+        #       FFTs natively, that code has to be here. However, cannot put in
+        #       _mismatch_core_numerical because numba wouldn't be able to
+        #       compile the function.
+        @contextmanager
+        def nullcontext(*args, **kwargs):
+            yield None
+
+        # We override objmode in the gobal scope with nullcontext
+        globals()['objmode'] = nullcontext
+
         _core_function = _mismatch_core_numerical
 
     (unnormalized_max_overlap, index_max) = _core_function(

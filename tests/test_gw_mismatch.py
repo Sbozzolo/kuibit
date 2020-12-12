@@ -15,7 +15,10 @@
 # You should have received a copy of the GNU General Public License along with
 # this program; if not, see <https://www.gnu.org/licenses/>.
 
+import sys
+from importlib import reload
 import unittest
+from unittest.mock import patch
 import warnings
 
 import numpy as np
@@ -40,29 +43,30 @@ class TestGWMismatch(unittest.TestCase):
 
     def test_mismatch_from_strains(self):
 
-        # Test with PyCBC
+        # Test with PyCBC.
         fmin = 10
         fmax = 15
 
-        # PyCBC raises some benign warnings. We ignore them.
-        with warnings.catch_warnings():
-            warnings.simplefilter("ignore")
+        # # PyCBC raises some benign warnings. We ignore them.
+        # with warnings.catch_warnings():
+        #     warnings.simplefilter("ignore")
 
-            from pycbc.types import timeseries as pycbcts
-            from pycbc.types import frequencyseries as pycbcfs
-            from pycbc.filter import match
+        #     from pycbc.types import timeseries as pycbcts
+        #     from pycbc.types import frequencyseries as pycbcfs
+        #     from pycbc.filter import match
 
-        ts1_pcbc = pycbcts.TimeSeries(self.values1, delta_t=self.ts1.dt)
-        ts2_pcbc = pycbcts.TimeSeries(self.values2, delta_t=self.ts2.dt)
-        pycbc_m, _ = match(
-            ts1_pcbc,
-            ts2_pcbc,
-            psd=None,
-            low_frequency_cutoff=fmin,
-            high_frequency_cutoff=fmax,
-        )
+        # ts1_pcbc = pycbcts.TimeSeries(self.values1, delta_t=self.ts1.dt)
+        # ts2_pcbc = pycbcts.TimeSeries(self.values2, delta_t=self.ts2.dt)
+        # pycbc_m, _ = match(
+        #     ts1_pcbc,
+        #     ts2_pcbc,
+        #     psd=None,
+        #     low_frequency_cutoff=fmin,
+        #     high_frequency_cutoff=fmax,
+        # )
 
-        expected_mism = 1 - pycbc_m
+        # expected_mism = 1 - pycbc_m
+        expected_mism = 0.9596805448739523
 
         # Test no noise, no antenna pattern, not using Numba
         # We are picking a very narrow time shift to reduce
@@ -184,7 +188,8 @@ class TestGWMismatch(unittest.TestCase):
         # Test with non trivial noise
         # PyCBC requires the noise to be defined on the same frequencies as the
         # data
-        df_noise = ts1_pcbc.to_frequencyseries().delta_f
+        # df_noise = ts1_pcbc.to_frequencyseries().delta_f
+        df_noise = 0.00795575771780612
         f_noise = np.array([i * df_noise for i in range(10000)])
 
         # Funky looking noise
@@ -192,16 +197,17 @@ class TestGWMismatch(unittest.TestCase):
         noise2 = fs.FrequencySeries(f_noise, psd_noise)
 
         # PyCBC
-        noise_pycbc = pycbcfs.FrequencySeries(psd_noise, delta_f=df_noise)
-        pycbc_m_noise, u = match(
-            ts1_pcbc,
-            ts2_pcbc,
-            psd=noise_pycbc,
-            low_frequency_cutoff=fmin,
-            high_frequency_cutoff=fmax,
-        )
+        # noise_pycbc = pycbcfs.FrequencySeries(psd_noise, delta_f=df_noise)
+        # pycbc_m_noise, u = match(
+        #     ts1_pcbc,
+        #     ts2_pcbc,
+        #     psd=noise_pycbc,
+        #     low_frequency_cutoff=fmin,
+        #     high_frequency_cutoff=fmax,
+        # )
 
-        expected_mism_noise = 1 - pycbc_m_noise
+        # # expected_mism_noise = 1 - pycbc_m_noise
+        expected_mism_noise = 0.8654645514638336
 
         o_noise2 = gwm.mismatch_from_strains(
             self.ts1,
@@ -316,106 +322,108 @@ class TestGWMismatch(unittest.TestCase):
         # First, we test the overlap by giving num_polarizations,
         # num_time_shifts=1
 
-        with warnings.catch_warnings():
-            warnings.simplefilter("ignore")
-            from pycbc.waveform import get_td_waveform
-            from pycbc.types import timeseries as pycbcts
-            from pycbc.filter import overlap
-            from pycbc.filter import match
+        try:
+            with warnings.catch_warnings():
+                warnings.simplefilter("ignore")
+                from pycbc.waveform import get_td_waveform
+                from pycbc.types import timeseries as pycbcts
+                from pycbc.filter import overlap
+                from pycbc.filter import match
+            fmin_gw = 50
+            fmax_gw = 100
+            delta_t = 1 / 4096
 
-        fmin_gw = 50
-        fmax_gw = 100
-        delta_t = 1 / 4096
+            hp1, hc1 = get_td_waveform(
+                approximant="IMRPhenomPv2",
+                mass1=10,
+                mass2=10,
+                spin1z=0.9,
+                delta_t=delta_t,
+                f_lower=40,
+            )
 
-        hp1, hc1 = get_td_waveform(
-            approximant="IMRPhenomPv2",
-            mass1=10,
-            mass2=10,
-            spin1z=0.9,
-            delta_t=delta_t,
-            f_lower=40,
-        )
+            hp2, hc2 = get_td_waveform(
+                approximant="IMRPhenomPv2",
+                mass1=10,
+                mass2=25,
+                spin1z=-0.5,
+                delta_t=delta_t,
+                f_lower=40,
+            )
 
-        hp2, hc2 = get_td_waveform(
-            approximant="IMRPhenomPv2",
-            mass1=10,
-            mass2=25,
-            spin1z=-0.5,
-            delta_t=delta_t,
-            f_lower=40,
-        )
+            # PyCBC does not work well with series with different length. So, we
+            # crop the longer one to the length of the shorter one. For the choice
+            # of paramters, it is 2 that is shorter than 1. 1 starts earlier in the
+            # past. However, they have the same frequencies, so we can simply crop
+            # away the part we are not interested in.
 
-        # PyCBC does not work well with series with different length. So, we
-        # crop the longer one to the length of the shorter one. For the choice
-        # of paramters, it is 2 that is shorter than 1. 1 starts earlier in the
-        # past. However, they have the same frequencies, so we can simply crop
-        # away the part we are not interested in.
+            time_offset = 2  # Manually computed looking at the times
+            hp1 = hp1.crop(time_offset, 0)
+            hc1 = hc1.crop(time_offset, 0)
 
-        time_offset = 2  # Manually computed looking at the times
-        hp1 = hp1.crop(time_offset, 0)
-        hc1 = hc1.crop(time_offset, 0)
+            # We apply the "antenna pattern"
+            h1_pycbc = pycbcts.TimeSeries(
+                0.33 * hp1 + 0.66 * hc1, delta_t=hp1.delta_t
+            )
+            h2_pycbc = pycbcts.TimeSeries(
+                0.33 * hp2 + 0.66 * hc2, delta_t=hp2.delta_t
+            )
 
-        # We apply the "antenna pattern"
-        h1_pycbc = pycbcts.TimeSeries(
-            0.33 * hp1 + 0.66 * hc1, delta_t=hp1.delta_t
-        )
-        h2_pycbc = pycbcts.TimeSeries(
-            0.33 * hp2 + 0.66 * hc2, delta_t=hp2.delta_t
-        )
+            overlap_m = overlap(
+                h1_pycbc,
+                h2_pycbc,
+                psd=None,
+                low_frequency_cutoff=fmin_gw,
+                high_frequency_cutoff=fmax_gw,
+            )
 
-        overlap_m = overlap(
-            h1_pycbc,
-            h2_pycbc,
-            psd=None,
-            low_frequency_cutoff=fmin_gw,
-            high_frequency_cutoff=fmax_gw,
-        )
+            h1_postcac = ts.TimeSeries(h1_pycbc.sample_times, hp1 - 1j * hc1)
+            h2_postcac = ts.TimeSeries(h2_pycbc.sample_times, hp2 - 1j * hc2)
 
-        h1_postcac = ts.TimeSeries(h1_pycbc.sample_times, hp1 - 1j * hc1)
-        h2_postcac = ts.TimeSeries(h2_pycbc.sample_times, hp2 - 1j * hc2)
+            o = gwm.mismatch_from_strains(
+                h1_postcac,
+                h2_postcac,
+                fmin=fmin_gw,
+                fmax=fmax_gw,
+                noises=None,
+                antenna_patterns=[(0.66, 0.33)],
+                num_polarization_shifts=1,
+                num_time_shifts=1,
+                time_shift_start=0,
+                time_shift_end=0,
+                force_numba=False,
+            )
 
-        o = gwm.mismatch_from_strains(
-            h1_postcac,
-            h2_postcac,
-            fmin=fmin_gw,
-            fmax=fmax_gw,
-            noises=None,
-            antenna_patterns=[(0.66, 0.33)],
-            num_polarization_shifts=1,
-            num_time_shifts=1,
-            time_shift_start=0,
-            time_shift_end=0,
-            force_numba=False,
-        )
+            self.assertAlmostEqual(1 - o[0], overlap_m, places=2)
 
-        self.assertAlmostEqual(1 - o[0], overlap_m, places=2)
+            # Now we can test the mismatch
+            pycbc_m, _ = match(
+                h1_pycbc,
+                h2_pycbc,
+                psd=None,
+                low_frequency_cutoff=fmin_gw,
+                high_frequency_cutoff=fmax_gw,
+            )
 
-        # Now we can test the mismatch
-        pycbc_m, _ = match(
-            h1_pycbc,
-            h2_pycbc,
-            psd=None,
-            low_frequency_cutoff=fmin_gw,
-            high_frequency_cutoff=fmax_gw,
-        )
+            pycbc_m = 1 - pycbc_m
 
-        pycbc_m = 1 - pycbc_m
+            mat = gwm.mismatch_from_strains(
+                h1_postcac,
+                h2_postcac,
+                fmin=fmin_gw,
+                fmax=fmax_gw,
+                noises=None,
+                antenna_patterns=[(0.66, 0.33)],
+                num_polarization_shifts=100,
+                num_time_shifts=800,
+                time_shift_start=-0.3,
+                time_shift_end=0.3,
+                force_numba=False,
+            )
 
-        mat = gwm.mismatch_from_strains(
-            h1_postcac,
-            h2_postcac,
-            fmin=fmin_gw,
-            fmax=fmax_gw,
-            noises=None,
-            antenna_patterns=[(0.66, 0.33)],
-            num_polarization_shifts=100,
-            num_time_shifts=800,
-            time_shift_start=-0.3,
-            time_shift_end=0.3,
-            force_numba=False,
-        )
-
-        self.assertAlmostEqual(mat[0], pycbc_m, places=2)
+            self.assertAlmostEqual(mat[0], pycbc_m, places=2)
+        except ImportError:  # pragma: no cover
+            pass
 
     def test_mismatch_from_psi4(self):
 
@@ -554,3 +562,33 @@ class TestGWMismatch(unittest.TestCase):
                 time_shift_end=200,
             )[0],
         )
+
+    def test_mismatch_without_numba_installed(self):
+
+        # We remove "njit" for the loaded module, so gwm thinks that numba is
+        # not available
+        del gwm.__dict__['njit']
+
+        fmin = 10
+        fmax = 15
+        expected_mism = 0.9596805448739523
+
+        # We try to force numba
+        with self.assertWarns(Warning):
+            o = gwm.mismatch_from_strains(
+                self.ts1,
+                self.ts2,
+                fmin=fmin,  # It's important to have fmin != 0
+                fmax=fmax,
+                noises=None,
+                # We only select the "real" polarization
+                # because the signal is real
+                antenna_patterns=[(0, 1)],
+                num_polarization_shifts=50,
+                num_time_shifts=50,
+                time_shift_start=-1,
+                time_shift_end=1,
+                force_numba=True,
+            )
+
+        self.assertAlmostEqual(o[0], expected_mism, places=3)
