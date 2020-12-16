@@ -22,7 +22,6 @@ is normally not used directly, but from the :py:mod:`~.simdir` module.
 The data loaded by this module is represented as
 :py:class:`~.TimeSeries` objects.
 """
-#test change
 
 import os
 import re
