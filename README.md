@@ -16,7 +16,7 @@ Hopefully, I will keep this up-to-date with the main PostCactus branch, but it i
 of what I am supporting here is not publicly available, nor under active development, so there is a limit to how
 much development effort should go into this fork.
 Also, since the Illinois code is an example of a Cactus code that PostCactus doesn't natively support, should't
-it be called "PostEinsteinToolkit"? Food for thought.
+it really be called "PostEinsteinToolkit"? Discuss!
 
 # PostCactus
 
