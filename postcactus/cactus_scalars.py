@@ -213,6 +213,168 @@ class OneScalar:
         """
         return list(self._vars.keys())
 
+class TwoScalar:
+    """Read scalar data produced by the IL code BHNS diagnostics suite.
+
+    TwoScalar is a dictionary-like object: it has keys() and you can
+    TimeSeries using the ['key'] syntax.
+
+    Single variable per file or single file per group are supported. In the
+    latter case, the header is inspected to understand the content of the file.
+
+    Compressed files (gz and bz2) are supported.
+
+    TwoScalar represents one scalar file, there can be multiple variables inside,
+    (if it was one_file_per_group).
+
+    """
+
+    # What is this pattern?
+    # See the comment in OneScalar for a general explanation.
+    # In this case, I have changed things so that it recognizes
+    # the set of files outputted by the BHNS diagnostics instead.
+    
+    _pattern_filename = r"""^bhns(?:\.(don|mon|xon)|-(dens_mode\.con|emf\.con|gam\.con|ham\.con|max_tor_pol\.mon|mom\.con)|(?:\.(jon)\.([0-9])))(?:\.(gz|bz2))?$"""
+
+    _rx_filename = re.compile(_pattern_filename, re.VERBOSE)
+
+    _reduction_types = {
+        "minimum": "min",
+        "maximum": "max",
+        "norm1": "norm1",
+        "norm2": "norm2",
+        "norm_inf": "infnorm",
+        "average": "average",
+        None: "scalar",
+    }
+
+    # What function to use to open the file?
+    # What mode?
+    _decompressor = {
+        None: (open, "r"),
+        "gz": (gopen, "rt"),
+        "bz2": (bopen, "rt"),
+    }
+
+    def __init__(self, path):
+        self.path = str(path)
+        # The _vars dictionary contains a mapping between the various variables
+        # and the column numbers in which they are stored.
+        self._vars = {}
+        self.folder, filename = os.path.split(self.path)
+
+        filename_match = self._rx_filename.match(filename)
+
+        if filename_match is None:
+            raise RuntimeError(f"Name scheme not recognized for {filename}")
+
+        # variable_name1 may be a thorn name (e.g. hydrobase-press)
+        # Or the actual variable name (e.g. H)
+        (
+            file_name_segment1,
+            file_name_segment2,
+            file_name_segment3,
+            extraction_radius_number
+            compression_method,
+        ) = filename_match.groups()
+
+        self._compression_method = compression_method
+
+        self.reduction_type = self._reduction_types[None] # All bhns files are of the 'scalar' reduction type
+        self._time_column = 0 # All bhns files have colmun 0 hold the times
+
+        if (file_name_segment1 is not None):
+            if (file_name_segment1=="don"):
+                self._vars = {"M0":1, "M0 inside AH":2, "M0_esc(r>30M)":3, "M0_esc(r>50M)":4,
+                              "M0_esc(r>70M)":5, "M0_esc(r>100M)":6, "Eint":7, "T":8, "M_ADM_Vol":9,
+                              "M_Komar Surf":10, "M0dot_BH":11, "int_M0dot":12, "Tfluid0_0_VolInt":13}
+            elif (file_name_segment1=="mon"):
+                self._vars = {"Phicent":1, "Kcent":2, "lapsecent":3, "psicent":4, "lapsemin":5,
+                              "phimax":6, "rhocent":7, "rho_b_max":8, "Jsurf_BH_1.1":9, "J_1.1exVol":10,
+                              "M_ADMsurf_BH_1.1":11, "M_ADM1.1exVol":12, "rhostar_min":13,
+                              "J_1.1exVolr":14, "J_1.1exVolr/2":15, "rho_b_max_x":16, "rho_b_max_y":17,
+                              "rho_b_max_z":18}
+            elif (file_name_segment1=="xon"):
+                self._vars = {"Box1x":1, "Box1y":2, "Box2x":3, "Box2y":4, "M0_star_1":5, "M0_star_2":6}
+            else:
+                raise RuntimeError("BHNSDiagnosticASCII: naming scheme not recognized for %s" % fn)
+        elif (file_name_segment2 is not None):
+            if (file_name_segment2=="dens_mode.con"):
+                # Ultimately there should be a special structure for the variables from
+                # this diagnostic file, but for now this will have to do.
+                self._vars = {"m=0":1, "m=1 real":2, "m=1 im":3, "m=2 real":4, "m=2 im":5, "m=3 real":6,
+                              "m=3 im":7, "m=4 real":8, "m=4 im":9, "m=5 real":10, "m=5 im":11,
+                              "m=6 real":12, "m=6 im":13}
+            elif (file_name_segment2=="emf.con"):
+                self._vars = {"Eem":1, "Eem_outsideAH":2, "int B_phi":3, "Bx_max":4, "By_max":5,
+                              "Monopole":6, "Monop.t=0":7, "Mpole_outAH":8, "b2_max":9, "b2_max_x":10,
+                              "b2_max_y":11, "b2_max_z":12, "Eemoutside_r1":13, "Eemoutside_r2":14,
+                              "b2_maxv2":15}
+            elif (file_name_segment2=="gam.con"):
+                 self._vars = {"Gamx Res":1, "Gamy Res":2, "Gamz Res":3}
+            elif (file_name_segment2=="ham.con"):
+                 self._vars = {"Haml ResN":1, "Haml ResD":2, "Ham Res2P1.1N":3, "Ham Res2P1.1D":4,
+                               "HR1.1-NoD":5, "HRes_outAH_N":6, "HRes_outAH_D":7, "HRes_outAHNoD":8,
+                               "HRes2P1.1NNR":9, "HRes2P1.1DNR":10}
+            elif (file_name_segment2=="max_tor_pol.mon"):
+                self._vars = {"B_tor_rhostarN_3":1, "B_pol_rhostarN_3":2, "B^2/(2P)rhostarN_3":3,
+                              "rhostar_D_3":4, "B_tor_max":5, "B_pol_max":6}
+            elif (file_name_segment2=="mom.con"):
+                self._vars = {"Momx ResN":1, "Momy ResN":2, "Momz ResN":3, "Mom ResD":4, "Momx Res1.1N":5, "Momy Res1.1N":6, "Momz Res1.1N":7, "Mom Res1.1D":8, "MRx 1.1NoD":9}
+            else:
+                raise RuntimeError("Naming scheme not recognized for %s" % filename)
+        elif ((file_name_segment3=="jon") and (extraction_radius_number is not None)):
+            # Ultimately there should probably be a special structure for the
+            # variables from this set of diagnostic files that treats them as lists
+            # of values at different extraction radii.
+            # For now the extraction_radius_number will just be appended to the variable name string.
+            tmp = {"fisheye radius":1, "phys radius":2, "Mass_sur":3, "Ang_mom_surf":4,
+                   "Komar Mass":5, "P_x2":6, "P_y2":7, "P_z2":8, "F_M0":9, "F_E_fluid":10,
+                   "F_E_em":11, "F_J_fluid":12, "F_J_em":13}
+            for key, val in tmp.items():
+                self._vars[key+"_"+str(extraction_radius_number)] = val
+        else:
+            raise RuntimeError("Naming scheme not recognized for %s" % filename)
+    
+    @lru_cache(128)
+    def load(self, variable):
+        """Read file and return a TimeSeries with the requested variable.
+
+        :param variable: Requested variable
+        :type variable: str
+
+        :returns: TimeSeries with requested variable as read from file
+        :rtype:        :py:class:`~.TimeSeries`
+
+        """
+        if variable not in self:
+            raise ValueError(f"{variable} not available")
+
+        column_number = self._vars[variable]
+        t, y = np.loadtxt(
+            self.path,
+            unpack=True,
+            ndmin=2,
+            usecols=(self._time_column, column_number),
+        )
+
+        return ts.remove_duplicate_iters(t, y)
+
+    def __getitem__(self, key):
+        return self.load(key)
+
+    def __contains__(self, key):
+        return key in self._vars
+
+    def keys(self):
+        """Return the list of variables available.
+
+        :returns: List of variables in the file
+        :rtype:   list
+
+        """
+        return list(self._vars.keys())
+
 
 class AllScalars:
     """Helper class to read various types of scalar data in a list of files and
