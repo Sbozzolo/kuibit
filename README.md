@@ -8,6 +8,16 @@
 license](https://img.shields.io/badge/License-GPLv3-blue.svg)](http://perso.crans.org/besson/LICENSE.html)
 [![DeepSource](https://static.deepsource.io/deepsource-badge-light-mini.svg)](https://deepsource.io/gh/Sbozzolo/PostCactus/?ref=repository-badge)
 
+# PostCactus-IL Compatible Fork!
+This is a fork of the main PostCactus 3+ repository, with additions to support use with the
+Illinois GRMHD code, which formats some of its output ever so slightly differently than the Einstein Toolkit,
+and as a result evades PostCactus's attempts to read in all scalars, as well as Psi4 data.
+Hopefully, I will keep this up-to-date with the main PostCactus branch, but it is worth remembering that much
+of what I am supporting here is not publicly available, nor under active development, so there is a limit to how
+much development effort should go into this fork.
+Also, since the Illinois code is an example of a Cactus code that PostCactus doesn't natively support, should't
+it be called "PostEinsteinToolkit"? Food for thought.
+
 # PostCactus
 
 PostCactus is a Python library to analyze simulations performed with the
