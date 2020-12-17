@@ -28,7 +28,6 @@ The important classes defined here are
 """
 
 import ast  # To read metadata in ASCII files
-import itertools
 import re
 from bz2 import open as bopen
 from gzip import open as gopen
@@ -1080,16 +1079,15 @@ class UniformGridData(BaseNumerical):
                 # For ext = 2, we simply have the raise an error if we have
                 # any outside_index
                 raise ValueError("Point outside the grid")
-            else:
-                # Numpy fancy indexing consists in a list of N tuples each
-                # representing a coordinate, so we have to reshape the indices.
-                # Here we use this trick:
-                # *indices unpacks the indices so that the iterator is over each
-                # point. Then, we zip them, which means that we take one element
-                # at the time from each dimension. Finally, we convert this iterator
-                # to a tuple
-                take_indices = tuple(zip(*indices))
-                return self.data[take_indices]
+            # Numpy fancy indexing consists in a list of N tuples each
+            # representing a coordinate, so we have to reshape the indices.
+            # Here we use this trick:
+            # *indices unpacks the indices so that the iterator is over each
+            # point. Then, we zip them, which means that we take one element
+            # at the time from each dimension. Finally, we convert this iterator
+            # to a tuple
+            take_indices = tuple(zip(*indices))
+            return self.data[take_indices]
 
         # Here we are with ext = 1. If we were to call self.data[indices], we
         # would have errors because we are trying to access elements outside the
