@@ -27,6 +27,7 @@ from contextlib import contextmanager
 from warnings import warn
 
 import numpy as np
+
 # What is this? This is numba!
 #
 # numba is a JITter (JIT = Just In Time). The following code is
@@ -43,7 +44,7 @@ import numpy as np
 try:
     from numba import njit
     from numba import objmode as numba_objmode
-except ImportError: # pragma: no cover
+except ImportError:  # pragma: no cover
     pass
 
 from postcactus import frequencyseries as fs
@@ -147,7 +148,7 @@ def _mismatch_core_numerical(
         # Numba does not support fft yet, so we have to go to object mode
         # This context manager does not affect anything when we run without
         # numba
-        with objmode( # skipcq PYL-E0602
+        with objmode(  # skipcq PYL-E0602
             h2_p_fft_pshifted="complex128[:]",
             h2_c_fft_pshifted="complex128[:]",
         ):
@@ -436,7 +437,7 @@ def mismatch_from_strains(
         use_numba = False
 
     if use_numba:
-        globals()['objmode'] = numba_objmode
+        globals()["objmode"] = numba_objmode
         _core_function = njit(_mismatch_core_numerical)
     else:
         # HACK: Now we have to do something dirty. _mismatch_core_numerical
@@ -451,7 +452,7 @@ def mismatch_from_strains(
             yield None
 
         # We override objmode in the gobal scope with nullcontext
-        globals()['objmode'] = nullcontext
+        globals()["objmode"] = nullcontext
 
         _core_function = _mismatch_core_numerical
 
@@ -523,10 +524,7 @@ def mismatch_from_strains(
     p_shift_max = polarization_shifts[p_index]
     t_shift_max = time_shifts[t_index]
 
-    return 1 - unnormalized_max_overlap / norm, (
-        p_shift_max,
-        t_shift_max,
-    )
+    return 1 - unnormalized_max_overlap / norm, (p_shift_max, t_shift_max,)
 
 
 def network_mismatch(

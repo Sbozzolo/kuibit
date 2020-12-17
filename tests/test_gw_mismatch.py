@@ -567,7 +567,7 @@ class TestGWMismatch(unittest.TestCase):
 
         # We remove "njit" for the loaded module, so gwm thinks that numba is
         # not available
-        del gwm.__dict__['njit']
+        del gwm.__dict__["njit"]
 
         fmin = 10
         fmax = 15

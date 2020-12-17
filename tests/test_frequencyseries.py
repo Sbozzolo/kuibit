@@ -255,7 +255,9 @@ class TestFrequencySeries(unittest.TestCase):
             )
 
             self.assertAlmostEqual(
-                f1_series.overlap(f2_series, fmin=fmin, fmax=fmax, noises=None),
+                f1_series.overlap(
+                    f2_series, fmin=fmin, fmax=fmax, noises=None
+                ),
                 ov,
                 places=4,
             )
@@ -264,7 +266,9 @@ class TestFrequencySeries(unittest.TestCase):
             # PyCBC requires the noise to be defined on the same frequencies as the
             # data
             df_noise = ts1_pcbc.to_frequencyseries().delta_f
-            f_noise = np.array([i * df_noise for i in range(num_times // 2 + 1)])
+            f_noise = np.array(
+                [i * df_noise for i in range(num_times // 2 + 1)]
+            )
 
             # Funky looking noise
             psd_noise = np.abs(np.sin(50 * f_noise) + 0.1)
@@ -280,7 +284,9 @@ class TestFrequencySeries(unittest.TestCase):
             )
 
             self.assertAlmostEqual(
-                f1_series.overlap(f2_series, fmin=fmin, fmax=fmax, noises=noise2),
+                f1_series.overlap(
+                    f2_series, fmin=fmin, fmax=fmax, noises=noise2
+                ),
                 ov_noise,
                 places=5,
             )
