@@ -47,7 +47,7 @@ For a full list of available features, see the :doc:`features page <features>`.
 - Handle unit conversion, in particular from geometrized to physical
   (:py:mod:`~.unitconv`).
 - Write command-line scripts (:py:mod:`~.argparse_helper`).
-
+- Visualize data with matplotlib (:py:mod:`~.visualize`).
 
 Installation
 ------------
@@ -101,6 +101,7 @@ Usage
    sensitivity_curves.rst
    unitconv.rst
    argparse_helper.rst
+   visualize.rst
 
 Tutorials
 ---------
@@ -161,6 +162,7 @@ Reference material (classes, functions, ...)
    sensitivity_curves_ref.rst
    unitconv_ref.rst
    argparse_helper_ref.rst
+   visualize_ref.rst
 
 What is a kuibit?
 -----------------
@@ -169,6 +171,7 @@ A kuibit (also known as *kukuipad* harvest pole) is the tool traditionally used
 by the Tohono O'odham people to reach the fruit of the Saguaro cacti during the
 harvesting season. In the same way, this package is a tool that you can use to
 collect the fruit of your ``Cactus`` simulations.
+
 
 Credits
 -------
