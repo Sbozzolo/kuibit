@@ -36,6 +36,6 @@ $(window).resize(function(){
         $("li.nav-item-0 a").text("Top");
     }
     else {
-        $("li.nav-item-0 a").text("PostCactus 3.0.0a11 documentation");
+        $("li.nav-item-0 a").text("PostCactus 3.0.0a12 documentation");
     }
 });
