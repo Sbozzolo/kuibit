@@ -274,7 +274,7 @@ class TwoScalar:
             file_name_segment1,
             file_name_segment2,
             file_name_segment3,
-            extraction_radius_number
+            extraction_radius_number,
             compression_method,
         ) = filename_match.groups()
 
@@ -418,8 +418,18 @@ class AllScalars:
                             folder
                         ] = cactusascii_file
             except RuntimeError:
-                pass
-
+                try:
+                    cactusascii_file = TwoScalar(file_)
+                    if cactusascii_file.reduction_type == reduction_type:
+                        for var in list(cactusascii_file.keys()):
+                            # We add to the _vars dictionary the mapping:
+                            # [var][folder] to OneScalar(f)
+                            folder = cactusascii_file.folder
+                            self._vars.setdefault(var, {})[
+                                folder
+                            ] = cactusascii_file
+                except RuntimeError:
+                    pass
         # What pythonize_name_dict does is to make the various variables
         # accessible as attributes, e.g. self.fields.rho
         self.fields = pythonize_name_dict(list(self.keys()), self.__getitem__)
