@@ -845,7 +845,12 @@ class OneGridFunctionH5(BaseOneGridFunction):
         # The default value of these parameters is yes
         with h5py.File(path, "r") as f:
             parameters = f["Parameters and Global Attributes"]
-            all_pars = parameters["All Parameters"][()].decode().split("\n")
+            all_pars = (
+                parameters["All Parameters"][()]
+                .tostring()
+                .decode()
+                .split("\n")
+            )
             # We make sure that everything is lowercase, we are case insensitive
             iohdf5_pars = [
                 param.lower()
