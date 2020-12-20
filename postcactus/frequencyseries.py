@@ -376,7 +376,12 @@ class FrequencySeries(BaseSeries):
         return timeseries.TimeSeries(t, y * len(t) * self.df)
 
     def inner_product(
-        self, other, fmin=0, fmax=np.inf, noises=None, same_domain=False,
+        self,
+        other,
+        fmin=0,
+        fmax=np.inf,
+        noises=None,
+        same_domain=False,
     ):
         r"""Compute the (network) inner product.
 
@@ -483,7 +488,12 @@ class FrequencySeries(BaseSeries):
         return 4 * np.sum(integrand.fft.real) * integrand.df
 
     def overlap(
-        self, other, fmin=0, fmax=np.inf, noises=None, same_domain=False,
+        self,
+        other,
+        fmin=0,
+        fmax=np.inf,
+        noises=None,
+        same_domain=False,
     ):
         r"""Compute the (network) overlap.
 
@@ -520,7 +530,11 @@ class FrequencySeries(BaseSeries):
         """
         # Error handling is done by inner_product
         inner_11 = self.inner_product(
-            self, fmin=fmin, fmax=fmax, noises=noises, same_domain=same_domain,
+            self,
+            fmin=fmin,
+            fmax=fmax,
+            noises=noises,
+            same_domain=same_domain,
         )
         inner_22 = other.inner_product(
             other,

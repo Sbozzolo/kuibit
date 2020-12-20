@@ -65,7 +65,12 @@ def _scan_strings_for_columns(strings, pattern, path=None):
     # to each element and see if they are all not None with the
     # all() function
 
-    columns = list(map(rx_columns.match, matched_pattern.groups()[0].split(),))
+    columns = list(
+        map(
+            rx_columns.match,
+            matched_pattern.groups()[0].split(),
+        )
+    )
 
     are_real_columns = all(columns)
 

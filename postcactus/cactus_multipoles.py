@@ -458,7 +458,12 @@ class MultipolesDir:
         # We prepare the data for MultipoleAllDets checking
         # for errors
         alldets = [
-            (mult_l, mult_m, radius, self._multipole_from_textfile(filename),)
+            (
+                mult_l,
+                mult_m,
+                radius,
+                self._multipole_from_textfile(filename),
+            )
             for mult_l, mult_m, radius, filename in mpfiles
         ]
         return MultipoleAllDets(alldets)

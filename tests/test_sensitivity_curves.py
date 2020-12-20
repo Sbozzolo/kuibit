@@ -54,7 +54,8 @@ class TestSensitivityCurves(unittest.TestCase):
         ce1 = sc.Sn_CE1(freqs)
 
         self.assertEqual(
-            ce1, fs.FrequencySeries(freqs, [1.6664e-19 ** 2, 2.6856e-24 ** 2]),
+            ce1,
+            fs.FrequencySeries(freqs, [1.6664e-19 ** 2, 2.6856e-24 ** 2]),
         )
 
     def test_CE2(self):
@@ -64,7 +65,8 @@ class TestSensitivityCurves(unittest.TestCase):
         ce2 = sc.Sn_CE2(freqs)
 
         self.assertEqual(
-            ce2, fs.FrequencySeries(freqs, [3.7939e-20 ** 2, 1.4944e-24 ** 2]),
+            ce2,
+            fs.FrequencySeries(freqs, [3.7939e-20 ** 2, 1.4944e-24 ** 2]),
         )
 
     def test_aLIGO(self):
@@ -88,7 +90,8 @@ class TestSensitivityCurves(unittest.TestCase):
         voya = sc.Sn_voyager(freqs)
 
         self.assertEqual(
-            voya, fs.FrequencySeries(freqs, [1.7021e-20 ** 2, 9.846e-25 ** 2]),
+            voya,
+            fs.FrequencySeries(freqs, [1.7021e-20 ** 2, 9.846e-25 ** 2]),
         )
 
     def test_KAGRA_D(self):
