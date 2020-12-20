@@ -470,10 +470,18 @@ class OneGridFunctionASCII(BaseOneGridFunction):
         ):
             # First, we compute x0 and x1
             x0_3d = np.asarray(
-                [np.amin(current_x), np.amin(current_y), np.amin(current_z),]
+                [
+                    np.amin(current_x),
+                    np.amin(current_y),
+                    np.amin(current_z),
+                ]
             )
             x1_3d = np.array(
-                [np.amax(current_x), np.amax(current_y), np.amax(current_z),]
+                [
+                    np.amax(current_x),
+                    np.amax(current_y),
+                    np.amax(current_z),
+                ]
             )
 
             # Now we find the interesting dimensions

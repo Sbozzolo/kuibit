@@ -497,7 +497,11 @@ class BaseSeries(BaseNumerical):
                 not np.allclose(other.x, self.x, atol=1e-14)
             ):
                 raise ValueError("The objects do not have the same x!")
-            return type(self)(self.x, function(self.y, other.y), True,)
+            return type(self)(
+                self.x,
+                function(self.y, other.y),
+                True,
+            )
         # If it is a number
         if isinstance(other, (int, float, complex)):
             return type(self)(self.x, function(self.y, other), True)
@@ -539,12 +543,15 @@ class BaseSeries(BaseNumerical):
             np.savetxt(
                 file_name,
                 np.transpose(
-                    (self.x, self.y.real, self.y.imag), *args, **kwargs,
+                    (self.x, self.y.real, self.y.imag),
+                    *args,
+                    **kwargs,
                 ),
             )
         else:
             np.savetxt(
-                file_name, np.transpose((self.x, self.y), *args, **kwargs),
+                file_name,
+                np.transpose((self.x, self.y), *args, **kwargs),
             )
 
     def nans_removed(self):
@@ -687,7 +694,9 @@ class BaseSeries(BaseNumerical):
             )
 
         return type(self)(
-            self.x, signal.savgol_filter(self.y, window_size, order), True,
+            self.x,
+            signal.savgol_filter(self.y, window_size, order),
+            True,
         )
 
     def savgol_smooth(self, window_size, order=3):

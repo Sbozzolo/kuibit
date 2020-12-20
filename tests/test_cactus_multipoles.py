@@ -124,7 +124,8 @@ class TestCactusMultipoles(unittest.TestCase):
             return x
 
         self.assertEqual(
-            mult.total_function_on_available_lm(identity), self.ts1 + ts3,
+            mult.total_function_on_available_lm(identity),
+            self.ts1 + ts3,
         )
 
         # Next, we use the l, m, r, information
@@ -148,7 +149,8 @@ class TestCactusMultipoles(unittest.TestCase):
 
         # Finally, test l_max
         self.assertEqual(
-            mult.total_function_on_available_lm(identity, l_max=1), ts3,
+            mult.total_function_on_available_lm(identity, l_max=1),
+            ts3,
         )
 
     def test_MultipoleAllDets(self):
@@ -228,14 +230,16 @@ class TestCactusMultipoles(unittest.TestCase):
 
         self.assertEqual(mpts, cacdir._multipole_from_textfile(path))
         self.assertEqual(
-            ts_h5, cacdir._multipoles_from_h5files([path_h5])[8.00](2, 2),
+            ts_h5,
+            cacdir._multipoles_from_h5files([path_h5])[8.00](2, 2),
         )
 
         mpfiles = [(2, 2, 100, path)]
 
         # Check one specific case
         self.assertEqual(
-            mpts, cacdir._multipoles_from_textfiles(mpfiles)[100](2, 2),
+            mpts,
+            cacdir._multipoles_from_textfiles(mpfiles)[100](2, 2),
         )
 
         self.assertEqual(cacdir["phi2"][110.69](2, -1), mpts)

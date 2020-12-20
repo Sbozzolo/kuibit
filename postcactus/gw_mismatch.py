@@ -524,7 +524,10 @@ def mismatch_from_strains(
     p_shift_max = polarization_shifts[p_index]
     t_shift_max = time_shifts[t_index]
 
-    return 1 - unnormalized_max_overlap / norm, (p_shift_max, t_shift_max,)
+    return 1 - unnormalized_max_overlap / norm, (
+        p_shift_max,
+        t_shift_max,
+    )
 
 
 def network_mismatch(

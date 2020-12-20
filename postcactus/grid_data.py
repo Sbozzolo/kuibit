@@ -930,7 +930,9 @@ class UniformGridData(BaseNumerical):
         header += f"iteration: {self.iteration}"
         np.savetxt(
             file_name,
-            self.data.reshape(np.prod(self.shape),),
+            self.data.reshape(
+                np.prod(self.shape),
+            ),
             *args,
             header=header,
             **kwargs,
@@ -1031,7 +1033,11 @@ class UniformGridData(BaseNumerical):
         data_real = np.pad(self.data.real, pad_width=1, mode="edge")
 
         self.spline_real = interpolate.RegularGridInterpolator(
-            coords, data_real, method=method, fill_value=0, bounds_error=True,
+            coords,
+            data_real,
+            method=method,
+            fill_value=0,
+            bounds_error=True,
         )
 
         if self.is_complex():

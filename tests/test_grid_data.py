@@ -808,19 +808,22 @@ class TestUniformGridData(unittest.TestCase):
 
         # Test __call__
         self.assertAlmostEqual(
-            sin_data_complex([np.pi / 3]), (1 + 1j) * np.sin(np.pi / 3),
+            sin_data_complex([np.pi / 3]),
+            (1 + 1j) * np.sin(np.pi / 3),
         )
 
         # Test on a point of the grid
         point = [sin_data.grid.coordinates_1d[0][2]]
         self.assertAlmostEqual(
-            sin_data_complex(point), (1 + 1j) * np.sin(point[0]),
+            sin_data_complex(point),
+            (1 + 1j) * np.sin(point[0]),
         )
 
         # Test on a point outside the grid with the lookup table
         with self.assertRaises(ValueError):
             sin_data_complex._nearest_neighbor_interpolation(
-                np.array([1000]), ext=2,
+                np.array([1000]),
+                ext=2,
             ),
 
         # Test on a point outside the grid with the lookup table and
@@ -858,7 +861,8 @@ class TestUniformGridData(unittest.TestCase):
         prod_data_complex = (1 + 1j) * prod_data
 
         self.assertAlmostEqual(
-            prod_data_complex.evaluate_with_spline((2, 3)), (1 + 1j) * 10,
+            prod_data_complex.evaluate_with_spline((2, 3)),
+            (1 + 1j) * 10,
         )
 
         # Vector input
@@ -880,7 +884,8 @@ class TestUniformGridData(unittest.TestCase):
 
         # Real data
         self.assertAlmostEqual(
-            prod_data.evaluate_with_spline((2, 3)), 10,
+            prod_data.evaluate_with_spline((2, 3)),
+            10,
         )
 
         # Extrapolate outside
@@ -995,7 +1000,8 @@ class TestUniformGridData(unittest.TestCase):
             ug_data.norm1(), np.sum(np.abs(data)) * self.geom.dv
         )
         self.assertAlmostEqual(
-            ug_data.norm2(), np.sum(np.abs(data) ** 2 * self.geom.dv) ** 0.5,
+            ug_data.norm2(),
+            np.sum(np.abs(data) ** 2 * self.geom.dv) ** 0.5,
         )
         self.assertAlmostEqual(
             ug_data.norm_p(3),
