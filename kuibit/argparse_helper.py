@@ -88,7 +88,7 @@ def add_grid_to_parser(parser):
     parser.add_argument(
         "--plane",
         type=str,
-        choices=["xy", "xz"],
+        choices=["xy", "xz", "yz"],
         default="xy",
         help="Plane to plot (default: %(default)s)",
     )
