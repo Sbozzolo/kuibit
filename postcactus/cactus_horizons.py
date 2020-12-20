@@ -672,7 +672,8 @@ class HorizonsDir:
         if len(key) != 2:
             raise KeyError(f"{key} does not identify an horizon")
 
-        qlm_index, ah_index = key
+        # We ensure that we have ints because we store the keys as int.
+        qlm_index, ah_index = int(key[0]), int(key[1])
 
         # We need at least of the two indices to be valid
         if (
