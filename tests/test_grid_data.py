@@ -24,6 +24,7 @@ import unittest
 import numpy as np
 
 from postcactus import grid_data as gd
+from postcactus import grid_data_utils as gdu
 
 
 class TestUniformGrid(unittest.TestCase):
@@ -349,82 +350,6 @@ class TestUniformGrid(unittest.TestCase):
         self.assertEqual(geom, geom2)
         self.assertIsNot(geom, geom2)
 
-    def test_common_bounding_box(self):
-
-        # Test error for not passing a list
-        with self.assertRaises(TypeError):
-            gd.common_bounding_box(1)
-
-        # Test error for not passing a list of UniformGrid
-        with self.assertRaises(TypeError):
-            gd.common_bounding_box([1, 2])
-
-        geom1 = gd.UniformGrid([101, 101], x0=[1, 1], x1=[3, 5])
-        geom2 = gd.UniformGrid([101], x0=[1], x1=[3])
-
-        # Different dimensions
-        with self.assertRaises(ValueError):
-            gd.common_bounding_box([geom1, geom2])
-
-        geom3 = gd.UniformGrid([11, 11], x0=[0, 0], x1=[5, 5])
-        geom4 = gd.UniformGrid([11, 11], x0=[0, -2], x1=[1, 5])
-
-        self.assertCountEqual(
-            gd.common_bounding_box([geom1, geom3, geom4])[0], [0, -2]
-        )
-        self.assertCountEqual(
-            gd.common_bounding_box([geom1, geom3, geom4])[1], [5, 5]
-        )
-
-        # Test that the function returns the same element when called with one
-        # element
-        self.assertCountEqual(gd.common_bounding_box([geom1])[0], geom1.x0)
-        self.assertCountEqual(gd.common_bounding_box([geom1])[1], geom1.x1)
-
-        # All the dimensions are different
-        geom5 = gd.UniformGrid([11, 11], x0=[0, 0], x1=[5, 5])
-        geom6 = gd.UniformGrid([21, 121], x0=[-3, -2], x1=[19, 20])
-
-        self.assertCountEqual(
-            gd.common_bounding_box([geom5, geom6])[0], [-3, -2]
-        )
-        self.assertCountEqual(
-            gd.common_bounding_box([geom5, geom6])[1], [19, 20]
-        )
-
-    def test_merge_uniform_grids(self):
-
-        # Test error for not passing a list
-        with self.assertRaises(TypeError):
-            gd.merge_uniform_grids(1)
-
-        # Test error for not passing a list of UniformGrid
-        with self.assertRaises(TypeError):
-            gd.merge_uniform_grids([1, 2])
-
-        geom1 = gd.UniformGrid([101, 101], x0=[1, 1], x1=[3, 5], ref_level=1)
-        geom2 = gd.UniformGrid([101, 101], x0=[1, 1], x1=[10, 5], ref_level=2)
-
-        # Different ref levels
-        with self.assertRaises(ValueError):
-            gd.merge_uniform_grids([geom1, geom2])
-
-        geom3 = gd.UniformGrid([101, 101], x0=[1, 1], x1=[10, 5], ref_level=1)
-
-        # Different dx
-        with self.assertRaises(ValueError):
-            gd.merge_uniform_grids([geom1, geom3])
-
-        geom4 = gd.UniformGrid(
-            [101, 101], x0=[0, -2], dx=geom1.dx, ref_level=1
-        )
-
-        expected_geom = gd.UniformGrid(
-            [151, 176], x0=[0, -2], x1=[3, 5], dx=geom1.dx, ref_level=1
-        )
-
-        self.assertEqual(gd.merge_uniform_grids([geom1, geom4]), expected_geom)
-
     def test__eq__(self):
 
         # The tricky part is the time and iteration
@@ -522,13 +447,13 @@ class TestUniformGridData(unittest.TestCase):
         self.assertTrue(ug_data.invalid_spline)
 
         # Test from 3D to 2D
-        grid_data3d = gd.sample_function_from_uniformgrid(
+        grid_data3d = gdu.sample_function_from_uniformgrid(
             lambda x, y, z: x * (y + 2) * (z + 5),
             gd.UniformGrid([10, 20, 1], x0=[0, 1, 0], dx=[1, 1, 1]),
         )
         grid_2d = gd.UniformGrid([10, 20], x0=[0, 1], dx=[1, 1])
 
-        expected_data2d = gd.sample_function_from_uniformgrid(
+        expected_data2d = gdu.sample_function_from_uniformgrid(
             lambda x, y: x * (y + 2) * (0 + 5), grid_2d
         )
 
@@ -540,7 +465,7 @@ class TestUniformGridData(unittest.TestCase):
 
         geom = gd.UniformGrid([8001, 3], x0=[0, 0], x1=[2 * np.pi, 1])
 
-        sin_wave = gd.sample_function_from_uniformgrid(
+        sin_wave = gdu.sample_function_from_uniformgrid(
             lambda x, y: np.sin(x), geom
         )
         original_sin = sin_wave.copy()
@@ -640,61 +565,9 @@ class TestUniformGridData(unittest.TestCase):
             np.sin(ug_data1), gd.UniformGridData(self.geom, np.sin(data1))
         )
 
-    def test_sample_function(self):
-
-        # Test not grid as input
-        with self.assertRaises(TypeError):
-            gd.sample_function_from_uniformgrid(np.sin, 0)
-
-        # Test 1d
-        geom = gd.UniformGrid(100, x0=0, x1=2 * np.pi)
-        data = np.sin(np.linspace(0, 2 * np.pi, 100))
-
-        self.assertEqual(
-            gd.sample_function(np.sin, 100, 0, 2 * np.pi),
-            gd.UniformGridData(geom, data),
-        )
-
-        # Test with additional arguments
-        geom_ref_level = gd.UniformGrid(100, x0=0, x1=2 * np.pi, ref_level=0)
-        self.assertEqual(
-            gd.sample_function(np.sin, 100, 0, 2 * np.pi, ref_level=0),
-            gd.UniformGridData(geom_ref_level, data),
-        )
-
-        # Test 2d
-        geom2d = gd.UniformGrid([100, 200], x0=[0, 1], x1=[1, 2])
-
-        def square(x, y):
-            return x * y
-
-        # Test function takes too few arguments
-        with self.assertRaises(TypeError):
-            gd.sample_function_from_uniformgrid(lambda x: x, geom2d)
-
-        # Test function takes too many arguments
-        with self.assertRaises(TypeError):
-            gd.sample_function_from_uniformgrid(square, geom)
-
-        # Test other TypeError
-        with self.assertRaises(TypeError):
-            gd.sample_function_from_uniformgrid(np.sin, geom2d)
-
-        data2d = np.vectorize(square)(*geom2d.coordinates(as_same_shape=True))
-
-        self.assertEqual(
-            gd.sample_function(square, [100, 200], [0, 1], [1, 2]),
-            gd.UniformGridData(geom2d, data2d),
-        )
-
-        self.assertEqual(
-            gd.sample_function_from_uniformgrid(square, geom2d),
-            gd.UniformGridData(geom2d, data2d),
-        )
-
     def test_slice(self):
 
-        grid_data = gd.sample_function_from_uniformgrid(
+        grid_data = gdu.sample_function_from_uniformgrid(
             lambda x, y, z: x * (y + 2) * (z + 5),
             gd.UniformGrid([10, 20, 30], x0=[0, 1, 2], dx=[1, 2, 0.1]),
         )
@@ -716,7 +589,7 @@ class TestUniformGridData(unittest.TestCase):
 
         # Test cut along one dimension
         grid_data.slice([None, None, 3], resample=True)
-        expected_no_z = gd.sample_function_from_uniformgrid(
+        expected_no_z = gdu.sample_function_from_uniformgrid(
             lambda x, y: x * (y + 2) * (3 + 5),
             gd.UniformGrid([10, 20], x0=[0, 1], dx=[1, 2]),
         )
@@ -738,13 +611,13 @@ class TestUniformGridData(unittest.TestCase):
         def square(x, y):
             return x * y
 
-        grid_data = gd.sample_function(square, [100, 200], [0, 1], [1, 2])
+        grid_data = gdu.sample_function(square, [100, 200], [0, 1], [1, 2])
 
         # Test save uncompressed
         grid_data.save(grid_file)
 
         # Load it
-        loaded = gd.load_UniformGridData(grid_file)
+        loaded = gdu.load_UniformGridData(grid_file)
 
         self.assertEqual(loaded, grid_data)
 
@@ -753,7 +626,7 @@ class TestUniformGridData(unittest.TestCase):
 
         # Test compressed
         grid_data.save(grid_file_bz)
-        loaded_bz = gd.load_UniformGridData(grid_file_bz)
+        loaded_bz = gdu.load_UniformGridData(grid_file_bz)
 
         self.assertEqual(loaded_bz, grid_data)
 
@@ -761,7 +634,7 @@ class TestUniformGridData(unittest.TestCase):
         os.remove(grid_file_bz)
 
         grid_data.save(grid_file_gz)
-        loaded_gz = gd.load_UniformGridData(grid_file_gz)
+        loaded_gz = gdu.load_UniformGridData(grid_file_gz)
 
         self.assertEqual(loaded_gz, grid_data)
 
@@ -771,7 +644,7 @@ class TestUniformGridData(unittest.TestCase):
     def test_splines(self):
 
         # Let's start with 1d.
-        sin_data = gd.sample_function(np.sin, 12000, 0, 2 * np.pi)
+        sin_data = gdu.sample_function(np.sin, 12000, 0, 2 * np.pi)
         sin_data_complex = sin_data + 1j * sin_data
 
         # Test unknown ext
@@ -857,7 +730,7 @@ class TestUniformGridData(unittest.TestCase):
         def product(x, y):
             return x * (y + 2)
 
-        prod_data = gd.sample_function(product, [101, 101], [0, 0], [3, 3])
+        prod_data = gdu.sample_function(product, [101, 101], [0, 0], [3, 3])
         prod_data_complex = (1 + 1j) * prod_data
 
         self.assertAlmostEqual(
@@ -901,7 +774,7 @@ class TestUniformGridData(unittest.TestCase):
         self.assertTrue(prod_data_complex.spline_imag.bounds_error)
 
         # Test on a UniformGrid
-        sin_data = gd.sample_function(np.sin, 12000, 0, 2 * np.pi)
+        sin_data = gdu.sample_function(np.sin, 12000, 0, 2 * np.pi)
         linspace = gd.UniformGrid(101, x0=0, x1=3)
         output = sin_data(linspace)
         self.assertTrue(
@@ -913,7 +786,7 @@ class TestUniformGridData(unittest.TestCase):
             sin_data(gd.UniformGrid([101, 201], x0=[0, 1], x1=[3, 4]))
 
         # Test with grid that has a flat dimension
-        prod_data_flat = gd.sample_function_from_uniformgrid(
+        prod_data_flat = gdu.sample_function_from_uniformgrid(
             product, gd.UniformGrid([101, 1], x0=[0, 0], dx=[1, 3])
         )
 
@@ -925,7 +798,7 @@ class TestUniformGridData(unittest.TestCase):
 
     def test_copy(self):
 
-        sin_data = gd.sample_function(np.sin, 1000, 0, 2 * np.pi)
+        sin_data = gdu.sample_function(np.sin, 1000, 0, 2 * np.pi)
 
         sin_data2 = sin_data.copy()
 
@@ -937,7 +810,7 @@ class TestUniformGridData(unittest.TestCase):
 
         # There should be no reason why the histogram behaves differently for
         # different dimensions, so let's test it with 1d
-        sin_data = gd.sample_function(np.sin, 1000, 0, 2 * np.pi)
+        sin_data = gdu.sample_function(np.sin, 1000, 0, 2 * np.pi)
         sin_data_complex = sin_data + 1j * sin_data
 
         # Test error weights
@@ -970,7 +843,7 @@ class TestUniformGridData(unittest.TestCase):
 
         # There should be no reason why the histogram behaves differently for
         # different dimensions, so let's test it with 1d
-        lin_data = gd.sample_function(lambda x: 1.0 * x, 1000, 0, 2 * np.pi)
+        lin_data = gdu.sample_function(lambda x: 1.0 * x, 1000, 0, 2 * np.pi)
 
         # Scalar input
         self.assertAlmostEqual(lin_data.percentiles(0.5), np.pi)
@@ -1016,8 +889,8 @@ class TestUniformGridData(unittest.TestCase):
         def product_complex(x, y):
             return (1 + 1j) * x * (y + 2)
 
-        prod_data = gd.sample_function(product, [101, 201], [0, 1], [3, 4])
-        prod_data_complex = gd.sample_function(
+        prod_data = gdu.sample_function(product, [101, 201], [0, 1], [3, 4])
+        prod_data_complex = gdu.sample_function(
             product_complex, [3001, 2801], [0, 1], [3, 4]
         )
         # Check error
@@ -1030,7 +903,7 @@ class TestUniformGridData(unittest.TestCase):
         new_grid = gd.UniformGrid([51, 101], x0=[1, 2], x1=[2, 3])
 
         resampled = prod_data_complex.resampled(new_grid)
-        exp_resampled = gd.sample_function_from_uniformgrid(
+        exp_resampled = gdu.sample_function_from_uniformgrid(
             product_complex, new_grid
         )
 
@@ -1058,7 +931,7 @@ class TestUniformGridData(unittest.TestCase):
         # Check with one point
         new_grid2 = gd.UniformGrid([11, 1], x0=[1, 2], dx=[0.1, 1])
         resampled2 = prod_data_complex.resampled(new_grid2)
-        prod_data_one_point = gd.sample_function_from_uniformgrid(
+        prod_data_one_point = gdu.sample_function_from_uniformgrid(
             product_complex, new_grid2
         )
 
@@ -1066,13 +939,13 @@ class TestUniformGridData(unittest.TestCase):
 
         # Resample from 3d to 2d
 
-        grid_data3d = gd.sample_function_from_uniformgrid(
+        grid_data3d = gdu.sample_function_from_uniformgrid(
             lambda x, y, z: x * (y + 2) * (z + 5),
             gd.UniformGrid([10, 20, 11], x0=[0, 1, 0], dx=[1, 2, 0.1]),
         )
         grid_2d = gd.UniformGrid([10, 20, 1], [0, 1, 0], dx=[1, 2, 0.1])
 
-        expected_data2d = gd.sample_function_from_uniformgrid(
+        expected_data2d = gdu.sample_function_from_uniformgrid(
             lambda x, y, z: x * (y + 2) * (z + 5), grid_2d
         )
 
@@ -1082,7 +955,7 @@ class TestUniformGridData(unittest.TestCase):
         def product_complex(x, y):
             return (1 + 1j) * x * (y + 2)
 
-        prod_data_complex = gd.sample_function(
+        prod_data_complex = gdu.sample_function(
             product_complex, [301, 401], [0, 1], [3, 4]
         )
 
@@ -1126,7 +999,7 @@ class TestUniformGridData(unittest.TestCase):
         def square(x, y):
             return x * (y + 2)
 
-        grid_data = gd.sample_function_from_uniformgrid(square, self.geom)
+        grid_data = gdu.sample_function_from_uniformgrid(square, self.geom)
 
         self.assertTrue(
             np.allclose(
@@ -1154,7 +1027,7 @@ class TestUniformGridData(unittest.TestCase):
         def square(x, y):
             return x * (y + 2)
 
-        grid_data = gd.sample_function_from_uniformgrid(square, self.geom)
+        grid_data = gdu.sample_function_from_uniformgrid(square, self.geom)
 
         self.assertCountEqual(grid_data.x0, self.geom.x0)
         self.assertCountEqual(grid_data.origin, self.geom.x0)
@@ -1174,13 +1047,13 @@ class TestUniformGridData(unittest.TestCase):
             return x * (y + 2)
 
         # These are just integers
-        prod_data = gd.sample_function(square, [11, 21], [0, 10], [10, 30])
+        prod_data = gdu.sample_function(square, [11, 21], [0, 10], [10, 30])
 
         self.assertAlmostEqual(prod_data[2, 2], 2 * 14)
 
     def test_fourier_transform(self):
 
-        prod_data_complex = gd.sample_function(
+        prod_data_complex = gdu.sample_function(
             lambda x, y: (1 + 1j) * x * (y + 2), [11, 21], [0, 10], [10, 30]
         )
 
@@ -1219,12 +1092,12 @@ class TestHierarchicalGridData(unittest.TestCase):
             return x * (y + 2)
 
         self.grid_data = [
-            gd.sample_function_from_uniformgrid(product, g)
+            gdu.sample_function_from_uniformgrid(product, g)
             for g in self.grids0
         ]
 
         self.grid_data_two_comp = [
-            gd.sample_function_from_uniformgrid(product, g)
+            gdu.sample_function_from_uniformgrid(product, g)
             for g in self.grids1
         ]
 
@@ -1232,7 +1105,7 @@ class TestHierarchicalGridData(unittest.TestCase):
             [15, 26], x0=[0, 1], x1=[14, 26], ref_level=0
         )
 
-        self.expected_data = gd.sample_function_from_uniformgrid(
+        self.expected_data = gdu.sample_function_from_uniformgrid(
             product, self.expected_grid
         )
 
@@ -1241,7 +1114,7 @@ class TestHierarchicalGridData(unittest.TestCase):
             [15, 26], x0=[0, 1], x1=[14, 26], ref_level=2
         )
 
-        self.expected_data_level2 = gd.sample_function_from_uniformgrid(
+        self.expected_data_level2 = gdu.sample_function_from_uniformgrid(
             product, self.expected_grid_level2
         )
 
@@ -1267,8 +1140,8 @@ class TestHierarchicalGridData(unittest.TestCase):
         def product2(x, y):
             return x * y
 
-        prod_data1 = gd.sample_function(product1, [101], [0], [3])
-        prod_data2 = gd.sample_function(product2, [101, 101], [0, 0], [3, 3])
+        prod_data1 = gdu.sample_function(product1, [101], [0], [3])
+        prod_data2 = gdu.sample_function(product2, [101, 101], [0, 0], [3, 3])
 
         with self.assertRaises(ValueError):
             gd.HierarchicalGridData([prod_data1, prod_data2])
@@ -1283,7 +1156,9 @@ class TestHierarchicalGridData(unittest.TestCase):
         grid = gd.UniformGrid([101], x0=[0], x1=[3], ref_level=2)
 
         # Two components at two different levels
-        prod_data1_level2 = gd.sample_function_from_uniformgrid(product1, grid)
+        prod_data1_level2 = gdu.sample_function_from_uniformgrid(
+            product1, grid
+        )
         two = gd.HierarchicalGridData([prod_data1, prod_data1_level2])
         self.assertDictEqual(
             two.grid_data_dict,
@@ -1445,10 +1320,10 @@ class TestHierarchicalGridData(unittest.TestCase):
             [11, 3], x0=[0, 0], x1=[2 * np.pi, 1], ref_level=1
         )
 
-        sin_wave1 = gd.sample_function_from_uniformgrid(
+        sin_wave1 = gdu.sample_function_from_uniformgrid(
             lambda x, y: np.sin(x), geom
         )
-        sin_wave2 = gd.sample_function_from_uniformgrid(
+        sin_wave2 = gdu.sample_function_from_uniformgrid(
             lambda x, y: np.sin(x), geom2
         )
 
@@ -1469,10 +1344,10 @@ class TestHierarchicalGridData(unittest.TestCase):
             [11, 3], x0=[0, 0], x1=[2 * np.pi, 1], ref_level=1
         )
 
-        sin_wave1 = gd.sample_function_from_uniformgrid(
+        sin_wave1 = gdu.sample_function_from_uniformgrid(
             lambda x, y: np.sin(x), geom
         )
-        sin_wave2 = gd.sample_function_from_uniformgrid(
+        sin_wave2 = gdu.sample_function_from_uniformgrid(
             lambda x, y: np.sin(x), geom2
         )
 
@@ -1498,7 +1373,7 @@ class TestHierarchicalGridData(unittest.TestCase):
         def neg_product(x, y):
             return -x * (y + 2)
 
-        neg_data = gd.sample_function_from_uniformgrid(
+        neg_data = gdu.sample_function_from_uniformgrid(
             neg_product, self.expected_grid
         )
 
@@ -1526,7 +1401,7 @@ class TestHierarchicalGridData(unittest.TestCase):
         def neg_product(x, y):
             return -x * (y + 2)
 
-        neg_data = gd.sample_function_from_uniformgrid(
+        neg_data = gdu.sample_function_from_uniformgrid(
             neg_product, self.expected_grid
         )
 
@@ -1541,7 +1416,7 @@ class TestHierarchicalGridData(unittest.TestCase):
 
         # Test incompatible refinement levels
 
-        neg_data_level2 = gd.sample_function_from_uniformgrid(
+        neg_data_level2 = gdu.sample_function_from_uniformgrid(
             neg_product, self.expected_grid_level2
         )
 
@@ -1620,7 +1495,7 @@ class TestHierarchicalGridData(unittest.TestCase):
 
         # Uniform grid as input
         grid = gd.UniformGrid([3, 5], x0=[0, 1], x1=[2, 5])
-        grid_data = gd.sample_function_from_uniformgrid(product, grid)
+        grid_data = gdu.sample_function_from_uniformgrid(product, grid)
         self.assertTrue(np.allclose(hg3(grid), grid_data.data))
 
     def test_merge_refinement_levels(self):
@@ -1643,10 +1518,10 @@ class TestHierarchicalGridData(unittest.TestCase):
             return x * (y + 2)
 
         grid_data_two_comp = [
-            gd.sample_function_from_uniformgrid(product, g) for g in grids
+            gdu.sample_function_from_uniformgrid(product, g) for g in grids
         ]
 
-        big_grid_data = gd.sample_function_from_uniformgrid(product, big_grid)
+        big_grid_data = gdu.sample_function_from_uniformgrid(product, big_grid)
         hg = gd.HierarchicalGridData(grid_data_two_comp + [big_grid_data])
         # When I merge the data I should just get big_grid at the resolution
         # of self.grid_data_two_comp
@@ -1654,7 +1529,7 @@ class TestHierarchicalGridData(unittest.TestCase):
             [31, 51], x0=[0, 1], x1=[30, 51], ref_level=-1
         )
 
-        expected_data = gd.sample_function_from_uniformgrid(
+        expected_data = gdu.sample_function_from_uniformgrid(
             product, expected_grid
         )
         # Test with resample
@@ -1706,10 +1581,10 @@ class TestHierarchicalGridData(unittest.TestCase):
             [10001, 3], x0=[0, 0], x1=[2 * np.pi, 1], ref_level=1
         )
 
-        sin_wave1 = gd.sample_function_from_uniformgrid(
+        sin_wave1 = gdu.sample_function_from_uniformgrid(
             lambda x, y: np.sin(x), geom
         )
-        sin_wave2 = gd.sample_function_from_uniformgrid(
+        sin_wave2 = gdu.sample_function_from_uniformgrid(
             lambda x, y: np.sin(x), geom2
         )
         original_sin1 = sin_wave1.copy()
