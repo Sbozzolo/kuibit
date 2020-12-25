@@ -15,9 +15,29 @@
 # You should have received a copy of the GNU General Public License along with
 # this program; if not, see <https://www.gnu.org/licenses/>.
 
-"""The :py:mod:`~.cactus_grid` module provides functions to load
-grid function in Cactus formats.
+"""The :py:mod:`~.cactus_grid` module provides functions to load grid function
+in Cactus formats.
+
+There are multiple classes defined in this module:
+
+- :py:class`~.GridFunctionsDir` interfaces with :py:class:`~.SimDir` and
+  organizes the grid functions by dimensionality. This is a dictionary-like
+  object with keys the possible dimensions (e.g., ``x``, ``yz``, ``xyz``).
+- :py:class`~.AllGridFunctions` takes all the files in SimDir and sort them
+  according the different grid functions they contain.
+- There are two :py:class`~.OneGridFunction` classes, one for HDF5 files and one
+  for ASCII files. They describe one single grid function and they contains the
+  files associated to that grid function. Both the classes are derived from the
+  same abstract base class :py:class`~.OneGridFunctionBase`, which implements
+  the shared methods.
+
+These are hierarchical classes, one containing the others, so one typically ends
+up with a series of brackets to access the actual data. For example, if ``sim``
+is a :py:class:`~.SimDir`, ``sim.gf.xy['rho_b'][0]`` is ``rho_b`` at iteration 0
+on the equatorial plane represented as :py:class:`~.HierarchicalGridData`.
+
 """
+
 import os
 import re
 import warnings
@@ -34,26 +54,48 @@ from postcactus import grid_data, simdir
 from postcactus.attr_dict import pythonize_name_dict
 from postcactus.cactus_ascii_utils import scan_header, total_filesize
 
-# There are multiple classes defined in this module:
-#
-# - GridFunctionsDir interfaces with SimDir and organizes the grid functions by
-#   dimensions
-# - AllGridFunctions takes all the files in SimDir and sort them out for the
-#   different grid functions
-# - There are two OneGridFunction classes, one for HDF5 files and one for ASCII
-#   files. They describe one single grid function and they contains the files
-#   associated to that grid function. Both the classes are derived from
-#   the same abstract base class OneGridFunctionBase, which implements
-#   the shared methods.
-
 
 class BaseOneGridFunction(ABC):
     """Abstract class that implements capabilities to handle grid functions.
 
-    Using the [] notation you can access values with as HierarchicalGridFunction.
+    This class is the parent class of :py:class:`~.OneGridFunctionASCII` and
+    :py:class:`~.OneGridFunctionH5`. :py:class:`~.BaseOneGridFunction`
+    implements most methods, except the readers.
+
+    The derived classes have to specify:
+
+    - How to read a file, populating the ``self.alldata`` dictionary
+      (method ``_parse_file``).
+    - How to populate the last level of ``self.alldata`` by returning
+      a :py:class:`~.UniformGridData` for a given iteration and component
+      (method ``_read_componenent_as_uniform_grid``)
+    - How to associate an iteration with a time (method
+      ``time_at_iteration``).
+
+    The simplest way to access data at a given iteration as
+    :py:class:`~.HierarchicalGridData` is using the ``[]`` notation.
+
+    :ivar allfiles: Paths of files associated to the variable.
+    :type allfiles: list of str
+    :ivar alldata: Dictionary that organizes files and iterations available.
+    :type alldata: nested dictionary
+    :ivar restarts_data: How iterations are distributed across files.
+    :type restarts_data: tuple of str
+    :ivar var_name: Variable name.
+    :type var_name: str
+
     """
 
     def __init__(self, allfiles, var_name):
+        """Constructor.
+
+        :param allfiles: Paths of files associated to the variable.
+        :type allfiles: list of str
+        :param var_name: Variable name.
+        :type var_name: str
+
+        """
+
         self.allfiles = list(allfiles)
 
         # self.alldata is a nested dictionary
@@ -88,41 +130,81 @@ class BaseOneGridFunction(ABC):
 
     @abstractmethod
     def _parse_file(self, path):
+        """Read file at path and populate ``self.alldata``."""
         pass
 
     @abstractmethod
     def _read_component_as_uniform_grid_data(
         self, path, iteration, ref_level, component
     ):
+        """Read specific component."""
         pass
 
     @abstractmethod
     def time_at_iteration(self, iteration):
+        """Return the time at a given iteration.
+
+        :param iteration: Iteration.
+        :type iteration: int
+        :returns: Time.
+        :rtype: float
+        """
         pass
 
     @lru_cache(128)
     def _iterations_in_file(self, path):
         """Return the (sorted) available iterations in file path.
 
-        Use this if you need to ensure that you are looping over iterations
-        in order!
+        Use this if you need to ensure that you are looping over iterations in
+        order!
+
+        :param path: File to inspect.
+        :type path: str
+
+        :returns: Sorted list of iterations available in a given file.
+        :rtype: list
+
         """
-        return sorted(self.alldata[path].keys())
+        return sorted(list(self.alldata[path].keys()))
 
     def _min_iteration_in_file(self, path):
-        """Return the minimum available iterations in file path."""
+        """Return the minimum available iterations in the given file.
+
+        :param path: File to inspect.
+        :type path: str
+
+        :returns: First iteration available.
+        :rtype: int
+
+        """
         return self._iterations_in_file(path)[0]
 
     def _max_iteration_in_file(self, path):
-        """Return the maximum available iterations in file path."""
+        """Return the maximum available iterations in the given file.
+
+        :param path: File to inspect.
+        :type path: str
+
+        :returns: Last iteration available.
+        :rtype: int
+
+        """
         return self._iterations_in_file(path)[-1]
 
-    def get_restarts(self):
-        """Return a list of tuples (iteration_min, iteration_max, paths)
+    def _get_restarts(self):
+        """Return a list of tuples of the form ``(iteration_min, iteration_max, paths)``
         with the minimum iterations and maximum iterations in each file
-        associated to this variable. (Restarts and checkpoints)
-        paths is a list of all the files with same min_iteration and
-        max_iteration (as when we have 3d xyz_file files)
+        associated to this variable. ``paths`` is a list of all the files with
+        same ``min_iteration`` and ``max_iteration`` (as when we have 3d
+        xyz_file files).
+
+        This routine is used to identify which files to use for any given
+        iteration.
+
+        :returns: List of tuples with first iteration, last iteration, and
+                  path for every file in ``self.allfiles``.
+        :rtype: list of tuple (int, int, list of str)
+
         """
         restarts = [
             (
@@ -168,13 +250,28 @@ class BaseOneGridFunction(ABC):
 
     @property
     def restarts(self):
+        """Return a list of tuples of the form ``(iteration_min, iteration_max, paths)``
+        with the minimum iterations and maximum iterations in each file
+        associated to this variable. ``paths`` is a list of all the files with
+        same ``min_iteration`` and ``max_iteration`` (as when we have 3d
+        xyz_file files).
+
+        :returns: List of tuples with first iteration, last iteration, and
+                  path for every file in ``self.allfiles``.
+        :rtype: list of tuple (int, int, list of str)
+        """
         if self.restarts_data is None:
-            self.restarts_data = self.get_restarts()
+            self.restarts_data = self._get_restarts()
         return self.restarts_data
 
     @property
     def min_iteration(self):
-        """Return the minimum available iteration."""
+        """Return the minimum available iteration in the all the files.
+
+        :returns: First iteration available.
+        :rtype: int
+
+        """
         # restarts is a ordered list of tuples with three elements:
         # (iteration_min, iteration_max, path)
 
@@ -183,7 +280,12 @@ class BaseOneGridFunction(ABC):
 
     @property
     def max_iteration(self):
-        """Return the maximum available iteration."""
+        """Return the maximum available iteration in the all the files.
+
+        :returns: Latest iteration available.
+        :rtype: int
+
+        """
         # restarts is a ordered list of tuples with three elements:
         # (iteration_min, iteration_max, path)
 
@@ -193,7 +295,12 @@ class BaseOneGridFunction(ABC):
     @property
     @lru_cache(128)
     def available_iterations(self):
-        """Return the available iterations."""
+        """Return the available iterations.
+
+        :returns: List with all the available iterations.
+        :rtype: list
+
+        """
         iterations_in_files = set()
         for path in self.allfiles:
             iterations_in_files.update(self._iterations_in_file(path))
@@ -204,7 +311,12 @@ class BaseOneGridFunction(ABC):
     @property
     @lru_cache(128)
     def available_times(self):
-        """Return the available times."""
+        """Return the available times.
+
+        :returns: List with all the available times.
+        :rtype: list
+
+        """
         return [
             self.time_at_iteration(iteration)
             for iteration in self.available_iterations
@@ -218,9 +330,21 @@ class BaseOneGridFunction(ABC):
             yield self[iteration]
 
     def iteration_at_time(self, time):
-        """Return the iteration that corresponds to the given time."""
+        """Return the iteration that corresponds to the given time.
 
-        # TODO: Add tolerance in time
+        :param time: Time.
+        :type time: float
+
+        :returns: Iteration corresponding to the given time.
+        :rtype: int
+
+        """
+
+        # TODO (FEATURE): Add tolerance in time.
+        #
+        # Often different outputs are not synced, so we need to allow for some
+        # tolerance.
+
         if time not in self.available_times:
             raise ValueError(f"Time {time} not available")
 
@@ -228,8 +352,16 @@ class BaseOneGridFunction(ABC):
         return self.available_iterations[index]
 
     def _ref_levels_in_file(self, path, iteration):
-        """Return the available refinement levels in file path at the
-        specified iteration
+        """Return the available refinement levels in the given path at the
+        specified iteration.
+
+        :param path: Path of the file.
+        :type path: str
+        :param iteration: Iteration.
+        :type iteration: int
+
+        :returns: Available refinement levels in ``path`` at ``iteration``.
+        :rtype: list
         """
         # In case we don't have the iteration, we want to return the empty
         # list, so we use the .get dictionary method. This return the
@@ -239,8 +371,19 @@ class BaseOneGridFunction(ABC):
         return list(self.alldata[path].get(iteration, {}).keys())
 
     def _components_in_file(self, path, iteration, ref_level):
-        """Return the available components in file path at the
-        specified iteration and refinement level
+        """Return the available components in the given file at the specified iteration
+        and refinement level.
+
+        :param path: Path of the file.
+        :type path: str
+        :param iteration: Iteration.
+        :type iteration: int
+        :param ref_level: Refinement level.
+        :type ref_level: int
+
+        :returns: Available components in ``path`` at ``iteration`` and ``ref_level``.
+        :rtype: list
+
         """
         # Same comment as _ref_levels_in_file, but with an
         # additional level
@@ -249,6 +392,17 @@ class BaseOneGridFunction(ABC):
         )
 
     def _files_with_iteration(self, iteration):
+        """Return all the files that contain the given iteration.
+
+        :param path: Path of the file.
+        :type path: str
+        :param iteration: Iteration.
+        :type iteration: int
+
+        :returns: Files that contain the given iteration.
+        :rtype: list
+
+        """
         # Using self.get_restarts(), find the file that the given iteration
         # between iteration_min and iteration_max
 
@@ -274,12 +428,28 @@ class BaseOneGridFunction(ABC):
 
     def total_filesize(self, unit="MB"):
         """Return the total size of the files with this variable.
-        Available units B, KB, MB and GB
+        Available units B, KB, MB and GB (in power of 1024 bytes).
+
+        :param unit: Unit to use (in powers of 1024 bytes).
+        :type unit: str among: ``B``, ``KB``, ``MB``, ``GB``.
+        :returns: Total size of the files associated to this variable.
+        :rtype: float
+
         """
         return total_filesize(self.allfiles, unit=unit)
 
     @lru_cache(128)
     def _read_iteration_as_HierarchicalGridData(self, iteration):
+        """Return the data at the given iteration as a :py:class:`~.HierarchicalGridData`.
+
+        :param iteration: Iteration.
+        :type iteration: int
+
+        :returns: Variable at the given iteration as a
+                  :py:class:`~.HierarchicalGridData`.
+        :rtype: :py:class:`~.HierarchicalGridData`
+
+        """
 
         uniform_grid_data_components = []
 
@@ -302,12 +472,39 @@ class BaseOneGridFunction(ABC):
 
     @lru_cache(128)
     def get_iteration(self, iteration, default=None):
+        """Return the data at the given iteration as a :py:class:`~.HierarchicalGridData`.
+        If the iteration is not available, return ``default``.
+
+        :param iteration: Iteration.
+        :type iteration: int
+        :param default: What to return if iteration is not available.
+        :type default: anything
+
+        :returns: Variable at the given iteration as a
+                  :py:class:`~.HierarchicalGridData`.
+        :rtype: :py:class:`~.HierarchicalGridData`
+
+        """
+
         if iteration not in self.available_iterations:
             return default
         return self[iteration]
 
     @lru_cache(128)
     def get_time(self, time, default=None):
+        """Return the data at the given time as a :py:class:`~.HierarchicalGridData`.
+        If the time is not available, return ``default``.
+
+        :param iteration: Iteration.
+        :type iteration: int
+        :param default: What to return if time is not available.
+        :type default: anything
+
+        :returns: Variable at the given time as a
+                  :py:class:`~.HierarchicalGridData`.
+        :rtype: :py:class:`~.HierarchicalGridData`
+
+        """
         if time not in self.available_times:
             return default
         return self[self.iteration_at_time(time)]
@@ -319,7 +516,7 @@ class BaseOneGridFunction(ABC):
         return self._read_iteration_as_HierarchicalGridData(iteration)
 
     def read_on_grid(self, iteration, grid, resample=False):
-        """Read an iteration and resamples the output on the specified grid.
+        """Read an iteration and resample the output on the specified grid.
 
         Warning: this can be computationally expensive!
 
@@ -382,14 +579,26 @@ class BaseOneGridFunction(ABC):
 
 
 class OneGridFunctionASCII(BaseOneGridFunction):
-    """Read grid data produced by CarpetASCII."""
+    """Read grid data produced by CarpetASCII.
 
-    # TODO: This class has to read the all files. When there are multiple
-    #       variables in one file, it would be better to avoid reading again
-    #       the various files (if we have already read them). Maybe we can add
-    #       another level in the class hierarchy that contains all the
-    #       information for a given file, and produces transparently
-    #       OneGridFunctionASCII objects upon request.
+    This class is derived from :py:class:`~.BaseOneGridFunction` and implements
+    the reading facilities.
+
+    :py:class:`~.OneGridFunctionASCII` can read 1D, 2D, and 3D ASCII files, even
+    when they are compressed with bzip2 or gzip.
+
+    ASCII files do not contain information about the ghost zones, but this can be
+    set "by hand".
+
+    """
+
+    # TODO (REFACTORING): Avoid reading files twice.
+    #
+    # This class has to read the all files. When there are multiple variables in
+    # one file, it would be better to avoid reading again the various files (if
+    # we have already read them). Maybe we can add another level in the class
+    # hierarchy that contains all the information for a given file, and produces
+    # transparently OneGridFunctionASCII objects upon request.
 
     # What function to use to open the file?
     # What mode?
@@ -400,6 +609,16 @@ class OneGridFunctionASCII(BaseOneGridFunction):
     }
 
     def __init__(self, allfiles, var_name, num_ghost=None):
+        """Constructor.
+
+        :param allfiles: Paths of files associated to the variable.
+        :type allfiles: list of str
+        :param var_name: Variable name.
+        :type var_name: str
+        :param num_ghost: Number of ghost zones in each direction.
+        :type num_ghost: 1d NumPy array
+
+        """
 
         self._iterations_to_times = {}
         self.num_ghost = num_ghost
@@ -407,8 +626,15 @@ class OneGridFunctionASCII(BaseOneGridFunction):
         super().__init__(allfiles, var_name)
 
     def _parse_file(self, path):
+        """Read the content of the given file.
 
-        # TODO: This code can be made more robust. More testing is needed.
+        At the moment, we read the entire file line by line, which is very
+        inefficient.
+
+        :param path: Path of the file to read.
+        :type path: str
+
+        """
 
         # First we parse the header to find the column description, then we read
         # the ENTIRE file. This is very inefficient, but it is not too hard to
@@ -440,7 +666,7 @@ class OneGridFunctionASCII(BaseOneGridFunction):
         _, column_description = scan_header(
             path,
             one_file_per_group=is_one_file_per_group,
-            file_has_column_format=True,
+            extended_format=True,
             opener=opener,
             opener_mode=opener_mode,
         )
@@ -630,11 +856,36 @@ class OneGridFunctionASCII(BaseOneGridFunction):
     def _read_component_as_uniform_grid_data(
         self, path, iteration, ref_level, component
     ):
+        """Return the component at the given iteration, refinement level, and component.
+
+        :param path: Path of the file.
+        :type path: str
+        :param iteration: Iteration.
+        :type iteration: int
+        :param ref_level: Refinement level.
+        :type ref_level: int
+        :param component: Component.
+        :type component: int
+
+        :returns: Component as a :py:class:`~.UniformGridData`.
+        :rtype: :py:class:`~.UniformGridData`
+
+        """
 
         # We have already read the files, so we just return it
         return self.alldata[path][iteration][ref_level][component]
 
     def time_at_iteration(self, iteration):
+        """Return the time at a given iteration.
+
+        :param iteration: Iteration.
+        :type iteration: int
+
+        :returns: Time at given iteration.
+        :rtype: float
+
+        """
+
         if iteration not in self.available_iterations:
             raise ValueError("Iteration {iteration} not available")
 
@@ -642,7 +893,12 @@ class OneGridFunctionASCII(BaseOneGridFunction):
 
 
 class OneGridFunctionH5(BaseOneGridFunction):
-    """Read grid data produced by CarpetHDF5 files."""
+    """Read grid data produced by CarpetHDF5 files.
+
+    This class is derived from :py:class:`~.BaseOneGridFunction` and implements
+    the reading facilities.
+
+    """
 
     # This class implements the details on how to read the data, most of the
     # functionalities of the class are in OneGridFunctionBase.
@@ -679,8 +935,16 @@ class OneGridFunctionH5(BaseOneGridFunction):
     """
 
     def __init__(self, allfiles, var_name):
+        """Constructor.
 
-        # We need these variables to propertly find what dataset to look at in
+        :param allfiles: Paths of files associated to the variable.
+        :type allfiles: list of str
+        :param var_name: Variable name.
+        :type var_name: str
+
+        """
+
+        # We need these variables to properly find what dataset to look at in
         # the HDF5 file.
         self.thorn_name = None
         self.map = None
@@ -693,8 +957,11 @@ class OneGridFunctionH5(BaseOneGridFunction):
         if self.map is None:
             self.map = ""
 
-        # TODO: Technically the separator :: is customizable, so we should be
-        #       more flexible
+        # TODO (FEATURE): Make separator customizable
+        #
+        # Technically the separator :: is customizable, so we should be more
+        # flexible.
+
         self.dataset_format = (
             f"{self.thorn_name}::{self.var_name} it=%d tl=0{self.map} rl=%d%s"
         )
@@ -719,6 +986,12 @@ class OneGridFunctionH5(BaseOneGridFunction):
         self.are_ghostzones_in_files = next(iter(ghost_in_files))
 
     def _parse_file(self, path):
+        """Read the content of the given file (without reading the data).
+
+        :param path: Path of the file.
+        :type path: str
+
+        """
         # This will give us an overview of what is available in the provided
         # file. We keep a collection of all these in the variable self.alldata
         with h5py.File(path, "r") as f:
@@ -768,8 +1041,23 @@ class OneGridFunctionH5(BaseOneGridFunction):
                 alldata_ref_level.setdefault(int(component), None)
 
     def _grid_from_dataset(self, dataset, iteration, ref_level, component):
+        """Return a :py:class:`~.UniformGrid` from a given HDF5 dataset.
 
-        # TODO: Why do we need to reverse the array?
+        :param dataset: Dataset to model the grid after.
+        :type dataset: H5py.dataset
+        :param iteration: Iteration.
+        :type iteration: int
+        :param ref_level: Refinement level.
+        :type ref_level: int
+        :param component: Component.
+        :type component: int
+
+        :returns: Grid corresponding to the dataset.
+        :rtype: :py:class:`~.UniformGrid`
+
+        """
+
+        # NOTE: Why are we taking the reverse?
         shape = np.array(dataset.shape[::-1])
 
         x0 = dataset.attrs["origin"]
@@ -802,6 +1090,18 @@ class OneGridFunctionH5(BaseOneGridFunction):
     # easily get the dataset.
     @contextmanager
     def _get_dataset(self, path, iteration, ref_level, component):
+        """Context manager to read an HDF5 file.
+
+        :param path: Path of the file.
+        :type path: str
+        :param iteration: Iteration.
+        :type iteration: int
+        :param ref_level: Refinement level.
+        :type ref_level: int
+        :param component: Component.
+        :type component: int
+
+        """
         component_str = f" c={component}" if (component >= 0) else ""
         with h5py.File(path, "r") as f:
             try:
@@ -816,6 +1116,21 @@ class OneGridFunctionH5(BaseOneGridFunction):
     def _read_component_as_uniform_grid_data(
         self, path, iteration, ref_level, component
     ):
+        """Return the component at the given iteration, refinement level, and component.
+
+        :param path: Path of the file.
+        :type path: str
+        :param iteration: Iteration.
+        :type iteration: int
+        :param ref_level: Refinement level.
+        :type ref_level: int
+        :param component: Component.
+        :type component: int
+
+        :returns: Component as a :py:class:`~.UniformGridData`.
+        :rtype: :py:class:`~.UniformGridData`
+
+        """
 
         if self.alldata[path][iteration][ref_level][component] is None:
             with self._get_dataset(
@@ -834,7 +1149,15 @@ class OneGridFunctionH5(BaseOneGridFunction):
 
     @staticmethod
     def _are_ghostzones_in_file(path):
-        """"""
+        """Return whether the ghostzones were output or not.
+
+        :param path: File to inspect.
+        :type path: str
+
+        :returns: Whether ``path`` contains ghost zones.
+        :rtype: bool
+
+        """
         # This is a tricky and important function to stitch together all the
         # different components. Carpet has an option (technically two) to output
         # the ghostzones in the files. These are: output_ghost_points and
@@ -873,7 +1196,15 @@ class OneGridFunctionH5(BaseOneGridFunction):
             )
 
     def time_at_iteration(self, iteration):
-        """Return the time corresponding to the provided iteration"""
+        """Return the time corresponding to the provided iteration.
+
+        :param iteration: Iteration.
+        :type iteration: int
+
+        :returns: Time corresponding to ``iteration``.
+        :rtype: float
+
+        """
         # If there are multiple files, we take the first.
         # A case in which there are multiple files is with 3D data
         path = self._files_with_iteration(iteration)[0]
@@ -888,13 +1219,23 @@ class OneGridFunctionH5(BaseOneGridFunction):
 
 class AllGridFunctions:
     """Helper class to read various types of grid data in a list of files and
-    properly order them. The core of this object is the _vars dictionary which
-    contains the location of all the files for a specific variable and
+    properly order them. The core of this object is the ``_vars`` dictionary
+    which contains the location of all the files for a specific variable and
     reduction.
 
-    AllGridFunction is a dictionary-like object.
+    :py:class:`~.AllGridFunction` is a dictionary-like object with keys the
+    various variables and values :py:class:`~.BaseOneGridFunction` (or derived).
 
-    Not intended for direct iniitalization.
+    You can access data with the bracket operator or as attributes of the
+    ``fields`` attribute.
+
+    Not intended for direct initialization.
+
+    :ivar dimension: Dimension associated to this object (e.g. (0, 1) would be the
+                     xy plane).
+    :type dimension: tuple
+    :ivar num_ghost: Number of ghost zones in each dimension.
+    :type num_ghost: 1d NumPy array.
 
     """
 
@@ -924,8 +1265,12 @@ class AllGridFunctions:
     }
 
     def __init__(self, allfiles, dimension, num_ghost=None):
-        """allfiles is a list of files, dimension has to a tuple.
+        """Constructor.
 
+        :param allfiles: List of all the files.
+        :type allfiles: list
+        :param dimension: Dimension associated to this object.
+        :type dimension: tuple
         :param num_ghost: Number of ghost zones in the data for each dimension.
                           This is used only for ASCII data.
         :type num_ghost: list or tuple of the same length as the number of dimension
@@ -1060,9 +1405,11 @@ class AllGridFunctions:
                     ):
                         continue
 
-                    # TODO: Here we scan the headers, we should not do this
-                    #       work again when we deal with the single variables
+                    # TODO (FEATURE): Avoid reading headers twice
                     #
+                    # Here we scan the headers, we should not do this work again
+                    # when we deal with the single variables.
+
                     # The last group is where compression information is. It
                     # could be None.
                     compression_method = matched_ascii.groups()[-1]
@@ -1072,7 +1419,7 @@ class AllGridFunctions:
                     _, column_description = scan_header(
                         f,
                         one_file_per_group=True,
-                        file_has_column_format=True,
+                        extended_format=True,
                         opener=opener,
                         opener_mode=opener_mode,
                     )
@@ -1108,6 +1455,11 @@ class AllGridFunctions:
 
     @property
     def num_ghost(self):
+        """Return the number of ghost zones along each direction.
+
+        :returns: Number of ghost zones along each direction.
+        :rtype: 1d NumPy array
+        """
         return self.__num_ghost
 
     @num_ghost.setter
@@ -1127,17 +1479,22 @@ class AllGridFunctions:
         return var in self.keys()
 
     def get(self, key, default=None):
+        """Return variable ``key``.
+
+        :param key: Variable to read.
+        :type key: str
+        :param default: Value to return is variable is not available.
+        :type default: anything
+        """
         if key not in self:
             return default
         return self[key]
 
     def keys(self):
-        # To find the unique keys we use transform the keys in sets, and then
-        # we unite them.
-        # TODO: In Python3, keys() should not be a list!
-        return list(
-            set(self._vars_h5.keys()).union(set(self._vars_ascii.keys()))
-        )
+        """Return the list of all the available variables."""
+        # We merge the dictionaries and return the keys.
+        # This automatically takes care of making sure that they keys are unique.
+        return {**self._vars_h5, **self._vars_ascii}.keys()
 
     def __str__(self):
         ret = "\nAvailable grid data of dimension "
@@ -1150,8 +1507,8 @@ class AllGridFunctions:
         """Return a set of all the files that have variables of the
         given dimension
 
-        :return: Collection of all the unique files with variales of
-                 this dimension
+        :return: Collection of all the unique files with variables of
+                 this dimension.
         :rtype: set
         """
         allfiles = set()
@@ -1165,8 +1522,10 @@ class AllGridFunctions:
 
     def total_filesize(self, unit="MB"):
         """Return the total size of the files with this dimension.
-        Available units B, KB, MB and GB
+        Available units B, KB, MB and GB (in power of 1024 bytes).
 
+        :param unit: Unit to use (in powers of 1024 bytes).
+        :type unit: str among: ``B``, ``KB``, ``MB``, ``GB``.
         :returns: Total size of all the files associated with this dimension.
         :rtype: float
 
@@ -1177,9 +1536,9 @@ class AllGridFunctions:
 class GridFunctionsDir:
     """This class provides access to all grid data.
 
-    This includes 1D-3D data in hdf5 format as well. Data of the required
-    dimensionality is read from any format available (hdf5 preferred over
-    ascii). If you need lower dimensional data, read the higher dimensional one
+    This includes 1D-3D data in HDF5 and ASCII formats. Data of the required
+    dimensionality is read from any format available (HDF5 preferred over
+    ASCII). If you need lower dimensional data, read the higher dimensional one
     and slice the data.
 
     :ivar x:           Access to 1D data along x-axis.
@@ -1207,6 +1566,11 @@ class GridFunctionsDir:
     }
 
     def __init__(self, sd):
+        """Constructor.
+
+        :param sd: Simulation directory.
+        :type sd: :py:class:`~.SimDir`
+        """
 
         if not isinstance(sd, simdir.SimDir):
             raise TypeError("Input is not SimDir")
@@ -1242,7 +1606,7 @@ class GridFunctionsDir:
         raise ValueError(f"{dimension} is not a recognized dimension")
 
     def __getitem__(self, dimension):
-        """Get data with given dimensionality
+        """Get data with given dimensionality.
 
         :param dimension:  tuple of dimensions, e.g. (0,1) for xy-plane.
         or string with the name, e.g. 'xy'
@@ -1272,8 +1636,14 @@ class GridFunctionsDir:
         return "\n".join([str(self[dim]) for dim in self._all_griddata])
 
     def total_filesize(self, unit="MB"):
-        """Return the total size of the files with this variable.
-        Available units B, KB, MB and GB
+        """Return the total size of the grid data files.
+        Available units B, KB, MB and GB (in power of 1024 bytes).
+
+        :param unit: Unit to use (in powers of 1024 bytes).
+        :type unit: str among: ``B``, ``KB``, ``MB``, ``GB``.
+        :returns: Total size of the grid data files.
+        :rtype: float
+
         """
         # First we find all the unique files
         allfiles = set()

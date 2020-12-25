@@ -15,17 +15,31 @@
 # You should have received a copy of the GNU General Public License along with
 # this program; if not, see <https://www.gnu.org/licenses/>.
 
-""" This module provides easy access to CACTUS data files.
+"""This module provides easy access to Cactus data files.
 
-A simulation directory is represented by an instance of the
-:py:class:`~.SimDir` class, which provides access to all supported
-data types.
+A simulation directory is represented by an instance of the :py:class:`~.SimDir`
+class, which provides access to all supported data types.
+
+This is the main entry point into ``PostCactus``. When a :py:class:`~.SimDir` is
+initialized, the simulation directory is scanned and all the data is organized.
+:py:class:`~.SimDir` objects have attributes that are interfaces to the data:
+each attribute is a dictionary-like object that indexes the relevant data in
+some way. For example, :py:meth:`~.timeseries` contains all the time series in
+the output, indexed by the type of reduction that produced them (for example,
+``norm2``, ``max``, ...).
+
+In case of uncertainty, it is always possible to print :py:class:`~.SimDir`,
+or any of its attributes, to obtain a message with the available content of
+such attribute.
+
 """
 
 import os
 
-# We ideally would like to use cached_property, but it is in Python 3.8
-# which is quite new
+# TODO (FUTURE): cached_property is the decorator we are looking for.
+#
+# We ideally would like to use cached_property, but it is in Python 3.8,
+# and currently we only support 3.6.
 from functools import lru_cache
 
 from postcactus import (
@@ -38,10 +52,10 @@ from postcactus import (
 
 
 class SimDir:
-    """This class represents a CACTUS simulation directory.
+    """This class represents a Cactus simulation directory.
 
     Data is searched recursively in all subfolders. No particular folder
-    structure (e.g. SimFactory style) is assumed. The following attributes
+    structure (e.g. ``simfactory`` style) is assumed. The following attributes
     allow access to the supported data types:
 
     :ivar path:           Top level path of simulation directory.
@@ -62,6 +76,7 @@ class SimDir:
                           :py:class:`~.HorizonsDir`.
     :ivar multipoles:     Multipole components, see
                           :py:class:`~.CactusMultipoleDir`.
+
     """
 
     def _sanitize_path(self, path):
@@ -71,8 +86,11 @@ class SimDir:
             raise RuntimeError(f"Folder does not exist: {path}")
 
     def _scan_folders(self, max_depth):
-        """Scan all the folders in self.path up to depth max_depth
+        """Scan all the folders in self.path up to depth ``max_depth``
         and categorize all the files.
+
+        :param max_depth: Maximum recursion depth to scan.
+        :type max_depth: int
         """
 
         self.dirs = []
@@ -136,7 +154,7 @@ class SimDir:
 
         simfac = os.path.join(self.path, "SIMFACTORY", "par")
 
-        # Simfactory has a folder SIMFATORY with a subdirectory for par files
+        # Simfactory has a folder SIMFACTORY with a subdirectory for par files
         # Even if SIMFACTORY is excluded, we should include that par file
         if os.path.isdir(simfac):
             mainpar = filter_ext(listdir_no_symlinks(simfac), ".par")
@@ -144,21 +162,14 @@ class SimDir:
 
         self.has_parfile = bool(self.parfiles)
 
-        # TODO: Add this when cactus_parfile is ready
-
-        # if self.has_parfile:
-        #     self.initial_params = cpar.load_parfile(self.parfiles[0])
-        # else:
-        #     self.initial_params = cpar.Parfile()
-
     def __init__(self, path, max_depth=8, ignore=None):
         """Constructor.
 
-        :param path:      Path to simulation directory.
-        :type path:       string
+        :param path:      Path to output of the simulation.
+        :type path:       str
         :param max_depth: Maximum recursion depth for subfolders.
         :type max_depth:  int
-        :param ignore: Folders to ignore
+        :param ignore: Names of folders to ignore (e.g. SIMFACTORY).
         :type ignore:  set
 
         Parfiles (``*.par``) will be searched in all data directories and the
@@ -179,6 +190,11 @@ class SimDir:
     # We only need to keep it 1 in memory: it is the only possible!
     @lru_cache(1)
     def ts(self):
+        """Return all the available timeseries in the data.
+
+        :returns: Interface to all the timeseries in the directory.
+        :rtype: :py:class:`~.ScalarsDir`
+        """
         return cactus_scalars.ScalarsDir(self)
 
     timeseries = ts
@@ -186,11 +202,21 @@ class SimDir:
     @property
     @lru_cache(1)
     def multipoles(self):
+        """Return all the available multipole data.
+
+        :returns: Interface to all the multipole data in the directory.
+        :rtype: :py:class:`~.MultipolesDir`
+        """
         return cactus_multipoles.MultipolesDir(self)
 
     @property
     @lru_cache(1)
     def gravitationalwaves(self):
+        """Return all the available ``Psi4`` data.
+
+        :returns: Interface to all the ``Psi4`` data in the directory.
+        :rtype: :py:class:`~.GravitationalWavesDir`
+        """
         return cactus_waves.GravitationalWavesDir(self)
 
     gws = gravitationalwaves
@@ -198,6 +224,11 @@ class SimDir:
     @property
     @lru_cache(1)
     def electromagneticwaves(self):
+        """Return all the available ``Phi2`` data.
+
+        :returns: Interface to all the ``Phi2`` data in the directory.
+        :rtype: :py:class:`~.ElectromagneticWavesDir`
+        """
         return cactus_waves.ElectromagneticWavesDir(self)
 
     emws = electromagneticwaves
@@ -205,6 +236,11 @@ class SimDir:
     @property
     @lru_cache(1)
     def gridfunctions(self):
+        """Return all the available grid data.
+
+        :returns: Interface to all the grid data in the directory.
+        :rtype: :py:class:`~.GridFunctionsDir`
+        """
         return cactus_grid_functions.GridFunctionsDir(self)
 
     gf = gridfunctions
@@ -212,6 +248,11 @@ class SimDir:
     @property
     @lru_cache(1)
     def horizons(self):
+        """Return all the available horizon data.
+
+        :returns: Interface to all the horizon data in the directory.
+        :rtype: :py:class:`~.HorizonsDir`
+        """
         return cactus_horizons.HorizonsDir(self)
 
     def __str__(self):

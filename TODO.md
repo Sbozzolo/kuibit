@@ -15,7 +15,7 @@ PostCactus or of Python required to complete the task.
   Pythonic and faster. [==]
 * Extend `Series` and `grid_data` to support array data instead of only scalar
   data. [====]
-* Correcly identify and merge refinement levels in `HierarchicalGridData` even
+* Correctly identify and merge refinement levels in `HierarchicalGridData` even
   where there are multiple centers of refinement. [===]
 * Linear momentum lost by gravitational waves. [=]
 
@@ -48,11 +48,9 @@ PostCactus or of Python required to complete the task.
 * `_multipoles_from_textfiles` takes a long time if there are thousands of
   files. [==]
 * `cactus_scalars`, `cactus_multipoles`, `cactus_grid_functions` have a lot of
-  common infrastrucutre. There should be a way to reduce code deduplication.
+  common infrastructure. There should be a way to reduce code deduplication.
   Also, at the moment, the three group of classes are structured in very
   different ways, they should be more uniform. [====]
-* Uniform `keys()` function to Python3 standard, and implement other dictionary
-  functions (e.g., `items()`). [==]
 * Add support for `logging`. [===]
 * Refactor code to correctly use `np.array` or `np.asarray` (not use `np.array`
   when is not needed). [==]

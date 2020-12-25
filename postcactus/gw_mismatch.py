@@ -16,11 +16,19 @@
 # this program; if not, see <https://www.gnu.org/licenses/>.
 
 """The :py:mod:`~.gw_mismatch` module functions to compute the mismatch between
-two waves.
+two waves using a simple grid search for phase and time shifts. Since no
+polarization shifts are performed, this is only relevant to the gravitational
+wave 2,2 mode.
 
-The two main interfaces are network_mismatch_from_psi4 (when computing the
-network mismatch starting from psi4 and the sky localization) and
-mismatch_from_strains (when computing the mismatch from the strains).
+The two main interfaces are :py:func:`~.network_mismatch_from_psi4` (when
+computing the network mismatch starting from psi4 and the sky localization) and
+:py:func:`~.mismatch_from_strains` (when computing the mismatch from the
+strains).
+
+    ..warning::
+
+        Make sure to understand what is going on if you are using this module.
+        You should read the code and comments in the code.
 
 """
 from contextlib import contextmanager
@@ -35,9 +43,9 @@ import numpy as np
 # faster.
 #
 # At the moment, fft is not supported, so the full power of numba
-# cannot be achived.
+# cannot be achieved.
 
-# TODO: Look at me if numba has support for FFTs
+# TODO (FUTURE): Update when numba supports FFTs
 
 # We have to put this here. See numba issue #4456
 # We always try to import numba because we need objtmode
@@ -64,56 +72,53 @@ def _mismatch_core_numerical(
     polarization_shifts,
     time_shifts,
 ):
-    """Compute the maximum overlap between h1_fft (frequency domain, cross and
-    plus) and h2_t (time domain). This function requires very specific
-    pre-processing and should never be used directly. All the details are in
-    the comments.
+    """Compute the maximum overlap between ``h1_fft`` (frequency domain, cross and
+    plus) and ``h2_t`` (time domain). This function requires very specific
+    pre-processing and should never be used directly. All the details are in the
+    comments.
 
-    This can be optinally "numba-ified" to increase the speed. The input and
-    output values and standard numpy objects.
+    This can be optinally "numba-ified" to increase the speed (if numba is
+    available). The input and output values and standard NumPy objects.
 
     :param h1_c_fft: Fourier transform of the cross polarization of the first
-                     strain (it will not be modified). It has to be defiend
+                     strain (it will not be modified). It has to be defined
                      only over the frequencies of interest.
-    :type h1_c_fft: 1D complex numpy array
+    :type h1_c_fft: 1D complex NumPy array
     :param h1_p_fft: Fourier transform of the plus polarization of the first
-                     strain (it will not be modified). It has to be defiend
+                     strain (it will not be modified). It has to be defined
                      only over the frequencies of interest.
-    :type h1_p_fft: 1D complex numpy array
-
+    :type h1_p_fft: 1D complex NumPy array
     :param h2_t: Timeseries of the second strain. It will be modified with time
     and polarization shifts. It has to be pre-processed so that is defined over
-    the same times as h1_t :type h2_t: 1D complex numpy array.
-    :type h2_t: 1D complex numpy array
-
-    :param delta_t: Timestep
+    the same times as h1_t :type h2_t: 1D complex NumPy array.
+    :type h2_t: 1D complex NumPy array
+    :param delta_t: Timestep.
     :type delta_t: float
-
     :param frequencies: Frequencies where we want to compute the integral (ie,
     from fmin to fmax).
-    :type frequencies: 1d numpy array
+    :type frequencies: 1d NumPy array
 
     :param frequency_mask: What frequencies we should keep from the unfiltered
     ones (we start from 0 to 1/dt, which ones are in frequencies). Technically
     we can compute this in this function, but it is easier and faster to just
     provide it.
-    :type frequency_mask: 1d numpy array of bools
+    :type frequency_mask: 1d NumPy array of bools
 
     :param noises: Power spectral density of the noise, defined on the correct
     frequencies.
-    :type noises: tuple of 1d numpy arrays
+    :type noises: tuple of 1d NumPy arrays
 
     :param antenna_patterns: Fc, Fp for all the detectors. It has to be ordered
-    in the same way as noises.
+    in the same way as ``noises``.
     :type antenna_patterns: tuple of tuples
 
     :param polarization_shifts: Polarization shifts that will be applied in the
     search for the maximum.
-    :type polarization_shifts: 1d numpy array
+    :type polarization_shifts: 1d NumPy array
 
     :param time_shifts: Time shifts that will be applied in the search for
     the maximum.
-    :type time_shifts: 1d numpy array
+    :type time_shifts: 1d NumPy array
 
     """
 
@@ -209,13 +214,13 @@ def mismatch_from_strains(
     time_shift_end=5,
     force_numba=False,
 ):
-    r"""Compute the netowrk-mismatch between h1 and h2 by maximising the
+    r"""Compute the network-mismatch between ``h1`` and ``h2`` by maximizing the
     overlap over time and polarization shifts.
 
     Network here means that the inner product is computed for N detectors, as
     provided by the lists antenna_patterns and noises. Noises and antenna
-    patterns have to be properly ordered: noises[i] has to correspond to
-    antenna_pattern[i].
+    patterns have to be properly ordered: ``noises[i]`` has to correspond to
+    ``antenna_pattern[i]``.
 
     See :ref:`gw_mismatch:Overlap and mismatch` for formulas and details.
 
@@ -282,9 +287,9 @@ def mismatch_from_strains(
     # Computing the mismatch is a numerical operation, we should be able
     # to crunch numbers at the speed of light (ie, as fast as C). For this,
     # we use numba and we break apart all our abstractions to expose only
-    # the data as numpy arrays. In this function we pre-process the
+    # the data as NumPy arrays. In this function we pre-process the
     # FrequencySeries so that we can feed _mismatch_core_numerical with
-    # what we need. _mismatch_core_numerical takes only standard numpy
+    # what we need. _mismatch_core_numerical takes only standard NumPy
     # objects (arrays, tuples, and floats) and return the mismatch and
     # the phase/time shifts needed for it.
     #
@@ -977,7 +982,7 @@ def network_mismatch_from_psi4(
     :type declination: float
     :param mass_scale1_msun: If not None, the signal h1 is converted from
                              computational units to physical units assuming that
-                             M = mass_scale1_msun.
+                             ``M = mass_scale1_msun``.
     :type mass_scale1_msun: float or None
     :param mass_scale2_msun: If not None, the signal h2 is converted from
                              computational units to physical units assuming that

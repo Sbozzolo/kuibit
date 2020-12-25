@@ -16,9 +16,24 @@
 # this program; if not, see <https://www.gnu.org/licenses/>.
 
 """The :py:mod:`~.cactus_ah` module provides classes to access the information
-about apparent horizons from various thorns. The main class is
-:py:class:`~.cactus_horizons` which collects all available data from a
-simulation.
+about apparent horizons from QuasiLocalMeasures and AHFinderDirect (including
+shape files).
+
+The main class is :py:class:`~.HorizonsDir` which collects all available data
+from a :py:class:`~.SimDir`. This is a dictionary-like object whose values can
+be accessed providing two integers. The first is the QuasiLocalMeasures index,
+the second is the AHFinderDirect (we need two indices because at the moment we
+have no way to connect the two indexing systems). If only one of the two is
+available, the other index can be a dummy.
+
+Once an horizon is selected with a combination of QLM and AHFinderDirect
+indices, the resulting object is a :py:class:`~.OneHorizon`.
+:py:class:`~.OneHorizon` contains as attributes all the QLM variables.
+Similarly, the attribute ``ah`` contains all the variables read from
+AHFinderDirect. All of these are represented as :py:class:`~.TimeSeries`.
+:py:class:`~.OneHorizon` also contains the shapes of the horizons (if the files
+are found), which can be accessed with the methods
+:py:meth:`~.shape_at_iteration` and :py:meth:`~.shape_outline_at_iteration`.
 
 """
 
@@ -36,27 +51,41 @@ class OneHorizon:
     r"""This class represents properties of an apparent horizon
     computed from the quasi-isolated horizon formalism.
 
-    The following variables are provided as :py:class:`~.TimeSeries`:
+    All the variables from QuasiLocalMeasures are available as
+    :py:class:`~.TimeSeries` as attributes. All the ones from AHFinderDirect are
+    attributes of the attribute ``ah``.
 
     :ivar formation_time: First time at which the horizon has been found
-                          (as from AHFinderDirect)
-
-    Those are taken from the QuasilocalMeasures thorn output, if available. For
-    each timeseries a boolean variable with prefix "has\_" reports if the
-    information is available or not. Variables with suffix "\_final" provide the
-    values at the end of the simulation. Printing this class (or conversion to
-    string) results in human readable summary.
+                          (as from AHFinderDirect).
+    :ivar mass_final: QLM mass at the last iteration available.
+    :ivar spin_final: QLM spin (angular momentum) at the last iteration available.
+    :ivar dimensionless_spin_final: Dimensionless spin computed from QLM variables
+                                    at the last iteration available.
+    :ivar shape_available: Whether the shape files are available.
+    :ivar shape_iterations: Iterations at which the shape is available.
+    :ivar shape_iterations_min: First iteration at which the shape is available.
+    :ivar shape_iterations_max: Last iteration at which the shape is available.
+    :ivar shape_times: Times at which the shape is available.
+    :ivar shape_times_min: First time at which the shape is available.
+    :ivar shape_times_max: Last time at which the shape is available.
+    :ivar ah: All the variables from AHFinderDirect as :py:class:`~.TimeSeries`.
 
     """
 
     def __init__(self, qlm_vars, ah_vars, shape_files):
-        """Constructor. No need to use this class directly, create a
-        :py:class:`~.HorizonsDir` instance instead to collect all BH
-        info.
+        """Constructor.
 
+        :param qlm_vars: Dictionary that maps the name of the QLM variable with
+                         the associated :py:class:`~.TimeSeries`.
+        :type qlm_vars: dict
+        :param ah_vars: Dictionary that maps the name of the AH variable with
+                        the associated :py:class:`~.TimeSeries`.
+        :type ah_vars: dict
+        :param shape_files: Dictionary that maps the iteration to the files where
+                            to find the shape at that iteration.
+        :type shape_files: dict
 
         """
-
         self._qlm_vars = qlm_vars
         self._ah_vars = ah_vars
 
@@ -142,7 +171,13 @@ class OneHorizon:
         return self._qlm_vars[key]
 
     def get_ah_property(self, key):
-        """Return a property from AHFinderDirect as timeseries."""
+        """Return a property from AHFinderDirect as timeseries.
+
+        :param key: AH property.
+        :type key: str
+        :returns: AH property as a function of time.
+        :rtype: :py:class:`~.TimeSeries`
+        """
         return self._ah_vars[key]
 
     def __str__(self):
@@ -161,7 +196,13 @@ class OneHorizon:
         return ret
 
     def ah_origin_at_iteration(self, iteration):
-        """Return the AH origin at the given iteration"""
+        """Return the AH origin at the given iteration.
+
+        :param iteration: Iteration number.
+        :type iteration: int
+        :returns: Origin of the horizon as from AHFinderDirect.
+        :rtype: 3D NumPy array
+        """
         return self._patches_at_iteration(iteration)[1]
 
     def _patches_at_iteration(self, iteration):
@@ -185,12 +226,15 @@ class OneHorizon:
         """Return the shape of the horizon as 3 arrays with the
         coordinates of the points.
 
-        :returns:
-        :rtype: three lists of 2D numpy arrays, one for each
-                coordinate. The list is over the different patches
+        :param iteration: Iteration number.
+        :type iteration: int
+        :returns: Shape of the horizon.
+        :rtype: three lists of 2D NumPy arrays, one for each
+                coordinate. The list is over the different patches.
         """
 
-        # TODO: Add an option to merge all the patches while keeping an order.
+        # TODO (FEATURE): Add an option to merge all the patches while keeping
+        #                 an order.
 
         patches, _ = self._patches_at_iteration(iteration)
 
@@ -209,7 +253,7 @@ class OneHorizon:
         axis). We will load this data.
 
         """
-        # TODO: Add support for HDF5 files
+        # TODO (FEATURE): Add support for HDF5 files
 
         # ASCII files are structured in this way:
         # * There is a header with the number of patches and the origin
@@ -301,7 +345,7 @@ class OneHorizon:
 
         if origin is None:
             raise RuntimeError("Corrupt AH files, missing origin.")
-        # Reorganize the data from the AHHorizonDirect format to a numpy matrix
+        # Reorganize the data from the AHHorizonDirect format to a NumPy matrix
         # Each patch is an array with three lists, one for each direction
         patches = {
             p: np.transpose(np.array(d), axes=(2, 0, 1))
@@ -312,20 +356,28 @@ class OneHorizon:
     def shape_outline_at_iteration(self, iteration, cut):
         """Return the cut of the 3D shape on a specified plane.
 
-        cut has to be a 3D tuple or list with None on the dimensions
-        you want to keep, and the value of the other coordinates. For
-        example, if you want the outline at z = 3 on the xy plane,
-        cut has to be (None, None, 3).
+        ``cut`` has to be a 3D tuple or list with None on the dimensions you
+        want to keep, and the value of the other coordinates. For example, if
+        you want the outline at z = 3 on the xy plane, ``cut`` has to be
+        ``(None, None, 3)``.
 
         No interpolation is performed, so results are not accurate when the cut
         is not along one of the major directions centered in the origin of the
         horizon.
 
+        :param iteration: Iteration number.
+        :type iteration: int
+        :param cut: How should the horizon be sliced?
+        :type cut: 3D tuple
         :returns:    Coordinates of AH outline.
-        :rtype:      tuple of two 1D numpy arrays.
+        :rtype:      tuple of two 1D NumPy arrays.
 
         """
-        # TODO: Add interpolation for off-axis cuts
+        # TODO (FEATURE): Add interpolation for off-axis cuts
+        #
+        # At the moment, cuts that are not along the main axes will return
+        # outlines with very few points, so we have to implement and
+        # interpolation scheme to ensure that the accuracy is high.
 
         if iteration not in self.shape_iterations:
             raise ValueError(f"Shape not available for iteration {iteration}")
@@ -341,7 +393,10 @@ class OneHorizon:
         patches, origin = self._patches_at_iteration(iteration)
 
         # If cut is three None, we return the entire shape.
-        # TODO: Merge patches here
+        # TODO (FEATURE): Merge patches here
+        #
+        # We should not return the multiple patches, but a single one,
+        # so we should merge them.
         if cut.count(None) == 3:  # all None
             return self.shape_at_iteration(iteration)
 
@@ -436,11 +491,6 @@ class HorizonsDir:
     available from thorns AHFinderDirect and QuasiLocalMeasures.
 
     :ivar found_any:   True if at least one horizon was found.
-
-    Iterating over HorizonsDir objects means iterating over
-    the horizons. The length of this object is the number of
-    horizons for which there's QLM and AH data (if there's any
-    QLM data, otherwise is the number of AH horizons)
 
     AHFinderDirect and QuasiLocalMeasures have different indexing. You must
     provide both when accessing a file. In the future, the map between the
@@ -657,12 +707,19 @@ class HorizonsDir:
 
     @property
     def available_qlm_horizons(self):
-        """Horizons in QLM indexing with associated data"""
+        """Horizons in QLM indexing with associated data.
+
+        :returns: Indices of the QLM horizons found in the data.
+        :rtype: list
+        """
         return sorted(list(self._qlm_vars.keys()))
 
     @property
     def available_apparent_horizons(self):
-        """Horizons in AH indexing with associated data"""
+        """Horizons in AH indexing with associated data.
+
+        :returns: Indices of the AH horizons found in the data.
+        :rtype: list"""
         return sorted(list(self._ah_vars.keys()))
 
     def __getitem__(self, key):
@@ -701,8 +758,9 @@ class HorizonsDir:
         ret += f"{num_ah} horizons from AHFinderDirect"
         return ret
 
-    # TODO: Implement the following functions, when we can infer the mapping
-    #       form the paramter file
+    # TODO (FUTURE): Infer the mapping from the parameter file
+    #
+    # Once that is done, implement the following features.
 
     # def __iter__(self):
     #     for horizon_number in self.available_horizons:

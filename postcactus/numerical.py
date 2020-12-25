@@ -16,8 +16,13 @@
 # this program; if not, see <https://www.gnu.org/licenses/>.
 
 """The :py:mod:`~.numerical` module provides an abstract class
-:py:class:`~.BaseNumerical` that implements basic mathematical operations.
-This is used by series and grid functions.
+:py:class:`~.BaseNumerical` that implements basic mathematical operations. This
+is used by series and grid functions.
+
+To work, class derived from :py:class:`~.BaseNumerical` have to implement
+methods to describe (1) how to apply a function that takes the object as argument,
+(2) how to apply a function that takes two objects as arguments, and (3) how to
+apply a reduction.
 
 """
 
@@ -28,12 +33,16 @@ import numpy as np
 
 # Note, we test this class testing its derived class TimeSeries
 class BaseNumerical(ABC):
-    """Base class (not intended for direct use) for generic numerical data.
+    """Base abstract class for generic numerical data.
+
+    This class provides the infrastructure needed to implement mathematical
+    operations in all the derived classes.
 
     The derived classes have to implement:
     - _apply_unary(self, function) that returns function(self)
     - _apply_binary(self, other, function) that returns function(self, other)
     - _apply_reduction(self, function) that returns function(self)
+
     """
 
     @abstractmethod

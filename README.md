@@ -7,6 +7,7 @@
 [![GPLv3
 license](https://img.shields.io/badge/License-GPLv3-blue.svg)](http://perso.crans.org/besson/LICENSE.html)
 [![DeepSource](https://static.deepsource.io/deepsource-badge-light-mini.svg)](https://deepsource.io/gh/Sbozzolo/PostCactus/?ref=repository-badge)
+[![Get help on Telegram](https://img.shields.io/badge/Get%20help%20on-Telegram-blue.svg)](https://t.me/postcactus)
 
 # PostCactus
 
@@ -73,6 +74,13 @@ coverage html
 ```
 This will produce a directory with the html files containing the analysis of
 the coverage of the tests.
+
+## Experimental branch
+
+The git repo of `PostCactus` has an `experimental` branch, which contains
+modules for visualization and several general-purpose scripts (e.g., to plot a
+given grid variable via command-line). It is worth to have a look at that branch
+too.
 
 ## Credits
 

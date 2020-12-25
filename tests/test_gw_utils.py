@@ -106,13 +106,13 @@ class TestGWUtils(unittest.TestCase):
         # retarded_times_to_coordinate_times
         # Scalar
         self.assertAlmostEqual(
-            gwu.retarded_times_to_coordinate_times(1, 2, 0.5), 3
+            gwu._retarded_times_to_coordinate_times(1, 2, 0.5), 3
         )
 
         # Array
         ones = np.ones(2)
         self.assertCountEqual(
-            gwu.retarded_times_to_coordinate_times(ones, rr, 0.5), rr + 1
+            gwu._retarded_times_to_coordinate_times(ones, rr, 0.5), rr + 1
         )
 
         # coordinate_times_to_retarded_times
@@ -120,8 +120,8 @@ class TestGWUtils(unittest.TestCase):
         # To test this, we just check that the composition with
         # retarded_times_to_coordinate_times is the identity
         self.assertCountEqual(
-            gwu.coordinate_times_to_retarded_times(
-                gwu.retarded_times_to_coordinate_times(ones, rr, 0.5), rr, 0.5
+            gwu._coordinate_times_to_retarded_times(
+                gwu._retarded_times_to_coordinate_times(ones, rr, 0.5), rr, 0.5
             ),
             ones,
         )
