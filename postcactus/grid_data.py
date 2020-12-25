@@ -16,15 +16,21 @@
 # this program; if not, see <https://www.gnu.org/licenses/>.
 
 """The :py:mod:`~.grid_data` module provides representations of data on
-uniform grids as well as for data on refined grid hirachies. Standard
+uniform grids as well as for data on refined grid hierarchies. Standard
 arithmetic operations are supported for those data grids, further methods
 to interpolate and resample. The number of dimensions is arbitrary.
 
 The important classes defined here are
- * :py:class:`~.UniformGrid`  represents the geometry of a uniform grid.
- * :py:class:`~.UniformGridData`  represents data on a uniform grid.
- * :py:class:`~.HierarchicalGridData` represents data on a refined grid
-   hierachy (AMR).
+- :py:class:`~.UniformGrid` represents the geometry of a uniform Cartesian
+cell-centered grid.
+- :py:class:`~.UniformGridData` represents data on a uniform grid.
+- :py:class:`~.HierarchicalGridData` represents data on a refined grid
+hierarchy (AMR).
+
+A :py:class:`~.UniformGridData` object contains a :py:class:`~.UniformGrid` one.
+Similarly, a :py:class:`~.HierarchicalGridData` contains multiple
+:py:class:`~.UniformGridData`.
+
 """
 
 import numpy as np
@@ -36,15 +42,13 @@ from postcactus.numerical import BaseNumerical
 
 class UniformGrid:
     """Describes the geometry of a regular rectangular dataset, as well as
-    information needed if part of refined grid hierachy, namely component
-    number and refinement level. In practice, this a fixed refinement level.
-
-    Also stores the number of ghost zones, which is however not used anywhere
-    in this class.
+    information needed to identify the grid if part of refined grid hierarchy
+    (namely component number and refinement level). In practice, this a fixed
+    refinement level, or part of it (as output by an MPI process).
 
     This is a standard Cartesian grid that we will describe with the language
     of computer graphics. To make things clear, let's consider a 2D grid (see
-    schematics below). We call the lower left corner "origin" or `x0`. We call
+    schematics below). We call the lower left corner "origin" or "x0". We call
     the top right corner "x1". The grid is cell-centered (see Fig 2).
 
     ..code-block::
@@ -68,37 +72,37 @@ class UniformGrid:
           |      |
           --------
 
-    The concept of shape is the same as NumPy shape: it's the number of points
-    in each dimention. dx is the spacing (dx, dy, dz, ...). To fully
-    describe a grid, one needs the origin, the shape, and x1 or dx.
+    The concept of ``shape`` is the same as NumPy shape: it's the number of points
+    in each dimension. ``dx`` is the spacing (dx, dy, dz, ...). To fully
+    describe a grid, one needs the ``origin``, the ``shape``, and ``x1`` or ``dx``.
 
-    This is the same convention that Carpet has.
+    (This is the same convention that Carpet has.)
 
     This class is supposed to be immutable.
 
-    :ivar shape:     Number of points in each dimension.
-    :type shape:      1d numpy arrary or list of int.
-    :ivar x0:    Position of cell center with lowest coordinate.
-    :type x0:     1d numpy array or list of float.
-    :ivar dx:     If not None, specifies grid spacing, else grid
+    :ivar ~.shape:     Number of points in each dimension.
+    :type ~.shape:      1d NumPy arrary or list of int.
+    :ivar ~.x0:    Position of cell center with lowest coordinate.
+    :type ~.x0:     1d NumPy array or list of float.
+    :ivar ~.dx:     If not None, specifies grid spacing, else grid
                       spacing is computed from x0, x1, and shape.
-    :type dx:      1d numpy array or list of float.
-    :ivar x1:        If grid spacing is None, this specifies the
+    :type ~.dx:      1d NumPy array or list of float.
+    :ivar ~.x1:        If grid spacing is None, this specifies the
                       position of the cell center with largest
                       coordinates.
-    :type x1:         1d numpy array or list of float.
-    :ivar ref_level:  Refinement level if this belongs to a hierachy,
+    :type ~.x1:         1d NumPy array or list of float.
+    :ivar ~.ref_level:  Refinement level if this belongs to a hierarchy,
                       else -1.
-    :type ref_level:   int
-    :ivar component: Component number if this belongs to a hierachy,
+    :type ~.ref_level:   int
+    :ivar ~.component: Component number if this belongs to a hierarchy,
                       else -1.
-    :type component:  int
-    :ivar num_ghost:    Number of ghost zones (default=0)
-    :type num_ghost:     1d numpy arrary or list of int.
-    :ivar time:      Time if that makes sense, else None.
-    :type time:       float or None
-    :ivar iteration: Iteration if that makes sense, else None.
-    :type iteration:  float or None
+    :type ~.component:  int
+    :ivar ~.num_ghost:    Number of ghost zones (default=0)
+    :type ~.num_ghost:     1d NumPy arrary or list of int.
+    :ivar ~.time:      Time if that makes sense, else None.
+    :type ~.time:       float or None
+    :ivar ~.iteration: Iteration if that makes sense, else None.
+    :type ~.iteration:  float or None
 
     """
 
@@ -126,6 +130,33 @@ class UniformGrid:
         time=None,
         iteration=None,
     ):
+        """
+        :param shape:     Number of points in each dimension.
+        :type shape:      1d NumPy arrary or list of int.
+        :param x0:    Position of cell center with lowest coordinate.
+        :type x0:     1d NumPy array or list of float.
+        :param dx:     If not None, specifies grid spacing, else grid
+                          spacing is computed from x0, x1, and shape.
+        :type dx:      1d NumPy array or list of float.
+        :param x1:        If grid spacing is None, this specifies the
+                          position of the cell center with largest
+                          coordinates.
+        :type x1:         1d NumPy array or list of float.
+        :param ref_level:  Refinement level if this belongs to a hierarchy,
+                          else -1.
+        :type ref_level:   int
+        :param component: Component number if this belongs to a hierarchy,
+                          else -1.
+        :type component:  int
+        :param num_ghost:    Number of ghost zones (default=0)
+        :type num_ghost:     1d NumPy arrary or list of int.
+        :param time:      Time if that makes sense, else None.
+        :type time:       float or None
+        :param iteration: Iteration if that makes sense, else None.
+        :type iteration:  float or None
+
+        """
+
         self.__shape = np.atleast_1d(np.array(shape, dtype=int))
         self.__x0 = np.atleast_1d(np.array(x0, dtype=float))
 
@@ -208,8 +239,9 @@ class UniformGrid:
 
     def __hash__(self):
         """UniformGrid is immutable, we can define an hash as the composition of
-        the hases of the members. This hash is quite slow to compute, so it
-        is not useful for caching small computations.
+        the hashes of the members. This hash is quite slow to compute, so it
+        is not useful for caching small computations. Having an hash function
+        solidifies the idea that this class is immutable.
         """
         # We convert all the arrays in tuples (because they are hashable)
         hash_shape = hash(tuple(self.shape))
@@ -235,14 +267,29 @@ class UniformGrid:
 
     @property
     def x0(self):
+        """Lower corner.
+
+        :returns: Center of lowest corner grid point.
+        :rtype: 1d NumPy array
+        """
         return self.__x0
 
     @property
     def shape(self):
+        """Number of cells across each dimension.
+
+        :returns: Number of cells across each dimension.
+        :rtype: 1d NumPy array
+        """
         return self.__shape
 
     @property
     def x1(self):
+        """Upper corner.
+
+        :returns: Center of top corner grid point.
+        :rtype: 1d NumPy array
+        """
         # We save x1 because it is computed a lot of times
         if self.__x1 is None:
             self.__x1 = self.x0 + (self.shape - 1) * self.dx
@@ -250,39 +297,84 @@ class UniformGrid:
 
     @property
     def origin(self):
+        """Lower corner.
+
+        Alias for :py:meth:`~.x0`.
+
+        :returns: Center of lowest corner grid point.
+        :rtype: 1d NumPy array
+        """
         return self.__x0
 
     @property
     def dx(self):
+        """Grid spacing.
+
+        :returns: Cell size across each dimension.
+        :rtype: 1d NumPy array
+        """
         return self.__dx
 
     @property
     def delta(self):
+        """Grid spacing.
+
+        Alias for :py:meth:`~.dx`.
+
+        :returns: Cell size across each dimension.
+        :rtype: 1d NumPy array
+        """
         return self.__dx
 
     @property
     def num_ghost(self):
+        """Number of ghost zones.
+
+        :returns: Number of ghost zones across each dimension.
+        :rtype: 1d NumPy array
+        """
         return self.__num_ghost
 
     @property
     def ref_level(self):
+        """Refinement level number.
+
+        :returns: Refinement level number.
+        :rtype: int
+        """
         return self.__ref_level
 
     @property
     def component(self):
+        """Component number.
+
+        :returns: Component number.
+        :rtype: int
+        """
         return self.__component
 
     @property
     def time(self):
+        """Time.
+
+        :returns: Time.
+        :rtype: float
+        """
         return self.__time
 
     @property
     def iteration(self):
+        """Iteration number
+
+        :returns: Iteration number.
+        :rtype: float
+        """
         return self.__iteration
 
     @property
     def dv(self):
-        """
+        """Volume of a grid cell.
+
         :returns: Volume of a grid cell.
         :rtype:   float
         """
@@ -290,7 +382,8 @@ class UniformGrid:
 
     @property
     def volume(self):
-        """
+        """Volume of the whole grid.
+
         :returns: Volume of the whole grid.
         :rtype:   float
         """
@@ -298,12 +391,20 @@ class UniformGrid:
 
     @property
     def num_dimensions(self):
+        """Number of dimensions of the grid.
+
+        :returns: Number of dimensions of the grid.
+        :rtype:   float
+        """
         return self.__num_dimensions
 
     @property
     def extended_dimensions(self):
         """Return an array of bools with whether a dimension has more than one
         point or not.
+
+        :returns: Dimensions with more than one point.
+        :rtype:   1d NumPy of bools
         """
         return self.shape > 1
 
@@ -322,7 +423,7 @@ class UniformGrid:
         the grid is cell centered).
 
         :returns: Lowest vertex of the lowest cell.
-        :rtype:   1d numpy array
+        :rtype:   1d NumPy array
         """
         if self.__lowest_vertex is None:
             self.__lowest_vertex = self.x0 - 0.5 * self.dx
@@ -334,7 +435,7 @@ class UniformGrid:
         the grid is cell centered).
 
         :returns: Highest vertex of the highest cell.
-        :rtype:   1d numpy array
+        :rtype:   1d NumPy array
         """
         if self.__highest_vertex is None:
             self.__highest_vertex = self.x1 + 0.5 * self.dx
@@ -343,24 +444,24 @@ class UniformGrid:
     def indices_to_coordinates(self, indices):
         """Compute coordinate corresponding to one or more grid points.
 
-        :param indices: Grid indices
-        :type indices:  1d array or list of int.
-        :returns: The coordinate of grid points
-        :rtype:   1d numpy array of float
+        :param indices: Grid indices.
+        :type indices:  1d array or list of int
+        :returns: Corresponding coordinates of the grid points.
+        :rtype:   1d NumPy array of float
         """
-        # TODO: Add dimensionality checks
+        # TODO (FEATURE): Add dimensionality checks
         return np.asarray(indices) * self.dx + self.x0
 
     def coordinates_to_indices(self, coordinates):
         """Find the indices corresponding to the point nearest to the given coordinates.
 
         :param coordinates: Coordinates.
-        :type coordinates:  1d numpy array or list of float
-        :returns: grid indidces of nearest point.
-        :rtype:   numpy array
+        :type coordinates:  1d NumPy array or list of float
+        :returns: Grid indices of nearest points.
+        :rtype:   NumPy array
 
         """
-        # TODO: Add dimensionality checks
+        # TODO (FEATURE): Add dimensionality checks
         indices = (
             ((np.asarray(coordinates) - self.x0) / self.dx) + 0.5
         ).astype(np.int32)
@@ -383,7 +484,7 @@ class UniformGrid:
         dx/2 on each side compared to the one given by x0, x1.
 
         :param point: Coordinate to test.
-        :type point:  1d numpy array or list of float.
+        :type point:  1d NumPy array or list of float.
         :returns:   If point is contained.
         :rtype:     bool
         """
@@ -415,7 +516,7 @@ class UniformGrid:
         dx/2 on each side compared to the one given by x0, x1.
 
         :param point: Coordinate to test.
-        :type point:  1d numpy array or list of float.
+        :type point:  1d NumPy array or list of float.
         :returns:   If point is contained.
         :rtype:     bool
         """
@@ -427,8 +528,8 @@ class UniformGrid:
 
         The return value is a list with the coordinates along each direction.
 
-        :returns: Coordinates of the grid points on each direction
-        :rtype: list of 1d numpy array
+        :returns: Coordinates of the grid points on each direction.
+        :rtype: list of 1d NumPy array
 
         """
         if self.__coordinates_1d is None:
@@ -447,18 +548,19 @@ class UniformGrid:
         coordinates, ...]).
 
         If ``as_same_shape`` is True return the coordinates as an array with the
-        same shape of self and with values the coordinates.
+        same shape of self and with values the coordinates. This is useful for
+        computations involving the coordinates.
 
         :param as_meshgrid: If True, return the coordinates as meshgrid.
         :type as_meshgrid: bool
         :param as_same_shape: If True, return the coordinates as a list
                               or coordinates with the same shape of self
                               and with values of a given coordinate.
-                              For instance, if the self.num_dimension there
-                              will be three lists with shape = self.shape.
+                              For instance, if ``self.num_dimension = 3`` there
+                              will be three lists with ``shape = self.shape``.
         :type as_same_shape: bool
-        :returns:  A list of 1d arrays of coordinates along the different axes.
-        :rtype:   list of numpy arrays with the same shape as grid
+        :returns:  Grid coordinates.
+        :rtype:   list of NumPy arrays with the same shape as grid
 
         """
         if as_meshgrid and as_same_shape:
@@ -520,7 +622,14 @@ class UniformGrid:
     def shifted(self, shift):
         """Return a new UniformGrid with coordinates shifted by the given amount.
 
-        ``x -> x + shift``."""
+        ``x -> x + shift``.
+
+        :param shift: Amount to shift coordinates.
+        :type shift: 1d NumPy array
+        :returns: New grid with coordinates shifted.
+        :rtype: :py:class:`~.UniformGrid`
+
+        """
         shift = np.asarray(shift)
         self._check_dims(shift, "shift")
 
@@ -596,13 +705,33 @@ Time             = {self.time}
 Iteration        = {self.iteration}
 """
 
+
 class UniformGridData(BaseNumerical):
     """Represents a rectangular data grid with coordinates, supporting
     common arithmetic operations.
 
+    :py:class:`~.UniformGridData` is a combination of a
+    :py:class:`~.UniformGrid` (in ``grid`` attribute) and the actual data (in
+    the ``data`` attribute). :py:class:`~.UniformGridData` makes sure that all
+    the operations on these objects are intuitive, meaningful, and consistent.
+
+    A :py:class:`~.UniformGridData` can be initialized with the default
+    constructor (which takes grid and data), of with the alternative constructor
+    :py:meth:`~.from_grid_structure` (which takes grid details and data).
+
     :ivar grid: Uniform grid over which the data is defined.
     :type grid: :py:class:`~.UniformGrid`
-    :ivar data: The actual data (numpy array).
+    :ivar data: The actual data.
+    :type data: NumPy array.
+
+    :ivar invalid_spline: Whether the spline stored is valid.
+    :type invalid_spline: bool
+
+    :ivar spline_real: Spline representation of the real part of the data.
+    :type spline_real: SciPy's RegularGridInterpolator, or None
+
+    :ivar spline_imag: Spline representation of the imaginary part of the data.
+    :type spline_imag: SciPy's RegularGridInterpolator, or None
 
     """
 
@@ -612,10 +741,10 @@ class UniformGridData(BaseNumerical):
 
     def __init__(self, grid, data):
         """
-        :param grid: Uniform grid over which the data is defined
+        :param grid: Uniform grid over which the data is defined.
         :type grid: :py:class:`~.UniformGrid`
         :param data: The data.
-        :type data: A numpy array.
+        :type data: A NumPy array.
         """
         if not isinstance(grid, UniformGrid):
             raise TypeError("grid has to be a UniformGrid")
@@ -634,8 +763,7 @@ class UniformGridData(BaseNumerical):
         # Here we also define the splines as empty objects so that we know that
         # they are attributes of the class and they are not uninitialized.
         # These attributes will store data relevant for evaluating the spline.
-        # In case of dimensions larger than 2, this will be an object
-        # RegularGridInterpolator.
+        # This will be an object of type SciPy's RegularGridInterpolator.
         self.spline_real = None
         self.spline_imag = None
 
@@ -656,20 +784,20 @@ class UniformGridData(BaseNumerical):
     ):
         """
         :param x0:    Position of cell center with lowest coordinate.
-        :type x0:     1d numpy array or list of float.
+        :type x0:     1d NumPy array or list of float.
         :param dx:     If not None, specifies grid spacing, else grid
                           spacing is computed from x0, x1, and shape.
-        :type dx:      1d numpy array or list of float.
+        :type dx:      1d NumPy array or list of float.
         :param data:      The data.
-        :type data:       A numpy array.
-        :param ref_level:  Refinement level if this belongs to a hierachy,
+        :type data:       A NumPy array.
+        :param ref_level:  Refinement level if this belongs to a hierarchy,
                           else -1.
         :type ref_level:   int
-        :param component: Component number if this belongs to a hierachy,
+        :param component: Component number if this belongs to a hierarchy,
                           else -1.
         :type component:  int
         :param num_ghost:    Number of ghost zones (default=0)
-        :type num_ghost:     1d numpy arrary or list of int.
+        :type num_ghost:     1d NumPy arrary or list of int.
         :param time:      Time if that makes sense, else None.
         :type time:       float or None
         :param iteration: Iteration if that makes sense, else None.
@@ -690,9 +818,15 @@ class UniformGridData(BaseNumerical):
         return cls(geom, data)
 
     def coordinates(self):
-        """Return coordinates of the grid points as list of UniformGridData.
+        """Return coordinates of the grid points as list of
+        :py:class:`~.UniformGridData`.
 
-        This can be used for computations."""
+        This can be used for computations involving the coordinates.
+
+        :returns: Coordinates along each direction.
+        :rtype: list of :py:class:`~.UniformGridData`
+
+        """
         return [
             type(self)(self.grid, coord)
             for coord in self.coordinates_from_grid(as_same_shape=True)
@@ -701,23 +835,27 @@ class UniformGridData(BaseNumerical):
     def coordinates_from_grid(self, as_meshgrid=False, as_same_shape=False):
         """Return coordinates of the grid points.
 
-        If as_meshgrid is True, the coordinates are returned as NumPy meshgrid.
-        Otherwise, return the coordinates of the grid points as
-        1D arrays (schematically, [array for x coordinates, array for y
+        This is equivalent to ``self.grid.coordinates()``.
+
+        If ``as_meshgrid`` is True, the coordinates are returned as NumPy
+        meshgrid. Otherwise, return the coordinates of the grid points as 1D
+        arrays (schematically, [array for x coordinates, array for y
         coordinates, ...]).
 
-        If True as_same_shape is True return the coordinates as an array
-        with the same shape of self and with values the coordinates.
+        If ``as_same_shape`` is True return the coordinates as an array with the
+        same shape of self and with values the coordinates. This is useful for
+        computations involving the coordinates.
 
         :param as_meshgrid: If True, return the coordinates as meshgrid.
         :type as_meshgrid: bool
-        :param as_same_shape: If True, return the coordinates as an array
-                              with the same shape of self and with values
-                              the coordinates.
+        :param as_same_shape: If True, return the coordinates as a list
+                              or coordinates with the same shape of self
+                              and with values of a given coordinate.
+                              For instance, if ``self.num_dimension = 3`` there
+                              will be three lists with ``shape = self.shape``.
         :type as_same_shape: bool
-        :returns:  A list of 1d arrays of coordinates
-                   along the different axes.
-        :rtype:   list of numpy arrays with the same shape as grid
+        :returns:  Grid coordinates.
+        :rtype:   list of NumPy arrays with the same shape as grid
 
         """
         return self.grid.coordinates(
@@ -725,27 +863,44 @@ class UniformGridData(BaseNumerical):
         )
 
     def coordinates_meshgrid(self):
-        """Return coordinates of the grid points as numpy meshgrid.
-        This is useful for plotting"""
+        """Return coordinates of the grid points as NumPy meshgrid.
+
+        This is syntactic sugar useful for plotting with matplotlib.
+
+        :returns:  Grid coordinates.
+        :rtype:   list of NumPy arrays
+        """
         return self.coordinates_from_grid(as_meshgrid=True)
 
     @property
     def data_xyz(self):
+        """Return the data, but transposed.
+
+        This is useful when plotting, because we store data in a matrix form,
+        which is the transposed of what we are used to thinking about coordinates
+        (ie, the first index is not ``x``).
+
+        :returns: Data in a coordinate-friendly form.
+        :rtype: NumPy array
+
+        """
         return np.transpose(self.data)
 
     def save(self, file_name, *args, **kwargs):
         """Saves into data and grid information in ASCII file.
 
         This method supports (and encourages) compression of the data. To enable
-        compression, just append bz or gz to the extension.
+        compression, just append ``bz`` or ``gz`` to the extension.
+
+        All the unknown arguments are passed to ``np.savetxt``.
 
         The backend used by the method does not support writing 3D or larger
         arrays to disk as ASCII, all the arrays reshaped to 1D.
 
         The file output with this method can be read with the
-        load_UniformGridData function.
+        :py:func:`~.load_UniformGridData` function.
 
-        :param file_name: Path (with extensiton) of the output file
+        :param file_name: Path (with extension) of the output file.
         :type file_name: str
 
         """
@@ -771,46 +926,105 @@ class UniformGridData(BaseNumerical):
 
     @property
     def x0(self):
+        """Lower corner.
+
+        :returns: Center of lowest corner grid point.
+        :rtype: 1d NumPy array
+        """
         return self.grid.x0
 
     @property
     def shape(self):
+        """Number of cells across each dimension.
+
+        :returns: Number of cells across each dimension.
+        :rtype: 1d NumPy array
+        """
         return self.grid.shape
 
     @property
     def x1(self):
+        """Upper corner.
+
+        :returns: Center of top corner grid point.
+        :rtype: 1d NumPy array
+        """
         return self.grid.x1
 
     @property
     def origin(self):
+        """Lower corner.
+
+        Alias for :py:meth:`~.x0`.
+
+        :returns: Center of lowest corner grid point.
+        :rtype: 1d NumPy array
+        """
         return self.x0
 
     @property
     def dx(self):
+        """Grid spacing.
+
+        :returns: Cell size across each dimension.
+        :rtype: 1d NumPy array
+        """
         return self.grid.dx
 
     @property
     def delta(self):
+        """Grid spacing.
+
+        Alias for :py:meth:`~.dx`.
+
+        :returns: Cell size across each dimension.
+        :rtype: 1d NumPy array
+        """
         return self.dx
 
     @property
     def num_ghost(self):
+        """Number of ghost zones.
+
+        :returns: Number of ghost zones across each dimension.
+        :rtype: 1d NumPy array
+        """
         return self.grid.num_ghost
 
     @property
     def ref_level(self):
+        """Refinement level number.
+
+        :returns: Refinement level number.
+        :rtype: int
+        """
         return self.grid.ref_level
 
     @property
     def component(self):
+        """Component number.
+
+        :returns: Component number.
+        :rtype: int
+        """
         return self.grid.component
 
     @property
     def time(self):
+        """Time.
+
+        :returns: Time.
+        :rtype: float
+        """
         return self.grid.time
 
     @property
     def iteration(self):
+        """Iteration number
+
+        :returns: Iteration number.
+        :rtype: float
+        """
         return self.grid.iteration
 
     def __getitem__(self, key):
@@ -818,7 +1032,7 @@ class UniformGridData(BaseNumerical):
 
     def _make_spline(self, k=1):
         """Private function to make spline representation of the data using
-        scipy.interpolate.RegularGridInterpolator.
+        ``scipy.interpolate.RegularGridInterpolator``.
 
         Only nearest neighbor or multilinear interpolations are available.
 
@@ -826,7 +1040,7 @@ class UniformGridData(BaseNumerical):
 
         This function is not meant to be called directly.
 
-        :param k: Order of the interpolation (k = 0 or 1)
+        :param k: Order of the interpolation (k = 0 or 1).
         :type k:  int
 
         """
@@ -886,13 +1100,16 @@ class UniformGridData(BaseNumerical):
     def _nearest_neighbor_interpolation(self, points, ext=2):
         """Return data of nearest neighbors of given points x.
 
-        :param ext: How to deal values outside the bounaries. Values outside
-                    the interval are set to 0 if ext=1,
-                    or an error is raised if ext=2.
-        :type ext:  bool
+        :param x: Points where to evaluate the data.
+        :type x: 1D NumPy array of float, or :py:class:`~.UniformGrid`
 
-        :returns: Values of the series evaluated on the input x
-        :rtype:   1D numpy array or float
+        :param ext: How to deal values outside the boundaries. Values outside
+                    the interval are set to 0 if ``ext=1``,
+                    or an error is raised if ``ext=2``.
+        :type ext:  int
+
+        :returns: Values of the data evaluated on the input ``x``.
+        :rtype:   1D NumPy array or float
 
         """
         # To implement the piecewise constant spline, we just lookup the
@@ -916,7 +1133,7 @@ class UniformGridData(BaseNumerical):
                 # For ext = 2, we simply have the raise an error if we have
                 # any outside_index
                 raise ValueError("Point outside the grid")
-            # Numpy fancy indexing consists in a list of N tuples each
+            # NumPy fancy indexing consists in a list of N tuples each
             # representing a coordinate, so we have to reshape the indices.
             # Here we use this trick:
             # *indices unpacks the indices so that the iterator is over each
@@ -946,30 +1163,32 @@ class UniformGridData(BaseNumerical):
         return ret
 
     def evaluate_with_spline(self, x, ext=2, piecewise_constant=False):
-        """Evaluate the spline on the points x.
+        """Evaluate the spline on the points ``x``.
 
-        Values outside the interval are set to 0 if ext=1, or a ValueError is
-        raised if ext=2.
+        Values outside the interval are set to 0 if ``ext=1``, or a
+        ``ValueError`` is raised if ``ext=2``.
 
         This method is meant to be used only if you want to use a different ext
         for a specific call, otherwise, just use __call__.
 
-        :param x: Array of x where to evaluate the series or single x
-        :type x: 1D numpy array of float, or UniformGrid
+        :param x: Points where to evaluate the data.
+        :type x: 1D NumPy array of float, or :py:class:`~.UniformGrid`
 
-        :param ext: How to deal values outside the bounaries. Values outside
-                    the interval are set to 0 if ext=1,
-                    or an error is raised if ext=2.
-        :type ext:  bool
+        :param ext: How to deal values outside the boundaries. Values outside
+                    the interval are set to 0 if ``ext=1``,
+                    or an error is raised if ``ext=2``.
+        :type ext:  int
 
-        :returns: Values of the series evaluated on the input x
-        :rtype:   1D numpy array or float
+        :returns: Values of the data evaluated on the input ``x``.
+        :rtype:   1D NumPy array or float
 
         """
         # ext = 0 is extrapolation and ext = 3 is setting the boundary
         # value. We cannot do this with RegularGridInterpolator
 
-        # TODO: We can implement ext = 3 by clamping the indices.
+        # TODO (FEATURE): Implement ext = 3
+        #
+        # We can implement ext = 3 by clamping the indices.
 
         if ext not in (1, 2):
             raise ValueError("Only ext=1 or ext=2 are available")
@@ -1046,38 +1265,42 @@ class UniformGridData(BaseNumerical):
         return ret
 
     def __call__(self, x):
-        # TODO: Avoid splines when the data is already available
+        # TODO (FEATURE): Avoid splines when the data is already available.
+        #
+        # At the moment, the splines are calculated even on points in which
+        # data is available. This is probably inefficient.
         return self.evaluate_with_spline(x)
 
     def sliced(self, cut, resample=False):
-        """Return a new UniformGridData obtained slicing the current one.
+        """Return a new :py:class:`~.UniformGridData` obtained slicing the current one.
 
-        cut specifies how to slice the data. It has to be an array with
-        the same num of dimensions of the data. Where cut is None, that
-        dimension is kept, where it is a coordinate, the data is cut
-        fixing that coordinate.
+        ``cut`` specifies how to slice the data. It has to be an array with the
+        same number of dimensions of the data. In the entries where ``cut`` is
+        None, that dimension is kept, where it is a number, the data is cut
+        fixing that coordinate. For example, for a 2D array, if ``cut`` is
+        ``[None, 2]``, the cut will be with ``y = 2``.
 
-        Eg, for a 2D array, if cut is [None, 2], the cut will be with y = 2.
+        If ``resample`` is True, you can cut at any point and we will compute
+        the values with multilinear interpolation. If ``resample`` is False, we
+        will use the data already available.
 
-        If resample is True, you can cut at any point and we will compute
-        the values with multilinear interpolation. If resample is False,
-        we will use the data already available.
+        In doing this, dimensions that are only one grid point are lost.
 
-        In doing this, dimensions that are one grid point are lost.
-
-        :param cut: How to slice the array. None entries mean "keep that dimension"
+        :param cut: How to slice the array. None entries mean "keep that dimension".
         :type cut:  array or list with dimension
         :param resample: Whether to use multilinear interpolation to compute the
                          data or simply use the value of the closest point.
         :type resample: bool
 
-        :returns: A sliced grid data
+        :returns: A sliced :py:class:`~.UniformGridData`.
         :rtype: :py:class:`~.UniformGridData`
 
         """
 
-        # TODO: There is redundancy in how this function is written. It should be easy
-        #       to simplify it.
+        # TODO (REFACTORING): Don't repet yourself!
+        #
+        # There is redundancy in how this function is written. It should be easy
+        # to simplify it.
 
         if np.asarray(cut).shape != (self.num_dimensions,):
             raise ValueError(
@@ -1128,7 +1351,6 @@ class UniformGridData(BaseNumerical):
             sliced_data.flat_dimensions_remove()
             return sliced_data
 
-        # TODO: Keep this code DRY. There is so much redundancy...!
         new_shape = [
             self.shape[dim]
             for dim in range(self.num_dimensions)
@@ -1187,47 +1409,43 @@ class UniformGridData(BaseNumerical):
     def slice(self, cut, resample=False):
         """Slice the data along given direction.
 
-        cut specifies how to slice the data. It has to be an array with
-        the same num of dimensions of the data. Where cut is None, that
-        dimension is kept, where it is a coordinate, the data is cut
-        fixing that coordinate.
+        ``cut`` specifies how to slice the data. It has to be an array with the
+        same number of dimensions of the data. In the entries where ``cut`` is
+        None, that dimension is kept, where it is a number, the data is cut
+        fixing that coordinate. For example, for a 2D array, if ``cut`` is
+        ``[None, 2]``, the cut will be with ``y = 2``.
 
-        Eg, for a 2D array, if cut is [None, 2], the cut will be with y = 2.
+        If ``resample`` is True, you can cut at any point and we will compute
+        the values with multilinear interpolation. If ``resample`` is False, we
+        will use the data already available.
 
-        If resample is True, you can cut at any point and we will compute
-        the values with multilinear interpolation. If resample is False,
-        we will use the data already available.
+        In doing this, dimensions that are only one grid point are lost.
 
-        :param cut: How to slice the array. None entries mean "keep that dimension"
+        :param cut: How to slice the array. None entries mean "keep that dimension".
         :type cut:  array or list with dimension
         :param resample: Whether to use multilinear interpolation to compute the
                          data or simply use the value of the closest point.
         :type resample: bool
 
-        :returns: A sliced grid data
-        :rtype: :py:class:`~.UniformGridData`
-
         """
         self._apply_to_self(self.sliced, cut=cut, resample=resample)
 
     def resampled(self, new_grid, ext=2, piecewise_constant=False):
-        """Return a new UniformGridData resampled from this to new_grid.
-
-        You can specify the details of the spline with the method make_spline.
+        """Return a new :py:class:`~.UniformGridData` resampled to ``new_grid``.
 
         If you want to resample without using the spline, and you want a nearest
-        neighbor resampling, pass the keyword piecewise_constant=True.
-        This may be a good choice for data with large discontinuities, where the
+        neighbor resampling, pass the keyword ``piecewise_constant=True``. This
+        may be a good choice for data with large discontinuities, where the
         splines are ineffective.
 
-        :param new_grid: New independent variable
-        :type new_grid:  1D numpy array or list of float
-        :param ext: How to handle points outside the data interval
-        :type ext: 1 for returning zero, 2 for ValueError,
+        :param new_grid: New independent variable.
+        :type new_grid:  1D NumPy array or list of float
+        :param ext: How to handle points outside the data interval.
+        :type ext: 1 for returning zero, 2 for ``ValueError``,
         :param piecewise_constant: Do not use splines, use the nearest neighbors.
         :type piecewise_constant: bool
-        :returns: Resampled series.
-        :rtype:   :py:class:`~.UniformGridData` or derived class
+        :returns: Resampled data.
+        :rtype:   :py:class:`~.UniformGridData`
 
         """
         if not isinstance(new_grid, UniformGrid):
@@ -1258,13 +1476,15 @@ class UniformGridData(BaseNumerical):
         return self.data.dtype
 
     def _apply_to_self(self, f, *args, **kwargs):
-        """Apply the method f to self, modifying self.
-        This is used to transform the commands from returning an object
-        to modifying self.
-        The function has to return a new copy of the object (not a reference).
+        """Apply the method ``f`` to ``self``, modifying ``self``.
 
         This function is used to implement those methods that act on the object
-        starting from methods that return a new object.
+        starting from methods that return a new object. The function has to
+        return a new copy of the object (not a reference).
+
+        :param f: Method to apply.
+        :type f: callable
+
         """
         ret = f(*args, **kwargs)
         self.grid, self.data = ret.grid, ret.data
@@ -1272,11 +1492,12 @@ class UniformGridData(BaseNumerical):
         self.invalid_spline = True
 
     def flat_dimensions_removed(self):
-        """Return a new UniformGridData with dimensions of one grid
-        point removed.
+        """Return a new :py:class:`~.UniformGridData` with dimensions of one grid point
+        removed.
 
-        :returns: New UniformGridData without flat dimensions.
+        :returns: New :py:class:`UniformGridData` without flat dimensions.
         :rtype: :py:class:`UniformGridData`
+
         """
         new_grid = self.grid.flat_dimensions_removed()
         new_data = self.data.reshape(new_grid.shape)
@@ -1287,9 +1508,9 @@ class UniformGridData(BaseNumerical):
         self._apply_to_self(self.flat_dimensions_removed)
 
     def ghost_zones_removed(self):
-        """Return a new UniformGridData witho all the ghost zones removed.
+        """Return a new :py:class:`UniformGridData` with all the ghost zones removed.
 
-        :returns: New UniformGridData without ghostzones.
+        :returns: New :py:class:`UniformGridData` without ghostzones.
         :rtype: :py:class:`UniformGridData`
         """
         if np.amax(self.num_ghost) == 0:
@@ -1307,19 +1528,29 @@ class UniformGridData(BaseNumerical):
         return type(self)(new_grid, new_data)
 
     def ghost_zones_remove(self):
-        """Remove ghost zones"""
+        """Remove all the ghost zones."""
         self._apply_to_self(self.ghost_zones_removed)
 
     def dx_changed(self, new_dx, piecewise_constant=False):
-        """Return a new UniformGridData with the same grid extent, but with a new
-        spacing. This effectively up-samples or down-samples the grid.
+        """Return a new :py:class:`UniformGridData` with the same grid extent, but with
+        a new spacing. This effectively up-samples or down-samples the grid.
 
         Missing data is obtained with splines.
 
-        new_dx has to be an integer multiple of the current dx (or vice versa).
+        ``new_dx`` has to be an integer multiple of the current ``dx`` (or vice
+        versa).
 
-        If piecewise_constant=True, the missing information is obtained with
+        If ``piecewise_constant=True``, the missing information is obtained with
         from the nearest neighbors.
+
+        :param new_dx: Do not use splines, use the nearest neighbors.
+        :type new_dx: 1d NumPy array
+        :param piecewise_constant: Do not use splines, use the nearest neighbors.
+        :type piecewise_constant: bool
+
+        :returns: Data with new grid spacing ``new_dx``.
+        :rtype: :py:class:`~.UniformGridData`
+
         """
         if not hasattr(new_dx, "__len__"):
             raise TypeError(
@@ -1363,15 +1594,20 @@ class UniformGridData(BaseNumerical):
         return self.resampled(new_grid, piecewise_constant=piecewise_constant)
 
     def dx_change(self, new_dx, piecewise_constant=False):
-        """Return a new UniformGridData with the same grid extent, but with a new
-        spacing. This effectively up-samples or down-samples the grid.
+        """Up-samples or down-samples the grid data.
 
         Missing data is obtained with splines.
 
-        new_dx has to be an integer multiple of the current dx (or vice versa).
+        ``new_dx`` has to be an integer multiple of the current ``dx`` (or vice
+        versa).
 
-        If piecewise_constant=True, the missing information is obtained with
+        If ``piecewise_constant=True``, the missing information is obtained with
         from the nearest neighbors.
+
+        :param new_dx: Do not use splines, use the nearest neighbors.
+        :type new_dx: 1d NumPy array
+        :param piecewise_constant: Do not use splines, use the nearest neighbors.
+        :type piecewise_constant: bool
         """
 
         self._apply_to_self(
@@ -1379,23 +1615,34 @@ class UniformGridData(BaseNumerical):
         )
 
     def copy(self):
-        """Return a deep of self"""
+        """Return a deep of self."""
         return type(self)(self.grid, self.data)
 
     @property
     def num_dimensions(self):
-        """Return the number of dimensions."""
+        """Number of dimensions of the grid.
+
+        :returns: Number of dimensions of the grid.
+        :rtype:   float
+        """
         return self.grid.num_dimensions
 
     @property
     def num_extended_dimensions(self):
-        """Return the number of dimensions with more than one grid point."""
+        """Return the number of dimensions with size larger than one gridpoint.
+
+        :returns: The number of extended dimensions (the ones with more than one cell).
+        :rtype:   int
+        """
         return self.grid.num_extended_dimensions
 
     @property
     def extended_dimensions(self):
         """Return an array of bools with whether a dimension has more than one
         point or not.
+
+        :returns: Dimensions with more than one point.
+        :rtype:   1d NumPy of bools
         """
         return self.grid.extended_dimensions
 
@@ -1418,9 +1665,12 @@ class UniformGridData(BaseNumerical):
     average = mean
 
     def norm_p(self, order):
-        r"""Compute the norm over the whole volume of the grid.
+        r"""Compute the norm of order ``p`` over the whole volume of the grid.
 
-        \|u\|_p = (\sum \|u\|^p dv)^1/p
+        :math:`\|u\|_p = (\sum \|u\|^p dv)^1/p`
+
+        :param order: Order of the norm.
+        :type order: int
 
         :returns: The norm2 computed as volume-weighted sum.
         :rtype:   float (or complex if data is complex).
@@ -1432,7 +1682,7 @@ class UniformGridData(BaseNumerical):
     def norm2(self):
         r"""Compute the norm over the whole volume of the grid.
 
-        \|u\|_2 = (\sum \|u\|^2 dv)^1/2
+        :math:`\|u\|_2 = (\sum \|u\|^2 dv)^1/2`
 
         :returns: The norm2 computed as volume-weighted sum.
         :rtype:   float (or complex if data is complex).
@@ -1442,7 +1692,7 @@ class UniformGridData(BaseNumerical):
     def norm1(self):
         r"""Compute the norm over the whole volume of the grid.
 
-        \|u\|_1 = \sum \|u\| dv
+        :math:`\|u\|_1 = \sum \|u\| dv`
 
         :returns: The norm2 computed as volume-weighted sum.
         :rtype:   float (or complex if data is complex).
@@ -1457,18 +1707,19 @@ class UniformGridData(BaseNumerical):
         num_bins=400,
         **kwargs,
     ):
-        """1D Histogram of the data.
-        :param weights:    the weight for each cell. Default is one.
-        :type weights:     RegData or numpy array of same shape or None.
+        """Return the 1D Histogram of the data.
+
+        :param weights:    The weight for each cell. Default is one.
+        :type weights:     :py:class:`~.UniformGridData` or NumPy array of same shape or None.
         :param min_value: Lower bound of data to consider. Default is data range.
         :type min_value: float or None
         :param max_value: Upper bound of data to consider. Default is data range.
         :type max_value: float or None
-        :param num_bins:      Number of bins to create.
-        :type num_bins:       integer > 1
+        :param num_bins: Number of bins to create.
+        :type num_bins: int > 1
 
-        :returns: the positions of the data bins and the distribution.
-        :rtype:   tuple of two 1D numpy arrays.
+        :returns: The positions of the data bins and the distribution.
+        :rtype:   tuple of two 1D NumPy arrays.
         """
         if self.is_complex():
             raise ValueError("Histogram only works with real data")
@@ -1481,7 +1732,7 @@ class UniformGridData(BaseNumerical):
         if isinstance(weights, UniformGridData):
             weights = weights.data
 
-        # Check that we have a numpy array or None
+        # Check that we have a NumPy array or None
         if weights is not None and not isinstance(weights, np.ndarray):
             raise TypeError(
                 "Weights has to be a UniformGrid, NumPy array or None"
@@ -1507,13 +1758,13 @@ class UniformGridData(BaseNumerical):
         """Find values for which a given fraction(s) of the data is smaller.
 
         Optionally, the cells can have an optional weight, and absolute counts
-        can be used insted of fraction.
+        can be used instead of fraction.
 
-        :param fractions: list of fraction/absolute values
+        :param fractions: List of fraction/absolute values.
         :type fractions:  list or array of floats
-        :param weights:    the weight for each cell. Default is one.
-        :type weights:     UniformGridData or numpy array of same shape or None.
-        :param relative:   whether fractions refer to relative or absolute count.
+        :param weights:    The weight for each cell. Default is one.
+        :type weights:     :py:class:`~.UniformGridData` or NumPy array of same shape or None.
+        :param relative:   Whether fractions refer to relative or absolute count.
         :type relative:    bool
         :param min_value: Lower bound of data to consider. Default is data range.
         :type min_value: float or None
@@ -1522,8 +1773,8 @@ class UniformGridData(BaseNumerical):
         :param num_bins:      Number of bins to create.
         :type num_bins:       integer > 1
 
-        :returns: data values corresponding to the given fractions.
-        :rtype:   1D numpy array
+        :returns: Data values corresponding to the given fractions.
+        :rtype:   1D NumPy array
         """
         hist_values, bin_edges = self.histogram(
             min_value=min_value,
@@ -1537,11 +1788,9 @@ class UniformGridData(BaseNumerical):
         # So that the last element is 1
         if relative:
             # We need to make sure that the everything is float here,
-            # otherwise numpy complains
+            # otherwise NumPy complains
             hist_cumulative = 1.0 * hist_cumulative
             hist_cumulative /= hist_cumulative[-1]
-
-        # TODO: Finish this
 
         # We remove the first point because all the data is larger than that.
         bin_edges = bin_edges[1:]
@@ -1568,22 +1817,22 @@ class UniformGridData(BaseNumerical):
         return percentiles
 
     def partial_derived(self, direction, order=1):
-        """Return a UniformGridData that is the numerical order-differentiation of the
-        present grid_data along a given direction. (order = number of
-        derivatives, ie order=2 is second derivative)
+        """Return a :py:class:`~.UniformGridData` that is the numerical
+        order-differentiation of the present grid_data along a given direction.
+        (``order`` = number of derivatives, ie ``order=2`` is second derivative)
 
         The derivative is calulated as centered differencing in the interior
         and one-sided derivatives at the boundaries. Higher orders are computed
         applying the same rule recursively.
 
-        The output has the same shape of self.
+        The output has the same shape of ``self``.
 
-        :param order: Order of derivative (e.g. 2 = second derivative)
+        :param order: Order of derivative (e.g. 2 = second derivative).
         :type order: int
-        :param direction: Direction of the partial derivative
+        :param direction: Direction of the partial derivative.
         :type direction: int
 
-        :returns:  New UniformGridData with derivative
+        :returns:  New :py:class:`~.UniformGridData` with derivative.
         :rtype:    :py:class:`~.UniformGridData`
 
         """
@@ -1602,23 +1851,22 @@ class UniformGridData(BaseNumerical):
         return type(self)(self.grid, ret_value)
 
     def gradient(self, order=1):
-        """Return a list UniformGridDatad that are the numerical
-        order-differentiation of the present grid_data along all the
-        directions. (order = number of derivatives, ie order=2 is second
-        derivative)
+        """Return a list :py:class:`~.UniformGridData` that are the numerical
+        order-differentiation of the present grid_data along all the directions.
+        (``order`` = number of derivatives, ie ``order=2`` is second derivative)
 
         The derivative is calulated as centered differencing in the interior
         and one-sided derivatives at the boundaries. Higher orders are computed
         applying the same rule recursively.
 
-        The output has the same shape of self.
+        The output has the same shape of ``self``.
 
-        :param order: Order of derivative (e.g. 2 = second derivative)
+        :param order: Order of derivative (e.g. 2 = second derivative).
         :type order: int
-        :param direction: Direction of the partial derivative
+        :param direction: Direction of the partial derivative.
         :type direction: int
-        :returns:  list of UniformGridData with partial derivative along the
-                   directions
+        :returns:  list of :py:class:`~.UniformGridData` with partial derivative
+                   along the directions.
         :rtype:    list of :py:class:`~.UniformGridData`
 
         """
@@ -1628,23 +1876,19 @@ class UniformGridData(BaseNumerical):
         ]
 
     def partial_derive(self, dimension, order=1):
-        """Return a UniformGridDatad that is the numerical order-differentiation of the
-        present grid_data along a given direction. (order = number of
-        derivatives, ie order=2 is second derivative)
+        """Derive the data with numerical finite difference along a given direction
+        (``order`` = number of derivatives, ie ``order=2`` is second derivative).
 
         The derivative is calulated as centered differencing in the interior
         and one-sided derivatives at the boundaries. Higher orders are computed
         applying the same rule recursively.
 
-        The output has the same shape of self.
+        The output has the same shape of ``self``.
 
-        :param order: Order of derivative (e.g. 2 = second derivative)
+        :param order: Order of derivative (e.g. 2 = second derivative).
         :type order: int
-        :param direction: Direction of the partial derivative
+        :param direction: Direction of the partial derivative.
         :type direction: int
-
-        :returns:  New UniformGridData with derivative
-        :rtype:    :py:class:`~.UniformGridData`
 
         """
         self._apply_to_self(self.partial_derived, dimension, order=order)
@@ -1652,10 +1896,10 @@ class UniformGridData(BaseNumerical):
     def _apply_unary(self, function):
         """Apply a unary function to the data.
 
-        :param op: unary function.
-        :type op:  function operating on a numpy array
-        :returns:  result.
-        :rtype:    :py:class:`~.UniformGridData`.
+        :param function: Unary function.
+        :type function:  callable
+        :returns: Function applied to the data.
+        :rtype:    :py:class:`~.UniformGridData`
 
         """
         return type(self)(self.grid, function(self.data))
@@ -1663,37 +1907,33 @@ class UniformGridData(BaseNumerical):
     def _apply_reduction(self, reduction):
         """Apply a reduction to the data.
 
-        :param function: Function to apply to the series
+        :param function: Function to apply to the data.
         :type function: callable
 
-        :return: Reduction applied to the data
+        :return: Reduction applied to the data.
         :rtype: float
 
         """
-        # TODO: Turn this into a decorator
-
         return reduction(self.data)
 
     def _apply_binary(self, other, function):
         """This is an abstract function that is used to implement mathematical
-        operations with other series (if they have the same grid) or
-        scalars.
+        operations with other :py:class:`~.UniformGridData` (if they have the
+        same grid) or scalars.
 
         _apply_binary takes another object that can be of the same type or a
         scalar, and applies function(self.data, other.data), performing type
         checking.
 
-        :param other: Other object
+        :param other: Other object.
         :type other: :py:class:`~.UniformGridData` or scalar
-        :param function: Dyadic function
+        :param function: Dyadic function.
         :type function: callable
 
-        :returns:  Return value of function when called with self and ohter
+        :returns:  Return value of function when called with ``self`` and ``other``.
         :rtype:    :py:class:`~.UniformGridData`
 
         """
-        # TODO: Turn this into a decorator
-
         # If the other object is of the same type
         if isinstance(other, type(self)):
             # Check the the coordinates are the same by checking shape, origin
@@ -1724,13 +1964,13 @@ class UniformGridData(BaseNumerical):
     def fourier_transform(self):
         """Perform the multi-dimensional Fourier transform on the data.
 
-        We follow Numpy's conventions, with the exception that we normalize
-        the amplitude with dx.
+        We follow NumPy's conventions, with the exception that we normalize the
+        amplitude with ``dx``.
 
         If the signal is complex, we also shift the negative components to be in
         the negative part of the signal.
 
-        :returns: Fourier transform
+        :returns: Fourier transform.
         :rtype: :py:class:`~.UniformGridData`
 
         """
@@ -1764,26 +2004,31 @@ class UniformGridData(BaseNumerical):
 
 
 class HierarchicalGridData(BaseNumerical):
-    """Data defined on mesh-refined grids, consisting of one or more regular
-    datasets with different grid spacings, i.e. a mesh refinement hierachy. The
-    grid spacings should differ by powers of two. Origins of the components
-    have to shifted relative to each other only by multiples of the finest
-    spacing. All the components are merged together, so there is one
-    UniformGridData per refinement level.
+    """Represents data defined on mesh-refined grids, consisting of one or more
+    regular datasets with different grid spacings.
 
-    Important: ghost zone information may be discarded!
-    TODO: Do not throw away ghost zones at the outer boundary
+    All the arithmetic operations and binary operators are defined for this
+    class, as well as interpolation and resampling.
 
-    Basic arithmetic operations are defined for this class, as well as
-    interpolation and resampling. This class can be iterated over to get all
-    the regular datasets, ordered by refinement level.
+    Upon initialization, we try to merge together all the components (output
+    from different MPI processes), so there is one :py:class:`~.UniformGridData`
+    per refinement level. In case of grids with more than one center of
+    refinement, this is currently not possible, so we keep all the components
+    around. In this, ghost zone information may be discarded.
+
+    :ivar grid_data_dict: Mapping between refinement levels and components at
+                          that refinement level.
+    :type grid_data_dict: dict of :py:class:`~.UniformGridData`
 
     """
 
     def __init__(self, uniform_grid_data):
-        """
-        :param data: list of regular datasets
-        :type adat:  list of :py:class:`~.UniformGridData` instances.
+        """Constructor.
+
+        Here we try to merge the different components, if we can.
+
+        :param uniform_grid_data: List of regular datasets.
+        :type uniform_grid_data:  list of :py:class:`~.UniformGridData`
         """
         if not hasattr(uniform_grid_data, "__len__"):
             raise TypeError(
@@ -1819,8 +2064,21 @@ class HierarchicalGridData(BaseNumerical):
 
     @staticmethod
     def _fill_grid_with_components(grid, components):
-        """Given a grid, try to fill it with the components Return a UniformGridData
-        and the indices that actually were used in filling the grid
+        """Given a grid, try to fill it with the components, returning a
+        :py:class:`~.UniformGridData` and the indices that actually were used in
+        filling the grid.
+
+        This happens by iterating over the components and copying data to the
+        output grid, recording what points were filled. We also return the indices
+        of the points that were filled.
+
+        :param grid: Grid to fill.
+        :type grid: :py:class:`~.UniformGrid`
+        :param components: Components to fill the grid.
+        :type components: list of :py:class:`~.UniformGridData`
+
+        :returns: Merged components and indices used to merge the components.
+        :rtype: tuple of :py:class:`~.UniformGridData` and numpy array
 
         """
 
@@ -1844,16 +2102,24 @@ class HierarchicalGridData(BaseNumerical):
         return UniformGridData(grid, data), indices_used
 
     def _try_merge_components(self, components):
-        """Try to merge a list of UniformGridData instances into one, assuming they all
-        have the same grid spacing and filling a regular grid completely.
+        """Try to merge a list of :py:class:`~.UniformGridData` instances into one,
+        assuming they all have the same grid spacing and filling a regular grid
+        completely.
 
         If the assumption is not verified, and some blank spaces are found, then
-        it returns the input untouched. This is because there are real cases in
-        which multiple components cannot be merged (if there are multiple
-        refinement levels).
+        it returns the input untouched. This happens in the case that there are
+        multiple refinement centers, or if there are missing components.
 
         This function always returns a list, even when the components are merged.
-        In that case, the return value is a [UniformGridData].
+        In that case, the return value is a ``[merged]``, where ``merged`` is a
+        :py:class:`~.UniformGridData`.
+
+        :param components: List of components.
+        :type components: list of :py:class:`~.UniformGridData`
+
+        :returns: List of components, or list with one single element, the merged
+                  components.
+        :rtype: list of :py:class:`~.UniformGridData`
 
         """
 
@@ -1873,7 +2139,7 @@ class HierarchicalGridData(BaseNumerical):
         # smallest x0 to the largest, so that we can easily find the
         # coordinates.
         #
-        # We have to transform x.x0 in tuple because we cannot compare numpy
+        # We have to transform x.x0 in tuple because we cannot compare NumPy
         # arrays directly for sorting.
         components_no_ghosts.sort(key=lambda x: tuple(x.x0))
 
@@ -1895,8 +2161,16 @@ class HierarchicalGridData(BaseNumerical):
         return self.grid_data_dict[key]
 
     def get_level(self, ref_level):
+        """Return the data at a given refinement level.
+
+        :param ref_level: Number of refinement level.
+        :type ref_level: int
+
+        :returns: Data at given refinement level.
+        :rtype: :py:class:`~.UniformGridData`
+        """
         if ref_level not in self.refinement_levels:
-            raise ValueError(f"Level {ref_level} not avilable")
+            raise ValueError(f"Level {ref_level} not available")
         if len(self[ref_level]) > 1:
             raise ValueError(
                 f"Level {ref_level} has multiple patches"
@@ -1905,24 +2179,26 @@ class HierarchicalGridData(BaseNumerical):
         return self[ref_level][0]
 
     def iter_from_finest(self):
-        """Supports iterating over the regular elements, sorted by refinement level.
-        This can yield a UniformGridData or a list of UniformGridData when it
-        is not possible to merge the grids.
+        """Iterator over the components, sorted by refinement level, from the finest to
+        the coarsest.
 
-        From the finest to the coarsest.
-
-        Use this when you know that the data you are working with have single
-        grids or grids that can be merged.
-
+        :returns: Refinement level number, component index, and data.
+        :rtype: tuple (int, int, :py:class:`~.UniformGridData`)
         """
-        # TODO: In Python 3.8 we can reverse without transformint into a list first
+        # TODO (FUTURE): Reverse dictionary in Python 3.8
+        #
+        # In Python 3.8 we can reverse without transforming into a list first
         for ref_level, data in reversed(list(self.grid_data_dict.items())):
             for comp_index, comp in enumerate(data):
                 yield ref_level, comp_index, comp
 
     def __iter__(self):
         """Iterate across all the refinement levels and components from the coarsest
-        to the finest."""
+        to the finest.
+
+        :returns: Refinement level number, component index, and data.
+        :rtype: tuple (int, int, :py:class:`~.UniformGridData`)
+        """
         for ref_level, data in self.grid_data_dict.items():
             for comp_index, comp in enumerate(data):
                 yield ref_level, comp_index, comp
@@ -1932,10 +2208,24 @@ class HierarchicalGridData(BaseNumerical):
 
     @property
     def refinement_levels(self):
+        """Return a list with the refinement levels available.
+
+        :returns: List of refinement levels available.
+        :rtype: list of ints
+        """
         return list(self.grid_data_dict.keys())
 
     @property
     def all_components(self):
+        """Return a list with all the components.
+
+        This is useful to create a new :py:class:`~.HierarchicalGridData`
+        from ``self``.
+
+        :returns: List of all the components.
+        :rtype: list of :py:class:`~.UniformGridData`
+
+        """
         all_components = []
         for comps in self.grid_data_dict.values():
             all_components.extend(comps)
@@ -1945,7 +2235,7 @@ class HierarchicalGridData(BaseNumerical):
     def num_finest_level(self):
         """Return the number of the finest refinement level.
 
-        :returns: index of the finest level
+        :returns: Index of the finest level.
         :rtype: int
         """
         return self.refinement_levels[-1]
@@ -1954,20 +2244,27 @@ class HierarchicalGridData(BaseNumerical):
     def finest_level(self):
         """Return the finest level, if it is a single grid.
 
-        :returns: finest level
+        :returns: Finest level.
         :rtype: :py:class:`~UniformGridData`
         """
         return self.get_level(self.num_finest_level)
 
     @property
     def max_refinement_level(self):
+        """Return the number of the finest refinement level.
+
+        Alias for :py:meth:`~.num_finest_level`.
+
+        :returns: Index of the finest level.
+        :rtype: int
+        """
         return self.num_finest_level
 
     @property
     def num_coarsest_level(self):
         """Return the number of the coarsest refinement level.
 
-        :returns: index of the coarsest level
+        :returns: Index of the coarsest level.
         :rtype: int
         """
         return self.refinement_levels[0]
@@ -1976,16 +2273,16 @@ class HierarchicalGridData(BaseNumerical):
     def coarsest_level(self):
         """Return the coarsest level, if it is a single grid.
 
-        :returns: Coarsest level
+        :returns: Coarsest level.
         :rtype: :py:class:`~UniformGridData`
         """
         return self.get_level(self.num_coarsest_level)
 
     @property
     def first_component(self):
-        """Return the first component of the coarsest refinement level
+        """Return the first component of the coarsest refinement level.
 
-        :returns: First component of coarsest level
+        :returns: First component of the coarsest level.
         :rtype: `:py:class:~UniformGridData`
         """
         return self[self.num_coarsest_level][0]
@@ -1996,14 +2293,18 @@ class HierarchicalGridData(BaseNumerical):
 
     @property
     def shape(self):
-        """Num components per each level.
+        """Return the number of components per each refinement level.
 
-        Eg, if data has three levels, with 1 component in the first, 2 in the second,
-        and three in the fifth, shape will be {1: 1, 2: 2, 5: 3}
+        For example, if data has three levels, with 1 component in the first, 2
+        in the second, and three in the fifth, shape will be {1: 1, 2: 2, 5: 3}
 
-        shape is useful for quick high level comparison between two HierachicalGridData
+        This method is useful for quick high level comparison between two
+        :py:class:`~.HierachicalGridData`.
 
+        :returns: Dictionary with keys the refinement level numbers and values the
+                  number of components at that level.
         :rtype: dictionary
+
         """
         return {
             ref_level: len(comp)
@@ -2012,6 +2313,11 @@ class HierarchicalGridData(BaseNumerical):
 
     @property
     def x0(self):
+        """Origin of the coarsest grid, if it is a single component.
+
+        :returns: Origin of the coarsest grid, if it is a single component.
+        :rtype: 1d NumPy array
+        """
         # We have multiple patches
         if len(self[self.num_coarsest_level]) != 1:
             raise ValueError(
@@ -2022,6 +2328,11 @@ class HierarchicalGridData(BaseNumerical):
 
     @property
     def x1(self):
+        """Corner of the coarsest grid, if it is a single component.
+
+        :returns: Corner of the coarsest grid, if it is a single component.
+        :rtype: 1d NumPy array
+        """
         # We have multiple patches
         if len(self[self.num_coarsest_level]) != 1:
             raise ValueError(
@@ -2031,51 +2342,79 @@ class HierarchicalGridData(BaseNumerical):
         return self.first_component.x1
 
     def dx_at_level(self, level):
-        """Return the grid spacing at the specified refinement level"""
+        """Return the grid spacing at the specified refinement level.
+
+        :param level: Refinement level number.
+        :type level: int
+        :returns: Spacing at the given refinement level.
+        :rtype: 1d NumPy array
+        """
         return self[level][0].dx
 
     @property
     def coarsest_dx(self):
-        """Return the coarsest dx"""
+        """Return the grid spacing of the coarsest level.
+
+        :returns:  Grid spacing of the coarsest level.
+        :rtype:   1d NumPy array
+        """
         return self.dx_at_level(self.num_coarsest_level)
 
     @property
     def finest_dx(self):
-        """Return the finest dx"""
+        """Return the grid spacing of the finest level.
+
+        :returns:  Grid spacing of the finest level.
+        :rtype:   1d NumPy array
+        """
         return self.dx_at_level(self.num_finest_level)
 
     @property
     def num_dimensions(self):
+        """Return the number of dimensions.
+
+        :returns:  Number of dimensions.
+        :rtype:   int
+        """
         return self.first_component.num_dimensions
 
     @property
     def num_extended_dimensions(self):
+        """Return the number of dimensions with more than one cell.
+
+        :returns:  Number of dimensions with more than one gridpoint.
+        :rtype:   int
+        """
         return self.first_component.num_extended_dimensions
 
     @property
     def time(self):
-        """The time of the coarsest refinement level"""
+        """The time of the coarsest refinement level.
+
+        :returns:  Time of the coarsest refinement level.
+        :rtype:   float
+        """
         return self.first_component.time
 
     @property
     def iteration(self):
-        """The iteration of the coarsest refinement level"""
+        """The iteration of the coarsest refinement level.
+
+        :returns:  Iteration number of the coarsest refinement level.
+        :rtype:   int
+        """
         return self.first_component.iteration
 
     def copy(self):
         """Return a deep copy.
 
-        :returns:  Deep copy of the HierarchicalGridData
+        :returns:  Deep copy of the :py:class:`~.HierarchicalGridData`.
         :rtype:    :py:class:`~.HierarchicalGridData`
         """
         return type(self)(self.all_components)
 
     def __eq__(self, other):
-        """Return a deep copy.
-
-        :returns:  Deep copy of the HierarchicalGridData
-        :rtype:    :py:class:`~.HierarchicalGridData`
-        """
+        """Check for equality."""
         if not isinstance(other, HierarchicalGridData):
             return False
         if self.shape != other.shape:
@@ -2084,9 +2423,15 @@ class HierarchicalGridData(BaseNumerical):
         return self.all_components == other.all_components
 
     def _finest_level_component_at_point_core(self, coordinate):
-        """Return the number and the component index of the most
-        refined level that contains the given coordinate assuming
-        a valid input coordinate.
+        """Return the number and the component index of the most refined level that
+        contains the given coordinate assuming a valid input coordinate.
+
+        :param coordinate: Point.
+        :type coordinate: tuple or NumPy array with the same dimension
+
+        :returns: Most refined level (and component) that contains the
+        coordinate.
+        :rtype: tuple of ints
         """
         # We walk from the finest level to the coarsest. If we find the point,
         # re return it. If we find nothing, we raise error.
@@ -2100,15 +2445,12 @@ class HierarchicalGridData(BaseNumerical):
         """Return the number and the component index of the most
         refined level that contains the given coordinate.
 
-        If the grid has multiple patches, the component index is
-        returned, otherwise, only the finest level.
+        :param coordinate: Point.
+        :type coordinate: tuple or NumPy array with the same dimension
 
-        :param coordiante: point
-        :type coordinate: tuple or numpy array with the same dimension
-
-        :returns: Most refined level (and component) that contains the coordinate.
-        :rtype: int if there's only one component, or tuple of ints if there are
-                multiple components.
+        :returns: Most refined level (and component) that contains the
+                  coordinate.
+        :rtype: tuple of ints
 
         """
         if not hasattr(coordinate, "__len__"):
@@ -2123,36 +2465,36 @@ class HierarchicalGridData(BaseNumerical):
         return self._finest_level_component_at_point_core(coordinate)
 
     def evaluate_with_spline(self, x, ext=2, piecewise_constant=False):
-        """Evaluate the spline on the points x.
+        """Evaluate the spline on the points ``x``.
 
-        Values outside the interval are set to 0 if ext=1, or a ValueError is
-        raised if ext=2.
+        Values outside the interval are set to 0 if ext=1, or a ``ValueError``
+        is raised if ``ext=2``.
 
-        This method is meant to be used only if you want to use a different ext
-        for a specific call, otherwise, just use __call__.
+        This method is meant to be used only if you want to use a different
+        ``ext`` for a specific call, otherwise, just use __call__.
 
-        :param x: Array of x where to evaluate the series or single x
-        :type x: 1D numpy array of float, or UniformGrid
+        :param x: Points where to evaluate the data.
+        :type x: 1D NumPy array of float, or :py:class:`~.UniformGrid`
 
         :param ext: How to deal values outside the bounaries. Values outside
-                    the interval are set to 0 if ext=1,
-                    or an error is raised if ext=2.
-        :type ext:  bool
+                    the interval are set to 0 if ``ext=1``,
+                    or an error is raised if ``ext=2``.
+        :type ext:  int
 
-        :returns: Values of the series evaluated on the input x
-        :rtype:   1D numpy array or float
+        :returns: Values of the data evaluated on the input ``x``.
+        :rtype:   1D NumPy array or float
 
         """
 
         if isinstance(x, UniformGrid):
             # The way we want the coordinates is like as an array with the same
-            # shape of the grid and with values the coordines (as arrays). This
+            # shape of the grid and with values the coordinates (as arrays). This
             # is similar to as_same_shape, but the coordinates have to be the
             # value, and not the first index.
             x = np.moveaxis(x.coordinates(as_same_shape=True), 0, -1)
 
         # We flatten the array (up to the last dimension) and we save the
-        # original shape, becasue we are going to reshape it at the end.
+        # original shape, because we are going to reshape it at the end.
         points_arr = np.asarray(x)
         original_shape = points_arr.shape
         points_arr = points_arr.reshape(-1, points_arr.shape[-1])
@@ -2192,8 +2534,18 @@ class HierarchicalGridData(BaseNumerical):
         return self.evaluate_with_spline(x)
 
     def to_UniformGridData_from_grid(self, grid, resample=False):
-        """Combine the refinement levels into a UniformGridData.
-        Optionally resample the data with a multilinear resampling.
+        """Combine the refinement levels into a :py:class:`~.UniformGridData`
+        on the specified :py:class:`~.UniformGrid`.
+
+        If ``resample`` is True, the data is resampled with multilinear
+        interpolation.
+
+        :param grid: Grid onto which to resample the data.
+        :type grid: :py:class:`~.UniformGrid`.
+        :param resample: If True, resample the data with multilinear interpolation,
+                         otherwise, use nearest neighbors.
+        :type resample: bool
+
         """
         return UniformGridData(
             grid,
@@ -2203,24 +2555,53 @@ class HierarchicalGridData(BaseNumerical):
     def to_UniformGridData(
         self, shape, x0, x1=None, dx=None, resample=False, **kwargs
     ):
-        """Combine the refinement levels into a UniformGridData specified by the
-        given shape, x0, and dx or x1. Additiona arguments are sent to UniformGrid.
-        Optionally resample the data with a multilinear resampling.
+        """Combine the refinement levels into a :py:class:`~.UniformGridData` specified
+        by the given ``shape``, ``x0``, and ``dx`` or ``x1``.
+
+        Additional arguments are sent to the constructor of
+        :py:class:`~.UniformGrid`.
+
+        If ``resample`` is True, the data is resampled with multilinear
+        interpolation.
+
+        :param shape: Number of points across all the dimensions.
+        :type shape: 1d NumPy array
+        :param x0: Origin.
+        :type x0: 1d NumPy array, or None
+        :param x1: Grid corner. If None, it will be inferred.
+        :type x1:  1d NumPy array, or None
+        :param dx: Grid spacing. If None, it will be inferred.
+        :type dx: 1d NumPy array, or None
+        :param resample: If True, resample the data with multilinear interpolation,
+                         otherwise, use nearest neighbors.
+        :type resample: bool
+
         """
         grid = UniformGrid(shape, x0, x1, dx, **kwargs)
 
         return self.to_UniformGridData_from_grid(grid, resample=resample)
 
     def merge_refinement_levels(self, resample=False):
-        """Combine all the available data and resample it on a provided
-        UniformGrid with resolution of the finest refinement level.
+        """Combine all the available data and resample it grid that encompasses all the
+        components and has resolution of the finest refinement level.
 
-        Optionally data from coarser refinement levels is resampled too (with a
-        multilinear resampling)
+        When ``resample`` is True, data from coarser refinement levels is
+        resampled with multilinear interpolation, otherwise the nearest
+        neighbors are used.
 
-        For most practical purposes, using this function is an overkill.
-        This can be a very expensive operation and require a lot of memory.
-        Prefer to_UniformGridData when possible.
+        .. warning::
+
+            For most practical purposes, using this function is an overkill.
+            This can be a very expensive operation and require a lot of memory.
+            Prefer :py:meth:`to_UniformGridData` when possible.
+
+        :param resample: If True, resample the data with multilinear interpolation,
+                         otherwise, use nearest neighbors.
+        :type resample: bool
+
+        :returns: New :py:class:`~.UniformGridData` with the resolution of the
+                  finest refinement level.
+        :rtype: :py:class:`~.UniformGridData`
 
         """
         # If we have only one refinement level, with one component, we should
@@ -2246,22 +2627,26 @@ class HierarchicalGridData(BaseNumerical):
         )
 
     def _apply_to_self(self, f, *args, **kwargs):
-        """Apply the method f to self, modifying self.
+        """Apply the method ``f`` to ``self``, modifying ``self``.
         This is used to transform the commands from returning an object
-        to modifying self.
+        to modifying ``self``.
         The function has to return a new copy of the object (not a reference).
+
+        :param f: Function to apply to ``self``.
+        :type f:  callable
         """
         ret = f(*args, **kwargs)
         self.grid_data_dict = ret.grid_data_dict
 
     def _apply_binary(self, other, function):
-        """Apply a binary function to the data.
+        """Apply a binary function to the data of ``self`` and ``other``.
 
         :param function: Function to apply to all the data in the various
-        refinement levels
+        refinement levels.
         :type function: callable
 
-        :return: New HierarchicalGridData with function applied to the data
+        :return: New :py:class:`~.HierarchicalGridData` with function applied to
+        ``self.data`` and ``other.data``.
         :rtype: :py:class:`~.HierarchicalGridData`
 
         """
@@ -2287,6 +2672,16 @@ class HierarchicalGridData(BaseNumerical):
         raise TypeError("I don't know how to combine these objects")
 
     def _apply_reduction(self, reduction):
+        """Apply a reduction to the data.
+
+        :param function: Reduction to apply to all the data in the various
+        refinement levels
+        :type function: callable
+
+        :return: Output of the reduction on the data.
+        :rtype: return type of ``reduction``
+
+        """
         # Assume reduction is np.min, we want the real minimum, so we have to
         # take the reduction of the reduction
         return reduction(
@@ -2305,9 +2700,11 @@ class HierarchicalGridData(BaseNumerical):
         """Apply a unary function to the data.
 
         :param function: Function to apply to all the data in the various
-        refinement levels :type function: callable
+        refinement levels
+        :type function: callable
 
-        :return: New HierarchicalGridData with function applied to the data
+        :return: New :py:class:`~.HierarchicalGridData` with function applied to
+        the data.
         :rtype: :py:class:`~.HierarchicalGridData`
 
         """
@@ -2317,18 +2714,21 @@ class HierarchicalGridData(BaseNumerical):
     def _call_component_method(
         self, method_name, *args, method_returns_list=False, **kwargs
     ):
-        """Call a method on each UniformGridData component and return
-        the result as a HierarchicalGridDatax
+        """Call a method on each component and return the result as a
+        :py:class:`~.HierarchicalGridData`.
 
         :param method_name: a string that identifies one of the methods in
-        :py:class:`~.UniformGridData`
+        :py:class:`~.UniformGridData`.
+        :type method_name: str
 
         :param method_returns_list: If True, the method is expected to return a
-                                    list, one UniformGridData per dimension
-                                    (e.g, gradient, coordiantes)
+                                    list, one :py:class:`~.UniformGridData` per
+                                    dimension (e.g,
+                                    :py:meth:`HierarchicalGridData.gradient`,
+                                    :py:meth:`HierarchicalGridData.coordinates`).
         :type method_returns_list: bool
 
-        :return: New HierarchicalGridData with function applied to the data
+        :return: New :py:class:`~.HierarchicalGridData` with function applied to the data
         :rtype: :py:class:`~.HierarchicalGridData`
 
         """
@@ -2364,22 +2764,22 @@ class HierarchicalGridData(BaseNumerical):
         ]
 
     def partial_derived(self, direction, order=1):
-        """Return a HierarchicalGridData that is the numerical order-differentiation of
-        the present grid_data along a given direction. (order = number of
-        derivatives, ie order=2 is second derivative)
+        """Return a :py:class:`~.HierarchicalGridData` that is the numerical
+        order-differentiation of the present grid_data along a given direction.
+        (order = number of derivatives, ie ``order=2`` is second derivative)
 
         The derivative is calulated as centered differencing in the interior
         and one-sided derivatives at the boundaries. Higher orders are computed
         applying the same rule recursively.
 
-        The output has the same shape of self.
+        The output has the same shape of ``self``.
 
-        :param order: Order of derivative (e.g. 2 = second derivative)
+        :param order: Order of derivative (e.g. 2 = second derivative).
         :type order: int
-        :param direction: Direction of the partial derivative
+        :param direction: Direction of the partial derivative.
         :type direction: int
 
-        :returns:  New HierarchicalGridData with derivative
+        :returns:  New :py:class:`~.HierarchicalGridData` with derivative.
         :rtype:    :py:class:`~.HierarchicalGridData`
 
         """
@@ -2388,10 +2788,9 @@ class HierarchicalGridData(BaseNumerical):
         )
 
     def gradient(self, order=1):
-        """Return a list HierarchicalGridData that are the numerical
-        order-differentiation of the present grid_data along all the
-        directions. (order = number of derivatives, ie order=2 is second
-        derivative)
+        """Return a list :py:class:`~.HierarchicalGridData` that are the numerical
+        order-differentiation of the present grid_data along all the directions.
+        (order = number of derivatives, ie ``order=2`` is second derivative)
 
         The derivative is calulated as centered differencing in the interior
         and one-sided derivatives at the boundaries. Higher orders are computed
@@ -2399,13 +2798,11 @@ class HierarchicalGridData(BaseNumerical):
 
         The output has the same shape of self.
 
-        :param order: Order of derivative (e.g. 2 = second derivative)
+        :param order: Order of derivative (e.g. 2 = second derivative).
         :type order: int
-        :param direction: Direction of the partial derivative
-        :type direction: int
-        :returns: list of HierarchicalGridData with partial derivative along
-                  the directions
-        :rtype:    list of :py:class:`~.HierarchicalGridData`
+        :returns: list of :py:class:`~.HierarchicalGridData` with partial
+                  derivative along all the directions.
+        :rtype:  list of :py:class:`~.HierarchicalGridData`
 
         """
         return self._call_component_method(
@@ -2419,12 +2816,15 @@ class HierarchicalGridData(BaseNumerical):
         and one-sided derivatives at the boundaries. Higher orders are computed
         applying the same rule recursively.
 
-        The output has the same shape of self.
+        The output has the same shape of ``self``.
 
-        :param order: Order of derivative (e.g. 2 = second derivative)
+        :param order: Order of derivative (e.g. 2 = second derivative).
         :type order: int
-        :param direction: Direction of the partial derivative
+        :param direction: Direction of the partial derivative.
         :type direction: int
+
+        :returns: Derivative along the specified direction.
+        :rtype: list of :py:class:`~.HierarchicalGridData`
 
         """
         return self._apply_to_self(
@@ -2432,10 +2832,11 @@ class HierarchicalGridData(BaseNumerical):
         )
 
     def coordinates(self):
-        """Return coordinates as a list of HierarchicalGridData.
+        """Return coordinates as a list of :py:class:`~.HierarchicalGridData`.
 
         Useful for computations involving coordinates.
 
+        :returns: Coordinates.
         :rtype: list of :py:class:`~.HierarchicalGridData`
         """
         return self._call_component_method(

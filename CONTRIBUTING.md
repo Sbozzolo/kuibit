@@ -6,7 +6,8 @@ If you find a bug, an un-helpful error message, or an expected result, please
 report it. If you can provide precise steps to reproduce the problem, that would
 lead certainly speed-up the resolution of the bug.
 
-You can also join us in the [Telegram channel](t.me/postcactus) for help.
+You can also join us in the [Telegram channel](https://t.me/postcactus) for help or
+discussions.
 
 ## New features/improvements
 
@@ -38,10 +39,26 @@ documentation yourself, we will be very excited to accept the contribution.
 We are explicit in naming variables, functions, methods, and classes. Long
 descriptive names are preferred over short ones.
 
-We apply `black -l 79` to all the files before commiting them.
+We apply `black -l 79` to all the files before committing them.
 
 Modules that work directly with Cactus/Carpet objects have start with `cactus`
 in their name (e.g., `cactus_grid_functions` vs `grid_data`).
+
+Using the spirit of [https://conventionalcomments.org/](conventional comments),
+we write our TODO comments in the following way:
+
+```python
+# TODO (TYPE): Subject
+#
+# Description of the problem.
+```
+
+`TYPE` has to be capitalized and has to be one of `FEATURE`, `FUTURE`,
+`REFACTORING`. The `FUTURE` keyword means that the TODO item
+depends on something else being accomplished, for example, an external
+dependency implementing some feature.
+
+NumPy is spelled like that: NumPy (not numpy, or Numpy). Similarly SciPy.
 
 ## Notes
 
@@ -54,7 +71,7 @@ in their name (e.g., `cactus_grid_functions` vs `grid_data`).
   to zero.
   PATCH is a bug fix or backwards compatible changes.
 
-When releasing a new version, there are the steps:
+When releasing a new version, these are the steps:
 
 - `poetry version <type_of_bump>`, with type of bump in the table in [poetry
   documentation](https://python-poetry.org/docs/cli/#version) (`patch`,

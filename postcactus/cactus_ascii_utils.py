@@ -15,7 +15,25 @@
 # You should have received a copy of the GNU General Public License along with
 # this program; if not, see <https://www.gnu.org/licenses/>.
 
-""" This module provides helper functions to read Cactus ASCII files.
+"""This module provides helper functions to extract information from Cactus
+ASCII files.
+
+The functions available are:
+
+- :py:func:`~.scan_header`: Takes the path of a Cactus ASCII file, a bool to
+                            indicate if the file contains one or multiple
+                            variables (if Carpet was set with
+                            ``one_file_per_group = yes``), a bool to indicate if
+                            the file has several columns and a line that
+                            describe them. ``scan_header`` then returns the
+                            number of the column with the time, and a dictionary
+                            (or a single number) with the description of the
+                            content of the other columns.
+
+- :py:func:`~.total_filesize`: Takes a list of files are return the total
+                               filesize with a given unit. This also works for
+                               non-ASCII files.
+
 """
 
 import os
@@ -24,10 +42,22 @@ import re
 
 def _scan_strings_for_columns(strings, pattern, path=None):
     """Match each string in strings against pattern and each matching result
-    against _pattern_columns, which match expressions like 3:kxx. Then, return
-    a dictionary that maps variable to column number.
+    against _pattern_columns, which matches expressions like "3:kxx". Then,
+    return a dictionary that maps variable to column number.
 
-    path here is given only for the error message
+    This is specialized function used by :py:meth:`~.scan_header` to go through
+    headers of CarpetASCII files.
+
+    :param strings: List of strings to match against the given pattern.
+    :type strings: list of str
+    :param pattern: Pattern to match against strings.
+    :type pattern: ``re.Pattern``
+    :param path: Path of the file, used only for producing useful error messages.
+    :type path: str
+
+    :returns: Dictionary with the mapping between columns numbers and their
+              variable.
+    :rtype: dict
 
     """
 
@@ -75,7 +105,7 @@ def _scan_strings_for_columns(strings, pattern, path=None):
     are_real_columns = all(columns)
 
     if not are_real_columns:
-        raise RuntimeError("Bad header found")
+        raise RuntimeError(f"Bad header found in file {path}")
 
     # Columns are good. Let's create a dictionary to map the number
     # to the description. Columns are indexed starting from 1.
@@ -90,25 +120,49 @@ def _scan_strings_for_columns(strings, pattern, path=None):
 def scan_header(
     path,
     one_file_per_group,
-    file_has_column_format=True,
+    extended_format=True,
     opener=open,
     opener_mode="r",
 ):
-    """Use regular expressions to understand the content of a file.
-    In particular, we look for column format and data columns.
+    """Use regular expressions to understand the content of a CarpetASCII file.
+    In particular, we look for column format and data columns by reading the
+    header, as defined as the lines that start with ``#``.
 
-    This function is also used by cactus_grid_function.
+    This function is used by :py:mod:`~.cactus_grid_functions` and
+    :py:mod:`~.cactus_scalars`.
 
-    Some files, like the scalars ouput by CarpetASCII, have an additional row
+    Some files, like the scalars output by CarpetASCII, have an additional row
     "column format" that describes the various columns. If that is available, we
-    should scan it. However, some files do not have that (e.g., the reductions).
+    scan it. However, some files do not have that (e.g., the reductions).
+
+    :param path: Path of the file to be scanned.
+    :type path: str
+    :param one_file_per_group: Was this file generated with the option
+                               ``one_file_per_group``? This can be understood by
+                               looking at the filename.
+    :type one_file_per_group: bool
+    :param extended_format: Does this file have many columns, and a line that
+                            explains all the columns?
+    :type extended_format: bool
+
+    :param opener: Function that has to be used to open the file. The default is
+                   ``open``, but it has to be different if the file is compressed.
+    :type opener: callable
+    :param opener_mode: Mode to open the file with (e.g., ``r`` as in ``read``).
+    :type opener_mode: str
 
     :returns: time_column and either the data column (if it is one variable per
-    group, or a dictionary with column: variable)
-
-    :rtype: int, another int or a dictionary
+              group), or a dictionary with column: variable.
+    :rtype: tuple with int, another int or a dictionary.
 
     """
+
+    # TODO (REFACTORING): This function really wants to be refactored!
+    #
+    # This function is a little bit convoluted for what it does, and it has four
+    # possible branching. It should be possible to simplify the function and
+    # deal with only one case. Instead of returning two possible return values,
+    # we should be able to return only one.
 
     # We are going to match some regular expressions in the header to
     # understand what variables are there
@@ -136,7 +190,7 @@ def scan_header(
             else:
                 break
 
-        if file_has_column_format:
+        if extended_format:
             columns_description = _scan_strings_for_columns(
                 header, rx_column_format, path=path
             )
@@ -172,16 +226,17 @@ def total_filesize(allfiles, unit="MB"):
     """Return the total size of the given files.
     Available units B, KB, MB and GB
 
-    :param allfiles: list of the full paths of the files
+    :param allfiles: List of the full paths of the files.
     :type allfiles: list
-
+    :param unit: Unit to use (in powers of 1024 bytes).
+    :type unit: str among: ``B``, ``KB``, ``MB``, ``GB``.
     :returns: Total size of the given files.
     :rtype: float
 
     """
 
     # This function is here, but it could be anywhere, it doesn't really
-    # apply only to ASCII files, nor only to CACTUS files...
+    # apply only to ASCII files, nor only to Cactus files...
     units = {"B": 1, "KB": 1024, "MB": 1024 ** 2, "GB": 1024 ** 3}
     if unit not in units.keys():
         raise ValueError(f"Invalid unit: expected one of {list(units.keys())}")

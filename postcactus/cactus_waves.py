@@ -18,6 +18,18 @@
 """The :py:mod:`~.cactus_waves` module provides classes to access gravitational
 and electromagnetic wave signals computed using Weyl scalars.
 
+The classes in this module specialize the ones in :py:mod:`~.cactus_multipoles`
+to deal with gravitational and electromagnetic wave data.
+
+There classes defined in this module are:
+
+- :py:class`~.GravitationalWavesOneDet` and :py:class`~.ElectromagneticWavesOneDet`,
+  which extend :py:class:`~.MultipoleOneDet` adding methods to compute quantities like
+  strain, or energy lost.
+- :py:class`~.WavesDir` (derived from :py:class`~.MultipoleAllDets`), from which we
+  derive :py:class`~.GravitationalWavesDir` and :py:class`~.ElectromagneticWavesDir`,
+  which organize the available data in terms of extraction radii.
+
 """
 
 import warnings
@@ -32,9 +44,10 @@ from postcactus.gw_utils import Detectors
 
 class GravitationalWavesOneDet(mp.MultipoleOneDet):
     """This class represents is an abstract class to represent multipole
-    signals from Weyl scalars available at a given distance. To check if
-    component is available, use the operator "in". You can iterate over all
-    the availble components with a for loop.
+    signals from Weyl scalars available at a given distance.
+
+    To check if component is available, use the operator "in". You can iterate
+    over all the availble components with a for loop.
 
     This class is derived from :py:class:`~.MultipoleOneDet`, so it shares most
     of the features, while expanding with methods specific for gravitational
@@ -45,6 +58,15 @@ class GravitationalWavesOneDet(mp.MultipoleOneDet):
     """
 
     def __init__(self, dist, data):
+        """Constructor.
+
+        :param dist: Radius of the spherical surface.
+        :type dist: float
+        :param data: List of tuples with the two multipolar numbers and
+                     the data as :py:class:`~.TimeSeries`.
+        :type data: list of tuple ``(l, m, timeseries)``
+
+        """
 
         super().__init__(dist, data, 2)
 
@@ -53,25 +75,25 @@ class GravitationalWavesOneDet(mp.MultipoleOneDet):
     @staticmethod
     def _fixed_frequency_integrated(timeseries, pcut, order=1):
         r"""Return a new timeseries that is the one obtained with the method of
-        the fixed frequency integration from the input timeseries.
+        the fixed frequency integration from the input ``timeseries``.
 
-        pcut is the longest physical period in the system (omega_threshold is
-        the lowest physical frequency).
+        ``pcut`` is the longest physical period in the system, corresponding to
+        ``omega_threshold``,  the lowest physical frequency.
 
-        omega is an angular velocity.
+        ``order`` is order of integration (how many integrations).
 
-        order is order of integration (how many integrations).
+        The fixed frequency integration algorithm is the following:
 
         The Fourier transform of f(t) is
 
-        F[f](omega) = \int_-inf^inf e^-i omega t f(t) dt
+        :math:`F[f](omega) = \int_-inf^inf e^-i omega t f(t) dt`
 
         The the Fourier transform of the integral of f(t) is
-        F[f](omega) / i omega
+        :math:`F[f](omega) / i omega`
 
         In the FFI method we replace this with
-        F[f](omega) / i omega               if omega > omega_thereshold
-        F[f](omega) / i omega_threshold     otherwise
+        :math:`F[f](omega) / i omega`               if omega > omega_threshold
+        :math:`F[f](omega) / i omega_threshold`     otherwise
 
         (Equation (27) in [arxiv:1006.1632])
 
@@ -80,21 +102,22 @@ class GravitationalWavesOneDet(mp.MultipoleOneDet):
         integration:
         (due to the convolution theorem)
 
-        F[f](omega) / (i omega)**order             if omega > omega_thereshold
-        F[f](omega) / (i omega_threshold)**order   otherwise
+        :math:`F[f](omega) / (i omega)**order`             if omega > omega_threshold
+        :math:`F[f](omega) / (i omega_threshold)**order`   otherwise
 
-        Than, we take the antitransform.
+        Than, we take the inverse Fourier transform.
 
-        It is important to window the signal before FFI!
-        It is also recommended to cut the boundaries.
-
-        :param timeseries: Timeseries that has to be integrated
-        :type timeseries: :py:mod:`~TimeSeries`
+        :param timeseries: :py:class:`~TimeSeries` that has to be integrated.
+        :type timeseries: :py:class:`~TimeSeries`
         :param pcut: Period associated with the threshold frequency
                      ``omega_0 = 2 * pi / pcut``
         :type pcut: float
-        :param order:
+        :param order: Number of integrations.
         :type order: int
+
+        :returns: :py:class:`~TimeSeries` integrated with the fixed-frequency integration
+                  method
+        :rtype: :py:class:`~TimeSeries`
 
         """
 
@@ -131,14 +154,15 @@ class GravitationalWavesOneDet(mp.MultipoleOneDet):
 
     # This function is only for convenience
     def get_psi4_lm(self, mult_l, mult_m):
-        r"""Return the multipolar components l and m of Psi4
+        r"""Return the multipolar components l and m of Psi4.
 
         :param mult_l:     Multipole component l.
         :type mult_l:      int
         :param mult_m:     Multipole component m.
         :type mult_m:      int
 
-        :returns: :math:`\Psi_4^{lm}` :rtype: complex :py:class:`~.TimeSeries`
+        :returns: :math:`\Psi_4^{lm}`
+        :rtype: complex :py:class:`~.TimeSeries`
         """
         return self[(mult_l, mult_m)]
 
@@ -155,7 +179,6 @@ class GravitationalWavesOneDet(mp.MultipoleOneDet):
         r"""Return the strain associated to the multipolar component (l, m).
 
         The strain returned is multiplied by the distance.
-
         The strain is extracted from the Weyl Scalar using the formula
 
         .. math::
@@ -164,33 +187,33 @@ class GravitationalWavesOneDet(mp.MultipoleOneDet):
              -     i h_\times^{lm}(r,t) = \int_{-\infty}^t \mathrm{d}u
                     \int_{-\infty}^u \mathrm{d}v\, \Psi_4^{lm}(r,v)
 
-        The return value is complex timeseries (r * h_plus + i r * h_cross).
+        The return value is the complex :py:class:`~.TimeSeries` ``(r * h_plus + i r * h_cross)``.
 
         It is always important to have a function that goes smoothly to zero
         before taking Fourier transform (to avoid spectral leakage and
-        aliasing). You can pass the window function to apply as a paramter.
-        If window_function is None, no tapering is performed.
-        If window_function is a function, it has to be a function that takes
-        as first argument the length of the array and returns a new array
-        with the same length that is to be multiplied to the data (this is
-        how SciPy's windows work)
-        If window_function is a string, use the method with corresponding
-        name from the TimeSeries class. You must only provide the name
-        (e.g, 'tukey' will call 'tukey_windowed').
-        Optional arguments to the window function can be passed directly to
-        this function.
+        aliasing). You can pass the ``window_function`` to apply as a parameter.
+        If ``window_function`` is None, no tapering is performed. If
+        ``window_function`` is a function, it has to be a function that takes as
+        first argument the length of the array and returns a new array with the
+        same length that is to be multiplied to the data (this is how SciPy's
+        windows work) If ``window_function`` is a string, use the method with
+        corresponding name from the :py:class:`~.TimeSeries` class. You must
+        only provide the name (e.g, 'tukey' will call 'tukey_windowed').
+        Optional arguments to the window function can be passed directly to this
+        function.
 
-        pcut is the period associated to the angular velocity that enters in
-        the fixed frequency integration (omega_th = 2 pi / pcut). In general,
-        a wise choise is to pick the longest physical period in the signal.
+        ``pcut`` is the period associated to the angular velocity that enters in
+        the fixed frequency integration (``omega_th = 2 pi / pcut``). In
+        general, a wise choise is to pick the longest physical period in the
+        signal.
 
         Optionally, remove part of the output signal at both the beginning and
-        the end. If trim_ends is True, pcut is removed. This is because those
-        parts of the signal are typically not very accurate.
+        the end. If ``trim_ends`` is True, ``pcut`` is removed. This is because
+        those parts of the signal are typically not very accurate.
 
-        :param mult_l: Multipolar component l
+        :param mult_l: Multipolar component l.
         :type mult_l: int
-        :param mult_m: Multipolar component m
+        :param mult_m: Multipolar component m.
         :type mult_m: int
         :param pcut: Period that enters the fixed-frequency integration.
                      Typically, the longest physical period in the signal.
@@ -254,15 +277,17 @@ class GravitationalWavesOneDet(mp.MultipoleOneDet):
         r"""Return the strain accounting for all the multipoles and the spin
         weighted spherical harmonics.
 
+        This is computed as:
+
         .. math::
 
              h_+(r,t)
              -     i h_\times(r,t) = \sum_{l=2}^{l=l_{\mathrm{max}}}
              \sum_{m=-l}^{m=l} h(r, t)^{lm} {}_{-2}Y_{lm}(\theta, \phi)
 
-        :param theta: Meridional observation angle
+        :param theta: Meridional observation angle.
         :type theta: float
-        :param phi: Azimuthal observation angle
+        :param phi: Azimuthal observation angle.
         :type phi: float
         :param pcut: Period that enters the fixed-frequency integration.
                      Typically, the longest physical period in the signal.
@@ -272,9 +297,9 @@ class GravitationalWavesOneDet(mp.MultipoleOneDet):
         :type window_function: callable, str, or None
         :param trim_ends: If True, a portion of the resulting strain is removed
                           at both the initial and final times. The amount removed
-                          is equal to pcut.
+                          is equal to ``pcut``.
         :type trim_ends: bool
-        :param l_max: Ingore multipoles with l > l_max
+        :param l_max: Ignore multipoles with ``l > l_max``
         :type l_max: int
 
         :returns: :math:`r (h^+ - i rh^\times)`
@@ -329,7 +354,7 @@ class GravitationalWavesOneDet(mp.MultipoleOneDet):
              -     i h_\times(r,t) = \sum_{l=2}^{l=l_{\mathrm{max}}}
              \sum_{m=-l}^{m=l} h(r, t)^{lm} {}_{-2}Y_{lm}(\theta, \phi)
 
-        Here theta and phi are theta_gw and phi_gw
+        Here \theta and \phi are the arguments ``theta_gw`` and ``phi_gw``.
 
         Then, for each detector
 
@@ -337,9 +362,9 @@ class GravitationalWavesOneDet(mp.MultipoleOneDet):
 
              h(r,t) = F_\times h_\times(theta_gw, phi_gw) + F_+ h_+(theta_gw, phi_gw)
 
-        :param right_ascension: Right ascension of the source in degrees
+        :param right_ascension: Right ascension of the source in degrees.
         :type right_ascension: float
-        :param declination: Declination of the source in degrees
+        :param declination: Declination of the source in degrees.
         :type declination: float
         :param time_utc: UTC time of the event
         :type declination: str
@@ -351,18 +376,18 @@ class GravitationalWavesOneDet(mp.MultipoleOneDet):
         :param pcut: Period that enters the fixed-frequency integration.
                      Typically, the longest physical period in the signal.
         :type pcut: float
-        :param window_function: If not None, apply window_function to the
+        :param window_function: If not None, apply ``window_function`` to the
                                 series before computing the strain.
         :type window_function: callable, str, or None
         :param trim_ends: If True, a portion of the resulting strain is removed
                           at both the initial and final times. The amount removed
                           is equal to pcut.
         :type trim_ends: bool
-        :param l_max: Ingore multipoles with l > l_max
+        :param l_max: Ignore multipoles with l > l_max
         :type l_max: int
 
         :returns: :math:`r (h^+ - i rh^\times)`
-        :rtype: :py:class:`~.TimeSeries`
+        :rtype: Detectors of :py:class:`~.TimeSeries`
 
         """
 
@@ -388,6 +413,7 @@ class GravitationalWavesOneDet(mp.MultipoleOneDet):
                 trim_ends=trim_ends,
                 **kwargs,
             )
+            # What have that:
             # strain.real = hp
             # strain.imag = -hc
             strains.append(strain.real() * Fp - strain.imag() * Fc)
@@ -397,7 +423,7 @@ class GravitationalWavesOneDet(mp.MultipoleOneDet):
     def get_power_lm(self, mult_l, mult_m, pcut):
         r"""Return the instantaneous power in the mode (l, m).
 
-        Eq (9.139) Buamgarte Shapiro
+        This is computed with Eq. (9.139) in Baumgarte Shapiro.
 
         .. math::
 
@@ -405,9 +431,17 @@ class GravitationalWavesOneDet(mp.MultipoleOneDet):
         \sum_{l=2}^{l=l_{\mathrm{max}}} \sum_{m=-l}^{m=l}
         \psi^{lm}_4(\theta, \phi, r, t)
 
+        :param mult_l: l multipole moment.
+        :type mult_t: int
+        :param mult_m: m multipole moment.
+        :type mult_m: int
         :param pcut: Period that enters the fixed-frequency integration.
                      Typically, the longest physical period in the signal.
         :type pcut: float
+
+        :returns: Instantaneous power in the mode ``(l, m)`` as a function of
+                  time.
+        :rtype: :py:class:`~TimeSeries`
         """
         psi4_int = self._fixed_frequency_integrated(
             self[(mult_l, mult_m)], pcut, order=1
@@ -419,22 +453,31 @@ class GravitationalWavesOneDet(mp.MultipoleOneDet):
 
         :param mult_l: l multipole moment.
         :type mult_t: int
-        :param mult_m: l multipole moment.
+        :param mult_m: m multipole moment.
         :type mult_m: int
         :param pcut: Period that enters the fixed-frequency integration.
                      Typically, the longest physical period in the signal.
         :type pcut: float
+
+        :returns: Energy lost up to the time t in the mode ``(l, m)`` as a function of
+                  time.
+        :rtype: :py:class:`~TimeSeries`
         """
         return self.get_power_lm(mult_l, mult_m, pcut).integrated()
 
     def get_total_power(self, pcut, l_max=None):
-        """Return the total power in all the modes up to l_max.
+        """Return the total power in all the modes up to ``l_max``.
 
         :param pcut: Period that enters the fixed-frequency integration.
                      Typically, the longest physical period in the signal.
         :type pcut: float
-        :param l_max: Ingore multipoles with l > l_max
+        :param l_max: Ignore multipoles with l > l_max
         :type l_max: int
+
+        :returns: Instantaneous total power in the modes up to  ``l_max``
+                  as a function of time.
+        :rtype: :py:class:`~TimeSeries`
+
         """
 
         def powlm(_1, mult_l, mult_m, _2):
@@ -443,20 +486,34 @@ class GravitationalWavesOneDet(mp.MultipoleOneDet):
         return self.total_function_on_available_lm(powlm, l_max=l_max)
 
     def get_total_energy(self, pcut, l_max=None):
-        """Return the cumulative energy lost in all the modes up to l_max.
+        """Return the cumulative energy lost in all the modes up to ``l_max``.
 
         :param pcut: Period that enters the fixed-frequency integration.
                      Typically, the longest physical period in the signal.
         :type pcut: float
-        :param l_max: Ingore multipoles with l > l_max
+        :param l_max: Ignore multipoles with l > l_max
         :type l_max: int
+
+        :returns: Cumulative total energy lost up to time in the modes up to  ``l_max``
+                  as a function of time.
+        :rtype: :py:class:`~TimeSeries`
+
         """
         return self.get_total_power(pcut, l_max).integrated()
 
     def get_torque_z_lm(self, mult_l, mult_m, pcut):
         """Return the instantaneous torque in the z axis in the mode (l, m).
 
-        Eq. (9.140) in Baumgarte Shapiro (or 9.137)
+        This is computed with Eq. (9.140) in Baumgarte Shapiro (or 9.137)
+
+        :param mult_l: l multipole moment.
+        :type mult_t: int
+        :param mult_m: m multipole moment.
+        :type mult_m: int
+        :returns: Instantaneous total torque in the z direction in the mode (l, m)
+                  as a function of time.
+        :rtype: :py:class:`~TimeSeries`
+
         """
         # This is what we are going to implement
         # The foruma is dJ/dt = r**2/16pi m (dot(A)B - dot(B)*A)
@@ -489,17 +546,35 @@ class GravitationalWavesOneDet(mp.MultipoleOneDet):
         )
 
     def get_angular_momentum_z_lm(self, mult_l, mult_m, pcut):
-        """Return the cumulative angular momentum lost in the mode (l, m)."""
+        """Return the cumulative angular momentum lost in the mode (l, m).
+
+        :param mult_l: l multipole moment.
+        :type mult_t: int
+        :param mult_m: l multipole moment.
+        :type mult_m: int
+        :param pcut: Period that enters the fixed-frequency integration.
+                     Typically, the longest physical period in the signal.
+        :type pcut: float
+
+        :returns: Cumulative angular momentum in the z direction in the mode (l, m)
+                  as a function of time.
+        :rtype: :py:class:`~TimeSeries`
+
+        """
         return self.get_torque_z_lm(mult_l, mult_m, pcut).integrated()
 
     def get_total_torque_z(self, pcut, l_max=None):
-        """Return the total torque z in all the modes up to l_max.
+        """Return the total torque z in all the modes up to ``l_max``.
 
         :param pcut: Period that enters the fixed-frequency integration.
                      Typically, the longest physical period in the signal.
         :type pcut: float
-        :param l_max: Ingore multipoles with l > l_max
+        :param l_max: Ignore multipoles with l > l_max
         :type l_max: int
+
+        :returns: Instantaneous total torque up to time in the modes up to  ``l_max``
+                  as a function of time.
+        :rtype: :py:class:`~TimeSeries`
         """
 
         def torqzlm(_1, mult_l, mult_m, _2):
@@ -509,20 +584,23 @@ class GravitationalWavesOneDet(mp.MultipoleOneDet):
 
     def get_total_angular_momentum_z(self, pcut, l_max=None):
         """Return the cumulative angular momentum lost in all the modes up to
-        l_max.
+        ``l_max``.
 
         :param pcut: Period that enters the fixed-frequency integration.
                      Typically, the longest physical period in the signal.
         :type pcut: float
-        :param l_max: Ingore multipoles with l > l_max
+        :param l_max: Ignore multipoles with l > l_max
         :type l_max: int
+
+        :returns: Cumulative angular momentum up to time in the modes up to  ``l_max``
+                  as a function of time.
+        :rtype: :py:class:`~TimeSeries`
         """
         return self.get_total_torque_z(pcut, l_max=l_max).integrated()
 
 
 class ElectromagneticWavesOneDet(mp.MultipoleOneDet):
-    """These are electromagnetic waves computed with the Newman-Penrose
-    approach, using Phi2.
+    """Electromagnetic waves computed with the Newman-Penrose approach, using Phi2.
 
     (These are useful when studying charged black holes, for instance)
 
@@ -535,18 +613,44 @@ class ElectromagneticWavesOneDet(mp.MultipoleOneDet):
     def get_power_lm(self, mult_l, mult_m):
         """Return the instantaneous power in the mode (l, m).
 
-        Eq 2.23 in 1311.6483
+        This is computed with Eq. 2.23 in 1311.6483
+
+        :param mult_l: l multipole moment.
+        :type mult_t: int
+        :param mult_m: m multipole moment.
+        :type mult_m: int
+        :returns: Instantaneous power in the mode ``(l, m)`` as a function of
+                  time.
+        :rtype: :py:class:`~TimeSeries`
         """
         return (
             self.dist ** 2 / (4 * np.pi) * np.abs(self[(mult_l, mult_m)]) ** 2
         )
 
     def get_energy_lm(self, mult_l, mult_m):
-        """Return the cumulative energy lost in the mode (l, m)."""
+        """Return the cumulative energy lost in the mode (l, m).
+
+        :param mult_l: l multipole moment.
+        :type mult_t: int
+        :param mult_m: m multipole moment.
+        :type mult_m: int
+
+        :returns: Energy lost up to the time t in the mode ``(l, m)`` as a function of
+                  time.
+        :rtype: :py:class:`~TimeSeries`
+        """
         return self.get_power_lm(mult_l, mult_m).integrated()
 
     def get_total_power(self, l_max=None):
-        """Return the total power in all the modes up to l_max."""
+        """Return the total power in all the modes up to ``l_max``.
+
+        :param l_max: Ignore multipoles with l > l_max
+        :type l_max: int
+
+        :returns: Instantaneous total power in the modes up to  ``l_max``
+                  as a function of time.
+        :rtype: :py:class:`~TimeSeries`
+        """
 
         def powlm(_1, mult_l, mult_m, _2):
             return self.get_power_lm(mult_l, mult_m)
@@ -554,10 +658,19 @@ class ElectromagneticWavesOneDet(mp.MultipoleOneDet):
         return self.total_function_on_available_lm(powlm, l_max=l_max)
 
     def get_total_energy(self, l_max=None):
-        """Return the cumulative energy lost in all the modes up to l_max."""
+        """Return the cumulative energy lost in all the modes up to l_max.
+
+        :param l_max: Ignore multipoles with l > l_max
+        :type l_max: int
+
+        :returns: Cumulative total energy lost up to time in the modes up to  ``l_max``
+                  as a function of time.
+        :rtype: :py:class:`~TimeSeries`
+
+        """
         return self.get_total_power(l_max=l_max).integrated()
 
-    # Angular momentum is computed by Proca_LFlux, which is not public
+    # Angular momentum is not computed by any public thorns.
 
 
 class WavesDir(mp.MultipoleAllDets):
@@ -568,17 +681,26 @@ class WavesDir(mp.MultipoleAllDets):
     :py:class:`~.MultipoleAllDets` are redefined as
     :py:class:`~.GravitationalWavesDet`.
 
-    This class is not meant to be used directly! It is abstract.
+    This class is an abstract class meant to be derived to describe gravitational waves
+        and electromagnetic waves.
 
     """
 
     def __init__(self, sd, l_min, var, derived_type_one_det):
-        """This class is meant to be derived to describe gravitational waves
-        and electromagnetic waves.
+        """Constructor.
 
-        var is the quantitiy (Weyl scalar) that describe the wave (Psi4 and
-        Phi2), and derived_type_one_det is the class that describes that
-        one in one detector.
+        ``derived_type_one_det`` is the type that the values of this
+        dictionary-like object has to have.
+
+        :param sd: Simulation directory.
+        :type sd: :py:class:`~.SimDir`
+        :param l_min: Minimum value of ``l`` to consider.
+        :type l_min: int
+        :param var: Name of the variable that has be consider
+        :type var: str (Psi4 or Phi2)
+        :param derived_type_one_det: Class of the derived object that
+                                     has to be initialized.
+        :type derived_type_one_det: class
 
         """
         if not isinstance(sd, simdir.SimDir):
@@ -607,7 +729,7 @@ class WavesDir(mp.MultipoleAllDets):
         super().__init__(data)
 
         # Next step is to change the type of the objects from MultipoleOneDet
-        # to GravitationalWaveOneDet.
+        # to GravitationalWaveOneDet (or ElectromagneticWavesDir).
         #
         # To do this, we redefine the objects by instantiating new ones with
         # the same data
@@ -616,9 +738,11 @@ class WavesDir(mp.MultipoleAllDets):
 
 
 class GravitationalWavesDir(WavesDir):
-    """This class provides acces gravitational-wave data at different radii.
+    """This class provides access gravitational-wave data at different radii as
+     computed from the Psi4 Weyl scalar.
 
-    Gravitational waves are computed from the Psi4 Weyl scalar.
+    This is dictionary-like objects with keys the extraction radii and values
+    the corresponding :py:class:`~.GravitationalWavesOneDet`.
 
     """
 
@@ -626,24 +750,30 @@ class GravitationalWavesDir(WavesDir):
         super().__init__(sd, 2, "Psi4", GravitationalWavesOneDet)
 
     @staticmethod
-    def _extrapolate_waves_to_infinity(waves, times, radii, mass, order=2):
-        """Extrapolate waves to infinity and evalute the result on times.
+    def _extrapolate_waves_to_infinity(waves, times, radii, mass=1, order=2):
+        """Extrapolate ``waves`` to infinity and evaluate the result on the given
+        ``times``.
 
-        We assume radii[i] correspond to waves[i].
+        We follow what described in 1307.5307.
 
-        :param waves: Waves that have to be extrapolated.
+        In practice, ``waves`` is a list of strains at the extraction radii ``radii``.
+
+        :param waves: Waves that have to be extrapolated (strains computed at
+                      different radii).
         :type waves: list of :py:class:`~.TimeSeries`
         :param times: Times at which the waves have to be evaluated
-        :type times: float or 1D numpy array
-        :param radii: Extraction radii
-        :type radii: float or 1D numpy array
-        :param mass: ADM mass of the system
+        :type times: float or 1D NumPy array
+        :param radii: Extraction radii. It has to be that radii[i] correspond to
+                      waves[i].
+        :type radii: float or 1D NumPy array
+        :param mass: ADM mass of the system.
         :type mass: float
         :param order: Order of the extrapolation.
         :type order: int
 
         :returns: Waves evaluated at the retarded times.
         :rtype: List of :py:class:`~.TimeSeries`
+
         """
 
         # Follows what done in the NRAR collaboration (1307.5307)
@@ -685,7 +815,7 @@ class GravitationalWavesDir(WavesDir):
         # compute tortoise radius).
         waves_retarded = [
             w.resampled(
-                gw_utils.retarded_times_to_coordinate_times(times, r, mass)
+                gw_utils._retarded_times_to_coordinate_times(times, r, mass)
             )
             for w, r in zip(waves, radii)
         ]
@@ -723,23 +853,44 @@ class GravitationalWavesDir(WavesDir):
         extrapolate_amplitude_phase=False,
         **kwargs,
     ):
-        """Extrapolate strains to spatial infinity.
+        """Extrapolate strains to spatial infinity with the method described in 1307.5307.
+
+        If ``extrapolate_amplitude_phase`` is True, extrapolate amplitude and
+        phase of the complex strain instead of real and imaginary parts.
 
         TODO: Test this function!
 
-        [Equation (29) in 1307.5307.]
+        [Equation (29)]
 
-          :param retarded_times: Times at which the waves have to be evaluated
-          :type retarded_times: float or 1D numpy array
-          :param rex: Extraction radii
-          :type rex: float or 1D numpy array
-          :param mass: ADM mass of the system
-          :type mass: float
-          :param order: Order of the extrapolation.
-          :type order: int
+        :param mult_l: Multipolar component l.
+        :type mult_l: int
+        :param mult_m: Multipolar component m.
+        :type mult_m: int
+        :param pcut: Period that enters the fixed-frequency integration.
+                     Typically, the longest physical period in the signal.
+        :type pcut: float
+        :param retarded_times: Times at which the waves have to be evaluated
+        :type retarded_times: float or 1D NumPy array
+        :param detectors_distances: Extraction radii
+        :type detectors_distances: 1D NumPy array
+        :param mass: ADM mass of the system
+        :type mass: float
+        :param order: Order of the extrapolation.
+        :type order: int
+        :param window_function: If not None, apply window_function to the
+                                series before computing the strain.
+        :type window_function: callable, str, or None
+        :param trim_ends: If True, a portion of the resulting strain is removed
+                          at both the initial and final times. The amount removed
+                          is equal to pcut.
+        :type trim_ends: bool
+        :param extrapolate_amplitude_phase: If True, extrapolate phase and amplitude, if
+                                            False, extrapolate real and imaginary parts.
+        :type extrapolate_amplitude_phase: int
 
-          :returns: Waves evaluated at the retarded times.
-          :rtype: List of :py:class:`~.TimeSeries`
+        :returns: Waves evaluated at the retarded times.
+        :rtype: List of :py:class:`~.TimeSeries`
+
         """
 
         dists = np.sort(detectors_distances)
@@ -761,7 +912,7 @@ class GravitationalWavesDir(WavesDir):
         # Resample the waves to have all the same retarded times
         strains_resampled = [
             strain.resampled(
-                gw_utils.retarded_times_to_coordinate_times(
+                gw_utils._retarded_times_to_coordinate_times(
                     retarded_times, dist, mass
                 )
             )
@@ -801,9 +952,11 @@ class GravitationalWavesDir(WavesDir):
 
 
 class ElectromagneticWavesDir(WavesDir):
-    """This class provides acces electromagnetic-wave data at different radii.
+    """This class provides access electromagnetic-wave data at different radii as
+     computed from the Phi2 Weyl scalar.
 
-    Electromagnetic waves are computed from the Phi2 Weyl scalar.
+    This is dictionary-like objects with keys the extraction radii and values
+    the corresponding :py:class:`~.ElectromagneticWavesOneDet`.
 
     """
 

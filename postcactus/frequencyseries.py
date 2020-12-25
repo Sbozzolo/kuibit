@@ -19,6 +19,25 @@
 """The :py:mod:`~.frequencyseries` module provides a representation of
 frequency series.
 
+:py:class:`~.FrequencySeries` can be evenly or unevenly sampled, real or
+complex. They support all the mathematical operations and operators you may
+expect, and have additional methods, which include ones for taking derivatives,
+integrals, apply windows, smooth the signal, take inverse Fourier transform, and
+more. Most of these methods are available in two flavors: those that return a
+new :py:class:`~.FrequencySeries`, and those which modify the object in place. The
+latter have names with imperative verbs.
+
+As in :py:class:`~.TimeSeries`, :py:class:`~.FrequencySeries` are derived from
+the :py:class:`~.BaseSeries`, which in turn is derived from the abstract class
+:py:class:`~.BaseNumerical`. Some of the capabilities of
+:py:class:`~.FrequencySeries` (e.g., overloading the mathematical operators) are
+implemented in the parent classes.
+
+Additionally, two functions are defined in this module
+:py:func:`~.load_FrequencySeries` and :py:func:`~.load_noise_curve`. Both loads
+:py:class:`~.FrequencySeries` from a text file, but :py:func:`~.load_noise_curve`
+is a simpler interface for real-valued signals.
+
 """
 
 import numpy as np
@@ -29,12 +48,13 @@ from postcactus.series import BaseSeries, sample_common
 
 
 def load_FrequencySeries(path, *args, complex_on_two_columns=False, **kwargs):
-    """Load a text file as a FrequencySeries.
+    """Load a text file as a :py:class:`~.FrequencySeries`.
 
-    The backend is np.loadtxt, so you can pass args or kwargs (for example to
-    specify the columns).
+    The backend is ``np.loadtxt``, and the unknown arguments passed to this
+    function are given to ``np.loadtxt``. This can be used, for example, to
+    specify the columns of the file that have to be read.
 
-    :param path: Path of the file to be loaded
+    :param path: Path of the file to be loaded.
     :type path: str
     :param complex_on_two_columns: When true, it is assumed that the real and
                                    the imaginary parts of the frequency series
@@ -42,8 +62,8 @@ def load_FrequencySeries(path, *args, complex_on_two_columns=False, **kwargs):
                                    This has to be False to load real data
                                    (e.g., noise curves).
     :type complex_on_two_columns: bool
-    :returns: Loaded Frequencyseries
-    :rtype: :py:mod:`~.FrequencySeries`
+    :returns: Loaded data as :py:class:`~.FrequencySeries`.
+    :rtype: :py:class:`~.FrequencySeries`
 
     """
     if complex_on_two_columns:
@@ -57,14 +77,16 @@ def load_FrequencySeries(path, *args, complex_on_two_columns=False, **kwargs):
 
 
 def load_noise_curve(path, *args, **kwargs):
-    """Load a noise curve as a FrequencySeries.
+    """Load a noise curve as a :py:class:`~.FrequencySeries`.
 
-    This is syntatic sugar for the function load_FrequencySeries.
+    Unknown arguments are passed to ``np.loadtxt``.
 
-    :param path: Path of the file to be loaded
+    This is syntactic sugar for the function :py:func:`~.load_FrequencySeries.`
+
+    :param path: Path of the file to be loaded.
     :type path: str
-    :returns: Loaded Frequencyseries
-    :rtype: :py:mod:`~.FrequencySeries`
+    :returns: Noise curve.
+    :rtype: :py:class:`~.FrequencySeries`
     """
     return load_FrequencySeries(
         path, complex_on_two_columns=False, *args, **kwargs
@@ -75,33 +97,33 @@ class FrequencySeries(BaseSeries):
     """Class representing a Fourier spectrum.
 
     :ivar f:   Frequency
-    :vartype f: 1D numpy array or float
+    :vartype f: 1D NumPy array or float
 
     :ivar fft:   Fourier transform
-    :vartype fft: 1D numpy array or float
+    :vartype fft: 1D NumPy array or float
 
     """
 
     def __init__(self, f, fft, guarantee_f_is_monotonic=False):
-        """Create a FrequencySeries providing frequencies and the
-        value at those frequencies.
+        """Create a :py:class:`~.FrequencySeries` providing frequencies and the value at
+        those frequencies.
 
         It is your duty to make sure everything makes sense!
 
-        When guarantee_f_is_monotonic is True no checks will be perform to make
-        sure that f is monotonically increasing (increasing performance). This
-        should is used internally whenever a new series is returned from self
-        (since we have already checked that f is good.) or in performance
+        When ``guarantee_f_is_monotonic`` is True, no checks will be perform to
+        make sure that f is monotonically increasing (increasing performance).
+        This should is used internally whenever a new series is returned from
+        self (since we have already checked that ``f`` is good.) or in performance
         critical routines.
 
-        :param f:  Frequencies
-        :type f: 1D numpy array or float
+        :param f:  Frequencies.
+        :type f: 1D NumPy array or float
 
-        :param fft:   Fourier transform
-        :type fft: 1D numpy array or float
+        :param fft:   Fourier transform.
+        :type fft: 1D NumPy array or float
 
-        :param guarantee_f_is_monotonic: The code will assume that f is
-                                         monotonically incresasing
+        :param guarantee_f_is_monotonic: If true, it will be assumes that ``f`` is
+                                         monotonically increasing.
         :type guarantee_f_is_monotonic: bool
 
         """
@@ -113,6 +135,11 @@ class FrequencySeries(BaseSeries):
     # Read documentation on BaseSeries
     @property
     def f(self):
+        """Frequencies.
+
+        :returns: Frequencies.
+        :rtype: 1d NumPy array
+        """
         # This is defined BaseClass
         return self.x
 
@@ -123,6 +150,11 @@ class FrequencySeries(BaseSeries):
 
     @property
     def fft(self):
+        """Fourier components.
+
+        :returns: Fourier components.
+        :rtype: 1d NumPy array
+        """
         # This is defined BaseClass
         return self.y
 
@@ -135,7 +167,7 @@ class FrequencySeries(BaseSeries):
     def fmin(self):
         """Return the minimum frequency.
 
-        :returns:  Minimum frequency of the frequencyseries
+        :returns:  Minimum frequency of the series.
         :rtype:    float
         """
         return self.xmin
@@ -144,7 +176,7 @@ class FrequencySeries(BaseSeries):
     def fmax(self):
         """Return the maximum frequency.
 
-        :returns:  Maximum frequency of the frequencyseries
+        :returns:  Maximum frequency of the series.
         :rtype:    float
         """
         return self.xmax
@@ -152,8 +184,9 @@ class FrequencySeries(BaseSeries):
     @property
     def frange(self):
         """Return the range of frequencies.
+        The range is defined as the maximum frequency minus the minimum.
 
-        :returns:  Range of the frequencyseries
+        :returns:  Range of the series (``f_max`` - ``f_min``).
         :rtype:    float
         """
         return self.fmax - self.fmin
@@ -162,8 +195,8 @@ class FrequencySeries(BaseSeries):
     def amplitude(self):
         """Return the amplitude of frequencies.
 
-        :returns:  Range of the frequencyseries
-        :rtype:    1d numpy array of float
+        :returns:  Amplitude of the series.
+        :rtype:    1d NumPy array
         """
         return abs(self.fft)
 
@@ -172,10 +205,10 @@ class FrequencySeries(BaseSeries):
 
     @property
     def df(self):
-        """Return the delta f if the series is regularly sampled,
+        """Return the spacing (``delta_f``) if the series is regularly sampled,
         otherwise raise error.
 
-        :returns: Delta t
+        :returns: Frequency spacing (``delta_f``).
         :rtype: float
 
         """
@@ -185,10 +218,10 @@ class FrequencySeries(BaseSeries):
         return self.f[1] - self.f[0]
 
     def normalized(self):
-        """Return a new frequencyseries with maximum amplitude of 1.
+        """Return a new :py:class:`~.FrequencySeries` with maximum amplitude of 1.
 
-        :returns: Normalized frequency series.
-        :rtype: :py:mod:`~.FrequencySeries`
+        :returns: Normalized :py:class:`~.FrequencySeries` series.
+        :rtype: :py:class:`~.FrequencySeries`
 
         """
         m = self.amplitude.max()
@@ -203,12 +236,12 @@ class FrequencySeries(BaseSeries):
         self._apply_to_self(self.normalized)
 
     def low_passed(self, f):
-        """FIXME
+        """Remove frequencies higher or equal than the given.
 
-        :param f: Frequency above which series will be zeroed
+        :param f: Frequency above which the series will be zeroed.
         :type f: float
-        :returns: High passed frequencyeseries
-        :rtype: :py:mod:`~.FrequencySeries`
+        :returns: Low-passed :py:class:`~.FrequencySeries`.
+        :rtype: :py:class:`~.FrequencySeries`
 
 
         """
@@ -216,16 +249,21 @@ class FrequencySeries(BaseSeries):
         return FrequencySeries(self.f[msk], self.fft[msk])
 
     def low_pass(self, f):
-        """Remove frequencies higher or equal than f (absolute value)."""
+        """Remove frequencies higher or equal than ``f`` (absolute value).
+
+        :param f: Frequency above which series will be zeroed.
+        :type f: float
+
+        """
         self._apply_to_self(self.low_passed, f)
 
     def high_passed(self, f):
-        """Remove frequencies lower or equal than f
+        """Remove frequencies lower or equal than the given.
 
-        :param f: Frequency below which series will be zeroed
+        :param f: Frequency below which series will be zeroed.
         :type f: float
-        :returns: High passed frequencyeseries
-        :rtype: :py:mod:`~.FrequencySeries`
+        :returns: High-passed :py:class:`~.FrequencySeries`.
+        :rtype: :py:class:`~.FrequencySeries`
 
         """
         msk = np.abs(self.f) >= f
@@ -234,59 +272,62 @@ class FrequencySeries(BaseSeries):
     def high_pass(self, f):
         """Remove all the frequencies smaller than f
 
-        :param f:
+        :param f: Frequency below which series will be zeroed.
         :type f: float
 
         """
         self._apply_to_self(self.high_passed, f)
 
     def negative_frequencies_removed(self):
-        """Remove frequencies lower than 0
+        """Remove frequencies lower than 0.
 
-        :returns:  Frequencyeseries with only positive frequencies
-        :rtype: :py:mod:`~.FrequencySeries`
+        :returns:  Frequencyeseries with only positive frequencies.
+        :rtype: :py:class:`~.FrequencySeries`
 
         """
         msk = self.f >= 0
         return FrequencySeries(self.f[msk], self.fft[msk])
 
     def negative_frequencies_remove(self):
-        """Remove all the frequencies smaller than 0"""
+        """Remove all the frequencies smaller than 0."""
         self._apply_to_self(self.negative_frequencies_removed)
 
     def band_passed(self, fmin, fmax):
-        """Remove frequencies outside the range fmin, fmax
+        """Remove frequencies outside the given range ``fmin, fmax``.
 
-        :param fmin:
-        :param fmax:
+        :param fmin: Minimum frequency.
+        :type fmin: float
+        :param fmax: Maximum frequency.
+        :type fmax: float
 
         """
         ret = self.low_passed(fmax)
         return ret.high_passed(fmin)
 
     def band_pass(self, fmin, fmax):
-        """Remove all the frequencies below fmin and above fmax
+        """Remove all the frequencies below ``fmin`` and above ``fmax``.
 
-        :param fmin: Minimum frequency
+        :param fmin: Minimum frequency.
         :type fmin: float
-        :param fmax: Maximum frequency
+        :param fmax: Maximum frequency.
         :type fmax: float
 
         """
         self._apply_to_self(self.band_passed, fmin, fmax)
 
     def peaks(self, amp_threshold=0.0):
-        """Return the location and amplitue of the peaks of the amplitue.
+        """Return the location and amplitude of the peaks of the amplitude.
 
         Peaks at the boundaries are not considered.
 
-        :param amp_threshold: Ignore peaks smaller than this value
+        :param amp_threshold: Ignore peaks smaller than this value.
         :type amp_threshold:  float
 
-        :returns: Peaks of the amplitude
-        :rtype: List of tuples of three elements: frequency of the bin in which
-                the peak is, fitted frequency of the maximum with parabolic
-                approximation, amplitude of the peak
+        :returns: Peaks of the amplitude as list of tuples of three elements:
+                frequency of the bin in which the peak is, fitted frequency of
+                the maximum with parabolic approximation, amplitude of the peak.
+        :rtype: List of tuples of three elements.
+
         """
         peaks_f_indexes = argrelextrema(self.amp, np.greater)
 
@@ -315,29 +356,29 @@ class FrequencySeries(BaseSeries):
 
     def peaks_frequencies(self, amp_threshold=0.0):
         """Return the frequencies of the peaks of the amplitude larger
-        than amp_threshold.
+        than ``amp_threshold``.
 
         The frequency is computed with a quadratic fit using the left and right
-        neighbours.
+        neighbors.
 
         Peaks at the boundaries are not considered.
 
-        :param amp_threshold: Ignore peaks smaller than this value
+        :param amp_threshold: Ignore peaks smaller than this value.
         :type amp_threshold:  float
 
-        :returns: Fitted frequencies of the peaks of the amplitude
-        :rtype: 1d numpy array
+        :returns: Fitted frequencies of the peaks of the amplitude.
+        :rtype: 1d NumPy array
 
         """
         return np.array([p[1] for p in self.peaks(amp_threshold)])
 
     def to_TimeSeries(self):
-        """FIXME! briefly describe function
+        """Perform a inverse Fourier transform.
 
         If only positive frequencies are found, we will assume that the
         original signal was real.
 
-        :returns:
+        :returns: Inverse Fourier transform.
         :rtype: :py:class:`.TimeSeries`
 
         """
@@ -363,15 +404,15 @@ class FrequencySeries(BaseSeries):
             # So, we simply recompute them assuming the current df
             frequencies = np.linspace(-self.fmax, self.fmax, len(y))
             t = np.fft.fftfreq(len(frequencies), d=self.df)
-            # This not the order numpy likes
+            # This not the order NumPy likes
             t = np.fft.fftshift(t)
 
         # We need the normalization df to compute physical quantities.
-        # Intuitively, numpy computes a_k = 1 / N \sum A_k exp(2 pi f t), to
+        # Intuitively, NumPy computes a_k = 1 / N \sum A_k exp(2 pi f t), to
         # transform this into an integral (true Fourier transform), we have to
         # multiply this by the measure of integration.
 
-        # TODO: Why exactly do we need len(t) here?
+        # NOTE: Why exactly do we need len(t) here?
         #       It works, and PyCBC does it too. But what is the reason?
         return timeseries.TimeSeries(t, y * len(t) * self.df)
 
@@ -383,47 +424,51 @@ class FrequencySeries(BaseSeries):
         noises=None,
         same_domain=False,
     ):
-        r"""Compute the (network) inner product.
+        r"""Compute the (network) inner product with another :py:class:`~.FrequencySeries`.
+
+        This is defined as:
 
         :math:`(h_1, h_2) = 4 \Re \int_{f_min}^{f_max} \frac{h_1 h_2^*}{S_n}`
 
+        where ``S_n`` is the noise curve, and ``h_1``, ``h_2`` the series.
+
         In case multiple noise curves are supplied, compute
 
-        :math:`(h_1, h_2) = \sum_detectors
+        :math:`(h_1, h_2) = \sum_{detectors}
         4 \Re \int_{f_min}^{f_max} \frac{h_1 h_2^*}{S_n}`
 
-        This is the network inner product. To compute this quantity, provide a
-        list of noises.
+        This is the network inner product. To compute this quantity, you have
+        to provide a list of noises.
 
-        We assume that the frequencyseries are zero outside of the interval of
-        definition, so if fmax (fmin) is larger (smaller) than the one
-        available, it is effectively set to the one available.
+        We assume that the :py:class:`~.FrequencySeries` are zero outside of the
+        interval of definition, so if ``fmax`` (``fmin``) is larger (smaller)
+        than the one available, it is effectively set to the one available.
 
-        Fourier transform explode at fmin = 0, so the result of the integration
-        is highly sensitive. One should avoid the region with fmin = 0.
+        Since Fourier typically transforms explode at fmin = 0, the result of
+        the integration is highly sensitive to regions near that frequency.
 
-        Same_domian If True, it is assumed that all the frequency series
-        involved are defined over the same frequencies. Turning this on speeds
-        up computations, but it will result in incorrect results if the
-        assumption is violated. If it is False, the domain of definition of the
-        series is checked, if it is not the same for all the series, then they
-        will be resampled.
+        If ``same_domain`` is True, it is assumed that all the
+        :py:class:`~.FrequencySeries` involved are defined over the same
+        frequencies. Turning this on speeds up computations, but it will result
+        in incorrect results if the assumption is violated. If it is False, the
+        domain of definition of the series is checked, if it is not the same for
+        all the series, then they will be resampled.
 
-        :param other: Second frequency series in the inner product
+        :param other: Second frequency series in the inner product.
         :type other: :py:class:`.FrequencySeries`
-        :param fmin: Remove frequencies below fmin
+        :param fmin: Remove frequencies below this value.
         :type fmin: float
-        :param fmax: Remove frequencies above fmin
+        :param fmax: Remove frequencies above this value.
         :type fmax: float
-        :param noise: If None, no weight is applied
+        :param noise: If None, no weight is applied.
         :type noise: :py:class:`.FrequencySeries`, list
                      of :py:class:`.FrequencySeries` or None
-        :param same_domain: Whether to assume that the frequencyseries are
-                            defined over the same frequencies. If you can
+        :param same_domain: Whether to assume that the :py:class:`~.FrequencySeries`
+                            are defined over the same frequencies. If you can
                             guarantee this, the computation will be faster.
         :type same_domain: bool
 
-        :returns: Inner product between self and other
+        :returns: Inner product between ``self`` and ``other``.
         :rtype: float
 
         """
@@ -497,34 +542,44 @@ class FrequencySeries(BaseSeries):
     ):
         r"""Compute the (network) overlap.
 
+        This is defined as:
+
         :math:`\textrm{overlap} = (h_1, h_2) / \sqrt{(h_1, h_1)(h_2, h_2)}`
 
-        We assume that the frequencyseries are zero outside of the interval of
-        definition, so if fmax (fmin) is larger (smaller) than the one
-        available, it is effectively set to the one available.
+        where ``h_1``, ``h_2`` are the series.
 
-        Same_domian If True, it is assumed that all the frequency series
-        involved are defined over the same frequencies. Turning this on speeds
-        up computations, but it will result in incorrect results if the
-        assumption is violated. If it is False, the domain of definition of the
-        series is checked, if it is not the same for all the series, then they
-        will be resampled.
+        To compute is the network overlap, you have to provide a list of noises.
 
-        :param other: Second frequency series in the overlap
+        We assume that the :py:class:`~.FrequencySeries` are zero outside of the
+        interval of definition, so if ``fmax`` (``fmin``) is larger (smaller)
+        than the one available, it is effectively set to the one available.
+
+        Since Fourier typically transforms explode at fmin = 0, the result of
+        the integration is highly sensitive to regions near that frequency.
+
+        If ``same_domain`` is True, it is assumed that all the
+        :py:class:`~.FrequencySeries` involved are defined over the same
+        frequencies. Turning this on speeds up computations, but it will result
+        in incorrect results if the assumption is violated. If it is False, the
+        domain of definition of the series is checked, if it is not the same for
+        all the series, then they will be resampled.
+
+
+        :param other: Second frequency series in the overlap.
         :type other: :py:class:`.FrequencySeries`
-        :param fmin: Remove frequencies below fmin
+        :param fmin: Remove frequencies below this value.
         :type fmin: float
-        :param fmax: Remove frequencies above fmin
+        :param fmax: Remove frequencies above this value.
         :type fmax: float
         :param noise: If None, no weight is applied. If it is a list,
                       the netowrk overlap is computed.
         :type noise: (list of) :py:class:`.FrequencySeries` or None
-        :param same_domain: Whether to assume that the frequencyseries are
-                            defined over the same frequencies. If you can
+        :param same_domain: Whether to assume that the :py:class:`~.FrequencySeries`
+                            are defined over the same frequencies. If you can
                             guarantee this, the computation will be faster.
         :type same_domain: bool
 
-        :returns: Overlap between self and other
+        :returns: Overlap between ``self`` and ``other``.
         :rtype: float
 
         """

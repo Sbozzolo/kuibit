@@ -15,10 +15,25 @@
 # You should have received a copy of the GNU General Public License along with
 # this program; if not, see <https://www.gnu.org/licenses/>.
 
-"""This module provides access to data saved by the multipoles thorn.
+"""This module provides access to data saved by the Multipole thorn.
 
-   The main class is :py:class:`MultipolesDir`, which is typically
-   accessed through :py:class:`~.SimDir` instances.
+There are multiple classes defined in this module:
+
+- :py:class`~.MultipolesDir` interfaces with :py:class:`~.SimDir` and organizes the
+  data according to the variable available. This is a dictionary-like object with keys
+  the variable names.
+- :py:class`~.MultipoleAllDets` takes all the files that correspond to a given variable
+  and organize them according to the extraction radius.
+- :py:class`~.MultipoleOneDet` represents one single extraction radius, for a single
+  variable. It is a dictionary-like object with keys the multipolar numbers and values
+  the multipolar decomposition represented as represented as :py:class:`~.TimeSeries`
+  objects.
+
+These are hierarchical classes, one containing the others, so one typically ends
+up with a series of brackets or dots to access the actual data. For example, if
+``sim`` is a :py:class:`~.SimDir`, ``sim.multipoles['rho_b'][100][2,2]`` is
+(2,2) decomposition of ``rho_b`` at radius 100 represented as
+:py:class:`~.TimeSeries`.
 
 """
 
@@ -41,38 +56,44 @@ class MultipoleOneDet:
     sphere where multipoles are computed is a "detector". Hence, the name
     of the class.
 
-    It works as a dictionary in terms of the component as a tuple (l,m),
-    returning a :py:class:`~.TimeSeries` object. Alternatively, it can be
-    called as a function(l,m). Iteration is supported and yields tuples
-    (l, m, data), which can be used to loop through all the multipoles
+    :py:class:`~.MultipoleOneDet` is a dictionary-like object with components as
+    the tuples (l,m) and values the corresponding multipolar decomposition as a
+    :py:class:`~.TimeSeries` object. Alternatively, this can also be called
+    directly ``multipoleonedet(l,m)``. Iteration is supported and yields tuples
+    ``(l, m, data)``, which can be used to loop through all the multipoles
     available.
 
-    The reason we allow for l_min is to remove those files that are not
+    The reason we allow for ``l_min`` is to remove those files that are not
     necessary when considering gravitational waves (l<2).
 
-    Not intended for direct use.
-
-    :ivar dist: Radius of the sphere
+    :ivar dist: Radius of the sphere.
     :vartype dist: float
-    :ivar radius: Radius of the sphere
-    :vartype radius: float
-    :ivar l_min: l smaller than l_min are dropped
-    :vartype l_min: int
-    :ivar available_l: Available l values
-    :vartype available_l: set
-    :ivar available_m: Available m values
+    :ivar radius: Radius of the sphere.
+    :type radius: float
+    :ivar l_min: l smaller than ``l_min`` are dropped.
+    :type l_min: int
+    :ivar available_l: Available l values.
+    :type available_l: set
+    :ivar available_m: Available m values.
     :ivar available_m: set
-    :ivar available_lm: Available (l, m) values
+    :ivar available_lm: Available ``(l, m)`` values.
     :ivar available_lm: set of tuples
-    :ivar missing_lm: Missing (l, m) values to have all from l_min to l_max
+    :ivar missing_lm: Missing (l, m) values to have all from ``l_min`` to ``l_max``.
     :ivar missing_lm: set of tuples
 
     """
 
     def __init__(self, dist, data, l_min=0):
-        """Data is a list of tuples with (l, m, timeseries).
+        """Constructor.
 
-        l smaller than l_min are dropped
+        :param dist: Radius of the spherical surface.
+        :type dist: float
+        :param data: List of tuples with the two multipolar numbers and
+                     the data as :py:class:`~.TimeSeries`.
+        :type data: list of tuple ``(l, m, timeseries)``
+        :ivar l_min: l smaller than ``l_min`` are dropped.
+        :type l_min: int
+
         """
 
         self.dist = float(dist)
@@ -123,6 +144,11 @@ class MultipoleOneDet:
         self.data = [(lm[0], lm[1], ts) for lm, ts in self._multipoles.items()]
 
     def copy(self):
+        """Return a deep copy.
+
+        :returns: Deep copy of ``self``.
+        :rtype: :py:class:`~.MultipoleOneDet`
+        """
         return type(self)(self.dist, self.data, self.l_min)
 
     def __contains__(self, key):
@@ -149,7 +175,12 @@ class MultipoleOneDet:
         return len(self._multipoles)
 
     def keys(self):
-        return self.available_lm
+        """Return available multipolar numbers.
+
+        :returns: Available multipolar numbers.
+        :rtype: dict_keys
+        """
+        return self._multipoles.keys()
 
     def __str__(self):
         ret = f"(l, m) available: {self.keys()}"
@@ -160,23 +191,26 @@ class MultipoleOneDet:
     def total_function_on_available_lm(
         self, function, *args, l_max=None, **kwargs
     ):
-        """Evaluate function on each multipole and accumulate the result.
+        """Evaluate ``function`` on each multipole and accumulate the result.
 
-        ``total_function_on_available_lm`` will call function with the
+        ``total_function_on_available_lm`` will call ``function`` with the
         following arguments:
 
         ``function(timeseries, mult_l, mult_m, dist, *args, **kwargs)``
 
-        If function does not need some paramters, it should use take
+        If ``function`` does not need some paramters, it should use take
         the ``*args`` argument to ignore the additional paramters that
         are always passed ``(l, m, r)``.
 
         Values of l larger than ``l_max`` are ignored.
 
-        function can take additional paramters passed directly from
-        ``total_function_on_available_lm`` (e.g. pcut for FFI).
+        This method is used to compute quantities like the total power in
+        gravitational waves.
 
-        :params function: Function that has to be applied on each monopole
+        ``function`` can take additional paramters passed directly from
+        ``total_function_on_available_lm`` (e.g. ``pcut`` for FFI).
+
+        :params function: Function that has to be applied on each multipole.
         :type function: callable
 
         :returns: Sum of function applied to each monopole
@@ -216,33 +250,37 @@ class MultipoleOneDet:
 class MultipoleAllDets:
     """This class collects available surfaces with multipole data.
 
-    It works as a dictionary in terms of spherical surface radius,
-    returning a :py:class:`MultipoleOneDet` object. Iteration is supported,
-    sorted by ascending radius. You can iterate over all the radii and
-    all the available l and m with a nested loop.
-
-    Not intended for direct use.
+    It is a dictionary-like object with keys the spherical surface radius, and
+    values :py:class:`MultipoleOneDet` object. Iteration is supported, sorted by
+    ascending radius. You can iterate over all the radii and all the available l
+    and m with a nested loop.
 
     :ivar radii:        Available surface radii.
-    :vartype radii: float
-    :ivar r_outer:      Radius of the outermost detector
-    :vartype r_outer: float
-    :ivar l_min: l smaller than l_min are dropped
-    :vartype l_min: int
-    :ivar outermost:    Outermost detector
-    :vartype outermost: :py:class:`~MultipoleOneDet`
+    :type radii: float
+    :ivar r_outer:      Radius of the outermost detector.
+    :type r_outer: float
+    :ivar l_min: l smaller than l_min are dropped.
+    :type l_min: int
+    :ivar outermost:    Outermost detector.
+    :type outermost: :py:class:`~MultipoleOneDet`
     :ivar available_lm: Available components as tuple (l,m).
-    :vartype available_lm: list of tuples
-    :ivar available_l:  List of available "l".
-    :vartype available_l: list
-    :ivar available_m:  List of available "m".
-    :vartype available_m: list
+    :type available_lm: list of tuples
+    :ivar available_l:  List of available l.
+    :type available_l: list
+    :ivar available_m:  List of available m.
+    :type available_m: list
 
     """
 
     def __init__(self, data, l_min=0):
-        """Data is a list of tuples with structure
-        (multipole_l, multipole_m, extraction_radius, [timeseries])
+        """Constructor.
+
+        :param data: List of tuples with ``(multipole_l, multipole_m,
+                     extraction_radius, [timeseries])``, where
+                     ``[timeseries]`` is a list of the :py:class:`~.TimeSeries`
+                     associated.
+        :type data: list of tuples
+
         """
         self.l_min = l_min
 
@@ -293,20 +331,25 @@ class MultipoleAllDets:
                 self.data.append((mult_l, mult_m, radius, ts))
 
     def copy(self):
+        """Return a deep copy.
+
+        :returns: Deep copy of ``self``.
+        :rtype: :py:class:`~.MultipoleAllDets`
+        """
         return type(self)(self.data, self.l_min)
 
     def has_detector(self, mult_l, mult_m, dist):
         """Check if a given multipole component extracted at a given
         distance is available.
 
-        :param mult_l:     Multipole component l
+        :param mult_l:     Multipole component l.
         :type mult_l:      int
-        :param mult_m:     Multipole component m
+        :param mult_m:     Multipole component m.
         :type mult_m:      int
-        :param dist:  Distance of detector
+        :param dist:  Distance of the detector.
         :type dist:   float
 
-        :returns:     If available or not
+        :returns:     If available or not.
         :rtype:       bool
         """
         if dist in self:
@@ -332,11 +375,15 @@ class MultipoleAllDets:
         return len(self._dets)
 
     def keys(self):
-        # TODO: In Python3 keys are not list, but iterables
-        return list(self._dets.keys())
+        """Return available extraction radii.
+
+        :returns: Available extraction radii.
+        :rtype: dict_keys
+        """
+        return self._dets.keys()
 
     def __str__(self):
-        ret = f"Avilable radii: {self.keys()}\n\n"
+        ret = f"Avilable radii: {list(self.keys())}\n\n"
         for d in sorted(self.keys()):
             ret += f"At radius {d}, {self._dets[d]}\n"
         return ret
@@ -347,15 +394,20 @@ class MultipolesDir:
     simulation directory.
 
     This class is like a dictionary, you can access its values using the
-    brackets operator. The output is a :py:mod:`~.MultipoleAllDets`, which has
-    a full multipolar description for all the available radii. Files are lazily
-    loaded. If both h5 and ASCII are present, h5 are preferred. There's no
-    attempt to combine the two.
+    brackets operator, with values that are :py:mod:`~.MultipoleAllDets`. These
+    contain the full multipolar description for all the available radii. Files
+    are lazily loaded. If both HDF5 and ASCII are present, HDF5 are preferred.
+    There's no attempt to combine the two. Alternatively, you can access
+    variables with ``get`` or with ``fields.var_name``.
 
-    Alternatively, you can access variables with get() or with fields.var_name.
     """
 
     def __init__(self, sd):
+        """Constructor.
+
+        :param sd: Simulation directory.
+        :type sd: :py:class:`~.SimDir`
+        """
         # self._vars is a dictionary. For _vars_ascii, the keys are the
         # variables  and the items are sets of tuples of the form
         # (multipole_l,  multipole_m, radius, filename) for text files.
@@ -365,7 +417,6 @@ class MultipolesDir:
         self._vars_ascii = {}
         self._vars_h5 = {}
 
-        self.path = sd.path
         # First, we need to find the multipole files.
         # There are text files and h5 files
         #
@@ -426,6 +477,14 @@ class MultipolesDir:
 
     @staticmethod
     def _multipole_from_textfile(path):
+        """Read multipole data from a text file.
+
+        :param path: File to read.
+        :type path: str
+
+        :returns: Multipole data.
+        :rtype: :py:class:`~.TimeSeries`
+        """
         a = np.loadtxt(path, unpack=True, ndmin=2)
         if len(a) != 3:
             raise RuntimeError(f"Wrong format in {path}")
@@ -434,6 +493,13 @@ class MultipolesDir:
 
     @staticmethod
     def _multipoles_from_h5file(path):
+        """Read multipole data from a HDF5 file.
+
+        :param path: File to read.
+        :type path: str
+        :returns: Multipole data.
+        :rtype: :py:class:`~.TimeSeries`
+        """
         alldets = []
         # This regex matches : l(number)_m(-number)_r(number)
         fieldname_pattern = re.compile(r"l(\d+)_m([-]?\d+)_r([0-9.]+)")
@@ -455,8 +521,15 @@ class MultipolesDir:
         return alldets
 
     def _multipoles_from_textfiles(self, mpfiles):
-        # We prepare the data for MultipoleAllDets checking
-        # for errors
+        """Read all the multipole data in several text files.
+
+        :param mpfiles: Files to read.
+        :type mpfiles: list of str
+
+        :returns: :py:class:`~.MultipoleAllDets` with all the data read.
+        :rtype: :py:class:`~.MultipoleAllDets`
+        """
+        # We prepare the data for MultipoleAllDets checking for errors
         alldets = [
             (
                 mult_l,
@@ -469,6 +542,14 @@ class MultipolesDir:
         return MultipoleAllDets(alldets)
 
     def _multipoles_from_h5files(self, mpfiles):
+        """Read all the multipole data in several HDF5 files.
+
+        :param mpfiles: Files to read.
+        :type mpfiles: list of str
+
+        :returns: :py:class:`~.MultipoleAllDets` with all the data read.
+        :rtype: :py:class:`~.MultipoleAllDets`
+        """
         mult_l = []
 
         for filename in mpfiles:
@@ -478,7 +559,12 @@ class MultipolesDir:
 
     @lru_cache(128)
     def __getitem__(self, key):
-        """:The return value is py:class:`~.MultipoleAllDets`."""
+        """Read data associated to variable ``key``.
+
+        :returns: Multipolar data.
+        :rtype: :py:class:`~.MultipoleAllDets`
+
+        """
         k = str(key).lower()
         # We prefer h5
         if k in self._vars_h5:
@@ -490,23 +576,36 @@ class MultipolesDir:
         raise KeyError
 
     def get(self, key, default=None):
+        """Return a the multipolar data for the given variable if available, else return
+        the default value.
+
+        :param key: Requested variable.
+        :type key: str
+        :param default: Returned value if ``key`` is not available.
+        :type default: any
+
+        :returns: Collection of all the multipolar data for the given variable.
+        :rtype: :py:class:`~.MultipoleAllDets`
+
+        """
+
         if key not in self:
             return default
         return self[key]
 
     def keys(self):
-        # To find the unique keys we use transofrm the keys in sets, and then
-        # we unite them.
-        return list(
-            set(self._vars_h5.keys()).union(set(self._vars_ascii.keys()))
-        )
+        """Return available variables with multipolar data.
+
+        :returns: Available variables that have multipolar data.
+        :rtype: dict_keys
+        """
+        # We merge the dictionaries and return the keys.
+        # This automatically takes care of making sure that they keys are unique.
+        return {**self._vars_h5, **self._vars_ascii}.keys()
 
     def __str__(self):
-        """NOTE: __str__ requires opening all the h5 files!
-        This can be slow!
-        """
-        ret = f"Folder: {self.path}\n"
-        ret += f"Variables available: {self.keys()}\n"
+        """NOTE: __str__ requires opening all the h5 files! This can be slow!"""
+        ret = f"Variables available: {self.keys()}\n"
         for variable in self.keys():
             ret += f"For variable {variable}:\n\n"
             ret += f"{self[variable]}\n"

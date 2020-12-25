@@ -18,7 +18,28 @@
 # this program; if not, see <https://www.gnu.org/licenses/>.
 
 
-"""Convenience functions to analyze and manipulate gravitational waves.
+"""The module :py:mod:`~.gw_utils` contains convenience functions and
+structures to analyze and work with gravitational waves.
+
+First, the ``Detectors`` object is defined. ``Detectors`` is a named tuple
+with fields "hanford", "livingston", "virgo". This is used every time we
+deal with specific detectors.
+
+The functions provided are:
+
+- :py:func:`~.luminosity_distance_to_redshift`: convert a given luminosity
+  distance to a redshift in the ΛCDM cosmology.
+- :py:func:`~.sYlm`: return the spin-weighted spherical harmonics at a given
+  angle.
+- :py:func:`~.ra_dec_to_theta_phi`: convert right ascension and declination to
+  spherical coordinates.
+- :py:func:`~.antenna_responses`: compute the antenna responses of a given
+  angle.
+- :py:func:`~.antenna_responses_from_sky_localization`: compute the antenna
+  responses for known detectors at a given sky localization.
+
+- :py:func:`~.signal_to_noise_ratio_from_strain`: compute the signal to noise
+  for a given signal and a given noise curve.
 
 """
 
@@ -44,26 +65,24 @@ def luminosity_distance_to_redshift(
     Omega_L=0.691,
     initial_guess=0.1,
 ):
-    r"""Compute redshift from luminosity distance in Mpc assuming
-    the LCMD cosmology.
+    r"""Compute redshift from luminosity distance in Mpc assuming the ΛCDM cosmology.
 
     This function is useful to correctly reproduce observed signals
     from cosmological sources (e.g., binary black holes far away).
 
-    The redshift is computed via root-finding, so an initial guess
-    is needed.
+    The redshift is computed via root-finding, so an initial guess is needed.
 
-    :param luminosity_distance: Luminosity distance in Mpc
+    :param luminosity_distance: Luminosity distance in megaparsec.
     :type luminosity_distance: float
-    :param Omega_m: :math:`\Omega_m` (matter) cosmological parameter
+    :param Omega_m: :math:`\Omega_m` (matter) cosmological parameter.
     :type Omega_m: float
-    :param Omega_L: :math:`\Omega_m` (dark energy) cosmological parameter
+    :param Omega_L: :math:`\Omega_m` (dark energy) cosmological parameter.
     :type Omega_L: float
     :param initial_guess: Initial guess to the redshift for the
-                          root-finding routine
+                          root-finding routine.
     :type initial_guess: float
 
-    :rvalue z: Redshift
+    :returns z: Redshift
     :rtype z: float
 
     """
@@ -89,22 +108,23 @@ def luminosity_distance_to_redshift(
 
 
 def sYlm(ss, ll, mm, theta, phi):
-    """Compute spin-weighted spherical harmonics at the angles theta and phi.
+    """Compute spin-weighted spherical harmonics at the angles ``theta`` and ``phi``.
 
-    When ss = 0, results are spherical harmonics.
+    When ``ss = 0``, these are spherical harmonics.
 
-    :param ss: Spin weight
+    :param ss: Spin weight.
     :type ss: int
-    :param ll: l multipolar number
+    :param ll: :math:`l` multipolar number.
     :type ll: int
-    :param mm: l multipolar number
+    :param mm: :math:`m` multipolar number.
     :type mm: int
-    :param theta: Meridional angle
+    :param theta: Meridional angle.
     :type theta: float
-    :param phi: Azimuthal angle
+    :param phi: Azimuthal angle.
     :type phi: float
 
-    :rvalue sYlm: Spin-weighted spherical harmonics
+    :returns sYlm: Spin-weighted spherical harmonic evaluated at
+                  ``theta`` and ``phi``.
     :rtype sYlm: float
 
     """
@@ -195,20 +215,20 @@ def sYlm(ss, ll, mm, theta, phi):
 
 
 def ra_dec_to_theta_phi(right_ascension, declination, time_utc):
-    """Compute spherical theta and phi for Hanford, Livingston and Virgo for a
-    given source localization.
+    """Compute the spherical angles ``theta`` and ``phi`` for Hanford, Livingston
+    and Virgo for a given source localization.
 
-    utc_time has to have the following formatting: %Y-%m-%d %H:%M,
-    eg 2015-09-14 09:50:45
+    ``utc_time`` has to have the following formatting: ``%Y-%m-%d %H:%M``,
+    (eg ``2015-09-14 09:50:45``)
 
-    :param right_ascension: Right ascension of the source in degrees
+    :param right_ascension: Right ascension of the source in degrees.
     :type right_ascension: float
-    :param declination: Declination of the source in degrees
+    :param declination: Declination of the source in degrees.
     :type declination: float
-    :param time_utc: UTC time of the event
+    :param time_utc: UTC time of the event.
     :type declination: str
 
-    :rvalue spherical coordinates: Theta, phi for the different detectors
+    :returns spherical coordinates: ``Theta``, ``phi`` for the different detectors.
     :rtype: namedtuple with fields hanford, livingston, and virgo
 
     """
@@ -322,17 +342,18 @@ def ra_dec_to_theta_phi(right_ascension, declination, time_utc):
 
 def antenna_responses(theta, phi, polarization=0):
     """Return the antenna response pattern of a detector on the z = 0 plane
-    with the arms on the x and y directions.
+    with the arms on the x and y directions for a given localization defined
+    by the spherical angles ``theta`` and ``phi``.
 
-    Theta and phi are the usual spherical angles.
-
-    :param theta: Meridional angle
+    :param theta: Meridional angle.
     :type theta: float
-    :param phi: Azimuthal angle
+    :param phi: Azimuthal angle.
     :type phi: float
-    :param polarization: Polarization angle of the wave (cross and plus,
-                         in this order)
+    :param polarization: Polarization angle of the wave.
     :type polarization: float
+
+    :returns: Antenna response for cross and plus polarizations (in this order).
+    :rtype: tuple of floats.
 
     """
     # http://research.physics.illinois.edu/cta/movies/bhbh_sim/wavestrain.html
@@ -356,11 +377,8 @@ def antenna_responses_from_sky_localization(
     See,
     http://research.physics.illinois.edu/cta/movies/bhbh_sim/wavestrain.html.
 
-    utc_time has to have the following formatting: ``%Y-%m-%d %H:%M``,
-    eg 2015-09-14 09:50:45
-
-    Return values are plus and cross responses for Hanford, Livingston, and
-    Virgo.
+    ``utc_time`` has to have the following formatting: ``%Y-%m-%d %H:%M``,
+    (eg ``2015-09-14 09:50:45``)
 
     :param right_ascension: Right ascension of the source in degrees
     :type right_ascension: float
@@ -371,8 +389,8 @@ def antenna_responses_from_sky_localization(
     :param polarization: Polarization of the wave
     :type polarization: float
 
-    :rvalue antenna_pattern: Cross and plus antenna pattern for the different
-                             interferometers
+    :returns antenna_pattern: Cross and plus antenna pattern for the different
+                             interferometers.
     :rtype: namedtuple with fields hanford, livingston, and virgo
 
     """
@@ -412,54 +430,64 @@ def antenna_responses_from_sky_localization(
 
 
 def Schwarzschild_radius_to_tortoise(radii, mass):
-    """Transform radial coordinates r to tortoise coordinates assuming mass M.
+    """Transform radial coordinates ``radii`` to tortoise coordinates assuming mass
+    ``mass``.
 
     Equation (26) in 1307.5307.
 
-    :param radii: Radius in Schwarzschild coordinates
-    :type radii: float or 1D numpy array
-    :param mass: ADM mass
+    :param radii: Radius in Schwarzschild coordinates.
+    :type radii: float or 1D NumPy array
+    :param mass: ADM mass.
     :type mass: float
 
-    :returns: Tortoise radii
-    :rtype: float or 1D numpy array
+    :returns: Tortoise radii.
+    :rtype: float or 1D NumPy array
 
     """
     return radii + 2 * mass * np.log(radii / (2 * mass) - 1)
 
 
-def retarded_times_to_coordinate_times(retarded_times, radii, mass):
+def _retarded_times_to_coordinate_times(retarded_times, radii, mass):
     """Compute the coordinate times corresponding to the retarded times at the
       coordinate radii.
 
-    First, the tortoise radius is computed from rex, then the coordinate times
-    are computed with t = u + r_tortoise(rex).
+    First, the tortoise radius is computed from ``radii``, then the
+    coordinate times are computed with :math:`t = u + r_{tortoise}(radii)`.
 
-      :param retarded_times: Retarded times
-      :type retarded_times: float or 1D numpy array
-      :param radii: Radii
-      :type radii: float or 1D numpy array
-      :param mass: ADM mass (needed to compute tortoise radius).
-      :type mass: float
+    This function is used to extrapolate gravitational waves to infinity.
+
+    :param retarded_times: Retarded times.
+    :type retarded_times: float or 1D NumPy array
+    :param radii: Radii of evaluation.
+    :type radii: float or 1D NumPy array
+    :param mass: ADM mass (needed to compute tortoise radius).
+    :type mass: float
+
+    :returns: Coordinate times corresponding to the given retarded times
+              and evaluation radii.
+    :rtype: float or 1D NumPy array
 
     """
     return retarded_times + Schwarzschild_radius_to_tortoise(radii, mass)
 
 
-def coordinate_times_to_retarded_times(coordinate_times, radii, mass):
+def _coordinate_times_to_retarded_times(coordinate_times, radii, mass):
     """Compute the coordinate times corresponding to the retarded times
-      at the coordinate radii. M is the ADM mass
-      (needed to compute tortoise radius).
+      at the given coordinate radii.
 
-    First, the tortoise radius is computed from rex, then the coordinate times
-    are computed with t = u + r_tortoise(rex).
+    This function is used to extrapolate gravitational waves to infinity.
 
-      :param retarded_times: Coordinate times
-      :type retarded_times: float or 1D numpy array
-      :param radii: Radii (it can be just one)
-      :type radii: float or 1D numpy array
-      :param mass: ADM mass
-      :type mass: float
+    :param retarded_times: Coordinate times.
+    :type retarded_times: float or 1D NumPy array
+    :param radii: Radii (it can be just one)
+    :type radii: float or 1D NumPy array
+    :param mass: ADM mass
+    :type mass: float
+
+    :returns: Retarded times corresponding to the given coordinate times
+              and evaluation radii.
+    :rtype: float or 1D NumPy array
+
     """
     return coordinate_times - Schwarzschild_radius_to_tortoise(radii, mass)
 
@@ -470,28 +498,35 @@ def signal_to_noise_ratio_from_strain(
     r"""Return the signal to noise ratio given a strain and a power spectal density
     distribution for a detector.
 
+    If ``window_function`` is not None, the window will be applied to the signal.
+    All the unknown arguments are passed to the window function.
+
     The SNR is computed as :math:`sqrt of 4 \int_fmin^fmax |\tilde{h} f|^2 / Sn(f) d f`
+    (equation from 1408.0740)
 
-    Using equation from 1408.0740
-
-    :param h: Strain
+    :param h: Gravitational-wave strain.
     :type h: :py:class:`~.TimeSeries`
-    :param noise: Power spectral density of the noise of the detector
+    :param noise: Power spectral density of the noise of the detector.
     :type noise: :py:class:`~.FrequencySeries`
     :param fmin: Minimum frequency over which to compute the SNR.
     :type fmin: float
     :param fmax: Maximum frequency over which to compute the SNR.
     :type fmax: float
-    :param window_function: If not None, apply window_function to the
+    :param window_function: If not None, apply ``window_function`` to the
                             series before computing the strain.
     :type window_function: callable, str, or None
+    :param args, kwargs: All the additional parameters are passed to
+                         the window function.
+
+    :returns: Signal-to-noise ratio.
+    :rtype: float
 
     """
     if not isinstance(h, ts.TimeSeries):
         raise TypeError("Strain has to be a TimeSeries")
     # First, we window to avoid spectral leakage
     h_win = h.windowed(window_function, *args, **kwargs)
-    # Then, we take the Fouerier transform
+    # Then, we take the Fourier transform
     h_fft = h_win.to_FrequencySeries()
     # The SNR is just the inner product of h_fft with itself
     return np.sqrt(

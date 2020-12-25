@@ -42,7 +42,7 @@ class AttributeDictionary:
         """Store elements in self._elem.
 
         :param elements: Dictionary that has to be converted in collections of
-                         attributesn
+                         attributes.
         :type elements: dict
 
         """
@@ -59,9 +59,9 @@ class AttributeDictionary:
     def __getattr__(self, name):
         """Read _elem and return the value associated to the key name.
 
-        :param name: Key in the dictionary _elem
+        :param name: Key in the dictionary _elem.
         :type name: str
-        :returns: Value of _elem[name]
+        :returns: Value of _elem[name].
 
         """
         if name not in self._elem:
@@ -75,8 +75,8 @@ class AttributeDictionary:
     def __getitem__(self, name):
         """Read _elem and return the value associated to the key name.
 
-        :param name: Key in the dictionary _elem
-        :returns: Value of _elem[name]
+        :param name: Key in the dictionary _elem.
+        :returns: Value of _elem[name].
 
         """
         return self._elem[name]
@@ -87,11 +87,10 @@ class AttributeDictionary:
 
     def keys(self):
         """Return the list of the attributes"""
-        # TODO: In Python 3 this should not be a list
-        return list(self._elem.keys())
+        return self._elem.keys()
 
     def __str__(self):
-        return f"Fields available:\n{self.keys()}"
+        return f"Fields available:\n{list(self.keys())}"
 
 
 class TransformDictionary:

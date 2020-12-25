@@ -16,8 +16,21 @@
 # this program; if not, see <https://www.gnu.org/licenses/>.
 
 """The :py:mod:`~.series` module provides a base class :py:class:`~.BaseSeries`
-for representing and handling series (from which time and frequency series are
-derived).
+for representing and handling series (from which :py:class:`~.TimeSeries` and
+:py:class:`~.FrequencySeries` are derived).
+
+:py:class:`~.BaseSeries` handles series that have a independent variable ``x``
+and a dependent variable ``y``. The derived classes have to implement setters
+and getters if they need to rename these variables (e.g. ``x -> t``). The
+independent variable has to be monotonically increasing.
+
+:py:class:`~.BaseSeries` implements several methods for operations on series.
+Most of these methods are available in two flavors: those that return a new
+:py:class:`~.BaseSeries`, and those which modify the object in place. The latter
+have names with imperative verbs.
+
+This module also provides the useful function :py:func:`~.sample_common`, which
+takes a list of series and resamples them to their common points.
 
 """
 
@@ -68,23 +81,23 @@ class BaseSeries(BaseNumerical):
         This is called when with ``.t = something``. Once these are defined,
         the derived classes should use their getters and setters.
 
-    :ivar data_x: x
-    :vartype data_x: 1D numpy array or float
-    :ivar y: y
-    :vartype y: 1D numpy array or float
+    :ivar data_x: Independent variable.
+    :vartype data_x: 1D NumPy array or float
+    :ivar y: Dependent variable.
+    :vartype y: 1D NumPy array or float
 
     :ivar spline_real: Coefficients for a spline represent of the real part
-                       of y
+                       of y.
     :vartype spline_real: Tuple
     :ivar spline_imag: Coefficients for a spline represent of the real part
-                       of y
+                       of y.
     :vartype spline_imag: Tuple
 
     """
 
     @staticmethod
     def _make_array(x):
-        """Return a numpy array version of x (if x is not already an array)"""
+        """Return a NumPy array version of x (if x is not already an array)."""
         return np.atleast_1d(x) if not isinstance(x, np.ndarray) else x
 
     def _return_array_if_monotonic(self, x_array):
@@ -94,6 +107,12 @@ class BaseSeries(BaseNumerical):
         We assume x_array is an array. We will not check for this, it is up to
         the developer to guarantee this. If this is not true, some errors will
         be thrown.
+
+        :param x_array: Array to check if it is monotonically increasing.
+        :type x_array: 1d NumPy array
+
+        :returns: Input array, if increasing monotonically.
+        :rtype: 1d NumPy array
 
         """
         if len(x_array) > 1:
@@ -122,6 +141,13 @@ class BaseSeries(BaseNumerical):
         This should is used internally whenever a new series is returned from
         self, since we have already checked that data_x is good.
 
+        :param x: Independent variable.
+        :type x: 1d NumPy array or list
+        :param y: Dependent variable.
+        :type y: 1d NumPy array or list
+        :param guarantee_x_is_monotonic: Whether we can skip the check on monotonicity.
+        :param guarantee_x_is_monotonic: bool
+
         """
 
         x_array = self._make_array(x)
@@ -146,7 +172,8 @@ class BaseSeries(BaseNumerical):
         # compute or update splines. The setter and getters are for x and y
 
         # We keep this flag around to know when we have to recompute the
-        # splines
+        # splines. Operations that invalidate the splines MUST reset this flag
+        # to True.
         self.invalid_spline = True
         # Here we also define the splines as empty objects so that we know
         # that they are attributes of the class and they are not uninitialized
@@ -191,7 +218,7 @@ class BaseSeries(BaseNumerical):
         # Invalidate the spline
         self.invalid_spline = True
 
-    # Here is where we pretend to be Pandas. We want to be able to plot our
+    # Here is where we pretend to be pandas. We want to be able to plot our
     # series with matplotlib. Unfortunately, there is no easy way to provide a
     # custom object to the plot functions. However, matplotlib has a special
     # hook for pandas in the function matplotlib.cbook.index_of. In this
@@ -223,18 +250,18 @@ class BaseSeries(BaseNumerical):
 
     @property
     def xmin(self):
-        """Return the min of the independent variable x
+        """Return the minimum of the independent variable x.
 
-        :rvalue: Min of x
+        :rvalue: Minimum of x.
         :rtype: float
         """
         return self.x[0]
 
     @property
     def xmax(self):
-        """Return the max of the independent variable x
+        """Return the maximum of the independent variable x.
 
-        :rvalue: Max of x
+        :rvalue: Maximum of x
         :rtype: float
         """
         return self.x[-1]
@@ -268,18 +295,26 @@ class BaseSeries(BaseNumerical):
     def is_complex(self):
         """Return whether the data is complex.
 
-        :returns:  True if the data is complex, false if it is not
+        :returns:  True if the data is complex, false if it is not.
         :rtype:   bool
 
         """
         return issubclass(self.y.dtype.type, complex)
 
     def x_at_abs_maximum_y(self):
-        """Return the value of x when abs(y) is maximum."""
+        """Return the value of x when abs(y) is maximum.
+
+        :returns: Value of x when abs(y) is maximum.
+        :rtype: float
+        """
         return self.x[np.argmax(np.abs(self.y))]
 
     def x_at_abs_minimum_y(self):
-        """Return the value of x when abs(y) is minimum."""
+        """Return the value of x when abs(y) is minimum.
+
+        :returns: Value of x when abs(y) is minimum.
+        :rtype: float
+        """
         return self.x[np.argmin(np.abs(self.y))]
 
     def _make_spline(self, *args, k=3, s=0, **kwargs):
@@ -287,13 +322,15 @@ class BaseSeries(BaseNumerical):
 
         This function is not meant to be called directly.
 
-        k is the degree of the spline fit. It is recommended to use cubic
-        splines. Even values of k should be avoided especially with small s
+        ``k`` is the degree of the spline fit. It is recommended to use cubic
+        splines. Even values of ``k`` should be avoided especially with small ``s``
         values. 1 <= k <= 5
 
-        :param k: Order of the spline representation
+        Unknown arguments are pass to ``scipy.interpolate.splrep``.
+
+        :param k: Order of the spline representation.
         :type k:  int
-        :param s: Smoothing of the spline
+        :param s: Smoothing of the spline.
         :type s:  float
 
         """
@@ -314,26 +351,26 @@ class BaseSeries(BaseNumerical):
         self.invalid_spline = False
 
     def evaluate_with_spline(self, x, ext=2):
-        """Evaluate the spline on the points x.
+        """Evaluate the spline on the points ``x``.
 
-        Values outside the interval are extrapolated if ext=0, set to 0 if
-        ext=1, raise a ValueError if ext=2, or if ext=3, return the boundary
-        value.
+        Values outside the interval are extrapolated if ``ext=0``, set to 0 if
+        ``ext=1``, raise a ``ValueError`` if ``ext=2``, or if ``ext=3``, return
+        the boundary value.
 
         This method is meant to be used only if you want to use a different ext
         for a specific call, otherwise, just use __call__.
 
-        :param x: Array of x where to evaluate the series or single x
-        :type x: 1D numpy array of float
+        :param x: Array of x where to evaluate the series or single x.
+        :type x: 1D NumPy array of float
 
-        :param ext: How to deal values outside the bounaries. Values outside
-                    the interval are extrapolated if ext=0, set to 0 if ext=1,
-                    raise a ValueError if ext=2, or if ext=3, return the
-                    boundary value.
-        :type ext:  bool
+        :param ext: How to deal values outside the bounaries. Values outside the
+                    interval are extrapolated if ``ext=0``, set to 0 if
+                    ``ext=1``, raise a ValueError if ``ext=2``, or if ``ext=3``,
+                    return the boundary value.
+        :type ext: int
 
-        :returns: Values of the series evaluated on the input x
-        :rtype:   1D numpy array or float
+        :returns: Values of the series evaluated on the input x.
+        :rtype:   1D NumPy array or float
 
         """
         if self.invalid_spline:
@@ -347,7 +384,7 @@ class BaseSeries(BaseNumerical):
             ret = y_real
 
         # When this method is called with a scalar input, at this point, ret
-        # would be a 0d numpy scalar array. What's that? - you may ask. I have
+        # would be a 0d NumPy scalar array. What's that? - you may ask. I have
         # no idea, but the user is expecting a scalar as output. Hence, we cast
         # the 0d array into at "at_least_1d" array, then we can see its length
         # and act consequently.
@@ -360,12 +397,12 @@ class BaseSeries(BaseNumerical):
         """
         # We call the spline only if we need to.
 
-        # TODO: This is not a Pythonic way to write this function.
-        #       The main problem is that it is is not vectorized.
-        #       It is also not efficient, we are going over the array a lot
-        #       of times, re-checking the same elements over and over. Also,
-        #       we are not considering the floating point arithmetic, we should
-        #       allow for some tolerance.
+        # TODO (REFACTORING): This is not a Pythonic way to write this function.
+        #
+        # The main problem is that it is is not vectorized. It is also not
+        # efficient, we are going over the array a lot of times, re-checking the
+        # same elements over and over. Also, we are not considering the floating
+        # point arithmetic, we should allow for some tolerance.
 
         # First we consider the scalar case
         if not hasattr(x, "__len__"):
@@ -389,12 +426,12 @@ class BaseSeries(BaseNumerical):
     def copy(self):
         """Return a deep copy.
 
-        :returns:  Deep copy of the series
+        :returns:  Deep copy of the series.
         :rtype:    :py:class:`~.BaseSeries` or derived class
         """
         # The following is more complicated copy constructor that is designed
         # to copy also the spline information without re-computing it.
-        # This can speed up some comutations.
+        # This can speed up some computations.
         copied = type(self).__new__(self.__class__)
         # We don't use the setters
         copied.__data_x = self.__data_x.copy()
@@ -415,14 +452,14 @@ class BaseSeries(BaseNumerical):
         You can specify the details of the spline with the method make_spline.
 
         If you want to resample without using the spline, and you want a nearest
-        neighbor resampling, pass the keyword piecewise_constant=True.
+        neighbor resampling, pass the keyword ``piecewise_constant=True``.
         This may be a good choice for data with large discontinuities, where the
         splines are ineffective.
 
-        :param new_x: New independent variable
-        :type new_x:  1D numpy array or list of float
-        :param ext: How to handle points outside the data interval
-        :type ext: 0 for extrapolation, 1 for returning zero, 2 for ValueError,
+        :param new_x: New independent variable.
+        :type new_x:  1D NumPy array or list of float
+        :param ext: How to handle points outside the data interval.
+        :type ext: 0 for extrapolation, 1 for returning zero, 2 for ``ValueError``,
                    3 for extending the boundary
         :param piecewise_constant: Do not use splines, use the nearest neighbors.
         :type piecewise_constant: bool
@@ -451,13 +488,13 @@ class BaseSeries(BaseNumerical):
         """Resample the series to new independent variable new_x.
 
         If you want to resample without using the spline, and you want a nearest
-        neighbor resampling, pass the keyword piecewise_constant=True.
+        neighbor resampling, pass the keyword ``piecewise_constant=True``.
         This may be a good choice for data with large discontinuities, where the
         splines are ineffective.
 
-        :param new_x: New independent variable
-        :type new_x:  1D numpy array or list of float
-        :param ext: How to handle points outside the interval
+        :param new_x: New independent variable.
+        :type new_x:  1D NumPy array or list of float
+        :param ext: How to handle points outside the interval.
         :type ext: 0 for extrapolation, 1 for returning zero, 2 for ValueError,
                    3 for extending the boundary
         :param piecewise_constant: Do not use splines, use the nearest neighbors.
@@ -476,21 +513,19 @@ class BaseSeries(BaseNumerical):
         operations with other series (if they have the same x) or
         scalars.
 
-        _apply_binary takes another object that can be of the same type or a
-        scalar, and applies function(self.y, other.y), performing type
+        :py:meth:`~._apply_binary` takes another object that can be of the same
+        type or a scalar, and applies ``function(self.y, other.y)``, performing type
         checking.
 
-        :param other: Other object
+        :param other: Other object.
         :type other: :py:class:`~.BaseSeries` or derived class or float
-        :param function: Dyadic function
+        :param function: Dyadic function (function that takes two arguments).
         :type function: callable
 
-        :returns:  Return value of function when called with self and ohter
+        :returns:  Return value of ``function`` when called with self and other.
         :rtype:   :py:class:`~.BaseSeries` or derived class (typically)
 
         """
-        # TODO: Turn this into a decorator
-
         # If the other object is of the same type
         if isinstance(other, type(self)):
             if (len(self.x) != len(other.x)) or (
@@ -518,10 +553,12 @@ class BaseSeries(BaseNumerical):
         return False
 
     def _apply_to_self(self, f, *args, **kwargs):
-        """Apply the method f to self, modifying self.
-        This is used to transform the commands from returning an object
-        to modifying self.
-        The function has to return a new copy of the object (not a reference).
+        """Apply the method ``f`` to ``self``, modifying ``self``.
+
+        This is used to transform the commands from returning an object to
+        modifying ``self``. The function ``f`` has to return a new copy of the
+        object (not a reference).
+
         """
         ret = f(*args, **kwargs)
         # We avoid the setters to avoid checking for consistency because this
@@ -531,11 +568,13 @@ class BaseSeries(BaseNumerical):
         self.invalid_spline = True
 
     def save(self, file_name, *args, **kwargs):
-        """Saves into simple ASCII format with 2 columns (x, y)
-        for real valued data and 3 columns (x, Re(y), Im(y))
+        """Saves into simple ASCII format with 2 columns ``(x, y)``
+        for real valued data and 3 columns ``(x, Re(y), Im(y))``
         for complex valued data.
 
-        :param file_name: Path (with extensiton) of the output file
+        Unknown arguments are passed to ``NumPy.savetxt``.
+
+        :param file_name: Path (with extension) of the output file.
         :type file_name: str
 
         """
@@ -558,7 +597,7 @@ class BaseSeries(BaseNumerical):
         """Filter out nans/infinite values.
         Return a new series with finite values only.
 
-        :returns: A new series with only finite values
+        :returns: A new series with only finite values.
         :rtype: :py:class:`~.BaseSeries` or derived class
         """
         msk = np.isfinite(self.y)
@@ -572,10 +611,13 @@ class BaseSeries(BaseNumerical):
         """Return a series that is the integral computed with method of
         the rectangles.
 
-        :param dx: Delta x in the independent variable. If provided, it
-                   will be used. This is especially convenient for evely spaced series, as computations will be faster
-        :type dx: float
-        :returns:  New series cumulative integral
+        The spacing ``dx`` can be optionally provided. If provided, it will be
+        used (increasing performance), otherwise it will be computed internally.
+
+        :param dx: Delta x in the independent variable. If None it will be
+                   computed internally.
+        :type dx: float or None
+        :returns:  New series with the cumulative integral.
         :rtype:    :py:class:`~.BaseSeries` or derived class
 
         """
@@ -587,16 +629,26 @@ class BaseSeries(BaseNumerical):
             True,
         )
 
-    def integrate(self):
-        """Integrate series with method of the trapeziod."""
-        self._apply_to_self(self.integrated)
+    def integrate(self, dx=None):
+        """Integrate series with method of the rectangles.
+
+        The spacing ``dx`` can be optionally provided. If provided, it will be
+        used (increasing performance), otherwise it will be computed internally.
+
+        """
+        self._apply_to_self(self.integrated, dx=dx)
 
     def spline_derived(self, order=1):
         """Return a series that is the derivative of the current one using
-        the spline interpolation. You shouldn't trust the values at the
-        boundaries too much, you may want to crop it out.
+        the spline representation.
 
-        :param order: Order of derivative (e.g. 2 = second derivative)
+        The optional parameter ``order`` specifies the order of the derivative.
+
+        .. warning::
+
+            The values at the boundary are typically not accurate.
+
+        :param order: Order of derivative (e.g. 2 = second derivative).
         :type order: int
 
         :returns:  New series with derivative
@@ -619,11 +671,15 @@ class BaseSeries(BaseNumerical):
         return type(self)(self.x, ret_value, True)
 
     def spline_derive(self, order=1):
-        """Derive the series current one using the spline interpolation.
-        To keep the series of the same size as the original one, the value
-        of the derivative at the boundaries is set to zero. Don't trust it!
+        """Derive the series using the spline representation.
 
-        :param order: Order of derivative (e.g. 2 = second derivative)
+        The optional parameter ``order`` specifies the order of the derivative.
+
+        .. warning::
+
+            The values at the boundary are typically not accurate.
+
+        :param order: Order of derivative (e.g. 2 = second derivative).
         :type order: int
 
         """
@@ -631,17 +687,18 @@ class BaseSeries(BaseNumerical):
 
     def derived(self, order=1):
         """Return a series that is the numerical order-differentiation of
-        the present series. (order = number of derivatives, ie order=2 is
-        second derivative)
+        the present series.
+
+        The optional parameter ``order`` specifies the order of the derivative.
 
         The derivative is calulated as centered differencing in the interior
         and one-sided derivatives at the boundaries. Higher orders are computed
         applying the same rule recursively.
 
-        :param order: Order of derivative (e.g. 2 = second derivative)
+        :param order: Order of derivative (e.g. 2 = second derivative).
         :type order: int
 
-        :returns:  New series with derivative
+        :returns:  New series with derivative.
         :rtype:    :py:class:`~.BaseSeries` or derived class
 
         """
@@ -651,14 +708,15 @@ class BaseSeries(BaseNumerical):
         return type(self)(self.x, ret_value, True)
 
     def derive(self, order=1):
-        """Derive with the numerical order-differentiation. (order = number of
-        derivatives, ie order=2 is second derivative)
+        """Derive with the numerical order-differentiation.
+
+        The optional parameter ``order`` specifies the order of the derivative.
 
         The derivative is calulated as centered differencing in the interior
         and one-sided derivatives at the boundaries. Higher orders are computed
         applying the same rule recursively.
 
-        :param order: Order of derivative (e.g. 2 = second derivative)
+        :param order: Order of derivative (e.g. 2 = second derivative).
         :type order: int
 
         """
@@ -666,7 +724,7 @@ class BaseSeries(BaseNumerical):
 
     def savgol_smoothed(self, window_size, order=3):
         """Return a smoothed series with a Savitzky-Golay filter with
-        window of size WINDOW-SIZE and order ORDER.
+        window of size ``window_size`` and order ``order``.
 
         This is just like a regular "Moving average" filter, but instead of
         just calculating the average, a polynomial (usually 2nd or 4th order)
@@ -675,13 +733,13 @@ class BaseSeries(BaseNumerical):
         bias introduced in "moving average" approach at local maxima or minima,
         is circumvented.
 
-        :param window_size: Number of points of the smoothing window (need to
-                            be odd)
+        :param window_size: Number of points of the smoothing window (needs to
+                            be odd).
         :type window_size: int
-        :param order: Order of the filter
+        :param order: Order of the filter.
         :type order: int
 
-        :returns:  New smoothed series
+        :returns:  New smoothed series.
         :rtype:    :py:class:`~.BaseSeries` or derived class
 
         """
@@ -701,7 +759,7 @@ class BaseSeries(BaseNumerical):
 
     def savgol_smooth(self, window_size, order=3):
         """Smooth the series with a Savitzky-Golay filter with window of
-        size WINDOW-SIZE and order ORDER.
+        size ``window_size`` and order ``order``.
 
         This is just like a regular "Moving average" filter, but instead of
         just calculating the average, a polynomial (usually 2nd or 4th order)
@@ -710,27 +768,28 @@ class BaseSeries(BaseNumerical):
         bias introduced in "moving average" approach at local maxima or minima,
         is circumvented.
 
-        :param window_size: Number of points of the smoothing window (need to
-                            be odd)
+        :param window_size: Number of points of the smoothing window (needs to
+                            be odd).
         :type window_size: int
-        :param order: Order of the filter
+        :param order: Order of the filter.
         :type order: int
 
         """
         self._apply_to_self(self.savgol_smoothed, window_size, order)
 
     def cropped(self, init=None, end=None):
-        """Return a series with data removed outside the intarval
-        [init, end]. If init or end are not specified or None, it does not
-        remove anything from this side.
+        """Return a series with data removed outside the interval ``[init, end]``. If
+        ``init`` or ``end`` are not specified or None, it does not remove
+        anything from this side.
 
-        :param init: New minimum x
-        :type init: float
-        :param end: New maximum x
-        :type end: float
+        :param init: Data with ``x <= init`` will be removed.
+        :type init: float or None
+        :param end: Data with ``x >= init`` will be removed.
+        :type end: float or None
 
         :returns:  Series with enforced minimum and maximum
         :rtype:    :py:class:`~.BaseSeries` or derived class
+
         """
         x = self.x
         y = self.y
@@ -745,13 +804,14 @@ class BaseSeries(BaseNumerical):
         return type(self)(x, y, True)
 
     def crop(self, init=None, end=None):
-        """Remove data outside the intarval [init, end]. If init or end
-        are not specified or None, it does not remove anything from this side.
+        """Remove data outside the the interval ``[init, end]``. If
+        ``init`` or ``end`` are not specified or None, it does not remove
+        anything from this side.
 
-        :param init: New minimum x
-        :type init: float
-        :param end: New maximum x
-        :type end: float
+        :param init: Data with ``x <= init`` will be removed.
+        :type init: float or None
+        :param end: Data with ``x >= init`` will be removed.
+        :type end: float or None
 
         """
         self._apply_to_self(self.cropped, init, end)
@@ -763,47 +823,41 @@ class BaseSeries(BaseNumerical):
     def _apply_unary(self, function):
         """Apply a unary function to the data.
 
-        :param function: Function to apply to the series
+        :param function: Function to apply to the series.
         :type function: callable
 
-        :return: New series with function applied to the data
+        :return: New series with function applied to the data.
         :rtype: :py:class:`~.BaseSeries` or derived class
 
         """
-        # TODO: Turn this into a decorator
-
         return type(self)(self.x, function(self.y), True)
 
     def _apply_reduction(self, reduction):
         """Apply a reduction to the data.
 
-        :param function: Function to apply to the series
+        :param function: Function to apply to the series.
         :type function: callable
 
         :return: Reduction applied to the data
         :rtype: float
 
         """
-        # TODO: Turn this into a decorator
-
         return reduction(self.y)
 
 
 def sample_common(series, resample=False, piecewise_constant=False):
-    """Take a list of series and return on so that they are all defined on the
-    same points. If resample is True, resample a list of series to the largest
-    interval covered by all series, using regularly spaced x.
+    """Take a list of series and return new ones so that they are all defined on the
+    same points.
 
-    If resample is False (default), take as input a list of series and return a
-    new list with the same series but only defined on those points that are
-    common to all the lists.
-
-    If resample is True, instead of removing points, find the common interval
-    of definition, and resample all the series on that internal. The number of
-    sample points is the minimum over all series. Additionally, if
-    piecewise_constant=True, the approximant used for resampling is a piecewise
-    constant function, splines are not used, instead, the nearest neighbors are
-    used. Turn this one when you have series with discontinuities.
+    If ``resample`` is False (default), take as input a list of series and
+    return a new list with the same series but only defined on those points that
+    are common to all the lists. If ``resample`` is True, instead of removing
+    points, find the common interval of definition, and resample all the series
+    on that internal. The number of sample points is the minimum over all
+    series. Additionally, if ``piecewise_constant=True``, the approximant used
+    for resampling is a piecewise constant function, splines are not used,
+    instead, the nearest neighbors are used. Use this when you have series with
+    discontinuities.
 
     :param series: The series to resample or redefine on the common points
     :type series:  list of :py:class:`~.Series`
@@ -812,11 +866,11 @@ def sample_common(series, resample=False, piecewise_constant=False):
     :type resample: bool
     :param piecewise_constant: Whether to use the nearest neighbor resampling
                                method instead of splines.
-                               If piecewise_constant=True, the approximant used
+                               If ``piecewise_constant=True``, the approximant used
                                for resampling is a piecewise constant function.
     :type piecewise_constant: bool
     :returns:  Resampled series so that they are all defined in
-               the same interval
+               the same interval.
     :rtype:    list of :py:class:`~.Series`
 
     """

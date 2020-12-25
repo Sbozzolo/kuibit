@@ -15,12 +15,25 @@
 # You should have received a copy of the GNU General Public License along with
 # this program; if not, see <https://www.gnu.org/licenses/>.
 
-"""The :py:mod:`~.cactus_scalars` module provides functions to load
-timeseries in Cactus formats and a class :py:class:`ScalarsDir` for easy
-access to all timeseries in a Cactus simulation directory. This module
-is normally not used directly, but from the :py:mod:`~.simdir` module.
-The data loaded by this module is represented as
-:py:class:`~.TimeSeries` objects.
+"""The :py:mod:`~.cactus_scalars` module provides simple interfaces to access
+time series data as output by CarpetASCII, including all the reductions.
+
+There are multiple classes defined in this module:
+
+- :py:class`~.ScalarsDir` interfaces with :py:class:`~.SimDir` and organizes the
+  data according to their reduction. This is a dictionary-like object with keys
+  the possible reduction (e.g., ``max``, ``average``, ``norm2``). -
+- :py:class`~.AllScalars` takes all the files that correspond to a given reduction
+  and organize them according to the variables they contain.
+- :py:class`~.OneScalar` represents one single scalar variable, with data that
+  is represented as :py:class:`~.TimeSeries` objects. :py:class`~.AllScalars` contains
+  many :py:class`~.OneScalar` objects.
+
+These are hierarchical classes, one containing the others, so one typically ends
+up with a series of brackets or dots to access the actual data. For example, if
+``sim`` is a :py:class:`~.SimDir`, ``sim.ts.max['rho_b']`` is maximum of
+``rho_b`` represented as :py:class:`~.TimeSeries`.
+
 """
 
 import os
@@ -40,16 +53,22 @@ from postcactus.cactus_ascii_utils import scan_header
 class OneScalar:
     """Read scalar data produced by CarpetASCII.
 
-    CactusScalarASCII is a dictionary-like object: it has keys() and you can
-    TimeSeries using the ['key'] syntax.
+    CactusScalarASCII is a dictionary-like object with keys the variables and
+    values the :py:class:`~.TimeSeries`.
 
     Single variable per file or single file per group are supported. In the
     latter case, the header is inspected to understand the content of the file.
+    Compressed files (gz and bz2) are supported too.
 
-    Compressed files (gz and bz2) are supported.
+    :py:class:`~.OneScalar` represents one scalar file, there can be multiple
+    variables inside, (if it was output with ``one_file_per_group = yes``).
 
-    OneScalar represents one scalar file, there can be multiple variables inside,
-    (if it was one_file_per_group).
+    :ivar path: Path of the file.
+    :type path: str
+    :ivar folder: Path of the folder that contains the file.
+    :type folder: str
+    :ivar reduction_type: Type of reduction.
+    :type reduction_type: str
 
     """
 
@@ -100,6 +119,13 @@ class OneScalar:
     }
 
     def __init__(self, path):
+        """Constructor.
+
+        Here we understand what the file contains.
+
+        :param path: Path of the file.
+        :type path: str
+        """
         self.path = str(path)
         # The _vars dictionary contains a mapping between the various variables
         # and the column numbers in which they are stored.
@@ -148,7 +174,7 @@ class OneScalar:
     def _scan_header(self):
         # Call scan_header with the right argument
 
-        file_has_column_format = self.reduction_type == "scalar"
+        extended_format = self.reduction_type == "scalar"
 
         # What method to we need to use to open the file?
         # opener can be open, gopen, or bopen depending on the extension
@@ -158,7 +184,7 @@ class OneScalar:
         self._time_column, columns_info = scan_header(
             self.path,
             self._is_one_file_per_group,
-            file_has_column_format,
+            extended_format,
             opener=opener,
             opener_mode=opener_mode,
         )
@@ -175,11 +201,12 @@ class OneScalar:
     def load(self, variable):
         """Read file and return a TimeSeries with the requested variable.
 
-        :param variable: Requested variable
+        :param variable: Requested variable.
         :type variable: str
 
-        :returns: TimeSeries with requested variable as read from file
-        :rtype:        :py:class:`~.TimeSeries`
+        :returns: :py:class:`~.TimeSeries` with requested variable as read from
+                  file
+        :rtype: :py:class:`~.TimeSeries`
 
         """
         if not self._was_header_scanned:
@@ -207,30 +234,35 @@ class OneScalar:
     def keys(self):
         """Return the list of variables available.
 
-        :returns: List of variables in the file
-        :rtype:   list
+        :returns: Variables in the file
+        :rtype:   dict_keys
 
         """
-        return list(self._vars.keys())
+        return self._vars.keys()
 
 
 class AllScalars:
     """Helper class to read various types of scalar data in a list of files and
-    properly order them. The core of this object is the _vars dictionary which
-    contains the location of all the files for a specific variable and
-    reduction.
+    properly order them. The core of this object is the ``_vars`` dictionary
+    which contains the location of all the files for a specific variable and
+    reduction (as :py:class:`~.OneScalar`).
 
-    AllScalars is a dictionary-like object.
+    :py:class:`~.AllScalars` is a dictionary-like object, using the bracket notation
+    you can access values with as TimeSeries. Alternatively, you can access the
+    data as attributes of the ``fields`` attribute.
 
-    Using the [] notation you can access values with as TimeSeries.
-
-    Not intended for direct use.
+    :ivar reduction_type: Type of reduction.
+    :type reduction_type: str
 
     """
 
     def __init__(self, allfiles, reduction_type):
-        """allfiles is a list of files, reduction_type has to be a reduction or
-        scalar.
+        """Constructor.
+
+        :param allfiles: List of all the files
+        :type allfiles: list of str
+        :param reduction_type: Type of reduction.
+        :type reduction_type: str
 
         """
         self.reduction_type = str(reduction_type)
@@ -273,24 +305,23 @@ class AllScalars:
         return key in self._vars
 
     def keys(self):
-        """Return the list of available variables corresponding to the given
-        reduction.
+        """Return the available variables corresponding to the given reduction.
 
-        :returns: List of variables with given reduction
-        :rtype:   list
+        :returns: Variables with given reduction
+        :rtype:   dict_keys
 
         """
-        return list(self._vars.keys())
+        return self._vars.keys()
 
     def get(self, key, default=None):
         """Return variable if available, else return the default value.
 
-        :param key: Requested variable
+        :param key: Requested variable.
         :type key: str
-        :param default: Returned value if variable is not available
+        :param default: Returned value if ``variable`` is not available.
         :type default: any
 
-        :returns: Timeseries of the requested variable
+        :returns: :py:class:`~.TimeSeries` of the requested variable
         :rtype: :py:class:`~.TimeSeries`
 
         """
@@ -307,8 +338,8 @@ class AllScalars:
 
 class ScalarsDir:
     """This class provides acces to various types of scalar data in a given
-    simulation directory. Typically used from simdir instance. The different
-    scalars are available as attributes:
+    simulation directory. Typically used from a :py:class:`~.SimDir` instance.
+    The different scalars are available as attributes:
 
     :ivar scalar:    access to grid scalars.
     :ivar minimum:   access to minimum reduction.
@@ -358,12 +389,12 @@ class ScalarsDir:
     def get(self, key, default=None):
         """Return a reduction if available, else return the default value.
 
-        :param key: Requested reduction
+        :param key: Requested reduction.
         :type key: str
-        :param default: Returned value if reduction is not available
+        :param default: Returned value if ``reduction`` is not available.
         :type default: any
 
-        :returns: Timeseries of the requested variable
+        :returns: Collection of all the variables with a given reduction.
         :rtype: :py:class:`~.AllScalars`
 
         """
