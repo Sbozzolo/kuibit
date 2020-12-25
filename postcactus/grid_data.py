@@ -27,14 +27,10 @@ The important classes defined here are
    hierachy (AMR).
 """
 
-import ast  # To read metadata in ASCII files
-import re
-from bz2 import open as bopen
-from gzip import open as gopen
-
 import numpy as np
 from scipy import interpolate, linalg
 
+import postcactus.grid_data_utils as gdu
 from postcactus.numerical import BaseNumerical
 
 
@@ -313,8 +309,9 @@ class UniformGrid:
 
     @property
     def num_extended_dimensions(self):
-        """
-        :returns: The number of dimensions with size larger than one gridpoint.
+        """Return the number of dimensions with size larger than one gridpoint.
+
+        :returns: The number of extended dimensions (the ones with more than one cell).
         :rtype:   int
         """
         return sum(self.extended_dimensions)
@@ -323,6 +320,9 @@ class UniformGrid:
     def lowest_vertex(self):
         """Return the location of the lowest cell vertex (considering that
         the grid is cell centered).
+
+        :returns: Lowest vertex of the lowest cell.
+        :rtype:   1d numpy array
         """
         if self.__lowest_vertex is None:
             self.__lowest_vertex = self.x0 - 0.5 * self.dx
@@ -332,6 +332,9 @@ class UniformGrid:
     def highest_vertex(self):
         """Return the location of the highest cell vertex (considering that
         the grid is cell centered).
+
+        :returns: Highest vertex of the highest cell.
+        :rtype:   1d numpy array
         """
         if self.__highest_vertex is None:
             self.__highest_vertex = self.x1 + 0.5 * self.dx
@@ -349,15 +352,13 @@ class UniformGrid:
         return np.asarray(indices) * self.dx + self.x0
 
     def coordinates_to_indices(self, coordinates):
-        """Find the indices corresponding to the
-        point nearest to the given coordinates.
-
-        ndarray_to_tuple can convert this into tuples.
+        """Find the indices corresponding to the point nearest to the given coordinates.
 
         :param coordinates: Coordinates.
         :type coordinates:  1d numpy array or list of float
         :returns: grid indidces of nearest point.
         :rtype:   numpy array
+
         """
         # TODO: Add dimensionality checks
         indices = (
@@ -426,6 +427,9 @@ class UniformGrid:
 
         The return value is a list with the coordinates along each direction.
 
+        :returns: Coordinates of the grid points on each direction
+        :rtype: list of 1d numpy array
+
         """
         if self.__coordinates_1d is None:
             self.__coordinates_1d = [
@@ -437,13 +441,13 @@ class UniformGrid:
     def coordinates(self, as_meshgrid=False, as_same_shape=False):
         """Return coordinates of the grid points.
 
-        If as_meshgrid is True, the coordinates are returned as NumPy meshgrid.
-        Otherwise, return the coordinates of the grid points as
-        1D arrays (schematically, [array for x coordinates, array for y
+        If ``as_meshgrid`` is True, the coordinates are returned as NumPy
+        meshgrid. Otherwise, return the coordinates of the grid points as 1D
+        arrays (schematically, [array for x coordinates, array for y
         coordinates, ...]).
 
-        If True as_same_shape is True return the coordinates as an array
-        with the same shape of self and with values the coordinates.
+        If ``as_same_shape`` is True return the coordinates as an array with the
+        same shape of self and with values the coordinates.
 
         :param as_meshgrid: If True, return the coordinates as meshgrid.
         :type as_meshgrid: bool
@@ -476,10 +480,14 @@ class UniformGrid:
         return self.coordinates_1d
 
     def flat_dimensions_removed(self):
-        """Return a new UniformGrid with dimensions which are only one gridpoint across
-        removed."""
+        """Return a new :py:class:`~.UniformGrid` with dimensions that have no
+        flat dimensions (dimensions with only one grid point).
 
-        # We need this infrastructure to slice GridData
+        :returns: Return a new grid without flat dimensions.
+        :rtype: :py:class:`~.UniformGrid`
+        """
+
+        # We need this infrastructure to slice UniformGridData
 
         copied = self.copy()
 
@@ -494,7 +502,11 @@ class UniformGrid:
         return copied
 
     def ghost_zones_removed(self):
-        """Return a new UniformGrid with ghostzones removed"""
+        """Return a new :py:class:`~.UniformGrid` with ghostzones removed.
+
+        :returns: Return a new grid without ghost zones.
+        :rtype: :py:class:`~.UniformGrid`
+        """
         copied = self.copy()
 
         # We remove twice the number of ghost zones because there are
@@ -506,9 +518,9 @@ class UniformGrid:
         return copied
 
     def shifted(self, shift):
-        """Return a new UniformGrid with coordinates shifted by some amount
+        """Return a new UniformGrid with coordinates shifted by the given amount.
 
-        x -> x + shift."""
+        ``x -> x + shift``."""
         shift = np.asarray(shift)
         self._check_dims(shift, "shift")
 
@@ -521,7 +533,7 @@ class UniformGrid:
     def copy(self):
         """Return a deep copy.
 
-        :returns:  Deep copy of the UniformGrid
+        :returns:  Deep copy of the UniformGrid.
         :rtype:    :py:class:`~.UniformGrid`
         """
         return type(self)(
@@ -537,6 +549,9 @@ class UniformGrid:
         )
 
     def __eq__(self, other):
+        """Test if two :py:class:`~.UniformGrid` are the equal up to numerical
+        precision.
+        """
         if not isinstance(other, type(self)):
             return False
         # Time and iterations can be None, so we check them independently
@@ -580,190 +595,6 @@ dx               = {self.dx}
 Time             = {self.time}
 Iteration        = {self.iteration}
 """
-
-
-def common_bounding_box(grids):
-    """Return corners of smallest common bounding box of regular grids.
-
-    :param geoms: list of grid geometries.
-    :type geoms:  list of :py:class:`~.UniformGrid`
-    :returns: the common bounding box of a list of geometries
-    :rtype: tuple of coordinates (x0 and x1)
-    """
-    # Let's check that grids is a list like objects
-    if not hasattr(grids, "__len__"):
-        raise TypeError("common_bounding_box takes a list")
-
-    # Check that they are all UniformGrids
-    if not all(isinstance(g, UniformGrid) for g in grids):
-        raise TypeError("common_bounding_boxes takes a list of UniformGrid")
-
-    # We have to check that the number of dimensions is the same
-    num_dims = {g.num_dimensions for g in grids}
-
-    if len(num_dims) != 1:
-        raise ValueError("Grids have different dimensions")
-
-    # Let's consider three 2d grids as example with
-    # x0 being respectively (0, 0), (-1, 0), (-3, 3)
-    # x1 being (5, 5), (2, 2), (1, 2)
-    x0s = np.array([g.x0 for g in grids])
-    x1s = np.array([g.x1 for g in grids])
-    # We put x0 and x1 in arrays:
-    # x0s = [[0, 0], [-1, 0], [-3, 3]]
-    # x1s = [[5, 5], [2, 2], [1, 2]]
-    # Now, if we transpose that, we have
-    # x0sT = [[0, -1, 0],
-    #         [0, 0, 3]]
-    # x1sT = [[5, 2, 1],
-    #         [5, 2, 2]]
-    # In this way we put all the same coordinates in a single
-    # row. We can take the minimum and maximum along these rows
-    # to find the common bounding box.
-    x0 = np.array([min(b) for b in np.transpose(x0s)])
-    x1 = np.array([max(b) for b in np.transpose(x1s)])
-    return (x0, x1)
-
-
-def merge_uniform_grids(grids, component=-1):
-    """Compute a regular grid covering the bounding box of a list of grid
-    geometries, with the same grid spacing. All geometries must belong to the
-    same refinement level and have the same dx. In practice, we return a new
-    grid that covers all the grids in the list.
-
-    dx is kept constant, but the number of points will change.
-
-    :param geoms: list of grid geometries.
-    :type geoms:  list of :py:class:`~.UniformGrid`
-    :returns: Grid geometry covering all input grids.
-    :rtype: :py:class:`~.UniformGrid`
-
-    """
-    # Let's check that grids is a list like objects
-    if not hasattr(grids, "__len__"):
-        raise TypeError("merge_uniform_grids takes a list")
-
-    if not all(isinstance(g, UniformGrid) for g in grids):
-        raise TypeError("merge_uniform_grids works only UniformGrid")
-
-    # Check that all the grids have the same refinement levels
-    ref_levels = {g.ref_level for g in grids}
-
-    if len(ref_levels) != 1:
-        raise ValueError("Can only merge grids on same refinement level.")
-
-    # Extract the only element from the set
-    ref_level = next(iter(ref_levels))
-
-    dx = [g.dx for g in grids]
-
-    if not np.allclose(dx, dx[0]):
-        raise ValueError("Can only merge grids on with same dx.")
-
-    # Find the bounding box
-    x0, x1 = common_bounding_box(grids)
-
-    # The additional 1.5 and 0.5 factors are because the points are
-    # cell-centered, so the cells have size
-
-    # dx here is a list of all the dx, we just want one (they are all the same)
-    shape = ((x1 - x0) / dx[0] + 1.5).astype(np.int64)
-
-    return UniformGrid(
-        shape, x0=x0, dx=dx[0], ref_level=ref_level, component=component
-    )
-
-
-def load_UniformGridData(path, *args, **kwargs):
-    """Load file to UniformGridData.
-
-    The file has to start with the following pattern:
-    # shape: {shape}
-    # x0: {x0}
-    # dx: {dx}
-    # ref_level: {ref_level}
-    # component: {component}
-    # num_ghost: {num_ghost}
-    # time: {time}
-    # iteration: {iteration}
-    where the curly parentheses contain the actual data.
-    This metadata is essential to reconstruct the grid information.
-    Files like this are generated by the save() method.
-
-    """
-    # We read the header to fill in the grid information
-    # The colon separates data from description
-    metadata = {
-        "shape": None,
-        "x0": None,
-        "dx": None,
-        "ref_level": None,
-        "component": None,
-        "num_ghost": None,
-        "time": None,
-        "iteration": None,
-    }
-    lines_to_read = len(metadata.keys())
-
-    # We try to understand if the file is compressed
-    # 1. (.+?) matches any character in a non-greedy way
-    #    (which means, if we find .gz or .bz2 we don't match that)
-    # 2. (\.(gz|bz2))? matches if we have compression
-    # 3. ^ $ means that we match the entire name
-    rx_filename = re.compile(r"^(.+?)(\.(gz|bz2))?$")
-
-    filename_match = rx_filename.match(path)
-
-    # What function to use to open the file?
-    # What mode?
-    decompressor = {
-        None: (open, "r"),
-        "gz": (gopen, "rt"),
-        "bz2": (bopen, "rt"),
-    }
-
-    opener, open_mode = decompressor[filename_match.group(3)]
-
-    with opener(path, open_mode) as f:
-        # Here we read the first lines_to_read into header
-        header = [next(f) for _ in range(lines_to_read)]
-
-    # The metadata looks like
-    # # shape: [50 50 50]
-    # # x0: [-10. -10. -10.]
-    # # dx: [0.40816327 0.40816327 0.40816327]
-    # # ref_level: -1
-    # # component: -1
-    # # num_ghost: [0 0 0]
-    # # time: None
-    # # iteration: None
-
-    for line in header:
-        # TODO: Make this into a regex
-
-        # We read what is after the colon (with space)
-        var_data = line.split(": ")
-
-        # The first part of var_data contains the var_name
-        # (Note the space)
-        var_name = var_data[0].split("# ")[-1]
-
-        # Next we evaluate the second part of var_data as a Python literal
-        # using ast, we save this into metadata
-        metadata[var_name] = ast.literal_eval(var_data[-1])
-
-    # We remove the shape and x0 keys from metadata so that we can pass
-    # directly the dictionary to the constructor
-    shape = metadata["shape"][:]  # (We need to copy the list)
-    x0 = metadata["x0"][:]
-
-    del metadata["shape"]
-    del metadata["x0"]
-
-    data = np.loadtxt(path).reshape(shape)
-    # skipcq: PYL:E1124
-    return UniformGridData.from_grid_structure(data, x0, **metadata)
-
 
 class UniformGridData(BaseNumerical):
     """Represents a rectangular data grid with coordinates, supporting
@@ -1932,74 +1763,6 @@ class UniformGridData(BaseNumerical):
         return type(self)(grid, fft_data)
 
 
-def sample_function_from_uniformgrid(function, grid):
-    """Create a regular dataset by sampling a scalar function of the form
-    f(x, y, z, ...) on a grid.
-
-    :param function:  The function to sample.
-    :type function:   A callable that takes as many arguments as the number
-                      of dimensions (in shape).
-    :param grid:   Grid over which to sample the function.
-    :type grid:    :py:class:`~.UniformGrid`
-    :returns:     Sampled data.
-    :rtype:       :py:class:`~.UniformGridData`
-
-    """
-    if not isinstance(grid, UniformGrid):
-        raise TypeError("grid has to be a UniformGrid")
-
-    # The try except block checks that the function supplied has the correct
-    # signature for the grid provided. If you try to pass a function that takes
-    # too many of too few arguments, you will get a TypeError
-
-    try:
-        ret = UniformGridData(
-            grid, np.vectorize(function)(*grid.coordinates(as_same_shape=True))
-        )
-    except TypeError as type_err:
-        # Too few arguments, type_err = missing N required positional arguments: ....
-        # Too many arguments, type_err = takes N positional arguments but M were given
-        ret = str(type_err)
-
-    # TODO: This is fragile way to do error parsing
-    if isinstance(ret, str):
-        if "missing" in ret:
-            raise TypeError(
-                "Provided function takes too few arguments for requested grid"
-            )
-        if "takes" in ret:
-            raise TypeError(
-                "Provided function takes too many arguments for requested grid"
-            )
-        raise TypeError(ret)
-
-    return ret
-
-
-def sample_function(function, shape, x0, x1, *args, **kwargs):
-    """Create a regular dataset by sampling a scalar function of the form
-    f(x, y, z, ...) on a grid.
-
-    You cannot use this function to initialize grids with flat dimensions
-    (dimensions with only one grid point).
-
-    :param function:  The function to sample.
-    :type function:   A callable that takes as many arguments as the number
-                      of dimensions (in shape).
-    :param shape: Number of sample points in each dimension.
-    :type shape:  1d numpy array or list of int
-    :param x0:    Minimum corner of regular sample grid.
-    :type x0:     1d numpy array or list of float
-    :param x0:    Maximum corner of regular sample grid.
-    :type x0:     1d numpy array or list of float
-    :returns:     Sampled data.
-    :rtype:       :py:class:`~.UniformGridData`
-
-    """
-    grid = UniformGrid(shape, x0=x0, x1=x1, *args, **kwargs)
-    return sample_function_from_uniformgrid(function, grid)
-
-
 class HierarchicalGridData(BaseNumerical):
     """Data defined on mesh-refined grids, consisting of one or more regular
     datasets with different grid spacings, i.e. a mesh refinement hierachy. The
@@ -2115,7 +1878,7 @@ class HierarchicalGridData(BaseNumerical):
         components_no_ghosts.sort(key=lambda x: tuple(x.x0))
 
         # Next, we prepare the global grid
-        grid = merge_uniform_grids(
+        grid = gdu.merge_uniform_grids(
             [comp.grid for comp in components_no_ghosts]
         )
 
