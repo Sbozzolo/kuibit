@@ -447,7 +447,7 @@ def Schwarzschild_radius_to_tortoise(radii, mass):
     return radii + 2 * mass * np.log(radii / (2 * mass) - 1)
 
 
-def _retarded_times_to_coordinate_times(retarded_times, radii, mass):
+def retarded_times_to_coordinate_times(retarded_times, radii, mass):
     """Compute the coordinate times corresponding to the retarded times at the
       coordinate radii.
 

@@ -815,7 +815,7 @@ class GravitationalWavesDir(WavesDir):
         # compute tortoise radius).
         waves_retarded = [
             w.resampled(
-                gw_utils._retarded_times_to_coordinate_times(times, r, mass)
+                gw_utils.retarded_times_to_coordinate_times(times, r, mass)
             )
             for w, r in zip(waves, radii)
         ]
@@ -912,7 +912,7 @@ class GravitationalWavesDir(WavesDir):
         # Resample the waves to have all the same retarded times
         strains_resampled = [
             strain.resampled(
-                gw_utils._retarded_times_to_coordinate_times(
+                gw_utils.retarded_times_to_coordinate_times(
                     retarded_times, dist, mass
                 )
             )
