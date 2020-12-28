@@ -1,0 +1,1745 @@
+
+
+<!doctype html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>postcactus.cactus_grid_functions &#8212; PostCactus 3.0.0a12 documentation</title>
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/bizstyle.css" type="text/css" />
+    
+    <script id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+    <script src="../../_static/jquery.js"></script>
+    <script src="../../_static/underscore.js"></script>
+    <script src="../../_static/doctools.js"></script>
+    <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script type="text/x-mathjax-config">MathJax.Hub.Config({"tex2jax": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true, "ignoreClass": "document", "processClass": "math|output_area"}})</script>
+    <script src="../../_static/bizstyle.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0" />
+    <!--[if lt IE 9]>
+    <script src="_static/css3-mediaqueries.js"></script>
+    <![endif]-->
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">PostCactus 3.0.0a12 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../index.html" accesskey="U">Module code</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">postcactus.cactus_grid_functions</a></li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for postcactus.cactus_grid_functions</h1><div class="highlight"><pre>
+<span></span><span class="ch">#!/usr/bin/env python3</span>
+
+<span class="c1"># Copyright (C) 2020 Gabriele Bozzola, Wolfgang Kastaun</span>
+<span class="c1">#</span>
+<span class="c1"># This program is free software; you can redistribute it and/or modify it under</span>
+<span class="c1"># the terms of the GNU General Public License as published by the Free Software</span>
+<span class="c1"># Foundation; either version 3 of the License, or (at your option) any later</span>
+<span class="c1"># version.</span>
+<span class="c1">#</span>
+<span class="c1"># This program is distributed in the hope that it will be useful, but WITHOUT</span>
+<span class="c1"># ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS</span>
+<span class="c1"># FOR A PARTICULAR PURPOSE. See the GNU General Public License for more</span>
+<span class="c1"># details.</span>
+<span class="c1">#</span>
+<span class="c1"># You should have received a copy of the GNU General Public License along with</span>
+<span class="c1"># this program; if not, see &lt;https://www.gnu.org/licenses/&gt;.</span>
+
+<span class="sd">&quot;&quot;&quot;The :py:mod:`~.cactus_grid` module provides functions to load grid function</span>
+<span class="sd">in Cactus formats.</span>
+
+<span class="sd">There are multiple classes defined in this module:</span>
+
+<span class="sd">- :py:class`~.GridFunctionsDir` interfaces with :py:class:`~.SimDir` and</span>
+<span class="sd">  organizes the grid functions by dimensionality. This is a dictionary-like</span>
+<span class="sd">  object with keys the possible dimensions (e.g., ``x``, ``yz``, ``xyz``).</span>
+<span class="sd">- :py:class`~.AllGridFunctions` takes all the files in SimDir and sort them</span>
+<span class="sd">  according the different grid functions they contain.</span>
+<span class="sd">- There are two :py:class`~.OneGridFunction` classes, one for HDF5 files and one</span>
+<span class="sd">  for ASCII files. They describe one single grid function and they contains the</span>
+<span class="sd">  files associated to that grid function. Both the classes are derived from the</span>
+<span class="sd">  same abstract base class :py:class`~.OneGridFunctionBase`, which implements</span>
+<span class="sd">  the shared methods.</span>
+
+<span class="sd">These are hierarchical classes, one containing the others, so one typically ends</span>
+<span class="sd">up with a series of brackets to access the actual data. For example, if ``sim``</span>
+<span class="sd">is a :py:class:`~.SimDir`, ``sim.gf.xy[&#39;rho_b&#39;][0]`` is ``rho_b`` at iteration 0</span>
+<span class="sd">on the equatorial plane represented as :py:class:`~.HierarchicalGridData`.</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">re</span>
+<span class="kn">import</span> <span class="nn">warnings</span>
+<span class="kn">from</span> <span class="nn">abc</span> <span class="kn">import</span> <span class="n">ABC</span><span class="p">,</span> <span class="n">abstractmethod</span>
+<span class="kn">from</span> <span class="nn">bz2</span> <span class="kn">import</span> <span class="nb">open</span> <span class="k">as</span> <span class="n">bopen</span>
+<span class="kn">from</span> <span class="nn">contextlib</span> <span class="kn">import</span> <span class="n">contextmanager</span>
+<span class="kn">from</span> <span class="nn">functools</span> <span class="kn">import</span> <span class="n">lru_cache</span>
+<span class="kn">from</span> <span class="nn">gzip</span> <span class="kn">import</span> <span class="nb">open</span> <span class="k">as</span> <span class="n">gopen</span>
+
+<span class="kn">import</span> <span class="nn">h5py</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
+<span class="kn">from</span> <span class="nn">postcactus</span> <span class="kn">import</span> <span class="n">grid_data</span><span class="p">,</span> <span class="n">simdir</span>
+<span class="kn">from</span> <span class="nn">postcactus.attr_dict</span> <span class="kn">import</span> <span class="n">pythonize_name_dict</span>
+<span class="kn">from</span> <span class="nn">postcactus.cactus_ascii_utils</span> <span class="kn">import</span> <span class="n">scan_header</span><span class="p">,</span> <span class="n">total_filesize</span>
+
+
+<div class="viewcode-block" id="BaseOneGridFunction"><a class="viewcode-back" href="../../cactus_grid_functions_ref.html#postcactus.cactus_grid_functions.BaseOneGridFunction">[docs]</a><span class="k">class</span> <span class="nc">BaseOneGridFunction</span><span class="p">(</span><span class="n">ABC</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Abstract class that implements capabilities to handle grid functions.</span>
+
+<span class="sd">    This class is the parent class of :py:class:`~.OneGridFunctionASCII` and</span>
+<span class="sd">    :py:class:`~.OneGridFunctionH5`. :py:class:`~.BaseOneGridFunction`</span>
+<span class="sd">    implements most methods, except the readers.</span>
+
+<span class="sd">    The derived classes have to specify:</span>
+
+<span class="sd">    - How to read a file, populating the ``self.alldata`` dictionary</span>
+<span class="sd">      (method ``_parse_file``).</span>
+<span class="sd">    - How to populate the last level of ``self.alldata`` by returning</span>
+<span class="sd">      a :py:class:`~.UniformGridData` for a given iteration and component</span>
+<span class="sd">      (method ``_read_componenent_as_uniform_grid``)</span>
+<span class="sd">    - How to associate an iteration with a time (method</span>
+<span class="sd">      ``time_at_iteration``).</span>
+
+<span class="sd">    The simplest way to access data at a given iteration as</span>
+<span class="sd">    :py:class:`~.HierarchicalGridData` is using the ``[]`` notation.</span>
+
+<span class="sd">    :ivar allfiles: Paths of files associated to the variable.</span>
+<span class="sd">    :type allfiles: list of str</span>
+<span class="sd">    :ivar alldata: Dictionary that organizes files and iterations available.</span>
+<span class="sd">    :type alldata: nested dictionary</span>
+<span class="sd">    :ivar restarts_data: How iterations are distributed across files.</span>
+<span class="sd">    :type restarts_data: tuple of str</span>
+<span class="sd">    :ivar var_name: Variable name.</span>
+<span class="sd">    :type var_name: str</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">allfiles</span><span class="p">,</span> <span class="n">var_name</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Constructor.</span>
+
+<span class="sd">        :param allfiles: Paths of files associated to the variable.</span>
+<span class="sd">        :type allfiles: list of str</span>
+<span class="sd">        :param var_name: Variable name.</span>
+<span class="sd">        :type var_name: str</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">allfiles</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">allfiles</span><span class="p">)</span>
+
+        <span class="c1"># self.alldata is a nested dictionary</span>
+        <span class="c1"># 1. At the first level, we have the file</span>
+        <span class="c1"># 2. self.alldata[filename] is a dictionary with keys the various</span>
+        <span class="c1">#    available iterations in filename</span>
+        <span class="c1"># 3. self.alldata[filename][iteration] is another dictionary with keys the</span>
+        <span class="c1">#    various refinement levels available in filename at the iteration</span>
+        <span class="c1">#    and as values another dictionary</span>
+        <span class="c1"># 4. This last dictionary has as keys the available components and as</span>
+        <span class="c1">#    values None if the data has not been read yet, or UniformGridData</span>
+        <span class="c1">#    for that component if the data has been read</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">alldata</span> <span class="o">=</span> <span class="p">{}</span>
+
+        <span class="c1"># We use this to extract only the information related to the specific</span>
+        <span class="c1"># variable</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">var_name</span> <span class="o">=</span> <span class="n">var_name</span>
+
+        <span class="k">for</span> <span class="n">path</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">allfiles</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_parse_file</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+
+        <span class="c1"># Here we are going to save the restart information</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">restarts_data</span> <span class="o">=</span> <span class="kc">None</span>
+
+    <span class="c1"># The derived classes have to specify:</span>
+    <span class="c1"># 1. How to read a file, populating the self.alldata dictionary up to the</span>
+    <span class="c1">#    last level (excluded or included) (_parse_file). This should also</span>
+    <span class="c1"># 2. How to populate the last level of self.alldata by returning</span>
+    <span class="c1">#    a UniformGridData for a given iteration and component</span>
+    <span class="c1">#    (_read_componenent_as_uniform_grid)</span>
+    <span class="c1"># 3. How to associate an iteration with a time (time_at_iteration)</span>
+
+    <span class="nd">@abstractmethod</span>
+    <span class="k">def</span> <span class="nf">_parse_file</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Read file at path and populate ``self.alldata``.&quot;&quot;&quot;</span>
+        <span class="k">pass</span>
+
+    <span class="nd">@abstractmethod</span>
+    <span class="k">def</span> <span class="nf">_read_component_as_uniform_grid_data</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="n">iteration</span><span class="p">,</span> <span class="n">ref_level</span><span class="p">,</span> <span class="n">component</span>
+    <span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Read specific component.&quot;&quot;&quot;</span>
+        <span class="k">pass</span>
+
+<div class="viewcode-block" id="BaseOneGridFunction.time_at_iteration"><a class="viewcode-back" href="../../cactus_grid_functions_ref.html#postcactus.cactus_grid_functions.BaseOneGridFunction.time_at_iteration">[docs]</a>    <span class="nd">@abstractmethod</span>
+    <span class="k">def</span> <span class="nf">time_at_iteration</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">iteration</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Return the time at a given iteration.</span>
+
+<span class="sd">        :param iteration: Iteration.</span>
+<span class="sd">        :type iteration: int</span>
+<span class="sd">        :returns: Time.</span>
+<span class="sd">        :rtype: float</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">pass</span></div>
+
+    <span class="nd">@lru_cache</span><span class="p">(</span><span class="mi">128</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">_iterations_in_file</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Return the (sorted) available iterations in file path.</span>
+
+<span class="sd">        Use this if you need to ensure that you are looping over iterations in</span>
+<span class="sd">        order!</span>
+
+<span class="sd">        :param path: File to inspect.</span>
+<span class="sd">        :type path: str</span>
+
+<span class="sd">        :returns: Sorted list of iterations available in a given file.</span>
+<span class="sd">        :rtype: list</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="nb">sorted</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">alldata</span><span class="p">[</span><span class="n">path</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">()))</span>
+
+    <span class="k">def</span> <span class="nf">_min_iteration_in_file</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Return the minimum available iterations in the given file.</span>
+
+<span class="sd">        :param path: File to inspect.</span>
+<span class="sd">        :type path: str</span>
+
+<span class="sd">        :returns: First iteration available.</span>
+<span class="sd">        :rtype: int</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_iterations_in_file</span><span class="p">(</span><span class="n">path</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+
+    <span class="k">def</span> <span class="nf">_max_iteration_in_file</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Return the maximum available iterations in the given file.</span>
+
+<span class="sd">        :param path: File to inspect.</span>
+<span class="sd">        :type path: str</span>
+
+<span class="sd">        :returns: Last iteration available.</span>
+<span class="sd">        :rtype: int</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_iterations_in_file</span><span class="p">(</span><span class="n">path</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+
+    <span class="k">def</span> <span class="nf">_get_restarts</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Return a list of tuples of the form ``(iteration_min, iteration_max, paths)``</span>
+<span class="sd">        with the minimum iterations and maximum iterations in each file</span>
+<span class="sd">        associated to this variable. ``paths`` is a list of all the files with</span>
+<span class="sd">        same ``min_iteration`` and ``max_iteration`` (as when we have 3d</span>
+<span class="sd">        xyz_file files).</span>
+
+<span class="sd">        This routine is used to identify which files to use for any given</span>
+<span class="sd">        iteration.</span>
+
+<span class="sd">        :returns: List of tuples with first iteration, last iteration, and</span>
+<span class="sd">                  path for every file in ``self.allfiles``.</span>
+<span class="sd">        :rtype: list of tuple (int, int, list of str)</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">restarts</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_min_iteration_in_file</span><span class="p">(</span><span class="n">path</span><span class="p">),</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_max_iteration_in_file</span><span class="p">(</span><span class="n">path</span><span class="p">),</span>
+                <span class="p">[</span><span class="n">path</span><span class="p">],</span>
+            <span class="p">)</span>
+            <span class="k">for</span> <span class="n">path</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">allfiles</span>
+        <span class="p">]</span>
+        <span class="c1"># We sort by first the minimum iteration. If the minimum iteration is</span>
+        <span class="c1"># the same, we sort by the -maximum iteration, which ensures that where</span>
+        <span class="c1"># we have more iterations is placed before. Consider the example of</span>
+        <span class="c1"># list to be sorted [(1, 2), (0, 3), (1, 5)], this would be sorted in</span>
+        <span class="c1"># ascending order with respect as if it was [(1, -2), (0, -3), (1, -5)],</span>
+        <span class="c1"># so [(0, 3), (1, 5), (1, 2)]</span>
+        <span class="n">restarts</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="o">-</span><span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">]))</span>
+
+        <span class="c1"># Next, we check that there is no overlap. If there&#39;s overlap, we</span>
+        <span class="c1"># ignore some folders, unless min_iteration and max_iteration are</span>
+        <span class="c1"># exactly the same, in which case we combine the two</span>
+        <span class="n">first</span><span class="p">,</span> <span class="o">*</span><span class="n">others</span> <span class="o">=</span> <span class="n">restarts</span>
+        <span class="c1"># We assemble a return list, starting with the first element. Then,</span>
+        <span class="c1"># we loop over the other elements and we keep expanding the return</span>
+        <span class="c1"># list only if we find that the maximum iteration is larger than</span>
+        <span class="c1"># the previous maximum iteration. Since we sorted as described above,</span>
+        <span class="c1"># this will ignore repeated runs in which the iterations are a subset</span>
+        <span class="c1"># of the previous one.</span>
+        <span class="n">ret</span> <span class="o">=</span> <span class="p">[</span><span class="n">first</span><span class="p">]</span>
+        <span class="k">for</span> <span class="n">min_iteration</span><span class="p">,</span> <span class="n">max_iteration</span><span class="p">,</span> <span class="n">path</span> <span class="ow">in</span> <span class="n">others</span><span class="p">:</span>
+            <span class="c1"># If we have exactly the same iterations, we are looking at ones</span>
+            <span class="c1"># of those 3D files, so we collect them</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">min_iteration</span><span class="p">,</span> <span class="n">max_iteration</span><span class="p">)</span> <span class="o">==</span> <span class="p">(</span><span class="n">ret</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span> <span class="n">ret</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="mi">1</span><span class="p">]):</span>
+                <span class="n">ret</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+                <span class="k">break</span>
+
+            <span class="n">max_iteration_in_ret</span> <span class="o">=</span> <span class="n">ret</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">max_iteration</span> <span class="o">&gt;</span> <span class="n">max_iteration_in_ret</span><span class="p">:</span>
+                <span class="n">ret</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">min_iteration</span><span class="p">,</span> <span class="n">max_iteration</span><span class="p">,</span> <span class="n">path</span><span class="p">))</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Unused (redundant) file: </span><span class="si">{</span><span class="n">path</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">ret</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">restarts</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Return a list of tuples of the form ``(iteration_min, iteration_max, paths)``</span>
+<span class="sd">        with the minimum iterations and maximum iterations in each file</span>
+<span class="sd">        associated to this variable. ``paths`` is a list of all the files with</span>
+<span class="sd">        same ``min_iteration`` and ``max_iteration`` (as when we have 3d</span>
+<span class="sd">        xyz_file files).</span>
+
+<span class="sd">        :returns: List of tuples with first iteration, last iteration, and</span>
+<span class="sd">                  path for every file in ``self.allfiles``.</span>
+<span class="sd">        :rtype: list of tuple (int, int, list of str)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">restarts_data</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">restarts_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_restarts</span><span class="p">()</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">restarts_data</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">min_iteration</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Return the minimum available iteration in the all the files.</span>
+
+<span class="sd">        :returns: First iteration available.</span>
+<span class="sd">        :rtype: int</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># restarts is a ordered list of tuples with three elements:</span>
+        <span class="c1"># (iteration_min, iteration_max, path)</span>
+
+        <span class="c1"># The minimum iteration is in restarts[0][0]</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">restarts</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">max_iteration</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Return the maximum available iteration in the all the files.</span>
+
+<span class="sd">        :returns: Latest iteration available.</span>
+<span class="sd">        :rtype: int</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># restarts is a ordered list of tuples with three elements:</span>
+        <span class="c1"># (iteration_min, iteration_max, path)</span>
+
+        <span class="c1"># The maximum iteration is in restarts[-1][1]</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">restarts</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span>
+
+    <span class="nd">@property</span>
+    <span class="nd">@lru_cache</span><span class="p">(</span><span class="mi">128</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">available_iterations</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Return the available iterations.</span>
+
+<span class="sd">        :returns: List with all the available iterations.</span>
+<span class="sd">        :rtype: list</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">iterations_in_files</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">path</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">allfiles</span><span class="p">:</span>
+            <span class="n">iterations_in_files</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_iterations_in_file</span><span class="p">(</span><span class="n">path</span><span class="p">))</span>
+
+        <span class="c1"># Next we merge everything to make a set and we sort it</span>
+        <span class="k">return</span> <span class="nb">sorted</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">iterations_in_files</span><span class="p">))</span>
+
+    <span class="nd">@property</span>
+    <span class="nd">@lru_cache</span><span class="p">(</span><span class="mi">128</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">available_times</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Return the available times.</span>
+
+<span class="sd">        :returns: List with all the available times.</span>
+<span class="sd">        :rtype: list</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="p">[</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">time_at_iteration</span><span class="p">(</span><span class="n">iteration</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">iteration</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">available_iterations</span>
+        <span class="p">]</span>
+
+    <span class="n">times</span> <span class="o">=</span> <span class="n">available_times</span>
+    <span class="n">iterations</span> <span class="o">=</span> <span class="n">available_iterations</span>
+
+    <span class="k">def</span> <span class="fm">__iter__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">iteration</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">available_iterations</span><span class="p">:</span>
+            <span class="k">yield</span> <span class="bp">self</span><span class="p">[</span><span class="n">iteration</span><span class="p">]</span>
+
+<div class="viewcode-block" id="BaseOneGridFunction.iteration_at_time"><a class="viewcode-back" href="../../cactus_grid_functions_ref.html#postcactus.cactus_grid_functions.BaseOneGridFunction.iteration_at_time">[docs]</a>    <span class="k">def</span> <span class="nf">iteration_at_time</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">time</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Return the iteration that corresponds to the given time.</span>
+
+<span class="sd">        :param time: Time.</span>
+<span class="sd">        :type time: float</span>
+
+<span class="sd">        :returns: Iteration corresponding to the given time.</span>
+<span class="sd">        :rtype: int</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># TODO (FEATURE): Add tolerance in time.</span>
+        <span class="c1">#</span>
+        <span class="c1"># Often different outputs are not synced, so we need to allow for some</span>
+        <span class="c1"># tolerance.</span>
+
+        <span class="k">if</span> <span class="n">time</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">available_times</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Time </span><span class="si">{</span><span class="n">time</span><span class="si">}</span><span class="s2"> not available&quot;</span><span class="p">)</span>
+
+        <span class="n">index</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">searchsorted</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">available_times</span><span class="p">,</span> <span class="n">time</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">available_iterations</span><span class="p">[</span><span class="n">index</span><span class="p">]</span></div>
+
+    <span class="k">def</span> <span class="nf">_ref_levels_in_file</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="n">iteration</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Return the available refinement levels in the given path at the</span>
+<span class="sd">        specified iteration.</span>
+
+<span class="sd">        :param path: Path of the file.</span>
+<span class="sd">        :type path: str</span>
+<span class="sd">        :param iteration: Iteration.</span>
+<span class="sd">        :type iteration: int</span>
+
+<span class="sd">        :returns: Available refinement levels in ``path`` at ``iteration``.</span>
+<span class="sd">        :rtype: list</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># In case we don&#39;t have the iteration, we want to return the empty</span>
+        <span class="c1"># list, so we use the .get dictionary method. This return the</span>
+        <span class="c1"># value, if the key is available, otherwise it returns the second</span>
+        <span class="c1"># argument. Here, we fix as second argument the empty dictionary, so</span>
+        <span class="c1"># when we take .keys() we get the empty list</span>
+        <span class="k">return</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">alldata</span><span class="p">[</span><span class="n">path</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">iteration</span><span class="p">,</span> <span class="p">{})</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+
+    <span class="k">def</span> <span class="nf">_components_in_file</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="n">iteration</span><span class="p">,</span> <span class="n">ref_level</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Return the available components in the given file at the specified iteration</span>
+<span class="sd">        and refinement level.</span>
+
+<span class="sd">        :param path: Path of the file.</span>
+<span class="sd">        :type path: str</span>
+<span class="sd">        :param iteration: Iteration.</span>
+<span class="sd">        :type iteration: int</span>
+<span class="sd">        :param ref_level: Refinement level.</span>
+<span class="sd">        :type ref_level: int</span>
+
+<span class="sd">        :returns: Available components in ``path`` at ``iteration`` and ``ref_level``.</span>
+<span class="sd">        :rtype: list</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Same comment as _ref_levels_in_file, but with an</span>
+        <span class="c1"># additional level</span>
+        <span class="k">return</span> <span class="nb">list</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">alldata</span><span class="p">[</span><span class="n">path</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">iteration</span><span class="p">,</span> <span class="p">{})</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">ref_level</span><span class="p">,</span> <span class="p">{})</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span>
+        <span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_files_with_iteration</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">iteration</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Return all the files that contain the given iteration.</span>
+
+<span class="sd">        :param path: Path of the file.</span>
+<span class="sd">        :type path: str</span>
+<span class="sd">        :param iteration: Iteration.</span>
+<span class="sd">        :type iteration: int</span>
+
+<span class="sd">        :returns: Files that contain the given iteration.</span>
+<span class="sd">        :rtype: list</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Using self.get_restarts(), find the file that the given iteration</span>
+        <span class="c1"># between iteration_min and iteration_max</span>
+
+        <span class="k">if</span> <span class="p">(</span><span class="n">iteration</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">min_iteration</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span>
+            <span class="n">iteration</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">max_iteration</span>
+        <span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Iteration </span><span class="si">{</span><span class="n">iteration</span><span class="si">}</span><span class="s2"> not in available range&quot;</span><span class="p">)</span>
+
+        <span class="c1"># restarts is a ordered list of tuples with three elements:</span>
+        <span class="c1"># (iteration_min, iteration_max, path)</span>
+        <span class="n">max_iterations_in_files</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">i</span> <span class="k">for</span> <span class="n">_</span><span class="p">,</span> <span class="n">i</span><span class="p">,</span> <span class="n">_</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">restarts</span><span class="p">])</span>
+        <span class="c1"># This returns the index of the first element in max_iterations_in_files</span>
+        <span class="c1"># that is greater than the given iteration.</span>
+        <span class="c1"># E.g. max_iterations_in_files = [1, 5, 10] and iteration = 6, since</span>
+        <span class="c1"># max_iterations_in_files are the maximum iterations in the various files,</span>
+        <span class="c1"># the function has to return 2, which is the index of the first element</span>
+        <span class="c1"># in max_iterations_in_files that is larger than 6. This is what</span>
+        <span class="c1"># np.searchsorted does.</span>
+        <span class="n">index</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">searchsorted</span><span class="p">(</span><span class="n">max_iterations_in_files</span><span class="p">,</span> <span class="n">iteration</span><span class="p">)</span>
+
+        <span class="c1"># The second element is the list of path</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">restarts</span><span class="p">[</span><span class="n">index</span><span class="p">][</span><span class="mi">2</span><span class="p">]</span>
+
+<div class="viewcode-block" id="BaseOneGridFunction.total_filesize"><a class="viewcode-back" href="../../cactus_grid_functions_ref.html#postcactus.cactus_grid_functions.BaseOneGridFunction.total_filesize">[docs]</a>    <span class="k">def</span> <span class="nf">total_filesize</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="s2">&quot;MB&quot;</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Return the total size of the files with this variable.</span>
+<span class="sd">        Available units B, KB, MB and GB (in power of 1024 bytes).</span>
+
+<span class="sd">        :param unit: Unit to use (in powers of 1024 bytes).</span>
+<span class="sd">        :type unit: str among: ``B``, ``KB``, ``MB``, ``GB``.</span>
+<span class="sd">        :returns: Total size of the files associated to this variable.</span>
+<span class="sd">        :rtype: float</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">total_filesize</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">allfiles</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="n">unit</span><span class="p">)</span></div>
+
+    <span class="nd">@lru_cache</span><span class="p">(</span><span class="mi">128</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">_read_iteration_as_HierarchicalGridData</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">iteration</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Return the data at the given iteration as a :py:class:`~.HierarchicalGridData`.</span>
+
+<span class="sd">        :param iteration: Iteration.</span>
+<span class="sd">        :type iteration: int</span>
+
+<span class="sd">        :returns: Variable at the given iteration as a</span>
+<span class="sd">                  :py:class:`~.HierarchicalGridData`.</span>
+<span class="sd">        :rtype: :py:class:`~.HierarchicalGridData`</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">uniform_grid_data_components</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="k">for</span> <span class="n">path</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">allfiles</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">ref_level</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ref_levels_in_file</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">iteration</span><span class="p">):</span>
+                <span class="k">for</span> <span class="n">comp</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_components_in_file</span><span class="p">(</span>
+                    <span class="n">path</span><span class="p">,</span> <span class="n">iteration</span><span class="p">,</span> <span class="n">ref_level</span>
+                <span class="p">):</span>
+                    <span class="n">uniform_grid_data_components</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">_read_component_as_uniform_grid_data</span><span class="p">(</span>
+                            <span class="n">path</span><span class="p">,</span> <span class="n">iteration</span><span class="p">,</span> <span class="n">ref_level</span><span class="p">,</span> <span class="n">comp</span>
+                        <span class="p">)</span>
+                    <span class="p">)</span>
+
+        <span class="k">return</span> <span class="p">(</span>
+            <span class="n">grid_data</span><span class="o">.</span><span class="n">HierarchicalGridData</span><span class="p">(</span><span class="n">uniform_grid_data_components</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">uniform_grid_data_components</span>
+            <span class="k">else</span> <span class="kc">None</span>
+        <span class="p">)</span>
+
+<div class="viewcode-block" id="BaseOneGridFunction.get_iteration"><a class="viewcode-back" href="../../cactus_grid_functions_ref.html#postcactus.cactus_grid_functions.BaseOneGridFunction.get_iteration">[docs]</a>    <span class="nd">@lru_cache</span><span class="p">(</span><span class="mi">128</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">get_iteration</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">iteration</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Return the data at the given iteration as a :py:class:`~.HierarchicalGridData`.</span>
+<span class="sd">        If the iteration is not available, return ``default``.</span>
+
+<span class="sd">        :param iteration: Iteration.</span>
+<span class="sd">        :type iteration: int</span>
+<span class="sd">        :param default: What to return if iteration is not available.</span>
+<span class="sd">        :type default: anything</span>
+
+<span class="sd">        :returns: Variable at the given iteration as a</span>
+<span class="sd">                  :py:class:`~.HierarchicalGridData`.</span>
+<span class="sd">        :rtype: :py:class:`~.HierarchicalGridData`</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="n">iteration</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">available_iterations</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">default</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="p">[</span><span class="n">iteration</span><span class="p">]</span></div>
+
+<div class="viewcode-block" id="BaseOneGridFunction.get_time"><a class="viewcode-back" href="../../cactus_grid_functions_ref.html#postcactus.cactus_grid_functions.BaseOneGridFunction.get_time">[docs]</a>    <span class="nd">@lru_cache</span><span class="p">(</span><span class="mi">128</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">get_time</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">time</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Return the data at the given time as a :py:class:`~.HierarchicalGridData`.</span>
+<span class="sd">        If the time is not available, return ``default``.</span>
+
+<span class="sd">        :param iteration: Iteration.</span>
+<span class="sd">        :type iteration: int</span>
+<span class="sd">        :param default: What to return if time is not available.</span>
+<span class="sd">        :type default: anything</span>
+
+<span class="sd">        :returns: Variable at the given time as a</span>
+<span class="sd">                  :py:class:`~.HierarchicalGridData`.</span>
+<span class="sd">        :rtype: :py:class:`~.HierarchicalGridData`</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">time</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">available_times</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">default</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">iteration_at_time</span><span class="p">(</span><span class="n">time</span><span class="p">)]</span></div>
+
+    <span class="k">def</span> <span class="fm">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">iteration</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">iteration</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">available_iterations</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Iteration </span><span class="si">{</span><span class="n">iteration</span><span class="si">}</span><span class="s2"> not present&quot;</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_iteration_as_HierarchicalGridData</span><span class="p">(</span><span class="n">iteration</span><span class="p">)</span>
+
+<div class="viewcode-block" id="BaseOneGridFunction.read_on_grid"><a class="viewcode-back" href="../../cactus_grid_functions_ref.html#postcactus.cactus_grid_functions.BaseOneGridFunction.read_on_grid">[docs]</a>    <span class="k">def</span> <span class="nf">read_on_grid</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">iteration</span><span class="p">,</span> <span class="n">grid</span><span class="p">,</span> <span class="n">resample</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Read an iteration and resample the output on the specified grid.</span>
+
+<span class="sd">        Warning: this can be computationally expensive!</span>
+
+<span class="sd">        :param iteration: requested iteration</span>
+<span class="sd">        :type iteration: time</span>
+<span class="sd">        :param grid:</span>
+<span class="sd">        :type grid: UniformGrid</span>
+<span class="sd">        :param resample: Whether to use multilinear interpolation</span>
+<span class="sd">        :type resample: bool</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="p">[</span><span class="n">iteration</span><span class="p">]</span><span class="o">.</span><span class="n">to_UniformGridData_from_grid</span><span class="p">(</span>
+            <span class="n">grid</span><span class="p">,</span> <span class="n">resample</span><span class="o">=</span><span class="n">resample</span>
+        <span class="p">)</span></div></div>
+
+    <span class="c1"># def read_evolution_on_grid(</span>
+    <span class="c1">#     self,</span>
+    <span class="c1">#     grid,</span>
+    <span class="c1">#     read_every=None,</span>
+    <span class="c1">#     min_iteration=None,</span>
+    <span class="c1">#     max_iteration=None,</span>
+    <span class="c1">#     **kwargs,</span>
+    <span class="c1"># ):</span>
+    <span class="c1">#     &quot;&quot;&quot;Read multiple iterations at once on the specified grid and return the result</span>
+    <span class="c1">#     as RegularGridData in which the first index is the time and the other indices</span>
+    <span class="c1">#     are the spatial indices of grid.</span>
+
+    <span class="c1">#     &quot;&quot;&quot;</span>
+    <span class="c1">#     # TODO: IMPLEMENT THIS</span>
+
+    <span class="c1">#     iterations = self.available_iterations</span>
+    <span class="c1">#     if min_iteration is not None:</span>
+    <span class="c1">#         iterations = iterations[iterations &gt;= min_iteration]</span>
+    <span class="c1">#     if max_iteration is not None:</span>
+    <span class="c1">#         iterations = iterations[iterations &lt;= max_iteration]</span>
+    <span class="c1">#     if read_every is None:</span>
+    <span class="c1">#         read_every = np.diff(iterations).max()</span>
+
+    <span class="c1">#     iterations = [</span>
+    <span class="c1">#         i for i in iterations if ((i - iterations[0]) % read_every == 0)</span>
+    <span class="c1">#     ]</span>
+    <span class="c1">#     times = [self.time_at_iteration(i) for i in iterations]</span>
+
+    <span class="c1">#     dt = np.diff(times).min()</span>
+    <span class="c1">#     if dt &lt;= 0:</span>
+    <span class="c1">#         raise RuntimeError(&quot;Non-positive timesteps detected.&quot;)</span>
+    <span class="c1">#     #</span>
+    <span class="c1">#     if abs(np.diff(times).max() - dt).max() &gt; dt * 1e-5:</span>
+    <span class="c1">#         raise RuntimeError(&quot;Timestep not constant enough&quot;)</span>
+
+    <span class="c1">#     data = np.asarray(</span>
+    <span class="c1">#         [self.read_on_grid(i, grid).data for i in iterations]</span>
+    <span class="c1">#     )</span>
+
+    <span class="c1">#     new_x0 = [times[0]] + list(grid.x0)</span>
+    <span class="c1">#     new_dx = [dt] + list(grid.dx)</span>
+
+    <span class="c1">#     return grid_data.UniformGridData.from_grid_structure(</span>
+    <span class="c1">#         data, x0=new_x0, dx=new_dx</span>
+    <span class="c1">#     )</span>
+
+
+<div class="viewcode-block" id="OneGridFunctionASCII"><a class="viewcode-back" href="../../cactus_grid_functions_ref.html#postcactus.cactus_grid_functions.OneGridFunctionASCII">[docs]</a><span class="k">class</span> <span class="nc">OneGridFunctionASCII</span><span class="p">(</span><span class="n">BaseOneGridFunction</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Read grid data produced by CarpetASCII.</span>
+
+<span class="sd">    This class is derived from :py:class:`~.BaseOneGridFunction` and implements</span>
+<span class="sd">    the reading facilities.</span>
+
+<span class="sd">    :py:class:`~.OneGridFunctionASCII` can read 1D, 2D, and 3D ASCII files, even</span>
+<span class="sd">    when they are compressed with bzip2 or gzip.</span>
+
+<span class="sd">    ASCII files do not contain information about the ghost zones, but this can be</span>
+<span class="sd">    set &quot;by hand&quot;.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># TODO (REFACTORING): Avoid reading files twice.</span>
+    <span class="c1">#</span>
+    <span class="c1"># This class has to read the all files. When there are multiple variables in</span>
+    <span class="c1"># one file, it would be better to avoid reading again the various files (if</span>
+    <span class="c1"># we have already read them). Maybe we can add another level in the class</span>
+    <span class="c1"># hierarchy that contains all the information for a given file, and produces</span>
+    <span class="c1"># transparently OneGridFunctionASCII objects upon request.</span>
+
+    <span class="c1"># What function to use to open the file?</span>
+    <span class="c1"># What mode?</span>
+    <span class="n">_decompressor</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="kc">None</span><span class="p">:</span> <span class="p">(</span><span class="nb">open</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span><span class="p">),</span>
+        <span class="s2">&quot;gz&quot;</span><span class="p">:</span> <span class="p">(</span><span class="n">gopen</span><span class="p">,</span> <span class="s2">&quot;rt&quot;</span><span class="p">),</span>
+        <span class="s2">&quot;bz2&quot;</span><span class="p">:</span> <span class="p">(</span><span class="n">bopen</span><span class="p">,</span> <span class="s2">&quot;rt&quot;</span><span class="p">),</span>
+    <span class="p">}</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">allfiles</span><span class="p">,</span> <span class="n">var_name</span><span class="p">,</span> <span class="n">num_ghost</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Constructor.</span>
+
+<span class="sd">        :param allfiles: Paths of files associated to the variable.</span>
+<span class="sd">        :type allfiles: list of str</span>
+<span class="sd">        :param var_name: Variable name.</span>
+<span class="sd">        :type var_name: str</span>
+<span class="sd">        :param num_ghost: Number of ghost zones in each direction.</span>
+<span class="sd">        :type num_ghost: 1d NumPy array</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_iterations_to_times</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">num_ghost</span> <span class="o">=</span> <span class="n">num_ghost</span>
+
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">allfiles</span><span class="p">,</span> <span class="n">var_name</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_parse_file</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Read the content of the given file.</span>
+
+<span class="sd">        At the moment, we read the entire file line by line, which is very</span>
+<span class="sd">        inefficient.</span>
+
+<span class="sd">        :param path: Path of the file to read.</span>
+<span class="sd">        :type path: str</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># First we parse the header to find the column description, then we read</span>
+        <span class="c1"># the ENTIRE file. This is very inefficient, but it is not too hard to</span>
+        <span class="c1"># implement.</span>
+
+        <span class="c1"># This regex is meant to understand if we have one variable per file or</span>
+        <span class="c1"># one group per file, and to understand if we have compression. To see a</span>
+        <span class="c1"># detailed explanation, see AllGridFunctions. The only difference here</span>
+        <span class="c1"># is that we don&#39;t care about the extension, so we have an addition (*)?</span>
+        <span class="n">rx_filename</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span>
+            <span class="sa">r</span><span class="s2">&quot;^(([a-zA-Z0-9_]+)-)?([a-zA-Z0-9\[\]_]+).([xyz]+)?.asc(\.(gz|bz2))?$&quot;</span>
+        <span class="p">)</span>
+
+        <span class="n">filename</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">path</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span>
+        <span class="n">matched</span> <span class="o">=</span> <span class="n">rx_filename</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">matched</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Found file with unusual name: </span><span class="si">{</span><span class="n">path</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+        <span class="n">is_one_file_per_group</span> <span class="o">=</span> <span class="n">matched</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+
+        <span class="n">compression_method</span> <span class="o">=</span> <span class="n">matched</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">6</span><span class="p">)</span>
+        <span class="n">opener</span><span class="p">,</span> <span class="n">opener_mode</span> <span class="o">=</span> <span class="n">OneGridFunctionASCII</span><span class="o">.</span><span class="n">_decompressor</span><span class="p">[</span>
+            <span class="n">compression_method</span>
+        <span class="p">]</span>
+
+        <span class="c1"># These files always have the column format line, and have the data</span>
+        <span class="c1"># format line only if they are &quot;one file per group&quot;</span>
+        <span class="n">_</span><span class="p">,</span> <span class="n">column_description</span> <span class="o">=</span> <span class="n">scan_header</span><span class="p">(</span>
+            <span class="n">path</span><span class="p">,</span>
+            <span class="n">one_file_per_group</span><span class="o">=</span><span class="n">is_one_file_per_group</span><span class="p">,</span>
+            <span class="n">extended_format</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+            <span class="n">opener</span><span class="o">=</span><span class="n">opener</span><span class="p">,</span>
+            <span class="n">opener_mode</span><span class="o">=</span><span class="n">opener_mode</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="c1"># We have two possibilities, one is that the file only contains one</span>
+        <span class="c1"># variable, column_description will be the column number. If the</span>
+        <span class="c1"># file contains many variables, column_description is a dictionary</span>
+        <span class="c1"># that maps variables to their column.</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">column_description</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
+            <span class="c1"># The variable we work with is column_description so we overwrite it</span>
+            <span class="c1"># to be the number of column with the data we are interested in</span>
+            <span class="n">column_description</span> <span class="o">=</span> <span class="n">column_description</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">var_name</span><span class="p">]</span>
+
+        <span class="c1"># Now we read the entire file, line by line. This is the most</span>
+        <span class="c1"># inefficient way possible. But at least, it is reasonably</span>
+        <span class="c1"># straightforward to implement. If you are reading this comment and you</span>
+        <span class="c1"># want to improve this, feel free to do it.</span>
+
+        <span class="k">def</span> <span class="nf">current_data_to_UniformGridData</span><span class="p">(</span>
+            <span class="n">current_x</span><span class="p">,</span>
+            <span class="n">current_y</span><span class="p">,</span>
+            <span class="n">current_z</span><span class="p">,</span>
+            <span class="n">current_data</span><span class="p">,</span>
+            <span class="n">current_time</span><span class="p">,</span>
+            <span class="n">current_iteration</span><span class="p">,</span>
+            <span class="n">current_component</span><span class="p">,</span>
+            <span class="n">current_ref_level</span><span class="p">,</span>
+        <span class="p">):</span>
+            <span class="c1"># First, we compute x0 and x1</span>
+            <span class="n">x0_3d</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span>
+                <span class="p">[</span>
+                    <span class="n">np</span><span class="o">.</span><span class="n">amin</span><span class="p">(</span><span class="n">current_x</span><span class="p">),</span>
+                    <span class="n">np</span><span class="o">.</span><span class="n">amin</span><span class="p">(</span><span class="n">current_y</span><span class="p">),</span>
+                    <span class="n">np</span><span class="o">.</span><span class="n">amin</span><span class="p">(</span><span class="n">current_z</span><span class="p">),</span>
+                <span class="p">]</span>
+            <span class="p">)</span>
+            <span class="n">x1_3d</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span>
+                <span class="p">[</span>
+                    <span class="n">np</span><span class="o">.</span><span class="n">amax</span><span class="p">(</span><span class="n">current_x</span><span class="p">),</span>
+                    <span class="n">np</span><span class="o">.</span><span class="n">amax</span><span class="p">(</span><span class="n">current_y</span><span class="p">),</span>
+                    <span class="n">np</span><span class="o">.</span><span class="n">amax</span><span class="p">(</span><span class="n">current_z</span><span class="p">),</span>
+                <span class="p">]</span>
+            <span class="p">)</span>
+
+            <span class="c1"># Now we find the interesting dimensions</span>
+            <span class="n">dimensions_in_data</span> <span class="o">=</span> <span class="n">x0_3d</span> <span class="o">!=</span> <span class="n">x1_3d</span>
+
+            <span class="c1"># With unique we find the real data</span>
+            <span class="n">shape_3d</span> <span class="o">=</span> <span class="p">[</span>
+                <span class="nb">len</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">current_x</span><span class="p">)),</span>
+                <span class="nb">len</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">current_y</span><span class="p">)),</span>
+                <span class="nb">len</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">current_z</span><span class="p">)),</span>
+            <span class="p">]</span>
+
+            <span class="n">shape</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">shape_3d</span><span class="p">)[</span><span class="n">dimensions_in_data</span><span class="p">]</span>
+            <span class="n">x0</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">x0_3d</span><span class="p">)[</span><span class="n">dimensions_in_data</span><span class="p">]</span>
+            <span class="n">x1</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">x1_3d</span><span class="p">)[</span><span class="n">dimensions_in_data</span><span class="p">]</span>
+
+            <span class="n">var_data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">current_data</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="nb">tuple</span><span class="p">(</span><span class="n">shape</span><span class="p">[::</span><span class="o">-</span><span class="mi">1</span><span class="p">]))</span>
+
+            <span class="n">grid</span> <span class="o">=</span> <span class="n">grid_data</span><span class="o">.</span><span class="n">UniformGrid</span><span class="p">(</span>
+                <span class="n">shape</span><span class="p">,</span>
+                <span class="n">x0</span><span class="o">=</span><span class="n">x0</span><span class="p">,</span>
+                <span class="n">x1</span><span class="o">=</span><span class="n">x1</span><span class="p">,</span>
+                <span class="n">num_ghost</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">num_ghost</span><span class="p">,</span>
+                <span class="n">component</span><span class="o">=</span><span class="n">current_component</span><span class="p">,</span>
+                <span class="n">ref_level</span><span class="o">=</span><span class="n">current_ref_level</span><span class="p">,</span>
+                <span class="n">time</span><span class="o">=</span><span class="n">current_time</span><span class="p">,</span>
+                <span class="n">iteration</span><span class="o">=</span><span class="n">current_iteration</span><span class="p">,</span>
+            <span class="p">)</span>
+
+            <span class="k">return</span> <span class="n">grid_data</span><span class="o">.</span><span class="n">UniformGridData</span><span class="p">(</span><span class="n">grid</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="n">var_data</span><span class="p">))</span>
+
+        <span class="c1"># We are going to assume that the iteration column is the first</span>
+        <span class="k">with</span> <span class="n">opener</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">opener_mode</span><span class="p">)</span> <span class="k">as</span> <span class="n">fil</span><span class="p">:</span>
+            <span class="c1"># We use these variables as local variables. We are going to aggregate</span>
+            <span class="c1"># the data read here, and reset it when we find a blank line</span>
+            <span class="n">current_iteration</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="n">current_ref_level</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="n">current_component</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="n">current_x</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="n">current_y</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="n">current_z</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="n">current_data</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="c1"># We scan the entire file line by line</span>
+            <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">fil</span><span class="p">:</span>
+                <span class="c1"># Skip header</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">line</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">isdigit</span><span class="p">():</span>
+                    <span class="c1"># We don&#39;t care about lines that don&#39;t start with a number</span>
+                    <span class="k">continue</span>
+
+                <span class="c1"># Here are can assume that this is a line with data</span>
+                <span class="n">line_data</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">split</span><span class="p">()</span>
+                <span class="n">line_data</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="nb">float</span><span class="p">,</span> <span class="n">line_data</span><span class="p">))</span>
+                <span class="k">if</span> <span class="n">current_iteration</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="n">current_iteration</span> <span class="o">=</span> <span class="n">line_data</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+                <span class="k">if</span> <span class="n">current_ref_level</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="n">current_ref_level</span> <span class="o">=</span> <span class="n">line_data</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+
+                <span class="k">if</span> <span class="n">current_component</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="n">current_component</span> <span class="o">=</span> <span class="n">line_data</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span>
+
+                <span class="c1"># If iteration, component, or refinement level changes, we</span>
+                <span class="c1"># write the data, else we continue reading</span>
+                <span class="k">if</span> <span class="p">(</span>
+                    <span class="n">line_data</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">!=</span> <span class="n">current_iteration</span>
+                    <span class="ow">or</span> <span class="n">line_data</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">!=</span> <span class="n">current_ref_level</span>
+                    <span class="ow">or</span> <span class="n">line_data</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="o">!=</span> <span class="n">current_component</span>
+                <span class="p">):</span>
+                    <span class="n">alldata_file</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">alldata</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="p">{})</span>
+                    <span class="n">alldata_iteration</span> <span class="o">=</span> <span class="n">alldata_file</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span>
+                        <span class="nb">int</span><span class="p">(</span><span class="n">current_iteration</span><span class="p">),</span> <span class="p">{}</span>
+                    <span class="p">)</span>
+                    <span class="n">alldata_ref_level</span> <span class="o">=</span> <span class="n">alldata_iteration</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span>
+                        <span class="nb">int</span><span class="p">(</span><span class="n">current_ref_level</span><span class="p">),</span> <span class="p">{}</span>
+                    <span class="p">)</span>
+
+                    <span class="n">current_time</span> <span class="o">=</span> <span class="n">line_data</span><span class="p">[</span><span class="mi">8</span><span class="p">]</span>
+
+                    <span class="n">uniform_grid_data</span> <span class="o">=</span> <span class="n">current_data_to_UniformGridData</span><span class="p">(</span>
+                        <span class="n">current_x</span><span class="p">,</span>
+                        <span class="n">current_y</span><span class="p">,</span>
+                        <span class="n">current_z</span><span class="p">,</span>
+                        <span class="n">current_data</span><span class="p">,</span>
+                        <span class="n">current_time</span><span class="p">,</span>
+                        <span class="n">current_iteration</span><span class="p">,</span>
+                        <span class="n">current_component</span><span class="p">,</span>
+                        <span class="n">current_ref_level</span><span class="p">,</span>
+                    <span class="p">)</span>
+
+                    <span class="n">alldata_ref_level</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span>
+                        <span class="nb">int</span><span class="p">(</span><span class="n">current_component</span><span class="p">),</span> <span class="n">uniform_grid_data</span>
+                    <span class="p">)</span>
+
+                    <span class="c1"># Write iterations_to_time</span>
+                    <span class="k">if</span> <span class="n">current_iteration</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_iterations_to_times</span><span class="p">:</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">_iterations_to_times</span><span class="p">[</span>
+                            <span class="n">current_iteration</span>
+                        <span class="p">]</span> <span class="o">=</span> <span class="n">current_time</span>
+
+                    <span class="c1"># Reset everything</span>
+                    <span class="n">current_iteration</span> <span class="o">=</span> <span class="n">line_data</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                    <span class="n">current_ref_level</span> <span class="o">=</span> <span class="n">line_data</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+                    <span class="n">current_component</span> <span class="o">=</span> <span class="n">line_data</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span>
+                    <span class="n">current_x</span> <span class="o">=</span> <span class="p">[]</span>
+                    <span class="n">current_y</span> <span class="o">=</span> <span class="p">[]</span>
+                    <span class="n">current_z</span> <span class="o">=</span> <span class="p">[]</span>
+                    <span class="n">current_data</span> <span class="o">=</span> <span class="p">[]</span>
+
+                <span class="c1"># We still have to read the data on this line even if we</span>
+                <span class="c1"># &quot;are done with a group&quot;</span>
+                <span class="n">current_x</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">line_data</span><span class="p">[</span><span class="mi">9</span><span class="p">])</span>
+                <span class="n">current_y</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">line_data</span><span class="p">[</span><span class="mi">10</span><span class="p">])</span>
+                <span class="n">current_z</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">line_data</span><span class="p">[</span><span class="mi">11</span><span class="p">])</span>
+
+                <span class="n">current_data</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">line_data</span><span class="p">[</span><span class="n">column_description</span><span class="p">])</span>
+
+            <span class="c1"># Here we take care of the last piece of data</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">current_data</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">current_iteration</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_iterations_to_times</span><span class="p">:</span>
+                    <span class="n">current_time</span> <span class="o">=</span> <span class="n">line_data</span><span class="p">[</span><span class="mi">8</span><span class="p">]</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_iterations_to_times</span><span class="p">[</span><span class="n">current_iteration</span><span class="p">]</span> <span class="o">=</span> <span class="n">current_time</span>
+
+                <span class="n">alldata_file</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">alldata</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="p">{})</span>
+                <span class="n">alldata_iteration</span> <span class="o">=</span> <span class="n">alldata_file</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span>
+                    <span class="nb">int</span><span class="p">(</span><span class="n">current_iteration</span><span class="p">),</span> <span class="p">{}</span>
+                <span class="p">)</span>
+                <span class="n">alldata_ref_level</span> <span class="o">=</span> <span class="n">alldata_iteration</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span>
+                    <span class="nb">int</span><span class="p">(</span><span class="n">current_ref_level</span><span class="p">),</span> <span class="p">{}</span>
+                <span class="p">)</span>
+
+                <span class="n">uniform_grid_data</span> <span class="o">=</span> <span class="n">current_data_to_UniformGridData</span><span class="p">(</span>
+                    <span class="n">current_x</span><span class="p">,</span>
+                    <span class="n">current_y</span><span class="p">,</span>
+                    <span class="n">current_z</span><span class="p">,</span>
+                    <span class="n">current_data</span><span class="p">,</span>
+                    <span class="n">current_time</span><span class="p">,</span>
+                    <span class="n">current_iteration</span><span class="p">,</span>
+                    <span class="n">current_component</span><span class="p">,</span>
+                    <span class="n">current_ref_level</span><span class="p">,</span>
+                <span class="p">)</span>
+
+                <span class="n">alldata_ref_level</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span>
+                    <span class="nb">int</span><span class="p">(</span><span class="n">current_component</span><span class="p">),</span> <span class="n">uniform_grid_data</span>
+                <span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_read_component_as_uniform_grid_data</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="n">iteration</span><span class="p">,</span> <span class="n">ref_level</span><span class="p">,</span> <span class="n">component</span>
+    <span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Return the component at the given iteration, refinement level, and component.</span>
+
+<span class="sd">        :param path: Path of the file.</span>
+<span class="sd">        :type path: str</span>
+<span class="sd">        :param iteration: Iteration.</span>
+<span class="sd">        :type iteration: int</span>
+<span class="sd">        :param ref_level: Refinement level.</span>
+<span class="sd">        :type ref_level: int</span>
+<span class="sd">        :param component: Component.</span>
+<span class="sd">        :type component: int</span>
+
+<span class="sd">        :returns: Component as a :py:class:`~.UniformGridData`.</span>
+<span class="sd">        :rtype: :py:class:`~.UniformGridData`</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># We have already read the files, so we just return it</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">alldata</span><span class="p">[</span><span class="n">path</span><span class="p">][</span><span class="n">iteration</span><span class="p">][</span><span class="n">ref_level</span><span class="p">][</span><span class="n">component</span><span class="p">]</span>
+
+<div class="viewcode-block" id="OneGridFunctionASCII.time_at_iteration"><a class="viewcode-back" href="../../cactus_grid_functions_ref.html#postcactus.cactus_grid_functions.OneGridFunctionASCII.time_at_iteration">[docs]</a>    <span class="k">def</span> <span class="nf">time_at_iteration</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">iteration</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Return the time at a given iteration.</span>
+
+<span class="sd">        :param iteration: Iteration.</span>
+<span class="sd">        :type iteration: int</span>
+
+<span class="sd">        :returns: Time at given iteration.</span>
+<span class="sd">        :rtype: float</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="n">iteration</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">available_iterations</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Iteration </span><span class="si">{iteration}</span><span class="s2"> not available&quot;</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_iterations_to_times</span><span class="p">[</span><span class="n">iteration</span><span class="p">]</span></div></div>
+
+
+<div class="viewcode-block" id="OneGridFunctionH5"><a class="viewcode-back" href="../../cactus_grid_functions_ref.html#postcactus.cactus_grid_functions.OneGridFunctionH5">[docs]</a><span class="k">class</span> <span class="nc">OneGridFunctionH5</span><span class="p">(</span><span class="n">BaseOneGridFunction</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Read grid data produced by CarpetHDF5 files.</span>
+
+<span class="sd">    This class is derived from :py:class:`~.BaseOneGridFunction` and implements</span>
+<span class="sd">    the reading facilities.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># This class implements the details on how to read the data, most of the</span>
+    <span class="c1"># functionalities of the class are in OneGridFunctionBase.</span>
+
+    <span class="c1"># Let&#39;s unpack the regex, we have 7 capturing groups</span>
+    <span class="c1">#</span>
+    <span class="c1"># 1. [^:] matches any number of characters (at least one), with the</span>
+    <span class="c1">#    exception of &#39;:&#39;</span>
+    <span class="c1"># 2. \S+ matches any number of non-whitespace characters (at least</span>
+    <span class="c1">#    one).</span>
+    <span class="c1">#</span>
+    <span class="c1"># 1. and 2. are thorn and variable name, then we have</span>
+    <span class="c1"># 3, 4. \d+ matches a number (iteration and time level)</span>
+    <span class="c1"># 5. &quot; m=0&quot; matches this exactly, if it is present</span>
+    <span class="c1"># 6. \d+ matches a number (refinement level)</span>
+    <span class="c1"># Then we have two nested capturing groups</span>
+    <span class="c1"># ( c=(\d+))? checked whether c=NUMBER is matched,</span>
+    <span class="c1"># and inside we have that the component number is matched</span>
+    <span class="c1">#</span>
+    <span class="c1"># All the [ ] are meaningful blank spaces. Note, we don&#39;t have $^ because</span>
+    <span class="c1"># there is more that we do not want to match</span>
+    <span class="n">_pattern_group_name</span> <span class="o">=</span> <span class="sa">r</span><span class="s2">&quot;&quot;&quot;</span>
+<span class="s2">    ([^:]+)             # Thorn name</span>
+<span class="s2">    ::</span>
+<span class="s2">    (\S+)               # Variable name</span>
+<span class="s2">    [ ]</span>
+<span class="s2">    it=(\d+)            # Iteration</span>
+<span class="s2">    [ ]</span>
+<span class="s2">    tl=(\d+)            # Timelevel (almost always 0)</span>
+<span class="s2">    ([ ]m=0)?           # Map</span>
+<span class="s2">    [ ]</span>
+<span class="s2">    rl=(\d+)            # Refinement level</span>
+<span class="s2">    ([ ]c=(\d+))?       # Component</span>
+<span class="s2">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">allfiles</span><span class="p">,</span> <span class="n">var_name</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Constructor.</span>
+
+<span class="sd">        :param allfiles: Paths of files associated to the variable.</span>
+<span class="sd">        :type allfiles: list of str</span>
+<span class="sd">        :param var_name: Variable name.</span>
+<span class="sd">        :type var_name: str</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># We need these variables to properly find what dataset to look at in</span>
+        <span class="c1"># the HDF5 file.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">thorn_name</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">map</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">rx_group_name</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_pattern_group_name</span><span class="p">,</span> <span class="n">re</span><span class="o">.</span><span class="n">VERBOSE</span><span class="p">)</span>
+
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">allfiles</span><span class="p">,</span> <span class="n">var_name</span><span class="p">)</span>
+
+        <span class="c1"># super() will fill the other variables that we need for dataset_format</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">map</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">map</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+
+        <span class="c1"># TODO (FEATURE): Make separator customizable</span>
+        <span class="c1">#</span>
+        <span class="c1"># Technically the separator :: is customizable, so we should be more</span>
+        <span class="c1"># flexible.</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">dataset_format</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">thorn_name</span><span class="si">}</span><span class="s2">::</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">var_name</span><span class="si">}</span><span class="s2"> it=%d tl=0</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">map</span><span class="si">}</span><span class="s2"> rl=%d%s&quot;</span>
+        <span class="p">)</span>
+
+        <span class="c1"># HDF5 files can contain ghostzones or not. Here, we can that all the</span>
+        <span class="c1"># files have the same behavior (they all contain, or they all don&#39;t)</span>
+        <span class="c1">#</span>
+        <span class="c1"># self._are_ghostzones_in_file(path) returns True or False, so this</span>
+        <span class="c1"># is a set with True, False or a mix</span>
+        <span class="n">ghost_in_files</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_are_ghostzones_in_file</span><span class="p">(</span><span class="n">path</span><span class="p">)</span> <span class="k">for</span> <span class="n">path</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">allfiles</span>
+        <span class="p">}</span>
+
+        <span class="c1"># Here we check that we only have True or False</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">ghost_in_files</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="s2">&quot;Inconsistent IOHDF5::output_ghost_points across files&quot;</span>
+            <span class="p">)</span>
+
+        <span class="c1"># We know that ghost_in_files has only one element (either True or</span>
+        <span class="c1"># False), so we pick that</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">are_ghostzones_in_files</span> <span class="o">=</span> <span class="nb">next</span><span class="p">(</span><span class="nb">iter</span><span class="p">(</span><span class="n">ghost_in_files</span><span class="p">))</span>
+
+    <span class="k">def</span> <span class="nf">_parse_file</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Read the content of the given file (without reading the data).</span>
+
+<span class="sd">        :param path: Path of the file.</span>
+<span class="sd">        :type path: str</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># This will give us an overview of what is available in the provided</span>
+        <span class="c1"># file. We keep a collection of all these in the variable self.alldata</span>
+        <span class="k">with</span> <span class="n">h5py</span><span class="o">.</span><span class="n">File</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">group</span> <span class="ow">in</span> <span class="n">f</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+                <span class="n">matched</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">rx_group_name</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">group</span><span class="p">)</span>
+                <span class="c1"># If this is not an interesting group, just skip it</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">matched</span><span class="p">:</span>
+                    <span class="k">continue</span>
+
+                <span class="p">(</span>
+                    <span class="n">thorn_name</span><span class="p">,</span>
+                    <span class="n">var_name</span><span class="p">,</span>
+                    <span class="n">iteration</span><span class="p">,</span>
+                    <span class="n">time_level</span><span class="p">,</span>
+                    <span class="n">map_</span><span class="p">,</span>
+                    <span class="n">ref_level</span><span class="p">,</span>
+                    <span class="n">_</span><span class="p">,</span>
+                    <span class="n">component</span><span class="p">,</span>
+                <span class="p">)</span> <span class="o">=</span> <span class="n">matched</span><span class="o">.</span><span class="n">groups</span><span class="p">()</span>
+
+                <span class="k">if</span> <span class="n">var_name</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">var_name</span><span class="p">:</span>
+                    <span class="k">continue</span>
+
+                <span class="n">time_level</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">time_level</span><span class="p">)</span>
+
+                <span class="c1"># We only care about the current timelevel</span>
+                <span class="k">if</span> <span class="n">time_level</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="k">continue</span>
+
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">thorn_name</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">thorn_name</span> <span class="o">=</span> <span class="n">thorn_name</span>
+
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">map</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">map</span> <span class="o">=</span> <span class="n">map_</span>
+
+                <span class="n">component</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span> <span class="k">if</span> <span class="n">matched</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">8</span><span class="p">)</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="nb">int</span><span class="p">(</span><span class="n">component</span><span class="p">)</span>
+
+                <span class="c1"># Here is where we prepare are nested alldata dictionary</span>
+                <span class="n">alldata_file</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">alldata</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="p">{})</span>
+                <span class="n">alldata_iteration</span> <span class="o">=</span> <span class="n">alldata_file</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">iteration</span><span class="p">),</span> <span class="p">{})</span>
+                <span class="n">alldata_ref_level</span> <span class="o">=</span> <span class="n">alldata_iteration</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span>
+                    <span class="nb">int</span><span class="p">(</span><span class="n">ref_level</span><span class="p">),</span> <span class="p">{}</span>
+                <span class="p">)</span>
+
+                <span class="c1"># We set the actual data to None, and we will read it in</span>
+                <span class="c1"># _read_component_as_uniform_grid_data upon request</span>
+                <span class="n">alldata_ref_level</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">component</span><span class="p">),</span> <span class="kc">None</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_grid_from_dataset</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dataset</span><span class="p">,</span> <span class="n">iteration</span><span class="p">,</span> <span class="n">ref_level</span><span class="p">,</span> <span class="n">component</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Return a :py:class:`~.UniformGrid` from a given HDF5 dataset.</span>
+
+<span class="sd">        :param dataset: Dataset to model the grid after.</span>
+<span class="sd">        :type dataset: H5py.dataset</span>
+<span class="sd">        :param iteration: Iteration.</span>
+<span class="sd">        :type iteration: int</span>
+<span class="sd">        :param ref_level: Refinement level.</span>
+<span class="sd">        :type ref_level: int</span>
+<span class="sd">        :param component: Component.</span>
+<span class="sd">        :type component: int</span>
+
+<span class="sd">        :returns: Grid corresponding to the dataset.</span>
+<span class="sd">        :rtype: :py:class:`~.UniformGrid`</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># NOTE: Why are we taking the reverse?</span>
+        <span class="n">shape</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">dataset</span><span class="o">.</span><span class="n">shape</span><span class="p">[::</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+
+        <span class="n">x0</span> <span class="o">=</span> <span class="n">dataset</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s2">&quot;origin&quot;</span><span class="p">]</span>
+        <span class="n">dx</span> <span class="o">=</span> <span class="n">dataset</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s2">&quot;delta&quot;</span><span class="p">]</span>
+        <span class="n">time</span> <span class="o">=</span> <span class="n">dataset</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s2">&quot;time&quot;</span><span class="p">]</span>
+        <span class="c1"># With the .get we ensure that if &quot;cctk_nghostzones&quot; cannot be read, we</span>
+        <span class="c1"># have returned None, which we can test later</span>
+        <span class="n">num_ghost</span> <span class="o">=</span> <span class="n">dataset</span><span class="o">.</span><span class="n">attrs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;cctk_nghostzones&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="c1"># If we do not have the ghostzones in the file, then it is as if we</span>
+        <span class="c1"># have ghostzones of size zero.</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">are_ghostzones_in_files</span> <span class="ow">or</span> <span class="n">num_ghost</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">num_ghost</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros_like</span><span class="p">(</span><span class="n">shape</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">int</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">grid_data</span><span class="o">.</span><span class="n">UniformGrid</span><span class="p">(</span>
+            <span class="n">shape</span><span class="p">,</span>
+            <span class="n">x0</span><span class="o">=</span><span class="n">x0</span><span class="p">,</span>
+            <span class="n">dx</span><span class="o">=</span><span class="n">dx</span><span class="p">,</span>
+            <span class="n">ref_level</span><span class="o">=</span><span class="n">ref_level</span><span class="p">,</span>
+            <span class="n">num_ghost</span><span class="o">=</span><span class="n">num_ghost</span><span class="p">,</span>
+            <span class="n">time</span><span class="o">=</span><span class="n">time</span><span class="p">,</span>
+            <span class="n">iteration</span><span class="o">=</span><span class="n">iteration</span><span class="p">,</span>
+            <span class="n">component</span><span class="o">=</span><span class="n">component</span><span class="p">,</span>
+        <span class="p">)</span>
+
+    <span class="c1"># What is a context manager?</span>
+    <span class="c1">#</span>
+    <span class="c1"># Context managers are useful ways to handle resources in Python. With a</span>
+    <span class="c1"># context manager, we do not have to worry about releasing resources. Here,</span>
+    <span class="c1"># we wrap reading the h5 file with another context manager so that we can</span>
+    <span class="c1"># easily get the dataset.</span>
+    <span class="nd">@contextmanager</span>
+    <span class="k">def</span> <span class="nf">_get_dataset</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="n">iteration</span><span class="p">,</span> <span class="n">ref_level</span><span class="p">,</span> <span class="n">component</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Context manager to read an HDF5 file.</span>
+
+<span class="sd">        :param path: Path of the file.</span>
+<span class="sd">        :type path: str</span>
+<span class="sd">        :param iteration: Iteration.</span>
+<span class="sd">        :type iteration: int</span>
+<span class="sd">        :param ref_level: Refinement level.</span>
+<span class="sd">        :type ref_level: int</span>
+<span class="sd">        :param component: Component.</span>
+<span class="sd">        :type component: int</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">component_str</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot; c=</span><span class="si">{</span><span class="n">component</span><span class="si">}</span><span class="s2">&quot;</span> <span class="k">if</span> <span class="p">(</span><span class="n">component</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">)</span> <span class="k">else</span> <span class="s2">&quot;&quot;</span>
+        <span class="k">with</span> <span class="n">h5py</span><span class="o">.</span><span class="n">File</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="k">yield</span> <span class="n">f</span><span class="p">[</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">dataset_format</span> <span class="o">%</span> <span class="p">(</span><span class="n">iteration</span><span class="p">,</span> <span class="n">ref_level</span><span class="p">,</span> <span class="n">component_str</span><span class="p">)</span>
+                <span class="p">]</span>
+            <span class="k">finally</span><span class="p">:</span>
+                <span class="c1"># All the hard work is done by the other &#39;with&#39; statement.</span>
+                <span class="c1"># We don&#39;t need to do anything here.</span>
+                <span class="k">pass</span>
+
+    <span class="k">def</span> <span class="nf">_read_component_as_uniform_grid_data</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="n">iteration</span><span class="p">,</span> <span class="n">ref_level</span><span class="p">,</span> <span class="n">component</span>
+    <span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Return the component at the given iteration, refinement level, and component.</span>
+
+<span class="sd">        :param path: Path of the file.</span>
+<span class="sd">        :type path: str</span>
+<span class="sd">        :param iteration: Iteration.</span>
+<span class="sd">        :type iteration: int</span>
+<span class="sd">        :param ref_level: Refinement level.</span>
+<span class="sd">        :type ref_level: int</span>
+<span class="sd">        :param component: Component.</span>
+<span class="sd">        :type component: int</span>
+
+<span class="sd">        :returns: Component as a :py:class:`~.UniformGridData`.</span>
+<span class="sd">        :rtype: :py:class:`~.UniformGridData`</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">alldata</span><span class="p">[</span><span class="n">path</span><span class="p">][</span><span class="n">iteration</span><span class="p">][</span><span class="n">ref_level</span><span class="p">][</span><span class="n">component</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_dataset</span><span class="p">(</span>
+                <span class="n">path</span><span class="p">,</span> <span class="n">iteration</span><span class="p">,</span> <span class="n">ref_level</span><span class="p">,</span> <span class="n">component</span>
+            <span class="p">)</span> <span class="k">as</span> <span class="n">dataset</span><span class="p">:</span>
+                <span class="n">grid</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_grid_from_dataset</span><span class="p">(</span>
+                    <span class="n">dataset</span><span class="p">,</span> <span class="n">iteration</span><span class="p">,</span> <span class="n">ref_level</span><span class="p">,</span> <span class="n">component</span>
+                <span class="p">)</span>
+                <span class="n">data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="n">dataset</span><span class="p">[()])</span>
+
+                <span class="bp">self</span><span class="o">.</span><span class="n">alldata</span><span class="p">[</span><span class="n">path</span><span class="p">][</span><span class="n">iteration</span><span class="p">][</span><span class="n">ref_level</span><span class="p">][</span>
+                    <span class="n">component</span>
+                <span class="p">]</span> <span class="o">=</span> <span class="n">grid_data</span><span class="o">.</span><span class="n">UniformGridData</span><span class="p">(</span><span class="n">grid</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">alldata</span><span class="p">[</span><span class="n">path</span><span class="p">][</span><span class="n">iteration</span><span class="p">][</span><span class="n">ref_level</span><span class="p">][</span><span class="n">component</span><span class="p">]</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_are_ghostzones_in_file</span><span class="p">(</span><span class="n">path</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Return whether the ghostzones were output or not.</span>
+
+<span class="sd">        :param path: File to inspect.</span>
+<span class="sd">        :type path: str</span>
+
+<span class="sd">        :returns: Whether ``path`` contains ghost zones.</span>
+<span class="sd">        :rtype: bool</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># This is a tricky and important function to stitch together all the</span>
+        <span class="c1"># different components. Carpet has an option (technically two) to output</span>
+        <span class="c1"># the ghostzones in the files. These are: output_ghost_points and</span>
+        <span class="c1"># out3D_ghosts (which is deprecated). When they are both set to yes,</span>
+        <span class="c1"># the ghostzones are output in the h5 files. When one of the two is set</span>
+        <span class="c1"># to no, the ghostzones are not output.</span>
+
+        <span class="c1"># The default value of these parameters is yes</span>
+        <span class="k">with</span> <span class="n">h5py</span><span class="o">.</span><span class="n">File</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+            <span class="n">parameters</span> <span class="o">=</span> <span class="n">f</span><span class="p">[</span><span class="s2">&quot;Parameters and Global Attributes&quot;</span><span class="p">]</span>
+            <span class="n">all_pars</span> <span class="o">=</span> <span class="n">parameters</span><span class="p">[</span><span class="s2">&quot;All Parameters&quot;</span><span class="p">][()]</span><span class="o">.</span><span class="n">decode</span><span class="p">()</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="c1"># We make sure that everything is lowercase, we are case insensitive</span>
+            <span class="n">iohdf5_pars</span> <span class="o">=</span> <span class="p">[</span>
+                <span class="n">param</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+                <span class="k">for</span> <span class="n">param</span> <span class="ow">in</span> <span class="n">all_pars</span>
+                <span class="k">if</span> <span class="n">param</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;carpetiohdf5&quot;</span><span class="p">)</span>
+                <span class="ow">or</span> <span class="n">param</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;iohdf5&quot;</span><span class="p">)</span>
+            <span class="p">]</span>
+
+            <span class="k">def</span> <span class="nf">is_param_true</span><span class="p">(</span><span class="n">name</span><span class="p">):</span>
+                <span class="n">param</span> <span class="o">=</span> <span class="p">[</span><span class="n">p</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">iohdf5_pars</span> <span class="k">if</span> <span class="n">name</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="ow">in</span> <span class="n">p</span><span class="p">]</span>
+                <span class="c1"># When the parameters are not set, they are set to yes by</span>
+                <span class="c1"># default</span>
+                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">param</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="k">return</span> <span class="kc">True</span>
+
+                <span class="c1"># The parameter is set</span>
+                <span class="k">return</span> <span class="p">(</span>
+                    <span class="p">(</span><span class="s2">&quot;true&quot;</span> <span class="ow">in</span> <span class="n">param</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+                    <span class="ow">or</span> <span class="p">(</span><span class="s2">&quot;yes&quot;</span> <span class="ow">in</span> <span class="n">param</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+                    <span class="ow">or</span> <span class="p">(</span><span class="s2">&quot;1&quot;</span> <span class="ow">in</span> <span class="n">param</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+                <span class="p">)</span>
+
+            <span class="k">return</span> <span class="n">is_param_true</span><span class="p">(</span><span class="s2">&quot;out3D_ghosts&quot;</span><span class="p">)</span> <span class="ow">and</span> <span class="n">is_param_true</span><span class="p">(</span>
+                <span class="s2">&quot;output_ghost_points&quot;</span>
+            <span class="p">)</span>
+
+<div class="viewcode-block" id="OneGridFunctionH5.time_at_iteration"><a class="viewcode-back" href="../../cactus_grid_functions_ref.html#postcactus.cactus_grid_functions.OneGridFunctionH5.time_at_iteration">[docs]</a>    <span class="k">def</span> <span class="nf">time_at_iteration</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">iteration</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Return the time corresponding to the provided iteration.</span>
+
+<span class="sd">        :param iteration: Iteration.</span>
+<span class="sd">        :type iteration: int</span>
+
+<span class="sd">        :returns: Time corresponding to ``iteration``.</span>
+<span class="sd">        :rtype: float</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># If there are multiple files, we take the first.</span>
+        <span class="c1"># A case in which there are multiple files is with 3D data</span>
+        <span class="n">path</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_files_with_iteration</span><span class="p">(</span><span class="n">iteration</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+
+        <span class="n">ref_levels</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ref_levels_in_file</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">iteration</span><span class="p">)</span>
+        <span class="n">components</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_components_in_file</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">iteration</span><span class="p">,</span> <span class="n">ref_levels</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+        <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_dataset</span><span class="p">(</span>
+            <span class="n">path</span><span class="p">,</span> <span class="n">iteration</span><span class="p">,</span> <span class="n">ref_levels</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">components</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+        <span class="p">)</span> <span class="k">as</span> <span class="n">dataset</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">dataset</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s2">&quot;time&quot;</span><span class="p">]</span></div></div>
+
+
+<div class="viewcode-block" id="AllGridFunctions"><a class="viewcode-back" href="../../cactus_grid_functions_ref.html#postcactus.cactus_grid_functions.AllGridFunctions">[docs]</a><span class="k">class</span> <span class="nc">AllGridFunctions</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Helper class to read various types of grid data in a list of files and</span>
+<span class="sd">    properly order them. The core of this object is the ``_vars`` dictionary</span>
+<span class="sd">    which contains the location of all the files for a specific variable and</span>
+<span class="sd">    reduction.</span>
+
+<span class="sd">    :py:class:`~.AllGridFunction` is a dictionary-like object with keys the</span>
+<span class="sd">    various variables and values :py:class:`~.BaseOneGridFunction` (or derived).</span>
+
+<span class="sd">    You can access data with the bracket operator or as attributes of the</span>
+<span class="sd">    ``fields`` attribute.</span>
+
+<span class="sd">    Not intended for direct initialization.</span>
+
+<span class="sd">    :ivar dimension: Dimension associated to this object (e.g. (0, 1) would be the</span>
+<span class="sd">                     xy plane).</span>
+<span class="sd">    :type dimension: tuple</span>
+<span class="sd">    :ivar num_ghost: Number of ghost zones in each dimension.</span>
+<span class="sd">    :type num_ghost: 1d NumPy array.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># Different &quot;cuts&quot; have different extensions in their filenames, here we</span>
+    <span class="c1"># save all the possible ones. In the instance of the class, we fix the</span>
+    <span class="c1"># specific pattern corresponding to the dimension (which are the keys on</span>
+    <span class="c1"># the following dictionary). In general, the file name will be:</span>
+    <span class="c1"># variable-name.ext.h5, eg rho.xy.h5.</span>
+    <span class="n">filename_extensions</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="p">(</span><span class="mi">0</span><span class="p">,):</span> <span class="s2">&quot;.x&quot;</span><span class="p">,</span>
+        <span class="p">(</span><span class="mi">1</span><span class="p">,):</span> <span class="s2">&quot;.y&quot;</span><span class="p">,</span>
+        <span class="p">(</span><span class="mi">2</span><span class="p">,):</span> <span class="s2">&quot;.z&quot;</span><span class="p">,</span>
+        <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">):</span> <span class="s2">&quot;(.0)?.xy&quot;</span><span class="p">,</span>
+        <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">):</span> <span class="s2">&quot;(.0)?.xz&quot;</span><span class="p">,</span>
+        <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">):</span> <span class="s2">&quot;(.0)?.yz&quot;</span><span class="p">,</span>
+        <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">):</span> <span class="sa">r</span><span class="s2">&quot;(.xyz)?(.file_[\d]+)?(.xyz)?&quot;</span><span class="p">,</span>
+    <span class="p">}</span>
+
+    <span class="n">_dim_names</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="p">(</span><span class="mi">0</span><span class="p">,):</span> <span class="s2">&quot;x&quot;</span><span class="p">,</span>
+        <span class="p">(</span><span class="mi">1</span><span class="p">,):</span> <span class="s2">&quot;y&quot;</span><span class="p">,</span>
+        <span class="p">(</span><span class="mi">2</span><span class="p">,):</span> <span class="s2">&quot;z&quot;</span><span class="p">,</span>
+        <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">):</span> <span class="s2">&quot;xy&quot;</span><span class="p">,</span>
+        <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">):</span> <span class="s2">&quot;xz&quot;</span><span class="p">,</span>
+        <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">):</span> <span class="s2">&quot;yz&quot;</span><span class="p">,</span>
+        <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">):</span> <span class="s2">&quot;xyz&quot;</span><span class="p">,</span>
+    <span class="p">}</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">allfiles</span><span class="p">,</span> <span class="n">dimension</span><span class="p">,</span> <span class="n">num_ghost</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Constructor.</span>
+
+<span class="sd">        :param allfiles: List of all the files.</span>
+<span class="sd">        :type allfiles: list</span>
+<span class="sd">        :param dimension: Dimension associated to this object.</span>
+<span class="sd">        :type dimension: tuple</span>
+<span class="sd">        :param num_ghost: Number of ghost zones in the data for each dimension.</span>
+<span class="sd">                          This is used only for ASCII data.</span>
+<span class="sd">        :type num_ghost: list or tuple of the same length as the number of dimension</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># Here we save what kind of file we are looking at</span>
+        <span class="c1"># We assume that dimension is already sanitized (that is, is in tuple</span>
+        <span class="c1"># form and not in string form)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dimension</span> <span class="o">=</span> <span class="n">dimension</span>
+
+        <span class="c1"># If we are using ASCII files, we have to know how many ghost zones are</span>
+        <span class="c1"># in the data. At the moment we ask the user to provide the data, but</span>
+        <span class="c1"># in the future we will parse the paramter file and find this value.</span>
+        <span class="c1">#</span>
+        <span class="c1"># We don&#39;t use this value for HDF5 data, as it is more reliable to just</span>
+        <span class="c1"># read it from the files.</span>
+        <span class="c1"># Here we are using a setter for num_ghost, see below</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">num_ghost</span> <span class="o">=</span> <span class="n">num_ghost</span>
+
+        <span class="c1"># This is a simple regex:</span>
+        <span class="c1"># 1. ^ and $ mean that we have to match the entire string</span>
+        <span class="c1"># 2. ([a-zA-Z0-9_]+) means that we match any combination of letters</span>
+        <span class="c1">#    and numebrs. This is the thorn name when we output one group</span>
+        <span class="c1">#    per file. We wrap this into another capturing group:</span>
+        <span class="c1">#    (([a-zA-Z0-9_]+)-). Here we also try to match the literal &#39;-&#39;.</span>
+        <span class="c1">#    This separates the thron name from the group name. If we match</span>
+        <span class="c1">#    this larger capturing group, it means that the file was output</span>
+        <span class="c1">#    with the option &quot;one_group_per_file&quot;.</span>
+        <span class="c1"># 3. ([a-zA-Z0-9\[\]_]+) means that we match any character any number</span>
+        <span class="c1">#    of times, this is a capturing group, and is the variable name,</span>
+        <span class="c1">#    or the group name if we output one group per file.</span>
+        <span class="c1"># 4. We have the extension, which identifies the dimension and is</span>
+        <span class="c1">#    saved in the class instance</span>
+        <span class="c1"># 5. Finally, we have the filename extension which can be either h5</span>
+        <span class="c1">#    or txt</span>
+        <span class="c1">#</span>
+        <span class="c1"># Example of filenames are:</span>
+        <span class="c1"># admbase-metric.xyz.file_158.h5 (one group per file)</span>
+        <span class="c1"># alp.xy.h5 (one variable per file)</span>
+        <span class="c1"># filename_pattern = r&quot;^([a-zA-Z0-9_]+)(-)?([a-zA-Z0-9\[\]_]+)%s.%s$&quot;</span>
+        <span class="n">filename_pattern</span> <span class="o">=</span> <span class="sa">r</span><span class="s2">&quot;^(([a-zA-Z0-9_]+)-)?([a-zA-Z0-9\[\]_]+)</span><span class="si">%s</span><span class="s2">.</span><span class="si">%s</span><span class="s2">$&quot;</span>
+        <span class="n">h5_pattern</span> <span class="o">=</span> <span class="n">filename_pattern</span> <span class="o">%</span> <span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">filename_extensions</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">dimension</span><span class="p">],</span>
+            <span class="s2">&quot;h5&quot;</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="n">ascii_pattern</span> <span class="o">=</span> <span class="n">filename_pattern</span> <span class="o">%</span> <span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">filename_extensions</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">dimension</span><span class="p">],</span>
+            <span class="sa">r</span><span class="s2">&quot;asc(\.(gz|bz2))?&quot;</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="c1"># Variable files is a dictionary, the keys are the variables, the</span>
+        <span class="c1"># values the set of files associated to that variable</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_vars_ascii</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_vars_h5</span> <span class="o">=</span> <span class="p">{}</span>
+
+        <span class="n">rx_h5</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="n">h5_pattern</span><span class="p">)</span>
+        <span class="n">rx_ascii</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="n">ascii_pattern</span><span class="p">)</span>
+
+        <span class="c1"># Here we scan all the files and find those with a name that match</span>
+        <span class="c1"># one of our regular expressions.</span>
+
+        <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">allfiles</span><span class="p">:</span>
+            <span class="n">filename</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">f</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span>
+            <span class="n">matched_h5</span> <span class="o">=</span> <span class="n">rx_h5</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+            <span class="n">matched_ascii</span> <span class="o">=</span> <span class="n">rx_ascii</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+            <span class="c1"># If matched_pattern is not None, this is a Carpet h5 file</span>
+            <span class="k">if</span> <span class="n">matched_h5</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="c1"># First, we understand if the file was output with</span>
+                <span class="c1"># &quot;one_group_per_file&quot;. In this case, the file contains</span>
+                <span class="c1"># multiple variables. Files output in this way have names:</span>
+                <span class="c1"># thorname-groupname.dim.h5 (possibly with also file_NUM).</span>
+                <span class="c1">#</span>
+                <span class="c1"># Group1 contains thorname- (notice the -). If we match</span>
+                <span class="c1"># group1 it means that the file contains one group,</span>
+                <span class="c1"># the thorn name is in group2, and the group name in group3.</span>
+                <span class="c1">#</span>
+                <span class="c1"># In case group1 is not matched, then the variable name is</span>
+                <span class="c1"># in group3.</span>
+                <span class="k">if</span> <span class="n">matched_h5</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="n">variable_name</span> <span class="o">=</span> <span class="n">matched_h5</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
+                    <span class="n">var_list</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_vars_h5</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="n">variable_name</span><span class="p">,</span> <span class="nb">set</span><span class="p">())</span>
+                    <span class="n">var_list</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="c1"># We have to open the file to understand which variables</span>
+                    <span class="c1"># are available</span>
+                    <span class="c1">#</span>
+                    <span class="c1"># We use the pattern name in OneGridFunctionH5</span>
+                    <span class="n">rx_group_name</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span>
+                        <span class="n">OneGridFunctionH5</span><span class="o">.</span><span class="n">_pattern_group_name</span><span class="p">,</span> <span class="n">re</span><span class="o">.</span><span class="n">VERBOSE</span>
+                    <span class="p">)</span>
+                    <span class="k">with</span> <span class="n">h5py</span><span class="o">.</span><span class="n">File</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">h5f</span><span class="p">:</span>
+                        <span class="c1"># Here group is in the sense of HDF5 group</span>
+                        <span class="k">for</span> <span class="n">group</span> <span class="ow">in</span> <span class="n">h5f</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+                            <span class="n">group_matched</span> <span class="o">=</span> <span class="n">rx_group_name</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">group</span><span class="p">)</span>
+                            <span class="c1"># If this is not an interesting group, just skip it</span>
+                            <span class="k">if</span> <span class="ow">not</span> <span class="n">group_matched</span><span class="p">:</span>
+                                <span class="k">continue</span>
+                            <span class="n">variable_name</span> <span class="o">=</span> <span class="n">group_matched</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+                            <span class="n">var_list</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_vars_h5</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span>
+                                <span class="n">variable_name</span><span class="p">,</span> <span class="nb">set</span><span class="p">()</span>
+                            <span class="p">)</span>
+                            <span class="n">var_list</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="n">matched_ascii</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="c1"># As in the case of H5 files, we first need to understand if</span>
+                <span class="c1"># the output is with &quot;one_group_per_file&quot;. If yes, we have to</span>
+                <span class="c1"># open all the files and read the headers to find what variables</span>
+                <span class="c1"># are available.</span>
+                <span class="k">if</span> <span class="n">matched_ascii</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="n">variable_name</span> <span class="o">=</span> <span class="n">matched_ascii</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
+                    <span class="n">var_list</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_vars_ascii</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span>
+                        <span class="n">variable_name</span><span class="p">,</span> <span class="nb">set</span><span class="p">()</span>
+                    <span class="p">)</span>
+                    <span class="n">var_list</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="c1"># In this case we need to open the file and scan the</span>
+                    <span class="c1"># header, for this we use the scan_header function in</span>
+                    <span class="c1"># cactus_scalars.</span>
+                    <span class="c1">#</span>
+                    <span class="c1"># Here we have to pay attention to the output of the Thorns</span>
+                    <span class="c1"># VolumeIntegralsGRMHD and VolumeIntegralsVacuum as they</span>
+                    <span class="c1"># produce output files with names:</span>
+                    <span class="c1"># volume_integrals-vacuum and volume_integrals-GRMHD.</span>
+                    <span class="c1">#</span>
+                    <span class="c1"># These would be matched here, so we will exclude the case in</span>
+                    <span class="c1"># which the thorn name is volume_integrals and the var name</span>
+                    <span class="c1"># is vacuum or GRMHD.</span>
+                    <span class="n">thorn_name</span> <span class="o">=</span> <span class="n">matched_ascii</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+                    <span class="n">var_name</span> <span class="o">=</span> <span class="n">matched_ascii</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="n">thorn_name</span> <span class="o">==</span> <span class="s2">&quot;volume_integrals&quot;</span> <span class="ow">and</span> <span class="p">(</span>
+                        <span class="n">var_name</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;GRMHD&quot;</span><span class="p">,</span> <span class="s2">&quot;vacuum&quot;</span><span class="p">)</span>
+                    <span class="p">):</span>
+                        <span class="k">continue</span>
+
+                    <span class="c1"># TODO (FEATURE): Avoid reading headers twice</span>
+                    <span class="c1">#</span>
+                    <span class="c1"># Here we scan the headers, we should not do this work again</span>
+                    <span class="c1"># when we deal with the single variables.</span>
+
+                    <span class="c1"># The last group is where compression information is. It</span>
+                    <span class="c1"># could be None.</span>
+                    <span class="n">compression_method</span> <span class="o">=</span> <span class="n">matched_ascii</span><span class="o">.</span><span class="n">groups</span><span class="p">()[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+                    <span class="n">opener</span><span class="p">,</span> <span class="n">opener_mode</span> <span class="o">=</span> <span class="n">OneGridFunctionASCII</span><span class="o">.</span><span class="n">_decompressor</span><span class="p">[</span>
+                        <span class="n">compression_method</span>
+                    <span class="p">]</span>
+                    <span class="n">_</span><span class="p">,</span> <span class="n">column_description</span> <span class="o">=</span> <span class="n">scan_header</span><span class="p">(</span>
+                        <span class="n">f</span><span class="p">,</span>
+                        <span class="n">one_file_per_group</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                        <span class="n">extended_format</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                        <span class="n">opener</span><span class="o">=</span><span class="n">opener</span><span class="p">,</span>
+                        <span class="n">opener_mode</span><span class="o">=</span><span class="n">opener_mode</span><span class="p">,</span>
+                    <span class="p">)</span>
+                    <span class="k">for</span> <span class="n">variable_name</span> <span class="ow">in</span> <span class="n">column_description</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+                        <span class="n">var_list</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_vars_ascii</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span>
+                            <span class="n">variable_name</span><span class="p">,</span> <span class="nb">set</span><span class="p">()</span>
+                        <span class="p">)</span>
+                        <span class="n">var_list</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+
+        <span class="c1"># What pythonize_name_dict does is to make the various variables</span>
+        <span class="c1"># accessible as attributes, e.g. self.fields.rho</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fields</span> <span class="o">=</span> <span class="n">pythonize_name_dict</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">keys</span><span class="p">()),</span> <span class="bp">self</span><span class="o">.</span><span class="fm">__getitem__</span><span class="p">)</span>
+
+    <span class="nd">@lru_cache</span><span class="p">(</span><span class="mi">128</span><span class="p">)</span>
+    <span class="k">def</span> <span class="fm">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">):</span>
+        <span class="n">var_name</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
+        <span class="c1"># We prefer h5</span>
+        <span class="k">if</span> <span class="n">var_name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_vars_h5</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">OneGridFunctionH5</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_vars_h5</span><span class="p">[</span><span class="n">var_name</span><span class="p">],</span> <span class="n">var_name</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">var_name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_vars_ascii</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">num_ghost</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
+                    <span class="s2">&quot;You are using ASCII files, which have no information&quot;</span>
+                    <span class="s2">&quot; about ghost zone information. Set the attribute num_ghost&quot;</span>
+                    <span class="s2">&quot; of this object to properly account for the ghost zones. &quot;</span>
+                <span class="p">)</span>
+            <span class="k">return</span> <span class="n">OneGridFunctionASCII</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_vars_ascii</span><span class="p">[</span><span class="n">var_name</span><span class="p">],</span> <span class="n">var_name</span><span class="p">,</span> <span class="n">num_ghost</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">num_ghost</span>
+            <span class="p">)</span>
+
+        <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Variable </span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s2"> not present in simulation data&quot;</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">num_ghost</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Return the number of ghost zones along each direction.</span>
+
+<span class="sd">        :returns: Number of ghost zones along each direction.</span>
+<span class="sd">        :rtype: 1d NumPy array</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__num_ghost</span>
+
+    <span class="nd">@num_ghost</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">num_ghost</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">num_ghost</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">num_ghost</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">num_ghost</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dimension</span><span class="p">):</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                    <span class="s2">&quot;Number of ghost zones {len(num_ghost)} is inconsistent &quot;</span>
+                    <span class="s2">&quot; with dimesionality (len(self.dimension))&quot;</span>
+                <span class="p">)</span>
+            <span class="c1"># We copy num_ghost, in case it was a mutable object</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__num_ghost</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">num_ghost</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__num_ghost</span> <span class="o">=</span> <span class="kc">None</span>
+
+    <span class="k">def</span> <span class="fm">__contains__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">var</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">var</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span>
+
+<div class="viewcode-block" id="AllGridFunctions.get"><a class="viewcode-back" href="../../cactus_grid_functions_ref.html#postcactus.cactus_grid_functions.AllGridFunctions.get">[docs]</a>    <span class="k">def</span> <span class="nf">get</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Return variable ``key``.</span>
+
+<span class="sd">        :param key: Variable to read.</span>
+<span class="sd">        :type key: str</span>
+<span class="sd">        :param default: Value to return is variable is not available.</span>
+<span class="sd">        :type default: anything</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">key</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">default</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="p">[</span><span class="n">key</span><span class="p">]</span></div>
+
+<div class="viewcode-block" id="AllGridFunctions.keys"><a class="viewcode-back" href="../../cactus_grid_functions_ref.html#postcactus.cactus_grid_functions.AllGridFunctions.keys">[docs]</a>    <span class="k">def</span> <span class="nf">keys</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Return the list of all the available variables.&quot;&quot;&quot;</span>
+        <span class="c1"># We merge the dictionaries and return the keys.</span>
+        <span class="c1"># This automatically takes care of making sure that they keys are unique.</span>
+        <span class="k">return</span> <span class="p">{</span><span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">_vars_h5</span><span class="p">,</span> <span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">_vars_ascii</span><span class="p">}</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span></div>
+
+    <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">ret</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Available grid data of dimension &quot;</span>
+        <span class="n">ret</span> <span class="o">+=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dimension</span><span class="p">)</span><span class="si">}</span><span class="s2">D (</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_dim_names</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">dimension</span><span class="p">]</span><span class="si">}</span><span class="s2">): &quot;</span>
+        <span class="n">ret</span> <span class="o">+=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="si">{</span><span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span><span class="si">}</span><span class="se">\n</span><span class="s2">&quot;</span>
+        <span class="k">return</span> <span class="n">ret</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">allfiles</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Return a set of all the files that have variables of the</span>
+<span class="sd">        given dimension</span>
+
+<span class="sd">        :return: Collection of all the unique files with variables of</span>
+<span class="sd">                 this dimension.</span>
+<span class="sd">        :rtype: set</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">allfiles</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+        <span class="c1"># We collect all the files by merging the lists into a set. The</span>
+        <span class="c1"># set will automatically remove repeated entries.</span>
+        <span class="k">for</span> <span class="n">file_list</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_vars_h5</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+            <span class="n">allfiles</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">file_list</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">file_list</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_vars_ascii</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+            <span class="n">allfiles</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">file_list</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">allfiles</span>
+
+<div class="viewcode-block" id="AllGridFunctions.total_filesize"><a class="viewcode-back" href="../../cactus_grid_functions_ref.html#postcactus.cactus_grid_functions.AllGridFunctions.total_filesize">[docs]</a>    <span class="k">def</span> <span class="nf">total_filesize</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="s2">&quot;MB&quot;</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Return the total size of the files with this dimension.</span>
+<span class="sd">        Available units B, KB, MB and GB (in power of 1024 bytes).</span>
+
+<span class="sd">        :param unit: Unit to use (in powers of 1024 bytes).</span>
+<span class="sd">        :type unit: str among: ``B``, ``KB``, ``MB``, ``GB``.</span>
+<span class="sd">        :returns: Total size of all the files associated with this dimension.</span>
+<span class="sd">        :rtype: float</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">total_filesize</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">allfiles</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="n">unit</span><span class="p">)</span></div></div>
+
+
+<div class="viewcode-block" id="GridFunctionsDir"><a class="viewcode-back" href="../../cactus_grid_functions_ref.html#postcactus.cactus_grid_functions.GridFunctionsDir">[docs]</a><span class="k">class</span> <span class="nc">GridFunctionsDir</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;This class provides access to all grid data.</span>
+
+<span class="sd">    This includes 1D-3D data in HDF5 and ASCII formats. Data of the required</span>
+<span class="sd">    dimensionality is read from any format available (HDF5 preferred over</span>
+<span class="sd">    ASCII). If you need lower dimensional data, read the higher dimensional one</span>
+<span class="sd">    and slice the data.</span>
+
+<span class="sd">    :ivar x:           Access to 1D data along x-axis.</span>
+<span class="sd">    :ivar y:           Access to 1D data along y-axis.</span>
+<span class="sd">    :ivar z:           Access to 1D data along z-axis.</span>
+<span class="sd">    :ivar xy:          Access to 2D data along xy-plane.</span>
+<span class="sd">    :ivar xz:          Access to 2D data along xz-plane.</span>
+<span class="sd">    :ivar yz:          Access to 2D data along yz-plane.</span>
+<span class="sd">    :ivar xyz:         Access to 3D data.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># Usually we think in terms of dimensions xyz, but it is much more</span>
+    <span class="c1"># convenint to index them with numbers. This dictionary provides a way</span>
+    <span class="c1"># to go from one notation to the other. Internally, we always use the</span>
+    <span class="c1"># index notation.</span>
+    <span class="n">_dim_indices</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s2">&quot;x&quot;</span><span class="p">:</span> <span class="p">(</span><span class="mi">0</span><span class="p">,),</span>
+        <span class="s2">&quot;y&quot;</span><span class="p">:</span> <span class="p">(</span><span class="mi">1</span><span class="p">,),</span>
+        <span class="s2">&quot;z&quot;</span><span class="p">:</span> <span class="p">(</span><span class="mi">2</span><span class="p">,),</span>
+        <span class="s2">&quot;xy&quot;</span><span class="p">:</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
+        <span class="s2">&quot;xz&quot;</span><span class="p">:</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span>
+        <span class="s2">&quot;yz&quot;</span><span class="p">:</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span>
+        <span class="s2">&quot;xyz&quot;</span><span class="p">:</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span>
+    <span class="p">}</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sd</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Constructor.</span>
+
+<span class="sd">        :param sd: Simulation directory.</span>
+<span class="sd">        :type sd: :py:class:`~.SimDir`</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">sd</span><span class="p">,</span> <span class="n">simdir</span><span class="o">.</span><span class="n">SimDir</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;Input is not SimDir&quot;</span><span class="p">)</span>
+
+        <span class="c1"># _all_griddata is a dictionary that maps dimension to an object</span>
+        <span class="c1"># AllGridFunctions, which contains all the variables for which that</span>
+        <span class="c1"># dimension is available</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_all_griddata</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="n">dim</span><span class="p">:</span> <span class="n">AllGridFunctions</span><span class="p">(</span><span class="n">sd</span><span class="o">.</span><span class="n">allfiles</span><span class="p">,</span> <span class="n">dim</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">dim</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dim_indices</span><span class="o">.</span><span class="n">values</span><span class="p">()</span>
+        <span class="p">}</span>
+
+    <span class="k">def</span> <span class="nf">_string_or_tuple_to_dimension_index</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dimension</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Internally, we always refer to the different dimensions with their</span>
+<span class="sd">        numerical index. However, it is more convenient to have public</span>
+<span class="sd">        interfaces with xyz. This method takes a dimension that can be either</span>
+<span class="sd">        a string or a tuple and returns the corresponding dimension in the</span>
+<span class="sd">        index notation.</span>
+
+<span class="sd">        E.g.: &#39;x&#39; -&gt; (0, ), or (1, 2) -&gt; (1, 2), or &#39;xy&#39; -&gt; (0, 1)</span>
+
+<span class="sd">        :returns:  tuple of dimensions, e.g. (0,1) for xy-plane.</span>
+<span class="sd">        or string with the name, e.g. &#39;xy&#39;</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># If the input is a recognized tuple, just return it</span>
+        <span class="k">if</span> <span class="n">dimension</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dim_indices</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+            <span class="k">return</span> <span class="n">dimension</span>
+
+        <span class="c1"># If the input is a recognized string, return the corresponding tuple</span>
+        <span class="k">if</span> <span class="n">dimension</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dim_indices</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dim_indices</span><span class="p">[</span><span class="n">dimension</span><span class="p">]</span>
+
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">dimension</span><span class="si">}</span><span class="s2"> is not a recognized dimension&quot;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="fm">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dimension</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Get data with given dimensionality.</span>
+
+<span class="sd">        :param dimension:  tuple of dimensions, e.g. (0,1) for xy-plane.</span>
+<span class="sd">        or string with the name, e.g. &#39;xy&#39;</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_all_griddata</span><span class="p">[</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_string_or_tuple_to_dimension_index</span><span class="p">(</span><span class="n">dimension</span><span class="p">)</span>
+        <span class="p">]</span>
+
+    <span class="k">def</span> <span class="fm">__getattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">attr</span><span class="p">):</span>
+        <span class="c1"># This allows to call self.x, self.xy and so on</span>
+        <span class="k">if</span> <span class="n">attr</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dim_indices</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+            <span class="c1"># We retrieve the data with __getitem__</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="p">[</span><span class="n">attr</span><span class="p">]</span>
+
+        <span class="k">raise</span> <span class="ne">AttributeError</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2"> object has no attribute </span><span class="si">{</span><span class="n">attr</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="p">)</span>
+
+    <span class="k">def</span> <span class="fm">__contains__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dimension</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_string_or_tuple_to_dimension_index</span><span class="p">(</span><span class="n">dimension</span><span class="p">)</span>
+            <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_all_griddata</span>
+        <span class="p">)</span>
+
+    <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;String representation&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="p">[</span><span class="n">dim</span><span class="p">])</span> <span class="k">for</span> <span class="n">dim</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_all_griddata</span><span class="p">])</span>
+
+<div class="viewcode-block" id="GridFunctionsDir.total_filesize"><a class="viewcode-back" href="../../cactus_grid_functions_ref.html#postcactus.cactus_grid_functions.GridFunctionsDir.total_filesize">[docs]</a>    <span class="k">def</span> <span class="nf">total_filesize</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="s2">&quot;MB&quot;</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Return the total size of the grid data files.</span>
+<span class="sd">        Available units B, KB, MB and GB (in power of 1024 bytes).</span>
+
+<span class="sd">        :param unit: Unit to use (in powers of 1024 bytes).</span>
+<span class="sd">        :type unit: str among: ``B``, ``KB``, ``MB``, ``GB``.</span>
+<span class="sd">        :returns: Total size of the grid data files.</span>
+<span class="sd">        :rtype: float</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># First we find all the unique files</span>
+        <span class="n">allfiles</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">dim</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_all_griddata</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+            <span class="n">allfiles</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="bp">self</span><span class="p">[</span><span class="n">dim</span><span class="p">]</span><span class="o">.</span><span class="n">allfiles</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">total_filesize</span><span class="p">(</span><span class="n">allfiles</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="n">unit</span><span class="p">)</span></div></div>
+</pre></div>
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="../../index.html">
+              <img class="logo" src="../../_static/logo.png" alt="Logo"/>
+            </a></p>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">PostCactus 3.0.0a12 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../index.html" >Module code</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">postcactus.cactus_grid_functions</a></li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2020, Gabriele Bozzola and Wolfgang Kastaun.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 3.4.1.
+    </div>
+  </body>
+</html>
