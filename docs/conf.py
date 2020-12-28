@@ -34,6 +34,7 @@ release = '3.0.0a12'
 extensions = ['sphinx.ext.autodoc',
               'sphinx.ext.autosectionlabel',
               'sphinx.ext.mathjax',
+              'sphinx.ext.viewcode',
               'nbsphinx'
               ]
 
