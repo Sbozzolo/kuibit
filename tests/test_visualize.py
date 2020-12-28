@@ -27,6 +27,7 @@ import numpy as np
 
 from postcactus import visualize as viz
 from postcactus import grid_data as gd
+from postcactus import grid_data_utils as gdu
 from postcactus import cactus_grid_functions as cgf
 
 
@@ -79,7 +80,7 @@ class TestVisualize(unittest.TestCase):
         # Check with UniformGridData
 
         # 2D
-        ugd = gd.sample_function(lambda x, y: x + y, [10, 20], [0, 1], [2, 5])
+        ugd = gdu.sample_function(lambda x, y: x + y, [10, 20], [0, 1], [2, 5])
         # Passing coordinates
         with self.assertWarns(Warning):
             ret = dec_func_grid(
@@ -183,7 +184,7 @@ class TestVisualize(unittest.TestCase):
 
     def test_plot_grid(self):
 
-        ugd = gd.sample_function(lambda x, y: x + y, [100, 20], [0, 1], [2, 5])
+        ugd = gdu.sample_function(lambda x, y: x + y, [100, 20], [0, 1], [2, 5])
 
         # Unknown plot type
         with self.assertRaises(ValueError):
@@ -223,7 +224,7 @@ class TestVisualize(unittest.TestCase):
 
     def test_plot_colorbar(self):
 
-        ugd = gd.sample_function(lambda x, y: x + y, [100, 20], [0, 1], [2, 5])
+        ugd = gdu.sample_function(lambda x, y: x + y, [100, 20], [0, 1], [2, 5])
 
         cf = viz.plot_contourf(ugd, xlabel="x", ylabel="y", colorbar=False)
 
