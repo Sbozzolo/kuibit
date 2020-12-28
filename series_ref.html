@@ -56,8 +56,18 @@
   <div class="section" id="module-postcactus.series">
 <span id="reference-on-postcactus-series"></span><h1>Reference on postcactus.series<a class="headerlink" href="#module-postcactus.series" title="Permalink to this headline">¶</a></h1>
 <p>The <a class="reference internal" href="#module-postcactus.series" title="postcactus.series"><code class="xref py py-mod docutils literal notranslate"><span class="pre">series</span></code></a> module provides a base class <a class="reference internal" href="#postcactus.series.BaseSeries" title="postcactus.series.BaseSeries"><code class="xref py py-class docutils literal notranslate"><span class="pre">BaseSeries</span></code></a>
-for representing and handling series (from which time and frequency series are
-derived).</p>
+for representing and handling series (from which <a class="reference internal" href="timeseries_ref.html#postcactus.timeseries.TimeSeries" title="postcactus.timeseries.TimeSeries"><code class="xref py py-class docutils literal notranslate"><span class="pre">TimeSeries</span></code></a> and
+<a class="reference internal" href="frequencyseries_ref.html#postcactus.frequencyseries.FrequencySeries" title="postcactus.frequencyseries.FrequencySeries"><code class="xref py py-class docutils literal notranslate"><span class="pre">FrequencySeries</span></code></a> are derived).</p>
+<p><a class="reference internal" href="#postcactus.series.BaseSeries" title="postcactus.series.BaseSeries"><code class="xref py py-class docutils literal notranslate"><span class="pre">BaseSeries</span></code></a> handles series that have a independent variable <code class="docutils literal notranslate"><span class="pre">x</span></code>
+and a dependent variable <code class="docutils literal notranslate"><span class="pre">y</span></code>. The derived classes have to implement setters
+and getters if they need to rename these variables (e.g. <code class="docutils literal notranslate"><span class="pre">x</span> <span class="pre">-&gt;</span> <span class="pre">t</span></code>). The
+independent variable has to be monotonically increasing.</p>
+<p><a class="reference internal" href="#postcactus.series.BaseSeries" title="postcactus.series.BaseSeries"><code class="xref py py-class docutils literal notranslate"><span class="pre">BaseSeries</span></code></a> implements several methods for operations on series.
+Most of these methods are available in two flavors: those that return a new
+<a class="reference internal" href="#postcactus.series.BaseSeries" title="postcactus.series.BaseSeries"><code class="xref py py-class docutils literal notranslate"><span class="pre">BaseSeries</span></code></a>, and those which modify the object in place. The latter
+have names with imperative verbs.</p>
+<p>This module also provides the useful function <a class="reference internal" href="#postcactus.series.sample_common" title="postcactus.series.sample_common"><code class="xref py py-func docutils literal notranslate"><span class="pre">sample_common()</span></code></a>, which
+takes a list of series and resamples them to their common points.</p>
 <dl class="py class">
 <dt id="postcactus.series.BaseSeries">
 <em class="property">class </em><code class="sig-prename descclassname">postcactus.series.</code><code class="sig-name descname">BaseSeries</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">x</span></em>, <em class="sig-param"><span class="n">y</span></em>, <em class="sig-param"><span class="n">guarantee_x_is_monotonic</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="headerlink" href="#postcactus.series.BaseSeries" title="Permalink to this definition">¶</a></dt>
@@ -67,12 +77,12 @@ which the independendent variable x is sorted.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Variables</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>data_x</strong> (<em>1D numpy array</em><em> or </em><em>float</em>) – x</p></li>
-<li><p><strong>y</strong> (<em>1D numpy array</em><em> or </em><em>float</em>) – y</p></li>
+<li><p><strong>data_x</strong> (<em>1D NumPy array</em><em> or </em><em>float</em>) – Independent variable.</p></li>
+<li><p><strong>y</strong> (<em>1D NumPy array</em><em> or </em><em>float</em>) – Dependent variable.</p></li>
 <li><p><strong>spline_real</strong> (<em>Tuple</em>) – Coefficients for a spline represent of the real part
-of y</p></li>
+of y.</p></li>
 <li><p><strong>spline_imag</strong> (<em>Tuple</em>) – Coefficients for a spline represent of the real part
-of y</p></li>
+of y.</p></li>
 </ul>
 </dd>
 </dl>
@@ -80,16 +90,27 @@ of y</p></li>
 make sure that x is monotonically increasing (increasing performance).
 This should is used internally whenever a new series is returned from
 self, since we have already checked that data_x is good.</p>
-<dl class="py method">
-<dt id="postcactus.series.BaseSeries.clip">
-<code class="sig-name descname">clip</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">init</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">end</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#postcactus.series.BaseSeries.clip" title="Permalink to this definition">¶</a></dt>
-<dd><p>Remove data outside the intarval [init, end]. If init or end
-are not specified or None, it does not remove anything from this side.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>init</strong> (<em>float</em>) – New minimum x</p></li>
-<li><p><strong>end</strong> (<em>float</em>) – New maximum x</p></li>
+<li><p><strong>x</strong> (<em>1d NumPy array</em><em> or </em><em>list</em>) – Independent variable.</p></li>
+<li><p><strong>y</strong> (<em>1d NumPy array</em><em> or </em><em>list</em>) – Dependent variable.</p></li>
+<li><p><strong>guarantee_x_is_monotonic</strong> – Whether we can skip the check on monotonicity.</p></li>
+<li><p><strong>guarantee_x_is_monotonic</strong> – bool</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt id="postcactus.series.BaseSeries.clip">
+<code class="sig-name descname">clip</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">init</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">end</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#postcactus.series.BaseSeries.clip" title="Permalink to this definition">¶</a></dt>
+<dd><p>Remove data outside the the interval <code class="docutils literal notranslate"><span class="pre">[init,</span> <span class="pre">end]</span></code>. If
+<code class="docutils literal notranslate"><span class="pre">init</span></code> or <code class="docutils literal notranslate"><span class="pre">end</span></code> are not specified or None, it does not remove
+anything from this side.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>init</strong> (<em>float</em><em> or </em><em>None</em>) – Data with <code class="docutils literal notranslate"><span class="pre">x</span> <span class="pre">&lt;=</span> <span class="pre">init</span></code> will be removed.</p></li>
+<li><p><strong>end</strong> (<em>float</em><em> or </em><em>None</em>) – Data with <code class="docutils literal notranslate"><span class="pre">x</span> <span class="pre">&gt;=</span> <span class="pre">init</span></code> will be removed.</p></li>
 </ul>
 </dd>
 </dl>
@@ -98,14 +119,14 @@ are not specified or None, it does not remove anything from this side.</p>
 <dl class="py method">
 <dt id="postcactus.series.BaseSeries.clipped">
 <code class="sig-name descname">clipped</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">init</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">end</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#postcactus.series.BaseSeries.clipped" title="Permalink to this definition">¶</a></dt>
-<dd><p>Return a series with data removed outside the intarval
-[init, end]. If init or end are not specified or None, it does not
-remove anything from this side.</p>
+<dd><p>Return a series with data removed outside the interval <code class="docutils literal notranslate"><span class="pre">[init,</span> <span class="pre">end]</span></code>. If
+<code class="docutils literal notranslate"><span class="pre">init</span></code> or <code class="docutils literal notranslate"><span class="pre">end</span></code> are not specified or None, it does not remove
+anything from this side.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>init</strong> (<em>float</em>) – New minimum x</p></li>
-<li><p><strong>end</strong> (<em>float</em>) – New maximum x</p></li>
+<li><p><strong>init</strong> (<em>float</em><em> or </em><em>None</em>) – Data with <code class="docutils literal notranslate"><span class="pre">x</span> <span class="pre">&lt;=</span> <span class="pre">init</span></code> will be removed.</p></li>
+<li><p><strong>end</strong> (<em>float</em><em> or </em><em>None</em>) – Data with <code class="docutils literal notranslate"><span class="pre">x</span> <span class="pre">&gt;=</span> <span class="pre">init</span></code> will be removed.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
@@ -123,7 +144,7 @@ remove anything from this side.</p>
 <dd><p>Return a deep copy.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p>Deep copy of the series</p>
+<dd class="field-odd"><p>Deep copy of the series.</p>
 </dd>
 <dt class="field-even">Return type</dt>
 <dd class="field-even"><p><a class="reference internal" href="#postcactus.series.BaseSeries" title="postcactus.series.BaseSeries"><code class="xref py py-class docutils literal notranslate"><span class="pre">BaseSeries</span></code></a> or derived class</p>
@@ -134,13 +155,14 @@ remove anything from this side.</p>
 <dl class="py method">
 <dt id="postcactus.series.BaseSeries.crop">
 <code class="sig-name descname">crop</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">init</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">end</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#postcactus.series.BaseSeries.crop" title="Permalink to this definition">¶</a></dt>
-<dd><p>Remove data outside the intarval [init, end]. If init or end
-are not specified or None, it does not remove anything from this side.</p>
+<dd><p>Remove data outside the the interval <code class="docutils literal notranslate"><span class="pre">[init,</span> <span class="pre">end]</span></code>. If
+<code class="docutils literal notranslate"><span class="pre">init</span></code> or <code class="docutils literal notranslate"><span class="pre">end</span></code> are not specified or None, it does not remove
+anything from this side.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>init</strong> (<em>float</em>) – New minimum x</p></li>
-<li><p><strong>end</strong> (<em>float</em>) – New maximum x</p></li>
+<li><p><strong>init</strong> (<em>float</em><em> or </em><em>None</em>) – Data with <code class="docutils literal notranslate"><span class="pre">x</span> <span class="pre">&lt;=</span> <span class="pre">init</span></code> will be removed.</p></li>
+<li><p><strong>end</strong> (<em>float</em><em> or </em><em>None</em>) – Data with <code class="docutils literal notranslate"><span class="pre">x</span> <span class="pre">&gt;=</span> <span class="pre">init</span></code> will be removed.</p></li>
 </ul>
 </dd>
 </dl>
@@ -149,14 +171,14 @@ are not specified or None, it does not remove anything from this side.</p>
 <dl class="py method">
 <dt id="postcactus.series.BaseSeries.cropped">
 <code class="sig-name descname">cropped</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">init</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">end</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#postcactus.series.BaseSeries.cropped" title="Permalink to this definition">¶</a></dt>
-<dd><p>Return a series with data removed outside the intarval
-[init, end]. If init or end are not specified or None, it does not
-remove anything from this side.</p>
+<dd><p>Return a series with data removed outside the interval <code class="docutils literal notranslate"><span class="pre">[init,</span> <span class="pre">end]</span></code>. If
+<code class="docutils literal notranslate"><span class="pre">init</span></code> or <code class="docutils literal notranslate"><span class="pre">end</span></code> are not specified or None, it does not remove
+anything from this side.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>init</strong> (<em>float</em>) – New minimum x</p></li>
-<li><p><strong>end</strong> (<em>float</em>) – New maximum x</p></li>
+<li><p><strong>init</strong> (<em>float</em><em> or </em><em>None</em>) – Data with <code class="docutils literal notranslate"><span class="pre">x</span> <span class="pre">&lt;=</span> <span class="pre">init</span></code> will be removed.</p></li>
+<li><p><strong>end</strong> (<em>float</em><em> or </em><em>None</em>) – Data with <code class="docutils literal notranslate"><span class="pre">x</span> <span class="pre">&gt;=</span> <span class="pre">init</span></code> will be removed.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
@@ -171,14 +193,14 @@ remove anything from this side.</p>
 <dl class="py method">
 <dt id="postcactus.series.BaseSeries.derive">
 <code class="sig-name descname">derive</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">order</span><span class="o">=</span><span class="default_value">1</span></em><span class="sig-paren">)</span><a class="headerlink" href="#postcactus.series.BaseSeries.derive" title="Permalink to this definition">¶</a></dt>
-<dd><p>Derive with the numerical order-differentiation. (order = number of
-derivatives, ie order=2 is second derivative)</p>
+<dd><p>Derive with the numerical order-differentiation.</p>
+<p>The optional parameter <code class="docutils literal notranslate"><span class="pre">order</span></code> specifies the order of the derivative.</p>
 <p>The derivative is calulated as centered differencing in the interior
 and one-sided derivatives at the boundaries. Higher orders are computed
 applying the same rule recursively.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>order</strong> (<em>int</em>) – Order of derivative (e.g. 2 = second derivative)</p>
+<dd class="field-odd"><p><strong>order</strong> (<em>int</em>) – Order of derivative (e.g. 2 = second derivative).</p>
 </dd>
 </dl>
 </dd></dl>
@@ -187,17 +209,17 @@ applying the same rule recursively.</p>
 <dt id="postcactus.series.BaseSeries.derived">
 <code class="sig-name descname">derived</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">order</span><span class="o">=</span><span class="default_value">1</span></em><span class="sig-paren">)</span><a class="headerlink" href="#postcactus.series.BaseSeries.derived" title="Permalink to this definition">¶</a></dt>
 <dd><p>Return a series that is the numerical order-differentiation of
-the present series. (order = number of derivatives, ie order=2 is
-second derivative)</p>
+the present series.</p>
+<p>The optional parameter <code class="docutils literal notranslate"><span class="pre">order</span></code> specifies the order of the derivative.</p>
 <p>The derivative is calulated as centered differencing in the interior
 and one-sided derivatives at the boundaries. Higher orders are computed
 applying the same rule recursively.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>order</strong> (<em>int</em>) – Order of derivative (e.g. 2 = second derivative)</p>
+<dd class="field-odd"><p><strong>order</strong> (<em>int</em>) – Order of derivative (e.g. 2 = second derivative).</p>
 </dd>
 <dt class="field-even">Returns</dt>
-<dd class="field-even"><p>New series with derivative</p>
+<dd class="field-even"><p>New series with derivative.</p>
 </dd>
 <dt class="field-odd">Return type</dt>
 <dd class="field-odd"><p><a class="reference internal" href="#postcactus.series.BaseSeries" title="postcactus.series.BaseSeries"><code class="xref py py-class docutils literal notranslate"><span class="pre">BaseSeries</span></code></a> or derived class</p>
@@ -208,27 +230,27 @@ applying the same rule recursively.</p>
 <dl class="py method">
 <dt id="postcactus.series.BaseSeries.evaluate_with_spline">
 <code class="sig-name descname">evaluate_with_spline</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">x</span></em>, <em class="sig-param"><span class="n">ext</span><span class="o">=</span><span class="default_value">2</span></em><span class="sig-paren">)</span><a class="headerlink" href="#postcactus.series.BaseSeries.evaluate_with_spline" title="Permalink to this definition">¶</a></dt>
-<dd><p>Evaluate the spline on the points x.</p>
-<p>Values outside the interval are extrapolated if ext=0, set to 0 if
-ext=1, raise a ValueError if ext=2, or if ext=3, return the boundary
-value.</p>
+<dd><p>Evaluate the spline on the points <code class="docutils literal notranslate"><span class="pre">x</span></code>.</p>
+<p>Values outside the interval are extrapolated if <code class="docutils literal notranslate"><span class="pre">ext=0</span></code>, set to 0 if
+<code class="docutils literal notranslate"><span class="pre">ext=1</span></code>, raise a <code class="docutils literal notranslate"><span class="pre">ValueError</span></code> if <code class="docutils literal notranslate"><span class="pre">ext=2</span></code>, or if <code class="docutils literal notranslate"><span class="pre">ext=3</span></code>, return
+the boundary value.</p>
 <p>This method is meant to be used only if you want to use a different ext
 for a specific call, otherwise, just use __call__.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>x</strong> (<em>1D numpy array of float</em>) – Array of x where to evaluate the series or single x</p></li>
-<li><p><strong>ext</strong> (<em>bool</em>) – How to deal values outside the bounaries. Values outside
-the interval are extrapolated if ext=0, set to 0 if ext=1,
-raise a ValueError if ext=2, or if ext=3, return the
-boundary value.</p></li>
+<li><p><strong>x</strong> (<em>1D NumPy array of float</em>) – Array of x where to evaluate the series or single x.</p></li>
+<li><p><strong>ext</strong> (<em>int</em>) – How to deal values outside the bounaries. Values outside the
+interval are extrapolated if <code class="docutils literal notranslate"><span class="pre">ext=0</span></code>, set to 0 if
+<code class="docutils literal notranslate"><span class="pre">ext=1</span></code>, raise a ValueError if <code class="docutils literal notranslate"><span class="pre">ext=2</span></code>, or if <code class="docutils literal notranslate"><span class="pre">ext=3</span></code>,
+return the boundary value.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
-<dd class="field-even"><p>Values of the series evaluated on the input x</p>
+<dd class="field-even"><p>Values of the series evaluated on the input x.</p>
 </dd>
 <dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>1D numpy array or float</p>
+<dd class="field-odd"><p>1D NumPy array or float</p>
 </dd>
 </dl>
 </dd></dl>
@@ -242,8 +264,10 @@ matplotlib.</p>
 
 <dl class="py method">
 <dt id="postcactus.series.BaseSeries.integrate">
-<code class="sig-name descname">integrate</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#postcactus.series.BaseSeries.integrate" title="Permalink to this definition">¶</a></dt>
-<dd><p>Integrate series with method of the trapeziod.</p>
+<code class="sig-name descname">integrate</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">dx</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#postcactus.series.BaseSeries.integrate" title="Permalink to this definition">¶</a></dt>
+<dd><p>Integrate series with method of the rectangles.</p>
+<p>The spacing <code class="docutils literal notranslate"><span class="pre">dx</span></code> can be optionally provided. If provided, it will be
+used (increasing performance), otherwise it will be computed internally.</p>
 </dd></dl>
 
 <dl class="py method">
@@ -251,13 +275,15 @@ matplotlib.</p>
 <code class="sig-name descname">integrated</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">dx</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#postcactus.series.BaseSeries.integrated" title="Permalink to this definition">¶</a></dt>
 <dd><p>Return a series that is the integral computed with method of
 the rectangles.</p>
+<p>The spacing <code class="docutils literal notranslate"><span class="pre">dx</span></code> can be optionally provided. If provided, it will be
+used (increasing performance), otherwise it will be computed internally.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>dx</strong> (<em>float</em>) – Delta x in the independent variable. If provided, it
-will be used. This is especially convenient for evely spaced series, as computations will be faster</p>
+<dd class="field-odd"><p><strong>dx</strong> (<em>float</em><em> or </em><em>None</em>) – Delta x in the independent variable. If None it will be
+computed internally.</p>
 </dd>
 <dt class="field-even">Returns</dt>
-<dd class="field-even"><p>New series cumulative integral</p>
+<dd class="field-even"><p>New series with the cumulative integral.</p>
 </dd>
 <dt class="field-odd">Return type</dt>
 <dd class="field-odd"><p><a class="reference internal" href="#postcactus.series.BaseSeries" title="postcactus.series.BaseSeries"><code class="xref py py-class docutils literal notranslate"><span class="pre">BaseSeries</span></code></a> or derived class</p>
@@ -271,7 +297,7 @@ will be used. This is especially convenient for evely spaced series, as computat
 <dd><p>Return whether the data is complex.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p>True if the data is complex, false if it is not</p>
+<dd class="field-odd"><p>True if the data is complex, false if it is not.</p>
 </dd>
 <dt class="field-even">Return type</dt>
 <dd class="field-even"><p>bool</p>
@@ -307,7 +333,7 @@ will be used. This is especially convenient for evely spaced series, as computat
 Return a new series with finite values only.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p>A new series with only finite values</p>
+<dd class="field-odd"><p>A new series with only finite values.</p>
 </dd>
 <dt class="field-even">Return type</dt>
 <dd class="field-even"><p><a class="reference internal" href="#postcactus.series.BaseSeries" title="postcactus.series.BaseSeries"><code class="xref py py-class docutils literal notranslate"><span class="pre">BaseSeries</span></code></a> or derived class</p>
@@ -320,15 +346,15 @@ Return a new series with finite values only.</p>
 <code class="sig-name descname">resample</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">new_x</span></em>, <em class="sig-param"><span class="n">ext</span><span class="o">=</span><span class="default_value">2</span></em>, <em class="sig-param"><span class="n">piecewise_constant</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="headerlink" href="#postcactus.series.BaseSeries.resample" title="Permalink to this definition">¶</a></dt>
 <dd><p>Resample the series to new independent variable new_x.</p>
 <p>If you want to resample without using the spline, and you want a nearest
-neighbor resampling, pass the keyword piecewise_constant=True.
+neighbor resampling, pass the keyword <code class="docutils literal notranslate"><span class="pre">piecewise_constant=True</span></code>.
 This may be a good choice for data with large discontinuities, where the
 splines are ineffective.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>new_x</strong> (<em>1D numpy array</em><em> or </em><em>list of float</em>) – New independent variable</p></li>
+<li><p><strong>new_x</strong> (<em>1D NumPy array</em><em> or </em><em>list of float</em>) – New independent variable.</p></li>
 <li><p><strong>ext</strong> (<em>0 for extrapolation</em><em>, </em><em>1 for returning zero</em><em>, </em><em>2 for ValueError</em><em>,
-</em><em>3 for extending the boundary</em>) – How to handle points outside the interval</p></li>
+</em><em>3 for extending the boundary</em>) – How to handle points outside the interval.</p></li>
 <li><p><strong>piecewise_constant</strong> (<em>bool</em>) – Do not use splines, use the nearest neighbors.</p></li>
 </ul>
 </dd>
@@ -341,15 +367,15 @@ splines are ineffective.</p>
 <dd><p>Return a new series resampled from this to new_x.</p>
 <p>You can specify the details of the spline with the method make_spline.</p>
 <p>If you want to resample without using the spline, and you want a nearest
-neighbor resampling, pass the keyword piecewise_constant=True.
+neighbor resampling, pass the keyword <code class="docutils literal notranslate"><span class="pre">piecewise_constant=True</span></code>.
 This may be a good choice for data with large discontinuities, where the
 splines are ineffective.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>new_x</strong> (<em>1D numpy array</em><em> or </em><em>list of float</em>) – New independent variable</p></li>
-<li><p><strong>ext</strong> (<em>0 for extrapolation</em><em>, </em><em>1 for returning zero</em><em>, </em><em>2 for ValueError</em><em>,
-</em><em>3 for extending the boundary</em>) – How to handle points outside the data interval</p></li>
+<li><p><strong>new_x</strong> (<em>1D NumPy array</em><em> or </em><em>list of float</em>) – New independent variable.</p></li>
+<li><p><strong>ext</strong> (0 for extrapolation, 1 for returning zero, 2 for <code class="docutils literal notranslate"><span class="pre">ValueError</span></code>,
+3 for extending the boundary) – How to handle points outside the data interval.</p></li>
 <li><p><strong>piecewise_constant</strong> (<em>bool</em>) – Do not use splines, use the nearest neighbors.</p></li>
 </ul>
 </dd>
@@ -365,12 +391,13 @@ splines are ineffective.</p>
 <dl class="py method">
 <dt id="postcactus.series.BaseSeries.save">
 <code class="sig-name descname">save</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">file_name</span></em>, <em class="sig-param"><span class="o">*</span><span class="n">args</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="headerlink" href="#postcactus.series.BaseSeries.save" title="Permalink to this definition">¶</a></dt>
-<dd><p>Saves into simple ASCII format with 2 columns (x, y)
-for real valued data and 3 columns (x, Re(y), Im(y))
+<dd><p>Saves into simple ASCII format with 2 columns <code class="docutils literal notranslate"><span class="pre">(x,</span> <span class="pre">y)</span></code>
+for real valued data and 3 columns <code class="docutils literal notranslate"><span class="pre">(x,</span> <span class="pre">Re(y),</span> <span class="pre">Im(y))</span></code>
 for complex valued data.</p>
+<p>Unknown arguments are passed to <code class="docutils literal notranslate"><span class="pre">NumPy.savetxt</span></code>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>file_name</strong> (<em>str</em>) – Path (with extensiton) of the output file</p>
+<dd class="field-odd"><p><strong>file_name</strong> (<em>str</em>) – Path (with extension) of the output file.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -379,7 +406,7 @@ for complex valued data.</p>
 <dt id="postcactus.series.BaseSeries.savgol_smooth">
 <code class="sig-name descname">savgol_smooth</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">window_size</span></em>, <em class="sig-param"><span class="n">order</span><span class="o">=</span><span class="default_value">3</span></em><span class="sig-paren">)</span><a class="headerlink" href="#postcactus.series.BaseSeries.savgol_smooth" title="Permalink to this definition">¶</a></dt>
 <dd><p>Smooth the series with a Savitzky-Golay filter with window of
-size WINDOW-SIZE and order ORDER.</p>
+size <code class="docutils literal notranslate"><span class="pre">window_size</span></code> and order <code class="docutils literal notranslate"><span class="pre">order</span></code>.</p>
 <p>This is just like a regular “Moving average” filter, but instead of
 just calculating the average, a polynomial (usually 2nd or 4th order)
 fit is made for every point, and only the “middle” point is chosen.
@@ -389,9 +416,9 @@ is circumvented.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>window_size</strong> (<em>int</em>) – Number of points of the smoothing window (need to
-be odd)</p></li>
-<li><p><strong>order</strong> (<em>int</em>) – Order of the filter</p></li>
+<li><p><strong>window_size</strong> (<em>int</em>) – Number of points of the smoothing window (needs to
+be odd).</p></li>
+<li><p><strong>order</strong> (<em>int</em>) – Order of the filter.</p></li>
 </ul>
 </dd>
 </dl>
@@ -401,7 +428,7 @@ be odd)</p></li>
 <dt id="postcactus.series.BaseSeries.savgol_smoothed">
 <code class="sig-name descname">savgol_smoothed</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">window_size</span></em>, <em class="sig-param"><span class="n">order</span><span class="o">=</span><span class="default_value">3</span></em><span class="sig-paren">)</span><a class="headerlink" href="#postcactus.series.BaseSeries.savgol_smoothed" title="Permalink to this definition">¶</a></dt>
 <dd><p>Return a smoothed series with a Savitzky-Golay filter with
-window of size WINDOW-SIZE and order ORDER.</p>
+window of size <code class="docutils literal notranslate"><span class="pre">window_size</span></code> and order <code class="docutils literal notranslate"><span class="pre">order</span></code>.</p>
 <p>This is just like a regular “Moving average” filter, but instead of
 just calculating the average, a polynomial (usually 2nd or 4th order)
 fit is made for every point, and only the “middle” point is chosen.
@@ -411,13 +438,13 @@ is circumvented.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>window_size</strong> (<em>int</em>) – Number of points of the smoothing window (need to
-be odd)</p></li>
-<li><p><strong>order</strong> (<em>int</em>) – Order of the filter</p></li>
+<li><p><strong>window_size</strong> (<em>int</em>) – Number of points of the smoothing window (needs to
+be odd).</p></li>
+<li><p><strong>order</strong> (<em>int</em>) – Order of the filter.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
-<dd class="field-even"><p>New smoothed series</p>
+<dd class="field-even"><p>New smoothed series.</p>
 </dd>
 <dt class="field-odd">Return type</dt>
 <dd class="field-odd"><p><a class="reference internal" href="#postcactus.series.BaseSeries" title="postcactus.series.BaseSeries"><code class="xref py py-class docutils literal notranslate"><span class="pre">BaseSeries</span></code></a> or derived class</p>
@@ -428,12 +455,15 @@ be odd)</p></li>
 <dl class="py method">
 <dt id="postcactus.series.BaseSeries.spline_derive">
 <code class="sig-name descname">spline_derive</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">order</span><span class="o">=</span><span class="default_value">1</span></em><span class="sig-paren">)</span><a class="headerlink" href="#postcactus.series.BaseSeries.spline_derive" title="Permalink to this definition">¶</a></dt>
-<dd><p>Derive the series current one using the spline interpolation.
-To keep the series of the same size as the original one, the value
-of the derivative at the boundaries is set to zero. Don’t trust it!</p>
+<dd><p>Derive the series using the spline representation.</p>
+<p>The optional parameter <code class="docutils literal notranslate"><span class="pre">order</span></code> specifies the order of the derivative.</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>The values at the boundary are typically not accurate.</p>
+</div>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>order</strong> (<em>int</em>) – Order of derivative (e.g. 2 = second derivative)</p>
+<dd class="field-odd"><p><strong>order</strong> (<em>int</em>) – Order of derivative (e.g. 2 = second derivative).</p>
 </dd>
 </dl>
 </dd></dl>
@@ -442,11 +472,15 @@ of the derivative at the boundaries is set to zero. Don’t trust it!</p>
 <dt id="postcactus.series.BaseSeries.spline_derived">
 <code class="sig-name descname">spline_derived</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">order</span><span class="o">=</span><span class="default_value">1</span></em><span class="sig-paren">)</span><a class="headerlink" href="#postcactus.series.BaseSeries.spline_derived" title="Permalink to this definition">¶</a></dt>
 <dd><p>Return a series that is the derivative of the current one using
-the spline interpolation. You shouldn’t trust the values at the
-boundaries too much, you may want to crop it out.</p>
+the spline representation.</p>
+<p>The optional parameter <code class="docutils literal notranslate"><span class="pre">order</span></code> specifies the order of the derivative.</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>The values at the boundary are typically not accurate.</p>
+</div>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>order</strong> (<em>int</em>) – Order of derivative (e.g. 2 = second derivative)</p>
+<dd class="field-odd"><p><strong>order</strong> (<em>int</em>) – Order of derivative (e.g. 2 = second derivative).</p>
 </dd>
 <dt class="field-even">Returns</dt>
 <dd class="field-even"><p>New series with derivative</p>
@@ -468,21 +502,37 @@ matplotlib.</p>
 <dt id="postcactus.series.BaseSeries.x_at_abs_maximum_y">
 <code class="sig-name descname">x_at_abs_maximum_y</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#postcactus.series.BaseSeries.x_at_abs_maximum_y" title="Permalink to this definition">¶</a></dt>
 <dd><p>Return the value of x when abs(y) is maximum.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Value of x when abs(y) is maximum.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>float</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py method">
 <dt id="postcactus.series.BaseSeries.x_at_abs_minimum_y">
 <code class="sig-name descname">x_at_abs_minimum_y</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#postcactus.series.BaseSeries.x_at_abs_minimum_y" title="Permalink to this definition">¶</a></dt>
 <dd><p>Return the value of x when abs(y) is minimum.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Value of x when abs(y) is minimum.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>float</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py method">
 <dt id="postcactus.series.BaseSeries.xmax">
 <em class="property">property </em><code class="sig-name descname">xmax</code><a class="headerlink" href="#postcactus.series.BaseSeries.xmax" title="Permalink to this definition">¶</a></dt>
-<dd><p>Return the max of the independent variable x</p>
+<dd><p>Return the maximum of the independent variable x.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Rvalue</dt>
-<dd class="field-odd"><p>Max of x</p>
+<dd class="field-odd"><p>Maximum of x</p>
 </dd>
 <dt class="field-even">Return type</dt>
 <dd class="field-even"><p>float</p>
@@ -493,10 +543,10 @@ matplotlib.</p>
 <dl class="py method">
 <dt id="postcactus.series.BaseSeries.xmin">
 <em class="property">property </em><code class="sig-name descname">xmin</code><a class="headerlink" href="#postcactus.series.BaseSeries.xmin" title="Permalink to this definition">¶</a></dt>
-<dd><p>Return the min of the independent variable x</p>
+<dd><p>Return the minimum of the independent variable x.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Rvalue</dt>
-<dd class="field-odd"><p>Min of x</p>
+<dd class="field-odd"><p>Minimum of x.</p>
 </dd>
 <dt class="field-even">Return type</dt>
 <dd class="field-even"><p>float</p>
@@ -509,18 +559,17 @@ matplotlib.</p>
 <dl class="py function">
 <dt id="postcactus.series.sample_common">
 <code class="sig-prename descclassname">postcactus.series.</code><code class="sig-name descname">sample_common</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">series</span></em>, <em class="sig-param"><span class="n">resample</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">piecewise_constant</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="headerlink" href="#postcactus.series.sample_common" title="Permalink to this definition">¶</a></dt>
-<dd><p>Take a list of series and return on so that they are all defined on the
-same points. If resample is True, resample a list of series to the largest
-interval covered by all series, using regularly spaced x.</p>
-<p>If resample is False (default), take as input a list of series and return a
-new list with the same series but only defined on those points that are
-common to all the lists.</p>
-<p>If resample is True, instead of removing points, find the common interval
-of definition, and resample all the series on that internal. The number of
-sample points is the minimum over all series. Additionally, if
-piecewise_constant=True, the approximant used for resampling is a piecewise
-constant function, splines are not used, instead, the nearest neighbors are
-used. Turn this one when you have series with discontinuities.</p>
+<dd><p>Take a list of series and return new ones so that they are all defined on the
+same points.</p>
+<p>If <code class="docutils literal notranslate"><span class="pre">resample</span></code> is False (default), take as input a list of series and
+return a new list with the same series but only defined on those points that
+are common to all the lists. If <code class="docutils literal notranslate"><span class="pre">resample</span></code> is True, instead of removing
+points, find the common interval of definition, and resample all the series
+on that internal. The number of sample points is the minimum over all
+series. Additionally, if <code class="docutils literal notranslate"><span class="pre">piecewise_constant=True</span></code>, the approximant used
+for resampling is a piecewise constant function, splines are not used,
+instead, the nearest neighbors are used. Use this when you have series with
+discontinuities.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
@@ -529,13 +578,13 @@ used. Turn this one when you have series with discontinuities.</p>
 points.</p></li>
 <li><p><strong>piecewise_constant</strong> (<em>bool</em>) – Whether to use the nearest neighbor resampling
 method instead of splines.
-If piecewise_constant=True, the approximant used
+If <code class="docutils literal notranslate"><span class="pre">piecewise_constant=True</span></code>, the approximant used
 for resampling is a piecewise constant function.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
 <dd class="field-even"><p>Resampled series so that they are all defined in
-the same interval</p>
+the same interval.</p>
 </dd>
 <dt class="field-odd">Return type</dt>
 <dd class="field-odd"><p>list of <code class="xref py py-class docutils literal notranslate"><span class="pre">Series</span></code></p>

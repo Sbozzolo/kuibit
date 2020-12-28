@@ -55,33 +55,68 @@
             
   <div class="section" id="module-postcactus.cactus_multipoles">
 <span id="reference-on-postcactus-cactus-multipoles"></span><h1>Reference on postcactus.cactus_multipoles<a class="headerlink" href="#module-postcactus.cactus_multipoles" title="Permalink to this headline">¶</a></h1>
-<p>This module provides access to data saved by the multipoles thorn.</p>
-<p>The main class is <a class="reference internal" href="#postcactus.cactus_multipoles.MultipolesDir" title="postcactus.cactus_multipoles.MultipolesDir"><code class="xref py py-class docutils literal notranslate"><span class="pre">MultipolesDir</span></code></a>, which is typically
-accessed through <a class="reference internal" href="simdir_ref.html#postcactus.simdir.SimDir" title="postcactus.simdir.SimDir"><code class="xref py py-class docutils literal notranslate"><span class="pre">SimDir</span></code></a> instances.</p>
+<p>This module provides access to data saved by the Multipole thorn.</p>
+<p>There are multiple classes defined in this module:</p>
+<ul class="simple">
+<li><p>:py:class`~.MultipolesDir` interfaces with <a class="reference internal" href="simdir_ref.html#postcactus.simdir.SimDir" title="postcactus.simdir.SimDir"><code class="xref py py-class docutils literal notranslate"><span class="pre">SimDir</span></code></a> and organizes the
+data according to the variable available. This is a dictionary-like object with keys
+the variable names.</p></li>
+<li><p>:py:class`~.MultipoleAllDets` takes all the files that correspond to a given variable
+and organize them according to the extraction radius.</p></li>
+<li><p>:py:class`~.MultipoleOneDet` represents one single extraction radius, for a single
+variable. It is a dictionary-like object with keys the multipolar numbers and values
+the multipolar decomposition represented as represented as <a class="reference internal" href="timeseries_ref.html#postcactus.timeseries.TimeSeries" title="postcactus.timeseries.TimeSeries"><code class="xref py py-class docutils literal notranslate"><span class="pre">TimeSeries</span></code></a>
+objects.</p></li>
+</ul>
+<p>These are hierarchical classes, one containing the others, so one typically ends
+up with a series of brackets or dots to access the actual data. For example, if
+<code class="docutils literal notranslate"><span class="pre">sim</span></code> is a <a class="reference internal" href="simdir_ref.html#postcactus.simdir.SimDir" title="postcactus.simdir.SimDir"><code class="xref py py-class docutils literal notranslate"><span class="pre">SimDir</span></code></a>, <code class="docutils literal notranslate"><span class="pre">sim.multipoles['rho_b'][100][2,2]</span></code> is
+(2,2) decomposition of <code class="docutils literal notranslate"><span class="pre">rho_b</span></code> at radius 100 represented as
+<a class="reference internal" href="timeseries_ref.html#postcactus.timeseries.TimeSeries" title="postcactus.timeseries.TimeSeries"><code class="xref py py-class docutils literal notranslate"><span class="pre">TimeSeries</span></code></a>.</p>
 <dl class="py class">
 <dt id="postcactus.cactus_multipoles.MultipoleAllDets">
 <em class="property">class </em><code class="sig-prename descclassname">postcactus.cactus_multipoles.</code><code class="sig-name descname">MultipoleAllDets</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">data</span></em>, <em class="sig-param"><span class="n">l_min</span><span class="o">=</span><span class="default_value">0</span></em><span class="sig-paren">)</span><a class="headerlink" href="#postcactus.cactus_multipoles.MultipoleAllDets" title="Permalink to this definition">¶</a></dt>
 <dd><p>This class collects available surfaces with multipole data.</p>
-<p>It works as a dictionary in terms of spherical surface radius,
-returning a <a class="reference internal" href="#postcactus.cactus_multipoles.MultipoleOneDet" title="postcactus.cactus_multipoles.MultipoleOneDet"><code class="xref py py-class docutils literal notranslate"><span class="pre">MultipoleOneDet</span></code></a> object. Iteration is supported,
-sorted by ascending radius. You can iterate over all the radii and
-all the available l and m with a nested loop.</p>
-<p>Not intended for direct use.</p>
+<p>It is a dictionary-like object with keys the spherical surface radius, and
+values <a class="reference internal" href="#postcactus.cactus_multipoles.MultipoleOneDet" title="postcactus.cactus_multipoles.MultipoleOneDet"><code class="xref py py-class docutils literal notranslate"><span class="pre">MultipoleOneDet</span></code></a> object. Iteration is supported, sorted by
+ascending radius. You can iterate over all the radii and all the available l
+and m with a nested loop.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Variables</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>radii</strong> (<em>float</em>) – Available surface radii.</p></li>
-<li><p><strong>r_outer</strong> (<em>float</em>) – Radius of the outermost detector</p></li>
-<li><p><strong>l_min</strong> (<em>int</em>) – l smaller than l_min are dropped</p></li>
-<li><p><strong>outermost</strong> (<a class="reference internal" href="#postcactus.cactus_multipoles.MultipoleOneDet" title="postcactus.cactus_multipoles.MultipoleOneDet"><code class="xref py py-class docutils literal notranslate"><span class="pre">MultipoleOneDet</span></code></a>) – Outermost detector</p></li>
-<li><p><strong>available_lm</strong> (<em>list of tuples</em>) – Available components as tuple (l,m).</p></li>
-<li><p><strong>available_l</strong> (<em>list</em>) – List of available “l”.</p></li>
-<li><p><strong>available_m</strong> (<em>list</em>) – List of available “m”.</p></li>
+<li><p><strong>radii</strong> – Available surface radii.</p></li>
+<li><p><strong>r_outer</strong> – Radius of the outermost detector.</p></li>
+<li><p><strong>l_min</strong> – l smaller than l_min are dropped.</p></li>
+<li><p><strong>outermost</strong> – Outermost detector.</p></li>
+<li><p><strong>available_lm</strong> – Available components as tuple (l,m).</p></li>
+<li><p><strong>available_l</strong> – List of available l.</p></li>
+<li><p><strong>available_m</strong> – List of available m.</p></li>
 </ul>
 </dd>
 </dl>
-<p>Data is a list of tuples with structure
-(multipole_l, multipole_m, extraction_radius, [timeseries])</p>
+<p>Constructor.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>data</strong> (<em>list of tuples</em>) – List of tuples with <code class="docutils literal notranslate"><span class="pre">(multipole_l,</span> <span class="pre">multipole_m,</span>
+<span class="pre">extraction_radius,</span> <span class="pre">[timeseries])</span></code>, where
+<code class="docutils literal notranslate"><span class="pre">[timeseries]</span></code> is a list of the <a class="reference internal" href="timeseries_ref.html#postcactus.timeseries.TimeSeries" title="postcactus.timeseries.TimeSeries"><code class="xref py py-class docutils literal notranslate"><span class="pre">TimeSeries</span></code></a>
+associated.</p>
+</dd>
+</dl>
+<dl class="py method">
+<dt id="postcactus.cactus_multipoles.MultipoleAllDets.copy">
+<code class="sig-name descname">copy</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#postcactus.cactus_multipoles.MultipoleAllDets.copy" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a deep copy.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Deep copy of <code class="docutils literal notranslate"><span class="pre">self</span></code>.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><a class="reference internal" href="#postcactus.cactus_multipoles.MultipoleAllDets" title="postcactus.cactus_multipoles.MultipoleAllDets"><code class="xref py py-class docutils literal notranslate"><span class="pre">MultipoleAllDets</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
 <dl class="py method">
 <dt id="postcactus.cactus_multipoles.MultipoleAllDets.has_detector">
 <code class="sig-name descname">has_detector</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">mult_l</span></em>, <em class="sig-param"><span class="n">mult_m</span></em>, <em class="sig-param"><span class="n">dist</span></em><span class="sig-paren">)</span><a class="headerlink" href="#postcactus.cactus_multipoles.MultipoleAllDets.has_detector" title="Permalink to this definition">¶</a></dt>
@@ -90,16 +125,30 @@ distance is available.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>mult_l</strong> (<em>int</em>) – Multipole component l</p></li>
-<li><p><strong>mult_m</strong> (<em>int</em>) – Multipole component m</p></li>
-<li><p><strong>dist</strong> (<em>float</em>) – Distance of detector</p></li>
+<li><p><strong>mult_l</strong> (<em>int</em>) – Multipole component l.</p></li>
+<li><p><strong>mult_m</strong> (<em>int</em>) – Multipole component m.</p></li>
+<li><p><strong>dist</strong> (<em>float</em>) – Distance of the detector.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
-<dd class="field-even"><p>If available or not</p>
+<dd class="field-even"><p>If available or not.</p>
 </dd>
 <dt class="field-odd">Return type</dt>
 <dd class="field-odd"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="postcactus.cactus_multipoles.MultipoleAllDets.keys">
+<code class="sig-name descname">keys</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#postcactus.cactus_multipoles.MultipoleAllDets.keys" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return available extraction radii.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Available extraction radii.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>dict_keys</p>
 </dd>
 </dl>
 </dd></dl>
@@ -114,48 +163,89 @@ a given spherical surface.</p>
 <p>Multipoles are tightly connected with gravitational waves, so morally a
 sphere where multipoles are computed is a “detector”. Hence, the name
 of the class.</p>
-<p>It works as a dictionary in terms of the component as a tuple (l,m),
-returning a <a class="reference internal" href="timeseries_ref.html#postcactus.timeseries.TimeSeries" title="postcactus.timeseries.TimeSeries"><code class="xref py py-class docutils literal notranslate"><span class="pre">TimeSeries</span></code></a> object. Alternatively, it can be
-called as a function(l,m). Iteration is supported and yields tuples
-(l, m, data), which can be used to loop through all the multipoles
+<p><a class="reference internal" href="#postcactus.cactus_multipoles.MultipoleOneDet" title="postcactus.cactus_multipoles.MultipoleOneDet"><code class="xref py py-class docutils literal notranslate"><span class="pre">MultipoleOneDet</span></code></a> is a dictionary-like object with components as
+the tuples (l,m) and values the corresponding multipolar decomposition as a
+<a class="reference internal" href="timeseries_ref.html#postcactus.timeseries.TimeSeries" title="postcactus.timeseries.TimeSeries"><code class="xref py py-class docutils literal notranslate"><span class="pre">TimeSeries</span></code></a> object. Alternatively, this can also be called
+directly <code class="docutils literal notranslate"><span class="pre">multipoleonedet(l,m)</span></code>. Iteration is supported and yields tuples
+<code class="docutils literal notranslate"><span class="pre">(l,</span> <span class="pre">m,</span> <span class="pre">data)</span></code>, which can be used to loop through all the multipoles
 available.</p>
-<p>The reason we allow for l_min is to remove those files that are not
+<p>The reason we allow for <code class="docutils literal notranslate"><span class="pre">l_min</span></code> is to remove those files that are not
 necessary when considering gravitational waves (l&lt;2).</p>
-<p>Not intended for direct use.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Variables</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>dist</strong> (<em>float</em>) – Radius of the sphere</p></li>
-<li><p><strong>radius</strong> (<em>float</em>) – Radius of the sphere</p></li>
-<li><p><strong>l_min</strong> (<em>int</em>) – l smaller than l_min are dropped</p></li>
-<li><p><strong>available_l</strong> (<em>set</em>) – Available l values</p></li>
-<li><p><strong>available_m</strong> – Available m values</p></li>
+<li><p><strong>dist</strong> (<em>float</em>) – Radius of the sphere.</p></li>
+<li><p><strong>radius</strong> – Radius of the sphere.</p></li>
+<li><p><strong>l_min</strong> – l smaller than <code class="docutils literal notranslate"><span class="pre">l_min</span></code> are dropped.</p></li>
+<li><p><strong>available_l</strong> – Available l values.</p></li>
+<li><p><strong>available_m</strong> – Available m values.</p></li>
 <li><p><strong>available_m</strong> – set</p></li>
-<li><p><strong>available_lm</strong> – Available (l, m) values</p></li>
+<li><p><strong>available_lm</strong> – Available <code class="docutils literal notranslate"><span class="pre">(l,</span> <span class="pre">m)</span></code> values.</p></li>
 <li><p><strong>available_lm</strong> – set of tuples</p></li>
-<li><p><strong>missing_lm</strong> – Missing (l, m) values to have all from l_min to l_max</p></li>
+<li><p><strong>missing_lm</strong> – Missing (l, m) values to have all from <code class="docutils literal notranslate"><span class="pre">l_min</span></code> to <code class="docutils literal notranslate"><span class="pre">l_max</span></code>.</p></li>
 <li><p><strong>missing_lm</strong> – set of tuples</p></li>
 </ul>
 </dd>
 </dl>
-<p>Data is a list of tuples with (l, m, timeseries).</p>
-<p>l smaller than l_min are dropped</p>
+<p>Constructor.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>dist</strong> (<em>float</em>) – Radius of the spherical surface.</p></li>
+<li><p><strong>data</strong> (list of tuple <code class="docutils literal notranslate"><span class="pre">(l,</span> <span class="pre">m,</span> <span class="pre">timeseries)</span></code>) – List of tuples with the two multipolar numbers and
+the data as <a class="reference internal" href="timeseries_ref.html#postcactus.timeseries.TimeSeries" title="postcactus.timeseries.TimeSeries"><code class="xref py py-class docutils literal notranslate"><span class="pre">TimeSeries</span></code></a>.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Variables</dt>
+<dd class="field-even"><p><strong>l_min</strong> – l smaller than <code class="docutils literal notranslate"><span class="pre">l_min</span></code> are dropped.</p>
+</dd>
+</dl>
+<dl class="py method">
+<dt id="postcactus.cactus_multipoles.MultipoleOneDet.copy">
+<code class="sig-name descname">copy</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#postcactus.cactus_multipoles.MultipoleOneDet.copy" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a deep copy.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Deep copy of <code class="docutils literal notranslate"><span class="pre">self</span></code>.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><a class="reference internal" href="#postcactus.cactus_multipoles.MultipoleOneDet" title="postcactus.cactus_multipoles.MultipoleOneDet"><code class="xref py py-class docutils literal notranslate"><span class="pre">MultipoleOneDet</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="postcactus.cactus_multipoles.MultipoleOneDet.keys">
+<code class="sig-name descname">keys</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#postcactus.cactus_multipoles.MultipoleOneDet.keys" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return available multipolar numbers.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Available multipolar numbers.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>dict_keys</p>
+</dd>
+</dl>
+</dd></dl>
+
 <dl class="py method">
 <dt id="postcactus.cactus_multipoles.MultipoleOneDet.total_function_on_available_lm">
 <code class="sig-name descname">total_function_on_available_lm</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">function</span></em>, <em class="sig-param"><span class="o">*</span><span class="n">args</span></em>, <em class="sig-param"><span class="n">l_max</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="headerlink" href="#postcactus.cactus_multipoles.MultipoleOneDet.total_function_on_available_lm" title="Permalink to this definition">¶</a></dt>
-<dd><p>Evaluate function on each multipole and accumulate the result.</p>
-<p><code class="docutils literal notranslate"><span class="pre">total_function_on_available_lm</span></code> will call function with the
+<dd><p>Evaluate <code class="docutils literal notranslate"><span class="pre">function</span></code> on each multipole and accumulate the result.</p>
+<p><code class="docutils literal notranslate"><span class="pre">total_function_on_available_lm</span></code> will call <code class="docutils literal notranslate"><span class="pre">function</span></code> with the
 following arguments:</p>
 <p><code class="docutils literal notranslate"><span class="pre">function(timeseries,</span> <span class="pre">mult_l,</span> <span class="pre">mult_m,</span> <span class="pre">dist,</span> <span class="pre">*args,</span> <span class="pre">**kwargs)</span></code></p>
-<p>If function does not need some paramters, it should use take
+<p>If <code class="docutils literal notranslate"><span class="pre">function</span></code> does not need some paramters, it should use take
 the <code class="docutils literal notranslate"><span class="pre">*args</span></code> argument to ignore the additional paramters that
 are always passed <code class="docutils literal notranslate"><span class="pre">(l,</span> <span class="pre">m,</span> <span class="pre">r)</span></code>.</p>
 <p>Values of l larger than <code class="docutils literal notranslate"><span class="pre">l_max</span></code> are ignored.</p>
-<p>function can take additional paramters passed directly from
-<code class="docutils literal notranslate"><span class="pre">total_function_on_available_lm</span></code> (e.g. pcut for FFI).</p>
+<p>This method is used to compute quantities like the total power in
+gravitational waves.</p>
+<p><code class="docutils literal notranslate"><span class="pre">function</span></code> can take additional paramters passed directly from
+<code class="docutils literal notranslate"><span class="pre">total_function_on_available_lm</span></code> (e.g. <code class="docutils literal notranslate"><span class="pre">pcut</span></code> for FFI).</p>
 <dl class="field-list simple">
 <dt class="field-odd">Params function</dt>
-<dd class="field-odd"><p>Function that has to be applied on each monopole</p>
+<dd class="field-odd"><p>Function that has to be applied on each multipole.</p>
 </dd>
 <dt class="field-even">Returns</dt>
 <dd class="field-even"><p>Sum of function applied to each monopole</p>
@@ -174,11 +264,52 @@ are always passed <code class="docutils literal notranslate"><span class="pre">(
 <dd><p>This class provides acces to various types of multipole data in a given
 simulation directory.</p>
 <p>This class is like a dictionary, you can access its values using the
-brackets operator. The output is a <code class="xref py py-mod docutils literal notranslate"><span class="pre">MultipoleAllDets</span></code>, which has
-a full multipolar description for all the available radii. Files are lazily
-loaded. If both h5 and ASCII are present, h5 are preferred. There’s no
-attempt to combine the two.</p>
-<p>Alternatively, you can access variables with get() or with fields.var_name.</p>
+brackets operator, with values that are <code class="xref py py-mod docutils literal notranslate"><span class="pre">MultipoleAllDets</span></code>. These
+contain the full multipolar description for all the available radii. Files
+are lazily loaded. If both HDF5 and ASCII are present, HDF5 are preferred.
+There’s no attempt to combine the two. Alternatively, you can access
+variables with <code class="docutils literal notranslate"><span class="pre">get</span></code> or with <code class="docutils literal notranslate"><span class="pre">fields.var_name</span></code>.</p>
+<p>Constructor.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>sd</strong> (<a class="reference internal" href="simdir_ref.html#postcactus.simdir.SimDir" title="postcactus.simdir.SimDir"><code class="xref py py-class docutils literal notranslate"><span class="pre">SimDir</span></code></a>) – Simulation directory.</p>
+</dd>
+</dl>
+<dl class="py method">
+<dt id="postcactus.cactus_multipoles.MultipolesDir.get">
+<code class="sig-name descname">get</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">key</span></em>, <em class="sig-param"><span class="n">default</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#postcactus.cactus_multipoles.MultipolesDir.get" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a the multipolar data for the given variable if available, else return
+the default value.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>key</strong> (<em>str</em>) – Requested variable.</p></li>
+<li><p><strong>default</strong> (<em>any</em>) – Returned value if <code class="docutils literal notranslate"><span class="pre">key</span></code> is not available.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Collection of all the multipolar data for the given variable.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="#postcactus.cactus_multipoles.MultipoleAllDets" title="postcactus.cactus_multipoles.MultipoleAllDets"><code class="xref py py-class docutils literal notranslate"><span class="pre">MultipoleAllDets</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="postcactus.cactus_multipoles.MultipolesDir.keys">
+<code class="sig-name descname">keys</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#postcactus.cactus_multipoles.MultipolesDir.keys" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return available variables with multipolar data.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Available variables that have multipolar data.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>dict_keys</p>
+</dd>
+</dl>
+</dd></dl>
+
 </dd></dl>
 
 </div>

@@ -55,16 +55,25 @@
             
   <div class="section" id="module-postcactus.simdir">
 <span id="reference-on-postcactus-simdir"></span><h1>Reference on postcactus.simdir<a class="headerlink" href="#module-postcactus.simdir" title="Permalink to this headline">¶</a></h1>
-<p>This module provides easy access to CACTUS data files.</p>
-<p>A simulation directory is represented by an instance of the
-<a class="reference internal" href="#postcactus.simdir.SimDir" title="postcactus.simdir.SimDir"><code class="xref py py-class docutils literal notranslate"><span class="pre">SimDir</span></code></a> class, which provides access to all supported
-data types.</p>
+<p>This module provides easy access to Cactus data files.</p>
+<p>A simulation directory is represented by an instance of the <a class="reference internal" href="#postcactus.simdir.SimDir" title="postcactus.simdir.SimDir"><code class="xref py py-class docutils literal notranslate"><span class="pre">SimDir</span></code></a>
+class, which provides access to all supported data types.</p>
+<p>This is the main entry point into <code class="docutils literal notranslate"><span class="pre">PostCactus</span></code>. When a <a class="reference internal" href="#postcactus.simdir.SimDir" title="postcactus.simdir.SimDir"><code class="xref py py-class docutils literal notranslate"><span class="pre">SimDir</span></code></a> is
+initialized, the simulation directory is scanned and all the data is organized.
+<a class="reference internal" href="#postcactus.simdir.SimDir" title="postcactus.simdir.SimDir"><code class="xref py py-class docutils literal notranslate"><span class="pre">SimDir</span></code></a> objects have attributes that are interfaces to the data:
+each attribute is a dictionary-like object that indexes the relevant data in
+some way. For example, <a class="reference internal" href="#postcactus.simdir.SimDir.timeseries" title="postcactus.simdir.SimDir.timeseries"><code class="xref py py-meth docutils literal notranslate"><span class="pre">timeseries()</span></code></a> contains all the time series in
+the output, indexed by the type of reduction that produced them (for example,
+<code class="docutils literal notranslate"><span class="pre">norm2</span></code>, <code class="docutils literal notranslate"><span class="pre">max</span></code>, …).</p>
+<p>In case of uncertainty, it is always possible to print <a class="reference internal" href="#postcactus.simdir.SimDir" title="postcactus.simdir.SimDir"><code class="xref py py-class docutils literal notranslate"><span class="pre">SimDir</span></code></a>,
+or any of its attributes, to obtain a message with the available content of
+such attribute.</p>
 <dl class="py class">
 <dt id="postcactus.simdir.SimDir">
 <em class="property">class </em><code class="sig-prename descclassname">postcactus.simdir.</code><code class="sig-name descname">SimDir</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">path</span></em>, <em class="sig-param"><span class="n">max_depth</span><span class="o">=</span><span class="default_value">8</span></em>, <em class="sig-param"><span class="n">ignore</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#postcactus.simdir.SimDir" title="Permalink to this definition">¶</a></dt>
-<dd><p>This class represents a CACTUS simulation directory.</p>
+<dd><p>This class represents a Cactus simulation directory.</p>
 <p>Data is searched recursively in all subfolders. No particular folder
-structure (e.g. SimFactory style) is assumed. The following attributes
+structure (e.g. <code class="docutils literal notranslate"><span class="pre">simfactory</span></code> style) is assumed. The following attributes
 allow access to the supported data types:</p>
 <dl class="field-list simple">
 <dt class="field-odd">Variables</dt>
@@ -73,19 +82,19 @@ allow access to the supported data types:</p>
 <li><p><strong>dirs</strong> – All directories in which data is searched.</p></li>
 <li><p><strong>logfiles</strong> – The locations of all log files (.out).</p></li>
 <li><p><strong>errfiles</strong> – The location of all error log files (.err).</p></li>
-<li><p><strong>ts</strong> – Scalar data of various type, see
+<li><p><a class="reference internal" href="#postcactus.simdir.SimDir.ts" title="postcactus.simdir.SimDir.ts"><strong>ts</strong></a> – Scalar data of various type, see
 <a class="reference internal" href="cactus_scalars_ref.html#postcactus.cactus_scalars.ScalarsDir" title="postcactus.cactus_scalars.ScalarsDir"><code class="xref py py-class docutils literal notranslate"><span class="pre">ScalarsDir</span></code></a></p></li>
-<li><p><strong>gf</strong> – Access to grid function data, see
+<li><p><a class="reference internal" href="#postcactus.simdir.SimDir.gf" title="postcactus.simdir.SimDir.gf"><strong>gf</strong></a> – Access to grid function data, see
 <a class="reference internal" href="cactus_grid_functions_ref.html#postcactus.cactus_grid_functions.GridFunctionsDir" title="postcactus.cactus_grid_functions.GridFunctionsDir"><code class="xref py py-class docutils literal notranslate"><span class="pre">GridFunctionsDir</span></code></a>.</p></li>
-<li><p><strong>gws</strong> – GW signal from the Weyl scalar multipole
+<li><p><a class="reference internal" href="#postcactus.simdir.SimDir.gws" title="postcactus.simdir.SimDir.gws"><strong>gws</strong></a> – GW signal from the Weyl scalar multipole
 decomposition, see
 <a class="reference internal" href="cactus_waves_ref.html#postcactus.cactus_waves.GravitationalWavesDir" title="postcactus.cactus_waves.GravitationalWavesDir"><code class="xref py py-class docutils literal notranslate"><span class="pre">GravitationalWavesDir</span></code></a>.</p></li>
-<li><p><strong>emws</strong> – EM signal from the Weyl scalar multipole
+<li><p><a class="reference internal" href="#postcactus.simdir.SimDir.emws" title="postcactus.simdir.SimDir.emws"><strong>emws</strong></a> – EM signal from the Weyl scalar multipole
 decomposition, see
 <a class="reference internal" href="cactus_waves_ref.html#postcactus.cactus_waves.ElectromagneticWavesDir" title="postcactus.cactus_waves.ElectromagneticWavesDir"><code class="xref py py-class docutils literal notranslate"><span class="pre">ElectromagneticWavesDir</span></code></a>.</p></li>
-<li><p><strong>horizons</strong> – Apparent horizon information, see
+<li><p><a class="reference internal" href="#postcactus.simdir.SimDir.horizons" title="postcactus.simdir.SimDir.horizons"><strong>horizons</strong></a> – Apparent horizon information, see
 <a class="reference internal" href="cactus_horizons_ref.html#postcactus.cactus_horizons.HorizonsDir" title="postcactus.cactus_horizons.HorizonsDir"><code class="xref py py-class docutils literal notranslate"><span class="pre">HorizonsDir</span></code></a>.</p></li>
-<li><p><strong>multipoles</strong> – Multipole components, see
+<li><p><a class="reference internal" href="#postcactus.simdir.SimDir.multipoles" title="postcactus.simdir.SimDir.multipoles"><strong>multipoles</strong></a> – Multipole components, see
 <code class="xref py py-class docutils literal notranslate"><span class="pre">CactusMultipoleDir</span></code>.</p></li>
 </ul>
 </dd>
@@ -94,9 +103,9 @@ decomposition, see
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>path</strong> (<em>string</em>) – Path to simulation directory.</p></li>
+<li><p><strong>path</strong> (<em>str</em>) – Path to output of the simulation.</p></li>
 <li><p><strong>max_depth</strong> (<em>int</em>) – Maximum recursion depth for subfolders.</p></li>
-<li><p><strong>ignore</strong> (<em>set</em>) – Folders to ignore</p></li>
+<li><p><strong>ignore</strong> (<em>set</em>) – Names of folders to ignore (e.g. SIMFACTORY).</p></li>
 </ul>
 </dd>
 </dl>
@@ -106,6 +115,146 @@ latter folder, if available, or else the oldest parfile in any of
 the data directories, will be used to extract the simulation
 parameters. Logfiles (<code class="docutils literal notranslate"><span class="pre">*.out</span></code>) and errorfiles (<code class="docutils literal notranslate"><span class="pre">*.err</span></code>) will be
 searched for in all data directories.</p>
+<dl class="py method">
+<dt id="postcactus.simdir.SimDir.electromagneticwaves">
+<em class="property">property </em><code class="sig-name descname">electromagneticwaves</code><a class="headerlink" href="#postcactus.simdir.SimDir.electromagneticwaves" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return all the available <code class="docutils literal notranslate"><span class="pre">Phi2</span></code> data.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Interface to all the <code class="docutils literal notranslate"><span class="pre">Phi2</span></code> data in the directory.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><a class="reference internal" href="cactus_waves_ref.html#postcactus.cactus_waves.ElectromagneticWavesDir" title="postcactus.cactus_waves.ElectromagneticWavesDir"><code class="xref py py-class docutils literal notranslate"><span class="pre">ElectromagneticWavesDir</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="postcactus.simdir.SimDir.emws">
+<em class="property">property </em><code class="sig-name descname">emws</code><a class="headerlink" href="#postcactus.simdir.SimDir.emws" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return all the available <code class="docutils literal notranslate"><span class="pre">Phi2</span></code> data.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Interface to all the <code class="docutils literal notranslate"><span class="pre">Phi2</span></code> data in the directory.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><a class="reference internal" href="cactus_waves_ref.html#postcactus.cactus_waves.ElectromagneticWavesDir" title="postcactus.cactus_waves.ElectromagneticWavesDir"><code class="xref py py-class docutils literal notranslate"><span class="pre">ElectromagneticWavesDir</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="postcactus.simdir.SimDir.gf">
+<em class="property">property </em><code class="sig-name descname">gf</code><a class="headerlink" href="#postcactus.simdir.SimDir.gf" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return all the available grid data.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Interface to all the grid data in the directory.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><a class="reference internal" href="cactus_grid_functions_ref.html#postcactus.cactus_grid_functions.GridFunctionsDir" title="postcactus.cactus_grid_functions.GridFunctionsDir"><code class="xref py py-class docutils literal notranslate"><span class="pre">GridFunctionsDir</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="postcactus.simdir.SimDir.gravitationalwaves">
+<em class="property">property </em><code class="sig-name descname">gravitationalwaves</code><a class="headerlink" href="#postcactus.simdir.SimDir.gravitationalwaves" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return all the available <code class="docutils literal notranslate"><span class="pre">Psi4</span></code> data.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Interface to all the <code class="docutils literal notranslate"><span class="pre">Psi4</span></code> data in the directory.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><a class="reference internal" href="cactus_waves_ref.html#postcactus.cactus_waves.GravitationalWavesDir" title="postcactus.cactus_waves.GravitationalWavesDir"><code class="xref py py-class docutils literal notranslate"><span class="pre">GravitationalWavesDir</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="postcactus.simdir.SimDir.gridfunctions">
+<em class="property">property </em><code class="sig-name descname">gridfunctions</code><a class="headerlink" href="#postcactus.simdir.SimDir.gridfunctions" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return all the available grid data.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Interface to all the grid data in the directory.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><a class="reference internal" href="cactus_grid_functions_ref.html#postcactus.cactus_grid_functions.GridFunctionsDir" title="postcactus.cactus_grid_functions.GridFunctionsDir"><code class="xref py py-class docutils literal notranslate"><span class="pre">GridFunctionsDir</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="postcactus.simdir.SimDir.gws">
+<em class="property">property </em><code class="sig-name descname">gws</code><a class="headerlink" href="#postcactus.simdir.SimDir.gws" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return all the available <code class="docutils literal notranslate"><span class="pre">Psi4</span></code> data.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Interface to all the <code class="docutils literal notranslate"><span class="pre">Psi4</span></code> data in the directory.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><a class="reference internal" href="cactus_waves_ref.html#postcactus.cactus_waves.GravitationalWavesDir" title="postcactus.cactus_waves.GravitationalWavesDir"><code class="xref py py-class docutils literal notranslate"><span class="pre">GravitationalWavesDir</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="postcactus.simdir.SimDir.horizons">
+<em class="property">property </em><code class="sig-name descname">horizons</code><a class="headerlink" href="#postcactus.simdir.SimDir.horizons" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return all the available horizon data.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Interface to all the horizon data in the directory.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><a class="reference internal" href="cactus_horizons_ref.html#postcactus.cactus_horizons.HorizonsDir" title="postcactus.cactus_horizons.HorizonsDir"><code class="xref py py-class docutils literal notranslate"><span class="pre">HorizonsDir</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="postcactus.simdir.SimDir.multipoles">
+<em class="property">property </em><code class="sig-name descname">multipoles</code><a class="headerlink" href="#postcactus.simdir.SimDir.multipoles" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return all the available multipole data.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Interface to all the multipole data in the directory.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><a class="reference internal" href="cactus_multipoles_ref.html#postcactus.cactus_multipoles.MultipolesDir" title="postcactus.cactus_multipoles.MultipolesDir"><code class="xref py py-class docutils literal notranslate"><span class="pre">MultipolesDir</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="postcactus.simdir.SimDir.timeseries">
+<em class="property">property </em><code class="sig-name descname">timeseries</code><a class="headerlink" href="#postcactus.simdir.SimDir.timeseries" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return all the available timeseries in the data.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Interface to all the timeseries in the directory.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><a class="reference internal" href="cactus_scalars_ref.html#postcactus.cactus_scalars.ScalarsDir" title="postcactus.cactus_scalars.ScalarsDir"><code class="xref py py-class docutils literal notranslate"><span class="pre">ScalarsDir</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="postcactus.simdir.SimDir.ts">
+<em class="property">property </em><code class="sig-name descname">ts</code><a class="headerlink" href="#postcactus.simdir.SimDir.ts" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return all the available timeseries in the data.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Interface to all the timeseries in the directory.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><a class="reference internal" href="cactus_scalars_ref.html#postcactus.cactus_scalars.ScalarsDir" title="postcactus.cactus_scalars.ScalarsDir"><code class="xref py py-class docutils literal notranslate"><span class="pre">ScalarsDir</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
 </dd></dl>
 
 </div>

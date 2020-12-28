@@ -395,7 +395,7 @@ HDF5 representation is preferred.</p>
 </pre></div>
 </div>
 <p>In case you are reading an ASCII file, you have to set the correct number of
-ghost zones. The simplest way to do this is to set the <code class="xref py py-meth docutils literal notranslate"><span class="pre">num_ghost()</span></code>
+ghost zones. The simplest way to do this is to set the <a class="reference internal" href="cactus_grid_functions_ref.html#postcactus.cactus_grid_functions.AllGridFunctions.num_ghost" title="postcactus.cactus_grid_functions.AllGridFunctions.num_ghost"><code class="xref py py-meth docutils literal notranslate"><span class="pre">num_ghost()</span></code></a>
 attribute. If the output does not contain ghost zones, set them to zero.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># If rho_star is from an ASCII file, we want to set num_ghost before</span>
 <span class="c1"># reading it</span>
@@ -404,7 +404,7 @@ attribute. If the output does not contain ghost zones, set them to zero.</p>
 <span class="n">rho_star</span> <span class="o">=</span> <span class="n">ASCII_reader</span><span class="o">.</span><span class="n">rho_star</span>
 </pre></div>
 </div>
-<p><code class="xref py py-meth docutils literal notranslate"><span class="pre">num_ghost()</span></code> has to be a tuple or a list with the same number of entries
+<p><a class="reference internal" href="cactus_grid_functions_ref.html#postcactus.cactus_grid_functions.AllGridFunctions.num_ghost" title="postcactus.cactus_grid_functions.AllGridFunctions.num_ghost"><code class="xref py py-meth docutils literal notranslate"><span class="pre">num_ghost()</span></code></a> has to be a tuple or a list with the same number of entries
 as the dimensionality of the grid: each entry is the number of ghost zones along
 a direction.</p>
 <div class="admonition warning">
@@ -425,7 +425,7 @@ definiteness, but the most of what said here holds true for
 <a class="reference internal" href="cactus_grid_functions_ref.html#postcactus.cactus_grid_functions.OneGridFunctionASCII" title="postcactus.cactus_grid_functions.OneGridFunctionASCII"><code class="xref py py-class docutils literal notranslate"><span class="pre">OneGridFunctionASCII</span></code></a>) is another dictionary-like object. The keys
 of this class are the various iterations available in the files. Hence, to read
 some data at a given iteration <code class="docutils literal notranslate"><span class="pre">iteration</span></code>, you can simply use the bracket
-operator. Alternatively, you can use the <code class="xref py py-meth docutils literal notranslate"><span class="pre">get_iteration()</span></code> method:</p>
+operator. Alternatively, you can use the <a class="reference internal" href="cactus_grid_functions_ref.html#postcactus.cactus_grid_functions.BaseOneGridFunction.get_iteration" title="postcactus.cactus_grid_functions.BaseOneGridFunction.get_iteration"><code class="xref py py-meth docutils literal notranslate"><span class="pre">get_iteration()</span></code></a> method:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># These methods are equivalent</span>
 <span class="n">rho0</span> <span class="o">=</span> <span class="n">sim</span><span class="o">.</span><span class="n">gf</span><span class="o">.</span><span class="n">xy</span><span class="o">.</span><span class="n">rho</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
 <span class="n">rho0</span> <span class="o">=</span> <span class="n">sim</span><span class="o">.</span><span class="n">gf</span><span class="o">.</span><span class="n">xy</span><span class="o">.</span><span class="n">rho</span><span class="o">.</span><span class="n">get_iteration</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
@@ -439,8 +439,8 @@ are available with <a class="reference internal" href="cactus_grid_functions_ref
 </pre></div>
 </div>
 <p>You can read a time instead of a iteration with the method
-<code class="xref py py-meth docutils literal notranslate"><span class="pre">get_time()</span></code>. You can convert between time and iteration with the
-methods <a class="reference internal" href="cactus_grid_functions_ref.html#postcactus.cactus_grid_functions.OneGridFunctionH5.time_at_iteration" title="postcactus.cactus_grid_functions.OneGridFunctionH5.time_at_iteration"><code class="xref py py-meth docutils literal notranslate"><span class="pre">time_at_iteration()</span></code></a> and <a class="reference internal" href="cactus_grid_functions_ref.html#postcactus.cactus_grid_functions.BaseOneGridFunction.iteration_at_time" title="postcactus.cactus_grid_functions.BaseOneGridFunction.iteration_at_time"><code class="xref py py-meth docutils literal notranslate"><span class="pre">iteration_at_time()</span></code></a>.</p>
+<a class="reference internal" href="cactus_grid_functions_ref.html#postcactus.cactus_grid_functions.BaseOneGridFunction.get_time" title="postcactus.cactus_grid_functions.BaseOneGridFunction.get_time"><code class="xref py py-meth docutils literal notranslate"><span class="pre">get_time()</span></code></a>. You can convert between time and iteration with the
+methods <a class="reference internal" href="cactus_grid_functions_ref.html#postcactus.cactus_grid_functions.BaseOneGridFunction.time_at_iteration" title="postcactus.cactus_grid_functions.BaseOneGridFunction.time_at_iteration"><code class="xref py py-meth docutils literal notranslate"><span class="pre">time_at_iteration()</span></code></a> and <a class="reference internal" href="cactus_grid_functions_ref.html#postcactus.cactus_grid_functions.BaseOneGridFunction.iteration_at_time" title="postcactus.cactus_grid_functions.BaseOneGridFunction.iteration_at_time"><code class="xref py py-meth docutils literal notranslate"><span class="pre">iteration_at_time()</span></code></a>.</p>
 <p>These methods return a <a class="reference internal" href="grid_data_ref.html#postcactus.grid_data.HierarchicalGridData" title="postcactus.grid_data.HierarchicalGridData"><code class="xref py py-class docutils literal notranslate"><span class="pre">HierarchicalGridData</span></code></a> object with all the
 available data for the requested iteration. If HDF5 files are being read, the
 correct ghost zone information is being used. In case you want to work with a

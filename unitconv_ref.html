@@ -21,7 +21,6 @@
     <script src="_static/bizstyle.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="Reference on postcactus.visualize" href="visualize_ref.html" />
     <link rel="prev" title="Reference on postcactus.sensitivity_curves" href="sensitivity_curves_ref.html" />
     <meta name="viewport" content="width=device-width,initial-scale=1.0" />
     <!--[if lt IE 9]>
@@ -38,9 +37,6 @@
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="right" >
-          <a href="visualize_ref.html" title="Reference on postcactus.visualize"
-             accesskey="N">next</a> |</li>
-        <li class="right" >
           <a href="sensitivity_curves_ref.html" title="Reference on postcactus.sensitivity_curves"
              accesskey="P">previous</a> |</li>
         <li class="nav-item nav-item-0"><a href="index.html">PostCactus 3.0.0a12 documentation</a> &#187;</li>
@@ -55,7 +51,7 @@
             
   <div class="section" id="module-postcactus.unitconv">
 <span id="reference-on-postcactus-unitconv"></span><h1>Reference on postcactus.unitconv<a class="headerlink" href="#module-postcactus.unitconv" title="Permalink to this headline">¶</a></h1>
-<p>This module provides a class Units representing unit sytems or unit
+<p>This module provides a class Units representing unit systems or unit
 conversions.</p>
 <p>Units can be used to convert from geometrized units to SI.</p>
 <p>For example, assuming a that we are using geometrized units with <span class="math notranslate nohighlight">\(G = c =
@@ -63,7 +59,12 @@ M = 1\)</span>, where <span class="math notranslate nohighlight">\(M = 65 M_\odo
 <span class="pre">geom_umass(65</span> <span class="pre">*</span> <span class="pre">M_SUN_SI)</span></code>. CU knows how to convert geometrized quantities to
 SI: for instance, to convert the length variable d from geometrized units to SI,
 just multiply d times <code class="docutils literal notranslate"><span class="pre">CU.length</span></code>. Similarly for all the other quantities.</p>
-<p>The following natural constants are defined</p>
+<p>The module provides convenience functions to define geometrized system of units:
+<a class="reference internal" href="#postcactus.unitconv.geom_umass_msun" title="postcactus.unitconv.geom_umass_msun"><code class="xref py py-func docutils literal notranslate"><span class="pre">geom_umass_msun()</span></code></a>, <a class="reference internal" href="#postcactus.unitconv.geom_umass" title="postcactus.unitconv.geom_umass"><code class="xref py py-func docutils literal notranslate"><span class="pre">geom_umass()</span></code></a>, and
+<code class="xref py py-func docutils literal notranslate"><span class="pre">geom_length()</span></code> can be used to generate <a class="reference internal" href="#postcactus.unitconv.Units" title="postcactus.unitconv.Units"><code class="xref py py-class docutils literal notranslate"><span class="pre">Units</span></code></a> objects
+that know how to convert from/to SI and geometrized units where lengthscale or
+mass scales were defined.</p>
+<p>The following natural constants are defined (in SI units)</p>
 <ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">C_SI</span></code>          (Vacuum speed of light)</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">G_SI</span></code>          (Gravitational constant)</p></li>
@@ -89,9 +90,9 @@ and mass unit umass.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>ulength</strong> (<em>float</em>) – Unit of length with respect to SI</p></li>
-<li><p><strong>utime</strong> (<em>float</em>) – Unit of time with respect to SI</p></li>
-<li><p><strong>umass</strong> (<em>float</em>) – Unit of mass with respect to SI</p></li>
+<li><p><strong>ulength</strong> (<em>float</em>) – Unit of length with respect to SI.</p></li>
+<li><p><strong>utime</strong> (<em>float</em>) – Unit of time with respect to SI.</p></li>
+<li><p><strong>umass</strong> (<em>float</em>) – Unit of mass with respect to SI.</p></li>
 </ul>
 </dd>
 </dl>
@@ -100,14 +101,14 @@ and mass unit umass.</p>
 <dl class="py function">
 <dt id="postcactus.unitconv.geom_ulength">
 <code class="sig-prename descclassname">postcactus.unitconv.</code><code class="sig-name descname">geom_ulength</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">ulength</span></em><span class="sig-paren">)</span><a class="headerlink" href="#postcactus.unitconv.geom_ulength" title="Permalink to this definition">¶</a></dt>
-<dd><p>Create a geometric unit system, expressed in SI, where the length unit
-is given by ulength, expressed in SI units as well.</p>
+<dd><p>Create a geometric unit system, expressed in SI, based on the given length
+unit expressed in SI units as well.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>ulength</strong> (<em>float</em>) – Unit of length with respect to SI</p>
+<dd class="field-odd"><p><strong>ulength</strong> (<em>float</em>) – Unit of length with respect to SI.</p>
 </dd>
 <dt class="field-even">Rvalue</dt>
-<dd class="field-even"><p>Gometrized units with length scale set by <code class="docutils literal notranslate"><span class="pre">ulength</span></code></p>
+<dd class="field-even"><p>Geometrized units with length scale set by <code class="docutils literal notranslate"><span class="pre">ulength</span></code>.</p>
 </dd>
 <dt class="field-odd">Return type</dt>
 <dd class="field-odd"><p>:py:class :<cite>~.Units</cite></p>
@@ -118,14 +119,14 @@ is given by ulength, expressed in SI units as well.</p>
 <dl class="py function">
 <dt id="postcactus.unitconv.geom_umass">
 <code class="sig-prename descclassname">postcactus.unitconv.</code><code class="sig-name descname">geom_umass</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">umass</span></em><span class="sig-paren">)</span><a class="headerlink" href="#postcactus.unitconv.geom_umass" title="Permalink to this definition">¶</a></dt>
-<dd><p>Create a geometric unit system, expressed in SI, where the mass unit
-is given by umass, expressed in SI units as well.</p>
+<dd><p>Create a geometric unit system, expressed in SI, based on the given mass
+unit expressed in SI units as well.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>ulength</strong> (<em>float</em>) – Unit of mass with respect to SI</p>
+<dd class="field-odd"><p><strong>ulength</strong> (<em>float</em>) – Unit of mass with respect to SI.</p>
 </dd>
 <dt class="field-even">Rvalue</dt>
-<dd class="field-even"><p>Gometrized units with mass scale set by <code class="docutils literal notranslate"><span class="pre">umass</span></code></p>
+<dd class="field-even"><p>Geometrized units with mass scale set by <code class="docutils literal notranslate"><span class="pre">umass</span></code>.</p>
 </dd>
 <dt class="field-odd">Return type</dt>
 <dd class="field-odd"><p><a class="reference internal" href="#postcactus.unitconv.Units" title="postcactus.unitconv.Units"><code class="xref py py-class docutils literal notranslate"><span class="pre">Units</span></code></a></p>
@@ -136,14 +137,14 @@ is given by umass, expressed in SI units as well.</p>
 <dl class="py function">
 <dt id="postcactus.unitconv.geom_umass_msun">
 <code class="sig-prename descclassname">postcactus.unitconv.</code><code class="sig-name descname">geom_umass_msun</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">umass</span></em><span class="sig-paren">)</span><a class="headerlink" href="#postcactus.unitconv.geom_umass_msun" title="Permalink to this definition">¶</a></dt>
-<dd><p>Create a geometric unit system, expressed in Sola, where the mass unit
-is given by umass, expressed in solar masses.</p>
+<dd><p>Create a geometric unit system, expressed in SI, based on the given mass
+unit expressed in solar masses.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>ulength</strong> (<em>float</em>) – Unit of mass in solar masses</p>
+<dd class="field-odd"><p><strong>ulength</strong> (<em>float</em>) – Unit of mass in solar masses.</p>
 </dd>
 <dt class="field-even">Rvalue</dt>
-<dd class="field-even"><p>Gometrized units with mass scale set by <code class="docutils literal notranslate"><span class="pre">umass</span></code></p>
+<dd class="field-even"><p>Geometrized units with mass scale set by <code class="docutils literal notranslate"><span class="pre">umass</span></code>.</p>
 </dd>
 <dt class="field-odd">Return type</dt>
 <dd class="field-odd"><p><a class="reference internal" href="#postcactus.unitconv.Units" title="postcactus.unitconv.Units"><code class="xref py py-class docutils literal notranslate"><span class="pre">Units</span></code></a></p>
@@ -166,9 +167,6 @@ is given by umass, expressed in solar masses.</p>
   <h4>Previous topic</h4>
   <p class="topless"><a href="sensitivity_curves_ref.html"
                         title="previous chapter">Reference on postcactus.sensitivity_curves</a></p>
-  <h4>Next topic</h4>
-  <p class="topless"><a href="visualize_ref.html"
-                        title="next chapter">Reference on postcactus.visualize</a></p>
 <div id="searchbox" style="display: none" role="search">
   <h3 id="searchlabel">Quick search</h3>
     <div class="searchformwrapper">
@@ -192,9 +190,6 @@ is given by umass, expressed in solar masses.</p>
         <li class="right" >
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="right" >
-          <a href="visualize_ref.html" title="Reference on postcactus.visualize"
-             >next</a> |</li>
         <li class="right" >
           <a href="sensitivity_curves_ref.html" title="Reference on postcactus.sensitivity_curves"
              >previous</a> |</li>

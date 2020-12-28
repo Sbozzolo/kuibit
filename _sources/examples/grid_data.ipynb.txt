@@ -28,6 +28,7 @@
     "import matplotlib.pyplot as plt\n",
     "import numpy as np\n",
     "from postcactus import grid_data as gd\n",
+    "from postcactus import grid_data_utils as gdu\n",
     "from postcactus import series\n",
     "\n",
     "%matplotlib inline"
@@ -141,7 +142,7 @@
    "metadata": {},
    "outputs": [],
    "source": [
-    "grid_data = gd.sample_function(lambda x, y: x * y,\n",
+    "grid_data = gdu.sample_function(lambda x, y: x * y,\n",
     "                          [101, 201], # shape\n",
     "                          [0, 0], # origin\n",
     "                          [10, 10] # other corner\n",
@@ -159,8 +160,7 @@
     "array. Often, we want to plot these objects. Using `data` directly would lead to \n",
     "transposing the actual physical quantity, because `data` is a matrix stored by rows, \n",
     "so, the first index does not label the x coordiante, but the y. \n",
-    "We provide the aliaxs `data_xyz`, which is the the tranposed of `data`. This is ready to be plotted. \n",
-    "Here we plot the various quantities directly so we can see how to access the data. `PostCactus.visualize` contains methods to streamline these operations.\n"
+    "We provide the aliaxs `data_xyz`, which is the the tranposed of `data`. This is ready to be plotted. \n"
    ]
   },
   {
@@ -281,7 +281,7 @@
     "data = []\n",
     "for ref_level in range(3):\n",
     "    resolution = (1 + ref_level) * 20 + 1\n",
-    "    data.append(gd.sample_function(lambda x, y: x*y + 5,\n",
+    "    data.append(gdu.sample_function(lambda x, y: x*y + 5,\n",
     "                                   [resolution, resolution],\n",
     "                                   [-10, -10], \n",
     "                                   [10, 10],\n",

@@ -55,22 +55,55 @@
             
   <div class="section" id="module-postcactus.cactus_grid_functions">
 <span id="reference-on-postcactus-cactus-grid-functions"></span><h1>Reference on postcactus.cactus_grid_functions<a class="headerlink" href="#module-postcactus.cactus_grid_functions" title="Permalink to this headline">¶</a></h1>
-<p>The <code class="xref py py-mod docutils literal notranslate"><span class="pre">cactus_grid</span></code> module provides functions to load
-grid function in Cactus formats.</p>
+<p>The <code class="xref py py-mod docutils literal notranslate"><span class="pre">cactus_grid</span></code> module provides functions to load grid function
+in Cactus formats.</p>
+<p>There are multiple classes defined in this module:</p>
+<ul class="simple">
+<li><p>:py:class`~.GridFunctionsDir` interfaces with <a class="reference internal" href="simdir_ref.html#postcactus.simdir.SimDir" title="postcactus.simdir.SimDir"><code class="xref py py-class docutils literal notranslate"><span class="pre">SimDir</span></code></a> and
+organizes the grid functions by dimensionality. This is a dictionary-like
+object with keys the possible dimensions (e.g., <code class="docutils literal notranslate"><span class="pre">x</span></code>, <code class="docutils literal notranslate"><span class="pre">yz</span></code>, <code class="docutils literal notranslate"><span class="pre">xyz</span></code>).</p></li>
+<li><p>:py:class`~.AllGridFunctions` takes all the files in SimDir and sort them
+according the different grid functions they contain.</p></li>
+<li><p>There are two :py:class`~.OneGridFunction` classes, one for HDF5 files and one
+for ASCII files. They describe one single grid function and they contains the
+files associated to that grid function. Both the classes are derived from the
+same abstract base class :py:class`~.OneGridFunctionBase`, which implements
+the shared methods.</p></li>
+</ul>
+<p>These are hierarchical classes, one containing the others, so one typically ends
+up with a series of brackets to access the actual data. For example, if <code class="docutils literal notranslate"><span class="pre">sim</span></code>
+is a <a class="reference internal" href="simdir_ref.html#postcactus.simdir.SimDir" title="postcactus.simdir.SimDir"><code class="xref py py-class docutils literal notranslate"><span class="pre">SimDir</span></code></a>, <code class="docutils literal notranslate"><span class="pre">sim.gf.xy['rho_b'][0]</span></code> is <code class="docutils literal notranslate"><span class="pre">rho_b</span></code> at iteration 0
+on the equatorial plane represented as <a class="reference internal" href="grid_data_ref.html#postcactus.grid_data.HierarchicalGridData" title="postcactus.grid_data.HierarchicalGridData"><code class="xref py py-class docutils literal notranslate"><span class="pre">HierarchicalGridData</span></code></a>.</p>
 <dl class="py class">
 <dt id="postcactus.cactus_grid_functions.AllGridFunctions">
 <em class="property">class </em><code class="sig-prename descclassname">postcactus.cactus_grid_functions.</code><code class="sig-name descname">AllGridFunctions</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">allfiles</span></em>, <em class="sig-param"><span class="n">dimension</span></em>, <em class="sig-param"><span class="n">num_ghost</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#postcactus.cactus_grid_functions.AllGridFunctions" title="Permalink to this definition">¶</a></dt>
 <dd><p>Helper class to read various types of grid data in a list of files and
-properly order them. The core of this object is the _vars dictionary which
-contains the location of all the files for a specific variable and
+properly order them. The core of this object is the <code class="docutils literal notranslate"><span class="pre">_vars</span></code> dictionary
+which contains the location of all the files for a specific variable and
 reduction.</p>
-<p>AllGridFunction is a dictionary-like object.</p>
-<p>Not intended for direct iniitalization.</p>
-<p>allfiles is a list of files, dimension has to a tuple.</p>
+<p><code class="xref py py-class docutils literal notranslate"><span class="pre">AllGridFunction</span></code> is a dictionary-like object with keys the
+various variables and values <a class="reference internal" href="#postcactus.cactus_grid_functions.BaseOneGridFunction" title="postcactus.cactus_grid_functions.BaseOneGridFunction"><code class="xref py py-class docutils literal notranslate"><span class="pre">BaseOneGridFunction</span></code></a> (or derived).</p>
+<p>You can access data with the bracket operator or as attributes of the
+<code class="docutils literal notranslate"><span class="pre">fields</span></code> attribute.</p>
+<p>Not intended for direct initialization.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Variables</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>dimension</strong> – Dimension associated to this object (e.g. (0, 1) would be the
+xy plane).</p></li>
+<li><p><a class="reference internal" href="#postcactus.cactus_grid_functions.AllGridFunctions.num_ghost" title="postcactus.cactus_grid_functions.AllGridFunctions.num_ghost"><strong>num_ghost</strong></a> – Number of ghost zones in each dimension.</p></li>
+</ul>
+</dd>
+</dl>
+<p>Constructor.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>num_ghost</strong> (<em>list</em><em> or </em><em>tuple of the same length as the number of dimension</em>) – Number of ghost zones in the data for each dimension.
-This is used only for ASCII data.</p>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>allfiles</strong> (<em>list</em>) – List of all the files.</p></li>
+<li><p><strong>dimension</strong> (<em>tuple</em>) – Dimension associated to this object.</p></li>
+<li><p><strong>num_ghost</strong> (<em>list</em><em> or </em><em>tuple of the same length as the number of dimension</em>) – Number of ghost zones in the data for each dimension.
+This is used only for ASCII data.</p></li>
+</ul>
 </dd>
 </dl>
 <dl class="py method">
@@ -80,8 +113,8 @@ This is used only for ASCII data.</p>
 given dimension</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p>Collection of all the unique files with variales of
-this dimension</p>
+<dd class="field-odd"><p>Collection of all the unique files with variables of
+this dimension.</p>
 </dd>
 <dt class="field-even">Return type</dt>
 <dd class="field-even"><p>set</p>
@@ -90,16 +123,53 @@ this dimension</p>
 </dd></dl>
 
 <dl class="py method">
+<dt id="postcactus.cactus_grid_functions.AllGridFunctions.get">
+<code class="sig-name descname">get</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">key</span></em>, <em class="sig-param"><span class="n">default</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#postcactus.cactus_grid_functions.AllGridFunctions.get" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return variable <code class="docutils literal notranslate"><span class="pre">key</span></code>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>key</strong> (<em>str</em>) – Variable to read.</p></li>
+<li><p><strong>default</strong> (<em>anything</em>) – Value to return is variable is not available.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="postcactus.cactus_grid_functions.AllGridFunctions.keys">
+<code class="sig-name descname">keys</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#postcactus.cactus_grid_functions.AllGridFunctions.keys" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the list of all the available variables.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="postcactus.cactus_grid_functions.AllGridFunctions.num_ghost">
+<em class="property">property </em><code class="sig-name descname">num_ghost</code><a class="headerlink" href="#postcactus.cactus_grid_functions.AllGridFunctions.num_ghost" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the number of ghost zones along each direction.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Number of ghost zones along each direction.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>1d NumPy array</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
 <dt id="postcactus.cactus_grid_functions.AllGridFunctions.total_filesize">
 <code class="sig-name descname">total_filesize</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">unit</span><span class="o">=</span><span class="default_value">'MB'</span></em><span class="sig-paren">)</span><a class="headerlink" href="#postcactus.cactus_grid_functions.AllGridFunctions.total_filesize" title="Permalink to this definition">¶</a></dt>
 <dd><p>Return the total size of the files with this dimension.
-Available units B, KB, MB and GB</p>
+Available units B, KB, MB and GB (in power of 1024 bytes).</p>
 <dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p>Total size of all the files associated with this dimension.</p>
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>unit</strong> (str among: <code class="docutils literal notranslate"><span class="pre">B</span></code>, <code class="docutils literal notranslate"><span class="pre">KB</span></code>, <code class="docutils literal notranslate"><span class="pre">MB</span></code>, <code class="docutils literal notranslate"><span class="pre">GB</span></code>.) – Unit to use (in powers of 1024 bytes).</p>
 </dd>
-<dt class="field-even">Return type</dt>
-<dd class="field-even"><p>float</p>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Total size of all the files associated with this dimension.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>float</p>
 </dd>
 </dl>
 </dd></dl>
@@ -110,57 +180,175 @@ Available units B, KB, MB and GB</p>
 <dt id="postcactus.cactus_grid_functions.BaseOneGridFunction">
 <em class="property">class </em><code class="sig-prename descclassname">postcactus.cactus_grid_functions.</code><code class="sig-name descname">BaseOneGridFunction</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">allfiles</span></em>, <em class="sig-param"><span class="n">var_name</span></em><span class="sig-paren">)</span><a class="headerlink" href="#postcactus.cactus_grid_functions.BaseOneGridFunction" title="Permalink to this definition">¶</a></dt>
 <dd><p>Abstract class that implements capabilities to handle grid functions.</p>
-<p>Using the [] notation you can access values with as HierarchicalGridFunction.</p>
+<p>This class is the parent class of <a class="reference internal" href="#postcactus.cactus_grid_functions.OneGridFunctionASCII" title="postcactus.cactus_grid_functions.OneGridFunctionASCII"><code class="xref py py-class docutils literal notranslate"><span class="pre">OneGridFunctionASCII</span></code></a> and
+<a class="reference internal" href="#postcactus.cactus_grid_functions.OneGridFunctionH5" title="postcactus.cactus_grid_functions.OneGridFunctionH5"><code class="xref py py-class docutils literal notranslate"><span class="pre">OneGridFunctionH5</span></code></a>. <a class="reference internal" href="#postcactus.cactus_grid_functions.BaseOneGridFunction" title="postcactus.cactus_grid_functions.BaseOneGridFunction"><code class="xref py py-class docutils literal notranslate"><span class="pre">BaseOneGridFunction</span></code></a>
+implements most methods, except the readers.</p>
+<p>The derived classes have to specify:</p>
+<ul class="simple">
+<li><p>How to read a file, populating the <code class="docutils literal notranslate"><span class="pre">self.alldata</span></code> dictionary
+(method <code class="docutils literal notranslate"><span class="pre">_parse_file</span></code>).</p></li>
+<li><p>How to populate the last level of <code class="docutils literal notranslate"><span class="pre">self.alldata</span></code> by returning
+a <a class="reference internal" href="grid_data_ref.html#postcactus.grid_data.UniformGridData" title="postcactus.grid_data.UniformGridData"><code class="xref py py-class docutils literal notranslate"><span class="pre">UniformGridData</span></code></a> for a given iteration and component
+(method <code class="docutils literal notranslate"><span class="pre">_read_componenent_as_uniform_grid</span></code>)</p></li>
+<li><p>How to associate an iteration with a time (method
+<code class="docutils literal notranslate"><span class="pre">time_at_iteration</span></code>).</p></li>
+</ul>
+<p>The simplest way to access data at a given iteration as
+<a class="reference internal" href="grid_data_ref.html#postcactus.grid_data.HierarchicalGridData" title="postcactus.grid_data.HierarchicalGridData"><code class="xref py py-class docutils literal notranslate"><span class="pre">HierarchicalGridData</span></code></a> is using the <code class="docutils literal notranslate"><span class="pre">[]</span></code> notation.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Variables</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><a class="reference internal" href="#postcactus.cactus_grid_functions.AllGridFunctions.allfiles" title="postcactus.cactus_grid_functions.AllGridFunctions.allfiles"><strong>allfiles</strong></a> – Paths of files associated to the variable.</p></li>
+<li><p><strong>alldata</strong> – Dictionary that organizes files and iterations available.</p></li>
+<li><p><strong>restarts_data</strong> – How iterations are distributed across files.</p></li>
+<li><p><strong>var_name</strong> – Variable name.</p></li>
+</ul>
+</dd>
+</dl>
+<p>Constructor.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>allfiles</strong> (<em>list of str</em>) – Paths of files associated to the variable.</p></li>
+<li><p><strong>var_name</strong> (<em>str</em>) – Variable name.</p></li>
+</ul>
+</dd>
+</dl>
 <dl class="py method">
 <dt id="postcactus.cactus_grid_functions.BaseOneGridFunction.available_iterations">
 <em class="property">property </em><code class="sig-name descname">available_iterations</code><a class="headerlink" href="#postcactus.cactus_grid_functions.BaseOneGridFunction.available_iterations" title="Permalink to this definition">¶</a></dt>
 <dd><p>Return the available iterations.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>List with all the available iterations.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>list</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py method">
 <dt id="postcactus.cactus_grid_functions.BaseOneGridFunction.available_times">
 <em class="property">property </em><code class="sig-name descname">available_times</code><a class="headerlink" href="#postcactus.cactus_grid_functions.BaseOneGridFunction.available_times" title="Permalink to this definition">¶</a></dt>
 <dd><p>Return the available times.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>List with all the available times.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>list</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py method">
-<dt id="postcactus.cactus_grid_functions.BaseOneGridFunction.get_restarts">
-<code class="sig-name descname">get_restarts</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#postcactus.cactus_grid_functions.BaseOneGridFunction.get_restarts" title="Permalink to this definition">¶</a></dt>
-<dd><p>Return a list of tuples (iteration_min, iteration_max, paths)
-with the minimum iterations and maximum iterations in each file
-associated to this variable. (Restarts and checkpoints)
-paths is a list of all the files with same min_iteration and
-max_iteration (as when we have 3d xyz_file files)</p>
+<dt id="postcactus.cactus_grid_functions.BaseOneGridFunction.get_iteration">
+<code class="sig-name descname">get_iteration</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">iteration</span></em>, <em class="sig-param"><span class="n">default</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#postcactus.cactus_grid_functions.BaseOneGridFunction.get_iteration" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the data at the given iteration as a <a class="reference internal" href="grid_data_ref.html#postcactus.grid_data.HierarchicalGridData" title="postcactus.grid_data.HierarchicalGridData"><code class="xref py py-class docutils literal notranslate"><span class="pre">HierarchicalGridData</span></code></a>.
+If the iteration is not available, return <code class="docutils literal notranslate"><span class="pre">default</span></code>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>iteration</strong> (<em>int</em>) – Iteration.</p></li>
+<li><p><strong>default</strong> (<em>anything</em>) – What to return if iteration is not available.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Variable at the given iteration as a
+<a class="reference internal" href="grid_data_ref.html#postcactus.grid_data.HierarchicalGridData" title="postcactus.grid_data.HierarchicalGridData"><code class="xref py py-class docutils literal notranslate"><span class="pre">HierarchicalGridData</span></code></a>.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="grid_data_ref.html#postcactus.grid_data.HierarchicalGridData" title="postcactus.grid_data.HierarchicalGridData"><code class="xref py py-class docutils literal notranslate"><span class="pre">HierarchicalGridData</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="postcactus.cactus_grid_functions.BaseOneGridFunction.get_time">
+<code class="sig-name descname">get_time</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">time</span></em>, <em class="sig-param"><span class="n">default</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#postcactus.cactus_grid_functions.BaseOneGridFunction.get_time" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the data at the given time as a <a class="reference internal" href="grid_data_ref.html#postcactus.grid_data.HierarchicalGridData" title="postcactus.grid_data.HierarchicalGridData"><code class="xref py py-class docutils literal notranslate"><span class="pre">HierarchicalGridData</span></code></a>.
+If the time is not available, return <code class="docutils literal notranslate"><span class="pre">default</span></code>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>iteration</strong> (<em>int</em>) – Iteration.</p></li>
+<li><p><strong>default</strong> (<em>anything</em>) – What to return if time is not available.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Variable at the given time as a
+<a class="reference internal" href="grid_data_ref.html#postcactus.grid_data.HierarchicalGridData" title="postcactus.grid_data.HierarchicalGridData"><code class="xref py py-class docutils literal notranslate"><span class="pre">HierarchicalGridData</span></code></a>.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="grid_data_ref.html#postcactus.grid_data.HierarchicalGridData" title="postcactus.grid_data.HierarchicalGridData"><code class="xref py py-class docutils literal notranslate"><span class="pre">HierarchicalGridData</span></code></a></p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py method">
 <dt id="postcactus.cactus_grid_functions.BaseOneGridFunction.iteration_at_time">
 <code class="sig-name descname">iteration_at_time</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">time</span></em><span class="sig-paren">)</span><a class="headerlink" href="#postcactus.cactus_grid_functions.BaseOneGridFunction.iteration_at_time" title="Permalink to this definition">¶</a></dt>
 <dd><p>Return the iteration that corresponds to the given time.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>time</strong> (<em>float</em>) – Time.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Iteration corresponding to the given time.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py method">
 <dt id="postcactus.cactus_grid_functions.BaseOneGridFunction.iterations">
 <em class="property">property </em><code class="sig-name descname">iterations</code><a class="headerlink" href="#postcactus.cactus_grid_functions.BaseOneGridFunction.iterations" title="Permalink to this definition">¶</a></dt>
 <dd><p>Return the available iterations.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>List with all the available iterations.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>list</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py method">
 <dt id="postcactus.cactus_grid_functions.BaseOneGridFunction.max_iteration">
 <em class="property">property </em><code class="sig-name descname">max_iteration</code><a class="headerlink" href="#postcactus.cactus_grid_functions.BaseOneGridFunction.max_iteration" title="Permalink to this definition">¶</a></dt>
-<dd><p>Return the maximum available iteration.</p>
+<dd><p>Return the maximum available iteration in the all the files.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Latest iteration available.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>int</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py method">
 <dt id="postcactus.cactus_grid_functions.BaseOneGridFunction.min_iteration">
 <em class="property">property </em><code class="sig-name descname">min_iteration</code><a class="headerlink" href="#postcactus.cactus_grid_functions.BaseOneGridFunction.min_iteration" title="Permalink to this definition">¶</a></dt>
-<dd><p>Return the minimum available iteration.</p>
+<dd><p>Return the minimum available iteration in the all the files.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>First iteration available.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>int</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py method">
 <dt id="postcactus.cactus_grid_functions.BaseOneGridFunction.read_on_grid">
 <code class="sig-name descname">read_on_grid</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">iteration</span></em>, <em class="sig-param"><span class="n">grid</span></em>, <em class="sig-param"><span class="n">resample</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="headerlink" href="#postcactus.cactus_grid_functions.BaseOneGridFunction.read_on_grid" title="Permalink to this definition">¶</a></dt>
-<dd><p>Read an iteration and resamples the output on the specified grid.</p>
+<dd><p>Read an iteration and resample the output on the specified grid.</p>
 <p>Warning: this can be computationally expensive!</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -174,16 +362,71 @@ max_iteration (as when we have 3d xyz_file files)</p>
 </dd></dl>
 
 <dl class="py method">
+<dt id="postcactus.cactus_grid_functions.BaseOneGridFunction.restarts">
+<em class="property">property </em><code class="sig-name descname">restarts</code><a class="headerlink" href="#postcactus.cactus_grid_functions.BaseOneGridFunction.restarts" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a list of tuples of the form <code class="docutils literal notranslate"><span class="pre">(iteration_min,</span> <span class="pre">iteration_max,</span> <span class="pre">paths)</span></code>
+with the minimum iterations and maximum iterations in each file
+associated to this variable. <code class="docutils literal notranslate"><span class="pre">paths</span></code> is a list of all the files with
+same <code class="docutils literal notranslate"><span class="pre">min_iteration</span></code> and <code class="docutils literal notranslate"><span class="pre">max_iteration</span></code> (as when we have 3d
+xyz_file files).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>List of tuples with first iteration, last iteration, and
+path for every file in <code class="docutils literal notranslate"><span class="pre">self.allfiles</span></code>.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>list of tuple (int, int, list of str)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="postcactus.cactus_grid_functions.BaseOneGridFunction.time_at_iteration">
+<em class="property">abstract </em><code class="sig-name descname">time_at_iteration</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">iteration</span></em><span class="sig-paren">)</span><a class="headerlink" href="#postcactus.cactus_grid_functions.BaseOneGridFunction.time_at_iteration" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the time at a given iteration.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>iteration</strong> (<em>int</em>) – Iteration.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Time.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
 <dt id="postcactus.cactus_grid_functions.BaseOneGridFunction.times">
 <em class="property">property </em><code class="sig-name descname">times</code><a class="headerlink" href="#postcactus.cactus_grid_functions.BaseOneGridFunction.times" title="Permalink to this definition">¶</a></dt>
 <dd><p>Return the available times.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>List with all the available times.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>list</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py method">
 <dt id="postcactus.cactus_grid_functions.BaseOneGridFunction.total_filesize">
 <code class="sig-name descname">total_filesize</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">unit</span><span class="o">=</span><span class="default_value">'MB'</span></em><span class="sig-paren">)</span><a class="headerlink" href="#postcactus.cactus_grid_functions.BaseOneGridFunction.total_filesize" title="Permalink to this definition">¶</a></dt>
 <dd><p>Return the total size of the files with this variable.
-Available units B, KB, MB and GB</p>
+Available units B, KB, MB and GB (in power of 1024 bytes).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>unit</strong> (str among: <code class="docutils literal notranslate"><span class="pre">B</span></code>, <code class="docutils literal notranslate"><span class="pre">KB</span></code>, <code class="docutils literal notranslate"><span class="pre">MB</span></code>, <code class="docutils literal notranslate"><span class="pre">GB</span></code>.) – Unit to use (in powers of 1024 bytes).</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Total size of the files associated to this variable.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
 </dd></dl>
 
 </dd></dl>
@@ -192,9 +435,9 @@ Available units B, KB, MB and GB</p>
 <dt id="postcactus.cactus_grid_functions.GridFunctionsDir">
 <em class="property">class </em><code class="sig-prename descclassname">postcactus.cactus_grid_functions.</code><code class="sig-name descname">GridFunctionsDir</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">sd</span></em><span class="sig-paren">)</span><a class="headerlink" href="#postcactus.cactus_grid_functions.GridFunctionsDir" title="Permalink to this definition">¶</a></dt>
 <dd><p>This class provides access to all grid data.</p>
-<p>This includes 1D-3D data in hdf5 format as well. Data of the required
-dimensionality is read from any format available (hdf5 preferred over
-ascii). If you need lower dimensional data, read the higher dimensional one
+<p>This includes 1D-3D data in HDF5 and ASCII formats. Data of the required
+dimensionality is read from any format available (HDF5 preferred over
+ASCII). If you need lower dimensional data, read the higher dimensional one
 and slice the data.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Variables</dt>
@@ -209,11 +452,28 @@ and slice the data.</p>
 </ul>
 </dd>
 </dl>
+<p>Constructor.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>sd</strong> (<a class="reference internal" href="simdir_ref.html#postcactus.simdir.SimDir" title="postcactus.simdir.SimDir"><code class="xref py py-class docutils literal notranslate"><span class="pre">SimDir</span></code></a>) – Simulation directory.</p>
+</dd>
+</dl>
 <dl class="py method">
 <dt id="postcactus.cactus_grid_functions.GridFunctionsDir.total_filesize">
 <code class="sig-name descname">total_filesize</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">unit</span><span class="o">=</span><span class="default_value">'MB'</span></em><span class="sig-paren">)</span><a class="headerlink" href="#postcactus.cactus_grid_functions.GridFunctionsDir.total_filesize" title="Permalink to this definition">¶</a></dt>
-<dd><p>Return the total size of the files with this variable.
-Available units B, KB, MB and GB</p>
+<dd><p>Return the total size of the grid data files.
+Available units B, KB, MB and GB (in power of 1024 bytes).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>unit</strong> (str among: <code class="docutils literal notranslate"><span class="pre">B</span></code>, <code class="docutils literal notranslate"><span class="pre">KB</span></code>, <code class="docutils literal notranslate"><span class="pre">MB</span></code>, <code class="docutils literal notranslate"><span class="pre">GB</span></code>.) – Unit to use (in powers of 1024 bytes).</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Total size of the grid data files.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
 </dd></dl>
 
 </dd></dl>
@@ -222,16 +482,71 @@ Available units B, KB, MB and GB</p>
 <dt id="postcactus.cactus_grid_functions.OneGridFunctionASCII">
 <em class="property">class </em><code class="sig-prename descclassname">postcactus.cactus_grid_functions.</code><code class="sig-name descname">OneGridFunctionASCII</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">allfiles</span></em>, <em class="sig-param"><span class="n">var_name</span></em>, <em class="sig-param"><span class="n">num_ghost</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#postcactus.cactus_grid_functions.OneGridFunctionASCII" title="Permalink to this definition">¶</a></dt>
 <dd><p>Read grid data produced by CarpetASCII.</p>
+<p>This class is derived from <a class="reference internal" href="#postcactus.cactus_grid_functions.BaseOneGridFunction" title="postcactus.cactus_grid_functions.BaseOneGridFunction"><code class="xref py py-class docutils literal notranslate"><span class="pre">BaseOneGridFunction</span></code></a> and implements
+the reading facilities.</p>
+<p><a class="reference internal" href="#postcactus.cactus_grid_functions.OneGridFunctionASCII" title="postcactus.cactus_grid_functions.OneGridFunctionASCII"><code class="xref py py-class docutils literal notranslate"><span class="pre">OneGridFunctionASCII</span></code></a> can read 1D, 2D, and 3D ASCII files, even
+when they are compressed with bzip2 or gzip.</p>
+<p>ASCII files do not contain information about the ghost zones, but this can be
+set “by hand”.</p>
+<p>Constructor.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>allfiles</strong> (<em>list of str</em>) – Paths of files associated to the variable.</p></li>
+<li><p><strong>var_name</strong> (<em>str</em>) – Variable name.</p></li>
+<li><p><strong>num_ghost</strong> (<em>1d NumPy array</em>) – Number of ghost zones in each direction.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt id="postcactus.cactus_grid_functions.OneGridFunctionASCII.time_at_iteration">
+<code class="sig-name descname">time_at_iteration</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">iteration</span></em><span class="sig-paren">)</span><a class="headerlink" href="#postcactus.cactus_grid_functions.OneGridFunctionASCII.time_at_iteration" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the time at a given iteration.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>iteration</strong> (<em>int</em>) – Iteration.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Time at given iteration.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
 </dd></dl>
 
 <dl class="py class">
 <dt id="postcactus.cactus_grid_functions.OneGridFunctionH5">
 <em class="property">class </em><code class="sig-prename descclassname">postcactus.cactus_grid_functions.</code><code class="sig-name descname">OneGridFunctionH5</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">allfiles</span></em>, <em class="sig-param"><span class="n">var_name</span></em><span class="sig-paren">)</span><a class="headerlink" href="#postcactus.cactus_grid_functions.OneGridFunctionH5" title="Permalink to this definition">¶</a></dt>
 <dd><p>Read grid data produced by CarpetHDF5 files.</p>
+<p>This class is derived from <a class="reference internal" href="#postcactus.cactus_grid_functions.BaseOneGridFunction" title="postcactus.cactus_grid_functions.BaseOneGridFunction"><code class="xref py py-class docutils literal notranslate"><span class="pre">BaseOneGridFunction</span></code></a> and implements
+the reading facilities.</p>
+<p>Constructor.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>allfiles</strong> (<em>list of str</em>) – Paths of files associated to the variable.</p></li>
+<li><p><strong>var_name</strong> (<em>str</em>) – Variable name.</p></li>
+</ul>
+</dd>
+</dl>
 <dl class="py method">
 <dt id="postcactus.cactus_grid_functions.OneGridFunctionH5.time_at_iteration">
 <code class="sig-name descname">time_at_iteration</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">iteration</span></em><span class="sig-paren">)</span><a class="headerlink" href="#postcactus.cactus_grid_functions.OneGridFunctionH5.time_at_iteration" title="Permalink to this definition">¶</a></dt>
-<dd><p>Return the time corresponding to the provided iteration</p>
+<dd><p>Return the time corresponding to the provided iteration.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>iteration</strong> (<em>int</em>) – Iteration.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Time corresponding to <code class="docutils literal notranslate"><span class="pre">iteration</span></code>.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
 </dd></dl>
 
 </dd></dl>
