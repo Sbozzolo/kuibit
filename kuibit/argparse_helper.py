@@ -27,18 +27,14 @@ import configargparse
 # flexibility.
 
 
-def init_argparse(description=None):
-    """Initialize a new argparse with given description and some basic default
-    options.
-
-    :param description: Description in the --help
-    :type description: str
+def init_argparse(*args, **kwargs):
+    """Initialize a new argparse with given arguments.
 
     :returns: Argparse parser
     :rtype: configargparse.ArgumentParser
 
     """
-    parser = configargparse.ArgParser(description=description)
+    parser = configargparse.ArgParser(*args, **kwargs)
     parser.add(
         "-c", "--configfile", is_config_file=True, help="Config file path"
     )
