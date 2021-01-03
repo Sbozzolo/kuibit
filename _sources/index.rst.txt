@@ -43,6 +43,9 @@ For a full list of available features, see the :doc:`features page <features>`.
   (:py:mod:`~.unitconv`).
 - [EXPERIMENTAL] Visualize data with matplotlib (:py:mod:`~.visualize`).
 - [EXPERIMENTAL] Write command-line scripts (:py:mod:`~.argparse_helper`).
+- [EXPERIMENTAL] Make movies with  `motionpicture`_.
+
+.. _motionpicture: https://github.com/Sbozzolo/motionpicture
 
 Installation
 ------------
