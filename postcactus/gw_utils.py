@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 
-# Copyright (C) 2020 Gabriele Bozzola
+# Copyright (C) 2020-2021 Gabriele Bozzola
 # sYlm: Copyright (C) Christian Reisswig
-# ra_dec_to_theta_phi: Copyright (C) 2020 Yuk Tung Liu
+# ra_dec_to_theta_phi: Copyright (C) 2020-2021 Yuk Tung Liu
 #
 # This program is free software; you can redistribute it and/or modify it under
 # the terms of the GNU General Public License as published by the Free Software
