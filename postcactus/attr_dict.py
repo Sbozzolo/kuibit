@@ -31,11 +31,15 @@ import re
 
 
 class AttributeDictionary:
-    """AttributeDictionary provide syntatic sugar to transform a dictionary
-    in a class in which the members are the key/values of the dictionary.
+    """AttributeDictionary provide syntactic sugar to transform a dictionary
+    in a class in which the attributes are the key/values of the dictionary.
+
+    With this, you can obtain the value of ``ad['attr']`` with the notation
+    ``ad.attr``.
 
     This works by using storing the dictionary as a member and using
-    __getattr__ to access the values.
+    ``__getattr__`` to access the values.
+
     """
 
     def __init__(self, elements):
@@ -46,10 +50,19 @@ class AttributeDictionary:
         :type elements: dict
 
         """
-        # Here we define a new attribute _elem
-
-        # If ad is an AttributeDictionary, we will have
-        # ad._elem = elements
+        # Here we define a new attribute _elem, which will be a dictionary with
+        # all the data.
+        #
+        # If ad is an AttributeDictionary, we will have ad._elem = elements
+        #
+        # Here we have to use super() because we are going change the
+        # __setattr__ method of this class to make the class immutable.
+        # If we were to write instead: self._elem = elements we would get
+        # the error "Attributes are immutable".
+        #
+        # Notice also that because of the non-standard way this class is written,
+        # AttributeDictionary would not be pickable without writing suitable
+        # __getstate__ and __setstate__ methods.
         super().__setattr__("_elem", elements)
 
     def __setattr__(self, name, value):
@@ -88,6 +101,15 @@ class AttributeDictionary:
     def keys(self):
         """Return the list of the attributes"""
         return self._elem.keys()
+
+    # We need __getstate__ and __setstate__ so that this class can be put in
+    # pickle. This class is used everywhere in PostCactus, so we must support
+    # pickles as they are the foundations of multiprocessing.
+    def __getstate__(self):
+        return self._elem
+
+    def __setstate__(self, elements):
+        super().__setattr__("_elem", elements)
 
     def __str__(self):
         return f"Fields available:\n{list(self.keys())}"
