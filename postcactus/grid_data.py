@@ -36,7 +36,7 @@ Similarly, a :py:class:`~.HierarchicalGridData` contains multiple
 import numpy as np
 from scipy import interpolate, linalg
 
-import postcactus.grid_data_utils as gdu
+from postcactus import grid_data_utils as gdu
 from postcactus.numerical import BaseNumerical
 
 

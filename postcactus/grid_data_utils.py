@@ -40,7 +40,7 @@ from gzip import open as gopen
 
 import numpy as np
 
-import postcactus.grid_data as gd
+from postcactus import grid_data as gd
 
 
 def common_bounding_box(grids):
