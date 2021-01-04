@@ -19,7 +19,7 @@ sys.path.insert(0, os.path.abspath('..'))
 # -- Project information -----------------------------------------------------
 
 project = 'PostCactus'
-copyright = '2020, Gabriele Bozzola and Wolfgang Kastaun'
+copyright = '2021, Gabriele Bozzola and Wolfgang Kastaun'
 author = 'Gabriele Bozzola and Wolfgang Kastaun'
 
 # The full version, including alpha/beta/rc tags
