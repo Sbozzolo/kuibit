@@ -42,6 +42,12 @@ class TestAttrDict(unittest.TestCase):
         with self.assertRaises(AttributeError):
             attr_dict.hey
 
+        # Test __setstate__, __getstate__
+        self.assertCountEqual(attr_dict.__getstate__(), dictionary)
+        empty_ad = ad.AttributeDictionary({})
+        empty_ad.__setstate__(dictionary)
+        self.assertCountEqual(attr_dict._elem, dictionary)
+
     def test_TransformDictionary(self):
 
         dictionary = {
