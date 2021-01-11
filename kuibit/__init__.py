@@ -20,4 +20,4 @@ Einstein Toolkit (or any Cactus-based code).
 
 """
 
-__version__ = "1.0.0a12"
+__version__ = "1.0.0b0"

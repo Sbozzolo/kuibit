@@ -22,4 +22,4 @@ from kuibit import __version__
 
 class Testkuibit(unittest.TestCase):
     def test_version(self):
-        self.assertEqual(__version__, "1.0.0a12")
+        self.assertEqual(__version__, "1.0.0b0")
