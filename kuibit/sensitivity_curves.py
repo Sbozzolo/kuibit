@@ -34,8 +34,8 @@ from io import StringIO
 
 import numpy as np
 
-from postcactus.frequencyseries import FrequencySeries, load_FrequencySeries
-from postcactus.unitconv import C_SI
+from kuibit.frequencyseries import FrequencySeries, load_FrequencySeries
+from kuibit.unitconv import C_SI
 
 
 def Sn_LISA(freqs, arms_length=2.5e9):
@@ -106,7 +106,7 @@ def Sn_ET_B(freqs):
     freqs = np.asarray(freqs)
 
     # Why is it so difficult to read files in Python packages? :(
-    data = pkgutil.get_data("postcactus", "data/ETB.dat").decode("utf8")
+    data = pkgutil.get_data("kuibit", "data/ETB.dat").decode("utf8")
     # We convert this data in a StringIO that NumPy can read, we can pass this
     # to load_FrequencySeries, since its backend is np.loadtxt
     #
@@ -143,7 +143,7 @@ def Sn_CE1(freqs):
     """
     freqs = np.asarray(freqs)
 
-    data = pkgutil.get_data("postcactus", "data/CE1.dat").decode("utf8")
+    data = pkgutil.get_data("kuibit", "data/CE1.dat").decode("utf8")
 
     # CE distributes Amplitude Spectral Densities
     asd = load_FrequencySeries(StringIO(data))
@@ -178,7 +178,7 @@ def Sn_CE2(freqs):
     """
     freqs = np.asarray(freqs)
 
-    data = pkgutil.get_data("postcactus", "data/CE1.dat").decode("utf8")
+    data = pkgutil.get_data("kuibit", "data/CE1.dat").decode("utf8")
 
     # CE distributes Amplitude Spectral Densities
     asd = load_FrequencySeries(StringIO(data))
@@ -213,7 +213,7 @@ def Sn_aLIGO(freqs):
     """
     freqs = np.asarray(freqs)
 
-    data = pkgutil.get_data("postcactus", "data/aLIGO_ZDHP.dat").decode("utf8")
+    data = pkgutil.get_data("kuibit", "data/aLIGO_ZDHP.dat").decode("utf8")
 
     # aLIGO distributes Amplitude Spectral Densities
     asd = load_FrequencySeries(StringIO(data))
@@ -248,7 +248,7 @@ def Sn_voyager(freqs):
     """
     freqs = np.asarray(freqs)
 
-    data = pkgutil.get_data("postcactus", "data/voyager.dat").decode("utf8")
+    data = pkgutil.get_data("kuibit", "data/voyager.dat").decode("utf8")
 
     # Voyager distributes Amplitude Spectral Densities
     asd = load_FrequencySeries(StringIO(data))
@@ -284,7 +284,7 @@ def Sn_KAGRA_D(freqs):
     """
     freqs = np.asarray(freqs)
 
-    data = pkgutil.get_data("postcactus", "data/KAGRA_VRSED.dat").decode(
+    data = pkgutil.get_data("kuibit", "data/KAGRA_VRSED.dat").decode(
         "utf8"
     )
 
@@ -321,7 +321,7 @@ def Sn_aLIGO_plus(freqs):
     """
     freqs = np.asarray(freqs)
 
-    data = pkgutil.get_data("postcactus", "data/aLIGO_PLUS.dat").decode("utf8")
+    data = pkgutil.get_data("kuibit", "data/aLIGO_PLUS.dat").decode("utf8")
 
     # aLIGO distributes Amplitude Spectral Densities
     asd = load_FrequencySeries(StringIO(data))

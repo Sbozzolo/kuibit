@@ -1,5 +1,5 @@
-Reference on postcactus.cactus_multipoles
+Reference on kuibit.cactus_multipoles
 =========================================
 
-.. automodule:: postcactus.cactus_multipoles
+.. automodule:: kuibit.cactus_multipoles
    :members:

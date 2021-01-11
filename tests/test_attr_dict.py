@@ -17,7 +17,7 @@
 
 import unittest
 
-from postcactus import attr_dict as ad
+from kuibit import attr_dict as ad
 
 
 class TestAttrDict(unittest.TestCase):

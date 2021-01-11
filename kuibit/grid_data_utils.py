@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-# Copyright (C) 2020-2021 Gabriele Bozzola, Wolfgang Kastaun
+# Copyright (C) 2020-2021 Gabriele Bozzola
 #
 # This program is free software; you can redistribute it and/or modify it under
 # the terms of the GNU General Public License as published by the Free Software
@@ -40,7 +40,7 @@ from gzip import open as gopen
 
 import numpy as np
 
-from postcactus import grid_data as gd
+from kuibit import grid_data as gd
 
 
 def common_bounding_box(grids):

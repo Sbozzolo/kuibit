@@ -15,7 +15,7 @@
 # You should have received a copy of the GNU General Public License along with
 # this program; if not, see <https://www.gnu.org/licenses/>.
 
-"""Tests for postcactus.frequencyseries
+"""Tests for kuibit.frequencyseries
 """
 
 import unittest
@@ -23,8 +23,8 @@ import warnings
 
 import numpy as np
 
-from postcactus import frequencyseries as fs
-from postcactus import timeseries as ts
+from kuibit import frequencyseries as fs
+from kuibit import timeseries as ts
 
 
 class TestFrequencySeries(unittest.TestCase):

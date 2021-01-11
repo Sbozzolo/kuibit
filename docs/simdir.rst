@@ -16,7 +16,7 @@ possibly contain multiple checkpoints and restarts.
 
 .. code-block:: python
 
-    import postcactus.simdir as sd
+    import kuibit.simdir as sd
 
     sim = sd.SimDir("gw150914")
 
@@ -54,15 +54,15 @@ decompositions`):
 Some useful conventions
 ------------------------
 
-It is useful to be aware of some conventions employed by ``PostCactus``. If you
+It is useful to be aware of some conventions employed by ``kuibit``. If you
 are reading this for the first time, you may skip this section, but we reccomend
 you come back here once you gain familiarity with the code. This section will be
-useful to you also in the case that you are extending ``PostCactus``.
+useful to you also in the case that you are extending ``kuibit``.
 
 Class hierarchy
 ________________
 
-``PostCactus`` defines a large number of custum object types to represent in a
+``kuibit`` defines a large number of custum object types to represent in a
 convinent way the simulation data. Some of these classes are not designed to be
 initialized directly, but are created by other more general objects. In general,
 we advise users to only directly define ``SimDir`` objects, and access

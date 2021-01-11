@@ -1,10 +1,10 @@
 # Wishlist
 
-Here we collect ideas to improve and extend PostCactus. If you want to
-contribute to the project, this a good place where to start. The projects are
-sorted in no particular order. The number of [=] along with each idea indicates
-the expected difficulty. This parameter increases with the level of knowledge of
-PostCactus or of Python required to complete the task.
+Here we collect ideas to improve and extend kuibit. If you want to contribute to
+the project, this a good place where to start. The projects are sorted in no
+particular order. The number of [=] along with each idea indicates the expected
+difficulty. This parameter increases with the level of knowledge of kuibit or of
+Python required to complete the task.
 
 ## Features
 
@@ -21,10 +21,10 @@ PostCactus or of Python required to complete the task.
 
 * Add layer in class hierarchy in `cactus_grid_functions` to save the work done in
   reading ASCII files containing multiple variables. [==]
-* Port `cactus_parfile` from `PostCactus2`. [==]
-* Port `cactus_timertree` from `PostCactus2`. [==]
-* Port support for grid data with reflection from `PostCactus2`. [==]
-* Port support for locating bounding boxes from `PostCactus2`. [==]
+* Port `cactus_parfile` from `PostCactus`. [==]
+* Port `cactus_timertree` from `PostCactus`. [==]
+* Port support for grid data with reflection from `PostCactus`. [==]
+* Port support for locating bounding boxes from `PostCactus`. [==]
 * Add support for HDF5 for `AHFinderDirect` output. [==]
 * Add method to merge `AHFinderDirect` patches. [==]
 * Perform interpolation in shapes of `AHFinderDirect` to better find shapes when

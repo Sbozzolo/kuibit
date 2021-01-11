@@ -1,7 +1,7 @@
-Reference on postcactus.grid_data
+Reference on kuibit.grid_data
 ==================================
 
-.. automodule:: postcactus.grid_data
+.. automodule:: kuibit.grid_data
    :members:
    :inherited-members:
 

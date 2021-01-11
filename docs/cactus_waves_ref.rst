@@ -1,6 +1,6 @@
-Reference on postcactus.cactus_waves
+Reference on kuibit.cactus_waves
 =========================================
 
-.. automodule:: postcactus.cactus_waves
+.. automodule:: kuibit.cactus_waves
    :members:
    :inherited-members:

@@ -55,9 +55,9 @@ try:
 except ImportError:  # pragma: no cover
     pass
 
-from postcactus import frequencyseries as fs
-from postcactus import gw_utils as gwu
-from postcactus import unitconv
+from kuibit import frequencyseries as fs
+from kuibit import gw_utils as gwu
+from kuibit import unitconv
 
 
 def _mismatch_core_numerical(
@@ -275,7 +275,7 @@ def mismatch_from_strains(
 
     """
 
-    # In PostCactus, we have beautiful collection of classes to represent
+    # In kuibit, we have beautiful collection of classes to represent
     # different data types (TimeSeries, FrequencySeries, ...).
     # However, from great abstraction comes great performance penalities.
     # Using these classes is too slow for expensive operations.
@@ -361,7 +361,7 @@ def mismatch_from_strains(
     #    splines. Therefore, instead of using cubic splines, here we prefer
     #    using a piecewise constant approximation. Since the noise has
     #    typically a lot of points, this should be a better approximation than
-    #    having large jumps. PostCactus does not have this option, so we use
+    #    having large jumps. kuibit does not have this option, so we use
     #    directly SciPy's interp1d.
 
     if noises is not None:

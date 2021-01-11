@@ -20,9 +20,9 @@ import unittest
 import h5py
 import numpy as np
 
-from postcactus import cactus_multipoles as mp
-from postcactus import simdir as sd
-from postcactus import timeseries as ts
+from kuibit import cactus_multipoles as mp
+from kuibit import simdir as sd
+from kuibit import timeseries as ts
 
 
 class TestCactusMultipoles(unittest.TestCase):

@@ -15,7 +15,7 @@
 # You should have received a copy of the GNU General Public License along with
 # this program; if not, see <https://www.gnu.org/licenses/>.
 
-"""Tests for postcactus.timeseries
+"""Tests for kuibit.timeseries
 """
 
 import os
@@ -25,8 +25,8 @@ from unittest import mock
 import numpy as np
 from scipy import signal
 
-from postcactus import numerical, series
-from postcactus import timeseries as ts
+from kuibit import numerical, series
+from kuibit import timeseries as ts
 
 
 class TestTimeseries(unittest.TestCase):

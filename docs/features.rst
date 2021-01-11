@@ -1,9 +1,9 @@
-List of features implemented in PostCactus
+List of features implemented in kuibit
 ==================================================
 
-``PostCactus`` implements a large collection of features. In general, the spirit
+``kuibit`` implements a large collection of features. In general, the spirit
 of the package is to provide high-level interfaces to simulation data, hiding
-all the computation complexity behind it. In doing this, ``PostCactus`` tries to
+all the computation complexity behind it. In doing this, ``kuibit`` tries to
 be Pythonic: many custom objects behave either like dictionaries, or like
 callable. These objects behave as you expect (or at least, they should). For
 example, if an objects smells like a dictionary, you should be able to ask for
@@ -15,9 +15,9 @@ Here we review all the available features as of version ``3.0.0b1``.
 General
 -------
 
-- ``PostCactus`` is documented, thoroughly commented, provides examples, and has
+- ``kuibit`` is documented, thoroughly commented, provides examples, and has
   a large test suite.
-- ``PostCactus`` is available as wheel and can be installed with ``pip``.
+- ``kuibit`` is available as wheel and can be installed with ``pip``.
 
 SimDir
 ------
@@ -25,7 +25,7 @@ SimDir
 - Scan and organize all the files in a directory up to a specified depth.
 - Print out an overview of what is available in the simulation.
 - Individuate all the par, log, out, and err files.
-- Easily access all the data that ``PostCactus`` can represent.
+- Easily access all the data that ``kuibit`` can represent.
 - Transparently handle all the restarts with any directory structure.
 
 Series

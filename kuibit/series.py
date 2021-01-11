@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-# Copyright (C) 2020-2021 Gabriele Bozzola, Wolfgang Kastaun
+# Copyright (C) 2020-2021 Gabriele Bozzola
 #
 # This program is free software; you can redistribute it and/or modify it under
 # the terms of the GNU General Public License as published by the Free Software
@@ -37,8 +37,8 @@ takes a list of series and resamples them to their common points.
 import numpy as np
 from scipy import integrate, interpolate, signal
 
-from postcactus.attr_dict import AttributeDictionary
-from postcactus.numerical import BaseNumerical
+from kuibit.attr_dict import AttributeDictionary
+from kuibit.numerical import BaseNumerical
 
 
 # Note, we test this class testing its derived class TimeSeries

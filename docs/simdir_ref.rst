@@ -1,5 +1,5 @@
-Reference on postcactus.simdir
+Reference on kuibit.simdir
 =======================================
 
-.. automodule:: postcactus.simdir
+.. automodule:: kuibit.simdir
    :members:

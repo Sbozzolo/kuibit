@@ -1,53 +1,53 @@
 <p align="center">
-<img src="https://github.com/Sbozzolo/PostCactus/raw/master/logo.png" width="435" height="200">
+<img src="https://github.com/Sbozzolo/kuibit/raw/master/logo.png" height="150">
 </p>
 
-[![codecov](https://codecov.io/gh/Sbozzolo/PostCactus/branch/master/graph/badge.svg)](https://codecov.io/gh/Sbozzolo/PostCactus)
-![Tests and documentation](https://github.com/Sbozzolo/PostCactus/workflows/Tests/badge.svg)
+[![codecov](https://codecov.io/gh/Sbozzolo/kuibit/branch/master/graph/badge.svg)](https://codecov.io/gh/Sbozzolo/kuibit)
+![Tests and documentation](https://github.com/Sbozzolo/kuibit/workflows/Tests/badge.svg)
 [![GPLv3
 license](https://img.shields.io/badge/License-GPLv3-blue.svg)](http://perso.crans.org/besson/LICENSE.html)
-[![Get help on Telegram](https://img.shields.io/badge/Get%20help%20on-Telegram-blue.svg)](https://t.me/postcactus)
-[![DeepSource](https://static.deepsource.io/deepsource-badge-light-mini.svg)](https://deepsource.io/gh/Sbozzolo/PostCactus/?ref=repository-badge)
+[![Get help on Telegram](https://img.shields.io/badge/Get%20help%20on-Telegram-blue.svg)](https://t.me/kuibit)
+[![DeepSource](https://static.deepsource.io/deepsource-badge-light-mini.svg)](https://deepsource.io/gh/Sbozzolo/kuibit/?ref=repository-badge)
 
-# PostCactus
+# kuibit
 
-PostCactus is a Python library to analyze simulations performed with the
-Einstein Toolkit [originally developed by Wolfgang
-Kastaun](https://github.com/wokast/PyCactus/tree/master/PostCactus). PostCactus
-can read simulation data and represent it with high-level classes. For a list of
-features available, look at the [official
-documentation](https://sbozzolo.github.io/PostCactus).
+`kuibit` is a Python library to analyze simulations performed with the Einstein
+Toolkit largely inspired by
+[PostCactus](https://github.com/wokast/PyCactus/tree/master/PostCactus).
+`kuibit` can read simulation data and represent it with high-level classes. For
+a list of features available, look at the [official
+documentation](https://sbozzolo.github.io/kuibit).
 
 ## Installation
 
-``PostCactus`` is available in TestPyPI. To install it with `pip`
+``kuibit`` is available in PyPI. To install it with `pip`
 ``` bash
-pip3 install --index-url https://test.pypi.org/simple/ postcactus
+pip3 install kuibit
 ```
 If they are not already available, `pip` will install all the necessary dependencies.
 
 The minimum version of Python required is 3.6.
 
-If you intend to develop ``PostCactus``, follow the instruction below.
+If you intend to develop ``kuibit``, follow the instruction below.
 
 ### Development
 
 For development, we use [poetry](https://python-poetry.org/). Poetry simplifies
 dependency management, building, and publishing the package.
 
-To install `PostCactus` with poetry, clone this repo, move into the folder, and run:
+To install `kuibit` with poetry, clone this repo, move into the folder, and run:
 ``` sh
 poetry install -E full
 ```
 This will download all the needed dependencies in a sandboxed environment (the
 `-E full` flag is for the optional dependencies). When you want to use
-``PostCactus``, just run ``poetry shell``. This will drop you in a shell in
-which you have full access to ``PostCactus`` in "development" version, and its
+``kuibit``, just run ``poetry shell``. This will drop you in a shell in
+which you have full access to ``kuibit`` in "development" version, and its
 dependencies (also the one needed only for development).
 
 ## Documentation
 
-`PostCactus` uses Sphinx to generate the documentation. To produce the documentation
+`kuibit` uses Sphinx to generate the documentation. To produce the documentation
 ```sh
 cd docs && make html
 ```
@@ -61,7 +61,7 @@ compiling the documentation will fail.
 
 ## Tests
 
-`PostCactus` comes with a suite of unit tests. To run the tests, (in a poetry shell),
+`kuibit` comes with a suite of unit tests. To run the tests, (in a poetry shell),
 ```sh
 poetry run python -m unittest
 ```
@@ -77,14 +77,22 @@ the coverage of the tests.
 
 ## Experimental branch
 
-The git repo of `PostCactus` has an `experimental` branch, which contains
+The git repo of `kuibit` has an `experimental` branch, which contains
 modules for visualization and several general-purpose scripts (e.g., to plot a
 given grid variable via command-line). It is worth to have a look at that branch
 too.
 
+## What is a _kuibit_?
+
+A kuibit (harvest pole) is the tool traditionally used by the Tohono O'odham
+people to reach the fruit of the Saguaro cacti during the harvesting season. In
+the same way, this package is a tool that you can use to collect the fruit of
+your `Cactus` simulations.
+
 ## Credits
 
-The code was originally developed by Wolfgang Kastaun. This fork completely
-rewrites the original code, adding emphasis on documentation, testing, and
-extensibility. The icon in the logo was designed by [freepik.com](freepik.com).
+`kuibit` follows the same designed as `PostCactus`, code developed by Wolfgang
+Kastaun. This fork completely rewrites the original code, adding emphasis on
+documentation, testing, and extensibility. The logo contains elements designed
+by [freepik.com](freepik.com).
 

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-# Copyright (C) 2020-2021 Gabriele Bozzola, Wolfgang Kastaun
+# Copyright (C) 2020-2021 Gabriele Bozzola
 #
 # This program is free software; you can redistribute it and/or modify it under
 # the terms of the GNU General Public License as published by the Free Software
@@ -15,9 +15,11 @@
 # You should have received a copy of the GNU General Public License along with
 # this program; if not, see <https://www.gnu.org/licenses/>.
 
-"""PostCactus provides utilities to post-process simulations performed with the
-Einstein Toolkit (or any Cactus-based code).
+import unittest
 
-"""
+from kuibit import __version__
 
-__version__ = "3.0.0a12"
+
+class Testkuibit(unittest.TestCase):
+    def test_version(self):
+        self.assertEqual(__version__, "1.0.0a12")

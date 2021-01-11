@@ -1,5 +1,5 @@
-Reference on postcactus.series
+Reference on kuibit.series
 ==================================
 
-.. automodule:: postcactus.series
+.. automodule:: kuibit.series
    :members:

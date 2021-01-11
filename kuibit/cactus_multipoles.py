@@ -1,6 +1,9 @@
 #!/usr/bin/env python3
 
-# Copyright (C) 2020-2021 Gabriele Bozzola, Wolfgang Kastaun
+# Copyright (C) 2020-2021 Gabriele Bozzola
+#
+# Based on code originally developed by Wolfgang Kastaun. See, GitHub,
+# wokast/PyCactus/PostCactus/cactus_multipoles.py
 #
 # This program is free software; you can redistribute it and/or modify it under
 # the terms of the GNU General Public License as published by the Free Software
@@ -44,8 +47,8 @@ from functools import lru_cache
 import h5py
 import numpy as np
 
-from postcactus import timeseries
-from postcactus.attr_dict import pythonize_name_dict
+from kuibit import timeseries
+from kuibit.attr_dict import pythonize_name_dict
 
 
 class MultipoleOneDet:

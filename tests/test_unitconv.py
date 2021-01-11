@@ -15,12 +15,12 @@
 # You should have received a copy of the GNU General Public License along with
 # this program; if not, see <https://www.gnu.org/licenses/>.
 
-"""Tests for postcactus.unitconv
+"""Tests for kuibit.unitconv
 """
 
 import unittest
 
-from postcactus import unitconv as uc
+from kuibit import unitconv as uc
 
 
 class TestUnitconv(unittest.TestCase):

@@ -1,5 +1,5 @@
-Reference on postcactus.sensitivity_curves
+Reference on kuibit.sensitivity_curves
 ==========================================
 
-.. automodule:: postcactus.sensitivity_curves
+.. automodule:: kuibit.sensitivity_curves
    :members:

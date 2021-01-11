@@ -19,8 +19,8 @@ import unittest
 
 import numpy as np
 
-from postcactus import frequencyseries as fs
-from postcactus import sensitivity_curves as sc
+from kuibit import frequencyseries as fs
+from kuibit import sensitivity_curves as sc
 
 
 class TestSensitivityCurves(unittest.TestCase):
