@@ -18,7 +18,7 @@
 import sys
 import unittest
 
-from postcactus import argparse_helper as pah
+from kuibit import argparse_helper as pah
 
 
 class TestArgparseHelper(unittest.TestCase):
