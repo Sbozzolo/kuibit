@@ -1,12 +1,12 @@
 Gravitational waves
 ==============================
 
-``PostCactus`` has a large number of features to work with gravitational (and
+``kuibit`` has a large number of features to work with gravitational (and
 electromagnetic) waves as extracted with the Newman-Penrose formalism. Most of
 these features are inherited from other objects: multipoles and timeseries, as
 gravitational waves are typically studied in a multipolar decomposition and they
 are functions evolving with time. For this reason, you should familiarize
-yourself with the objects in ``PostCactus`` that represent those quantities:
+yourself with the objects in ``kuibit`` that represent those quantities:
 :ref:`series:Time and frequency series` and
 :ref:`cactus_multipoles:Working with multipolar decompositions`.
 
@@ -15,7 +15,7 @@ The main two objects to work with gravitational waves are
 The first described waves as seen by one specific detector (fixed radius), the
 second collects :py:class:`~.GravitationalWavesOneDet` for all the available
 detectors. These classes inherit several features from the base version in the
-:py:mod:`~.cactus_multipoles` module (:ref:`cactus_waves_ref:Reference on postcactus.cactus_waves`).
+:py:mod:`~.cactus_multipoles` module (:ref:`cactus_waves_ref:Reference on kuibit.cactus_waves`).
 
 .. note::
 

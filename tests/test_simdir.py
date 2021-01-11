@@ -17,7 +17,7 @@
 
 import unittest
 
-from postcactus import simdir as sd
+from kuibit import simdir as sd
 
 
 class TestSimDir(unittest.TestCase):
@@ -82,5 +82,5 @@ class TestSimDir(unittest.TestCase):
 
         # Test for a simdir with no information
         # This is a fake folder
-        empty_sim = sd.SimDir("postcactus")
+        empty_sim = sd.SimDir("kuibit")
         self.assertIn("No horizon found", empty_sim.__str__())

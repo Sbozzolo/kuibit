@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-# Copyright (C) 2020-2021 Gabriele Bozzola, Wolfgang Kastaun
+# Copyright (C) 2020-2021 Gabriele Bozzola
 #
 # This program is free software; you can redistribute it and/or modify it under
 # the terms of the GNU General Public License as published by the Free Software
@@ -20,7 +20,7 @@
 A simulation directory is represented by an instance of the :py:class:`~.SimDir`
 class, which provides access to all supported data types.
 
-This is the main entry point into ``PostCactus``. When a :py:class:`~.SimDir` is
+This is the main entry point into ``kuibit``. When a :py:class:`~.SimDir` is
 initialized, the simulation directory is scanned and all the data is organized.
 :py:class:`~.SimDir` objects have attributes that are interfaces to the data:
 each attribute is a dictionary-like object that indexes the relevant data in
@@ -42,7 +42,7 @@ import os
 # and currently we only support 3.6.
 from functools import lru_cache
 
-from postcactus import (
+from kuibit import (
     cactus_grid_functions,
     cactus_horizons,
     cactus_multipoles,

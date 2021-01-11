@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-# Copyright (C) 2020-2021 Gabriele Bozzola, Wolfgang Kastaun
+# Copyright (C) 2020-2021 Gabriele Bozzola
 #
 # This program is free software; you can redistribute it and/or modify it under
 # the terms of the GNU General Public License as published by the Free Software
@@ -44,10 +44,10 @@ from gzip import open as gopen
 
 import numpy as np
 
-from postcactus import simdir
-from postcactus import timeseries as ts
-from postcactus.attr_dict import pythonize_name_dict
-from postcactus.cactus_ascii_utils import scan_header
+from kuibit import simdir
+from kuibit import timeseries as ts
+from kuibit.attr_dict import pythonize_name_dict
+from kuibit.cactus_ascii_utils import scan_header
 
 
 class OneScalar:

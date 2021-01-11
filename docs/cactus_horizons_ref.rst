@@ -1,5 +1,5 @@
-Reference on postcactus.cactus_horizons
+Reference on kuibit.cactus_horizons
 =============================================
 
-.. automodule:: postcactus.cactus_horizons
+.. automodule:: kuibit.cactus_horizons
    :members:

@@ -20,10 +20,10 @@ import unittest
 import numpy as np
 from scipy import signal
 
-from postcactus import cactus_waves as cw
-from postcactus import gw_utils as gwu
-from postcactus import simdir as sd
-from postcactus import timeseries as ts
+from kuibit import cactus_waves as cw
+from kuibit import gw_utils as gwu
+from kuibit import simdir as sd
+from kuibit import timeseries as ts
 
 
 class TestCactusWaves(unittest.TestCase):
@@ -376,5 +376,5 @@ class TestCactusWaves(unittest.TestCase):
     def test_empty(self):
 
         # Test with no wave information
-        empty_sim = sd.SimDir("postcactus")
+        empty_sim = sd.SimDir("kuibit")
         self.assertIs(empty_sim.gws.l_max, None)

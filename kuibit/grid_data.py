@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-# Copyright (C) 2020-2021 Gabriele Bozzola, Wolfgang Kastaun
+# Copyright (C) 2020-2021 Gabriele Bozzola
 #
 # This program is free software; you can redistribute it and/or modify it under
 # the terms of the GNU General Public License as published by the Free Software
@@ -36,8 +36,8 @@ Similarly, a :py:class:`~.HierarchicalGridData` contains multiple
 import numpy as np
 from scipy import interpolate, linalg
 
-from postcactus import grid_data_utils as gdu
-from postcactus.numerical import BaseNumerical
+from kuibit import grid_data_utils as gdu
+from kuibit.numerical import BaseNumerical
 
 
 class UniformGrid:

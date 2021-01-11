@@ -1,9 +1,9 @@
 Unit conversion and constants
 =============================
 
-``Postcactus`` has a module, ``unitconv``, that with physical/astronomical
+``kuibit`` has a module, ``unitconv``, that with physical/astronomical
 constants and with helper functions to convert between different unit systems.
-:ref:`unitconv_ref:Reference on postcactus.unitconv`
+:ref:`unitconv_ref:Reference on kuibit.unitconv`
 
 Physical and astrophysical units
 --------------------------------
@@ -36,7 +36,7 @@ You can use these units as follows:
 
 .. code-block:: python
 
-    import postcactus.unitconv as uc
+    import kuibit.unitconv as uc
 
     print(f"1 Parsec is {uc.PARSEC_SI}")
 
@@ -54,7 +54,7 @@ perform unit conversion is initializing an ``Units`` object with
 
 .. code-block:: python
 
-    import postcactus.unitconv as uc
+    import kuibit.unitconv as uc
 
     # CU stands for Computational Units
     # Here we initialize a Units object for geometrized units with M = 65 M_sun

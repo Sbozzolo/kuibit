@@ -2,12 +2,12 @@ Time and frequency series
 ==============================
 
 Time and frequency series are fundamental objects in most simulations.
-``PostCactus`` supports them through the ``timeseries`` and ``frequencyseries``
+``kuibit`` supports them through the ``timeseries`` and ``frequencyseries``
 modules, which define the ``TimeSeries`` (:ref:`timeseries_ref:Reference on
-postcactus.timeseries`) and ``FrequencySeries``
-(:ref:`frequencyseries_ref:Reference on postcactus.frequencyseries`) object
+kuibit.timeseries`) and ``FrequencySeries``
+(:ref:`frequencyseries_ref:Reference on kuibit.frequencyseries`) object
 types. Both the classes are derived from a base class ``BaseSeries``
-(:ref:`series_ref:Reference on postcactus.series`) which defines common methods
+(:ref:`series_ref:Reference on kuibit.series`) which defines common methods
 and features, so ``TimeSeries`` and ``FrequencySeries`` share a lot of
 functionalities.
 
@@ -23,8 +23,8 @@ Defining time series is easy:
 
 .. code-block:: python
 
-    import postcactus.timeseries as ts
-    # or import postcactus.frequencyseries as fs
+    import kuibit.timeseries as ts
+    # or import kuibit.frequencyseries as fs
     import numpy as np
 
     t = np.linspace(0, 2 * np.pi, 100)
@@ -219,7 +219,7 @@ factor of :math:`1+z`.
 
 .. code-block:: python
 
-    import postcactus.unitconv as uc
+    import kuibit.unitconv as uc
 
     # Gravitational waves in geometrized units
     gw_cu = TimeSeries(...)
@@ -520,4 +520,4 @@ and ``other`` (e.g., ``self + other``).
 - ``_apply_reduction``, that describes the output of applying a function to
 ``self`` that returns a float (e.g., ``min(self)``).
 
-This infrastrcture is also used by grid functions in ``PostCactus``.
+This infrastrcture is also used by grid functions in ``kuibit``.

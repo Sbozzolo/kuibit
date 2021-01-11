@@ -1,5 +1,5 @@
-Reference on postcactus.gw_mismatch
+Reference on kuibit.gw_mismatch
 =========================================
 
-.. automodule:: postcactus.gw_mismatch
+.. automodule:: kuibit.gw_mismatch
    :members:

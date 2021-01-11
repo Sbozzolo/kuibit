@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-# Copyright (C) 2020-2021 Gabriele Bozzola, Wolfgang Kastaun
+# Copyright (C) 2020-2021 Gabriele Bozzola
 #
 # This program is free software; you can redistribute it and/or modify it under
 # the terms of the GNU General Public License as published by the Free Software
@@ -43,8 +43,8 @@ import warnings
 
 import numpy as np
 
-from postcactus.attr_dict import pythonize_name_dict
-from postcactus.timeseries import TimeSeries, combine_ts
+from kuibit.attr_dict import pythonize_name_dict
+from kuibit.timeseries import TimeSeries, combine_ts
 
 
 class OneHorizon:

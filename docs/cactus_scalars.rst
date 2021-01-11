@@ -3,7 +3,7 @@ Scalar data
 
 Scalar output are common in several simulations, with the most notable example
 being reductions (max, min, average, ...). The module :py:mod:`~.cactus_scalars`
-(:ref:`cactus_scalars_ref:Reference on postcactus.cactus_scalars`) handles these
+(:ref:`cactus_scalars_ref:Reference on kuibit.cactus_scalars`) handles these
 quantities. Data is loaded lazily.
 
 What data can be read?
@@ -29,8 +29,8 @@ You can also print the content of a :py:class:`~.ScalarsDir`:
 
 .. code-block:: python
 
-    import postcactus.cactus_scalars as cs
-    import postcactus.simdir as sd
+    import kuibit.cactus_scalars as cs
+    import kuibit.simdir as sd
 
     sim = sd.SimDir("simulation")
 

@@ -15,11 +15,9 @@
 # You should have received a copy of the GNU General Public License along with
 # this program; if not, see <https://www.gnu.org/licenses/>.
 
-import unittest
+"""kuibit provides utilities to post-process simulations performed with the
+Einstein Toolkit (or any Cactus-based code).
 
-from postcactus import __version__
+"""
 
-
-class TestPostCactus(unittest.TestCase):
-    def test_version(self):
-        self.assertEqual(__version__, "3.0.0a12")
+__version__ = "1.0.0a12"

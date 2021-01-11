@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-# Copyright (C) 2020-2021 Gabriele Bozzola, Wolfgang Kastaun
+# Copyright (C) 2020-2021 Gabriele Bozzola
 #
 # This program is free software; you can redistribute it and/or modify it under
 # the terms of the GNU General Public License as published by the Free Software
@@ -47,8 +47,8 @@ import warnings
 import numpy as np
 from scipy import signal
 
-from postcactus import frequencyseries
-from postcactus.series import BaseSeries
+from kuibit import frequencyseries
+from kuibit.series import BaseSeries
 
 
 def remove_duplicate_iters(t, y):

@@ -1,12 +1,12 @@
 Overview
 ========
 
-``PostCactus`` is a set of tools to post-process simulations performed with the
+``kuibit`` is a set of tools to post-process simulations performed with the
 `Einstein Toolkit <https://einsteintoolkit.org/>`_.
 
 The goal of this package is to enable you to pursue your scientific goals
 without having to worry about computational details (e.g., handling simulation
-restarts, reading HDF5 files, ...). ``PostCactus`` represent simulation data in
+restarts, reading HDF5 files, ...). ``kuibit`` represent simulation data in
 a high-level and intuitive way, and provides some commonly used routines in
 numerical-relativity (e.g., computing the strain of gravitational waves).
 
@@ -45,19 +45,19 @@ For a full list of available features, see the :doc:`features page <features>`.
 Installation
 ------------
 
-``PostCactus`` is available in TestPyPI. To install it with `pip`
+``kuibit`` is available in TestPyPI. To install it with `pip`
 
 .. code-block:: bash
 
-   pip3 install --index-url https://test.pypi.org/simple/ postcactus
+   pip3 install --index-url https://test.pypi.org/simple/ kuibit
 
 If they are not already available, ``pip`` will install all the necessary
 dependencies.
 
 The minimum version of Python required is 3.6.
 
-If you intend to extend/develop ``PostCactus``, follow the instruction on
-`GitHub <https://github.com/Sbozzolo/PostCactus>`_.
+If you intend to extend/develop ``kuibit``, follow the instruction on
+`GitHub <https://github.com/Sbozzolo/kuibit>`_.
 
 Usage
 -----
@@ -111,6 +111,15 @@ Reference material (classes, functions, ...)
    grid_data_ref.rst
    sensitivity_curves_ref.rst
    unitconv_ref.rst
+
+What is a kuibit?
+-----------------
+
+A kuibit (harvest pole) is the tool traditionally used by the Tohono O'odham
+people to reach the fruit of the Saguaro cacti during the harvesting season. In
+the same way, this package is a tool that you can use to collect the fruit of
+your ``Cactus`` simulations.
+
 
 Credits
 -------

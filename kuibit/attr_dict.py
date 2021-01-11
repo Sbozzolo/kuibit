@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-# Copyright (C) 2020-2021 Gabriele Bozzola, Wolfgang Kastaun
+# Copyright (C) 2020-2021 Gabriele Bozzola
 #
 # This program is free software; you can redistribute it and/or modify it under
 # the terms of the GNU General Public License as published by the Free Software
@@ -20,7 +20,7 @@ access dictionary as attributes. That is, to be able to do something like
 object.attribute instead of object['attribute'] with attribute dynamically
 determined.
 
-This module is widely used in `PostCactus`, for example in the ``fields``
+This module is widely used in `kuibit`, for example in the ``fields``
 attributes. The class :py:class:`~.AttributeDictionary` is used in conjuction
 with :py:class:`~.TransformDictionary`, which we use to invoke ``_getitem__``
 of the parent class.
@@ -103,7 +103,7 @@ class AttributeDictionary:
         return self._elem.keys()
 
     # We need __getstate__ and __setstate__ so that this class can be put in
-    # pickle. This class is used everywhere in PostCactus, so we must support
+    # pickle. This class is used everywhere in kuibit, so we must support
     # pickles as they are the foundations of multiprocessing.
     def __getstate__(self):
         return self._elem

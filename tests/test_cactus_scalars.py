@@ -21,10 +21,10 @@ import unittest
 
 import numpy as np
 
-from postcactus import cactus_ascii_utils as cau
-from postcactus import cactus_scalars as cs
-from postcactus import simdir as sd
-from postcactus import timeseries as ts
+from kuibit import cactus_ascii_utils as cau
+from kuibit import cactus_scalars as cs
+from kuibit import simdir as sd
+from kuibit import timeseries as ts
 
 
 class TestCactusScalar(unittest.TestCase):

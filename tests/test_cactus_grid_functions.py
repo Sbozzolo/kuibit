@@ -22,9 +22,9 @@ from unittest import mock
 import h5py
 import numpy as np
 
-from postcactus import cactus_grid_functions as cg
-from postcactus import grid_data
-from postcactus import simdir as sd
+from kuibit import cactus_grid_functions as cg
+from kuibit import grid_data
+from kuibit import simdir as sd
 
 
 class TestGridFunctionsDir(unittest.TestCase):

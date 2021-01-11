@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-# Copyright (C) 2020-2021 Gabriele Bozzola, Wolfgang Kastaun
+# Copyright (C) 2020-2021 Gabriele Bozzola
 #
 # This program is free software; you can redistribute it and/or modify it under
 # the terms of the GNU General Public License as published by the Free Software
@@ -56,7 +56,7 @@ class Units:
     For example, define ``CGS = Units(1.0e-2, 1.0, 1.0e-3)``.
     If the length d is in SI, then ``d * CGS.length`` will be in CGS.
 
-    The main use of Units in PostCactus is to provide a way to convert from
+    The main use of Units in kuibit is to provide a way to convert from
     geometrized units to physical units (see, :py:func:`~.geom_umass`).
     """
 

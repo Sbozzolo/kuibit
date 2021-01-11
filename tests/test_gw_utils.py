@@ -19,8 +19,8 @@ import unittest
 
 import numpy as np
 
-from postcactus import gw_utils as gwu
-from postcactus import timeseries as ts
+from kuibit import gw_utils as gwu
+from kuibit import timeseries as ts
 
 
 class TestGWUtils(unittest.TestCase):

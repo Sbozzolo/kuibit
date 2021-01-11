@@ -1,4 +1,4 @@
-# How to contirbute to `PostCactus`
+# How to contirbute to `kuibit`
 
 ## Bug reports
 
@@ -6,13 +6,13 @@ If you find a bug, an un-helpful error message, or an expected result, please
 report it. If you can provide precise steps to reproduce the problem, that would
 lead certainly speed-up the resolution of the bug.
 
-You can also join us in the [Telegram channel](https://t.me/postcactus) for help or
+You can also join us in the [Telegram channel](https://t.me/kuibit) for help or
 discussions.
 
 ## New features/improvements
 
 We always welcome new features of general improvements in the code. If you have
-some scripts based on ``PostCactus`` that implement functionalities useful to
+some scripts based on ``kuibit`` that implement functionalities useful to
 the community, we can work together to port them in the main package. (Your
 contributed code should not depend on private thorns or other private codes.)
 
@@ -76,6 +76,6 @@ When releasing a new version, these are the steps:
 - `poetry version <type_of_bump>`, with type of bump in the table in [poetry
   documentation](https://python-poetry.org/docs/cli/#version) (`patch`,
   `minor`, `major`, `prepatch`, `preminor`, `premajor`, `prerelease`).
-- Edit `postcactus/__init__.py`.
-- Edit `tests/test_postcactus.py`.
+- Edit `kuibit/__init__.py`.
+- Edit `tests/test_kuibit.py`.
 - Edit `docs/conf.py`

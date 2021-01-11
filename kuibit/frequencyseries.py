@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-# Copyright (C) 2020-2021 Gabriele Bozzola, Wolfgang Kastaun
+# Copyright (C) 2020-2021 Gabriele Bozzola
 #
 # This program is free software; you can redistribute it and/or modify it under
 # the terms of the GNU General Public License as published by the Free Software
@@ -43,8 +43,8 @@ is a simpler interface for real-valued signals.
 import numpy as np
 from scipy.signal import argrelextrema
 
-from postcactus import timeseries
-from postcactus.series import BaseSeries, sample_common
+from kuibit import timeseries
+from kuibit.series import BaseSeries, sample_common
 
 
 def load_FrequencySeries(path, *args, complex_on_two_columns=False, **kwargs):

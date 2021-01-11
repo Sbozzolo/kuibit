@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-# Copyright (C) 2020-2021 Gabriele Bozzola, Wolfgang Kastaun
+# Copyright (C) 2020-2021 Gabriele Bozzola
 #
 # This program is free software; you can redistribute it and/or modify it under
 # the terms of the GNU General Public License as published by the Free Software
@@ -36,10 +36,10 @@ import warnings
 
 import numpy as np
 
-from postcactus import cactus_multipoles as mp
-from postcactus import gw_utils, simdir
-from postcactus import timeseries as ts
-from postcactus.gw_utils import Detectors
+from kuibit import cactus_multipoles as mp
+from kuibit import gw_utils, simdir
+from kuibit import timeseries as ts
+from kuibit.gw_utils import Detectors
 
 
 class GravitationalWavesOneDet(mp.MultipoleOneDet):

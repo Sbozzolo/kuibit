@@ -21,8 +21,8 @@ import unittest
 
 import numpy as np
 
-from postcactus import cactus_horizons as ch
-from postcactus import simdir as sd
+from kuibit import cactus_horizons as ch
+from kuibit import simdir as sd
 
 
 class TestHorizonsDir(unittest.TestCase):

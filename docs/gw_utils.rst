@@ -5,7 +5,7 @@ The :py:mod:`~.gw_utils` module contains functions that are useful in connecting
 numerical relativity simulation with gravitational-waves observations.
 
 
-:ref:`gw_utils_ref:Reference on postcactus.gw_utils`
+:ref:`gw_utils_ref:Reference on kuibit.gw_utils`
 
 Detectors
 ^^^^^^^^^^^^^^^^^

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-# Copyright (C) 2020-2021 Gabriele Bozzola, Wolfgang Kastaun
+# Copyright (C) 2020-2021 Gabriele Bozzola
 #
 # This program is free software; you can redistribute it and/or modify it under
 # the terms of the GNU General Public License as published by the Free Software
@@ -50,9 +50,9 @@ from gzip import open as gopen
 import h5py
 import numpy as np
 
-from postcactus import grid_data, simdir
-from postcactus.attr_dict import pythonize_name_dict
-from postcactus.cactus_ascii_utils import scan_header, total_filesize
+from kuibit import grid_data, simdir
+from kuibit.attr_dict import pythonize_name_dict
+from kuibit.cactus_ascii_utils import scan_header, total_filesize
 
 
 class BaseOneGridFunction(ABC):

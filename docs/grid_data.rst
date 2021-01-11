@@ -3,14 +3,14 @@ Grid functions
 
 Other than series (time and frequency), grid functions are probably the other
 most important quantity that we extract from simulations with the Einstein
-Toolkit. In this page, we describe how to use ``PostCactus`` to handle grids.
-(:ref:`grid_data_ref:Reference on postcactus.grid_data`). The main object
+Toolkit. In this page, we describe how to use ``kuibit`` to handle grids.
+(:ref:`grid_data_ref:Reference on kuibit.grid_data`). The main object
 that we use to represent grid function is the
 :py:class:`~.HierarchicalGridData`. This represents data defined on a grid with
 multiple refinement levels. On each level, data is represented as
 :py:class:`~.UniformGridData`. While you will likely never initialize these
 objects directly, it is useful to be aware of what they are and what they can
-do. If you want to know how to read data into ``PostCactus``, jump to the second
+do. If you want to know how to read data into ``kuibit``, jump to the second
 half of this page.
 
 UniformGrid
@@ -29,7 +29,7 @@ Let's see how to define a :py:class:`~.UniformGrid`:
 
 .. code-block:: python
 
-    import postcactus.grid_data as gd
+    import kuibit.grid_data as gd
 
     box = gd.UniformGrid(
                 [101, 201],  # shape: 101 (201) points along the x (y) direction,
@@ -258,15 +258,15 @@ operations.
 In many cases, one works with a nested series of refinement levels, with a
 domain that is split in multiple patches. Hence, the output data will also be in
 multiple chunks. When initializing an :py:class:`~.HierarchicalGridData`,
-PostCactus will make an effort to put all the different patches back together.
-If the provided components cover an entire grid, PostCactus will merge them. In
-doing this, all the ghost zone information is discarded. If PostCactus finds
+kuibit will make an effort to put all the different patches back together.
+If the provided components cover an entire grid, kuibit will merge them. In
+doing this, all the ghost zone information is discarded. If kuibit finds
 that the provided components do not cover a regular grid, then it will leave
 them untouched. This is the case when one has multiple refinement centers (for
 example in binary simulations). :py:class:`~.HierarchicalGridData` is
 essentially a dictionary that maps refinement level lists of
 :py:class:`~.UniformGridData` that represent the different patches. In case
-PostCactus manages to combine all the patches, then the list will have only one
+kuibit manages to combine all the patches, then the list will have only one
 element.
 
 You can access the relative level using the bracket operator (e.g. ``rho[0][0]``
@@ -315,18 +315,18 @@ a :py:class:`~.HierarchicalGridData` or a list of :py:class:`~.HierarchicalGridD
 Reading data
 ------------
 
-So far, we have discussed how grid functions are represented in ``PostCactus``.
+So far, we have discussed how grid functions are represented in ``kuibit``.
 In this section, we discuss how to read the output data from simulations as
 :py:class:`~.HierarchicalGridData` or :py:class:`~.UniformGridData`.
 
-At the moment, ``PostCactus`` fully support reading HDF5 files of any dimension
-(1D, 2D, and 3D). ``PostCactus`` can also read ASCII files, but the interface is
+At the moment, ``kuibit`` fully support reading HDF5 files of any dimension
+(1D, 2D, and 3D). ``kuibit`` can also read ASCII files, but the interface is
 less robus and not as well-tested.
 
 .. warning::
 
-   ``PostCactus`` works better with HDF5 data. In general, reading and parsing
-   HDF5 is orders of magnitude faster than ASCII data. ``PostCactus`` can read
+   ``kuibit`` works better with HDF5 data. In general, reading and parsing
+   HDF5 is orders of magnitude faster than ASCII data. ``kuibit`` can read
    one iteration at the time in HDF5 data, but has to read the entire content of
    all the files when the data is ASCII. This can take a long time. HDF5 are
    also much more storage-efficient and contain metadata that can be used to
@@ -467,7 +467,7 @@ grid the grid you specify. The grid is specified by passing a
 
 .. code-block:: python
 
-    from postcactus.grid_data import UniformGrid
+    from kuibit.grid_data import UniformGrid
 
     grid = UniformGrid([100, 100], x0=[0, 0], x1=[2,2])
     rho0_center = sim.gf.xy.rho.read_on_grid(0, # iteration

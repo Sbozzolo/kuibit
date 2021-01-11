@@ -1,5 +1,5 @@
-Reference on postcactus.cactus_scalars
+Reference on kuibit.cactus_scalars
 =======================================
 
-.. automodule:: postcactus.cactus_scalars
+.. automodule:: kuibit.cactus_scalars
    :members:

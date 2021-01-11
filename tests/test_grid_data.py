@@ -15,7 +15,7 @@
 # You should have received a copy of the GNU General Public License along with
 # this program; if not, see <https://www.gnu.org/licenses/>.
 
-"""Tests for postcactus.grid_data
+"""Tests for kuibit.grid_data
 """
 
 import os
@@ -23,8 +23,8 @@ import unittest
 
 import numpy as np
 
-from postcactus import grid_data as gd
-from postcactus import grid_data_utils as gdu
+from kuibit import grid_data as gd
+from kuibit import grid_data_utils as gdu
 
 
 class TestUniformGrid(unittest.TestCase):

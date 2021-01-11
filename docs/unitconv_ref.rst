@@ -1,7 +1,7 @@
-Reference on postcactus.unitconv
+Reference on kuibit.unitconv
 ==================================
 
-.. automodule:: postcactus.unitconv
+.. automodule:: kuibit.unitconv
    :members:
 
 ..

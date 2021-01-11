@@ -18,12 +18,12 @@ sys.path.insert(0, os.path.abspath('..'))
 
 # -- Project information -----------------------------------------------------
 
-project = 'PostCactus'
-copyright = '2021, Gabriele Bozzola and Wolfgang Kastaun'
-author = 'Gabriele Bozzola and Wolfgang Kastaun'
+project = 'kuibit'
+copyright = '2020-2021, Gabriele Bozzola'
+author = 'Gabriele Bozzola'
 
 # The full version, including alpha/beta/rc tags
-release = '3.0.0a12'
+release = '1.0.0a12'
 
 
 # -- General configuration ---------------------------------------------------
