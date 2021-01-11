@@ -45,11 +45,11 @@ For a full list of available features, see the :doc:`features page <features>`.
 Installation
 ------------
 
-``kuibit`` is available in TestPyPI. To install it with `pip`
+``kuibit`` is available in PyPI. To install it with `pip`
 
 .. code-block:: bash
 
-   pip3 install --index-url https://test.pypi.org/simple/ kuibit
+   pip3 install kuibit
 
 If they are not already available, ``pip`` will install all the necessary
 dependencies.
