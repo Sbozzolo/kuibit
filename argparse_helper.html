@@ -6,7 +6,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Building command-line scripts &#8212; PostCactus 3.0.0a12 documentation</title>
+    <title>Building command-line scripts &#8212; kuibit 1.0.0a12 documentation</title>
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <link rel="stylesheet" href="_static/bizstyle.css" type="text/css" />
     
@@ -42,7 +42,7 @@
         <li class="right" >
           <a href="visualize.html" title="Visualizing data"
              accesskey="P">previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">PostCactus 3.0.0a12 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="index.html">kuibit 1.0.0a12 documentation</a> &#187;</li>
         <li class="nav-item nav-item-this"><a href="">Building command-line scripts</a></li> 
       </ul>
     </div>  
@@ -54,20 +54,20 @@
             
   <div class="section" id="building-command-line-scripts">
 <h1>Building command-line scripts<a class="headerlink" href="#building-command-line-scripts" title="Permalink to this headline">¶</a></h1>
-<p><code class="docutils literal notranslate"><span class="pre">PostCactus</span></code> is a library and it is designed to assist you in performing your
-analyses. Hence, <code class="docutils literal notranslate"><span class="pre">PostCactus</span></code> supports multiple workflows. A possible choice
+<p><code class="docutils literal notranslate"><span class="pre">kuibit</span></code> is a library and it is designed to assist you in performing your
+analyses. Hence, <code class="docutils literal notranslate"><span class="pre">kuibit</span></code> supports multiple workflows. A possible choice
 consists in writing command-line executables to perform specific tasks. For
 example, it is useful to have a script <code class="docutils literal notranslate"><span class="pre">plot_grid.py</span></code> that takes a simulation
 folder and a variable name and plots a 2D snapshot of such variable. The module
-<a class="reference internal" href="argparse_helper_ref.html#module-postcactus.argparse_helper" title="postcactus.argparse_helper"><code class="xref py py-mod docutils literal notranslate"><span class="pre">argparse_helper</span></code></a> contains functions to make writing such scripts
-easier (<a class="reference internal" href="argparse_helper_ref.html#module-postcactus.argparse_helper"><span class="std std-ref">Reference on postcactus.argparse_helper</span></a>).</p>
+<a class="reference internal" href="argparse_helper_ref.html#module-kuibit.argparse_helper" title="kuibit.argparse_helper"><code class="xref py py-mod docutils literal notranslate"><span class="pre">argparse_helper</span></code></a> contains functions to make writing such scripts
+easier (<a class="reference internal" href="argparse_helper_ref.html#module-kuibit.argparse_helper"><span class="std std-ref">Reference on kuibit.argparse_helper</span></a>).</p>
 <div class="section" id="argparse-and-argparse-helper">
 <h2>Argparse and argparse_helper<a class="headerlink" href="#argparse-and-argparse-helper" title="Permalink to this headline">¶</a></h2>
 <p><code class="docutils literal notranslate"><span class="pre">argparse</span></code> is a built-in module in Python used to read information from the
-command line. <a class="reference internal" href="argparse_helper_ref.html#module-postcactus.argparse_helper" title="postcactus.argparse_helper"><code class="xref py py-mod docutils literal notranslate"><span class="pre">argparse_helper</span></code></a> provides functions that automatically
+command line. <a class="reference internal" href="argparse_helper_ref.html#module-kuibit.argparse_helper" title="kuibit.argparse_helper"><code class="xref py py-mod docutils literal notranslate"><span class="pre">argparse_helper</span></code></a> provides functions that automatically
 populate <code class="docutils literal notranslate"><span class="pre">argparse</span></code> with common options and reasonable defaults. The minimum
 working example is simply</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">postcactus</span> <span class="kn">import</span> <span class="n">argparse_helper</span> <span class="k">as</span> <span class="n">pah</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">kuibit</span> <span class="kn">import</span> <span class="n">argparse_helper</span> <span class="k">as</span> <span class="n">pah</span>
 
 <span class="n">desc</span> <span class="o">=</span> <span class="s2">&quot;This is an example&quot;</span>
 <span class="n">parser</span> <span class="o">=</span> <span class="n">pah</span><span class="o">.</span><span class="n">init_argparse</span><span class="p">(</span><span class="n">desc</span><span class="p">)</span>
@@ -76,7 +76,7 @@ working example is simply</p>
 </div>
 <p>This will populate the options <code class="docutils literal notranslate"><span class="pre">configfile</span></code>, <code class="docutils literal notranslate"><span class="pre">verbose</span></code>, <code class="docutils literal notranslate"><span class="pre">datadir</span></code>, and
 <code class="docutils literal notranslate"><span class="pre">outdir</span></code>, which can be accessed with <code class="docutils literal notranslate"><span class="pre">args.varname</span></code> (e.g.,
-<code class="docutils literal notranslate"><span class="pre">args.verbose</span></code>), or with <code class="docutils literal notranslate"><span class="pre">args.fields['varname']</span></code>. <code class="docutils literal notranslate"><span class="pre">PostCactus</span></code> supports
+<code class="docutils literal notranslate"><span class="pre">args.verbose</span></code>), or with <code class="docutils literal notranslate"><span class="pre">args.fields['varname']</span></code>. <code class="docutils literal notranslate"><span class="pre">kuibit</span></code> supports
 being configured with configfiles, which can be useful to control scripts with
 many options. The method <code class="xref py py-meth docutils literal notranslate"><span class="pre">get_args()</span></code> takes the parser object and
 process the command-line data.</p>
@@ -84,7 +84,7 @@ process the command-line data.</p>
 working with grid data, you will likely will want to specify grid extents. To
 add common grid options, use the method <code class="xref py py-meth docutils literal notranslate"><span class="pre">add_grid_to_parser()</span></code>, which
 adds arguments like <code class="docutils literal notranslate"><span class="pre">origin</span></code>, <code class="docutils literal notranslate"><span class="pre">corner</span></code>, and <code class="docutils literal notranslate"><span class="pre">resolution</span></code>.</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">postcactus</span> <span class="kn">import</span> <span class="n">argparse_helper</span> <span class="k">as</span> <span class="n">pah</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">kuibit</span> <span class="kn">import</span> <span class="n">argparse_helper</span> <span class="k">as</span> <span class="n">pah</span>
 
 <span class="n">desc</span> <span class="o">=</span> <span class="s2">&quot;This is an example&quot;</span>
 <span class="n">parser</span> <span class="o">=</span> <span class="n">pah</span><span class="o">.</span><span class="n">init_argparse</span><span class="p">(</span><span class="n">desc</span><span class="p">)</span>
@@ -94,7 +94,7 @@ adds arguments like <code class="docutils literal notranslate"><span class="pre"
 </div>
 <p>Often, the default arguments are not enough and you want to add your own. This
 can be achieved with the method <code class="docutils literal notranslate"><span class="pre">add_argument</span></code>, as in the following example:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">postcactus</span> <span class="kn">import</span> <span class="n">argparse_helper</span> <span class="k">as</span> <span class="n">pah</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">kuibit</span> <span class="kn">import</span> <span class="n">argparse_helper</span> <span class="k">as</span> <span class="n">pah</span>
 
 <span class="n">desc</span> <span class="o">=</span> <span class="s2">&quot;This is an example&quot;</span>
 <span class="n">parser</span> <span class="o">=</span> <span class="n">pah</span><span class="o">.</span><span class="n">init_argparse</span><span class="p">(</span><span class="n">desc</span><span class="p">)</span>
@@ -163,13 +163,13 @@ you can use them as examples (or you can directly use them).</p>
         <li class="right" >
           <a href="visualize.html" title="Visualizing data"
              >previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">PostCactus 3.0.0a12 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="index.html">kuibit 1.0.0a12 documentation</a> &#187;</li>
         <li class="nav-item nav-item-this"><a href="">Building command-line scripts</a></li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">
-        &#169; Copyright 2021, Gabriele Bozzola and Wolfgang Kastaun.
-      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 3.4.1.
+        &#169; Copyright 2020-2021, Gabriele Bozzola.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 3.4.3.
     </div>
   </body>
 </html>

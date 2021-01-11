@@ -1,6 +1,6 @@
-Reference on postcactus.frequencyseries
+Reference on kuibit.frequencyseries
 =======================================
 
-.. automodule:: postcactus.frequencyseries
+.. automodule:: kuibit.frequencyseries
    :members:
    :inherited-members:

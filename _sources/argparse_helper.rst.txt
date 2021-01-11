@@ -1,13 +1,13 @@
 Building command-line scripts
 =============================
 
-``PostCactus`` is a library and it is designed to assist you in performing your
-analyses. Hence, ``PostCactus`` supports multiple workflows. A possible choice
+``kuibit`` is a library and it is designed to assist you in performing your
+analyses. Hence, ``kuibit`` supports multiple workflows. A possible choice
 consists in writing command-line executables to perform specific tasks. For
 example, it is useful to have a script ``plot_grid.py`` that takes a simulation
 folder and a variable name and plots a 2D snapshot of such variable. The module
 :py:mod:`~.argparse_helper` contains functions to make writing such scripts
-easier (:ref:`argparse_helper_ref:Reference on postcactus.argparse_helper`).
+easier (:ref:`argparse_helper_ref:Reference on kuibit.argparse_helper`).
 
 Argparse and argparse_helper
 ----------------------------
@@ -19,7 +19,7 @@ working example is simply
 
 .. code-block:: python
 
-   from postcactus import argparse_helper as pah
+   from kuibit import argparse_helper as pah
 
    desc = "This is an example"
    parser = pah.init_argparse(desc)
@@ -27,7 +27,7 @@ working example is simply
 
 This will populate the options ``configfile``, ``verbose``, ``datadir``, and
 ``outdir``, which can be accessed with ``args.varname`` (e.g.,
-``args.verbose``), or with ``args.fields['varname']``. ``PostCactus`` supports
+``args.verbose``), or with ``args.fields['varname']``. ``kuibit`` supports
 being configured with configfiles, which can be useful to control scripts with
 many options. The method :py:meth:`~.get_args` takes the parser object and
 process the command-line data.
@@ -39,7 +39,7 @@ adds arguments like ``origin``, ``corner``, and ``resolution``.
 
 .. code-block:: python
 
-   from postcactus import argparse_helper as pah
+   from kuibit import argparse_helper as pah
 
    desc = "This is an example"
    parser = pah.init_argparse(desc)
@@ -51,7 +51,7 @@ can be achieved with the method ``add_argument``, as in the following example:
 
 .. code-block:: python
 
-   from postcactus import argparse_helper as pah
+   from kuibit import argparse_helper as pah
 
    desc = "This is an example"
    parser = pah.init_argparse(desc)

@@ -2,7 +2,7 @@ Working with horizons
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 The module :py:mod:`~.cactus_horizon` (:ref:`cactus_horizons_ref:Reference on
-postcactus.cactus_horizons`) can read output data produced by ``AHFinderDirect``
+kuibit.cactus_horizons`) can read output data produced by ``AHFinderDirect``
 and ``QuasiLocalMeasures``.
 
 The simplest way to access horizon data is via :py:class:`~.SimDir` with the
@@ -14,7 +14,7 @@ thorns, including the shape of the horizons.
 .. note::
 
    ``AHFinderDirect`` and ``QuasiLocalMeasures`` use different indexing systems.
-   At the moment, ``PostCactus`` cannot connect the two automatically, so an
+   At the moment, ``kuibit`` cannot connect the two automatically, so an
    horizon is identified by both the numbers.
 
 To access horizon information, use the bracket notation, for example, if ``sim``

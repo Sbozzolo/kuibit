@@ -6,7 +6,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Mismatch between gravitational waves &#8212; PostCactus 3.0.0a12 documentation</title>
+    <title>Mismatch between gravitational waves &#8212; kuibit 1.0.0a12 documentation</title>
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <link rel="stylesheet" href="_static/bizstyle.css" type="text/css" />
     
@@ -42,7 +42,7 @@
         <li class="right" >
           <a href="gw_utils.html" title="Gravitational-wave utilities"
              accesskey="P">previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">PostCactus 3.0.0a12 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="index.html">kuibit 1.0.0a12 documentation</a> &#187;</li>
         <li class="nav-item nav-item-this"><a href="">Mismatch between gravitational waves</a></li> 
       </ul>
     </div>  
@@ -54,14 +54,14 @@
             
   <div class="section" id="mismatch-between-gravitational-waves">
 <h1>Mismatch between gravitational waves<a class="headerlink" href="#mismatch-between-gravitational-waves" title="Permalink to this headline">¶</a></h1>
-<p><code class="docutils literal notranslate"><span class="pre">PostCactus</span></code> has a module to compute the mismatch between two gravitational
+<p><code class="docutils literal notranslate"><span class="pre">kuibit</span></code> has a module to compute the mismatch between two gravitational
 waves (currently, only for the <span class="math notranslate nohighlight">\(l=2\)</span>, <span class="math notranslate nohighlight">\(m=2\)</span> mode). See,
-<a class="reference internal" href="gw_mismatch_ref.html#module-postcactus.gw_mismatch"><span class="std std-ref">Reference on postcactus.gw_mismatch</span></a>, for a comprehensive
+<a class="reference internal" href="gw_mismatch_ref.html#module-kuibit.gw_mismatch"><span class="std std-ref">Reference on kuibit.gw_mismatch</span></a>, for a comprehensive
 reference.</p>
 <div class="admonition warning">
 <p class="admonition-title">Warning</p>
 <p>You have to read carefully and understand everything in this page to use and
-interpret the results from <a class="reference internal" href="gw_mismatch_ref.html#module-postcactus.gw_mismatch" title="postcactus.gw_mismatch"><code class="xref py py-mod docutils literal notranslate"><span class="pre">gw_mismatch</span></code></a>. In some cases, misusing
+interpret the results from <a class="reference internal" href="gw_mismatch_ref.html#module-kuibit.gw_mismatch" title="kuibit.gw_mismatch"><code class="xref py py-mod docutils literal notranslate"><span class="pre">gw_mismatch</span></code></a>. In some cases, misusing
 the functions will lead to incorrect results without raising any error. The
 code has a lot of comments, you are encouraged to read them.</p>
 </div>
@@ -92,7 +92,7 @@ signal-to-noise ratio needed to experimentally distinguish <span class="math not
 if multiple detectors are considered, the overlap has to be computed with the
 network inner product (sum of all the inner products). If only the <span class="math notranslate nohighlight">\(l =
 2\)</span>, <span class="math notranslate nohighlight">\(m = 2\)</span> mode is considered, phase and polarization shifts are
-degenerate, so one can consider only one of the two. In <a class="reference internal" href="gw_mismatch_ref.html#module-postcactus.gw_mismatch" title="postcactus.gw_mismatch"><code class="xref py py-mod docutils literal notranslate"><span class="pre">gw_mismatch</span></code></a>,
+degenerate, so one can consider only one of the two. In <a class="reference internal" href="gw_mismatch_ref.html#module-kuibit.gw_mismatch" title="kuibit.gw_mismatch"><code class="xref py py-mod docutils literal notranslate"><span class="pre">gw_mismatch</span></code></a>,
 we implement the mismatch computation for a network of detectors restricting to
 the <span class="math notranslate nohighlight">\(l = 2\)</span>, <span class="math notranslate nohighlight">\(m = 2\)</span>.</p>
 <div class="admonition note">
@@ -123,16 +123,16 @@ values, inspect the result, and refine your search. In should also expand the
 bounds to make sure that you are localizing the absolute maximum.</p>
 <div class="admonition warning">
 <p class="admonition-title">Warning</p>
-<p><code class="docutils literal notranslate"><span class="pre">PostCactus</span></code> has no way to determine if the maximum found is the absolute
+<p><code class="docutils literal notranslate"><span class="pre">kuibit</span></code> has no way to determine if the maximum found is the absolute
 one. It is your job to set the limits of the search in a meaningful way.</p>
 </div>
-<p>To make up for the algorithmic inefficiency, <code class="docutils literal notranslate"><span class="pre">PostCactus</span></code> optionally uses
+<p>To make up for the algorithmic inefficiency, <code class="docutils literal notranslate"><span class="pre">kuibit</span></code> optionally uses
 <a class="reference external" href="https://numba.pydata.org/">numba</a> to speed up the search. Using numba enables
 high-resolution searches that would not be possible otherwise. Numba compiles
 the main mismatch function (<code class="xref py py-meth docutils literal notranslate"><span class="pre">_mismatch_core_numerical()</span></code>) to machine
 code to achieve native performances. Numba requires a substantial overhead to do
 this, so for small searches it is not convenient to use it. Therefore,
-<code class="docutils literal notranslate"><span class="pre">PostCactus</span></code> activates numba only when the size of the parameter space is
+<code class="docutils literal notranslate"><span class="pre">kuibit</span></code> activates numba only when the size of the parameter space is
 larger than 2500 elements. If you want to use numba with fewer elements, you can
 set <code class="docutils literal notranslate"><span class="pre">force_numba</span></code> to <code class="docutils literal notranslate"><span class="pre">True</span></code>. This may be faster in some cases (for example,
 for very long arrays). To use numba, make sure that the package is available (it
@@ -145,8 +145,8 @@ and <code class="docutils literal notranslate"><span class="pre">num_polarizatio
 the strains from there. Hence, you have to provide all the quantities you would
 need for computing the strains: <code class="docutils literal notranslate"><span class="pre">pcut</span></code>, <code class="docutils literal notranslate"><span class="pre">window_function</span></code>, and the arguments
 to the window function. <span class="math notranslate nohighlight">\(\Psi_4\)</span> are passed as
-<a class="reference internal" href="cactus_waves_ref.html#postcactus.cactus_waves.GravitationalWavesOneDet" title="postcactus.cactus_waves.GravitationalWavesOneDet"><code class="xref py py-class docutils literal notranslate"><span class="pre">GravitationalWavesOneDet</span></code></a>, as they are found in
-<a class="reference internal" href="simdir_ref.html#postcactus.simdir.SimDir" title="postcactus.simdir.SimDir"><code class="xref py py-class docutils literal notranslate"><span class="pre">SimDir</span></code></a>, when a radius is specified for gravitational waves.
+<a class="reference internal" href="cactus_waves_ref.html#kuibit.cactus_waves.GravitationalWavesOneDet" title="kuibit.cactus_waves.GravitationalWavesOneDet"><code class="xref py py-class docutils literal notranslate"><span class="pre">GravitationalWavesOneDet</span></code></a>, as they are found in
+<a class="reference internal" href="simdir_ref.html#kuibit.simdir.SimDir" title="kuibit.simdir.SimDir"><code class="xref py py-class docutils literal notranslate"><span class="pre">SimDir</span></code></a>, when a radius is specified for gravitational waves.
 <code class="docutils literal notranslate"><span class="pre">window_function</span></code> can be <code class="docutils literal notranslate"><span class="pre">None</span></code>, a string (indicating one of the buil-in
 windows), or a function that implements a custom-window.</p>
 <p>Since the operation requires taking Fourier transform, we provide ways to
@@ -160,7 +160,7 @@ the detectors. For this <code class="xref py py-meth docutils literal notranslat
 paramters, <code class="docutils literal notranslate"><span class="pre">noises</span></code>. This can be None, in which case the mismatch will be
 computed with no noise. If <code class="docutils literal notranslate"><span class="pre">noises</span></code> is not None, then, it has to be a
 <code class="docutils literal notranslate"><span class="pre">Detectors</span></code> object (<a class="reference internal" href="gw_utils.html#detectors"><span class="std std-ref">Detectors</span></a>) with each entry being a
-<a class="reference internal" href="frequencyseries_ref.html#postcactus.frequencyseries.FrequencySeries" title="postcactus.frequencyseries.FrequencySeries"><code class="xref py py-class docutils literal notranslate"><span class="pre">FrequencySeries</span></code></a> with the noise power spectral densities. At the
+<a class="reference internal" href="frequencyseries_ref.html#kuibit.frequencyseries.FrequencySeries" title="kuibit.frequencyseries.FrequencySeries"><code class="xref py py-class docutils literal notranslate"><span class="pre">FrequencySeries</span></code></a> with the noise power spectral densities. At the
 moment, <code class="docutils literal notranslate"><span class="pre">Detectors</span></code> are set to work with the LIGO and Virgo interferometers.
 In case you want to disable one of the detectors, set the entry to -1 (see
 example below). You can also set one entry to <code class="docutils literal notranslate"><span class="pre">None</span></code> so that its contribution
@@ -312,13 +312,13 @@ the code of this function.</p>
         <li class="right" >
           <a href="gw_utils.html" title="Gravitational-wave utilities"
              >previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">PostCactus 3.0.0a12 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="index.html">kuibit 1.0.0a12 documentation</a> &#187;</li>
         <li class="nav-item nav-item-this"><a href="">Mismatch between gravitational waves</a></li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">
-        &#169; Copyright 2021, Gabriele Bozzola and Wolfgang Kastaun.
-      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 3.4.1.
+        &#169; Copyright 2020-2021, Gabriele Bozzola.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 3.4.3.
     </div>
   </body>
 </html>

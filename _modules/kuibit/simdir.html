@@ -1,0 +1,371 @@
+
+
+<!doctype html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>kuibit.simdir &#8212; kuibit 1.0.0a12 documentation</title>
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/bizstyle.css" type="text/css" />
+    
+    <script id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+    <script src="../../_static/jquery.js"></script>
+    <script src="../../_static/underscore.js"></script>
+    <script src="../../_static/doctools.js"></script>
+    <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script type="text/x-mathjax-config">MathJax.Hub.Config({"tex2jax": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true, "ignoreClass": "document", "processClass": "math|output_area"}})</script>
+    <script src="../../_static/bizstyle.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0" />
+    <!--[if lt IE 9]>
+    <script src="_static/css3-mediaqueries.js"></script>
+    <![endif]-->
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">kuibit 1.0.0a12 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../index.html" accesskey="U">Module code</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">kuibit.simdir</a></li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for kuibit.simdir</h1><div class="highlight"><pre>
+<span></span><span class="ch">#!/usr/bin/env python3</span>
+
+<span class="c1"># Copyright (C) 2020-2021 Gabriele Bozzola, Wolfgang Kastaun</span>
+<span class="c1">#</span>
+<span class="c1"># This program is free software; you can redistribute it and/or modify it under</span>
+<span class="c1"># the terms of the GNU General Public License as published by the Free Software</span>
+<span class="c1"># Foundation; either version 3 of the License, or (at your option) any later</span>
+<span class="c1"># version.</span>
+<span class="c1">#</span>
+<span class="c1"># This program is distributed in the hope that it will be useful, but WITHOUT</span>
+<span class="c1"># ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS</span>
+<span class="c1"># FOR A PARTICULAR PURPOSE. See the GNU General Public License for more</span>
+<span class="c1"># details.</span>
+<span class="c1">#</span>
+<span class="c1"># You should have received a copy of the GNU General Public License along with</span>
+<span class="c1"># this program; if not, see &lt;https://www.gnu.org/licenses/&gt;.</span>
+
+<span class="sd">&quot;&quot;&quot;This module provides easy access to Cactus data files.</span>
+
+<span class="sd">A simulation directory is represented by an instance of the :py:class:`~.SimDir`</span>
+<span class="sd">class, which provides access to all supported data types.</span>
+
+<span class="sd">This is the main entry point into ``kuibit``. When a :py:class:`~.SimDir` is</span>
+<span class="sd">initialized, the simulation directory is scanned and all the data is organized.</span>
+<span class="sd">:py:class:`~.SimDir` objects have attributes that are interfaces to the data:</span>
+<span class="sd">each attribute is a dictionary-like object that indexes the relevant data in</span>
+<span class="sd">some way. For example, :py:meth:`~.timeseries` contains all the time series in</span>
+<span class="sd">the output, indexed by the type of reduction that produced them (for example,</span>
+<span class="sd">``norm2``, ``max``, ...).</span>
+
+<span class="sd">In case of uncertainty, it is always possible to print :py:class:`~.SimDir`,</span>
+<span class="sd">or any of its attributes, to obtain a message with the available content of</span>
+<span class="sd">such attribute.</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">os</span>
+
+<span class="c1"># TODO (FUTURE): cached_property is the decorator we are looking for.</span>
+<span class="c1">#</span>
+<span class="c1"># We ideally would like to use cached_property, but it is in Python 3.8,</span>
+<span class="c1"># and currently we only support 3.6.</span>
+<span class="kn">from</span> <span class="nn">functools</span> <span class="kn">import</span> <span class="n">lru_cache</span>
+
+<span class="kn">from</span> <span class="nn">kuibit</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">cactus_grid_functions</span><span class="p">,</span>
+    <span class="n">cactus_horizons</span><span class="p">,</span>
+    <span class="n">cactus_multipoles</span><span class="p">,</span>
+    <span class="n">cactus_scalars</span><span class="p">,</span>
+    <span class="n">cactus_waves</span><span class="p">,</span>
+<span class="p">)</span>
+
+
+<div class="viewcode-block" id="SimDir"><a class="viewcode-back" href="../../simdir_ref.html#kuibit.simdir.SimDir">[docs]</a><span class="k">class</span> <span class="nc">SimDir</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;This class represents a Cactus simulation directory.</span>
+
+<span class="sd">    Data is searched recursively in all subfolders. No particular folder</span>
+<span class="sd">    structure (e.g. ``simfactory`` style) is assumed. The following attributes</span>
+<span class="sd">    allow access to the supported data types:</span>
+
+<span class="sd">    :ivar path:           Top level path of simulation directory.</span>
+<span class="sd">    :ivar dirs:           All directories in which data is searched.</span>
+<span class="sd">    :ivar logfiles:       The locations of all log files (.out).</span>
+<span class="sd">    :ivar errfiles:       The location of all error log files (.err).</span>
+<span class="sd">    :ivar ts:             Scalar data of various type, see</span>
+<span class="sd">                          :py:class:`~.ScalarsDir`</span>
+<span class="sd">    :ivar gf:              Access to grid function data, see</span>
+<span class="sd">                          :py:class:`~.GridFunctionsDir`.</span>
+<span class="sd">    :ivar gws:            GW signal from the Weyl scalar multipole</span>
+<span class="sd">                          decomposition, see</span>
+<span class="sd">                          :py:class:`~.GravitationalWavesDir`.</span>
+<span class="sd">    :ivar emws:           EM signal from the Weyl scalar multipole</span>
+<span class="sd">                          decomposition, see</span>
+<span class="sd">                          :py:class:`~.ElectromagneticWavesDir`.</span>
+<span class="sd">    :ivar horizons:       Apparent horizon information, see</span>
+<span class="sd">                          :py:class:`~.HorizonsDir`.</span>
+<span class="sd">    :ivar multipoles:     Multipole components, see</span>
+<span class="sd">                          :py:class:`~.CactusMultipoleDir`.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">_sanitize_path</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">):</span>
+        <span class="c1"># Make sure to have complete paths with respect to the current folder</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">expanduser</span><span class="p">(</span><span class="n">path</span><span class="p">))</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">path</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Folder does not exist: </span><span class="si">{</span><span class="n">path</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_scan_folders</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">max_depth</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Scan all the folders in self.path up to depth ``max_depth``</span>
+<span class="sd">        and categorize all the files.</span>
+
+<span class="sd">        :param max_depth: Maximum recursion depth to scan.</span>
+<span class="sd">        :type max_depth: int</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">dirs</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">parfiles</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">logfiles</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">errfiles</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">allfiles</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="k">def</span> <span class="nf">listdir_no_symlinks</span><span class="p">(</span><span class="n">path</span><span class="p">):</span>
+            <span class="sd">&quot;&quot;&quot;Return a list of files in path that are not symlink&quot;&quot;&quot;</span>
+            <span class="n">dir_content</span> <span class="o">=</span> <span class="p">[</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">p</span><span class="p">)</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span><span class="n">path</span><span class="p">)]</span>
+            <span class="k">return</span> <span class="p">[</span><span class="n">p</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">dir_content</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">islink</span><span class="p">(</span><span class="n">p</span><span class="p">)]</span>
+
+        <span class="k">def</span> <span class="nf">filter_ext</span><span class="p">(</span><span class="n">files</span><span class="p">,</span> <span class="n">ext</span><span class="p">):</span>
+            <span class="sd">&quot;&quot;&quot;Return a list from the input list of file that</span>
+<span class="sd">            has file extension ext.&quot;&quot;&quot;</span>
+            <span class="k">return</span> <span class="p">[</span><span class="n">f</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">files</span> <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">splitext</span><span class="p">(</span><span class="n">f</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="n">ext</span><span class="p">]</span>
+
+        <span class="k">def</span> <span class="nf">walk_rec</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">level</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+            <span class="sd">&quot;&quot;&quot;Walk_rec is a recursive function that steps down all the</span>
+<span class="sd">            subdirectories (except the ones with name defined in self.ignore)</span>
+<span class="sd">            up to max_depth and add to self.allfiles the files found in the</span>
+<span class="sd">            directories.</span>
+
+<span class="sd">            &quot;&quot;&quot;</span>
+            <span class="k">if</span> <span class="n">level</span> <span class="o">&gt;=</span> <span class="n">max_depth</span><span class="p">:</span>
+                <span class="k">return</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">dirs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+
+            <span class="n">all_files_in_path</span> <span class="o">=</span> <span class="n">listdir_no_symlinks</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+
+            <span class="n">files_in_path</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">filter</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">,</span> <span class="n">all_files_in_path</span><span class="p">))</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">allfiles</span> <span class="o">+=</span> <span class="n">files_in_path</span>
+
+            <span class="n">directories_in_path</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span>
+                <span class="nb">filter</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">,</span> <span class="n">all_files_in_path</span><span class="p">)</span>
+            <span class="p">)</span>
+
+            <span class="c1"># We ignore the ones in self.ignore</span>
+            <span class="n">directories_to_scan</span> <span class="o">=</span> <span class="p">[</span>
+                <span class="n">p</span>
+                <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">directories_in_path</span>
+                <span class="k">if</span> <span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">p</span><span class="p">)</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">ignore</span><span class="p">)</span>
+            <span class="p">]</span>
+
+            <span class="c1"># Apply walk_rec to all the subdirectory, but with level increased</span>
+            <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">directories_to_scan</span><span class="p">:</span>
+                <span class="n">walk_rec</span><span class="p">(</span><span class="n">p</span><span class="p">,</span> <span class="n">level</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+
+        <span class="n">walk_rec</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">path</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">logfiles</span> <span class="o">=</span> <span class="n">filter_ext</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">allfiles</span><span class="p">,</span> <span class="s2">&quot;.out&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">errfiles</span> <span class="o">=</span> <span class="n">filter_ext</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">allfiles</span><span class="p">,</span> <span class="s2">&quot;.err&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">parfiles</span> <span class="o">=</span> <span class="n">filter_ext</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">allfiles</span><span class="p">,</span> <span class="s2">&quot;.par&quot;</span><span class="p">)</span>
+
+        <span class="c1"># Sort by time</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">parfiles</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">key</span><span class="o">=</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">getmtime</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">logfiles</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">key</span><span class="o">=</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">getmtime</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">errfiles</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">key</span><span class="o">=</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">getmtime</span><span class="p">)</span>
+
+        <span class="n">simfac</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">path</span><span class="p">,</span> <span class="s2">&quot;SIMFACTORY&quot;</span><span class="p">,</span> <span class="s2">&quot;par&quot;</span><span class="p">)</span>
+
+        <span class="c1"># Simfactory has a folder SIMFACTORY with a subdirectory for par files</span>
+        <span class="c1"># Even if SIMFACTORY is excluded, we should include that par file</span>
+        <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">(</span><span class="n">simfac</span><span class="p">):</span>
+            <span class="n">mainpar</span> <span class="o">=</span> <span class="n">filter_ext</span><span class="p">(</span><span class="n">listdir_no_symlinks</span><span class="p">(</span><span class="n">simfac</span><span class="p">),</span> <span class="s2">&quot;.par&quot;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">parfiles</span> <span class="o">=</span> <span class="n">mainpar</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">parfiles</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">has_parfile</span> <span class="o">=</span> <span class="nb">bool</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parfiles</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="n">max_depth</span><span class="o">=</span><span class="mi">8</span><span class="p">,</span> <span class="n">ignore</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Constructor.</span>
+
+<span class="sd">        :param path:      Path to output of the simulation.</span>
+<span class="sd">        :type path:       str</span>
+<span class="sd">        :param max_depth: Maximum recursion depth for subfolders.</span>
+<span class="sd">        :type max_depth:  int</span>
+<span class="sd">        :param ignore: Names of folders to ignore (e.g. SIMFACTORY).</span>
+<span class="sd">        :type ignore:  set</span>
+
+<span class="sd">        Parfiles (``*.par``) will be searched in all data directories and the</span>
+<span class="sd">        top-level SIMFACTORY/par folder, if it exists. The parfile in the</span>
+<span class="sd">        latter folder, if available, or else the oldest parfile in any of</span>
+<span class="sd">        the data directories, will be used to extract the simulation</span>
+<span class="sd">        parameters. Logfiles (``*.out``) and errorfiles (``*.err``) will be</span>
+<span class="sd">        searched for in all data directories.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">ignore</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">ignore</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;SIMFACTORY&quot;</span><span class="p">,</span> <span class="s2">&quot;report&quot;</span><span class="p">,</span> <span class="s2">&quot;movies&quot;</span><span class="p">,</span> <span class="s2">&quot;tmp&quot;</span><span class="p">,</span> <span class="s2">&quot;temp&quot;</span><span class="p">}</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">ignore</span> <span class="o">=</span> <span class="n">ignore</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_sanitize_path</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">path</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_scan_folders</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">max_depth</span><span class="p">))</span>
+
+    <span class="nd">@property</span>
+    <span class="c1"># We only need to keep it 1 in memory: it is the only possible!</span>
+    <span class="nd">@lru_cache</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">ts</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Return all the available timeseries in the data.</span>
+
+<span class="sd">        :returns: Interface to all the timeseries in the directory.</span>
+<span class="sd">        :rtype: :py:class:`~.ScalarsDir`</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">cactus_scalars</span><span class="o">.</span><span class="n">ScalarsDir</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+
+    <span class="n">timeseries</span> <span class="o">=</span> <span class="n">ts</span>
+
+    <span class="nd">@property</span>
+    <span class="nd">@lru_cache</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">multipoles</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Return all the available multipole data.</span>
+
+<span class="sd">        :returns: Interface to all the multipole data in the directory.</span>
+<span class="sd">        :rtype: :py:class:`~.MultipolesDir`</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">cactus_multipoles</span><span class="o">.</span><span class="n">MultipolesDir</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="nd">@lru_cache</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">gravitationalwaves</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Return all the available ``Psi4`` data.</span>
+
+<span class="sd">        :returns: Interface to all the ``Psi4`` data in the directory.</span>
+<span class="sd">        :rtype: :py:class:`~.GravitationalWavesDir`</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">cactus_waves</span><span class="o">.</span><span class="n">GravitationalWavesDir</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+
+    <span class="n">gws</span> <span class="o">=</span> <span class="n">gravitationalwaves</span>
+
+    <span class="nd">@property</span>
+    <span class="nd">@lru_cache</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">electromagneticwaves</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Return all the available ``Phi2`` data.</span>
+
+<span class="sd">        :returns: Interface to all the ``Phi2`` data in the directory.</span>
+<span class="sd">        :rtype: :py:class:`~.ElectromagneticWavesDir`</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">cactus_waves</span><span class="o">.</span><span class="n">ElectromagneticWavesDir</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+
+    <span class="n">emws</span> <span class="o">=</span> <span class="n">electromagneticwaves</span>
+
+    <span class="nd">@property</span>
+    <span class="nd">@lru_cache</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">gridfunctions</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Return all the available grid data.</span>
+
+<span class="sd">        :returns: Interface to all the grid data in the directory.</span>
+<span class="sd">        :rtype: :py:class:`~.GridFunctionsDir`</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">cactus_grid_functions</span><span class="o">.</span><span class="n">GridFunctionsDir</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+
+    <span class="n">gf</span> <span class="o">=</span> <span class="n">gridfunctions</span>
+
+    <span class="nd">@property</span>
+    <span class="nd">@lru_cache</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">horizons</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Return all the available horizon data.</span>
+
+<span class="sd">        :returns: Interface to all the horizon data in the directory.</span>
+<span class="sd">        :rtype: :py:class:`~.HorizonsDir`</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">cactus_horizons</span><span class="o">.</span><span class="n">HorizonsDir</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">header</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;Indexed </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">allfiles</span><span class="p">)</span><span class="si">}</span><span class="s2"> files&quot;</span>
+        <span class="n">header</span> <span class="o">+=</span> <span class="sa">f</span><span class="s2">&quot; and </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dirs</span><span class="p">)</span><span class="si">}</span><span class="s2"> subdirectories</span><span class="se">\n</span><span class="s2">&quot;</span>
+
+        <span class="n">ts_ret</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">ts</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="n">mp_ret</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">multipoles</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="n">gf_ret</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">gf</span><span class="si">}</span><span class="s2">&quot;</span>
+
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">gravitationalwaves</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">gw_ret</span> <span class="o">=</span> <span class="s2">&quot;Available gravitational wave data&quot;</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">gw_ret</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">electromagneticwaves</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">em_ret</span> <span class="o">=</span> <span class="s2">&quot;Available electromagnetic wave data&quot;</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">em_ret</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+
+        <span class="n">hor_ret</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">horizons</span><span class="si">}</span><span class="s2">&quot;</span>
+
+        <span class="k">return</span> <span class="n">header</span> <span class="o">+</span> <span class="n">ts_ret</span> <span class="o">+</span> <span class="n">mp_ret</span> <span class="o">+</span> <span class="n">gw_ret</span> <span class="o">+</span> <span class="n">em_ret</span> <span class="o">+</span> <span class="n">gf_ret</span> <span class="o">+</span> <span class="n">hor_ret</span></div>
+</pre></div>
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="../../index.html">
+              <img class="logo" src="../../_static/logo.png" alt="Logo"/>
+            </a></p>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">kuibit 1.0.0a12 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../index.html" >Module code</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">kuibit.simdir</a></li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2020-2021, Gabriele Bozzola.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 3.4.3.
+    </div>
+  </body>
+</html>

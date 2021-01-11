@@ -1,5 +1,5 @@
-Reference on postcactus.cactus_grid_functions
+Reference on kuibit.cactus_grid_functions
 =============================================
 
-.. automodule:: postcactus.cactus_grid_functions
+.. automodule:: kuibit.cactus_grid_functions
    :members:

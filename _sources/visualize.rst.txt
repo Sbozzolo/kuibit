@@ -2,7 +2,7 @@ Visualizing data
 =============================
 
 The module :py:mod:`~.visualize` contains functions to immediately visualize
-Einstein Toolkit data. (:ref:`visualize_ref:Reference on postcactus.visualize`)
+Einstein Toolkit data. (:ref:`visualize_ref:Reference on kuibit.visualize`)
 
 Grid functions
 --------------

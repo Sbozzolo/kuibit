@@ -1,6 +1,6 @@
-Reference on postcactus.gw_utils
+Reference on kuibit.gw_utils
 ==================================
 
-.. automodule:: postcactus.gw_utils
+.. automodule:: kuibit.gw_utils
    :members:
 

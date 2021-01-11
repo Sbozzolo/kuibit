@@ -1,5 +1,5 @@
-Reference on postcactus.visualize
+Reference on kuibit.visualize
 =============================================
 
-.. automodule:: postcactus.visualize
+.. automodule:: kuibit.visualize
    :members:

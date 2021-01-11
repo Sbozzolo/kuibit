@@ -1,0 +1,1057 @@
+
+
+<!doctype html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>kuibit.cactus_waves &#8212; kuibit 1.0.0a12 documentation</title>
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/bizstyle.css" type="text/css" />
+    
+    <script id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+    <script src="../../_static/jquery.js"></script>
+    <script src="../../_static/underscore.js"></script>
+    <script src="../../_static/doctools.js"></script>
+    <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script type="text/x-mathjax-config">MathJax.Hub.Config({"tex2jax": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true, "ignoreClass": "document", "processClass": "math|output_area"}})</script>
+    <script src="../../_static/bizstyle.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0" />
+    <!--[if lt IE 9]>
+    <script src="_static/css3-mediaqueries.js"></script>
+    <![endif]-->
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">kuibit 1.0.0a12 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../index.html" accesskey="U">Module code</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">kuibit.cactus_waves</a></li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for kuibit.cactus_waves</h1><div class="highlight"><pre>
+<span></span><span class="ch">#!/usr/bin/env python3</span>
+
+<span class="c1"># Copyright (C) 2020-2021 Gabriele Bozzola, Wolfgang Kastaun</span>
+<span class="c1">#</span>
+<span class="c1"># This program is free software; you can redistribute it and/or modify it under</span>
+<span class="c1"># the terms of the GNU General Public License as published by the Free Software</span>
+<span class="c1"># Foundation; either version 3 of the License, or (at your option) any later</span>
+<span class="c1"># version.</span>
+<span class="c1">#</span>
+<span class="c1"># This program is distributed in the hope that it will be useful, but WITHOUT</span>
+<span class="c1"># ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS</span>
+<span class="c1"># FOR A PARTICULAR PURPOSE. See the GNU General Public License for more</span>
+<span class="c1"># details.</span>
+<span class="c1">#</span>
+<span class="c1"># You should have received a copy of the GNU General Public License along with</span>
+<span class="c1"># this program; if not, see &lt;https://www.gnu.org/licenses/&gt;.</span>
+
+<span class="sd">&quot;&quot;&quot;The :py:mod:`~.cactus_waves` module provides classes to access gravitational</span>
+<span class="sd">and electromagnetic wave signals computed using Weyl scalars.</span>
+
+<span class="sd">The classes in this module specialize the ones in :py:mod:`~.cactus_multipoles`</span>
+<span class="sd">to deal with gravitational and electromagnetic wave data.</span>
+
+<span class="sd">There classes defined in this module are:</span>
+
+<span class="sd">- :py:class`~.GravitationalWavesOneDet` and :py:class`~.ElectromagneticWavesOneDet`,</span>
+<span class="sd">  which extend :py:class:`~.MultipoleOneDet` adding methods to compute quantities like</span>
+<span class="sd">  strain, or energy lost.</span>
+<span class="sd">- :py:class`~.WavesDir` (derived from :py:class`~.MultipoleAllDets`), from which we</span>
+<span class="sd">  derive :py:class`~.GravitationalWavesDir` and :py:class`~.ElectromagneticWavesDir`,</span>
+<span class="sd">  which organize the available data in terms of extraction radii.</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">warnings</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
+<span class="kn">from</span> <span class="nn">kuibit</span> <span class="kn">import</span> <span class="n">cactus_multipoles</span> <span class="k">as</span> <span class="n">mp</span>
+<span class="kn">from</span> <span class="nn">kuibit</span> <span class="kn">import</span> <span class="n">gw_utils</span><span class="p">,</span> <span class="n">simdir</span>
+<span class="kn">from</span> <span class="nn">kuibit</span> <span class="kn">import</span> <span class="n">timeseries</span> <span class="k">as</span> <span class="n">ts</span>
+<span class="kn">from</span> <span class="nn">kuibit.gw_utils</span> <span class="kn">import</span> <span class="n">Detectors</span>
+
+
+<div class="viewcode-block" id="GravitationalWavesOneDet"><a class="viewcode-back" href="../../cactus_waves_ref.html#kuibit.cactus_waves.GravitationalWavesOneDet">[docs]</a><span class="k">class</span> <span class="nc">GravitationalWavesOneDet</span><span class="p">(</span><span class="n">mp</span><span class="o">.</span><span class="n">MultipoleOneDet</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;This class represents is an abstract class to represent multipole</span>
+<span class="sd">    signals from Weyl scalars available at a given distance.</span>
+
+<span class="sd">    To check if component is available, use the operator &quot;in&quot;. You can iterate</span>
+<span class="sd">    over all the availble components with a for loop.</span>
+
+<span class="sd">    This class is derived from :py:class:`~.MultipoleOneDet`, so it shares most</span>
+<span class="sd">    of the features, while expanding with methods specific for gravitational</span>
+<span class="sd">    waves (e.g, to compute the strain).</span>
+
+<span class="sd">    This class is not intended to be initialized directly.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dist</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Constructor.</span>
+
+<span class="sd">        :param dist: Radius of the spherical surface.</span>
+<span class="sd">        :type dist: float</span>
+<span class="sd">        :param data: List of tuples with the two multipolar numbers and</span>
+<span class="sd">                     the data as :py:class:`~.TimeSeries`.</span>
+<span class="sd">        :type data: list of tuple ``(l, m, timeseries)``</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">dist</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+
+    <span class="c1"># staticmethod means that this function will be allocated by python only</span>
+    <span class="c1"># once, since it doesn&#39;t depend on the detail of the instance</span>
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_fixed_frequency_integrated</span><span class="p">(</span><span class="n">timeseries</span><span class="p">,</span> <span class="n">pcut</span><span class="p">,</span> <span class="n">order</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Return a new timeseries that is the one obtained with the method of</span>
+<span class="sd">        the fixed frequency integration from the input ``timeseries``.</span>
+
+<span class="sd">        ``pcut`` is the longest physical period in the system, corresponding to</span>
+<span class="sd">        ``omega_threshold``,  the lowest physical frequency.</span>
+
+<span class="sd">        ``order`` is order of integration (how many integrations).</span>
+
+<span class="sd">        The fixed frequency integration algorithm is the following:</span>
+
+<span class="sd">        The Fourier transform of f(t) is</span>
+
+<span class="sd">        :math:`F[f](omega) = \int_-inf^inf e^-i omega t f(t) dt`</span>
+
+<span class="sd">        The the Fourier transform of the integral of f(t) is</span>
+<span class="sd">        :math:`F[f](omega) / i omega`</span>
+
+<span class="sd">        In the FFI method we replace this with</span>
+<span class="sd">        :math:`F[f](omega) / i omega`               if omega &gt; omega_threshold</span>
+<span class="sd">        :math:`F[f](omega) / i omega_threshold`     otherwise</span>
+
+<span class="sd">        (Equation (27) in [arxiv:1006.1632])</span>
+
+<span class="sd">        We can perform multiple integrations (needed for example to go from</span>
+<span class="sd">        psi4 to h) by raising everything to the power of the order of</span>
+<span class="sd">        integration:</span>
+<span class="sd">        (due to the convolution theorem)</span>
+
+<span class="sd">        :math:`F[f](omega) / (i omega)**order`             if omega &gt; omega_threshold</span>
+<span class="sd">        :math:`F[f](omega) / (i omega_threshold)**order`   otherwise</span>
+
+<span class="sd">        Than, we take the inverse Fourier transform.</span>
+
+<span class="sd">        :param timeseries: :py:class:`~TimeSeries` that has to be integrated.</span>
+<span class="sd">        :type timeseries: :py:class:`~TimeSeries`</span>
+<span class="sd">        :param pcut: Period associated with the threshold frequency</span>
+<span class="sd">                     ``omega_0 = 2 * pi / pcut``</span>
+<span class="sd">        :type pcut: float</span>
+<span class="sd">        :param order: Number of integrations.</span>
+<span class="sd">        :type order: int</span>
+
+<span class="sd">        :returns: :py:class:`~TimeSeries` integrated with the fixed-frequency integration</span>
+<span class="sd">                  method</span>
+<span class="sd">        :rtype: :py:class:`~TimeSeries`</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">timeseries</span><span class="o">.</span><span class="n">is_regularly_sampled</span><span class="p">():</span>
+            <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
+                <span class="s2">&quot;Timeseries not regularly sampled. Resampling.&quot;</span><span class="p">,</span>
+                <span class="ne">RuntimeWarning</span><span class="p">,</span>
+            <span class="p">)</span>
+            <span class="n">integrand</span> <span class="o">=</span> <span class="n">timeseries</span><span class="o">.</span><span class="n">regular_resampled</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">integrand</span> <span class="o">=</span> <span class="n">timeseries</span>
+
+        <span class="n">fft</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">fft</span><span class="o">.</span><span class="n">fft</span><span class="p">(</span><span class="n">integrand</span><span class="o">.</span><span class="n">y</span><span class="p">)</span>
+        <span class="n">omega</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">fft</span><span class="o">.</span><span class="n">fftfreq</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">integrand</span><span class="p">),</span> <span class="n">d</span><span class="o">=</span><span class="n">integrand</span><span class="o">.</span><span class="n">dt</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">)</span>
+
+        <span class="n">omega_abs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">omega</span><span class="p">)</span>
+        <span class="n">omega_threshold</span> <span class="o">=</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">/</span> <span class="n">pcut</span>
+
+        <span class="c1"># np.where(omega_abs &gt; omega_threshold, omega_abs, omega_threshold)</span>
+        <span class="c1"># means: return omega_abs when omega_abs &gt; omega_threshold, otherwise</span>
+        <span class="c1"># return omega_threshold</span>
+        <span class="n">ffi_omega</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span>
+            <span class="n">omega_abs</span> <span class="o">&gt;</span> <span class="n">omega_threshold</span><span class="p">,</span> <span class="n">omega_abs</span><span class="p">,</span> <span class="n">omega_threshold</span>
+        <span class="p">)</span>
+
+        <span class="c1"># np.sign(omega) / (ffi_omega) is omega when omega_abs &gt; omega_thres</span>
+        <span class="c1"># this is a convient way to group together positive and negative omega</span>
+        <span class="n">integration_factor</span> <span class="o">=</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sign</span><span class="p">(</span><span class="n">omega</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="mi">1</span><span class="n">j</span> <span class="o">*</span> <span class="n">ffi_omega</span><span class="p">))</span> <span class="o">**</span> <span class="nb">int</span><span class="p">(</span><span class="n">order</span><span class="p">)</span>
+
+        <span class="c1"># Now, inverse fft</span>
+        <span class="n">integrated_y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">fft</span><span class="o">.</span><span class="n">ifft</span><span class="p">(</span><span class="n">fft</span> <span class="o">*</span> <span class="n">integration_factor</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">ts</span><span class="o">.</span><span class="n">TimeSeries</span><span class="p">(</span><span class="n">integrand</span><span class="o">.</span><span class="n">t</span><span class="p">,</span> <span class="n">integrated_y</span><span class="p">)</span>
+
+    <span class="c1"># This function is only for convenience</span>
+<div class="viewcode-block" id="GravitationalWavesOneDet.get_psi4_lm"><a class="viewcode-back" href="../../cactus_waves_ref.html#kuibit.cactus_waves.GravitationalWavesOneDet.get_psi4_lm">[docs]</a>    <span class="k">def</span> <span class="nf">get_psi4_lm</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mult_l</span><span class="p">,</span> <span class="n">mult_m</span><span class="p">):</span>
+        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Return the multipolar components l and m of Psi4.</span>
+
+<span class="sd">        :param mult_l:     Multipole component l.</span>
+<span class="sd">        :type mult_l:      int</span>
+<span class="sd">        :param mult_m:     Multipole component m.</span>
+<span class="sd">        :type mult_m:      int</span>
+
+<span class="sd">        :returns: :math:`\Psi_4^{lm}`</span>
+<span class="sd">        :rtype: complex :py:class:`~.TimeSeries`</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="p">[(</span><span class="n">mult_l</span><span class="p">,</span> <span class="n">mult_m</span><span class="p">)]</span></div>
+
+<div class="viewcode-block" id="GravitationalWavesOneDet.get_strain_lm"><a class="viewcode-back" href="../../cactus_waves_ref.html#kuibit.cactus_waves.GravitationalWavesOneDet.get_strain_lm">[docs]</a>    <span class="k">def</span> <span class="nf">get_strain_lm</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">mult_l</span><span class="p">,</span>
+        <span class="n">mult_m</span><span class="p">,</span>
+        <span class="n">pcut</span><span class="p">,</span>
+        <span class="o">*</span><span class="n">args</span><span class="p">,</span>
+        <span class="n">window_function</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">trim_ends</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Return the strain associated to the multipolar component (l, m).</span>
+
+<span class="sd">        The strain returned is multiplied by the distance.</span>
+<span class="sd">        The strain is extracted from the Weyl Scalar using the formula</span>
+
+<span class="sd">        .. math::</span>
+
+<span class="sd">             h_+^{lm}(r,t)</span>
+<span class="sd">             -     i h_\times^{lm}(r,t) = \int_{-\infty}^t \mathrm{d}u</span>
+<span class="sd">                    \int_{-\infty}^u \mathrm{d}v\, \Psi_4^{lm}(r,v)</span>
+
+<span class="sd">        The return value is the complex :py:class:`~.TimeSeries` ``(r * h_plus + i r * h_cross)``.</span>
+
+<span class="sd">        It is always important to have a function that goes smoothly to zero</span>
+<span class="sd">        before taking Fourier transform (to avoid spectral leakage and</span>
+<span class="sd">        aliasing). You can pass the ``window_function`` to apply as a parameter.</span>
+<span class="sd">        If ``window_function`` is None, no tapering is performed. If</span>
+<span class="sd">        ``window_function`` is a function, it has to be a function that takes as</span>
+<span class="sd">        first argument the length of the array and returns a new array with the</span>
+<span class="sd">        same length that is to be multiplied to the data (this is how SciPy&#39;s</span>
+<span class="sd">        windows work) If ``window_function`` is a string, use the method with</span>
+<span class="sd">        corresponding name from the :py:class:`~.TimeSeries` class. You must</span>
+<span class="sd">        only provide the name (e.g, &#39;tukey&#39; will call &#39;tukey_windowed&#39;).</span>
+<span class="sd">        Optional arguments to the window function can be passed directly to this</span>
+<span class="sd">        function.</span>
+
+<span class="sd">        ``pcut`` is the period associated to the angular velocity that enters in</span>
+<span class="sd">        the fixed frequency integration (``omega_th = 2 pi / pcut``). In</span>
+<span class="sd">        general, a wise choise is to pick the longest physical period in the</span>
+<span class="sd">        signal.</span>
+
+<span class="sd">        Optionally, remove part of the output signal at both the beginning and</span>
+<span class="sd">        the end. If ``trim_ends`` is True, ``pcut`` is removed. This is because</span>
+<span class="sd">        those parts of the signal are typically not very accurate.</span>
+
+<span class="sd">        :param mult_l: Multipolar component l.</span>
+<span class="sd">        :type mult_l: int</span>
+<span class="sd">        :param mult_m: Multipolar component m.</span>
+<span class="sd">        :type mult_m: int</span>
+<span class="sd">        :param pcut: Period that enters the fixed-frequency integration.</span>
+<span class="sd">                     Typically, the longest physical period in the signal.</span>
+<span class="sd">        :type pcut: float</span>
+<span class="sd">        :param window_function: If not None, apply window_function to the</span>
+<span class="sd">                                series before computing the strain.</span>
+<span class="sd">        :type window_function: callable, str, or None</span>
+<span class="sd">        :param trim_ends: If True, a portion of the resulting strain is removed</span>
+<span class="sd">                          at both the initial and final times. The amount removed</span>
+<span class="sd">                          is equal to pcut.</span>
+<span class="sd">        :type trim_ends: bool</span>
+
+<span class="sd">        :returns: :math:`r (h^+ - i rh^\times)`</span>
+<span class="sd">        :rtype: :py:class:`~.TimeSeries`</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">mult_l</span><span class="p">,</span> <span class="n">mult_m</span><span class="p">)</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">available_lm</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;l = </span><span class="si">{</span><span class="n">mult_l</span><span class="si">}</span><span class="s2">, m = </span><span class="si">{</span><span class="n">mult_m</span><span class="si">}</span><span class="s2"> not available&quot;</span><span class="p">)</span>
+
+        <span class="n">psi4lm</span> <span class="o">=</span> <span class="bp">self</span><span class="p">[(</span><span class="n">mult_l</span><span class="p">,</span> <span class="n">mult_m</span><span class="p">)]</span>
+
+        <span class="c1"># If pcut is too large, the result will likely be inaccurate</span>
+        <span class="k">if</span> <span class="n">psi4lm</span><span class="o">.</span><span class="n">time_length</span> <span class="o">&lt;</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">pcut</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;pcut too large for timeseries&quot;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">callable</span><span class="p">(</span><span class="n">window_function</span><span class="p">):</span>
+            <span class="n">integrand</span> <span class="o">=</span> <span class="n">psi4lm</span><span class="o">.</span><span class="n">windowed</span><span class="p">(</span><span class="n">window_function</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">window_function</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+            <span class="n">window_function_method</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">window_function</span><span class="si">}</span><span class="s2">_windowed&quot;</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">psi4lm</span><span class="p">,</span> <span class="n">window_function_method</span><span class="p">):</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Window </span><span class="si">{</span><span class="n">window_function</span><span class="si">}</span><span class="s2"> not implemented&quot;</span><span class="p">)</span>
+            <span class="n">window_function_callable</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">psi4lm</span><span class="p">,</span> <span class="n">window_function_method</span><span class="p">)</span>
+
+            <span class="c1"># This returns a new TimeSeries</span>
+            <span class="n">integrand</span> <span class="o">=</span> <span class="n">window_function_callable</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">window_function</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">integrand</span> <span class="o">=</span> <span class="n">psi4lm</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Unknown window function&quot;</span><span class="p">)</span>
+
+        <span class="n">strain</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_fixed_frequency_integrated</span><span class="p">(</span><span class="n">integrand</span><span class="p">,</span> <span class="n">pcut</span><span class="p">,</span> <span class="n">order</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">trim_ends</span><span class="p">:</span>
+            <span class="n">strain</span><span class="o">.</span><span class="n">crop</span><span class="p">(</span><span class="n">strain</span><span class="o">.</span><span class="n">tmin</span> <span class="o">+</span> <span class="n">pcut</span><span class="p">,</span> <span class="n">strain</span><span class="o">.</span><span class="n">tmax</span> <span class="o">-</span> <span class="n">pcut</span><span class="p">)</span>
+
+        <span class="c1"># The return value is rh not just h (the strain)</span>
+        <span class="c1"># h_plus - i h_cross</span>
+        <span class="k">return</span> <span class="n">strain</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">dist</span></div>
+
+<div class="viewcode-block" id="GravitationalWavesOneDet.get_strain"><a class="viewcode-back" href="../../cactus_waves_ref.html#kuibit.cactus_waves.GravitationalWavesOneDet.get_strain">[docs]</a>    <span class="k">def</span> <span class="nf">get_strain</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">theta</span><span class="p">,</span>
+        <span class="n">phi</span><span class="p">,</span>
+        <span class="n">pcut</span><span class="p">,</span>
+        <span class="o">*</span><span class="n">args</span><span class="p">,</span>
+        <span class="n">window_function</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">l_max</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">trim_ends</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Return the strain accounting for all the multipoles and the spin</span>
+<span class="sd">        weighted spherical harmonics.</span>
+
+<span class="sd">        This is computed as:</span>
+
+<span class="sd">        .. math::</span>
+
+<span class="sd">             h_+(r,t)</span>
+<span class="sd">             -     i h_\times(r,t) = \sum_{l=2}^{l=l_{\mathrm{max}}}</span>
+<span class="sd">             \sum_{m=-l}^{m=l} h(r, t)^{lm} {}_{-2}Y_{lm}(\theta, \phi)</span>
+
+<span class="sd">        :param theta: Meridional observation angle.</span>
+<span class="sd">        :type theta: float</span>
+<span class="sd">        :param phi: Azimuthal observation angle.</span>
+<span class="sd">        :type phi: float</span>
+<span class="sd">        :param pcut: Period that enters the fixed-frequency integration.</span>
+<span class="sd">                     Typically, the longest physical period in the signal.</span>
+<span class="sd">        :type pcut: float</span>
+<span class="sd">        :param window_function: If not None, apply window_function to the</span>
+<span class="sd">                                series before computing the strain.</span>
+<span class="sd">        :type window_function: callable, str, or None</span>
+<span class="sd">        :param trim_ends: If True, a portion of the resulting strain is removed</span>
+<span class="sd">                          at both the initial and final times. The amount removed</span>
+<span class="sd">                          is equal to ``pcut``.</span>
+<span class="sd">        :type trim_ends: bool</span>
+<span class="sd">        :param l_max: Ignore multipoles with ``l &gt; l_max``</span>
+<span class="sd">        :type l_max: int</span>
+
+<span class="sd">        :returns: :math:`r (h^+ - i rh^\times)`</span>
+<span class="sd">        :rtype: :py:class:`~.TimeSeries`</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># Here we use the BaseClass method total_function_on_available_lm</span>
+        <span class="c1"># This function loops over all the available (l, m) (with l &lt; l_max)</span>
+        <span class="c1"># and invokes a function that takes as arguments the timeseries</span>
+        <span class="c1"># of the multipole component, l, m, r, and potentially others.</span>
+        <span class="c1"># Then, it accumulates all the results, and return the sum.</span>
+
+        <span class="c1"># This is a closure with theta, phi, pcut, and window_function and</span>
+        <span class="c1"># trim_ends</span>
+        <span class="k">def</span> <span class="nf">compute_strain</span><span class="p">(</span><span class="n">_1</span><span class="p">,</span> <span class="n">mult_l</span><span class="p">,</span> <span class="n">mult_m</span><span class="p">,</span> <span class="n">_2</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">gw_utils</span><span class="o">.</span><span class="n">sYlm</span><span class="p">(</span>
+                <span class="o">-</span><span class="mi">2</span><span class="p">,</span> <span class="n">mult_l</span><span class="p">,</span> <span class="n">mult_m</span><span class="p">,</span> <span class="n">theta</span><span class="p">,</span> <span class="n">phi</span>
+            <span class="p">)</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_strain_lm</span><span class="p">(</span>
+                <span class="n">mult_l</span><span class="p">,</span>
+                <span class="n">mult_m</span><span class="p">,</span>
+                <span class="n">pcut</span><span class="p">,</span>
+                <span class="o">*</span><span class="n">args</span><span class="p">,</span>
+                <span class="n">window_function</span><span class="o">=</span><span class="n">window_function</span><span class="p">,</span>
+                <span class="n">trim_ends</span><span class="o">=</span><span class="n">trim_ends</span><span class="p">,</span>
+                <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+            <span class="p">)</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">total_function_on_available_lm</span><span class="p">(</span><span class="n">compute_strain</span><span class="p">,</span> <span class="n">l_max</span><span class="o">=</span><span class="n">l_max</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="GravitationalWavesOneDet.get_observed_strain"><a class="viewcode-back" href="../../cactus_waves_ref.html#kuibit.cactus_waves.GravitationalWavesOneDet.get_observed_strain">[docs]</a>    <span class="k">def</span> <span class="nf">get_observed_strain</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">right_ascension</span><span class="p">,</span>
+        <span class="n">declination</span><span class="p">,</span>
+        <span class="n">time_utc</span><span class="p">,</span>
+        <span class="n">theta_gw</span><span class="p">,</span>
+        <span class="n">phi_gw</span><span class="p">,</span>
+        <span class="n">pcut</span><span class="p">,</span>
+        <span class="o">*</span><span class="n">args</span><span class="p">,</span>
+        <span class="n">window_function</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">polarization</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+        <span class="n">l_max</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">trim_ends</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Return the strain accounting for all the multipoles and the spin</span>
+<span class="sd">        weighted spherical harmonics as observed by Hanford, Livingston and</span>
+<span class="sd">        Virgo.</span>
+
+<span class="sd">        .. math::</span>
+
+<span class="sd">             h_+(r,t)</span>
+<span class="sd">             -     i h_\times(r,t) = \sum_{l=2}^{l=l_{\mathrm{max}}}</span>
+<span class="sd">             \sum_{m=-l}^{m=l} h(r, t)^{lm} {}_{-2}Y_{lm}(\theta, \phi)</span>
+
+<span class="sd">        Here \theta and \phi are the arguments ``theta_gw`` and ``phi_gw``.</span>
+
+<span class="sd">        Then, for each detector</span>
+
+<span class="sd">        .. math::</span>
+
+<span class="sd">             h(r,t) = F_\times h_\times(theta_gw, phi_gw) + F_+ h_+(theta_gw, phi_gw)</span>
+
+<span class="sd">        :param right_ascension: Right ascension of the source in degrees.</span>
+<span class="sd">        :type right_ascension: float</span>
+<span class="sd">        :param declination: Declination of the source in degrees.</span>
+<span class="sd">        :type declination: float</span>
+<span class="sd">        :param time_utc: UTC time of the event</span>
+<span class="sd">        :type declination: str</span>
+<span class="sd">        :param theta_gw, phi_gw: Spherical coordinates of the observer</span>
+<span class="sd">                                 from the binary&#39;s frame, taking the angular</span>
+<span class="sd">                                 momentum of the binary to</span>
+<span class="sd">                                 point along the z-axis.</span>
+<span class="sd">        :type theta_gw, phi_gw: floats</span>
+<span class="sd">        :param pcut: Period that enters the fixed-frequency integration.</span>
+<span class="sd">                     Typically, the longest physical period in the signal.</span>
+<span class="sd">        :type pcut: float</span>
+<span class="sd">        :param window_function: If not None, apply ``window_function`` to the</span>
+<span class="sd">                                series before computing the strain.</span>
+<span class="sd">        :type window_function: callable, str, or None</span>
+<span class="sd">        :param trim_ends: If True, a portion of the resulting strain is removed</span>
+<span class="sd">                          at both the initial and final times. The amount removed</span>
+<span class="sd">                          is equal to pcut.</span>
+<span class="sd">        :type trim_ends: bool</span>
+<span class="sd">        :param l_max: Ignore multipoles with l &gt; l_max</span>
+<span class="sd">        :type l_max: int</span>
+
+<span class="sd">        :returns: :math:`r (h^+ - i rh^\times)`</span>
+<span class="sd">        :rtype: Detectors of :py:class:`~.TimeSeries`</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># Detectors contains three fields, one for each detector</span>
+        <span class="n">antennas</span> <span class="o">=</span> <span class="n">gw_utils</span><span class="o">.</span><span class="n">antenna_responses_from_sky_localization</span><span class="p">(</span>
+            <span class="n">right_ascension</span><span class="p">,</span> <span class="n">declination</span><span class="p">,</span> <span class="n">time_utc</span><span class="p">,</span> <span class="n">polarization</span>
+        <span class="p">)</span>
+
+        <span class="c1"># We collect all the strains in a list, then we convert it in a</span>
+        <span class="c1"># nameduples Detectors</span>
+        <span class="n">strains</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="c1"># Loop over the detectors in Detectors</span>
+        <span class="c1"># antennas and coords are namedtuples Detectors</span>
+        <span class="k">for</span> <span class="p">(</span><span class="n">Fc</span><span class="p">,</span> <span class="n">Fp</span><span class="p">)</span> <span class="ow">in</span> <span class="n">antennas</span><span class="p">:</span>
+            <span class="n">strain</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_strain</span><span class="p">(</span>
+                <span class="n">theta_gw</span><span class="p">,</span>
+                <span class="n">phi_gw</span><span class="p">,</span>
+                <span class="n">pcut</span><span class="p">,</span>
+                <span class="o">*</span><span class="n">args</span><span class="p">,</span>
+                <span class="n">window_function</span><span class="o">=</span><span class="n">window_function</span><span class="p">,</span>
+                <span class="n">l_max</span><span class="o">=</span><span class="n">l_max</span><span class="p">,</span>
+                <span class="n">trim_ends</span><span class="o">=</span><span class="n">trim_ends</span><span class="p">,</span>
+                <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+            <span class="p">)</span>
+            <span class="c1"># What have that:</span>
+            <span class="c1"># strain.real = hp</span>
+            <span class="c1"># strain.imag = -hc</span>
+            <span class="n">strains</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">strain</span><span class="o">.</span><span class="n">real</span><span class="p">()</span> <span class="o">*</span> <span class="n">Fp</span> <span class="o">-</span> <span class="n">strain</span><span class="o">.</span><span class="n">imag</span><span class="p">()</span> <span class="o">*</span> <span class="n">Fc</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">Detectors</span><span class="p">(</span><span class="o">*</span><span class="n">strains</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="GravitationalWavesOneDet.get_power_lm"><a class="viewcode-back" href="../../cactus_waves_ref.html#kuibit.cactus_waves.GravitationalWavesOneDet.get_power_lm">[docs]</a>    <span class="k">def</span> <span class="nf">get_power_lm</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mult_l</span><span class="p">,</span> <span class="n">mult_m</span><span class="p">,</span> <span class="n">pcut</span><span class="p">):</span>
+        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Return the instantaneous power in the mode (l, m).</span>
+
+<span class="sd">        This is computed with Eq. (9.139) in Baumgarte Shapiro.</span>
+
+<span class="sd">        .. math::</span>
+
+<span class="sd">        \frac{dE}{\dt}(r, t) = \frac{r^2}{16 \pi}</span>
+<span class="sd">        \sum_{l=2}^{l=l_{\mathrm{max}}} \sum_{m=-l}^{m=l}</span>
+<span class="sd">        \psi^{lm}_4(\theta, \phi, r, t)</span>
+
+<span class="sd">        :param mult_l: l multipole moment.</span>
+<span class="sd">        :type mult_t: int</span>
+<span class="sd">        :param mult_m: m multipole moment.</span>
+<span class="sd">        :type mult_m: int</span>
+<span class="sd">        :param pcut: Period that enters the fixed-frequency integration.</span>
+<span class="sd">                     Typically, the longest physical period in the signal.</span>
+<span class="sd">        :type pcut: float</span>
+
+<span class="sd">        :returns: Instantaneous power in the mode ``(l, m)`` as a function of</span>
+<span class="sd">                  time.</span>
+<span class="sd">        :rtype: :py:class:`~TimeSeries`</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">psi4_int</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_fixed_frequency_integrated</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">[(</span><span class="n">mult_l</span><span class="p">,</span> <span class="n">mult_m</span><span class="p">)],</span> <span class="n">pcut</span><span class="p">,</span> <span class="n">order</span><span class="o">=</span><span class="mi">1</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">dist</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">/</span> <span class="p">(</span><span class="mi">16</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">)</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">psi4_int</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span></div>
+
+<div class="viewcode-block" id="GravitationalWavesOneDet.get_energy_lm"><a class="viewcode-back" href="../../cactus_waves_ref.html#kuibit.cactus_waves.GravitationalWavesOneDet.get_energy_lm">[docs]</a>    <span class="k">def</span> <span class="nf">get_energy_lm</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mult_l</span><span class="p">,</span> <span class="n">mult_m</span><span class="p">,</span> <span class="n">pcut</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Return the cumulative energy lost in the mode (l, m).</span>
+
+<span class="sd">        :param mult_l: l multipole moment.</span>
+<span class="sd">        :type mult_t: int</span>
+<span class="sd">        :param mult_m: m multipole moment.</span>
+<span class="sd">        :type mult_m: int</span>
+<span class="sd">        :param pcut: Period that enters the fixed-frequency integration.</span>
+<span class="sd">                     Typically, the longest physical period in the signal.</span>
+<span class="sd">        :type pcut: float</span>
+
+<span class="sd">        :returns: Energy lost up to the time t in the mode ``(l, m)`` as a function of</span>
+<span class="sd">                  time.</span>
+<span class="sd">        :rtype: :py:class:`~TimeSeries`</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_power_lm</span><span class="p">(</span><span class="n">mult_l</span><span class="p">,</span> <span class="n">mult_m</span><span class="p">,</span> <span class="n">pcut</span><span class="p">)</span><span class="o">.</span><span class="n">integrated</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="GravitationalWavesOneDet.get_total_power"><a class="viewcode-back" href="../../cactus_waves_ref.html#kuibit.cactus_waves.GravitationalWavesOneDet.get_total_power">[docs]</a>    <span class="k">def</span> <span class="nf">get_total_power</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pcut</span><span class="p">,</span> <span class="n">l_max</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Return the total power in all the modes up to ``l_max``.</span>
+
+<span class="sd">        :param pcut: Period that enters the fixed-frequency integration.</span>
+<span class="sd">                     Typically, the longest physical period in the signal.</span>
+<span class="sd">        :type pcut: float</span>
+<span class="sd">        :param l_max: Ignore multipoles with l &gt; l_max</span>
+<span class="sd">        :type l_max: int</span>
+
+<span class="sd">        :returns: Instantaneous total power in the modes up to  ``l_max``</span>
+<span class="sd">                  as a function of time.</span>
+<span class="sd">        :rtype: :py:class:`~TimeSeries`</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">def</span> <span class="nf">powlm</span><span class="p">(</span><span class="n">_1</span><span class="p">,</span> <span class="n">mult_l</span><span class="p">,</span> <span class="n">mult_m</span><span class="p">,</span> <span class="n">_2</span><span class="p">):</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_power_lm</span><span class="p">(</span><span class="n">mult_l</span><span class="p">,</span> <span class="n">mult_m</span><span class="p">,</span> <span class="n">pcut</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">total_function_on_available_lm</span><span class="p">(</span><span class="n">powlm</span><span class="p">,</span> <span class="n">l_max</span><span class="o">=</span><span class="n">l_max</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="GravitationalWavesOneDet.get_total_energy"><a class="viewcode-back" href="../../cactus_waves_ref.html#kuibit.cactus_waves.GravitationalWavesOneDet.get_total_energy">[docs]</a>    <span class="k">def</span> <span class="nf">get_total_energy</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pcut</span><span class="p">,</span> <span class="n">l_max</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Return the cumulative energy lost in all the modes up to ``l_max``.</span>
+
+<span class="sd">        :param pcut: Period that enters the fixed-frequency integration.</span>
+<span class="sd">                     Typically, the longest physical period in the signal.</span>
+<span class="sd">        :type pcut: float</span>
+<span class="sd">        :param l_max: Ignore multipoles with l &gt; l_max</span>
+<span class="sd">        :type l_max: int</span>
+
+<span class="sd">        :returns: Cumulative total energy lost up to time in the modes up to  ``l_max``</span>
+<span class="sd">                  as a function of time.</span>
+<span class="sd">        :rtype: :py:class:`~TimeSeries`</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_total_power</span><span class="p">(</span><span class="n">pcut</span><span class="p">,</span> <span class="n">l_max</span><span class="p">)</span><span class="o">.</span><span class="n">integrated</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="GravitationalWavesOneDet.get_torque_z_lm"><a class="viewcode-back" href="../../cactus_waves_ref.html#kuibit.cactus_waves.GravitationalWavesOneDet.get_torque_z_lm">[docs]</a>    <span class="k">def</span> <span class="nf">get_torque_z_lm</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mult_l</span><span class="p">,</span> <span class="n">mult_m</span><span class="p">,</span> <span class="n">pcut</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Return the instantaneous torque in the z axis in the mode (l, m).</span>
+
+<span class="sd">        This is computed with Eq. (9.140) in Baumgarte Shapiro (or 9.137)</span>
+
+<span class="sd">        :param mult_l: l multipole moment.</span>
+<span class="sd">        :type mult_t: int</span>
+<span class="sd">        :param mult_m: m multipole moment.</span>
+<span class="sd">        :type mult_m: int</span>
+<span class="sd">        :returns: Instantaneous total torque in the z direction in the mode (l, m)</span>
+<span class="sd">                  as a function of time.</span>
+<span class="sd">        :rtype: :py:class:`~TimeSeries`</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># This is what we are going to implement</span>
+        <span class="c1"># The foruma is dJ/dt = r**2/16pi m (dot(A)B - dot(B)*A)</span>
+        <span class="c1"># where ddot(A) = psi4.real and ddot(B) = -psi4.imag</span>
+        <span class="c1"># So, A - i B = \int\int psi4, and</span>
+        <span class="c1"># dot(A) - i dot(B) = \int psi4</span>
+        <span class="c1">#</span>
+        <span class="c1"># Considering that:</span>
+        <span class="c1"># (A - i B) (dot(A) - i dot(B)) =</span>
+        <span class="c1"># = A dot(A) + B dot(B) - i A dot(B) - i B dot(A)</span>
+        <span class="c1">#</span>
+        <span class="c1"># To get the integrand for the angular momentum we can evaluate</span>
+        <span class="c1"># (A + i B) (dot(A) - i dot(B)) =</span>
+        <span class="c1"># = A dot(A) - B dot(B) - i A dot(B) + i B dot(A)</span>
+        <span class="c1"># and take the imaginary part. So,</span>
+        <span class="c1"># torque = - Im(conj(\int\int psi4) * \int psi4)</span>
+
+        <span class="n">psi4_int1</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_fixed_frequency_integrated</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">[(</span><span class="n">mult_l</span><span class="p">,</span> <span class="n">mult_m</span><span class="p">)],</span> <span class="n">pcut</span>
+        <span class="p">)</span>
+        <span class="c1"># We need to integrate twice</span>
+        <span class="n">psi4_int2</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_fixed_frequency_integrated</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">[(</span><span class="n">mult_l</span><span class="p">,</span> <span class="n">mult_m</span><span class="p">)],</span> <span class="n">pcut</span><span class="p">,</span> <span class="n">order</span><span class="o">=</span><span class="mi">2</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">dist</span> <span class="o">**</span> <span class="mi">2</span>
+            <span class="o">/</span> <span class="p">(</span><span class="mi">16</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">)</span>
+            <span class="o">*</span> <span class="n">mult_m</span>
+            <span class="o">*</span> <span class="p">(</span><span class="n">psi4_int1</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">conj</span><span class="p">(</span><span class="n">psi4_int2</span><span class="p">))</span><span class="o">.</span><span class="n">imag</span><span class="p">()</span>
+        <span class="p">)</span></div>
+
+<div class="viewcode-block" id="GravitationalWavesOneDet.get_angular_momentum_z_lm"><a class="viewcode-back" href="../../cactus_waves_ref.html#kuibit.cactus_waves.GravitationalWavesOneDet.get_angular_momentum_z_lm">[docs]</a>    <span class="k">def</span> <span class="nf">get_angular_momentum_z_lm</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mult_l</span><span class="p">,</span> <span class="n">mult_m</span><span class="p">,</span> <span class="n">pcut</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Return the cumulative angular momentum lost in the mode (l, m).</span>
+
+<span class="sd">        :param mult_l: l multipole moment.</span>
+<span class="sd">        :type mult_t: int</span>
+<span class="sd">        :param mult_m: l multipole moment.</span>
+<span class="sd">        :type mult_m: int</span>
+<span class="sd">        :param pcut: Period that enters the fixed-frequency integration.</span>
+<span class="sd">                     Typically, the longest physical period in the signal.</span>
+<span class="sd">        :type pcut: float</span>
+
+<span class="sd">        :returns: Cumulative angular momentum in the z direction in the mode (l, m)</span>
+<span class="sd">                  as a function of time.</span>
+<span class="sd">        :rtype: :py:class:`~TimeSeries`</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_torque_z_lm</span><span class="p">(</span><span class="n">mult_l</span><span class="p">,</span> <span class="n">mult_m</span><span class="p">,</span> <span class="n">pcut</span><span class="p">)</span><span class="o">.</span><span class="n">integrated</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="GravitationalWavesOneDet.get_total_torque_z"><a class="viewcode-back" href="../../cactus_waves_ref.html#kuibit.cactus_waves.GravitationalWavesOneDet.get_total_torque_z">[docs]</a>    <span class="k">def</span> <span class="nf">get_total_torque_z</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pcut</span><span class="p">,</span> <span class="n">l_max</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Return the total torque z in all the modes up to ``l_max``.</span>
+
+<span class="sd">        :param pcut: Period that enters the fixed-frequency integration.</span>
+<span class="sd">                     Typically, the longest physical period in the signal.</span>
+<span class="sd">        :type pcut: float</span>
+<span class="sd">        :param l_max: Ignore multipoles with l &gt; l_max</span>
+<span class="sd">        :type l_max: int</span>
+
+<span class="sd">        :returns: Instantaneous total torque up to time in the modes up to  ``l_max``</span>
+<span class="sd">                  as a function of time.</span>
+<span class="sd">        :rtype: :py:class:`~TimeSeries`</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">def</span> <span class="nf">torqzlm</span><span class="p">(</span><span class="n">_1</span><span class="p">,</span> <span class="n">mult_l</span><span class="p">,</span> <span class="n">mult_m</span><span class="p">,</span> <span class="n">_2</span><span class="p">):</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_torque_z_lm</span><span class="p">(</span><span class="n">mult_l</span><span class="p">,</span> <span class="n">mult_m</span><span class="p">,</span> <span class="n">pcut</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">total_function_on_available_lm</span><span class="p">(</span><span class="n">torqzlm</span><span class="p">,</span> <span class="n">l_max</span><span class="o">=</span><span class="n">l_max</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="GravitationalWavesOneDet.get_total_angular_momentum_z"><a class="viewcode-back" href="../../cactus_waves_ref.html#kuibit.cactus_waves.GravitationalWavesOneDet.get_total_angular_momentum_z">[docs]</a>    <span class="k">def</span> <span class="nf">get_total_angular_momentum_z</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pcut</span><span class="p">,</span> <span class="n">l_max</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Return the cumulative angular momentum lost in all the modes up to</span>
+<span class="sd">        ``l_max``.</span>
+
+<span class="sd">        :param pcut: Period that enters the fixed-frequency integration.</span>
+<span class="sd">                     Typically, the longest physical period in the signal.</span>
+<span class="sd">        :type pcut: float</span>
+<span class="sd">        :param l_max: Ignore multipoles with l &gt; l_max</span>
+<span class="sd">        :type l_max: int</span>
+
+<span class="sd">        :returns: Cumulative angular momentum up to time in the modes up to  ``l_max``</span>
+<span class="sd">                  as a function of time.</span>
+<span class="sd">        :rtype: :py:class:`~TimeSeries`</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_total_torque_z</span><span class="p">(</span><span class="n">pcut</span><span class="p">,</span> <span class="n">l_max</span><span class="o">=</span><span class="n">l_max</span><span class="p">)</span><span class="o">.</span><span class="n">integrated</span><span class="p">()</span></div></div>
+
+
+<div class="viewcode-block" id="ElectromagneticWavesOneDet"><a class="viewcode-back" href="../../cactus_waves_ref.html#kuibit.cactus_waves.ElectromagneticWavesOneDet">[docs]</a><span class="k">class</span> <span class="nc">ElectromagneticWavesOneDet</span><span class="p">(</span><span class="n">mp</span><span class="o">.</span><span class="n">MultipoleOneDet</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Electromagnetic waves computed with the Newman-Penrose approach, using Phi2.</span>
+
+<span class="sd">    (These are useful when studying charged black holes, for instance)</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dist</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">dist</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+
+<div class="viewcode-block" id="ElectromagneticWavesOneDet.get_power_lm"><a class="viewcode-back" href="../../cactus_waves_ref.html#kuibit.cactus_waves.ElectromagneticWavesOneDet.get_power_lm">[docs]</a>    <span class="k">def</span> <span class="nf">get_power_lm</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mult_l</span><span class="p">,</span> <span class="n">mult_m</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Return the instantaneous power in the mode (l, m).</span>
+
+<span class="sd">        This is computed with Eq. 2.23 in 1311.6483</span>
+
+<span class="sd">        :param mult_l: l multipole moment.</span>
+<span class="sd">        :type mult_t: int</span>
+<span class="sd">        :param mult_m: m multipole moment.</span>
+<span class="sd">        :type mult_m: int</span>
+<span class="sd">        :returns: Instantaneous power in the mode ``(l, m)`` as a function of</span>
+<span class="sd">                  time.</span>
+<span class="sd">        :rtype: :py:class:`~TimeSeries`</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">dist</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">/</span> <span class="p">(</span><span class="mi">4</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">)</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="bp">self</span><span class="p">[(</span><span class="n">mult_l</span><span class="p">,</span> <span class="n">mult_m</span><span class="p">)])</span> <span class="o">**</span> <span class="mi">2</span>
+        <span class="p">)</span></div>
+
+<div class="viewcode-block" id="ElectromagneticWavesOneDet.get_energy_lm"><a class="viewcode-back" href="../../cactus_waves_ref.html#kuibit.cactus_waves.ElectromagneticWavesOneDet.get_energy_lm">[docs]</a>    <span class="k">def</span> <span class="nf">get_energy_lm</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mult_l</span><span class="p">,</span> <span class="n">mult_m</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Return the cumulative energy lost in the mode (l, m).</span>
+
+<span class="sd">        :param mult_l: l multipole moment.</span>
+<span class="sd">        :type mult_t: int</span>
+<span class="sd">        :param mult_m: m multipole moment.</span>
+<span class="sd">        :type mult_m: int</span>
+
+<span class="sd">        :returns: Energy lost up to the time t in the mode ``(l, m)`` as a function of</span>
+<span class="sd">                  time.</span>
+<span class="sd">        :rtype: :py:class:`~TimeSeries`</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_power_lm</span><span class="p">(</span><span class="n">mult_l</span><span class="p">,</span> <span class="n">mult_m</span><span class="p">)</span><span class="o">.</span><span class="n">integrated</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="ElectromagneticWavesOneDet.get_total_power"><a class="viewcode-back" href="../../cactus_waves_ref.html#kuibit.cactus_waves.ElectromagneticWavesOneDet.get_total_power">[docs]</a>    <span class="k">def</span> <span class="nf">get_total_power</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">l_max</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Return the total power in all the modes up to ``l_max``.</span>
+
+<span class="sd">        :param l_max: Ignore multipoles with l &gt; l_max</span>
+<span class="sd">        :type l_max: int</span>
+
+<span class="sd">        :returns: Instantaneous total power in the modes up to  ``l_max``</span>
+<span class="sd">                  as a function of time.</span>
+<span class="sd">        :rtype: :py:class:`~TimeSeries`</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">def</span> <span class="nf">powlm</span><span class="p">(</span><span class="n">_1</span><span class="p">,</span> <span class="n">mult_l</span><span class="p">,</span> <span class="n">mult_m</span><span class="p">,</span> <span class="n">_2</span><span class="p">):</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_power_lm</span><span class="p">(</span><span class="n">mult_l</span><span class="p">,</span> <span class="n">mult_m</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">total_function_on_available_lm</span><span class="p">(</span><span class="n">powlm</span><span class="p">,</span> <span class="n">l_max</span><span class="o">=</span><span class="n">l_max</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="ElectromagneticWavesOneDet.get_total_energy"><a class="viewcode-back" href="../../cactus_waves_ref.html#kuibit.cactus_waves.ElectromagneticWavesOneDet.get_total_energy">[docs]</a>    <span class="k">def</span> <span class="nf">get_total_energy</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">l_max</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Return the cumulative energy lost in all the modes up to l_max.</span>
+
+<span class="sd">        :param l_max: Ignore multipoles with l &gt; l_max</span>
+<span class="sd">        :type l_max: int</span>
+
+<span class="sd">        :returns: Cumulative total energy lost up to time in the modes up to  ``l_max``</span>
+<span class="sd">                  as a function of time.</span>
+<span class="sd">        :rtype: :py:class:`~TimeSeries`</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_total_power</span><span class="p">(</span><span class="n">l_max</span><span class="o">=</span><span class="n">l_max</span><span class="p">)</span><span class="o">.</span><span class="n">integrated</span><span class="p">()</span></div></div>
+
+    <span class="c1"># Angular momentum is not computed by any public thorns.</span>
+
+
+<div class="viewcode-block" id="WavesDir"><a class="viewcode-back" href="../../cactus_waves_ref.html#kuibit.cactus_waves.WavesDir">[docs]</a><span class="k">class</span> <span class="nc">WavesDir</span><span class="p">(</span><span class="n">mp</span><span class="o">.</span><span class="n">MultipoleAllDets</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;This class provides acces gravitational-wave data at different radii.</span>
+
+<span class="sd">    It is based on :py:class:`~.MultipoleAllDets` with the difference that</span>
+<span class="sd">    takes as input :py:class:`~.SimDir`. Objects inside</span>
+<span class="sd">    :py:class:`~.MultipoleAllDets` are redefined as</span>
+<span class="sd">    :py:class:`~.GravitationalWavesDet`.</span>
+
+<span class="sd">    This class is an abstract class meant to be derived to describe gravitational waves</span>
+<span class="sd">        and electromagnetic waves.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sd</span><span class="p">,</span> <span class="n">l_min</span><span class="p">,</span> <span class="n">var</span><span class="p">,</span> <span class="n">derived_type_one_det</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Constructor.</span>
+
+<span class="sd">        ``derived_type_one_det`` is the type that the values of this</span>
+<span class="sd">        dictionary-like object has to have.</span>
+
+<span class="sd">        :param sd: Simulation directory.</span>
+<span class="sd">        :type sd: :py:class:`~.SimDir`</span>
+<span class="sd">        :param l_min: Minimum value of ``l`` to consider.</span>
+<span class="sd">        :type l_min: int</span>
+<span class="sd">        :param var: Name of the variable that has be consider</span>
+<span class="sd">        :type var: str (Psi4 or Phi2)</span>
+<span class="sd">        :param derived_type_one_det: Class of the derived object that</span>
+<span class="sd">                                     has to be initialized.</span>
+<span class="sd">        :type derived_type_one_det: class</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">sd</span><span class="p">,</span> <span class="n">simdir</span><span class="o">.</span><span class="n">SimDir</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;Input is not SimDir&quot;</span><span class="p">)</span>
+
+        <span class="c1"># This module is morally equivalent to mp.MultipoleAllDets because &quot;it</span>
+        <span class="c1"># is indexed by radius&quot;. However, it is the main point of access to GW</span>
+        <span class="c1"># data, so we keep naming consistent and call it &quot;Dir&quot; and let it have</span>
+        <span class="c1"># it interface with a SimDir.</span>
+
+        <span class="n">data</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="c1"># We have to collect data only if var is available</span>
+        <span class="k">if</span> <span class="n">var</span> <span class="ow">in</span> <span class="n">sd</span><span class="o">.</span><span class="n">multipoles</span><span class="p">:</span>
+
+            <span class="n">psi4_mpalldets</span> <span class="o">=</span> <span class="n">sd</span><span class="o">.</span><span class="n">multipoles</span><span class="p">[</span><span class="n">var</span><span class="p">]</span>
+
+            <span class="c1"># Now we have to prepare the data for the constructor of the base class</span>
+            <span class="c1"># The data has format:</span>
+            <span class="c1"># (multipole_l, multipole_m, extraction_radius, timeseries)</span>
+            <span class="k">for</span> <span class="n">radius</span><span class="p">,</span> <span class="n">det</span> <span class="ow">in</span> <span class="n">psi4_mpalldets</span><span class="o">.</span><span class="n">_dets</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                <span class="k">for</span> <span class="n">mult_l</span><span class="p">,</span> <span class="n">mult_m</span><span class="p">,</span> <span class="n">tts</span> <span class="ow">in</span> <span class="n">det</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">mult_l</span> <span class="o">&gt;=</span> <span class="n">l_min</span><span class="p">:</span>
+                        <span class="n">data</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">mult_l</span><span class="p">,</span> <span class="n">mult_m</span><span class="p">,</span> <span class="n">radius</span><span class="p">,</span> <span class="n">tts</span><span class="p">))</span>
+
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+
+        <span class="c1"># Next step is to change the type of the objects from MultipoleOneDet</span>
+        <span class="c1"># to GravitationalWaveOneDet (or ElectromagneticWavesDir).</span>
+        <span class="c1">#</span>
+        <span class="c1"># To do this, we redefine the objects by instantiating new ones with</span>
+        <span class="c1"># the same data</span>
+        <span class="k">for</span> <span class="n">dist</span><span class="p">,</span> <span class="n">det</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dets</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_dets</span><span class="p">[</span><span class="n">dist</span><span class="p">]</span> <span class="o">=</span> <span class="n">derived_type_one_det</span><span class="p">(</span><span class="n">det</span><span class="o">.</span><span class="n">dist</span><span class="p">,</span> <span class="n">det</span><span class="o">.</span><span class="n">data</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="GravitationalWavesDir"><a class="viewcode-back" href="../../cactus_waves_ref.html#kuibit.cactus_waves.GravitationalWavesDir">[docs]</a><span class="k">class</span> <span class="nc">GravitationalWavesDir</span><span class="p">(</span><span class="n">WavesDir</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;This class provides access gravitational-wave data at different radii as</span>
+<span class="sd">     computed from the Psi4 Weyl scalar.</span>
+
+<span class="sd">    This is dictionary-like objects with keys the extraction radii and values</span>
+<span class="sd">    the corresponding :py:class:`~.GravitationalWavesOneDet`.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sd</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">sd</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="s2">&quot;Psi4&quot;</span><span class="p">,</span> <span class="n">GravitationalWavesOneDet</span><span class="p">)</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_extrapolate_waves_to_infinity</span><span class="p">(</span><span class="n">waves</span><span class="p">,</span> <span class="n">times</span><span class="p">,</span> <span class="n">radii</span><span class="p">,</span> <span class="n">mass</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">order</span><span class="o">=</span><span class="mi">2</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Extrapolate ``waves`` to infinity and evaluate the result on the given</span>
+<span class="sd">        ``times``.</span>
+
+<span class="sd">        We follow what described in 1307.5307.</span>
+
+<span class="sd">        In practice, ``waves`` is a list of strains at the extraction radii ``radii``.</span>
+
+<span class="sd">        :param waves: Waves that have to be extrapolated (strains computed at</span>
+<span class="sd">                      different radii).</span>
+<span class="sd">        :type waves: list of :py:class:`~.TimeSeries`</span>
+<span class="sd">        :param times: Times at which the waves have to be evaluated</span>
+<span class="sd">        :type times: float or 1D NumPy array</span>
+<span class="sd">        :param radii: Extraction radii. It has to be that radii[i] correspond to</span>
+<span class="sd">                      waves[i].</span>
+<span class="sd">        :type radii: float or 1D NumPy array</span>
+<span class="sd">        :param mass: ADM mass of the system.</span>
+<span class="sd">        :type mass: float</span>
+<span class="sd">        :param order: Order of the extrapolation.</span>
+<span class="sd">        :type order: int</span>
+
+<span class="sd">        :returns: Waves evaluated at the retarded times.</span>
+<span class="sd">        :rtype: List of :py:class:`~.TimeSeries`</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># Follows what done in the NRAR collaboration (1307.5307)</span>
+        <span class="c1"># This is what we are going to do:</span>
+
+        <span class="c1"># 1. Assume that the spacetime is almost Schwarzschild with mass mass.</span>
+        <span class="c1"># 2. Choose a set of retarded times u_i where GWs have to be evaluated</span>
+        <span class="c1"># 3. Compute the coordinate times t_i that correspond to the retarded</span>
+        <span class="c1">#    times u_i at the radius r. This uses tortoise coordinates.</span>
+        <span class="c1"># 4. Interpolate the waveforms at the coordinate times corresponding to</span>
+        <span class="c1">#    the retarded times u_i for different extraction radii.</span>
+        <span class="c1">#    Now our waves are so that they are evaluated at different t_i but</span>
+        <span class="c1">#    at the same u_i.</span>
+        <span class="c1"># 5. We do this process for a bunch of extraction radii</span>
+        <span class="c1">#    (rex1, rex2, rex3, ...)</span>
+        <span class="c1">#    So, we should have wave1, wave2, wave3, with all the same number</span>
+        <span class="c1">#    of points that correspond to the same retarded time.</span>
+        <span class="c1"># 6. For each element in u_i, fit all the waves (wave1, wave2, ...)</span>
+        <span class="c1">#    with a polynomial of the form a_n/r^n.</span>
+
+        <span class="k">if</span> <span class="n">order</span> <span class="o">&gt;=</span> <span class="nb">len</span><span class="p">(</span><span class="n">radii</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span>
+                <span class="s2">&quot;Order too high for the number of extraction radii provided&quot;</span>
+            <span class="p">)</span>
+
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">radii</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="n">waves</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span>
+                <span class="s2">&quot;Numbers of extraction radii and waves do not agree&quot;</span>
+            <span class="p">)</span>
+        <span class="c1"># Make sure radii is an array</span>
+        <span class="n">radii</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">radii</span><span class="p">)</span>
+
+        <span class="c1"># First, we resample the waves so that they have all the same retarded</span>
+        <span class="c1"># times.</span>
+        <span class="c1">#</span>
+        <span class="c1"># Take the timeseries w, and return a timeseries evaluated at</span>
+        <span class="c1"># coordinate times that correspond to the retarded times ui at the</span>
+        <span class="c1"># coordinate extraction radius rex. mass is the ADM mass (needed to</span>
+        <span class="c1"># compute tortoise radius).</span>
+        <span class="n">waves_retarded</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="n">w</span><span class="o">.</span><span class="n">resampled</span><span class="p">(</span>
+                <span class="n">gw_utils</span><span class="o">.</span><span class="n">retarded_times_to_coordinate_times</span><span class="p">(</span><span class="n">times</span><span class="p">,</span> <span class="n">r</span><span class="p">,</span> <span class="n">mass</span><span class="p">)</span>
+            <span class="p">)</span>
+            <span class="k">for</span> <span class="n">w</span><span class="p">,</span> <span class="n">r</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">waves</span><span class="p">,</span> <span class="n">radii</span><span class="p">)</span>
+        <span class="p">]</span>
+
+        <span class="c1"># We perform the fit in ir=1/r instead of r</span>
+        <span class="c1"># So, technically, we are fitting sum^p_n=0 a_n * ir^n</span>
+        <span class="n">inverse_radii</span> <span class="o">=</span> <span class="mf">1.0</span> <span class="o">/</span> <span class="n">radii</span>
+
+        <span class="c1"># waves_matrix is a table. Each line is a different time, each column</span>
+        <span class="c1"># is a different extraction radius. We will polyfit on every fixed line</span>
+        <span class="c1"># to get the extrapolated waves.</span>
+        <span class="n">waves_matrix</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">([</span><span class="n">w</span><span class="o">.</span><span class="n">y</span> <span class="k">for</span> <span class="n">w</span> <span class="ow">in</span> <span class="n">waves_retarded</span><span class="p">])</span><span class="o">.</span><span class="n">T</span>
+
+        <span class="c1"># Polyfit returns coefficient ordered from the highest to the lowest</span>
+        <span class="c1"># This is why we take the [-1]</span>
+        <span class="n">extrapolated_wave</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="n">np</span><span class="o">.</span><span class="n">polyfit</span><span class="p">(</span><span class="n">inverse_radii</span><span class="p">,</span> <span class="n">waves_at_t</span><span class="p">,</span> <span class="n">order</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+            <span class="k">for</span> <span class="n">waves_at_t</span> <span class="ow">in</span> <span class="n">waves_matrix</span>
+        <span class="p">]</span>
+
+        <span class="k">return</span> <span class="n">ts</span><span class="o">.</span><span class="n">TimeSeries</span><span class="p">(</span><span class="n">times</span><span class="p">,</span> <span class="n">extrapolated_wave</span><span class="p">)</span>
+
+<div class="viewcode-block" id="GravitationalWavesDir.extrapolate_strain_lm_to_infinity"><a class="viewcode-back" href="../../cactus_waves_ref.html#kuibit.cactus_waves.GravitationalWavesDir.extrapolate_strain_lm_to_infinity">[docs]</a>    <span class="k">def</span> <span class="nf">extrapolate_strain_lm_to_infinity</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">mult_l</span><span class="p">,</span>
+        <span class="n">mult_m</span><span class="p">,</span>
+        <span class="n">pcut</span><span class="p">,</span>
+        <span class="n">detectors_distances</span><span class="p">,</span>
+        <span class="n">retarded_times</span><span class="p">,</span>
+        <span class="o">*</span><span class="n">args</span><span class="p">,</span>
+        <span class="n">window_function</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">trim_ends</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">mass</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+        <span class="n">order</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
+        <span class="n">extrapolate_amplitude_phase</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Extrapolate strains to spatial infinity with the method described in 1307.5307.</span>
+
+<span class="sd">        If ``extrapolate_amplitude_phase`` is True, extrapolate amplitude and</span>
+<span class="sd">        phase of the complex strain instead of real and imaginary parts.</span>
+
+<span class="sd">        TODO: Test this function!</span>
+
+<span class="sd">        [Equation (29)]</span>
+
+<span class="sd">        :param mult_l: Multipolar component l.</span>
+<span class="sd">        :type mult_l: int</span>
+<span class="sd">        :param mult_m: Multipolar component m.</span>
+<span class="sd">        :type mult_m: int</span>
+<span class="sd">        :param pcut: Period that enters the fixed-frequency integration.</span>
+<span class="sd">                     Typically, the longest physical period in the signal.</span>
+<span class="sd">        :type pcut: float</span>
+<span class="sd">        :param retarded_times: Times at which the waves have to be evaluated</span>
+<span class="sd">        :type retarded_times: float or 1D NumPy array</span>
+<span class="sd">        :param detectors_distances: Extraction radii</span>
+<span class="sd">        :type detectors_distances: 1D NumPy array</span>
+<span class="sd">        :param mass: ADM mass of the system</span>
+<span class="sd">        :type mass: float</span>
+<span class="sd">        :param order: Order of the extrapolation.</span>
+<span class="sd">        :type order: int</span>
+<span class="sd">        :param window_function: If not None, apply window_function to the</span>
+<span class="sd">                                series before computing the strain.</span>
+<span class="sd">        :type window_function: callable, str, or None</span>
+<span class="sd">        :param trim_ends: If True, a portion of the resulting strain is removed</span>
+<span class="sd">                          at both the initial and final times. The amount removed</span>
+<span class="sd">                          is equal to pcut.</span>
+<span class="sd">        :type trim_ends: bool</span>
+<span class="sd">        :param extrapolate_amplitude_phase: If True, extrapolate phase and amplitude, if</span>
+<span class="sd">                                            False, extrapolate real and imaginary parts.</span>
+<span class="sd">        :type extrapolate_amplitude_phase: int</span>
+
+<span class="sd">        :returns: Waves evaluated at the retarded times.</span>
+<span class="sd">        :rtype: List of :py:class:`~.TimeSeries`</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">dists</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">detectors_distances</span><span class="p">)</span>
+
+        <span class="c1"># Strains are in the form r * h_+ - i r * h_cross</span>
+        <span class="n">strains</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="bp">self</span><span class="p">[</span><span class="n">dist</span><span class="p">]</span><span class="o">.</span><span class="n">get_strain_lm</span><span class="p">(</span>
+                <span class="n">mult_l</span><span class="p">,</span>
+                <span class="n">mult_m</span><span class="p">,</span>
+                <span class="n">pcut</span><span class="p">,</span>
+                <span class="o">*</span><span class="n">args</span><span class="p">,</span>
+                <span class="n">window_function</span><span class="o">=</span><span class="n">window_function</span><span class="p">,</span>
+                <span class="n">trim_ends</span><span class="o">=</span><span class="n">trim_ends</span><span class="p">,</span>
+                <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+            <span class="p">)</span>
+            <span class="k">for</span> <span class="n">dist</span> <span class="ow">in</span> <span class="n">dists</span>
+        <span class="p">]</span>
+
+        <span class="c1"># Resample the waves to have all the same retarded times</span>
+        <span class="n">strains_resampled</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="n">strain</span><span class="o">.</span><span class="n">resampled</span><span class="p">(</span>
+                <span class="n">gw_utils</span><span class="o">.</span><span class="n">retarded_times_to_coordinate_times</span><span class="p">(</span>
+                    <span class="n">retarded_times</span><span class="p">,</span> <span class="n">dist</span><span class="p">,</span> <span class="n">mass</span>
+                <span class="p">)</span>
+            <span class="p">)</span>
+            <span class="k">for</span> <span class="n">strain</span><span class="p">,</span> <span class="n">dist</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">strains</span><span class="p">,</span> <span class="n">dists</span><span class="p">)</span>
+        <span class="p">]</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">extrapolate_amplitude_phase</span><span class="p">:</span>
+            <span class="n">extrapolated</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_extrapolate_waves_to_infinity</span><span class="p">(</span>
+                <span class="n">strains_resampled</span><span class="p">,</span>
+                <span class="n">retarded_times</span><span class="p">,</span>
+                <span class="n">dists</span><span class="p">,</span>
+                <span class="n">mass</span><span class="p">,</span>
+                <span class="n">order</span><span class="o">=</span><span class="n">order</span><span class="p">,</span>
+            <span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">strains_amplitudes</span> <span class="o">=</span> <span class="p">[</span><span class="n">s</span><span class="o">.</span><span class="n">abs</span><span class="p">()</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">strains_resampled</span><span class="p">]</span>
+            <span class="n">strains_phases</span> <span class="o">=</span> <span class="p">[</span><span class="n">s</span><span class="o">.</span><span class="n">unfolded_phase</span><span class="p">()</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">strains_resampled</span><span class="p">]</span>
+
+            <span class="n">extrapolated_amp</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_extrapolate_waves_to_infinity</span><span class="p">(</span>
+                <span class="n">strains_amplitudes</span><span class="p">,</span>
+                <span class="n">retarded_times</span><span class="p">,</span>
+                <span class="n">dists</span><span class="p">,</span>
+                <span class="n">mass</span><span class="p">,</span>
+                <span class="n">order</span><span class="o">=</span><span class="n">order</span><span class="p">,</span>
+            <span class="p">)</span>
+            <span class="n">extrapolated_phase</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_extrapolate_waves_to_infinity</span><span class="p">(</span>
+                <span class="n">strains_phases</span><span class="p">,</span>
+                <span class="n">retarded_times</span><span class="p">,</span>
+                <span class="n">dists</span><span class="p">,</span>
+                <span class="n">mass</span><span class="p">,</span>
+                <span class="n">order</span><span class="o">=</span><span class="n">order</span><span class="p">,</span>
+            <span class="p">)</span>
+
+            <span class="n">extrapolated</span> <span class="o">=</span> <span class="n">extrapolated_amp</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="mi">1</span><span class="n">j</span> <span class="o">*</span> <span class="n">extrapolated_phase</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">extrapolated</span></div></div>
+
+
+<div class="viewcode-block" id="ElectromagneticWavesDir"><a class="viewcode-back" href="../../cactus_waves_ref.html#kuibit.cactus_waves.ElectromagneticWavesDir">[docs]</a><span class="k">class</span> <span class="nc">ElectromagneticWavesDir</span><span class="p">(</span><span class="n">WavesDir</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;This class provides access electromagnetic-wave data at different radii as</span>
+<span class="sd">     computed from the Phi2 Weyl scalar.</span>
+
+<span class="sd">    This is dictionary-like objects with keys the extraction radii and values</span>
+<span class="sd">    the corresponding :py:class:`~.ElectromagneticWavesOneDet`.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sd</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">sd</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="s2">&quot;Phi2&quot;</span><span class="p">,</span> <span class="n">ElectromagneticWavesOneDet</span><span class="p">)</span></div>
+</pre></div>
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="../../index.html">
+              <img class="logo" src="../../_static/logo.png" alt="Logo"/>
+            </a></p>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">kuibit 1.0.0a12 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../index.html" >Module code</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">kuibit.cactus_waves</a></li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2020-2021, Gabriele Bozzola.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 3.4.3.
+    </div>
+  </body>
+</html>

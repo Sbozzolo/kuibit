@@ -1,7 +1,7 @@
-Reference on postcactus.timeseries
+Reference on kuibit.timeseries
 ==================================
 
-.. automodule:: postcactus.timeseries
+.. automodule:: kuibit.timeseries
    :members:
    :inherited-members:
 

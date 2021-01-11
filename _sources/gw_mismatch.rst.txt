@@ -1,9 +1,9 @@
 Mismatch between gravitational waves
 ====================================
 
-``PostCactus`` has a module to compute the mismatch between two gravitational
+``kuibit`` has a module to compute the mismatch between two gravitational
 waves (currently, only for the :math:`l=2`, :math:`m=2` mode). See,
-:ref:`gw_mismatch_ref:Reference on postcactus.gw_mismatch`, for a comprehensive
+:ref:`gw_mismatch_ref:Reference on kuibit.gw_mismatch`, for a comprehensive
 reference.
 
 .. warning::
@@ -87,16 +87,16 @@ bounds to make sure that you are localizing the absolute maximum.
 
 .. warning::
 
-   ``PostCactus`` has no way to determine if the maximum found is the absolute
+   ``kuibit`` has no way to determine if the maximum found is the absolute
    one. It is your job to set the limits of the search in a meaningful way.
 
-To make up for the algorithmic inefficiency, ``PostCactus`` optionally uses
+To make up for the algorithmic inefficiency, ``kuibit`` optionally uses
 `numba <https://numba.pydata.org/>`_ to speed up the search. Using numba enables
 high-resolution searches that would not be possible otherwise. Numba compiles
 the main mismatch function (:py:meth:`~_mismatch_core_numerical`) to machine
 code to achieve native performances. Numba requires a substantial overhead to do
 this, so for small searches it is not convenient to use it. Therefore,
-``PostCactus`` activates numba only when the size of the parameter space is
+``kuibit`` activates numba only when the size of the parameter space is
 larger than 2500 elements. If you want to use numba with fewer elements, you can
 set ``force_numba`` to ``True``. This may be faster in some cases (for example,
 for very long arrays). To use numba, make sure that the package is available (it

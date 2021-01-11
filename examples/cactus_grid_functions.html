@@ -6,7 +6,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Working with Cactus grid functions &#8212; PostCactus 3.0.0a12 documentation</title>
+    <title>Working with Cactus grid functions &#8212; kuibit 1.0.0a12 documentation</title>
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
     <link rel="stylesheet" href="../_static/bizstyle.css" type="text/css" />
     
@@ -42,7 +42,7 @@
         <li class="right" >
           <a href="grid_data.html" title="Working with grid data"
              accesskey="P">previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../index.html">PostCactus 3.0.0a12 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">kuibit 1.0.0a12 documentation</a> &#187;</li>
         <li class="nav-item nav-item-this"><a href="">Working with Cactus grid functions</a></li> 
       </ul>
     </div>  
@@ -288,7 +288,7 @@ div.rendered_html tbody tr:hover {
 <div class="section" id="Working-with-Cactus-grid-functions">
 <h1>Working with Cactus grid functions<a class="headerlink" href="#Working-with-Cactus-grid-functions" title="Permalink to this headline">¶</a></h1>
 <p>In this notebook, we learn how to read data and represent it with the classes in the <a class="reference internal" href="../grid_data.html"><span class="doc">grid_data</span></a> module. Make sure to see the example on how to work in grid data to better make use of this module (<a class="reference internal" href="grid_data.html"><span class="doc">grid_data</span></a>).</p>
-<p>As for all the objects in <code class="docutils literal notranslate"><span class="pre">PostCactus</span></code>, the module for reading grid data is also structured hierarchically. Each level of this hierarchy focuses on a different subset of all the grid functions. The first level deals with dimensionality, the second on the available grid functions, and the third will be a specific variable. (Don’t worry if this is not clear, if will become clear in a second).</p>
+<p>As for all the objects in <code class="docutils literal notranslate"><span class="pre">kuibit</span></code>, the module for reading grid data is also structured hierarchically. Each level of this hierarchy focuses on a different subset of all the grid functions. The first level deals with dimensionality, the second on the available grid functions, and the third will be a specific variable. (Don’t worry if this is not clear, if will become clear in a second).</p>
 <p>(This notebook is meant to be converted in Sphinx documentation and not used directly.)</p>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
@@ -297,8 +297,8 @@ div.rendered_html tbody tr:hover {
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
 <span></span><span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="kn">from</span> <span class="nn">postcactus.simdir</span> <span class="kn">import</span> <span class="n">SimDir</span>
-<span class="kn">from</span> <span class="nn">postcactus.grid_data</span> <span class="kn">import</span> <span class="n">UniformGrid</span>
+<span class="kn">from</span> <span class="nn">kuibit.simdir</span> <span class="kn">import</span> <span class="n">SimDir</span>
+<span class="kn">from</span> <span class="nn">kuibit.grid_data</span> <span class="kn">import</span> <span class="n">UniformGrid</span>
 
 <span class="o">%</span><span class="k">matplotlib</span> inline
 </pre></div>
@@ -352,7 +352,7 @@ Available grid data of dimension 3D (xyz):
 </pre></div></div>
 </div>
 <p>To work with a variable, we first have to select what dimension we are interested in. In this example we will focus on 2D and 3D data. In case you want lower-dimensional cuts from higher-dimensional data (e.g, the plane with z=2 from 3D data), you can ask for 3D data and use the functions in <code class="docutils literal notranslate"><span class="pre">UniformGridData</span></code> to slice the data as you need.</p>
-<p>Some of the variables listed here are stored in HDF5 files, other in ASCII files. When you can, always use HDF5 data, as the performances are orders of magnitude better. <code class="docutils literal notranslate"><span class="pre">PostCactus</span></code> can handle both, but when HDF5 files are available, those are preferred.</p>
+<p>Some of the variables listed here are stored in HDF5 files, other in ASCII files. When you can, always use HDF5 data, as the performances are orders of magnitude better. <code class="docutils literal notranslate"><span class="pre">kuibit</span></code> can handle both, but when HDF5 files are available, those are preferred.</p>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
 </pre></div>
@@ -409,7 +409,7 @@ Available grid data of dimension 3D (xyz):
 <div class="output_area docutils container">
 <div class="highlight"><pre>
 [0, 1, 2]
-rho0 is a &lt;class &#39;postcactus.grid_data.HierarchicalGridData&#39;&gt;
+rho0 is a &lt;class &#39;kuibit.grid_data.HierarchicalGridData&#39;&gt;
 The value of rho0 at the point (1, 2) is 1.29285273509444e-10
 </pre></div></div>
 </div>
@@ -455,7 +455,7 @@ The value of rho0 at the point (1, 2) is 1.29285273509444e-10
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-&lt;matplotlib.colorbar.Colorbar at 0x7f3fda0e18d0&gt;
+&lt;matplotlib.colorbar.Colorbar at 0x7f3b816cde50&gt;
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
@@ -466,7 +466,7 @@ The value of rho0 at the point (1, 2) is 1.29285273509444e-10
 </div>
 </div>
 <p>The resolution is poor because we are only using 10 points (since this documentation is generated on the fly, so we want to keep the computation cost small).</p>
-<p>We can also make 3D plots. A simple package to made 3D plots is <code class="docutils literal notranslate"><span class="pre">mayavi</span></code>.</p>
+<p>Here we are plotting the quantities directly so we can how how to access the data. However, <code class="docutils literal notranslate"><span class="pre">kuibit</span></code> has also a module for plotting, which simplifies most of these operations. We can also make 3D plots. A simple package to made 3D plots is <code class="docutils literal notranslate"><span class="pre">mayavi</span></code>.</p>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
 </pre></div>
@@ -547,13 +547,13 @@ Notebook initialized with png backend.
         <li class="right" >
           <a href="grid_data.html" title="Working with grid data"
              >previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../index.html">PostCactus 3.0.0a12 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">kuibit 1.0.0a12 documentation</a> &#187;</li>
         <li class="nav-item nav-item-this"><a href="">Working with Cactus grid functions</a></li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">
-        &#169; Copyright 2021, Gabriele Bozzola and Wolfgang Kastaun.
-      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 3.4.1.
+        &#169; Copyright 2020-2021, Gabriele Bozzola.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 3.4.3.
     </div>
   </body>
 </html>
