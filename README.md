@@ -7,6 +7,7 @@
 [![GPLv3
 license](https://img.shields.io/badge/License-GPLv3-blue.svg)](http://perso.crans.org/besson/LICENSE.html)
 [![Get help on Telegram](https://img.shields.io/badge/Get%20help%20on-Telegram-blue.svg)](https://t.me/kuibit)
+[![PyPI version](https://badge.fury.io/py/motionpicture.svg)](https://badge.fury.io/py/kuibit)
 [![DeepSource](https://static.deepsource.io/deepsource-badge-light-mini.svg)](https://deepsource.io/gh/Sbozzolo/kuibit/?ref=repository-badge)
 
 # kuibit
