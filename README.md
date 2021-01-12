@@ -31,14 +31,6 @@ The minimum version of Python required is 3.6.
 
 If you intend to develop ``kuibit``, follow the instruction below.
 
-## Help!
-
-Users and developers of ``kuibit`` meet in the [Telegram
-group](https://t.me/kuibit). If you have any problem or suggestion, that's a
-good place where to discuss it. Alternatively, you can also open an issue on
-GitHub.
-
-
 ### Development
 
 For development, we use [poetry](https://python-poetry.org/). Poetry simplifies
@@ -53,6 +45,13 @@ This will download all the needed dependencies in a sandboxed environment (the
 ``kuibit``, just run ``poetry shell``. This will drop you in a shell in
 which you have full access to ``kuibit`` in "development" version, and its
 dependencies (also the one needed only for development).
+
+## Help!
+
+Users and developers of ``kuibit`` meet in the [Telegram
+group](https://t.me/kuibit). If you have any problem or suggestion, that's a
+good place where to discuss it. Alternatively, you can also open an issue on
+GitHub.
 
 ## Documentation
 
