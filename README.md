@@ -1,5 +1,5 @@
 <p align="center">
-<img src="https://github.com/Sbozzolo/kuibit/raw/master/logo.png" height="150">
+<img src="https://github.com/Sbozzolo/kuibit/raw/master/logo.png" height="120">
 </p>
 
 [![codecov](https://codecov.io/gh/Sbozzolo/kuibit/branch/master/graph/badge.svg)](https://codecov.io/gh/Sbozzolo/kuibit)
