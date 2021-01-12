@@ -59,6 +59,13 @@ The minimum version of Python required is 3.6.
 If you intend to extend/develop ``kuibit``, follow the instruction on
 `GitHub <https://github.com/Sbozzolo/kuibit>`_.
 
+Help!
+------------
+
+Users and developers of ``kuibit`` meet in the `Telegram group
+<https://t.me/kuibit>`_. If you have any problem or suggestion, that's a good
+place where to discuss it. Alternatively, you can also open an issue on GitHub.
+
 Usage
 -----
 
