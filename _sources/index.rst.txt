@@ -50,7 +50,7 @@ For a full list of available features, see the :doc:`features page <features>`.
 Installation
 ------------
 
-``kuibit`` is available in PyPI. To install it with `pip`
+``kuibit`` is available in PyPI. To install it with ``pip``
 
 .. code-block:: bash
 
@@ -94,8 +94,6 @@ Usage
 Examples
 --------
 
-You can additional examples in the folder ``example_bins``.
-
 .. toctree::
    :maxdepth: 1
 
@@ -105,6 +103,8 @@ You can additional examples in the folder ``example_bins``.
    examples/cactus_grid_functions.ipynb
    examples/cactus_horizons.ipynb
    examples/gravitational_waves.ipynb
+
+You can additional examples in the folder ``examples`` in the ``experimental``.
 
 Reference material (classes, functions, ...)
 ---------------------------------------------
