@@ -125,6 +125,7 @@ def add_figure_to_parser(parser, default_figname=None):
         "--fig-extension",
         type=str,
         default="png",
+        env_var="KBIT_FIG_EXTENSION",
         help="Extension of the output figure (default: %(default)s)."
         " This is ignored when the output is a TikZ figure, "
         "in which case the extension is .tikz",
