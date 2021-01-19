@@ -47,7 +47,7 @@ For a full list of available features, see the :doc:`features page <features>`.
 - Handle unit conversion, in particular from geometrized to physical
   (:py:mod:`~.unitconv`).
 - Write command-line scripts (:py:mod:`~.argparse_helper`).
-- Visualize data with matplotlib (:py:mod:`~.visualize`).
+- Visualize data with ``matplotlib`` (:py:mod:`~.visualize_matplotlib`).
 
 Installation
 ------------
@@ -100,8 +100,8 @@ Usage
    grid_data.rst
    sensitivity_curves.rst
    unitconv.rst
+   visualize_matplotlib.rst
    argparse_helper.rst
-   visualize.rst
 
 Tutorials
 ---------
@@ -161,8 +161,8 @@ Reference material (classes, functions, ...)
    grid_data_ref.rst
    sensitivity_curves_ref.rst
    unitconv_ref.rst
+   visualize_matplotlib_ref.rst
    argparse_helper_ref.rst
-   visualize_ref.rst
 
 What is a kuibit?
 -----------------

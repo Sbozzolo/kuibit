@@ -1,8 +1,9 @@
-Visualizing data
-=============================
+Visualizing data with matplotlib
+================================
 
-The module :py:mod:`~.visualize` contains functions to immediately visualize
-Einstein Toolkit data. (:ref:`visualize_ref:Reference on postcactus.visualize`)
+The module :py:mod:`~.visualize_matplotlib` contains functions to easily
+visualize Einstein Toolkit data with ``matplotlib``
+(:ref:`visualize_matplotlib_ref:Reference on kuibit.visualize_matplotlib`).
 
 Grid functions
 --------------
@@ -31,14 +32,14 @@ adding text in the bottom right corner with
 Implementation details
 ----------------------
 
-In :py:mod:`~.visualize`, we embrace duck-typing. Ideally, we want to be able to
-plot what the user wants to plot, taking care of the nuisances. This includes:
-numpy arrays, :py:class:`~.UniformGridData`, :py:class:`~.HierarchicalGridData`,
-and so on. To abstract away the details of how to handle all the different
-types, we have decorators. For example, with the decorator
-:py:class:`~._preprocess_plot_grid`, we give support to handling all the
-differnt types to any function that takes ``data`` and and ``coordiantes`` as
-arguments. This can be used for other functions too.
+In :py:mod:`~.visualize_matplotlib`, we embrace duck-typing. Ideally, we want to
+be able to plot what the user wants to plot, taking care of the nuisances. This
+includes: numpy arrays, :py:class:`~.UniformGridData`,
+:py:class:`~.HierarchicalGridData`, and so on. To abstract away the details of
+how to handle all the different types, we have decorators. For example, with the
+decorator :py:class:`~._preprocess_plot_grid`, we give support to handling all
+the differnt types to any function that takes ``data`` and and ``coordiantes``
+as arguments. This can be used for other functions too.
 
 The methods :py:mod:`~.plot_color` and :py:mod:`~.plot_contourf` call a
 primitive :py:mod:`~._plot_grid` which implements all the different types of

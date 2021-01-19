@@ -15,8 +15,8 @@
 # You should have received a copy of the GNU General Public License along with
 # this program; if not, see <https://www.gnu.org/licenses/>.
 
-"""The :py:mod:`~.visualize` module provides functions to plot ``PostCactus``
-objects with matplotlib.
+"""The :py:mod:`~.visualize_matplotlib` module provides functions to plot
+``kuibit`` objects with matplotlib.
 
 """
 import warnings
