@@ -133,5 +133,5 @@ Credits
 
 The code was originally developed by Wolfgang Kastaun. This fork completely
 rewrites the original code, adding emphasis on documentation, testing, and
-extensibility. The icon in the logo was designed by `freepik.com
+extensibility. The logo contains elements designed by `freepik.com
 <https://freepik.com/>`_.
