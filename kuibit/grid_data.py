@@ -552,7 +552,8 @@ class UniformGrid:
 
         If ``as_same_shape`` is True return the coordinates as an array with the
         same shape of self and with values the coordinates. This is useful for
-        computations involving the coordinates.
+        computations involving the coordinates. The output of ``as_same_shape``
+        is the same as using ``np.mgrid``.
 
         :param as_meshgrid: If True, return the coordinates as meshgrid.
         :type as_meshgrid: bool
@@ -561,6 +562,7 @@ class UniformGrid:
                               and with values of a given coordinate.
                               For instance, if ``self.num_dimension = 3`` there
                               will be three lists with ``shape = self.shape``.
+                              This is equivalent to ``np.mgrid``.
         :type as_same_shape: bool
         :returns:  Grid coordinates.
         :rtype:   list of NumPy arrays with the same shape as grid
