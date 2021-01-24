@@ -1,0 +1,143 @@
+
+
+<!doctype html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>kuibit.visualize_mayavi &#8212; kuibit 1.0.0b0 documentation</title>
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/bizstyle.css" type="text/css" />
+    
+    <script id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+    <script src="../../_static/jquery.js"></script>
+    <script src="../../_static/underscore.js"></script>
+    <script src="../../_static/doctools.js"></script>
+    <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script type="text/x-mathjax-config">MathJax.Hub.Config({"tex2jax": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true, "ignoreClass": "document", "processClass": "math|output_area"}})</script>
+    <script src="../../_static/bizstyle.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0" />
+    <!--[if lt IE 9]>
+    <script src="_static/css3-mediaqueries.js"></script>
+    <![endif]-->
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">kuibit 1.0.0b0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../index.html" accesskey="U">Module code</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">kuibit.visualize_mayavi</a></li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for kuibit.visualize_mayavi</h1><div class="highlight"><pre>
+<span></span><span class="ch">#!/usr/bin/env python3</span>
+
+
+<span class="c1"># Copyright (C) 2020-2021 Gabriele Bozzola</span>
+<span class="c1">#</span>
+<span class="c1"># This program is free software; you can redistribute it and/or modify it under</span>
+<span class="c1"># the terms of the GNU General Public License as published by the Free Software</span>
+<span class="c1"># Foundation; either version 3 of the License, or (at your option) any later</span>
+<span class="c1"># version.</span>
+<span class="c1">#</span>
+<span class="c1"># This program is distributed in the hope that it will be useful, but WITHOUT</span>
+<span class="c1"># ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS</span>
+<span class="c1"># FOR A PARTICULAR PURPOSE. See the GNU General Public License for more</span>
+<span class="c1"># details.</span>
+<span class="c1">#</span>
+<span class="c1"># You should have received a copy of the GNU General Public License along with</span>
+<span class="c1"># this program; if not, see &lt;https://www.gnu.org/licenses/&gt;.</span>
+
+<span class="sd">&quot;&quot;&quot;The :py:mod:`~.visualize_mayavi` module provides functions to perform 3D</span>
+<span class="sd">renderings of ``kuibit`` objects using mayavi.</span>
+
+<span class="sd">The functions provided are:</span>
+<span class="sd">- :py:func:`~.enable_mayavi_offscreen_rendering` disables mayavi&#39;s interactive</span>
+<span class="sd">  window. This function must be called in batch scripts.</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">from</span> <span class="nn">mayavi</span> <span class="kn">import</span> <span class="n">mlab</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
+<span class="kn">from</span> <span class="nn">kuibit.cactus_horizons</span> <span class="kn">import</span> <span class="n">OneHorizon</span>
+
+<div class="viewcode-block" id="disable_interactive_window"><a class="viewcode-back" href="../../visualize_mayavi_ref.html#kuibit.visualize_mayavi.disable_interactive_window">[docs]</a><span class="k">def</span> <span class="nf">disable_interactive_window</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;Disable mayavi interactive window.</span>
+
+<span class="sd">    mayavi requires a window to be drawn to produce the image. With this</span>
+<span class="sd">    function, this window is created but is not presented to the user.</span>
+<span class="sd">    Always invoke this function in scripts!</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">mlab</span><span class="o">.</span><span class="n">options</span><span class="o">.</span><span class="n">offscreen</span> <span class="o">=</span> <span class="kc">True</span></div>
+
+<div class="viewcode-block" id="save"><a class="viewcode-back" href="../../visualize_mayavi_ref.html#kuibit.visualize_mayavi.save">[docs]</a><span class="k">def</span> <span class="nf">save</span><span class="p">(</span><span class="n">outputpath</span><span class="p">,</span> <span class="n">figure_extension</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Save figure to outputpath with figure_extension.</span>
+
+<span class="sd">    :param outputpath:  Output path without extension.</span>
+<span class="sd">    :type outputpath:  str</span>
+<span class="sd">    :param figure_extension: Extension of the figure to save.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">mlab</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">outputpath</span><span class="si">}</span><span class="s2">.</span><span class="si">{</span><span class="n">figure_extension</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span></div>
+</pre></div>
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="../../index.html">
+              <img class="logo" src="../../_static/logo.png" alt="Logo"/>
+            </a></p>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">kuibit 1.0.0b0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../index.html" >Module code</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">kuibit.visualize_mayavi</a></li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2020-2021, Gabriele Bozzola.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 3.4.3.
+    </div>
+  </body>
+</html>
