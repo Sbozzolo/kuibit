@@ -92,10 +92,10 @@ too.
 
 ## What is a _kuibit_?
 
-A kuibit (harvest pole) is the tool traditionally used by the Tohono O'odham
-people to reach the fruit of the Saguaro cacti during the harvesting season. In
-the same way, this package is a tool that you can use to collect the fruit of
-your `Cactus` simulations.
+A kuibit (also known as _kukuipad_, meaning harvest pole) is the tool
+traditionally used by the Tohono O'odham people to reach the fruit of the
+Saguaro cacti during the harvesting season. In the same way, this package is a
+tool that you can use to collect the fruit of your `Cactus` simulations.
 
 ## Credits
 
