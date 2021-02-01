@@ -209,9 +209,10 @@ class UniformGrid:
             self.__dx = np.atleast_1d(np.array(dx, dtype=float))
             self._check_dims(self.dx, "dx")
             expected_x1 = self.x0 + (self.shape - 1) * self.dx
-            if x1 is not None:
-                if not np.allclose(expected_x1, x1, atol=1e-14):
-                    raise ValueError("Incompatible x1 and dx")
+            if (x1 is not None) and (
+                not np.allclose(expected_x1, x1, atol=1e-14)
+            ):
+                raise ValueError("Incompatible x1 and dx")
 
         if num_ghost is None:
             self.__num_ghost = np.zeros_like(self.shape)
