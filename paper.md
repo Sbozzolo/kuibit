@@ -19,18 +19,18 @@ bibliography: paper.bib
 
 # Summary
 
-`kuibit` [^0][^3] is a Python library for analyzing simulations performed with
-the `Einstein Toolkit`[^1] [@einsteintoolkit, @einsteintoolkit2], a free and
-open-source code for numerical relativity and relativistic astrophysics. Over
-the past years, numerical simulations like the ones enabled by the `Einstein
-Toolkit` have become a critical tool in modeling, predicting, and understanding
-several astrophysical phenomena, including binary black hole or neutron star
-mergers. As a result of the recent detections of gravitational waves by the
-LIGO-Virgo collaboration, these studies are at the forefront of scientific
-research. The package presented in this paper, `kuibit`, provides an intuitive
-infrastructure to read and represent the output of the `Einstein Toolkit`. This
-simplifies analyzing simulations and significantly lowers the barrier in
-learning how to use the tool.
+`kuibit` [^0] is a Python library for analyzing simulations performed
+with the `Einstein Toolkit`[^1] [@einsteintoolkit, @einsteintoolkit2], a free
+and open-source code for numerical relativity and relativistic astrophysics.
+Over the past years, numerical simulations like the ones enabled by the
+`Einstein Toolkit` have become a critical tool in modeling, predicting, and
+understanding several astrophysical phenomena, including binary black hole or
+neutron star mergers. As a result of the recent detections of gravitational
+waves by the LIGO-Virgo collaboration, these studies are at the forefront of
+scientific research. The package presented in this paper, `kuibit`, provides an
+intuitive infrastructure to read and represent the output of the `Einstein
+Toolkit`. This simplifies analyzing simulations and significantly lowers the
+barrier in learning how to use the tool.
 
 # Statement of need
 
@@ -68,7 +68,7 @@ from geometrized units to physical), it has the noise curves of known detectors,
 or it computes gravitational-waves from simulation data.
 
 `kuibit` is based on the same design (and in various cases, implementation
-details too) of a pre-existing package named `PostCactus` [^4]. Like
+details too) of a pre-existing package named `PostCactus` [@pycactus]. Like
 `PostCactus`, `kuibit` has two groups of modules. The first is to define custom
 data-types for time series, Fourier spectra, multipolar decompositions, and grid
 data (both on uniform grids and mesh-refined ones). The second group consists of
@@ -97,8 +97,8 @@ it encourages contributions.
 Gabriele Bozzola is supported by the Frontera Fellowship by the Frontera
 Fellowship by the Texas Advanced Computing Center (TACC). Frontera is founded by
 NSF grant OAC-1818253. Gabriele Bozzola wishes to thank Wolfgang Kastaun for
-publicly releasing his `PostCactus` package [^4] without which, `kuibit` would
-not exist.
+publicly releasing his `PostCactus` package [@pycactus] without which, `kuibit`
+would not exist.
 
 # References
 
@@ -113,9 +113,3 @@ instance, it is known that `kuibit` can be used to analyze `Illinois GRMHD`
 
 [^2]: Capabilities similar to those of `kuibit` are offered by `SimulationTools`
 [@simulationtools], which is a Wolfram Mathematica package.
-
-[^3]: [https://github.com/Sbozzolo/kuibit](https://github.com/Sbozzolo/kuibit)
-
-[^4]: [https://github.com/wokast/PyCactus](https://github.com/wokast/PyCactus)
-
-
