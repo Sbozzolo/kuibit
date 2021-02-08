@@ -9,6 +9,8 @@ without having to worry about computational details (e.g., handling simulation
 restarts, reading HDF5 files, ...). ``kuibit`` represent simulation data in
 a high-level and intuitive way, and provides some commonly used routines in
 numerical-relativity (e.g., computing the strain of gravitational waves).
+A video introduction about ``kuibit`` can be found on
+`YouTube <https://www.youtube.com/watch?v=7-F2xh-m31A>`_.
 
 Summary of Features
 -------------------

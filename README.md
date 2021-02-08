@@ -67,6 +67,11 @@ have to be un-evaluated. `nbsphinx` requires [pandoc](https://pandoc.org/). If
 don't have `pandoc`, you should comment out `nbsphinx` in `docs/conf.py`, or
 compiling the documentation will fail.
 
+## Videos
+
+Here is a list of videos describing `kuibit` and how to use it:
+- [Introduction on kuibit - Einstein Toolkit Seminar, 2021](https://www.youtube.com/watch?v=7-F2xh-m31A)
+
 ## Tests
 
 `kuibit` comes with a suite of unit tests. To run the tests, (in a poetry shell),
