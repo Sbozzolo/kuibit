@@ -2164,6 +2164,19 @@ class HierarchicalGridData(BaseNumerical):
         return components
 
     def __getitem__(self, key):
+        """Return the list of components at the given refinement level.
+
+        You can also consider using :py:meth:`~.get_level`, which returns a
+        single :py:class:`~.UniformGridData` if there's only one component at
+        that level (otherwise error).
+
+        :param key: Refinement level.
+        :type key: int
+
+        :returns: List of components at a given refinement level.
+        :rvalue: list of :py:class:`~.UniformGridData`
+
+        """
         return self.grid_data_dict[key]
 
     def get_level(self, ref_level):
