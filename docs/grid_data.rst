@@ -82,17 +82,17 @@ The operation considers the size of the cell, for example
 The :py:meth:`~.contains` is syntactic sugar for the same operation.
 
 To obtain all the coordinates in the grid, you can use the
-:py:meth:`~.grid_data.UnfiromGrid.coordinates` method. This can be used in thre different ways. When
-called with no arguments, the output is a list of 1D arrays. Each of these
-arrays contains the coordinates along a fixed axis. For example, for the 2D
-grid, the first array will be the x coordinates, the second the y. Finally, with
-``as_meshgrid=True``, the return value will be a NumPy meshgrid. This is useful
-for plotting. When ``as_same_shape=True`` the return value is a list of
-coordinates with the same shape of the grid itself, each element of this list is
-the value of that coordinate over the grid. This last one is the most useful way
-to do computations that involve the coordinates.
-You can obtained the coordinate as a list of coordinates along each direction
-also with the method :py:meth:`~.coordinates_1d`.
+:py:meth:`~.grid_data.UnfiromGrid.coordinates` method. This can be used in three
+different ways. When called with no arguments, the output is a list of 1D
+arrays. Each of these arrays contains the coordinates along a fixed axis. For
+example, for the 2D grid, the first array will be the x coordinates, the second
+the y. Finally, with ``as_meshgrid=True``, the return value will be a NumPy
+meshgrid. This is useful for plotting. When ``as_same_shape=True`` the return
+value is a list of coordinates with the same shape of the grid itself, each
+element of this list is the value of that coordinate over the grid. This last
+one is the most useful way to do computations that involve the coordinates. You
+can obtained the coordinate as a list of coordinates along each direction also
+with the method :py:meth:`~.coordinates_1d`.
 
 To obtain a coordinate from a multidimensional index, just use the bracket
 operator (``box[i, j]``).
@@ -188,10 +188,10 @@ Some basic useful functions are :py:meth:`~.mean`, :py:meth:`~.integral`,
 with :math:`\Delta v` being the volume of a cell.
 
 :py:class:`~.UniformGridData` can be derived along a direction with
-:py:meth:`~.grid_data.UnfiromGridData.partial_derived`, or the gradient can be calculated with meth:`~.grid_data.UnfiromGridData.gradient`.
-In both cases, the order of the derivative can be specified. The derivative
-are numerical with finite difference. Derivative are second order accurate
-everywhere.
+:py:meth:`~.grid_data.UnfiromGridData.partial_derived`, or the gradient can be
+:py:calculated with meth:`~.grid_data.UnfiromGridData.gradient`. In both cases,
+:py:the order of the derivative can be specified. The derivative are numerical
+:py:with finite difference. Derivative are second order accurate everywhere.
 
 A convenient function is :py:meth:`~.sample_function`. This takes a multivariate
 function (e.g., :math:`sin(x + y)`) and returns a :py:class:`~.UniformGridData`
@@ -205,14 +205,15 @@ function can either be relative (percentuals, as 0.01, 0.5, or so, if you enable
 ``relative=True``), or the actual number of points.
 
 You can resample the data to a new grid using the function
-:py:meth:`~.grid_data.UniformGridData.resampled`, which takes as input a :py:class:`~.UniformGrid` and
-returns a new :py:class:`~.UniformGridData` resampled on the new grid. If the
-new grid is outside the old one, you can either raise an error, of fill the
-points outside with zeros. This behavior is controlled by the flag ``ext``. When
-``ext=1``, zeros are returned, when it is 2, ``ValueError`` is raised. By
-default, :py:meth:`~.grid_data.UniformGridData.resampled` uses a multilinear interpolation, but you can
-force to use a piecewise constant interpolation with the nearest neighbors by
-setting ``piecewise_constant=True``.
+:py:meth:`~.grid_data.UniformGridData.resampled`, which takes as input a
+:py:class:`~.UniformGrid` and returns a new :py:class:`~.UniformGridData`
+resampled on the new grid. If the new grid is outside the old one, you can
+either raise an error, of fill the points outside with zeros. This behavior is
+controlled by the flag ``ext``. When ``ext=1``, zeros are returned, when it is
+2, ``ValueError`` is raised. By default,
+:py:meth:`~.grid_data.UniformGridData.resampled` uses a multilinear
+interpolation, but you can force to use a piecewise constant interpolation with
+the nearest neighbors by setting ``piecewise_constant=True``.
 
 Another useful feature is to :py:meth:`~.dx_changed`, which can be used to
 return a new :py:class:`~.UniformGridData` with different grid spacing. The new
@@ -248,7 +249,7 @@ matrix-indexed).
 HierarchicalGridData
 --------------------
 
-A :py:class:`~.HierarchicalGridData` represent data defined on a mesh-refined
+A :py:class:`~.HierarchicalGridData` represents data defined on a mesh-refined
 grid. In practice, this is a collection of :py:class:`~.UniformGridData`,
 roughly one per level. You can work directly with the
 :py:class:`~.UniformGridData` on the different levels using the brackets
@@ -257,23 +258,38 @@ operations.
 
 In many cases, one works with a nested series of refinement levels, with a
 domain that is split in multiple patches. Hence, the output data will also be in
-multiple chunks. When initializing an :py:class:`~.HierarchicalGridData`,
-kuibit will make an effort to put all the different patches back together.
-If the provided components cover an entire grid, kuibit will merge them. In
-doing this, all the ghost zone information is discarded. If kuibit finds
-that the provided components do not cover a regular grid, then it will leave
-them untouched. This is the case when one has multiple refinement centers (for
-example in binary simulations). :py:class:`~.HierarchicalGridData` is
-essentially a dictionary that maps refinement level lists of
-:py:class:`~.UniformGridData` that represent the different patches. In case
-kuibit manages to combine all the patches, then the list will have only one
-element.
+multiple chunks. When initializing an :py:class:`~.HierarchicalGridData`, kuibit
+will make an effort to put all the different patches back together. If the
+provided components cover an entire grid, kuibit will merge them. In doing this,
+all the ghost zone information is discarded. If kuibit finds that the provided
+components do not cover a regular grid, then it will leave them untouched. This
+is the case when one has multiple refinement centers (for example in binary
+simulations). :py:class:`~.HierarchicalGridData` is essentially a dictionary
+that maps refinement level to lists of :py:class:`~.UniformGridData` that
+represent the different patches. In case kuibit manages to combine all the
+patches, then the list will have only one element. You can print a
+:py:class:`~.HierarchicalGridData` to see what the structure looks like:
+
+.. code-block:: python
+
+    print(rho)
+
+    # The output will look like
+    #
+    # Available refinement levels (components):
+    # 0 (1)
+    # 1 (3)
+    # 2 (2)
+    # 3 (2)
+    # Spacing at coarsest level (0): [640. 640.]
+    # Spacing at finest level (3): [0.01 0.01]
 
 You can access the relative level using the bracket operator (e.g. ``rho[0][0]``
 is ``rho`` on the coarsest level on the 0th patch, which could be the only one).
-In many cases, the grid structure is simple and there are no multiple refinement
-centers, so one can access the level with `:py:meth:~.get_ref_level`. This method
-will work only if there's a single component.
+The two level of brackets are (in order): refinement level, then component. In
+many cases, the grid structure is simple and there are no multiple refinement
+centers, so one can access the level with `:py:meth:~.get_ref_level`. This
+method will work only if there's a single component.
 
 As for :py:class:`~.UniformGridData`, :py:class:`~.HierarchicalGridData` are
 callable and splines are used to interpolate to the requested points. This
@@ -299,18 +315,20 @@ time.
    Operations that involve resampling can be very expensive and require a lot
    of memory!
 
-Another useful method is the :py:meth:`~.grid_data.HierarchicalGridData.coordinates`, which returns a list of
+Another useful method is the
+:py:meth:`~.grid_data.HierarchicalGridData.coordinates`, which returns a list of
 :py:class:`~.HierarchicalGridData` with the same structure as the one in
 consideration but with values the various coordinates at the points. This is
 useful for computations that involve the coordinates.
 
 As it is the case for :py:class:`~.UniformGridData`, also
 :py:class:`~.HierarchicalGridData` can be derived along a direction with
-:py:meth:`~.grid_data.HierarchicalGridData.partial_derived`, or the gradient can be calculated with
-:py:meth:`~.grid_data.HierarchicalGridData.gradient`. In both cases, the order of the derivative can be
-specified. The derivative are numerical with finite difference. The result is
-a :py:class:`~.HierarchicalGridData` or a list of :py:class:`~.HierarchicalGridData`
-(for each direction).
+:py:meth:`~.grid_data.HierarchicalGridData.partial_derived`, or the gradient can
+be calculated with :py:meth:`~.grid_data.HierarchicalGridData.gradient`. In both
+cases, the order of the derivative can be specified. The derivative are
+numerical with finite difference. The result is a
+:py:class:`~.HierarchicalGridData` or a list of
+:py:class:`~.HierarchicalGridData` (for each direction).
 
 Reading data
 ------------
