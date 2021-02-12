@@ -122,17 +122,17 @@ The operation considers the size of the cell, for example</p>
 </div>
 <p>The <a class="reference internal" href="grid_data_ref.html#kuibit.grid_data.UniformGrid.contains" title="kuibit.grid_data.UniformGrid.contains"><code class="xref py py-meth docutils literal notranslate"><span class="pre">contains()</span></code></a> is syntactic sugar for the same operation.</p>
 <p>To obtain all the coordinates in the grid, you can use the
-<code class="xref py py-meth docutils literal notranslate"><span class="pre">coordinates()</span></code> method. This can be used in thre different ways. When
-called with no arguments, the output is a list of 1D arrays. Each of these
-arrays contains the coordinates along a fixed axis. For example, for the 2D
-grid, the first array will be the x coordinates, the second the y. Finally, with
-<code class="docutils literal notranslate"><span class="pre">as_meshgrid=True</span></code>, the return value will be a NumPy meshgrid. This is useful
-for plotting. When <code class="docutils literal notranslate"><span class="pre">as_same_shape=True</span></code> the return value is a list of
-coordinates with the same shape of the grid itself, each element of this list is
-the value of that coordinate over the grid. This last one is the most useful way
-to do computations that involve the coordinates.
-You can obtained the coordinate as a list of coordinates along each direction
-also with the method <a class="reference internal" href="grid_data_ref.html#kuibit.grid_data.UniformGrid.coordinates_1d" title="kuibit.grid_data.UniformGrid.coordinates_1d"><code class="xref py py-meth docutils literal notranslate"><span class="pre">coordinates_1d()</span></code></a>.</p>
+<code class="xref py py-meth docutils literal notranslate"><span class="pre">coordinates()</span></code> method. This can be used in three
+different ways. When called with no arguments, the output is a list of 1D
+arrays. Each of these arrays contains the coordinates along a fixed axis. For
+example, for the 2D grid, the first array will be the x coordinates, the second
+the y. Finally, with <code class="docutils literal notranslate"><span class="pre">as_meshgrid=True</span></code>, the return value will be a NumPy
+meshgrid. This is useful for plotting. When <code class="docutils literal notranslate"><span class="pre">as_same_shape=True</span></code> the return
+value is a list of coordinates with the same shape of the grid itself, each
+element of this list is the value of that coordinate over the grid. This last
+one is the most useful way to do computations that involve the coordinates. You
+can obtained the coordinate as a list of coordinates along each direction also
+with the method <a class="reference internal" href="grid_data_ref.html#kuibit.grid_data.UniformGrid.coordinates_1d" title="kuibit.grid_data.UniformGrid.coordinates_1d"><code class="xref py py-meth docutils literal notranslate"><span class="pre">coordinates_1d()</span></code></a>.</p>
 <p>To obtain a coordinate from a multidimensional index, just use the bracket
 operator (<code class="docutils literal notranslate"><span class="pre">box[i,</span> <span class="pre">j]</span></code>).</p>
 <p><a class="reference internal" href="grid_data_ref.html#kuibit.grid_data.UniformGrid" title="kuibit.grid_data.UniformGrid"><code class="xref py py-class docutils literal notranslate"><span class="pre">UniformGrid</span></code></a> may have dimensions that are only one point (e.g.,
@@ -208,10 +208,10 @@ removing the flat dimensions with <code class="xref py py-meth docutils literal 
 <a class="reference internal" href="grid_data_ref.html#kuibit.grid_data.UniformGridData.norm_p" title="kuibit.grid_data.UniformGridData.norm_p"><code class="xref py py-meth docutils literal notranslate"><span class="pre">norm_p()</span></code></a>, computed as</p>
 <p>with <span class="math notranslate nohighlight">\(\Delta v\)</span> being the volume of a cell.</p>
 <p><a class="reference internal" href="grid_data_ref.html#kuibit.grid_data.UniformGridData" title="kuibit.grid_data.UniformGridData"><code class="xref py py-class docutils literal notranslate"><span class="pre">UniformGridData</span></code></a> can be derived along a direction with
-<code class="xref py py-meth docutils literal notranslate"><span class="pre">partial_derived()</span></code>, or the gradient can be calculated with meth:<cite>~.grid_data.UnfiromGridData.gradient</cite>.
-In both cases, the order of the derivative can be specified. The derivative
-are numerical with finite difference. Derivative are second order accurate
-everywhere.</p>
+<code class="xref py py-meth docutils literal notranslate"><span class="pre">partial_derived()</span></code>, or the gradient can be
+:py:calculated with meth:<cite>~.grid_data.UnfiromGridData.gradient</cite>. In both cases,
+:py:the order of the derivative can be specified. The derivative are numerical
+:py:with finite difference. Derivative are second order accurate everywhere.</p>
 <p>A convenient function is <code class="xref py py-meth docutils literal notranslate"><span class="pre">sample_function()</span></code>. This takes a multivariate
 function (e.g., <span class="math notranslate nohighlight">\(sin(x + y)\)</span>) and returns a <a class="reference internal" href="grid_data_ref.html#kuibit.grid_data.UniformGridData" title="kuibit.grid_data.UniformGridData"><code class="xref py py-class docutils literal notranslate"><span class="pre">UniformGridData</span></code></a>
 sampling that function. If you already have the grid structure, you can use
@@ -222,14 +222,15 @@ one can compute percentiles with <a class="reference internal" href="grid_data_r
 function can either be relative (percentuals, as 0.01, 0.5, or so, if you enable
 <code class="docutils literal notranslate"><span class="pre">relative=True</span></code>), or the actual number of points.</p>
 <p>You can resample the data to a new grid using the function
-<a class="reference internal" href="grid_data_ref.html#kuibit.grid_data.UniformGridData.resampled" title="kuibit.grid_data.UniformGridData.resampled"><code class="xref py py-meth docutils literal notranslate"><span class="pre">resampled()</span></code></a>, which takes as input a <a class="reference internal" href="grid_data_ref.html#kuibit.grid_data.UniformGrid" title="kuibit.grid_data.UniformGrid"><code class="xref py py-class docutils literal notranslate"><span class="pre">UniformGrid</span></code></a> and
-returns a new <a class="reference internal" href="grid_data_ref.html#kuibit.grid_data.UniformGridData" title="kuibit.grid_data.UniformGridData"><code class="xref py py-class docutils literal notranslate"><span class="pre">UniformGridData</span></code></a> resampled on the new grid. If the
-new grid is outside the old one, you can either raise an error, of fill the
-points outside with zeros. This behavior is controlled by the flag <code class="docutils literal notranslate"><span class="pre">ext</span></code>. When
-<code class="docutils literal notranslate"><span class="pre">ext=1</span></code>, zeros are returned, when it is 2, <code class="docutils literal notranslate"><span class="pre">ValueError</span></code> is raised. By
-default, <a class="reference internal" href="grid_data_ref.html#kuibit.grid_data.UniformGridData.resampled" title="kuibit.grid_data.UniformGridData.resampled"><code class="xref py py-meth docutils literal notranslate"><span class="pre">resampled()</span></code></a> uses a multilinear interpolation, but you can
-force to use a piecewise constant interpolation with the nearest neighbors by
-setting <code class="docutils literal notranslate"><span class="pre">piecewise_constant=True</span></code>.</p>
+<a class="reference internal" href="grid_data_ref.html#kuibit.grid_data.UniformGridData.resampled" title="kuibit.grid_data.UniformGridData.resampled"><code class="xref py py-meth docutils literal notranslate"><span class="pre">resampled()</span></code></a>, which takes as input a
+<a class="reference internal" href="grid_data_ref.html#kuibit.grid_data.UniformGrid" title="kuibit.grid_data.UniformGrid"><code class="xref py py-class docutils literal notranslate"><span class="pre">UniformGrid</span></code></a> and returns a new <a class="reference internal" href="grid_data_ref.html#kuibit.grid_data.UniformGridData" title="kuibit.grid_data.UniformGridData"><code class="xref py py-class docutils literal notranslate"><span class="pre">UniformGridData</span></code></a>
+resampled on the new grid. If the new grid is outside the old one, you can
+either raise an error, of fill the points outside with zeros. This behavior is
+controlled by the flag <code class="docutils literal notranslate"><span class="pre">ext</span></code>. When <code class="docutils literal notranslate"><span class="pre">ext=1</span></code>, zeros are returned, when it is
+2, <code class="docutils literal notranslate"><span class="pre">ValueError</span></code> is raised. By default,
+<a class="reference internal" href="grid_data_ref.html#kuibit.grid_data.UniformGridData.resampled" title="kuibit.grid_data.UniformGridData.resampled"><code class="xref py py-meth docutils literal notranslate"><span class="pre">resampled()</span></code></a> uses a multilinear
+interpolation, but you can force to use a piecewise constant interpolation with
+the nearest neighbors by setting <code class="docutils literal notranslate"><span class="pre">piecewise_constant=True</span></code>.</p>
 <p>Another useful feature is to <a class="reference internal" href="grid_data_ref.html#kuibit.grid_data.UniformGridData.dx_changed" title="kuibit.grid_data.UniformGridData.dx_changed"><code class="xref py py-meth docutils literal notranslate"><span class="pre">dx_changed()</span></code></a>, which can be used to
 return a new <a class="reference internal" href="grid_data_ref.html#kuibit.grid_data.UniformGridData" title="kuibit.grid_data.UniformGridData"><code class="xref py py-class docutils literal notranslate"><span class="pre">UniformGridData</span></code></a> with different grid spacing. The new
 grid spacing has to be an integer multiple or an integer factor of the old one.
@@ -259,7 +260,7 @@ for an explanation.)</p>
 </div>
 <div class="section" id="hierarchicalgriddata">
 <h2>HierarchicalGridData<a class="headerlink" href="#hierarchicalgriddata" title="Permalink to this headline">¶</a></h2>
-<p>A <a class="reference internal" href="grid_data_ref.html#kuibit.grid_data.HierarchicalGridData" title="kuibit.grid_data.HierarchicalGridData"><code class="xref py py-class docutils literal notranslate"><span class="pre">HierarchicalGridData</span></code></a> represent data defined on a mesh-refined
+<p>A <a class="reference internal" href="grid_data_ref.html#kuibit.grid_data.HierarchicalGridData" title="kuibit.grid_data.HierarchicalGridData"><code class="xref py py-class docutils literal notranslate"><span class="pre">HierarchicalGridData</span></code></a> represents data defined on a mesh-refined
 grid. In practice, this is a collection of <a class="reference internal" href="grid_data_ref.html#kuibit.grid_data.UniformGridData" title="kuibit.grid_data.UniformGridData"><code class="xref py py-class docutils literal notranslate"><span class="pre">UniformGridData</span></code></a>,
 roughly one per level. You can work directly with the
 <a class="reference internal" href="grid_data_ref.html#kuibit.grid_data.UniformGridData" title="kuibit.grid_data.UniformGridData"><code class="xref py py-class docutils literal notranslate"><span class="pre">UniformGridData</span></code></a> on the different levels using the brackets
@@ -267,22 +268,36 @@ operator. As for <a class="reference internal" href="grid_data_ref.html#kuibit.g
 operations.</p>
 <p>In many cases, one works with a nested series of refinement levels, with a
 domain that is split in multiple patches. Hence, the output data will also be in
-multiple chunks. When initializing an <a class="reference internal" href="grid_data_ref.html#kuibit.grid_data.HierarchicalGridData" title="kuibit.grid_data.HierarchicalGridData"><code class="xref py py-class docutils literal notranslate"><span class="pre">HierarchicalGridData</span></code></a>,
-kuibit will make an effort to put all the different patches back together.
-If the provided components cover an entire grid, kuibit will merge them. In
-doing this, all the ghost zone information is discarded. If kuibit finds
-that the provided components do not cover a regular grid, then it will leave
-them untouched. This is the case when one has multiple refinement centers (for
-example in binary simulations). <a class="reference internal" href="grid_data_ref.html#kuibit.grid_data.HierarchicalGridData" title="kuibit.grid_data.HierarchicalGridData"><code class="xref py py-class docutils literal notranslate"><span class="pre">HierarchicalGridData</span></code></a> is
-essentially a dictionary that maps refinement level lists of
-<a class="reference internal" href="grid_data_ref.html#kuibit.grid_data.UniformGridData" title="kuibit.grid_data.UniformGridData"><code class="xref py py-class docutils literal notranslate"><span class="pre">UniformGridData</span></code></a> that represent the different patches. In case
-kuibit manages to combine all the patches, then the list will have only one
-element.</p>
+multiple chunks. When initializing an <a class="reference internal" href="grid_data_ref.html#kuibit.grid_data.HierarchicalGridData" title="kuibit.grid_data.HierarchicalGridData"><code class="xref py py-class docutils literal notranslate"><span class="pre">HierarchicalGridData</span></code></a>, kuibit
+will make an effort to put all the different patches back together. If the
+provided components cover an entire grid, kuibit will merge them. In doing this,
+all the ghost zone information is discarded. If kuibit finds that the provided
+components do not cover a regular grid, then it will leave them untouched. This
+is the case when one has multiple refinement centers (for example in binary
+simulations). <a class="reference internal" href="grid_data_ref.html#kuibit.grid_data.HierarchicalGridData" title="kuibit.grid_data.HierarchicalGridData"><code class="xref py py-class docutils literal notranslate"><span class="pre">HierarchicalGridData</span></code></a> is essentially a dictionary
+that maps refinement level to lists of <a class="reference internal" href="grid_data_ref.html#kuibit.grid_data.UniformGridData" title="kuibit.grid_data.UniformGridData"><code class="xref py py-class docutils literal notranslate"><span class="pre">UniformGridData</span></code></a> that
+represent the different patches. In case kuibit manages to combine all the
+patches, then the list will have only one element. You can print a
+<a class="reference internal" href="grid_data_ref.html#kuibit.grid_data.HierarchicalGridData" title="kuibit.grid_data.HierarchicalGridData"><code class="xref py py-class docutils literal notranslate"><span class="pre">HierarchicalGridData</span></code></a> to see what the structure looks like:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="n">rho</span><span class="p">)</span>
+
+<span class="c1"># The output will look like</span>
+<span class="c1">#</span>
+<span class="c1"># Available refinement levels (components):</span>
+<span class="c1"># 0 (1)</span>
+<span class="c1"># 1 (3)</span>
+<span class="c1"># 2 (2)</span>
+<span class="c1"># 3 (2)</span>
+<span class="c1"># Spacing at coarsest level (0): [640. 640.]</span>
+<span class="c1"># Spacing at finest level (3): [0.01 0.01]</span>
+</pre></div>
+</div>
 <p>You can access the relative level using the bracket operator (e.g. <code class="docutils literal notranslate"><span class="pre">rho[0][0]</span></code>
 is <code class="docutils literal notranslate"><span class="pre">rho</span></code> on the coarsest level on the 0th patch, which could be the only one).
-In many cases, the grid structure is simple and there are no multiple refinement
-centers, so one can access the level with <cite>:py:meth:~.get_ref_level</cite>. This method
-will work only if there’s a single component.</p>
+The two level of brackets are (in order): refinement level, then component. In
+many cases, the grid structure is simple and there are no multiple refinement
+centers, so one can access the level with <cite>:py:meth:~.get_ref_level</cite>. This
+method will work only if there’s a single component.</p>
 <p>As for <a class="reference internal" href="grid_data_ref.html#kuibit.grid_data.UniformGridData" title="kuibit.grid_data.UniformGridData"><code class="xref py py-class docutils literal notranslate"><span class="pre">UniformGridData</span></code></a>, <a class="reference internal" href="grid_data_ref.html#kuibit.grid_data.HierarchicalGridData" title="kuibit.grid_data.HierarchicalGridData"><code class="xref py py-class docutils literal notranslate"><span class="pre">HierarchicalGridData</span></code></a> are
 callable and splines are used to interpolate to the requested points. This
 operation can be expensive, especially for 3D grids with many points.
@@ -305,17 +320,19 @@ time.</p>
 <p>Operations that involve resampling can be very expensive and require a lot
 of memory!</p>
 </div>
-<p>Another useful method is the <a class="reference internal" href="grid_data_ref.html#kuibit.grid_data.HierarchicalGridData.coordinates" title="kuibit.grid_data.HierarchicalGridData.coordinates"><code class="xref py py-meth docutils literal notranslate"><span class="pre">coordinates()</span></code></a>, which returns a list of
+<p>Another useful method is the
+<a class="reference internal" href="grid_data_ref.html#kuibit.grid_data.HierarchicalGridData.coordinates" title="kuibit.grid_data.HierarchicalGridData.coordinates"><code class="xref py py-meth docutils literal notranslate"><span class="pre">coordinates()</span></code></a>, which returns a list of
 <a class="reference internal" href="grid_data_ref.html#kuibit.grid_data.HierarchicalGridData" title="kuibit.grid_data.HierarchicalGridData"><code class="xref py py-class docutils literal notranslate"><span class="pre">HierarchicalGridData</span></code></a> with the same structure as the one in
 consideration but with values the various coordinates at the points. This is
 useful for computations that involve the coordinates.</p>
 <p>As it is the case for <a class="reference internal" href="grid_data_ref.html#kuibit.grid_data.UniformGridData" title="kuibit.grid_data.UniformGridData"><code class="xref py py-class docutils literal notranslate"><span class="pre">UniformGridData</span></code></a>, also
 <a class="reference internal" href="grid_data_ref.html#kuibit.grid_data.HierarchicalGridData" title="kuibit.grid_data.HierarchicalGridData"><code class="xref py py-class docutils literal notranslate"><span class="pre">HierarchicalGridData</span></code></a> can be derived along a direction with
-<a class="reference internal" href="grid_data_ref.html#kuibit.grid_data.HierarchicalGridData.partial_derived" title="kuibit.grid_data.HierarchicalGridData.partial_derived"><code class="xref py py-meth docutils literal notranslate"><span class="pre">partial_derived()</span></code></a>, or the gradient can be calculated with
-<a class="reference internal" href="grid_data_ref.html#kuibit.grid_data.HierarchicalGridData.gradient" title="kuibit.grid_data.HierarchicalGridData.gradient"><code class="xref py py-meth docutils literal notranslate"><span class="pre">gradient()</span></code></a>. In both cases, the order of the derivative can be
-specified. The derivative are numerical with finite difference. The result is
-a <a class="reference internal" href="grid_data_ref.html#kuibit.grid_data.HierarchicalGridData" title="kuibit.grid_data.HierarchicalGridData"><code class="xref py py-class docutils literal notranslate"><span class="pre">HierarchicalGridData</span></code></a> or a list of <a class="reference internal" href="grid_data_ref.html#kuibit.grid_data.HierarchicalGridData" title="kuibit.grid_data.HierarchicalGridData"><code class="xref py py-class docutils literal notranslate"><span class="pre">HierarchicalGridData</span></code></a>
-(for each direction).</p>
+<a class="reference internal" href="grid_data_ref.html#kuibit.grid_data.HierarchicalGridData.partial_derived" title="kuibit.grid_data.HierarchicalGridData.partial_derived"><code class="xref py py-meth docutils literal notranslate"><span class="pre">partial_derived()</span></code></a>, or the gradient can
+be calculated with <a class="reference internal" href="grid_data_ref.html#kuibit.grid_data.HierarchicalGridData.gradient" title="kuibit.grid_data.HierarchicalGridData.gradient"><code class="xref py py-meth docutils literal notranslate"><span class="pre">gradient()</span></code></a>. In both
+cases, the order of the derivative can be specified. The derivative are
+numerical with finite difference. The result is a
+<a class="reference internal" href="grid_data_ref.html#kuibit.grid_data.HierarchicalGridData" title="kuibit.grid_data.HierarchicalGridData"><code class="xref py py-class docutils literal notranslate"><span class="pre">HierarchicalGridData</span></code></a> or a list of
+<a class="reference internal" href="grid_data_ref.html#kuibit.grid_data.HierarchicalGridData" title="kuibit.grid_data.HierarchicalGridData"><code class="xref py py-class docutils literal notranslate"><span class="pre">HierarchicalGridData</span></code></a> (for each direction).</p>
 </div>
 <div class="section" id="reading-data">
 <h2>Reading data<a class="headerlink" href="#reading-data" title="Permalink to this headline">¶</a></h2>
