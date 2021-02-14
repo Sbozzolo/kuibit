@@ -242,9 +242,12 @@ class TestOneGridFunction(unittest.TestCase):
     def test_baseclass(self):
 
         abs_base = cg.BaseOneGridFunction("", "")
-        abs_base._parse_file("")
-        abs_base._read_component_as_uniform_grid_data("", 0, 0, 0)
-        abs_base.time_at_iteration("")
+        with self.assertRaises(NotImplementedError):
+            abs_base._parse_file("")
+        with self.assertRaises(NotImplementedError):
+            abs_base._read_component_as_uniform_grid_data("", 0, 0, 0)
+        with self.assertRaises(NotImplementedError):
+            abs_base.time_at_iteration("")
 
     def test__properties_in_file(self):
 

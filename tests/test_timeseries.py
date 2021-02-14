@@ -44,9 +44,12 @@ class TestTimeseries(unittest.TestCase):
     def test_numerical(self):
 
         abs_numerical = numerical.BaseNumerical()
-        abs_numerical._apply_unary(lambda x: x)
-        abs_numerical._apply_binary(0, lambda x: x)
-        abs_numerical._apply_reduction(lambda x: x)
+        with self.assertRaises(NotImplementedError):
+            abs_numerical._apply_unary(lambda x: x)
+        with self.assertRaises(NotImplementedError):
+            abs_numerical._apply_binary(0, lambda x: x)
+        with self.assertRaises(NotImplementedError):
+            abs_numerical._apply_reduction(lambda x: x)
 
     def test__make_array(self):
 

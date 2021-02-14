@@ -47,15 +47,15 @@ class BaseNumerical(ABC):
 
     @abstractmethod
     def _apply_unary(self, function):
-        pass
+        raise NotImplementedError
 
     @abstractmethod
     def _apply_binary(self, other, function):
-        pass
+        raise NotImplementedError
 
     @abstractmethod
     def _apply_reduction(self, reduction):
-        pass
+        raise NotImplementedError
 
     def __add__(self, other):
         return self._apply_binary(other, np.add)

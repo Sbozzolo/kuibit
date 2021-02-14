@@ -135,14 +135,14 @@ class BaseOneGridFunction(ABC):
     @abstractmethod
     def _parse_file(self, path):
         """Read file at path and populate ``self.alldata``."""
-        pass
+        raise NotImplementedError
 
     @abstractmethod
     def _read_component_as_uniform_grid_data(
         self, path, iteration, ref_level, component
     ):
         """Read specific component."""
-        pass
+        raise NotImplementedError
 
     @abstractmethod
     def time_at_iteration(self, iteration):
@@ -153,7 +153,7 @@ class BaseOneGridFunction(ABC):
         :returns: Time.
         :rtype: float
         """
-        pass
+        raise NotImplementedError
 
     @lru_cache(128)
     def _iterations_in_file(self, path):
