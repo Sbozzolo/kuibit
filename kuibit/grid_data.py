@@ -2202,7 +2202,7 @@ class HierarchicalGridData(BaseNumerical):
         the coarsest.
 
         :returns: Refinement level number, component index, and data.
-        :rtype: tuple (int, int, :py:class:`~.UniformGridData`)
+        :rtype: generator of tuples (int, int, :py:class:`~.UniformGridData`)
         """
         # TODO (FUTURE): Reverse dictionary in Python 3.8
         #
