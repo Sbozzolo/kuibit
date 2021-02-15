@@ -431,6 +431,16 @@ class TestTimeseries(unittest.TestCase):
         self.assertEqual(self.TS.abs_min(), np.min(np.abs(self.TS.y)))
         self.assertEqual(self.TS.abs_max(), np.max(np.abs(self.TS.y)))
 
+        # Add a NaN and test the nan-methods
+        TS_c = self.TS.copy()
+
+        TS_c.y[0] = np.nan
+
+        self.assertEqual(self.TS.nanmin(), np.nanmin(self.TS.y))
+        self.assertEqual(self.TS.nanmax(), np.nanmax(self.TS.y))
+        self.assertEqual(self.TS.abs_nanmin(), np.nanmin(np.abs(self.TS.y)))
+        self.assertEqual(self.TS.abs_nanmax(), np.nanmax(np.abs(self.TS.y)))
+
     def test_zero_pad(self):
 
         # Check invalid number of points

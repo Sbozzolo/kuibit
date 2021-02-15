@@ -114,6 +114,12 @@ class BaseNumerical(ABC):
     def max(self):
         return self._apply_reduction(np.max)
 
+    def nanmin(self):
+        return self._apply_reduction(np.nanmin)
+
+    def nanmax(self):
+        return self._apply_reduction(np.nanmax)
+
     def abs_min(self):
         """Return the minimum of the absolute value"""
         # skipcq PYL-W0212
@@ -123,6 +129,16 @@ class BaseNumerical(ABC):
         """Return the maximum of the absolute value"""
         # skipcq PYL-W0212
         return abs(self)._apply_reduction(np.max)
+
+    def abs_nanmin(self):
+        """Return the minimum of the absolute value ignoring NaNs"""
+        # skipcq PYL-W0212
+        return abs(self)._apply_reduction(np.nanmin)
+
+    def abs_nanmax(self):
+        """Return the maximum of the absolute value ignoring NaNs"""
+        # skipcq PYL-W0212
+        return abs(self)._apply_reduction(np.nanmax)
 
     def abs(self):
         return self._apply_unary(np.abs)
