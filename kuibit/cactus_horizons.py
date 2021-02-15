@@ -47,7 +47,7 @@ import warnings
 import numpy as np
 
 from kuibit.attr_dict import pythonize_name_dict
-from kuibit.timeseries import TimeSeries, combine_ts
+from kuibit.timeseries import remove_duplicated_iters, combine_ts
 
 
 class OneHorizon:
@@ -146,7 +146,7 @@ class OneHorizon:
                 # self.ah.cctk_iteration is a function time vs iteration, we
                 # want the opposite. We define a new timeseries in which we swap
                 # t and y
-                times_iterations = TimeSeries(
+                times_iterations = remove_duplicated_iters(
                     self.ah.cctk_iteration.y, self.ah.cctk_iteration.t
                 )
                 self.shape_times = times_iterations(self.shape_iterations)
@@ -684,7 +684,9 @@ class HorizonsDir:
                     # the data in each file and we convert them into TimeSeries
                     data_ts = combine_ts(
                         [
-                            TimeSeries(data[time_column], data[column_number])
+                            remove_duplicated_iters(
+                                data[time_column], data[column_number]
+                            )
                             for data in alldata
                         ]
                     )
