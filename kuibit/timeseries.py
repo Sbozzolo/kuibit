@@ -36,7 +36,7 @@ operators) are implemented in the parent classes.
 
 The additional functions provided in :py:mod:`~.timeseries` are:
 
-- :py:func:`~.remove_duplicate_iters` cleans the input arrays by removing duplicated times.
+- :py:func:`~.remove_duplicated_iters` cleans the input arrays by removing duplicated times.
 - :py:func:`~.unfold_phase` takes as argument a NumPy array representing a phase
   and unfolds it removing all the jumps of 2 pi. This is useful in gravitational
   wave analysis.
@@ -54,7 +54,7 @@ from kuibit import frequencyseries
 from kuibit.series import BaseSeries
 
 
-def remove_duplicate_iters(t, y):
+def remove_duplicated_iters(t, y):
     """Remove overlapping segments from a time series in (t,y).
 
     Only the latest of overlapping segments is kept, the rest

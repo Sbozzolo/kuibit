@@ -803,13 +803,13 @@ class TestTimeseries(unittest.TestCase):
 
         self.assertTrue(np.allclose(sins.y, np.cos(times), atol=1e-3))
 
-    def test_remove_duplicate_iters(self):
+    def test_remove_duplicated_iters(self):
 
         t = np.array([1, 2, 3, 4, 2, 3])
         y = np.array([0, 0, 0, 0, 0, 0])
 
         self.assertEqual(
-            ts.remove_duplicate_iters(t, y),
+            ts.remove_duplicated_iters(t, y),
             ts.TimeSeries([1, 2, 3], [0, 0, 0]),
         )
 

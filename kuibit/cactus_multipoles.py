@@ -492,7 +492,7 @@ class MultipolesDir:
         if len(a) != 3:
             raise RuntimeError(f"Wrong format in {path}")
         complex_mp = a[1] + 1j * a[2]
-        return timeseries.remove_duplicate_iters(a[0], complex_mp)
+        return timeseries.remove_duplicated_iters(a[0], complex_mp)
 
     @staticmethod
     def _multipoles_from_h5file(path):
@@ -519,7 +519,7 @@ class MultipolesDir:
                     # Read the actual data
                     a = data[entry][()].T
                     complex_mp = a[1] + 1j * a[2]
-                    ts = timeseries.remove_duplicate_iters(a[0], complex_mp)
+                    ts = timeseries.remove_duplicated_iters(a[0], complex_mp)
                     alldets.append((mult_l, mult_m, radius, ts))
 
         return alldets
