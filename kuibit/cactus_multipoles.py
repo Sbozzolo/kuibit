@@ -518,7 +518,8 @@ class MultipolesDir:
                     radius = float(matched.group(3))
                     # Read the actual data
                     a = data[entry][()].T
-                    ts = timeseries.TimeSeries(a[0], a[1] + 1j * a[2])
+                    complex_mp = a[1] + 1j * a[2]
+                    ts = timeseries.remove_duplicate_iters(a[0], complex_mp)
                     alldets.append((mult_l, mult_m, radius, ts))
 
         return alldets
