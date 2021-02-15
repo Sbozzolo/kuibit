@@ -92,7 +92,7 @@
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 
 <span class="kn">from</span> <span class="nn">kuibit.attr_dict</span> <span class="kn">import</span> <span class="n">pythonize_name_dict</span>
-<span class="kn">from</span> <span class="nn">kuibit.timeseries</span> <span class="kn">import</span> <span class="n">TimeSeries</span><span class="p">,</span> <span class="n">combine_ts</span>
+<span class="kn">from</span> <span class="nn">kuibit.timeseries</span> <span class="kn">import</span> <span class="n">remove_duplicated_iters</span><span class="p">,</span> <span class="n">combine_ts</span>
 
 
 <div class="viewcode-block" id="OneHorizon"><a class="viewcode-back" href="../../cactus_horizons_ref.html#kuibit.cactus_horizons.OneHorizon">[docs]</a><span class="k">class</span> <span class="nc">OneHorizon</span><span class="p">:</span>
@@ -191,7 +191,7 @@
                 <span class="c1"># self.ah.cctk_iteration is a function time vs iteration, we</span>
                 <span class="c1"># want the opposite. We define a new timeseries in which we swap</span>
                 <span class="c1"># t and y</span>
-                <span class="n">times_iterations</span> <span class="o">=</span> <span class="n">TimeSeries</span><span class="p">(</span>
+                <span class="n">times_iterations</span> <span class="o">=</span> <span class="n">remove_duplicated_iters</span><span class="p">(</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">ah</span><span class="o">.</span><span class="n">cctk_iteration</span><span class="o">.</span><span class="n">y</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">ah</span><span class="o">.</span><span class="n">cctk_iteration</span><span class="o">.</span><span class="n">t</span>
                 <span class="p">)</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">shape_times</span> <span class="o">=</span> <span class="n">times_iterations</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">shape_iterations</span><span class="p">)</span>
@@ -729,7 +729,9 @@
                     <span class="c1"># the data in each file and we convert them into TimeSeries</span>
                     <span class="n">data_ts</span> <span class="o">=</span> <span class="n">combine_ts</span><span class="p">(</span>
                         <span class="p">[</span>
-                            <span class="n">TimeSeries</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="n">time_column</span><span class="p">],</span> <span class="n">data</span><span class="p">[</span><span class="n">column_number</span><span class="p">])</span>
+                            <span class="n">remove_duplicated_iters</span><span class="p">(</span>
+                                <span class="n">data</span><span class="p">[</span><span class="n">time_column</span><span class="p">],</span> <span class="n">data</span><span class="p">[</span><span class="n">column_number</span><span class="p">]</span>
+                            <span class="p">)</span>
                             <span class="k">for</span> <span class="n">data</span> <span class="ow">in</span> <span class="n">alldata</span>
                         <span class="p">]</span>
                     <span class="p">)</span>
