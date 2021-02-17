@@ -68,6 +68,9 @@ Users and developers of ``kuibit`` meet in the `Telegram group
 <https://t.me/kuibit>`_. If you have any problem or suggestion, that's a good
 place where to discuss it. Alternatively, you can also open an issue on GitHub.
 
+Frequently asked questions are collected in the page :ref:`faq:Frequently Asked
+Questions`.
+
 Usage
 -----
 
@@ -106,6 +109,7 @@ Reference material (classes, functions, ...)
    :maxdepth: 1
 
    features.rst
+   faq.rst
    simdir_ref.rst
    series_ref.rst
    timeseries_ref.rst
