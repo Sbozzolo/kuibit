@@ -97,20 +97,21 @@ Usage
    visualize_matplotlib.rst
    argparse_helper.rst
 
-Examples
---------
+Tutorials
+---------
 
 .. toctree::
    :maxdepth: 1
 
-   examples/simdir.ipynb
-   examples/timeseries.ipynb
-   examples/grid_data.ipynb
-   examples/cactus_grid_functions.ipynb
-   examples/cactus_horizons.ipynb
-   examples/gravitational_waves.ipynb
+   tutorials/simdir.ipynb
+   tutorials/timeseries.ipynb
+   tutorials/grid_data.ipynb
+   tutorials/cactus_grid_functions.ipynb
+   tutorials/cactus_horizons.ipynb
+   tutorials/gravitational_waves.ipynb
 
-You can additional examples in the folder ``examples`` in the ``experimental``.
+You can find some real-word examples in the folder ``examples`` in the
+``experimental`` branch.
 
 Reference material (classes, functions, ...)
 ---------------------------------------------
