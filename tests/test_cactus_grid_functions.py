@@ -124,9 +124,23 @@ class TestAllGridFunctions(unittest.TestCase):
             list(self.gf._vars_ascii.keys()),
             ["rho_b", "P", "vx", "vy", "vz", "rho_star"],
         )
+
+        # Here we also have the grid arrays in
+        # diskdiagnostics-integrated_quantities.xy.h5
         self.assertCountEqual(
             list(self.gf._vars_h5.keys()),
-            ["rho_b", "P", "vx", "vy", "vz", "rho"],
+            [
+                "rho_b",
+                "P",
+                "vx",
+                "vy",
+                "vz",
+                "rho",
+                "int_em_T_rph",
+                "int_hydro_T_rph",
+                "int_surface_density",
+                "int_torque_dens",
+            ],
         )
 
         # Here we are not testing that files are correctly organized...
@@ -134,13 +148,38 @@ class TestAllGridFunctions(unittest.TestCase):
     def test_keys(self):
 
         self.assertCountEqual(
-            self.gf.keys(), ["rho_b", "P", "vx", "vy", "vz", "rho", "rho_star"]
+            self.gf.keys(),
+            [
+                "rho_b",
+                "P",
+                "vx",
+                "vy",
+                "vz",
+                "rho",
+                "rho_star",
+                "int_em_T_rph",
+                "int_hydro_T_rph",
+                "int_surface_density",
+                "int_torque_dens",
+            ],
         )
 
         # Test .fields, which depends on keys()
         self.assertCountEqual(
             self.gf.fields.keys(),
-            ["rho_b", "P", "vx", "vy", "vz", "rho", "rho_star"],
+            [
+                "rho_b",
+                "P",
+                "vx",
+                "vy",
+                "vz",
+                "rho",
+                "rho_star",
+                "int_em_T_rph",
+                "int_hydro_T_rph",
+                "int_surface_density",
+                "int_torque_dens",
+            ],
         )
 
     def test__contains(self):
@@ -201,7 +240,7 @@ class TestAllGridFunctions(unittest.TestCase):
         # This is a weak test, we are just testing how many files we have...
 
         # There should be 4 files
-        self.assertEqual(len(self.gf.allfiles), 4)
+        self.assertEqual(len(self.gf.allfiles), 5)
 
     def test_total_filesize(self):
 
@@ -220,11 +259,11 @@ class TestAllGridFunctions(unittest.TestCase):
 class TestOneGridFunction(unittest.TestCase):
     def setUp(self):
         # First we set the correct number of ghost zones
-        reader = sd.SimDir("tests/grid_functions").gf.xy
-        reader.num_ghost = (3, 3)
+        self.reader = sd.SimDir("tests/grid_functions").gf.xy
+        self.reader.num_ghost = (3, 3)
 
         # ASCII
-        self.rho_star = reader["rho_star"]
+        self.rho_star = self.reader["rho_star"]
         # There's only one file
         self.rho_star_file = self.rho_star.allfiles[0]
 
@@ -232,7 +271,7 @@ class TestOneGridFunction(unittest.TestCase):
         # HDF5 files
 
         # HDF5
-        self.P = reader["P"]
+        self.P = self.reader["P"]
         # There's only one file
         self.P_file = self.P.allfiles[0]
 
@@ -362,6 +401,13 @@ class TestOneGridFunction(unittest.TestCase):
         self.assertEqual(
             self.P._read_component_as_uniform_grid_data(self.P_file, 0, 0, 0),
             expected_grid_data,
+        )
+
+        # Test that we can read a grid array
+        self.assertTrue(
+            isinstance(
+                self.reader["int_em_T_rph"][0], grid_data.HierarchicalGridData
+            )
         )
 
     def test_time_at_iteration(self):

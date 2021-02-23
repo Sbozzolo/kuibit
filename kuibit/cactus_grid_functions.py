@@ -917,7 +917,8 @@ class OneGridFunctionH5(BaseOneGridFunction):
     # 1. and 2. are thorn and variable name, then we have
     # 3, 4. \d+ matches a number (iteration and time level)
     # 5. " m=0" matches this exactly, if it is present
-    # 6. \d+ matches a number (refinement level)
+    # 6. \d+ matches a number (refinement level) if present
+    #    (grid arrays don't have this)
     # Then we have two nested capturing groups
     # ( c=(\d+))? checked whether c=NUMBER is matched,
     # and inside we have that the component number is matched
@@ -933,8 +934,7 @@ class OneGridFunctionH5(BaseOneGridFunction):
     [ ]
     tl=(\d+)            # Timelevel (almost always 0)
     ([ ]m=0)?           # Map
-    [ ]
-    rl=(\d+)            # Refinement level
+    ([ ]rl=(\d+))?      # Refinement level
     ([ ]c=(\d+))?       # Component
     """
 
@@ -967,7 +967,7 @@ class OneGridFunctionH5(BaseOneGridFunction):
         # flexible.
 
         self.dataset_format = (
-            f"{self.thorn_name}::{self.var_name} it=%d tl=0{self.map} rl=%d%s"
+            f"{self.thorn_name}::{self.var_name} it=%d tl=0{self.map}%s%s"
         )
 
         # HDF5 files can contain ghostzones or not. Here, we can that all the
@@ -1011,6 +1011,7 @@ class OneGridFunctionH5(BaseOneGridFunction):
                     iteration,
                     time_level,
                     map_,
+                    _,
                     ref_level,
                     _,
                     component,
@@ -1031,14 +1032,15 @@ class OneGridFunctionH5(BaseOneGridFunction):
                 if self.map is None:
                     self.map = map_
 
-                component = -1 if matched.group(8) is None else int(component)
+                component = -1 if matched.group(9) is None else int(component)
+                # This is important to support grid arrays, which do not have a
+                # refinement level
+                ref_level = -1 if matched.group(7) is None else int(ref_level)
 
                 # Here is where we prepare are nested alldata dictionary
                 alldata_file = self.alldata.setdefault(path, {})
                 alldata_iteration = alldata_file.setdefault(int(iteration), {})
-                alldata_ref_level = alldata_iteration.setdefault(
-                    int(ref_level), {}
-                )
+                alldata_ref_level = alldata_iteration.setdefault(ref_level, {})
 
                 # We set the actual data to None, and we will read it in
                 # _read_component_as_uniform_grid_data upon request
@@ -1106,11 +1108,13 @@ class OneGridFunctionH5(BaseOneGridFunction):
         :type component: int
 
         """
+        ref_level_str = f" rl={ref_level}" if (ref_level >= 0) else ""
         component_str = f" c={component}" if (component >= 0) else ""
         with h5py.File(path, "r") as f:
             try:
                 yield f[
-                    self.dataset_format % (iteration, ref_level, component_str)
+                    self.dataset_format
+                    % (iteration, ref_level_str, component_str)
                 ]
             finally:
                 # All the hard work is done by the other 'with' statement.
