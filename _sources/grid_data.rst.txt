@@ -505,3 +505,12 @@ can also be used to generate additional time frames between two outputs.
 
 :py:class:`~.OneGridFunctionH5` objects are iterable: you can loop over all
 the available iterations by iterating over the object.
+
+.. warning::
+
+   ``kuibit`` supports grid arrays, which are arrays with a fixed size,
+   typically distributed among all the MPI processes. ``Carpet`` treats them in
+   the same way as standard grid functions, so in ``kuibit`` there is no
+   distinction between the two. This means that ``kuibit`` will assign some
+   coordinates (which are read from the output), but these coordinates are
+   meaningless.
