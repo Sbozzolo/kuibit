@@ -441,7 +441,6 @@ a direction.
    results in the regions of overlap between two grid patches. In the future, we
    will try to read this value from the parameter file.
 
-
 Finally, once you selected the variable, you will have a
 :py:class:`~.OneGridFunctionH5` or :py:class:`~.OneGridFunctionASCII` object.
 These are derived from the same base class :py:class:`~.OneGridFunctionBase` and
@@ -514,3 +513,10 @@ the available iterations by iterating over the object.
    distinction between the two. This means that ``kuibit`` will assign some
    coordinates (which are read from the output), but these coordinates are
    meaningless.
+
+.. warning::
+
+   ``kuibit`` supports files output with the option ``one_file_per_group`` set
+   to ``yes``. However, the maximize the performance it is best to set that
+   option to ``no``. ``kuibit`` has to open each single file to understand what
+   variables are inside, and this impacts, especially for several or big files.
