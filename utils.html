@@ -1,0 +1,148 @@
+
+
+<!doctype html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Various utilities &#8212; kuibit 1.0.0b0 documentation</title>
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="_static/bizstyle.css" type="text/css" />
+    
+    <script id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/doctools.js"></script>
+    <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="_static/bizstyle.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Working with Simulation Directories" href="tutorials/simdir.html" />
+    <link rel="prev" title="Building command-line scripts" href="argparse_helper.html" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0" />
+    <!--[if lt IE 9]>
+    <script src="_static/css3-mediaqueries.js"></script>
+    <![endif]-->
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="tutorials/simdir.html" title="Working with Simulation Directories"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="argparse_helper.html" title="Building command-line scripts"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">kuibit 1.0.0b0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">Various utilities</a></li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="various-utilities">
+<h1>Various utilities<a class="headerlink" href="#various-utilities" title="Permalink to this headline">¶</a></h1>
+<p>The <a class="reference internal" href="utils_ref.html#module-kuibit.utils" title="kuibit.utils"><code class="xref py py-mod docutils literal notranslate"><span class="pre">utils</span></code></a> module contains a series of useful functions that are used
+around the code. For example, the module contains the basics of the logging
+facility used. For a full list, see <span class="xref std std-ref">gw_utils_ref:Reference on
+kuibit.utils</span>.</p>
+<div class="section" id="loggers">
+<h2>Loggers<a class="headerlink" href="#loggers" title="Permalink to this headline">¶</a></h2>
+<p>It is important to be able to print out info and debug messages to monitor the
+execution of the various modules. The <a class="reference internal" href="utils_ref.html#module-kuibit.utils" title="kuibit.utils"><code class="xref py py-mod docutils literal notranslate"><span class="pre">utils</span></code></a> module contains useful
+function to do so based on the <code class="docutils literal notranslate"><span class="pre">logging</span></code> module that comes with Python. The
+main functions are:</p>
+<ul class="simple">
+<li><p><a class="reference internal" href="utils_ref.html#kuibit.utils.get_logger" title="kuibit.utils.get_logger"><code class="xref py py-func docutils literal notranslate"><span class="pre">get_logger()</span></code></a>, which returns <code class="docutils literal notranslate"><span class="pre">kuibit</span></code>’s’ <code class="docutils literal notranslate"><span class="pre">logger</span></code> object that
+should be used for all the internal logging,</p></li>
+<li><p><a class="reference internal" href="utils_ref.html#kuibit.utils.set_verbosity" title="kuibit.utils.set_verbosity"><code class="xref py py-func docutils literal notranslate"><span class="pre">set_verbosity()</span></code></a>, which takes as input one of <code class="docutils literal notranslate"><span class="pre">INFO</span></code> or <code class="docutils literal notranslate"><span class="pre">DEBUG</span></code>
+and set the corresponding level of output for the logger.</p></li>
+</ul>
+<p>In practice, the way these functions should be used is as follows:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">logger</span> <span class="o">=</span> <span class="n">get_logger</span><span class="p">()</span>
+<span class="c1"># ...</span>
+<span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;This is a message with general information&quot;</span><span class="p">)</span>
+<span class="c1"># ...</span>
+<span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;This is a message with debug information&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Then, applications that use <code class="docutils literal notranslate"><span class="pre">kuibit</span></code> can choose what level of reporting they
+want with <a class="reference internal" href="utils_ref.html#kuibit.utils.set_verbosity" title="kuibit.utils.set_verbosity"><code class="xref py py-func docutils literal notranslate"><span class="pre">set_verbosity()</span></code></a> (importing the function from the module).</p>
+<p>In <code class="docutils literal notranslate"><span class="pre">kuibit</span></code>, we only use <code class="docutils literal notranslate"><span class="pre">INFO</span></code> or <code class="docutils literal notranslate"><span class="pre">DEBUG</span></code>. For errors and warnings, we
+raise an exception.</p>
+</div>
+</div>
+
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="index.html">
+              <img class="logo" src="_static/logo.png" alt="Logo"/>
+            </a></p>
+  <h3><a href="index.html">Table of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Various utilities</a><ul>
+<li><a class="reference internal" href="#loggers">Loggers</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="argparse_helper.html"
+                        title="previous chapter">Building command-line scripts</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="tutorials/simdir.html"
+                        title="next chapter">Working with Simulation Directories</a></p>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="tutorials/simdir.html" title="Working with Simulation Directories"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="argparse_helper.html" title="Building command-line scripts"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">kuibit 1.0.0b0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">Various utilities</a></li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2020-2021, Gabriele Bozzola.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 3.5.1.
+    </div>
+  </body>
+</html>

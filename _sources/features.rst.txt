@@ -157,6 +157,8 @@ Experimental features may change in the future.
 
 - Visualize grid data.
 - Build command-line scripts with common options.
-- Make movies with Get the latest news at `motionpicture`_.
+- Make movies with `motionpicture`_.
 
 .. _motionpicture: https://github.com/Sbozzolo/motionpicture
+
+- Produce log messages.
