@@ -157,8 +157,17 @@ Visualize
 Experimental features may change in the future.
 
 - Visualize grid data.
+<<<<<<< HEAD
 
 Utilities
 ------------
 
 - Build command-line scripts with commonly used options.
+=======
+- Build command-line scripts with common options.
+- Make movies with `motionpicture`_.
+
+.. _motionpicture: https://github.com/Sbozzolo/motionpicture
+
+- Produce log messages.
+>>>>>>> cbfe94e (Add utils and logging facility)
