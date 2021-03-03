@@ -25,6 +25,9 @@ Python required to complete the task.
 * Port `cactus_timertree` from `PostCactus`. [==]
 * Port support for grid data with reflection from `PostCactus`. [==]
 * Port support for locating bounding boxes from `PostCactus`. [==]
+
+* Transparently handle low dimensional grid data with higher dimensional one is
+  available (e.g. add to the `xy` if `xyz` is available). [==]
 * Add support for HDF5 for `AHFinderDirect` output. [==]
 * Add method to merge `AHFinderDirect` patches. [==]
 * Perform interpolation in shapes of `AHFinderDirect` to better find shapes when
