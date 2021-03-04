@@ -538,7 +538,7 @@
 
         <span class="c1"># A pythonic way to write this function is:</span>
         <span class="c1"># if np.any(point &lt; (self.lowest_vertex)) or np.any(</span>
-        <span class="c1">#     point &gt;= (self.highest_vertex)</span>
+        <span class="c1">#     point &gt; (self.highest_vertex)</span>
         <span class="c1"># ):</span>
         <span class="c1">#     return False</span>
         <span class="c1"># return True</span>
@@ -1447,6 +1447,9 @@
                     <span class="o">&lt;=</span> <span class="n">cut</span><span class="p">[</span><span class="n">dim</span><span class="p">]</span>
                     <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">grid</span><span class="o">.</span><span class="n">highest_vertex</span><span class="p">[</span><span class="n">dim</span><span class="p">]</span>
                 <span class="p">):</span>
+                    <span class="c1"># The slice method in HierarchicalGridData matches this</span>
+                    <span class="c1"># error message, so you change it, update the corresponding</span>
+                    <span class="c1"># method.</span>
                     <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Cut point is outside the grid&quot;</span><span class="p">)</span>
                 <span class="c1"># Transform from coordinate to index</span>
                 <span class="n">index</span> <span class="o">=</span> <span class="nb">int</span><span class="p">((</span><span class="n">cut</span><span class="p">[</span><span class="n">dim</span><span class="p">]</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">x0</span><span class="p">[</span><span class="n">dim</span><span class="p">])</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">dx</span><span class="p">[</span><span class="n">dim</span><span class="p">]</span> <span class="o">+</span> <span class="mf">0.5</span><span class="p">)</span>
@@ -2892,6 +2895,80 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_apply_to_self</span><span class="p">(</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">partial_derived</span><span class="p">,</span> <span class="n">direction</span><span class="p">,</span> <span class="n">order</span><span class="o">=</span><span class="n">order</span>
         <span class="p">)</span></div>
+
+<div class="viewcode-block" id="HierarchicalGridData.sliced"><a class="viewcode-back" href="../../grid_data_ref.html#kuibit.grid_data.HierarchicalGridData.sliced">[docs]</a>    <span class="k">def</span> <span class="nf">sliced</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cut</span><span class="p">,</span> <span class="n">resample</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Return a new :py:class:`~.HierarchicalGridData` obtained slicing the current one.</span>
+
+<span class="sd">        ``cut`` specifies how to slice the data. It has to be an array with the</span>
+<span class="sd">        same number of dimensions of the data. In the entries where ``cut`` is</span>
+<span class="sd">        None, that dimension is kept, where it is a number, the data is cut</span>
+<span class="sd">        fixing that coordinate. For example, for a 2D array, if ``cut`` is</span>
+<span class="sd">        ``[None, 2]``, the cut will be with ``y = 2``.</span>
+
+<span class="sd">        If ``resample`` is True, you can cut at any point and we will compute</span>
+<span class="sd">        the values with multilinear interpolation. If ``resample`` is False, we</span>
+<span class="sd">        will use the data already available.</span>
+
+<span class="sd">        In doing this, dimensions that are only one grid point are lost.</span>
+
+<span class="sd">        :param cut: How to slice the array. None entries mean &quot;keep that dimension&quot;.</span>
+<span class="sd">        :type cut:  array or list with dimension</span>
+<span class="sd">        :param resample: Whether to use multilinear interpolation to compute the</span>
+<span class="sd">                         data or simply use the value of the closest point.</span>
+<span class="sd">        :type resample: bool</span>
+
+<span class="sd">        :returns: A sliced :py:class:`~.HierachicalGridData`.</span>
+<span class="sd">        :rtype: :py:class:`~.HierachicalGridData`</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># We can use _call_component_method here because we have to handle the</span>
+        <span class="c1"># errors</span>
+
+        <span class="c1"># A HierarchicalGridData can be formed by multiple components (e.g., one</span>
+        <span class="c1"># for each MPI rank). When we slice it, some components do not</span>
+        <span class="c1"># contribute at all to the result. For example, if we ask for the xy</span>
+        <span class="c1"># plane and a component has zmin = 3, the component should be excluded.</span>
+        <span class="c1"># The slice method raises an error when the cut is outside the grid, here</span>
+        <span class="c1"># we capture those errors and ignore the components that raised them.</span>
+        <span class="n">new_data</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="k">for</span> <span class="n">data</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">all_components</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">new_data</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">sliced</span><span class="p">(</span><span class="n">cut</span><span class="p">,</span> <span class="n">resample</span><span class="o">=</span><span class="n">resample</span><span class="p">))</span>
+            <span class="k">except</span> <span class="ne">ValueError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                <span class="k">if</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)</span> <span class="o">!=</span> <span class="s2">&quot;Cut point is outside the grid&quot;</span><span class="p">:</span>
+                    <span class="k">raise</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="k">pass</span>  <span class="c1"># Ignore the component</span>
+
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">new_data</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Cut point is outside the grid&quot;</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)(</span><span class="n">new_data</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="HierarchicalGridData.slice"><a class="viewcode-back" href="../../grid_data_ref.html#kuibit.grid_data.HierarchicalGridData.slice">[docs]</a>    <span class="k">def</span> <span class="nf">slice</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cut</span><span class="p">,</span> <span class="n">resample</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Slice the data along given direction.</span>
+
+<span class="sd">        ``cut`` specifies how to slice the data. It has to be an array with the</span>
+<span class="sd">        same number of dimensions of the data. In the entries where ``cut`` is</span>
+<span class="sd">        None, that dimension is kept, where it is a number, the data is cut</span>
+<span class="sd">        fixing that coordinate. For example, for a 2D array, if ``cut`` is</span>
+<span class="sd">        ``[None, 2]``, the cut will be with ``y = 2``.</span>
+
+<span class="sd">        If ``resample`` is True, you can cut at any point and we will compute</span>
+<span class="sd">        the values with multilinear interpolation. If ``resample`` is False, we</span>
+<span class="sd">        will use the data already available.</span>
+
+<span class="sd">        In doing this, dimensions that are only one grid point are lost.</span>
+
+<span class="sd">        :param cut: How to slice the array. None entries mean &quot;keep that dimension&quot;.</span>
+<span class="sd">        :type cut:  array or list with dimension</span>
+<span class="sd">        :param resample: Whether to use multilinear interpolation to compute the</span>
+<span class="sd">                         data or simply use the value of the closest point.</span>
+<span class="sd">        :type resample: bool</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_apply_to_self</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sliced</span><span class="p">,</span> <span class="n">cut</span><span class="o">=</span><span class="n">cut</span><span class="p">,</span> <span class="n">resample</span><span class="o">=</span><span class="n">resample</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="HierarchicalGridData.coordinates"><a class="viewcode-back" href="../../grid_data_ref.html#kuibit.grid_data.HierarchicalGridData.coordinates">[docs]</a>    <span class="k">def</span> <span class="nf">coordinates</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Return coordinates as a list of :py:class:`~.HierarchicalGridData`.</span>

@@ -404,6 +404,8 @@ attribute. For example, if you are interested in 2D data on the xy plane:
 In case you want a lower dimensional cut (say, you want only the y axis and you
 have the xy data), you can always look at higher-dimensional data and slice it
 to your liking, as described in the above sections.
+:py:class:`~.HierachicalGridData` can be sliced in the same way as
+:py:class:`~.UniformGridData`.
 
 Once you selected the data you are interested in, you will be working with a
 :py:class:`~.AllGridFunctions` object. This is a dictionary-like object that
