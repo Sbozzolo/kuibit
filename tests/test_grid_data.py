@@ -1079,14 +1079,14 @@ class TestHierarchicalGridData(unittest.TestCase):
     def setUp(self):
         # Here we split the rectangle with x0 = [0, 1], x1 = [14, 26]
         # and shape [14, 26] in 4 pieces
-        grid1 = gd.UniformGrid([4, 5], x0=[0, 1], x1=[3, 5], ref_level=0)
-        grid2 = gd.UniformGrid([11, 21], x0=[4, 6], x1=[14, 26], ref_level=0)
-        grid3 = gd.UniformGrid([11, 5], x0=[4, 1], x1=[14, 5], ref_level=0)
-        grid4 = gd.UniformGrid([4, 21], x0=[0, 6], x1=[3, 26], ref_level=0)
+        patch1 = gd.UniformGrid([4, 5], x0=[0, 1], x1=[3, 5], ref_level=0)
+        patch2 = gd.UniformGrid([11, 21], x0=[4, 6], x1=[14, 26], ref_level=0)
+        patch3 = gd.UniformGrid([11, 5], x0=[4, 1], x1=[14, 5], ref_level=0)
+        patch4 = gd.UniformGrid([4, 21], x0=[0, 6], x1=[3, 26], ref_level=0)
 
-        self.grids0 = [grid1, grid2, grid3, grid4]
+        self.grids0 = [patch1, patch2, patch3, patch4]
         # self.grids1 are not to be merged because they do not fill the space
-        self.grids1 = [grid1, grid2]
+        self.grids1 = [patch1, patch2]
 
         def product(x, y):
             return x * (y + 2)
@@ -1622,3 +1622,28 @@ class TestHierarchicalGridData(unittest.TestCase):
         self.assertTrue(
             np.allclose(-partial_x[1][0].data, original_sin2.data, atol=1e-3)
         )
+
+    def test_slice(self):
+
+        hg = gd.HierarchicalGridData(self.grid_data)
+
+        # Test cut is outside grid
+        with self.assertRaises(ValueError):
+            hg.slice([-100, -200])
+
+        # Test other error (captured matching the error message)
+        with self.assertRaises(ValueError):
+            hg.slice([1, 2, 3])
+
+        # hg splits the rectangle with x0 = [0, 1], x1 = [14, 26] in four pieces
+        # (self.grid0). If we cut at x = 2, we should only get two pieces,
+        # patch1 and patch4, the first and the last elements of self.grid_data
+
+        cut = [2, None]
+        expected_hg = gd.HierarchicalGridData(
+            [self.grid_data[0].sliced(cut), self.grid_data[3].sliced(cut)]
+        )
+
+        hg.slice(cut)
+
+        self.assertEqual(hg, expected_hg)

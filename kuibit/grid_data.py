@@ -1404,6 +1404,9 @@ class UniformGridData(BaseNumerical):
                     <= cut[dim]
                     < self.grid.highest_vertex[dim]
                 ):
+                    # The slice method in HierarchicalGridData matches this
+                    # error message, so you change it, update the corresponding
+                    # method.
                     raise ValueError("Cut point is outside the grid")
                 # Transform from coordinate to index
                 index = int((cut[dim] - self.x0[dim]) / self.dx[dim] + 0.5)
@@ -2849,6 +2852,80 @@ class HierarchicalGridData(BaseNumerical):
         return self._apply_to_self(
             self.partial_derived, direction, order=order
         )
+
+    def sliced(self, cut, resample=False):
+        """Return a new :py:class:`~.HierarchicalGridData` obtained slicing the current one.
+
+        ``cut`` specifies how to slice the data. It has to be an array with the
+        same number of dimensions of the data. In the entries where ``cut`` is
+        None, that dimension is kept, where it is a number, the data is cut
+        fixing that coordinate. For example, for a 2D array, if ``cut`` is
+        ``[None, 2]``, the cut will be with ``y = 2``.
+
+        If ``resample`` is True, you can cut at any point and we will compute
+        the values with multilinear interpolation. If ``resample`` is False, we
+        will use the data already available.
+
+        In doing this, dimensions that are only one grid point are lost.
+
+        :param cut: How to slice the array. None entries mean "keep that dimension".
+        :type cut:  array or list with dimension
+        :param resample: Whether to use multilinear interpolation to compute the
+                         data or simply use the value of the closest point.
+        :type resample: bool
+
+        :returns: A sliced :py:class:`~.HierachicalGridData`.
+        :rtype: :py:class:`~.HierachicalGridData`
+
+        """
+        # We can use _call_component_method here because we have to handle the
+        # errors
+
+        # A HierarchicalGridData can be formed by multiple components (e.g., one
+        # for each MPI rank). When we slice it, some components do not
+        # contribute at all to the result. For example, if we ask for the xy
+        # plane and a component has zmin = 3, the component should be excluded.
+        # The slice method raises an error when the cut is outside the grid, here
+        # we capture those errors and ignore the components that raised them.
+        new_data = []
+
+        for data in self.all_components:
+            try:
+                new_data.append(data.sliced(cut, resample=resample))
+            except ValueError as e:
+                if str(e) != "Cut point is outside the grid":
+                    raise
+                # Otherwise, do nothing
+                pass  # Ignore the component
+
+        if len(new_data) == 0:
+            raise ValueError("Cut point is outside the grid")
+
+        return type(self)(new_data)
+
+    def slice(self, cut, resample=False):
+        """Slice the data along given direction.
+
+        ``cut`` specifies how to slice the data. It has to be an array with the
+        same number of dimensions of the data. In the entries where ``cut`` is
+        None, that dimension is kept, where it is a number, the data is cut
+        fixing that coordinate. For example, for a 2D array, if ``cut`` is
+        ``[None, 2]``, the cut will be with ``y = 2``.
+
+        If ``resample`` is True, you can cut at any point and we will compute
+        the values with multilinear interpolation. If ``resample`` is False, we
+        will use the data already available.
+
+        In doing this, dimensions that are only one grid point are lost.
+
+        :param cut: How to slice the array. None entries mean "keep that dimension".
+        :type cut:  array or list with dimension
+        :param resample: Whether to use multilinear interpolation to compute the
+                         data or simply use the value of the closest point.
+        :type resample: bool
+
+        """
+        self._apply_to_self(self.sliced, cut=cut, resample=resample)
 
     def coordinates(self):
         """Return coordinates as a list of :py:class:`~.HierarchicalGridData`.
