@@ -28,6 +28,7 @@ Python required to complete the task.
 
 * Transparently handle low dimensional grid data with higher dimensional one is
   available (e.g. add to the `xy` if `xyz` is available). [==]
+* Add natural Python slicing operators to grid data (e.g. [:, 1] = slice([None, 1])). [==]
 * Add support for HDF5 for `AHFinderDirect` output. [==]
 * Add method to merge `AHFinderDirect` patches. [==]
 * Perform interpolation in shapes of `AHFinderDirect` to better find shapes when
