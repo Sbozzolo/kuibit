@@ -301,7 +301,8 @@ def _plot_grid(
     # like colormaps.
     data = np.clip(data, vmin, vmax)
 
-    axis.set_aspect(aspect_ratio)
+    if aspect_ratio is not None:
+        axis.set_aspect(aspect_ratio)
 
     if xlabel is not None:
         axis.set_xlabel(xlabel)
