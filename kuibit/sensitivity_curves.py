@@ -284,9 +284,7 @@ def Sn_KAGRA_D(freqs):
     """
     freqs = np.asarray(freqs)
 
-    data = pkgutil.get_data("kuibit", "data/KAGRA_VRSED.dat").decode(
-        "utf8"
-    )
+    data = pkgutil.get_data("kuibit", "data/KAGRA_VRSED.dat").decode("utf8")
 
     # KAGRA distributes Amplitude Spectral Densities
     asd = load_FrequencySeries(StringIO(data))

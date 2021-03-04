@@ -468,7 +468,9 @@ class BaseSeries(BaseNumerical):
 
         """
         # If x is the same, there's no need to resample
-        if len(self.x) == len(new_x) and np.allclose(self.x, new_x, atol=1e-14):
+        if len(self.x) == len(new_x) and np.allclose(
+            self.x, new_x, atol=1e-14
+        ):
             return self.copy()
 
         # Unfortunately there is no nearest neighor resampling in SciPy's splines.
