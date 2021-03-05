@@ -137,7 +137,11 @@ collect the fruit of your ``Cactus`` simulations.
 Credits
 -------
 
-The code was originally developed by Wolfgang Kastaun. This fork completely
+
+``kuibit`` follows the same design and part of the implementation details of
+``PostCactus``, code developed by Wolfgang Kastaun. This fork completely
 rewrites the original code, adding emphasis on documentation, testing, and
 extensibility. The logo contains elements designed by `freepik.com
-<https://freepik.com/>`_.
+<https://freepik.com/>`_. We thank ``kuibit`` first users, Stamatis Vretinaris
+and Pedro Espino, for providing comments to improve the code and the
+documentation.
