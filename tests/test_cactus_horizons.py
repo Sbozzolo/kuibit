@@ -337,6 +337,14 @@ class TestOneHorizon(unittest.TestCase):
             np.allclose(expected_x, self.ho.shape_at_iteration(0)[0])
         )
 
+    def test_shape_time_at_iteration(self):
+
+        # Test iteration not available
+        with self.assertRaises(ValueError):
+            self.ho.shape_time_at_iteration(10465)
+
+        self.assertAlmostEqual(self.ho.shape_time_at_iteration(1024), 6.400)
+
     def test_shape_outline_at_iteration(self):
 
         # Iteration not present

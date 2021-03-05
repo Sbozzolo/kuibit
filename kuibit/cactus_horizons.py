@@ -146,10 +146,12 @@ class OneHorizon:
                 # self.ah.cctk_iteration is a function time vs iteration, we
                 # want the opposite. We define a new timeseries in which we swap
                 # t and y
-                times_iterations = remove_duplicated_iters(
+                self._times_iterations = remove_duplicated_iters(
                     self.ah.cctk_iteration.y, self.ah.cctk_iteration.t
                 )
-                self.shape_times = times_iterations(self.shape_iterations)
+                self.shape_times = self._times_iterations(
+                    self.shape_iterations
+                )
                 self.shape_time_min = self.shape_times[0]
                 self.shape_time_max = self.shape_times[-1]
             else:
@@ -248,6 +250,20 @@ class OneHorizon:
         coord_z = [p[2] for p in patches.values()]
 
         return coord_x, coord_y, coord_z
+
+    def shape_time_at_iteration(self, iteration):
+        """Return the time corresponding to the given iteration using the information
+        from the shape files.
+
+        :param iteration: Iteration number.
+        :type iteration: int
+        :returns: Time at the given iteration.
+        :rtype: float
+        """
+        if iteration not in self.shape_iterations:
+            raise ValueError(f"Shape not available for iteration {iteration}")
+
+        return self._times_iterations(iteration)
 
     @staticmethod
     def _load_patches(path):

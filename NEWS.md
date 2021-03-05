@@ -7,7 +7,8 @@
 #### Features
 - Added `nanmax`, `nanmix`, `abs_nanmax`, `abs_nanmin` to `BaseNumerical`
 - Added support for HDF5 grid arrays
-- Added slicing `hierarchicalGridData`
+- Added slicing `HierarchicalGridData`
+- Add `shape_time_at_iteration` in `cactus_horizon`
 #### Bug fixes
 - `cactus_horizons` and `cactus_multiploes` now remove duplicate iterations
 #### Breaking changes
