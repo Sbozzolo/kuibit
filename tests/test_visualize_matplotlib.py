@@ -244,6 +244,17 @@ class TestVisualizeMatplotlib(unittest.TestCase):
             )
         )
 
+        # Test with a 3D plot
+        from mpl_toolkits.mplot3d import Axes3D
+
+        ax = plt.figure().gca(projection="3d")
+        self.assertTrue(
+            isinstance(
+                viz.add_text_to_figure_corner("test", axis=ax),
+                matplotlib.text.Text,
+            )
+        )
+
     def test_save(self):
 
         plt.plot([1, 1], [2, 2])
