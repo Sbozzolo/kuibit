@@ -530,6 +530,48 @@ class OneHorizon:
             ordering = np.argsort(phi)
             return points0[ordering], points1[ordering]
 
+    def shape_outline_at_time(self, time, cut, tolerance=1e-10):
+        """Return the cut of the 3D shape on a specified plane.
+
+        ``cut`` has to be a 3D tuple or list with None on the dimensions you
+        want to keep, and the value of the other coordinates. For example, if
+        you want the outline at z = 3 on the xy plane, ``cut`` has to be
+        ``(None, None, 3)``.
+
+        No interpolation is performed, so results are not accurate when the cut
+        is not along one of the major directions centered in the origin of the
+        horizon.
+
+        :param time: Time.
+        :type time: float
+        :param tolerance: Tolerance in determining the time.
+        :type tolerance: float
+        :param cut: How should the horizon be sliced?
+        :type cut: 3D tuple
+        :returns:    Coordinates of AH outline.
+        :rtype:      tuple of two 1D NumPy arrays.
+
+        """
+        # TODO: (REFACTOR) Code logic shared with shape_at_time
+        #
+        # This code is essentially the same as shape_at_time. We should refactor
+        # all the _at_time methods, maybe defining a function that transforms
+        # _at_iteration methods to _at_time_methods.
+
+        # https://stackoverflow.com/a/41022847
+        try:
+            index_closest = next(
+                i
+                for i, _ in enumerate(self.shape_times)
+                if np.isclose(_, time, tolerance)
+            )
+        except StopIteration:
+            raise ValueError(f"Time {time} not available")
+
+        iteration = self.shape_iterations[index_closest]
+
+        return self.shape_outline_at_iteration(iteration, cut=cut)
+
 
 class HorizonsDir:
     """Class to collect information on apparent horizons
