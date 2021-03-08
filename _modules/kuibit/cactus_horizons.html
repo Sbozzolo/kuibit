@@ -189,10 +189,10 @@
                 <span class="c1"># self.ah.cctk_iteration is a function time vs iteration, we</span>
                 <span class="c1"># want the opposite. We define a new timeseries in which we swap</span>
                 <span class="c1"># t and y</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">_times_iterations</span> <span class="o">=</span> <span class="n">remove_duplicated_iters</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_iterations_to_times</span> <span class="o">=</span> <span class="n">remove_duplicated_iters</span><span class="p">(</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">ah</span><span class="o">.</span><span class="n">cctk_iteration</span><span class="o">.</span><span class="n">y</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">ah</span><span class="o">.</span><span class="n">cctk_iteration</span><span class="o">.</span><span class="n">t</span>
                 <span class="p">)</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">shape_times</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_times_iterations</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">shape_times</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_iterations_to_times</span><span class="p">(</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">shape_iterations</span>
                 <span class="p">)</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">shape_time_min</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">shape_times</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
@@ -294,6 +294,32 @@
 
         <span class="k">return</span> <span class="n">coord_x</span><span class="p">,</span> <span class="n">coord_y</span><span class="p">,</span> <span class="n">coord_z</span></div>
 
+<div class="viewcode-block" id="OneHorizon.shape_at_time"><a class="viewcode-back" href="../../cactus_horizons_ref.html#kuibit.cactus_horizons.OneHorizon.shape_at_time">[docs]</a>    <span class="k">def</span> <span class="nf">shape_at_time</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">time</span><span class="p">,</span> <span class="n">tolerance</span><span class="o">=</span><span class="mf">1e-10</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Return the shape of the horizon as 3 arrays with the</span>
+<span class="sd">        coordinates of the points.</span>
+
+<span class="sd">        :param time: Time.</span>
+<span class="sd">        :type time: float</span>
+<span class="sd">        :param tolerance: Tolerance in determining the time.</span>
+<span class="sd">        :type tolerance: float</span>
+<span class="sd">        :returns: Shape of the horizon.</span>
+<span class="sd">        :rtype: three lists of 2D NumPy arrays, one for each</span>
+<span class="sd">                coordinate. The list is over the different patches.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># https://stackoverflow.com/a/41022847</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">index_closest</span> <span class="o">=</span> <span class="nb">next</span><span class="p">(</span>
+                <span class="n">i</span>
+                <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">shape_times</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">isclose</span><span class="p">(</span><span class="n">_</span><span class="p">,</span> <span class="n">time</span><span class="p">,</span> <span class="n">tolerance</span><span class="p">)</span>
+            <span class="p">)</span>
+        <span class="k">except</span> <span class="ne">StopIteration</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Time </span><span class="si">{</span><span class="n">time</span><span class="si">}</span><span class="s2"> not available&quot;</span><span class="p">)</span>
+
+        <span class="n">iteration</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">shape_iterations</span><span class="p">[</span><span class="n">index_closest</span><span class="p">]</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">shape_at_iteration</span><span class="p">(</span><span class="n">iteration</span><span class="p">)</span></div>
+
 <div class="viewcode-block" id="OneHorizon.shape_time_at_iteration"><a class="viewcode-back" href="../../cactus_horizons_ref.html#kuibit.cactus_horizons.OneHorizon.shape_time_at_iteration">[docs]</a>    <span class="k">def</span> <span class="nf">shape_time_at_iteration</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">iteration</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Return the time corresponding to the given iteration using the information</span>
 <span class="sd">        from the shape files.</span>
@@ -306,7 +332,7 @@
         <span class="k">if</span> <span class="n">iteration</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">shape_iterations</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Shape not available for iteration </span><span class="si">{</span><span class="n">iteration</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_times_iterations</span><span class="p">(</span><span class="n">iteration</span><span class="p">)</span></div>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_iterations_to_times</span><span class="p">(</span><span class="n">iteration</span><span class="p">)</span></div>
 
     <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">_load_patches</span><span class="p">(</span><span class="n">path</span><span class="p">):</span>
@@ -545,7 +571,49 @@
                 <span class="n">points0</span> <span class="o">-</span> <span class="n">origin</span><span class="p">[</span><span class="n">dim0</span><span class="p">]</span> <span class="o">+</span> <span class="mi">1</span><span class="n">j</span> <span class="o">*</span> <span class="p">(</span><span class="n">points1</span> <span class="o">-</span> <span class="n">origin</span><span class="p">[</span><span class="n">dim1</span><span class="p">])</span>
             <span class="p">)</span>
             <span class="n">ordering</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argsort</span><span class="p">(</span><span class="n">phi</span><span class="p">)</span>
-            <span class="k">return</span> <span class="n">points0</span><span class="p">[</span><span class="n">ordering</span><span class="p">],</span> <span class="n">points1</span><span class="p">[</span><span class="n">ordering</span><span class="p">]</span></div></div>
+            <span class="k">return</span> <span class="n">points0</span><span class="p">[</span><span class="n">ordering</span><span class="p">],</span> <span class="n">points1</span><span class="p">[</span><span class="n">ordering</span><span class="p">]</span></div>
+
+<div class="viewcode-block" id="OneHorizon.shape_outline_at_time"><a class="viewcode-back" href="../../cactus_horizons_ref.html#kuibit.cactus_horizons.OneHorizon.shape_outline_at_time">[docs]</a>    <span class="k">def</span> <span class="nf">shape_outline_at_time</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">time</span><span class="p">,</span> <span class="n">cut</span><span class="p">,</span> <span class="n">tolerance</span><span class="o">=</span><span class="mf">1e-10</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Return the cut of the 3D shape on a specified plane.</span>
+
+<span class="sd">        ``cut`` has to be a 3D tuple or list with None on the dimensions you</span>
+<span class="sd">        want to keep, and the value of the other coordinates. For example, if</span>
+<span class="sd">        you want the outline at z = 3 on the xy plane, ``cut`` has to be</span>
+<span class="sd">        ``(None, None, 3)``.</span>
+
+<span class="sd">        No interpolation is performed, so results are not accurate when the cut</span>
+<span class="sd">        is not along one of the major directions centered in the origin of the</span>
+<span class="sd">        horizon.</span>
+
+<span class="sd">        :param time: Time.</span>
+<span class="sd">        :type time: float</span>
+<span class="sd">        :param tolerance: Tolerance in determining the time.</span>
+<span class="sd">        :type tolerance: float</span>
+<span class="sd">        :param cut: How should the horizon be sliced?</span>
+<span class="sd">        :type cut: 3D tuple</span>
+<span class="sd">        :returns:    Coordinates of AH outline.</span>
+<span class="sd">        :rtype:      tuple of two 1D NumPy arrays.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># TODO: (REFACTOR) Code logic shared with shape_at_time</span>
+        <span class="c1">#</span>
+        <span class="c1"># This code is essentially the same as shape_at_time. We should refactor</span>
+        <span class="c1"># all the _at_time methods, maybe defining a function that transforms</span>
+        <span class="c1"># _at_iteration methods to _at_time_methods.</span>
+
+        <span class="c1"># https://stackoverflow.com/a/41022847</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">index_closest</span> <span class="o">=</span> <span class="nb">next</span><span class="p">(</span>
+                <span class="n">i</span>
+                <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">shape_times</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">isclose</span><span class="p">(</span><span class="n">_</span><span class="p">,</span> <span class="n">time</span><span class="p">,</span> <span class="n">tolerance</span><span class="p">)</span>
+            <span class="p">)</span>
+        <span class="k">except</span> <span class="ne">StopIteration</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Time </span><span class="si">{</span><span class="n">time</span><span class="si">}</span><span class="s2"> not available&quot;</span><span class="p">)</span>
+
+        <span class="n">iteration</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">shape_iterations</span><span class="p">[</span><span class="n">index_closest</span><span class="p">]</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">shape_outline_at_iteration</span><span class="p">(</span><span class="n">iteration</span><span class="p">,</span> <span class="n">cut</span><span class="o">=</span><span class="n">cut</span><span class="p">)</span></div></div>
 
 
 <div class="viewcode-block" id="HorizonsDir"><a class="viewcode-back" href="../../cactus_horizons_ref.html#kuibit.cactus_horizons.HorizonsDir">[docs]</a><span class="k">class</span> <span class="nc">HorizonsDir</span><span class="p">:</span>
