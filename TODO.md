@@ -35,6 +35,7 @@ Python required to complete the task.
   the cut is not on a major direction. [==]
 
 * Add support for `all_reductions_in_one_file` to `cactus_scalars`. [==]
+* Add support for `VolumeIntegral` thorns to `cactus_scalars`. [==]
 
 * Hunt for TODOs in the codebase and implement them. [=?=]
 
