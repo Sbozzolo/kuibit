@@ -189,10 +189,12 @@
                 <span class="c1"># self.ah.cctk_iteration is a function time vs iteration, we</span>
                 <span class="c1"># want the opposite. We define a new timeseries in which we swap</span>
                 <span class="c1"># t and y</span>
-                <span class="n">times_iterations</span> <span class="o">=</span> <span class="n">remove_duplicated_iters</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_times_iterations</span> <span class="o">=</span> <span class="n">remove_duplicated_iters</span><span class="p">(</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">ah</span><span class="o">.</span><span class="n">cctk_iteration</span><span class="o">.</span><span class="n">y</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">ah</span><span class="o">.</span><span class="n">cctk_iteration</span><span class="o">.</span><span class="n">t</span>
                 <span class="p">)</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">shape_times</span> <span class="o">=</span> <span class="n">times_iterations</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">shape_iterations</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">shape_times</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_times_iterations</span><span class="p">(</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">shape_iterations</span>
+                <span class="p">)</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">shape_time_min</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">shape_times</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">shape_time_max</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">shape_times</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
             <span class="k">else</span><span class="p">:</span>
@@ -291,6 +293,20 @@
         <span class="n">coord_z</span> <span class="o">=</span> <span class="p">[</span><span class="n">p</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">patches</span><span class="o">.</span><span class="n">values</span><span class="p">()]</span>
 
         <span class="k">return</span> <span class="n">coord_x</span><span class="p">,</span> <span class="n">coord_y</span><span class="p">,</span> <span class="n">coord_z</span></div>
+
+<div class="viewcode-block" id="OneHorizon.shape_time_at_iteration"><a class="viewcode-back" href="../../cactus_horizons_ref.html#kuibit.cactus_horizons.OneHorizon.shape_time_at_iteration">[docs]</a>    <span class="k">def</span> <span class="nf">shape_time_at_iteration</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">iteration</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Return the time corresponding to the given iteration using the information</span>
+<span class="sd">        from the shape files.</span>
+
+<span class="sd">        :param iteration: Iteration number.</span>
+<span class="sd">        :type iteration: int</span>
+<span class="sd">        :returns: Time at the given iteration.</span>
+<span class="sd">        :rtype: float</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">iteration</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">shape_iterations</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Shape not available for iteration </span><span class="si">{</span><span class="n">iteration</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_times_iterations</span><span class="p">(</span><span class="n">iteration</span><span class="p">)</span></div>
 
     <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">_load_patches</span><span class="p">(</span><span class="n">path</span><span class="p">):</span>
