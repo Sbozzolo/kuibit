@@ -146,10 +146,10 @@ class OneHorizon:
                 # self.ah.cctk_iteration is a function time vs iteration, we
                 # want the opposite. We define a new timeseries in which we swap
                 # t and y
-                self._times_iterations = remove_duplicated_iters(
+                self._iterations_to_times = remove_duplicated_iters(
                     self.ah.cctk_iteration.y, self.ah.cctk_iteration.t
                 )
-                self.shape_times = self._times_iterations(
+                self.shape_times = self._iterations_to_times(
                     self.shape_iterations
                 )
                 self.shape_time_min = self.shape_times[0]
@@ -251,6 +251,32 @@ class OneHorizon:
 
         return coord_x, coord_y, coord_z
 
+    def shape_at_time(self, time, tolerance=1e-10):
+        """Return the shape of the horizon as 3 arrays with the
+        coordinates of the points.
+
+        :param time: Time.
+        :type time: float
+        :param tolerance: Tolerance in determining the time.
+        :type tolerance: float
+        :returns: Shape of the horizon.
+        :rtype: three lists of 2D NumPy arrays, one for each
+                coordinate. The list is over the different patches.
+        """
+        # https://stackoverflow.com/a/41022847
+        try:
+            index_closest = next(
+                i
+                for i, _ in enumerate(self.shape_times)
+                if np.isclose(_, time, tolerance)
+            )
+        except StopIteration:
+            raise ValueError(f"Time {time} not available")
+
+        iteration = self.shape_iterations[index_closest]
+
+        return self.shape_at_iteration(iteration)
+
     def shape_time_at_iteration(self, iteration):
         """Return the time corresponding to the given iteration using the information
         from the shape files.
@@ -263,7 +289,7 @@ class OneHorizon:
         if iteration not in self.shape_iterations:
             raise ValueError(f"Shape not available for iteration {iteration}")
 
-        return self._times_iterations(iteration)
+        return self._iterations_to_times(iteration)
 
     @staticmethod
     def _load_patches(path):
