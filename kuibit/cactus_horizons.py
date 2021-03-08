@@ -691,7 +691,8 @@ class HorizonsDir:
         # We continue only if we find some files
         if self._num_ah_horizons > 0:
 
-            first_ah_file = next(iter(self._ah_files.values()))[0]
+            # [0][0] is because the values are lists
+            first_ah_file = tuple(self._ah_files.values())[0][0]
             with open(first_ah_file, "r") as fil:
                 # Here we read the first lines_to_read into header
                 # We strip the new line
