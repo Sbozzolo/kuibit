@@ -61,9 +61,9 @@
 <span class="c1"># You should have received a copy of the GNU General Public License along with</span>
 <span class="c1"># this program; if not, see &lt;https://www.gnu.org/licenses/&gt;.</span>
 
-<span class="sd">&quot;&quot;&quot;The :py:mod:`~.cactus_ah` module provides classes to access the information</span>
-<span class="sd">about apparent horizons from QuasiLocalMeasures and AHFinderDirect (including</span>
-<span class="sd">shape files).</span>
+<span class="sd">&quot;&quot;&quot;The :py:mod:`~.cactus_horizons` module provides classes to access the</span>
+<span class="sd">information about apparent horizons from QuasiLocalMeasures and AHFinderDirect</span>
+<span class="sd">(including shape files).</span>
 
 <span class="sd">The main class is :py:class:`~.HorizonsDir` which collects all available data</span>
 <span class="sd">from a :py:class:`~.SimDir`. This is a dictionary-like object whose values can</span>
@@ -81,6 +81,10 @@
 <span class="sd">are found), which can be accessed with the methods</span>
 <span class="sd">:py:meth:`~.shape_at_iteration` and :py:meth:`~.shape_outline_at_iteration`.</span>
 
+<span class="sd">The module contains also functions to work with horizons:</span>
+<span class="sd">- :py:func:`~.compute_horizons_separation`, which takes</span>
+<span class="sd">  two :py:class:`~.OneHorizon` and returns the timeseries of their separation</span>
+
 <span class="sd">&quot;&quot;&quot;</span>
 
 <span class="kn">import</span> <span class="nn">os</span>
@@ -90,7 +94,49 @@
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 
 <span class="kn">from</span> <span class="nn">kuibit.attr_dict</span> <span class="kn">import</span> <span class="n">pythonize_name_dict</span>
-<span class="kn">from</span> <span class="nn">kuibit.timeseries</span> <span class="kn">import</span> <span class="n">remove_duplicated_iters</span><span class="p">,</span> <span class="n">combine_ts</span>
+<span class="kn">from</span> <span class="nn">kuibit.timeseries</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">remove_duplicated_iters</span><span class="p">,</span>
+    <span class="n">combine_ts</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="kn">from</span> <span class="nn">kuibit.series</span> <span class="kn">import</span> <span class="n">sample_common</span>
+
+
+<div class="viewcode-block" id="compute_horizons_separation"><a class="viewcode-back" href="../../cactus_horizons_ref.html#kuibit.cactus_horizons.compute_horizons_separation">[docs]</a><span class="k">def</span> <span class="nf">compute_horizons_separation</span><span class="p">(</span><span class="n">horizon1</span><span class="p">,</span> <span class="n">horizon2</span><span class="p">,</span> <span class="n">resample</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Compute the coordinate separation between the centroids of two horizons.</span>
+
+<span class="sd">    The information from the apparent horizons is used (contained in the</span>
+<span class="sd">    BHDiagnostics files).</span>
+
+<span class="sd">    :param horizon1: First horizon.</span>
+<span class="sd">    :type horizon1: :py:class:`~.OneHorizon`</span>
+<span class="sd">    :param horizon2: Second horizon.</span>
+<span class="sd">    :type horizon2: :py:class:`~.OneHorizon`</span>
+
+<span class="sd">    :returns: Coordinate distance between the two centroids, sampled over both</span>
+<span class="sd">              the horizons are available.</span>
+<span class="sd">    :rtype: :py:class:`~.TimeSeries`</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># We add sample_common to make sure that everything is defined on the same</span>
+    <span class="c1"># interval.</span>
+    <span class="p">(</span><span class="n">cen1_x</span><span class="p">,</span> <span class="n">cen1_y</span><span class="p">,</span> <span class="n">cen1_z</span><span class="p">,</span> <span class="n">cen2_x</span><span class="p">,</span> <span class="n">cen2_y</span><span class="p">,</span> <span class="n">cen2_z</span><span class="p">,)</span> <span class="o">=</span> <span class="n">sample_common</span><span class="p">(</span>
+        <span class="p">(</span>
+            <span class="n">horizon1</span><span class="o">.</span><span class="n">ah</span><span class="o">.</span><span class="n">centroid_x</span><span class="p">,</span>
+            <span class="n">horizon1</span><span class="o">.</span><span class="n">ah</span><span class="o">.</span><span class="n">centroid_y</span><span class="p">,</span>
+            <span class="n">horizon1</span><span class="o">.</span><span class="n">ah</span><span class="o">.</span><span class="n">centroid_z</span><span class="p">,</span>
+            <span class="n">horizon2</span><span class="o">.</span><span class="n">ah</span><span class="o">.</span><span class="n">centroid_x</span><span class="p">,</span>
+            <span class="n">horizon2</span><span class="o">.</span><span class="n">ah</span><span class="o">.</span><span class="n">centroid_y</span><span class="p">,</span>
+            <span class="n">horizon2</span><span class="o">.</span><span class="n">ah</span><span class="o">.</span><span class="n">centroid_z</span><span class="p">,</span>
+        <span class="p">),</span>
+        <span class="n">resample</span><span class="o">=</span><span class="n">resample</span><span class="p">,</span>
+    <span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span>
+        <span class="p">(</span><span class="n">cen1_x</span> <span class="o">-</span> <span class="n">cen2_x</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span>
+        <span class="o">+</span> <span class="p">(</span><span class="n">cen1_y</span> <span class="o">-</span> <span class="n">cen2_y</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span>
+        <span class="o">+</span> <span class="p">(</span><span class="n">cen1_z</span> <span class="o">-</span> <span class="n">cen2_z</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span>
+    <span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="OneHorizon"><a class="viewcode-back" href="../../cactus_horizons_ref.html#kuibit.cactus_horizons.OneHorizon">[docs]</a><span class="k">class</span> <span class="nc">OneHorizon</span><span class="p">:</span>

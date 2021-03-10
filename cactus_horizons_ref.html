@@ -52,9 +52,9 @@
             
   <div class="section" id="module-kuibit.cactus_horizons">
 <span id="reference-on-kuibit-cactus-horizons"></span><h1>Reference on kuibit.cactus_horizons<a class="headerlink" href="#module-kuibit.cactus_horizons" title="Permalink to this headline">¶</a></h1>
-<p>The <code class="xref py py-mod docutils literal notranslate"><span class="pre">cactus_ah</span></code> module provides classes to access the information
-about apparent horizons from QuasiLocalMeasures and AHFinderDirect (including
-shape files).</p>
+<p>The <a class="reference internal" href="#module-kuibit.cactus_horizons" title="kuibit.cactus_horizons"><code class="xref py py-mod docutils literal notranslate"><span class="pre">cactus_horizons</span></code></a> module provides classes to access the
+information about apparent horizons from QuasiLocalMeasures and AHFinderDirect
+(including shape files).</p>
 <p>The main class is <a class="reference internal" href="#kuibit.cactus_horizons.HorizonsDir" title="kuibit.cactus_horizons.HorizonsDir"><code class="xref py py-class docutils literal notranslate"><span class="pre">HorizonsDir</span></code></a> which collects all available data
 from a <a class="reference internal" href="simdir_ref.html#kuibit.simdir.SimDir" title="kuibit.simdir.SimDir"><code class="xref py py-class docutils literal notranslate"><span class="pre">SimDir</span></code></a>. This is a dictionary-like object whose values can
 be accessed providing two integers. The first is the QuasiLocalMeasures index,
@@ -69,6 +69,11 @@ AHFinderDirect. All of these are represented as <a class="reference internal" hr
 <a class="reference internal" href="#kuibit.cactus_horizons.OneHorizon" title="kuibit.cactus_horizons.OneHorizon"><code class="xref py py-class docutils literal notranslate"><span class="pre">OneHorizon</span></code></a> also contains the shapes of the horizons (if the files
 are found), which can be accessed with the methods
 <a class="reference internal" href="#kuibit.cactus_horizons.OneHorizon.shape_at_iteration" title="kuibit.cactus_horizons.OneHorizon.shape_at_iteration"><code class="xref py py-meth docutils literal notranslate"><span class="pre">shape_at_iteration()</span></code></a> and <a class="reference internal" href="#kuibit.cactus_horizons.OneHorizon.shape_outline_at_iteration" title="kuibit.cactus_horizons.OneHorizon.shape_outline_at_iteration"><code class="xref py py-meth docutils literal notranslate"><span class="pre">shape_outline_at_iteration()</span></code></a>.</p>
+<p>The module contains also functions to work with horizons:
+- <a class="reference internal" href="#kuibit.cactus_horizons.compute_horizons_separation" title="kuibit.cactus_horizons.compute_horizons_separation"><code class="xref py py-func docutils literal notranslate"><span class="pre">compute_horizons_separation()</span></code></a>, which takes</p>
+<blockquote>
+<div><p>two <a class="reference internal" href="#kuibit.cactus_horizons.OneHorizon" title="kuibit.cactus_horizons.OneHorizon"><code class="xref py py-class docutils literal notranslate"><span class="pre">OneHorizon</span></code></a> and returns the timeseries of their separation</p>
+</div></blockquote>
 <dl class="py class">
 <dt id="kuibit.cactus_horizons.HorizonsDir">
 <em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">kuibit.cactus_horizons.</span></code><code class="sig-name descname"><span class="pre">HorizonsDir</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sd</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/kuibit/cactus_horizons.html#HorizonsDir"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kuibit.cactus_horizons.HorizonsDir" title="Permalink to this definition">¶</a></dt>
@@ -307,6 +312,29 @@ from the shape files.</p>
 </dl>
 </dd></dl>
 
+</dd></dl>
+
+<dl class="py function">
+<dt id="kuibit.cactus_horizons.compute_horizons_separation">
+<code class="sig-prename descclassname"><span class="pre">kuibit.cactus_horizons.</span></code><code class="sig-name descname"><span class="pre">compute_horizons_separation</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">horizon1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">horizon2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">resample</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/kuibit/cactus_horizons.html#compute_horizons_separation"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kuibit.cactus_horizons.compute_horizons_separation" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compute the coordinate separation between the centroids of two horizons.</p>
+<p>The information from the apparent horizons is used (contained in the
+BHDiagnostics files).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>horizon1</strong> (<a class="reference internal" href="#kuibit.cactus_horizons.OneHorizon" title="kuibit.cactus_horizons.OneHorizon"><code class="xref py py-class docutils literal notranslate"><span class="pre">OneHorizon</span></code></a>) – First horizon.</p></li>
+<li><p><strong>horizon2</strong> (<a class="reference internal" href="#kuibit.cactus_horizons.OneHorizon" title="kuibit.cactus_horizons.OneHorizon"><code class="xref py py-class docutils literal notranslate"><span class="pre">OneHorizon</span></code></a>) – Second horizon.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Coordinate distance between the two centroids, sampled over both
+the horizons are available.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="timeseries_ref.html#kuibit.timeseries.TimeSeries" title="kuibit.timeseries.TimeSeries"><code class="xref py py-class docutils literal notranslate"><span class="pre">TimeSeries</span></code></a></p>
+</dd>
+</dl>
 </dd></dl>
 
 </div>
