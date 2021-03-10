@@ -18,9 +18,9 @@
 # You should have received a copy of the GNU General Public License along with
 # this program; if not, see <https://www.gnu.org/licenses/>.
 
-"""The :py:mod:`~.cactus_ah` module provides classes to access the information
-about apparent horizons from QuasiLocalMeasures and AHFinderDirect (including
-shape files).
+"""The :py:mod:`~.cactus_horizons` module provides classes to access the
+information about apparent horizons from QuasiLocalMeasures and AHFinderDirect
+(including shape files).
 
 The main class is :py:class:`~.HorizonsDir` which collects all available data
 from a :py:class:`~.SimDir`. This is a dictionary-like object whose values can
@@ -38,6 +38,10 @@ AHFinderDirect. All of these are represented as :py:class:`~.TimeSeries`.
 are found), which can be accessed with the methods
 :py:meth:`~.shape_at_iteration` and :py:meth:`~.shape_outline_at_iteration`.
 
+The module contains also functions to work with horizons:
+- :py:func:`~.compute_horizons_separation`, which takes
+  two :py:class:`~.OneHorizon` and returns the timeseries of their separation
+
 """
 
 import os
@@ -47,7 +51,49 @@ import warnings
 import numpy as np
 
 from kuibit.attr_dict import pythonize_name_dict
-from kuibit.timeseries import remove_duplicated_iters, combine_ts
+from kuibit.timeseries import (
+    remove_duplicated_iters,
+    combine_ts,
+)
+from kuibit.series import sample_common
+
+
+def compute_horizons_separation(horizon1, horizon2, resample=True):
+    """Compute the coordinate separation between the centroids of two horizons.
+
+    The information from the apparent horizons is used (contained in the
+    BHDiagnostics files).
+
+    :param horizon1: First horizon.
+    :type horizon1: :py:class:`~.OneHorizon`
+    :param horizon2: Second horizon.
+    :type horizon2: :py:class:`~.OneHorizon`
+
+    :returns: Coordinate distance between the two centroids, sampled over both
+              the horizons are available.
+    :rtype: :py:class:`~.TimeSeries`
+
+    """
+
+    # We add sample_common to make sure that everything is defined on the same
+    # interval.
+    (cen1_x, cen1_y, cen1_z, cen2_x, cen2_y, cen2_z,) = sample_common(
+        (
+            horizon1.ah.centroid_x,
+            horizon1.ah.centroid_y,
+            horizon1.ah.centroid_z,
+            horizon2.ah.centroid_x,
+            horizon2.ah.centroid_y,
+            horizon2.ah.centroid_z,
+        ),
+        resample=resample,
+    )
+
+    return np.sqrt(
+        (cen1_x - cen2_x) ** 2
+        + (cen1_y - cen2_y) ** 2
+        + (cen1_z - cen2_z) ** 2
+    )
 
 
 class OneHorizon:
