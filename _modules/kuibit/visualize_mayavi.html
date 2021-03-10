@@ -88,6 +88,79 @@
     <span class="n">mlab</span><span class="o">.</span><span class="n">options</span><span class="o">.</span><span class="n">offscreen</span> <span class="o">=</span> <span class="kc">True</span></div>
 
 
+<div class="viewcode-block" id="plot_apparent_horizon"><a class="viewcode-back" href="../../visualize_mayavi_ref.html#kuibit.visualize_mayavi.plot_apparent_horizon">[docs]</a><span class="k">def</span> <span class="nf">plot_apparent_horizon</span><span class="p">(</span><span class="n">horizon</span><span class="p">,</span> <span class="n">iteration</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Plot given apparent horizon.</span>
+
+<span class="sd">    TODO: This is very tentative and will change in the future!</span>
+
+<span class="sd">    Unknown arguments are passed to ``mayavi.mesh``. One of these arguments</span>
+<span class="sd">    can be ``color``. You can set ``color`` to</span>
+
+<span class="sd">    :param horizon: Apparent horizon to plot.</span>
+<span class="sd">    :type horizon: `~.:py:class:OneHorizon`</span>
+<span class="sd">    :param color: RGB values of the color of the horizon.</span>
+<span class="sd">                  ``(1,1,1)`` for a white hole, ``(0,0,0)`` for a black hole.</span>
+<span class="sd">    :type color: tuple of three floats</span>
+<span class="sd">    :param iteration: Iteration to plot.</span>
+<span class="sd">    :type iteration: int</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">horizon</span><span class="p">,</span> <span class="n">OneHorizon</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;Invalid horizon&quot;</span><span class="p">)</span>
+
+    <span class="c1"># We add this here because one could set colormap instead of color.</span>
+    <span class="k">if</span> <span class="n">color</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">color</span> <span class="o">=</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+
+    <span class="c1"># TODO (FEATURE): Add time as parameter alternative to iteration.</span>
+
+    <span class="c1"># HACK: We are plotting multiple patches on top of each other.</span>
+    <span class="c1">#</span>
+    <span class="c1"># Apparent horizons are described by multiple patches. At the moment, kuibit</span>
+    <span class="c1"># cannot merge them in a meaningful way. So, we cheat and plot everything</span>
+    <span class="c1"># with the same color so that it is impossible to see that there are</span>
+    <span class="c1"># multiple patches.</span>
+
+    <span class="c1"># First, we get the patches</span>
+    <span class="c1">#</span>
+    <span class="c1"># patches is a list of three elements, the three coordinates. Each coordinate</span>
+    <span class="c1"># is a list with the various patches describes as a list of np.array.</span>
+    <span class="n">patches</span> <span class="o">=</span> <span class="n">horizon</span><span class="o">.</span><span class="n">shape_at_iteration</span><span class="p">(</span><span class="n">iteration</span><span class="p">)</span>
+
+    <span class="c1"># We must remove one layer from patches, the one that describes the various</span>
+    <span class="c1"># patches. We do this in a rather brutal way by looping over all the</span>
+    <span class="c1"># elements.</span>
+    <span class="c1">#</span>
+    <span class="c1"># What is going on here? We have an other loop (dim in range(3)) that loops</span>
+    <span class="c1"># over the three coordinates. The elements of this list comprehension are</span>
+    <span class="c1"># np.concatenate of the various points in the patch.</span>
+    <span class="n">shape_xyz</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">([</span><span class="n">patch</span> <span class="k">for</span> <span class="n">patch</span> <span class="ow">in</span> <span class="n">patches</span><span class="p">[</span><span class="n">dim</span><span class="p">]])</span> <span class="k">for</span> <span class="n">dim</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
+    <span class="p">]</span>
+
+    <span class="c1"># Here we plot!</span>
+    <span class="k">return</span> <span class="n">mlab</span><span class="o">.</span><span class="n">mesh</span><span class="p">(</span><span class="o">*</span><span class="n">shape_xyz</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">color</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="add_text_to_figure_corner"><a class="viewcode-back" href="../../visualize_mayavi_ref.html#kuibit.visualize_mayavi.add_text_to_figure_corner">[docs]</a><span class="k">def</span> <span class="nf">add_text_to_figure_corner</span><span class="p">(</span><span class="n">text</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Add text to the bottom right corner of a figure.</span>
+
+<span class="sd">    TODO: This is very tentative and will change in the future!</span>
+
+<span class="sd">    Unknown arguments are passed to mayavi.text.</span>
+
+<span class="sd">    :param text: Text to be inserted.</span>
+<span class="sd">    :type text: str</span>
+<span class="sd">    :param color: RGB colors of the text ``(1,1,1)`` for a white,</span>
+<span class="sd">                  ``(0,0,0)`` for black.</span>
+<span class="sd">    :type color: tuple of three floats</span>
+
+<span class="sd">    :returns: mayavi&#39;s Text object</span>
+<span class="sd">    :rtype: mayavi.Text</span>
+<span class="sd">    ``&quot;&quot;&quot;</span>
+
+    <span class="k">return</span> <span class="n">mlab</span><span class="o">.</span><span class="n">text</span><span class="p">(</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.93</span><span class="p">,</span> <span class="n">text</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">color</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
+
+
 <div class="viewcode-block" id="save"><a class="viewcode-back" href="../../visualize_mayavi_ref.html#kuibit.visualize_mayavi.save">[docs]</a><span class="k">def</span> <span class="nf">save</span><span class="p">(</span><span class="n">outputpath</span><span class="p">,</span> <span class="n">figure_extension</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Save figure to outputpath with figure_extension.</span>
 
