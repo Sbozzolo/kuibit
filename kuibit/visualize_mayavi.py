@@ -112,11 +112,11 @@ def add_text_to_figure_corner(text, color=(1, 1, 1), **kwargs):
 
     return mlab.text(0.0, 0.93, text, color=color, **kwargs)
 
-def save(outputpath, figure_extension):
+def save(outputpath, figure_extension, **kwargs):
     """Save figure to outputpath with figure_extension.
 
     :param outputpath:  Output path without extension.
     :type outputpath:  str
     :param figure_extension: Extension of the figure to save.
     """
-    mlab.savefig(f"{outputpath}.{figure_extension}")
+    mlab.savefig(f"{outputpath}.{figure_extension}", **kwargs)
