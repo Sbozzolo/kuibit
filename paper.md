@@ -81,6 +81,17 @@ like handling transparently simulation restarts, or merging grid data stored in
 different files. Therefore, users can easily access the data regardless of how
 complicated the structure of the output is.
 
+Currently, `kuibit` is the only available package for quantitative analysis of
+simulations that is free to use and that comes with documentation, tutorials,
+and examples. Tools like `visit` [@visit] or `rugutils` [@rugutils] focus only
+on visualizing grid data, while other packages like `POWER` [@POWER], or
+`pyGWAnalysis` [@pyGWAnalysis] only on gravitational-wave data. Capabilities
+similar to those of `kuibit` are offered by `SimulationTools`
+[@simulationtools], that runs on the proprietary Wolfram Mathematica, and by
+`PostCactus` [@pycactus] and `scidata` [@scidata], which, at the moment, do not
+support Python3 and do not have documentation. In addition to this, several
+research groups develop their own private analysis software.
+
 `kuibit` embraces the core principles of the `Einstein Toolkit`: On one side,
 `kuibit` solves the engineering problems of reading and representing `Einstein
 Toolkit` data, so that researchers can directly pursue their scientific goals
@@ -88,7 +99,7 @@ without having to worry about how the data is stored. With `kuibit`, the entry
 barrier into using the `Einstein Toolkit` is the lowest it has ever been, and
 students and researchers can inspect and visualize simulations in just a few
 lines of code. On the other side, `kuibit` is designed to be a code for the
-community: it is free and does not require any proprietary software to run [^2],
+community: it is free and does not require any proprietary software to run,
 it is openly developed with an emphasis on readability and maintainability, and
 it encourages contributions.
 
@@ -111,5 +122,3 @@ capabilities will work also for all the other codes based on `Cactus`. For
 instance, it is known that `kuibit` can be used to analyze `Illinois GRMHD`
 [@illinoisgrmhd] simulations.
 
-[^2]: Capabilities similar to those of `kuibit` are offered by `SimulationTools`
-[@simulationtools], which is a Wolfram Mathematica package.
