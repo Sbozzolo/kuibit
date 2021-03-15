@@ -106,9 +106,10 @@ it encourages contributions.
 # Acknowledgments
 
 Gabriele Bozzola is supported by by the Frontera Fellowship by the Texas
-Advanced Computing Center (TACC). Frontera is founded by NSF grant OAC-1818253.
-Gabriele Bozzola wishes to thank Wolfgang Kastaun for publicly releasing his
-`PostCactus` package [@pycactus] without which, `kuibit` would not exist.
+Advanced Computing Center (TACC). Frontera [@frontera] is founded by NSF grant
+OAC-1818253. Gabriele Bozzola wishes to thank Wolfgang Kastaun for publicly
+releasing his `PostCactus` package [@pycactus] without which, `kuibit` would not
+exist.
 
 # References
 
