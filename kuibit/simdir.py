@@ -102,9 +102,14 @@ class SimDir:
         self.errfiles = []
         self.allfiles = []
 
-        def listdir_no_symlinks(path):
-            """Return a list of files in path that are not symlink"""
+        def listdir_process_symlinks(path):
+            """Return a list of files in path. If self.ignore_symlinks, exclude the
+            symlinks, otherwise keep them around.
+
+            """
             dir_content = [os.path.join(path, p) for p in os.listdir(path)]
+            if not self.ignore_symlinks:
+                return dir_content
             return [p for p in dir_content if not os.path.islink(p)]
 
         def filter_ext(files, ext):
@@ -124,7 +129,7 @@ class SimDir:
 
             self.dirs.append(path)
 
-            all_files_in_path = listdir_no_symlinks(path)
+            all_files_in_path = listdir_process_symlinks(path)
 
             files_in_path = list(filter(os.path.isfile, all_files_in_path))
             self.allfiles += files_in_path
@@ -160,12 +165,12 @@ class SimDir:
         # Simfactory has a folder SIMFACTORY with a subdirectory for par files
         # Even if SIMFACTORY is excluded, we should include that par file
         if os.path.isdir(simfac):
-            mainpar = filter_ext(listdir_no_symlinks(simfac), ".par")
+            mainpar = filter_ext(listdir_process_symlinks(simfac), ".par")
             self.parfiles = mainpar + self.parfiles
 
         self.has_parfile = bool(self.parfiles)
 
-    def __init__(self, path, max_depth=8, ignore=None):
+    def __init__(self, path, max_depth=8, ignore=None, ignore_symlinks=True):
         """Constructor.
 
         :param path:      Path to output of the simulation.
@@ -174,6 +179,8 @@ class SimDir:
         :type max_depth:  int
         :param ignore: Names of folders to ignore (e.g. SIMFACTORY).
         :type ignore:  set
+        :param ignore_symlink: If True, do not consider symlinks.
+        :type ignore_symlink: bool
 
         Parfiles (``*.par``) will be searched in all data directories and the
         top-level SIMFACTORY/par folder, if it exists. The parfile in the
@@ -186,6 +193,7 @@ class SimDir:
             ignore = {"SIMFACTORY", "report", "movies", "tmp", "temp"}
 
         self.ignore = ignore
+        self.ignore_symlinks = ignore_symlinks
         self._sanitize_path(str(path))
         self._scan_folders(int(max_depth))
 

@@ -12,6 +12,7 @@
 - Added `shape_at_time` in `cactus_horizon`
 - Added `shape_outline_at_time` in `cactus_horizon`
 - Added `compute_horizons_separation` in `cactus_horizon`
+- Added `ignore_symlinks` to `SimDir`
 #### Bug fixes
 - `cactus_horizons` and `cactus_multiploes` now remove duplicate iterations
 #### Breaking changes

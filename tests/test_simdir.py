@@ -84,3 +84,7 @@ class TestSimDir(unittest.TestCase):
         # This is a fake folder
         empty_sim = sd.SimDir("kuibit")
         self.assertIn("No horizon found", empty_sim.__str__())
+
+        # Test symlink
+        sim_with_symlink = sd.SimDir("tests/tov", ignore_symlinks=False)
+        self.assertEqual(len(sim_with_symlink.allfiles), 447)

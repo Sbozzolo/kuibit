@@ -26,6 +26,9 @@ specify the option ``max_depth`` to increase the default.
 If you want to ignore specific folders (by default ``SIMFACTORY``, ``report``,
 ``movies``, ``tmp``, ``temp``), you can provide the ``ignore`` argument.
 
+By default, symlinks are ignored. You can change this behavior by passing the
+keyword argument ``ignore_symlinks=False``.
+
 Using SimDir objects
 --------------------
 
