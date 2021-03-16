@@ -190,7 +190,7 @@ class GravitationalWavesOneDet(mp.MultipoleOneDet):
              -     i h_\times^{lm}(r,t) = \int_{-\infty}^t \mathrm{d}u
                     \int_{-\infty}^u \mathrm{d}v\, \Psi_4^{lm}(r,v)
 
-        The return value is the complex :py:class:`~.TimeSeries` ``(r * h_plus + i r * h_cross)``.
+        The return value is the complex :py:class:`~.TimeSeries` ``(r * h_plus - i r * h_cross)``.
 
         It is always important to have a function that goes smoothly to zero
         before taking Fourier transform (to avoid spectral leakage and
