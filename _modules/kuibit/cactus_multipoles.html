@@ -276,7 +276,10 @@
         <span class="c1"># element</span>
 
         <span class="n">iter_self</span> <span class="o">=</span> <span class="nb">iter</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
-        <span class="n">first_l</span><span class="p">,</span> <span class="n">first_m</span><span class="p">,</span> <span class="n">first_det</span> <span class="o">=</span> <span class="nb">next</span><span class="p">(</span><span class="n">iter_self</span><span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">first_l</span><span class="p">,</span> <span class="n">first_m</span><span class="p">,</span> <span class="n">first_det</span> <span class="o">=</span> <span class="nb">next</span><span class="p">(</span><span class="n">iter_self</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">StopIteration</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s2">&quot;No multipole moments available&quot;</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">first_l</span> <span class="o">&gt;</span> <span class="n">l_max</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;l max smaller than all l available&quot;</span><span class="p">)</span>
 
