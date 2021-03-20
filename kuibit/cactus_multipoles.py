@@ -233,7 +233,10 @@ class MultipoleOneDet:
         # element
 
         iter_self = iter(self)
-        first_l, first_m, first_det = next(iter_self)
+        try:
+            first_l, first_m, first_det = next(iter_self)
+        except StopIteration:
+            raise RuntimeError("No multipole moments available")
         if first_l > l_max:
             raise ValueError("l max smaller than all l available")
 

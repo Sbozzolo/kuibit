@@ -113,8 +113,8 @@ def merge_uniform_grids(grids, component=-1):
     if len(ref_levels) != 1:
         raise ValueError("Can only merge grids on same refinement level.")
 
-    # Extract the only element from the set
-    ref_level = next(iter(ref_levels))
+    # Extract the only element from the set (using tuple unpacking)
+    (ref_level,) = ref_levels
 
     dx = [g.dx for g in grids]
 
@@ -195,7 +195,7 @@ def load_UniformGridData(path, *args, **kwargs):
 
     with opener(path, open_mode) as f:
         # Here we read the first lines_to_read into header
-        header = [next(f) for _ in range(lines_to_read)]
+        header = [f.readline().strip() for _ in range(lines_to_read)]
 
     # The metadata looks like
     # # shape: [50 50 50]

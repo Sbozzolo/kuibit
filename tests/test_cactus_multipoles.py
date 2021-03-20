@@ -153,6 +153,11 @@ class TestCactusMultipoles(unittest.TestCase):
             ts3,
         )
 
+        # Test no multiple moments
+        with self.assertRaises(RuntimeError):
+            mult._multipoles = {}
+            mult.total_function_on_available_lm(lambda x: x, l_max=1)
+
     def test_MultipoleAllDets(self):
 
         data = [(2, 2, 100, self.ts1), (2, -2, 150, self.ts2)]

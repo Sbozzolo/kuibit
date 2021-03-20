@@ -986,8 +986,8 @@ class OneGridFunctionH5(BaseOneGridFunction):
             )
 
         # We know that ghost_in_files has only one element (either True or
-        # False), so we pick that
-        self.are_ghostzones_in_files = next(iter(ghost_in_files))
+        # False), so we pick that (with tuple unpacking)
+        (self.are_ghostzones_in_files,) = ghost_in_files
 
     def _parse_file(self, path):
         """Read the content of the given file (without reading the data).
