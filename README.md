@@ -17,7 +17,9 @@ Toolkit largely inspired by
 [PostCactus](https://github.com/wokast/PyCactus/tree/master/PostCactus).
 `kuibit` can read simulation data and represent it with high-level classes. For
 a list of features available, look at the [official
-documentation](https://sbozzolo.github.io/kuibit).
+documentation](https://sbozzolo.github.io/kuibit). The
+[testimonials](https://sbozzolo.github.io/kuibit/testimonials.html) page
+collects short reviews about `kuibit`.
 
 ## Installation
 
