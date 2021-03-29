@@ -12,6 +12,9 @@ numerical-relativity (e.g., computing the strain of gravitational waves).
 A video introduction about ``kuibit`` can be found on
 `YouTube <https://www.youtube.com/watch?v=7-F2xh-m31A>`_.
 
+The :doc:`testimonials page <testimonials>` collects short user's reviews about
+``kuibit``.
+
 Summary of Features
 -------------------
 
