@@ -30,6 +30,21 @@ Plots can be enanched by adding a colorbar with :py:mod:`~.plot_colorbar` or by
 adding text in the bottom right corner with
 :py:mod:`~.add_text_to_figure_corner` (for example the time).
 
+Horizons
+--------------
+
+Apparent horizons can be plotted with :py:func:`~.plot_horizon_shape`. This
+function takes the 2D shape of an horizon as returned by
+:py:meth:`~.shape_outline_at_iteration` or :py:meth:`~.shape_outline_at_time`.
+There are two wrappers around this function to simplify plotting horizons on the
+usual planes ``xy``, ``xz``, and ``yz``:
+:py:func:`~.plot_horizon_shape_on_plane_at_iteration` and
+:py:func:`~.plot_horizon_shape_on_plane_at_time`. These take an
+:py:class:`~.OneHorizon` object, the iteration/time that has to be plotted, and
+the plane over which you are plotting. All these functions take also the color
+of the horizon, the color of its boundary, and the opacity (``alpha``).
+
+
 Implementation details
 ----------------------
 
