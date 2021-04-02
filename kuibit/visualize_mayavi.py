@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
 
-
 # Copyright (C) 2020-2021 Gabriele Bozzola
 #
 # This program is free software; you can redistribute it and/or modify it under
@@ -91,6 +90,22 @@ def plot_apparent_horizon(horizon, iteration, color=None, **kwargs):
 
     # Here we plot!
     return mlab.mesh(*shape_xyz, color=color, **kwargs)
+
+
+def plot_ah_trajectory(horizon, time=None, **kwargs):
+    """Plot the 3D trajectory of the given horizon.
+
+    :param horizon: Apparent horizon to plot.
+    :type horizon: `~.:py:class:OneHorizon`
+    :param time: If not None, plot up to this time.
+    :type time: float or None
+    """
+    return mlab.plot3d(
+        horizon.ah.centroid_x.cropped(end=time).y,
+        horizon.ah.centroid_y.cropped(end=time).y,
+        horizon.ah.centroid_z.cropped(end=time).y,
+        **kwargs,
+    )
 
 
 def add_text_to_figure_corner(text, color=(1, 1, 1), **kwargs):
