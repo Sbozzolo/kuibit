@@ -601,6 +601,128 @@ class GravitationalWavesOneDet(mp.MultipoleOneDet):
         """
         return self.get_total_torque_z(pcut, l_max=l_max).integrated()
 
+    def get_force_z_lm(self, mult_l, mult_m, pcut):
+        r"""Return the instantaneous linear momentum along the z direction
+        lost in the mode (l, m).
+
+        This is computed with Eq. (3.15) in Ruiz 2008.
+
+        :param mult_l: l multipole moment.
+        :type mult_t: int
+        :param mult_m: m multipole moment.
+        :type mult_m: int
+        :param pcut: Period that enters the fixed-frequency integration.
+                     Typically, the longest physical period in the signal.
+        :type pcut: float
+
+        :returns: Instantaneous force along the z axis in the mode ``(l, m)``
+                  as a function of time.
+        :rtype: :py:class:`~TimeSeries`
+        """
+
+        # Needed only for Px and Py
+
+        # def a_lm(el, em):
+        #     return np.sqrt((el - em) * (el + em + 1)) / (el * (el + 1))
+
+        # def b_lm(el, em):
+        #     return 1 / (2 * el) * np.sqrt(((el - 2) * (el + 2) * (el + em) * (el + em - 1))/((2 * el - 1) * (2 * el + 1)))
+
+        def c_lm(el, em):
+            num = 2 * em
+            den = el * (el + 1)
+            return num / den
+
+        def d_lm(el, em):
+            num = np.sqrt((el - 2) * (el + 2) * (el - em) * (el + em))
+            den = el * np.sqrt((2 * el - 1) * (2 * el + 1))
+            return num / den
+
+        # Pz_int1 = \int psi4_lm
+        # Pz_int2 = \int [(c_lm * conj(psi4_lm)
+        #                + d_lm * conj(psi_(l-1)m)
+        #                + d_(l+1)m * conj(psi_(l+1)m))]
+        #         = \int conj(A + B + C)
+        #
+        # (We move the conjugate outside given that all the coefficients
+        #  are real)
+        Pz_int1 = self._fixed_frequency_integrated(
+            self[(mult_l, mult_m)], pcut, order=1
+        )
+
+        A = c_lm(mult_l, mult_m) * self[(mult_l, mult_m)]
+        if (mult_l - 1, mult_m) in self:
+            B = d_lm(mult_l, mult_m) * self[(mult_l - 1, mult_m)]
+        else:
+            B = ts.TimeSeries(A.t, np.zeros_like(A.y))
+
+        if (mult_l + 1, mult_m) in self:
+            C = d_lm(mult_l + 1, mult_m) * self[(mult_l + 1, mult_m)]
+        else:
+            C = ts.TimeSeries(A.t, np.zeros_like(A.y))
+
+        Pz_int2 = self._fixed_frequency_integrated(
+            np.conj(A + B + C), pcut, order=1
+        )
+
+        # The imaginary part is zero, so we make the signal real
+        return self.dist ** 2 / (16 * np.pi) * (Pz_int1 * Pz_int2).real()
+
+    def get_linear_momentum_z_lm(self, mult_l, mult_m, pcut):
+        """Return the cumulative linear momentum lost along the z direction
+        in the mode (l, m).
+
+        :param mult_l: l multipole moment.
+        :type mult_t: int
+        :param mult_m: m multipole moment.
+        :type mult_m: int
+        :param pcut: Period that enters the fixed-frequency integration.
+                     Typically, the longest physical period in the signal.
+        :type pcut: float
+
+        :returns: Linear momentum along the z direction lost up to the time t
+                  in the mode ``(l, m)`` as a function of time.
+        :rtype: :py:class:`~TimeSeries`
+        """
+        return self.get_force_z_lm(mult_l, mult_m, pcut).integrated()
+
+    def get_total_force_z(self, pcut, l_max=None):
+        """Return the total force along the z direction in all the modes
+        up to ``l_max``.
+
+        :param pcut: Period that enters the fixed-frequency integration.
+                     Typically, the longest physical period in the signal.
+        :type pcut: float
+        :param l_max: Ignore multipoles with l > l_max
+        :type l_max: int
+
+        :returns: Instantaneous total force along the z direction in the
+                  modes up to  ``l_max`` as a function of time.
+        :rtype: :py:class:`~TimeSeries`
+
+        """
+
+        def forclm(_1, mult_l, mult_m, _2):
+            return self.get_force_z_lm(mult_l, mult_m, pcut)
+
+        return self.total_function_on_available_lm(forclm, l_max=l_max)
+
+    def get_total_linear_momentum_z(self, pcut, l_max=None):
+        """Return the cumulative linear momentum lost in all the modes up to ``l_max``.
+
+         :param pcut: Period that enters the fixed-frequency integration.
+                      Typically, the longest physical period in the signal.
+         :type pcut: float
+         :param l_max: Ignore multipoles with l > l_max
+         :type l_max: int
+
+        :returns: Cumulative total linear momentum along the z direction lost
+                  up to time in the modes up to  ``l_max`` as a function of time.
+         :rtype: :py:class:`~TimeSeries`
+
+        """
+        return self.get_total_force_z(pcut, l_max).integrated()
+
 
 class ElectromagneticWavesOneDet(mp.MultipoleOneDet):
     """Electromagnetic waves computed with the Newman-Penrose approach, using Phi2.

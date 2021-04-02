@@ -9,6 +9,9 @@ command-line scripts. It comes with options for working with figure, grid data,
 and horizons. Options can be stored in text files and read passing the path to
 the `-c` flag.
 
+#### Features
+- Added method to compute the linear momentum lost by gravitational waves
+
 #### Bug fixes
 - Fix bug that, under certain circumstances, resulted in `cactus_grid_function`
   not correctly indexing all the 3D data files
