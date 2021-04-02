@@ -92,13 +92,14 @@ Multipoles and waves
   - strains at given multipole number,
   - strains at a given point (accounting for the spin-weigthed spherical harmonics),
   - strain as observed by LIGO/Virgo (considering the antenna patterns),
+  - force/linear momentum along the z axis lost via gravitational waves (one or multiple modes),
   - power/energy lost via gravitational waves (one or multiple modes),
   - torque/angular momentum along the z axis lost via gravitational waves (one or multiple modes),
   - Compute the last two for electromagnetic waves from ``Phi2``.
 
 - Extrapolate waves at infinity with polynomial expansion in real/imaginary parts or amplitude and phase.
 - Compute spin-weigthed spherical harmonics.
-- Convert from RA and Dec to spherical coordiantes.
+- Convert from RA and Dec to spherical coordinates.
 - Compute antenna responses.
 - Compute signal to noise ratio from strain.
 - Compute redshift from luminosity distance.

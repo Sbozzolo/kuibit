@@ -46,7 +46,6 @@
   <h1>Source code for kuibit.visualize_mayavi</h1><div class="highlight"><pre>
 <span></span><span class="ch">#!/usr/bin/env python3</span>
 
-
 <span class="c1"># Copyright (C) 2020-2021 Gabriele Bozzola</span>
 <span class="c1">#</span>
 <span class="c1"># This program is free software; you can redistribute it and/or modify it under</span>
@@ -139,6 +138,22 @@
 
     <span class="c1"># Here we plot!</span>
     <span class="k">return</span> <span class="n">mlab</span><span class="o">.</span><span class="n">mesh</span><span class="p">(</span><span class="o">*</span><span class="n">shape_xyz</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">color</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="plot_ah_trajectory"><a class="viewcode-back" href="../../visualize_mayavi_ref.html#kuibit.visualize_mayavi.plot_ah_trajectory">[docs]</a><span class="k">def</span> <span class="nf">plot_ah_trajectory</span><span class="p">(</span><span class="n">horizon</span><span class="p">,</span> <span class="n">time</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Plot the 3D trajectory of the given horizon.</span>
+
+<span class="sd">    :param horizon: Apparent horizon to plot.</span>
+<span class="sd">    :type horizon: `~.:py:class:OneHorizon`</span>
+<span class="sd">    :param time: If not None, plot up to this time.</span>
+<span class="sd">    :type time: float or None</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">mlab</span><span class="o">.</span><span class="n">plot3d</span><span class="p">(</span>
+        <span class="n">horizon</span><span class="o">.</span><span class="n">ah</span><span class="o">.</span><span class="n">centroid_x</span><span class="o">.</span><span class="n">cropped</span><span class="p">(</span><span class="n">end</span><span class="o">=</span><span class="n">time</span><span class="p">)</span><span class="o">.</span><span class="n">y</span><span class="p">,</span>
+        <span class="n">horizon</span><span class="o">.</span><span class="n">ah</span><span class="o">.</span><span class="n">centroid_y</span><span class="o">.</span><span class="n">cropped</span><span class="p">(</span><span class="n">end</span><span class="o">=</span><span class="n">time</span><span class="p">)</span><span class="o">.</span><span class="n">y</span><span class="p">,</span>
+        <span class="n">horizon</span><span class="o">.</span><span class="n">ah</span><span class="o">.</span><span class="n">centroid_z</span><span class="o">.</span><span class="n">cropped</span><span class="p">(</span><span class="n">end</span><span class="o">=</span><span class="n">time</span><span class="p">)</span><span class="o">.</span><span class="n">y</span><span class="p">,</span>
+        <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+    <span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="add_text_to_figure_corner"><a class="viewcode-back" href="../../visualize_mayavi_ref.html#kuibit.visualize_mayavi.add_text_to_figure_corner">[docs]</a><span class="k">def</span> <span class="nf">add_text_to_figure_corner</span><span class="p">(</span><span class="n">text</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
