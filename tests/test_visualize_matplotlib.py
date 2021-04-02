@@ -25,6 +25,7 @@ matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import numpy as np
 
+from kuibit.simdir import SimDir
 from kuibit import visualize_matplotlib as viz
 from kuibit import grid_data as gd
 from kuibit import grid_data_utils as gdu
@@ -234,6 +235,25 @@ class TestVisualizeMatplotlib(unittest.TestCase):
                 matplotlib.colorbar.Colorbar,
             )
         )
+
+    def test_plot_horizon_shape(self):
+
+        ah = SimDir("tests/horizons").horizons[0, 1]
+
+        shape = ah.shape_outline_at_iteration(0, (None, None, 0))
+
+        self.assertTrue(
+            isinstance(
+                viz.plot_horizon_shape(shape)[0],
+                matplotlib.patches.Polygon,
+            )
+        )
+
+        with self.assertRaises(ValueError):
+            viz.plot_horizon_shape_on_plane_at_iteration(ah, 0, "bob")
+
+        with self.assertRaises(ValueError):
+            viz.plot_horizon_shape_on_plane_at_time(ah, 0, "bob")
 
     def test_add_text_to_figure_corner(self):
 

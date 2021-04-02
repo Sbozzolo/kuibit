@@ -381,6 +381,132 @@ def add_text_to_figure_corner(text, figure=None, axis=None):
 
 
 @_preprocess_plot
+def plot_horizon_shape(
+    shape,
+    color=None,
+    edgecolor=None,
+    alpha=None,
+    figure=None,
+    axis=None,
+    **kwargs,
+):
+    """Plot outline of horizon in 2D.
+
+    :param shape: Shape of the horizon as returned by `~.shape_outline_at_iteration` or
+                  `~.shape_outline_at_time`.
+    :type shape: two NumPy arrays
+    :param color: Color of the interior of the horizon.
+    :type color: color as supported by Matplotlib
+    :param edgecolor: Color of the edge of the horizon.
+    :type edgecolor: color as supported by Matplotlib
+    :param alpha:  Opacity of the horizon.
+    :type alpha:  float
+    """
+    return axis.fill(*shape, color=color, edgecolor=edgecolor, alpha=alpha)
+
+
+@_preprocess_plot
+def plot_horizon_shape_on_plane_at_iteration(
+    horizon,
+    iteration,
+    plane,
+    color=None,
+    edgecolor=None,
+    alpha=None,
+    figure=None,
+    axis=None,
+    **kwargs,
+):
+    """Plot outline of horizon in 2D on a given plane at a given iteration.
+
+    :param horizon: Horizon to plot.
+    :type horizon: :py:class:`~.OneHorizon`
+    :param iteration: Iteration to plot.
+    :type iteration: int
+    :param plane: Plane where to plot (options: `xy`, `xz`, `yz`)
+    :type plane: str
+    :param color: Color of the interior of the horizon.
+    :type color: color as supported by Matplotlib
+    :param edgecolor: Color of the edge of the horizon.
+    :type edgecolor: color as supported by Matplotlib
+    :param alpha:  Opacity of the horizon.
+    :type alpha:  float
+    """
+
+    cut = {
+        "xy": (None, None, 0),
+        "xz": (None, 0, None),
+        "yz": (0, None, None),
+    }
+
+    if plane not in cut.keys():
+        raise ValueError(f"Plane has to be one of {list(cut.keys())}")
+
+    shape = horizon.shape_outline_at_iteration(iteration, cut[plane])
+    return plot_horizon_shape(
+        shape,
+        color=color,
+        edgecolor=edgecolor,
+        alpha=alpha,
+        figure=figure,
+        axis=axis,
+        **kwargs,
+    )
+
+
+@_preprocess_plot
+def plot_horizon_shape_on_plane_at_time(
+    horizon,
+    time,
+    plane,
+    tolerance=1e-10,
+    color=None,
+    edgecolor=None,
+    alpha=None,
+    figure=None,
+    axis=None,
+    **kwargs,
+):
+    """Plot outline of horizon in 2D on a given plane at a given time.
+
+    :param horizon: Horizon to plot.
+    :type horizon: :py:class:`~.OneHorizon`
+    :param time: Time to plot.
+    :type time: float
+    :param tolerance: Tolerance in the determination of the time.
+    :type tolerance: float
+    :param plane: Plane where to plot (options: `xy`, `xz`, `yz`)
+    :type plane: str
+    :param color: Color of the interior of the horizon.
+    :type color: color as supported by Matplotlib
+    :param edgecolor: Color of the edge of the horizon.
+    :type edgecolor: color as supported by Matplotlib
+    :param alpha:  Opacity of the horizon.
+    :type alpha:  float
+    """
+
+    cut = {
+        "xy": (None, None, 0),
+        "xz": (None, 0, None),
+        "yz": (0, None, None),
+    }
+
+    if plane not in cut.keys():
+        raise ValueError(f"Plane has to be one of {list(cut.keys())}")
+
+    shape = horizon.shape_outline_at_time(time, cut[plane], tolerance)
+    return plot_horizon_shape(
+        shape,
+        color=color,
+        edgecolor=edgecolor,
+        alpha=alpha,
+        figure=figure,
+        axis=axis,
+        **kwargs,
+    )
+
+
+@_preprocess_plot
 def save(
     outputpath,
     figure_extension,
