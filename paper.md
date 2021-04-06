@@ -46,11 +46,11 @@ depend on the physical system under consideration. On the other, there are the
 physics modules, which implement the scientific aspects of the simulation. Codes
 are developed by domain-experts and researchers can focus on their goals without
 having to worry about the technical details of the implementation. This makes
-`Einstein Toolkit` easier to use and extend.
+the `Einstein Toolkit` easier to use and extend.
 
-Despite the advancements made by `Einstein Toolkit`, there is still a big leap
-between running a simulation and obtaining scientific results. The output from
-the `Einstein Toolkit` is a collection of files with different formats and
+Despite the advancements made by the `Einstein Toolkit`, there is still a big
+leap between running a simulation and obtaining scientific results. The output
+from the `Einstein Toolkit` is a collection of files with different formats and
 structures, with data that is typically spread across multiple files (one or
 more for each MPI process) in various directories (one per checkpoint). Reading
 the simulation output and properly combining all the data is a challenging task.
@@ -79,11 +79,14 @@ in `SimDir` is a dictionary-like object that contains all the time series in the
 output. When reading data, `kuibit` takes care of all the low-level details,
 like handling transparently simulation restarts, or merging grid data stored in
 different files. Therefore, users can easily access the data regardless of how
-complicated the structure of the output is.
+complicated the structure of the output is. Moreover, `kuibit` does not assume
+any particular organization of the output and uses regular expressions to find
+the relevant information from filenames or metadata, allowing for flexibility in
+the simulation workflow.
 
 Currently, `kuibit` is the only available package for quantitative analysis of
 simulations that is free to use and that comes with documentation, tutorials,
-and examples. Tools like `visit` [@visit] or `rugutils` [@rugutils] focus only
+and examples. Tools like `VisIt` [@visit] or `rugutils` [@rugutils] focus only
 on visualizing grid data, while other packages like `POWER` [@POWER], or
 `pyGWAnalysis` [@pyGWAnalysis] only on gravitational-wave data. Capabilities
 similar to those of `kuibit` are offered by `SimulationTools`
@@ -106,7 +109,7 @@ it encourages contributions.
 # Acknowledgments
 
 Gabriele Bozzola is supported by by the Frontera Fellowship by the Texas
-Advanced Computing Center (TACC). Frontera [@frontera] is founded by NSF grant
+Advanced Computing Center (TACC). Frontera [@Frontera2020] is founded by NSF grant
 OAC-1818253. This work was in part supported by NSF Grant PHY-1912619 to the
 University of Arizona and made use of computational resources provided by the
 Extreme Science and Engineering Discovery Environment (XSEDE) under grant number
