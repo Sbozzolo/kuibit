@@ -39,6 +39,29 @@ def disable_interactive_window():
     """
     mlab.options.offscreen = True
 
+def create_figure(
+    background_color=None, foreground_color=None, size=(1920, 1080), **kwargs
+):
+    """Create a mayavi figure clearing up previous ones.
+
+    :param background_color: Color of the background of the image. It is a tuple that
+                             describes the intensity along the three channels. The value
+                             ``(1,1,1)`` is black.
+    :type background_color: tuple
+    :param foreground_color: Color of the elements like text and boxes. It is a tuple that
+                             describes the intensity along the three channels. The value
+                             ``(1,1,1)`` is black.
+    :type foreground_color: tuple
+    :param size: Size in pixels of the image.
+    :type size: tuple
+    """
+    mlab.clf()
+
+    return mlab.figure(
+        bgcolor=background_color, fgcolor=foreground_color, size=size, **kwargs
+    )
+
+
 def plot_apparent_horizon(horizon, iteration, color=None, **kwargs):
     """Plot given apparent horizon.
 
