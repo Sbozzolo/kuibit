@@ -131,6 +131,52 @@ def plot_ah_trajectory(horizon, time=None, **kwargs):
     )
 
 
+def plot_horizon_vector(
+    horizon, quantity, iteration, magnification=3, color=None, **kwargs
+):
+    """Plot an arrow from the centroid of an horizon in the direction
+    of a given quasi-local quantity
+
+    :param horizon: Horizon to plot.
+    :type horizon: `~.:py:class:OneHorizon`
+    :param quantity: Quasi-local quantity to plot.
+    :type quantity: str
+    :param iteration: Iteration to plot.
+    :type iteration: int
+    :param color: RGB values of the color of the horizon.
+                  ``(1,1,1)`` for a white, ``(0,0,0)`` for a black, default red.
+    :type color: tuple of three floats
+    :param magnification: Extend the length of the arrow by this amount
+    :type magnification: float
+    :param time: If not None, plot up to this time.
+    :type time: float or None
+    """
+    if color is None:
+        color = (1, 0, 0)
+
+    cent_x, cent_y, cent_z = horizon.ah_origin_at_iteration(iteration)
+
+    # We are going to use the shape to convert between time to iteration,
+    # since the qlm variables are defined in terms of time
+
+    time = horizon.shape_time_at_iteration(iteration)
+
+    def var(ax):
+        return magnification * horizon[f"{quantity}{ax}"](time)
+
+    var_x, var_y, var_z = var("x"), var("y"), var("z")
+
+    vector = mlab.pipeline.vectors(
+        mlab.pipeline.vector_scatter(
+            cent_x, cent_y, cent_z, var_x, var_y, var_z,
+        ),
+        color=color,
+    )
+    vector.glyph.glyph.clamping = False
+
+    return vector
+
+
 def add_text_to_figure_corner(text, color=(1, 1, 1), **kwargs):
     """Add text to the bottom right corner of a figure.
 
