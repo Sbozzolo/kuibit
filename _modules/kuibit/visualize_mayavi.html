@@ -179,6 +179,52 @@
     <span class="p">)</span></div>
 
 
+<div class="viewcode-block" id="plot_horizon_vector"><a class="viewcode-back" href="../../visualize_mayavi_ref.html#kuibit.visualize_mayavi.plot_horizon_vector">[docs]</a><span class="k">def</span> <span class="nf">plot_horizon_vector</span><span class="p">(</span>
+    <span class="n">horizon</span><span class="p">,</span> <span class="n">quantity</span><span class="p">,</span> <span class="n">iteration</span><span class="p">,</span> <span class="n">magnification</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span>
+<span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Plot an arrow from the centroid of an horizon in the direction</span>
+<span class="sd">    of a given quasi-local quantity</span>
+
+<span class="sd">    :param horizon: Horizon to plot.</span>
+<span class="sd">    :type horizon: `~.:py:class:OneHorizon`</span>
+<span class="sd">    :param quantity: Quasi-local quantity to plot.</span>
+<span class="sd">    :type quantity: str</span>
+<span class="sd">    :param iteration: Iteration to plot.</span>
+<span class="sd">    :type iteration: int</span>
+<span class="sd">    :param color: RGB values of the color of the horizon.</span>
+<span class="sd">                  ``(1,1,1)`` for a white, ``(0,0,0)`` for a black, default red.</span>
+<span class="sd">    :type color: tuple of three floats</span>
+<span class="sd">    :param magnification: Extend the length of the arrow by this amount</span>
+<span class="sd">    :type magnification: float</span>
+<span class="sd">    :param time: If not None, plot up to this time.</span>
+<span class="sd">    :type time: float or None</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">color</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">color</span> <span class="o">=</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+
+    <span class="n">cent_x</span><span class="p">,</span> <span class="n">cent_y</span><span class="p">,</span> <span class="n">cent_z</span> <span class="o">=</span> <span class="n">horizon</span><span class="o">.</span><span class="n">ah_origin_at_iteration</span><span class="p">(</span><span class="n">iteration</span><span class="p">)</span>
+
+    <span class="c1"># We are going to use the shape to convert between time to iteration,</span>
+    <span class="c1"># since the qlm variables are defined in terms of time</span>
+
+    <span class="n">time</span> <span class="o">=</span> <span class="n">horizon</span><span class="o">.</span><span class="n">shape_time_at_iteration</span><span class="p">(</span><span class="n">iteration</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">var</span><span class="p">(</span><span class="n">ax</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">magnification</span> <span class="o">*</span> <span class="n">horizon</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">quantity</span><span class="si">}{</span><span class="n">ax</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">](</span><span class="n">time</span><span class="p">)</span>
+
+    <span class="n">var_x</span><span class="p">,</span> <span class="n">var_y</span><span class="p">,</span> <span class="n">var_z</span> <span class="o">=</span> <span class="n">var</span><span class="p">(</span><span class="s2">&quot;x&quot;</span><span class="p">),</span> <span class="n">var</span><span class="p">(</span><span class="s2">&quot;y&quot;</span><span class="p">),</span> <span class="n">var</span><span class="p">(</span><span class="s2">&quot;z&quot;</span><span class="p">)</span>
+
+    <span class="n">vector</span> <span class="o">=</span> <span class="n">mlab</span><span class="o">.</span><span class="n">pipeline</span><span class="o">.</span><span class="n">vectors</span><span class="p">(</span>
+        <span class="n">mlab</span><span class="o">.</span><span class="n">pipeline</span><span class="o">.</span><span class="n">vector_scatter</span><span class="p">(</span>
+            <span class="n">cent_x</span><span class="p">,</span> <span class="n">cent_y</span><span class="p">,</span> <span class="n">cent_z</span><span class="p">,</span> <span class="n">var_x</span><span class="p">,</span> <span class="n">var_y</span><span class="p">,</span> <span class="n">var_z</span><span class="p">,</span>
+        <span class="p">),</span>
+        <span class="n">color</span><span class="o">=</span><span class="n">color</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="n">vector</span><span class="o">.</span><span class="n">glyph</span><span class="o">.</span><span class="n">glyph</span><span class="o">.</span><span class="n">clamping</span> <span class="o">=</span> <span class="kc">False</span>
+
+    <span class="k">return</span> <span class="n">vector</span></div>
+
+
 <div class="viewcode-block" id="add_text_to_figure_corner"><a class="viewcode-back" href="../../visualize_mayavi_ref.html#kuibit.visualize_mayavi.add_text_to_figure_corner">[docs]</a><span class="k">def</span> <span class="nf">add_text_to_figure_corner</span><span class="p">(</span><span class="n">text</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Add text to the bottom right corner of a figure.</span>
 
