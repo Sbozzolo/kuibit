@@ -489,7 +489,7 @@ minimum) is at ``t=0`` have specialized methods (for convenience):
 ``align_at_maximum`` and ``align_at_minimum``.
 
 remove_duplicated_iters
-^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^^
 
 This function takes two arrays ``t`` and ``y`` and remove overlapping segments
 of time (such as, from checkpointing) returning a ``TimeSeries`` with
