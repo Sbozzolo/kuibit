@@ -62,7 +62,7 @@ def get_args(parser, args=None):
     return parser.parse_args(args)
 
 
-def add_grid_to_parser(parser):
+def add_grid_to_parser(parser, dimensions=2):
     """Add parameters that have to do with grid configurations to a given
     parser.
 
@@ -70,8 +70,13 @@ def add_grid_to_parser(parser):
 
     :param parser: Argparse parser
     :type parser: configargparse.ArgumentParser
+    :param dimensions: Number of dimensions to consider.
+    :type dimensions: int
 
     """
+    if dimensions not in (1, 2, 3):
+        raise ValueError("dimensions has to be 1, 2, or 3")
+
     parser.add_argument(
         "--resolution",
         type=int,
@@ -81,27 +86,30 @@ def add_grid_to_parser(parser):
             + "(default: %(default)s)"
         ),
     )
-    parser.add_argument(
-        "--plane",
-        type=str,
-        choices=["xy", "xz", "yz"],
-        default="xy",
-        help="Plane to plot (default: %(default)s)",
-    )
+
     parser.add_argument(
         "-x0",
         "--origin",
         type=float,
-        nargs=2,
-        default=[0, 0],
+        nargs=dimensions,
+        default=[0] * dimensions,
     )
     parser.add_argument(
         "-x1",
         "--corner",
         type=float,
-        nargs=2,
-        default=[1, 1],
+        nargs=dimensions,
+        default=[1] * dimensions,
     )
+
+    if dimensions == 2:
+        parser.add_argument(
+            "--plane",
+            type=str,
+            choices=["xy", "xz", "yz"],
+            default="xy",
+            help="Plane to plot (default: %(default)s)",
+        )
 
 
 def add_figure_to_parser(parser, default_figname=None):
