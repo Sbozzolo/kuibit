@@ -901,7 +901,7 @@ class UniformGridData(BaseNumerical):
         All the unknown arguments are passed to ``np.savetxt``.
 
         The backend used by the method does not support writing 3D or larger
-        arrays to disk as ASCII, all the arrays reshaped to 1D.
+        arrays to disk as ASCII, so all the arrays are reshaped to 1D.
 
         The file output with this method can be read with the
         :py:func:`~.load_UniformGridData` function.
