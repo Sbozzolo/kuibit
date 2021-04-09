@@ -5,8 +5,7 @@
 <html>
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17: http://docutils.sourceforge.net/" />
-
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Working with gravitational waves &#8212; kuibit 1.0.0b0 documentation</title>
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
     <link rel="stylesheet" href="../_static/bizstyle.css" type="text/css" />
@@ -22,7 +21,7 @@
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="What users say about kuibit" href="../testimonials.html" />
-    <link rel="prev" title="&lt;no title&gt;" href="cactus_horizons.html" />
+    <link rel="prev" title="Working with Cactus horizons" href="cactus_horizons.html" />
     <meta name="viewport" content="width=device-width,initial-scale=1.0" />
     <!--[if lt IE 9]>
     <script src="_static/css3-mediaqueries.js"></script>
@@ -41,7 +40,7 @@
           <a href="../testimonials.html" title="What users say about kuibit"
              accesskey="N">next</a> |</li>
         <li class="right" >
-          <a href="cactus_horizons.html" title="&lt;no title&gt;"
+          <a href="cactus_horizons.html" title="Working with Cactus horizons"
              accesskey="P">previous</a> |</li>
         <li class="nav-item nav-item-0"><a href="../index.html">kuibit 1.0.0b0 documentation</a> &#187;</li>
         <li class="nav-item nav-item-this"><a href="">Working with gravitational waves</a></li> 
@@ -286,7 +285,7 @@ div.rendered_html tbody tr:hover {
   background: rgba(66, 165, 245, 0.2);
 }
 </style>
-<section id="Working-with-gravitational-waves">
+<div class="section" id="Working-with-gravitational-waves">
 <h1>Working with gravitational waves<a class="headerlink" href="#Working-with-gravitational-waves" title="Permalink to this headline">¶</a></h1>
 <p>Gravitational waves are one of the most important quantity in numerical-relativity simulations. Here, we will see how to extract the strain and how to do some of the most common operations with gravitational waves. For this, we will some some sample data that we will read with the <a class="reference internal" href="../simdir.html"><span class="doc">SimDir</span></a> module.</p>
 <p>(This notebook is meant to be converted in Sphinx documentation and not used directly.)</p>
@@ -336,7 +335,7 @@ div.rendered_html tbody tr:hover {
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-Avilable radii: [48.95, 91.46, 53.96, 140.16, 44.78, 67.88, 77.93, 110.69, 60.13, 191.0]
+Avilable radii: [67.88, 77.93, 191.0, 91.46, 44.78, 110.69, 48.95, 60.13, 53.96, 140.16]
 
 At radius 44.78, (l, m) available: dict_keys([(2, 2)]) (missing: [(2, 0), (2, -2), (2, 1), (2, -1)])
 At radius 48.95, (l, m) available: dict_keys([(2, 2)]) (missing: [(2, 0), (2, -2), (2, 1), (2, -1)])
@@ -351,7 +350,7 @@ At radius 191.0, (l, m) available: dict_keys([(2, 2)]) (missing: [(2, 0), (2, -2
 
 </pre></div></div>
 </div>
-<p>We see the extraction radii available and the available multipoles. There’s also information about the missing multipoles. This information is also avilable through the <code class="docutils literal notranslate"><span class="pre">available_lm</span></code> and <code class="docutils literal notranslate"><span class="pre">missing_lm</span></code> attributes in <code class="docutils literal notranslate"><span class="pre">gws</span></code>. In this dataset we only have the (2, 2). In case you had a l=1 or l=0 mode, that would have been ignored.</p>
+<p>We see the extraction radii available and the available multipoles. There’s also information about the missing multipoles. This information is also available through the <code class="docutils literal notranslate"><span class="pre">available_lm</span></code> and <code class="docutils literal notranslate"><span class="pre">missing_lm</span></code> attributes in <code class="docutils literal notranslate"><span class="pre">gws</span></code>. In this dataset we only have the (2, 2). In case you had a l=1 or l=0 mode, that would have been ignored.</p>
 <p>Data from ASCII files or from hdf5 files is supported.</p>
 <p><code class="docutils literal notranslate"><span class="pre">gws</span></code> is like a dictionary, where the keys are the radii and the values are <code class="docutils literal notranslate"><span class="pre">GravitationalWaveOneDet</span></code>.</p>
 <div class="nbinput docutils container">
@@ -369,7 +368,7 @@ At radius 191.0, (l, m) available: dict_keys([(2, 2)]) (missing: [(2, 0), (2, -2
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-dict_keys([48.95, 91.46, 53.96, 140.16, 44.78, 67.88, 77.93, 110.69, 60.13, 191.0])
+dict_keys([67.88, 77.93, 191.0, 91.46, 44.78, 110.69, 48.95, 60.13, 53.96, 140.16])
 </pre></div></div>
 </div>
 <p>Let’s focus on one extraction radius. You can access the corresponding <code class="docutils literal notranslate"><span class="pre">GravitationalWavesOneDet</span></code> with the bracket operator.</p>
@@ -434,7 +433,7 @@ dict_keys([48.95, 91.46, 53.96, 140.16, 44.78, 67.88, 77.93, 110.69, 60.13, 191.
 </pre></div>
 </div>
 </div>
-<p>This is a TimeSeries, we can plot it. <span class="math notranslate nohighlight">\(\Psi_4\)</span> is a complex number, so we only plot the real part&gt;</p>
+<p>This is a TimeSeries, we can plot it. <span class="math notranslate nohighlight">\(\Psi_4\)</span> is a complex number, so we only plot the real part.</p>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
 </pre></div>
@@ -455,7 +454,7 @@ dict_keys([48.95, 91.46, 53.96, 140.16, 44.78, 67.88, 77.93, 110.69, 60.13, 191.
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-[&lt;matplotlib.lines.Line2D at 0x7fccd8872210&gt;]
+[&lt;matplotlib.lines.Line2D at 0x7fbec5a71750&gt;]
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
@@ -465,8 +464,8 @@ dict_keys([48.95, 91.46, 53.96, 140.16, 44.78, 67.88, 77.93, 110.69, 60.13, 191.
 <img alt="../_images/tutorials_gravitational_waves_19_1.png" src="../_images/tutorials_gravitational_waves_19_1.png" />
 </div>
 </div>
-<p>In general, we are interested in the strain. <code class="docutils literal notranslate"><span class="pre">GravitationalWavesOneDet</span></code> objects have numerous methods to extract the strain. The most simple is the one to obtain the strain associated to a specific mode. This (as all the other methods that involve strains) needs to take a Fourier transform. To avoid aliasing effects, your signal should go smoothly to zero. In case it doesn’t, you have to window it. To do this, you have to pass the <code class="docutils literal notranslate"><span class="pre">window_function</span></code> paramter, and all the additional paramters
-that the window may need. You can pass the window in multiple ways, but the simplest is to use one the window functions already coded up. In this example, we will use the Tukey window. If you don’t need a window, you can pass <code class="docutils literal notranslate"><span class="pre">None</span></code> (or nothing). In addition to the window, you have to provide <code class="docutils literal notranslate"><span class="pre">pcut</span></code>. This is the period that will go in the fixed-frequency integration (<code class="docutils literal notranslate"><span class="pre">omega_threshold</span> <span class="pre">=</span> <span class="pre">2</span> <span class="pre">*</span> <span class="pre">pi</span> <span class="pre">/</span> <span class="pre">pcut</span></code>). Choose pcut as the longest physical period you expect in your signal.</p>
+<p>In general, we are interested in the strain. <code class="docutils literal notranslate"><span class="pre">GravitationalWavesOneDet</span></code> objects have numerous methods to extract the strain. The most simple is the one to obtain the strain associated to a specific mode. This (as all the other methods that involve strains) needs to take a Fourier transform. To avoid aliasing effects, your signal should go smoothly to zero. In case it doesn’t, you have to window it. To do this, you have to pass the <code class="docutils literal notranslate"><span class="pre">window_function</span></code> parameter, and all the additional
+parameters that the window may need. You can pass the window in multiple ways, but the simplest is to use one the window functions already coded up. In this example, we will use the Tukey window. If you don’t need a window, you can pass <code class="docutils literal notranslate"><span class="pre">None</span></code> (or nothing). In addition to the window, you have to provide <code class="docutils literal notranslate"><span class="pre">pcut</span></code>. This is the period that will go in the fixed-frequency integration (<code class="docutils literal notranslate"><span class="pre">omega_threshold</span> <span class="pre">=</span> <span class="pre">2</span> <span class="pre">*</span> <span class="pre">pi</span> <span class="pre">/</span> <span class="pre">pcut</span></code>). Choose pcut as the longest physical period you expect in your signal.</p>
 <p>Also notice, when extracting the strain <code class="docutils literal notranslate"><span class="pre">h</span></code>, we always obtain <code class="docutils literal notranslate"><span class="pre">r</span> <span class="pre">*</span> <span class="pre">h</span></code>, where <code class="docutils literal notranslate"><span class="pre">r</span></code> is the extraction radius.</p>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[11]:
@@ -476,7 +475,7 @@ that the window may need. You can pass the window in multiple ways, but the simp
 <span></span><span class="n">strain_22</span> <span class="o">=</span> <span class="n">psi4</span><span class="o">.</span><span class="n">get_strain_lm</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="c1"># l</span>
                                <span class="mi">2</span><span class="p">,</span> <span class="c1"># m</span>
                                <span class="mi">120</span><span class="p">,</span> <span class="c1"># pcut</span>
-                               <span class="mf">0.1</span><span class="p">,</span> <span class="c1"># paramter of the window</span>
+                               <span class="mf">0.1</span><span class="p">,</span> <span class="c1"># parameter of the window</span>
                                <span class="n">window_function</span><span class="o">=</span><span class="s1">&#39;tukey&#39;</span>
                                <span class="p">)</span>
 <span class="n">rhp</span> <span class="o">=</span> <span class="n">strain_22</span><span class="o">.</span><span class="n">real</span><span class="p">()</span>
@@ -496,7 +495,7 @@ that the window may need. You can pass the window in multiple ways, but the simp
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-&lt;matplotlib.legend.Legend at 0x7fccd0724f90&gt;
+&lt;matplotlib.legend.Legend at 0x7fbebd92c090&gt;
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
@@ -519,7 +518,7 @@ that the window may need. You can pass the window in multiple ways, but the simp
                                    <span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">/</span><span class="mi">3</span><span class="p">,</span> <span class="c1"># theta_gw</span>
                                    <span class="mi">0</span><span class="p">,</span> <span class="c1"># phi_gw</span>
                                    <span class="mi">120</span><span class="p">,</span> <span class="c1"># pcut</span>
-                                   <span class="mf">0.1</span><span class="p">,</span> <span class="c1"># paramter of the window</span>
+                                   <span class="mf">0.1</span><span class="p">,</span> <span class="c1"># parameter of the window</span>
                                    <span class="n">window_function</span><span class="o">=</span><span class="s1">&#39;tukey&#39;</span>
                                    <span class="p">)</span>
 </pre></div>
@@ -545,7 +544,7 @@ that the window may need. You can pass the window in multiple ways, but the simp
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-&lt;matplotlib.legend.Legend at 0x7fccd0640c90&gt;
+&lt;matplotlib.legend.Legend at 0x7fbebd865510&gt;
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
@@ -624,7 +623,7 @@ SNR = 38.23
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-[&lt;matplotlib.lines.Line2D at 0x7fccd05d7a10&gt;]
+[&lt;matplotlib.lines.Line2D at 0x7fbebd83fd90&gt;]
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
@@ -653,7 +652,7 @@ SNR = 38.23
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-[&lt;matplotlib.lines.Line2D at 0x7fccd066a3d0&gt;]
+[&lt;matplotlib.lines.Line2D at 0x7fbebd719c50&gt;]
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
@@ -663,7 +662,7 @@ SNR = 38.23
 <img alt="../_images/tutorials_gravitational_waves_30_1.png" src="../_images/tutorials_gravitational_waves_30_1.png" />
 </div>
 </div>
-</section>
+</div>
 
 
             <div class="clearer"></div>
@@ -677,7 +676,7 @@ SNR = 38.23
             </a></p>
   <h4>Previous topic</h4>
   <p class="topless"><a href="cactus_horizons.html"
-                        title="previous chapter">&lt;no title&gt;</a></p>
+                        title="previous chapter">Working with Cactus horizons</a></p>
   <h4>Next topic</h4>
   <p class="topless"><a href="../testimonials.html"
                         title="next chapter">What users say about kuibit</a></p>
@@ -708,7 +707,7 @@ SNR = 38.23
           <a href="../testimonials.html" title="What users say about kuibit"
              >next</a> |</li>
         <li class="right" >
-          <a href="cactus_horizons.html" title="&lt;no title&gt;"
+          <a href="cactus_horizons.html" title="Working with Cactus horizons"
              >previous</a> |</li>
         <li class="nav-item nav-item-0"><a href="../index.html">kuibit 1.0.0b0 documentation</a> &#187;</li>
         <li class="nav-item nav-item-this"><a href="">Working with gravitational waves</a></li> 
@@ -716,7 +715,7 @@ SNR = 38.23
     </div>
     <div class="footer" role="contentinfo">
         &#169; Copyright 2020-2021, Gabriele Bozzola.
-      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 3.5.3.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 3.5.2.
     </div>
   </body>
 </html>
