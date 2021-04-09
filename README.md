@@ -46,7 +46,8 @@ poetry install -E full
 ```
 This will download all the needed dependencies in a sandboxed environment (the
 `-E full` flag is for the optional dependencies). When you want to use
-``kuibit``, just run ``poetry shell``. This will drop you in a shell in
+``kuibit``, just run ``poetry shell`` from within the `kuibit` directory.
+This will drop you in a shell in
 which you have full access to ``kuibit`` in "development" version, and its
 dependencies (also the one needed only for development).
 
