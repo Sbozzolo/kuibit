@@ -49,7 +49,12 @@ This will download all the needed dependencies in a sandboxed environment (the
 ``kuibit``, just run ``poetry shell`` from within the `kuibit` directory.
 This will drop you in a shell in
 which you have full access to ``kuibit`` in "development" version, and its
-dependencies (also the one needed only for development).
+dependencies (including the one needed only for development). Alternatively, you
+can activate the virtual environment directly. You can find where the environment
+in installed running the command `poetry env info --path` in the `kuibit` directory.
+This is a standard virtual environment, which can be activated with the `activate`
+scripts in the `bin` folder. Once you do that, you will be able to use `kuibit`
+for anywhere.
 
 ## Help!
 
