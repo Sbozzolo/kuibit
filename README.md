@@ -19,7 +19,7 @@ Toolkit largely inspired by
 `kuibit` can read simulation data and represent it with high-level classes. For
 a list of features available, look at the [official
 documentation](https://sbozzolo.github.io/kuibit). For examples and tools that
-ready to be used, read the [Experimental branch and examples
+are ready to be used, read the [Experimental branch and examples
 section](https://github.com/Sbozzolo/kuibit/#experimental-branch-and-examples).
 The [testimonials page](https://sbozzolo.github.io/kuibit/testimonials.html)
 collects short reviews about `kuibit`.
