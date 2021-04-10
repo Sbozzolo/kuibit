@@ -639,7 +639,7 @@ class BaseSeries(BaseNumerical):
         """
         self._apply_to_self(self.integrated, dx=dx)
 
-    def spline_derived(self, order=1):
+    def spline_differentiated(self, order=1):
         """Return a series that is the derivative of the current one using
         the spline representation.
 
@@ -671,8 +671,8 @@ class BaseSeries(BaseNumerical):
 
         return type(self)(self.x, ret_value, True)
 
-    def spline_derive(self, order=1):
-        """Derive the series using the spline representation.
+    def spline_differentiate(self, order=1):
+        """Differentiate the series using the spline representation.
 
         The optional parameter ``order`` specifies the order of the derivative.
 
@@ -684,9 +684,9 @@ class BaseSeries(BaseNumerical):
         :type order: int
 
         """
-        self._apply_to_self(self.spline_derived, order)
+        self._apply_to_self(self.spline_differentiated, order)
 
-    def derived(self, order=1):
+    def differentiated(self, order=1):
         """Return a series that is the numerical order-differentiation of
         the present series.
 
@@ -708,8 +708,8 @@ class BaseSeries(BaseNumerical):
             ret_value = np.gradient(ret_value, self.x, edge_order=2)
         return type(self)(self.x, ret_value, True)
 
-    def derive(self, order=1):
-        """Derive with the numerical order-differentiation.
+    def differentiate(self, order=1):
+        """Differentiate with the numerical order-differentiation.
 
         The optional parameter ``order`` specifies the order of the derivative.
 
@@ -721,7 +721,7 @@ class BaseSeries(BaseNumerical):
         :type order: int
 
         """
-        self._apply_to_self(self.derived, order)
+        self._apply_to_self(self.differentiated, order)
 
     def savgol_smoothed(self, window_size, order=3):
         """Return a smoothed series with a Savitzky-Golay filter with

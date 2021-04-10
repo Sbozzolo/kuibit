@@ -45,7 +45,7 @@ Time and frequency series are represented in an intuitive way. They
 - can be written to disk in a human-readable way (with ``save``);
 - can be clean from ``nans``;
 - can be integrated with the trapezional method (cumulative integral);
-- can be derived from splines, or with second-order finite differencing;
+- can be differentiated from splines, or with second-order finite differencing;
 - can be smoothed with the Savitzky-Golay filter;
 - can be cropped;
 - can be resampled to the points common points with other series.

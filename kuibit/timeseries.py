@@ -722,9 +722,9 @@ class TimeSeries(BaseSeries):
         :rtype:    :py:class:`~.TimeSeries`
         """
         if use_splines:
-            ret_value = self.unfolded_phase().spline_derived()
+            ret_value = self.unfolded_phase().spline_differentiated()
         else:
-            ret_value = self.unfolded_phase().derived()
+            ret_value = self.unfolded_phase().differentiated()
 
         if tsmooth is not None:
             ret_value.savgol_smooth_time(tsmooth, order)

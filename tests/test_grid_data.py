@@ -461,7 +461,7 @@ class TestUniformGridData(unittest.TestCase):
             grid_data3d.flat_dimensions_removed(), expected_data2d
         )
 
-    def test_partial_derive(self):
+    def test_partial_differentiate(self):
 
         geom = gd.UniformGrid([8001, 3], x0=[0, 0], x1=[2 * np.pi, 1])
 
@@ -472,10 +472,10 @@ class TestUniformGridData(unittest.TestCase):
 
         # Error dimension not found
         with self.assertRaises(ValueError):
-            sin_wave.partial_derived(5)
+            sin_wave.partial_differentiated(5)
 
         # Second derivative should still be a -sin
-        sin_wave.partial_derive(0, order=2)
+        sin_wave.partial_differentiate(0, order=2)
 
         self.assertTrue(
             np.allclose(-sin_wave.data, original_sin.data, atol=1e-3)
@@ -1594,7 +1594,7 @@ class TestHierarchicalGridData(unittest.TestCase):
         sin_copy = sin_wave.copy()
 
         # Second derivative should still be a -sin
-        sin_wave.partial_derive(0, order=2)
+        sin_wave.partial_differentiate(0, order=2)
 
         self.assertTrue(
             np.allclose(-sin_wave[0][0].data, original_sin1.data, atol=1e-3)

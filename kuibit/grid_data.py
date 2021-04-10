@@ -1825,7 +1825,7 @@ class UniformGridData(BaseNumerical):
             return percentiles[0]
         return percentiles
 
-    def partial_derived(self, direction, order=1):
+    def partial_differentiated(self, direction, order=1):
         """Return a :py:class:`~.UniformGridData` that is the numerical
         order-differentiation of the present grid_data along a given direction.
         (``order`` = number of derivatives, ie ``order=2`` is second derivative)
@@ -1880,11 +1880,11 @@ class UniformGridData(BaseNumerical):
 
         """
         return [
-            self.partial_derived(direction, order=order)
+            self.partial_differentiated(direction, order=order)
             for direction in range(self.num_dimensions)
         ]
 
-    def partial_derive(self, dimension, order=1):
+    def partial_differentiate(self, dimension, order=1):
         """Derive the data with numerical finite difference along a given direction
         (``order`` = number of derivatives, ie ``order=2`` is second derivative).
 
@@ -1900,7 +1900,7 @@ class UniformGridData(BaseNumerical):
         :type direction: int
 
         """
-        self._apply_to_self(self.partial_derived, dimension, order=order)
+        self._apply_to_self(self.partial_differentiated, dimension, order=order)
 
     def _apply_unary(self, function):
         """Apply a unary function to the data.
@@ -2785,7 +2785,7 @@ class HierarchicalGridData(BaseNumerical):
             for dim in range(self.num_dimensions)
         ]
 
-    def partial_derived(self, direction, order=1):
+    def partial_differentiated(self, direction, order=1):
         """Return a :py:class:`~.HierarchicalGridData` that is the numerical
         order-differentiation of the present grid_data along a given direction.
         (order = number of derivatives, ie ``order=2`` is second derivative)
@@ -2806,7 +2806,7 @@ class HierarchicalGridData(BaseNumerical):
 
         """
         return self._call_component_method(
-            "partial_derived", direction, order=order
+            "partial_differentiated", direction, order=order
         )
 
     def gradient(self, order=1):
@@ -2831,7 +2831,7 @@ class HierarchicalGridData(BaseNumerical):
             "gradient", method_returns_list=True, order=order
         )
 
-    def partial_derive(self, direction, order=1):
+    def partial_differentiate(self, direction, order=1):
         """Apply a numerical differentiatin along the specified direction.
 
         The derivative is calulated as centered differencing in the interior
@@ -2850,7 +2850,7 @@ class HierarchicalGridData(BaseNumerical):
 
         """
         return self._apply_to_self(
-            self.partial_derived, direction, order=order
+            self.partial_differentiated, direction, order=order
         )
 
     def sliced(self, cut, resample=False):

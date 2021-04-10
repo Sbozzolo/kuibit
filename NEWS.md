@@ -17,3 +17,4 @@
 - `cactus_horizons` and `cactus_multiploes` now remove duplicate iterations
 #### Breaking changes
 - `remove_duplicate_iters` was renamed to `remove_duplicated_iters`
+- `_derive` methods are renamed to`_differentiate`

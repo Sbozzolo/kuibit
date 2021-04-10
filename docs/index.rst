@@ -32,7 +32,7 @@ For a full list of available features, see the :doc:`features page <features>`.
 - Work with the power spectral densities of known detectors
   (:py:mod:`~.sensitivity_curves`).
 - Represent and manipulate time series (:py:mod:`~.timeseries`). Examples of
-  functions available for time series: ``integrate``, ``derive``, ``resample``,
+  functions available for time series: ``integrate``, ``differentiate``, ``resample``,
   ``to_FrequencySeries`` (Fourier transform).
 - Represent and manipulate frequency series (:py:mod:`~.frequencyseries`), like
   Fourier transforms of time series. Inverse Fourier transform is available.

@@ -187,8 +187,8 @@ Some basic useful functions are :py:meth:`~.mean`, :py:meth:`~.integral`,
 
 with :math:`\Delta v` being the volume of a cell.
 
-:py:class:`~.UniformGridData` can be derived along a direction with
-:py:meth:`~.grid_data.UnfiromGridData.partial_derived`, or the gradient can be
+:py:class:`~.UniformGridData` can be differentiated along a direction with
+:py:meth:`~.grid_data.UnfiromGridData.partial_differentiated`, or the gradient can be
 :py:calculated with meth:`~.grid_data.UnfiromGridData.gradient`. In both cases,
 :py:the order of the derivative can be specified. The derivative are numerical
 :py:with finite difference. Derivative are second order accurate everywhere.
@@ -322,8 +322,8 @@ consideration but with values the various coordinates at the points. This is
 useful for computations that involve the coordinates.
 
 As it is the case for :py:class:`~.UniformGridData`, also
-:py:class:`~.HierarchicalGridData` can be derived along a direction with
-:py:meth:`~.grid_data.HierarchicalGridData.partial_derived`, or the gradient can
+:py:class:`~.HierarchicalGridData` can be differentiated along a direction with
+:py:meth:`~.grid_data.HierarchicalGridData.partial_differentiated`, or the gradient can
 be calculated with :py:meth:`~.grid_data.HierarchicalGridData.gradient`. In both
 cases, the order of the derivative can be specified. The derivative are
 numerical with finite difference. The result is a

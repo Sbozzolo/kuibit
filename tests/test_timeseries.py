@@ -744,7 +744,7 @@ class TestTimeseries(unittest.TestCase):
 
         self.assertTrue(np.allclose(sins.y, 1 - np.cos(times_long), atol=1e-4))
 
-    def test_derive(self):
+    def test_differentiate(self):
 
         times = np.linspace(0, 2 * np.pi, 1000)
         values = np.sin(times)
@@ -753,53 +753,61 @@ class TestTimeseries(unittest.TestCase):
         higher_res_TS_c = ts.TimeSeries(times, values + 1j * values)
 
         self.assertTrue(
-            np.allclose(higher_res_TS.derived().y, np.cos(times), atol=1e-3)
-        )
-
-        self.assertTrue(
-            np.allclose(higher_res_TS.derived(2).y, -np.sin(times), atol=5e-2)
+            np.allclose(
+                higher_res_TS.differentiated().y, np.cos(times), atol=1e-3
+            )
         )
 
         self.assertTrue(
             np.allclose(
-                higher_res_TS_c.derived().y,
+                higher_res_TS.differentiated(2).y, -np.sin(times), atol=5e-2
+            )
+        )
+
+        self.assertTrue(
+            np.allclose(
+                higher_res_TS_c.differentiated().y,
                 np.cos(times) + 1j * np.cos(times),
                 atol=1e-3,
             )
         )
 
         sins = higher_res_TS.copy()
-        sins.derive()
+        sins.differentiate()
 
         self.assertTrue(np.allclose(sins.y, np.cos(times), atol=1e-3))
 
         sins = higher_res_TS.copy()
 
         with self.assertRaises(ValueError):
-            sins.spline_derived(8)
+            sins.spline_differentiated(8)
 
         # The boundaries are not accurate
         self.assertTrue(
             np.allclose(
-                higher_res_TS.spline_derived().y, np.cos(times), atol=1e-3
+                higher_res_TS.spline_differentiated().y,
+                np.cos(times),
+                atol=1e-3,
             )
         )
 
         self.assertTrue(
             np.allclose(
-                higher_res_TS.spline_derived(2).y, -np.sin(times), atol=1e-3
+                higher_res_TS.spline_differentiated(2).y,
+                -np.sin(times),
+                atol=1e-3,
             )
         )
 
         self.assertTrue(
             np.allclose(
-                higher_res_TS_c.spline_derived().y,
+                higher_res_TS_c.spline_differentiated().y,
                 np.cos(times) + 1j * np.cos(times),
                 atol=1e-3,
             )
         )
 
-        sins.spline_derive()
+        sins.spline_differentiate()
 
         self.assertTrue(np.allclose(sins.y, np.cos(times), atol=1e-3))
 

@@ -124,14 +124,14 @@ integral as a function of time. Optinally, one can provide ``dx``, which is the
 spacing in the independent variable. If provided, it will be used. This is
 especially convenient for evely spaced series, as computations will be faster
 
-derive, spline_derive
-^^^^^^^^^^^^^^^^^^^^^
+differentiate, spline_differentiated
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-The method ``derive`` derives ``Series(order)`` with a centered difference
+The method ``differentiate`` derives ``Series(order)`` with a centered difference
 method in the interior and a one-sided difference on the boundary. The operation
 is applied ``order`` times to obtain a high-order derivative. On the other hand,
-``spline_derive`` uses the spline representation to achieve the same task.
-``spline_derive`` is typically and better behaved for nice enough timeseries.
+``spline_differentiate`` uses the spline representation to achieve the same task.
+``spline_differentiate`` is typically and better behaved for nice enough timeseries.
 You should not trust the values at the boundaries too much, you may want to crop
 it out.
 
