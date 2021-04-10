@@ -685,7 +685,7 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_apply_to_self</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">integrated</span><span class="p">,</span> <span class="n">dx</span><span class="o">=</span><span class="n">dx</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="BaseSeries.spline_derived"><a class="viewcode-back" href="../../series_ref.html#kuibit.series.BaseSeries.spline_derived">[docs]</a>    <span class="k">def</span> <span class="nf">spline_derived</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">order</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+<div class="viewcode-block" id="BaseSeries.spline_differentiated"><a class="viewcode-back" href="../../series_ref.html#kuibit.series.BaseSeries.spline_differentiated">[docs]</a>    <span class="k">def</span> <span class="nf">spline_differentiated</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">order</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Return a series that is the derivative of the current one using</span>
 <span class="sd">        the spline representation.</span>
 
@@ -717,8 +717,8 @@
 
         <span class="k">return</span> <span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)(</span><span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="n">ret_value</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="BaseSeries.spline_derive"><a class="viewcode-back" href="../../series_ref.html#kuibit.series.BaseSeries.spline_derive">[docs]</a>    <span class="k">def</span> <span class="nf">spline_derive</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">order</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Derive the series using the spline representation.</span>
+<div class="viewcode-block" id="BaseSeries.spline_differentiate"><a class="viewcode-back" href="../../series_ref.html#kuibit.series.BaseSeries.spline_differentiate">[docs]</a>    <span class="k">def</span> <span class="nf">spline_differentiate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">order</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Differentiate the series using the spline representation.</span>
 
 <span class="sd">        The optional parameter ``order`` specifies the order of the derivative.</span>
 
@@ -730,9 +730,9 @@
 <span class="sd">        :type order: int</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_apply_to_self</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">spline_derived</span><span class="p">,</span> <span class="n">order</span><span class="p">)</span></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_apply_to_self</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">spline_differentiated</span><span class="p">,</span> <span class="n">order</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="BaseSeries.derived"><a class="viewcode-back" href="../../series_ref.html#kuibit.series.BaseSeries.derived">[docs]</a>    <span class="k">def</span> <span class="nf">derived</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">order</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+<div class="viewcode-block" id="BaseSeries.differentiated"><a class="viewcode-back" href="../../series_ref.html#kuibit.series.BaseSeries.differentiated">[docs]</a>    <span class="k">def</span> <span class="nf">differentiated</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">order</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Return a series that is the numerical order-differentiation of</span>
 <span class="sd">        the present series.</span>
 
@@ -754,8 +754,8 @@
             <span class="n">ret_value</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">gradient</span><span class="p">(</span><span class="n">ret_value</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="n">edge_order</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
         <span class="k">return</span> <span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)(</span><span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="n">ret_value</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="BaseSeries.derive"><a class="viewcode-back" href="../../series_ref.html#kuibit.series.BaseSeries.derive">[docs]</a>    <span class="k">def</span> <span class="nf">derive</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">order</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Derive with the numerical order-differentiation.</span>
+<div class="viewcode-block" id="BaseSeries.differentiate"><a class="viewcode-back" href="../../series_ref.html#kuibit.series.BaseSeries.differentiate">[docs]</a>    <span class="k">def</span> <span class="nf">differentiate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">order</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Differentiate with the numerical order-differentiation.</span>
 
 <span class="sd">        The optional parameter ``order`` specifies the order of the derivative.</span>
 
@@ -767,7 +767,7 @@
 <span class="sd">        :type order: int</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_apply_to_self</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">derived</span><span class="p">,</span> <span class="n">order</span><span class="p">)</span></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_apply_to_self</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">differentiated</span><span class="p">,</span> <span class="n">order</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="BaseSeries.savgol_smoothed"><a class="viewcode-back" href="../../series_ref.html#kuibit.series.BaseSeries.savgol_smoothed">[docs]</a>    <span class="k">def</span> <span class="nf">savgol_smoothed</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">window_size</span><span class="p">,</span> <span class="n">order</span><span class="o">=</span><span class="mi">3</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Return a smoothed series with a Savitzky-Golay filter with</span>
@@ -1011,7 +1011,7 @@
     </div>
     <div class="footer" role="contentinfo">
         &#169; Copyright 2020-2021, Gabriele Bozzola.
-      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 3.5.3.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 3.5.2.
     </div>
   </body>
 </html>

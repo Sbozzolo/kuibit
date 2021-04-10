@@ -48,6 +48,9 @@
 
 <span class="c1"># Copyright (C) 2020-2021 Gabriele Bozzola</span>
 <span class="c1">#</span>
+<span class="c1"># Inspired by code originally developed by Wolfgang Kastaun. See, GitHub,</span>
+<span class="c1"># wokast/PyCactus/PostCactus/grid_data.py</span>
+<span class="c1">#</span>
 <span class="c1"># This program is free software; you can redistribute it and/or modify it under</span>
 <span class="c1"># the terms of the GNU General Public License as published by the Free Software</span>
 <span class="c1"># Foundation; either version 3 of the License, or (at your option) any later</span>
@@ -538,7 +541,7 @@
 
         <span class="c1"># A pythonic way to write this function is:</span>
         <span class="c1"># if np.any(point &lt; (self.lowest_vertex)) or np.any(</span>
-        <span class="c1">#     point &gt;= (self.highest_vertex)</span>
+        <span class="c1">#     point &gt; (self.highest_vertex)</span>
         <span class="c1"># ):</span>
         <span class="c1">#     return False</span>
         <span class="c1"># return True</span>
@@ -944,7 +947,7 @@
 <span class="sd">        All the unknown arguments are passed to ``np.savetxt``.</span>
 
 <span class="sd">        The backend used by the method does not support writing 3D or larger</span>
-<span class="sd">        arrays to disk as ASCII, so all the arrays are reshaped to 1D.</span>
+<span class="sd">        arrays to disk as ASCII, all the arrays reshaped to 1D.</span>
 
 <span class="sd">        The file output with this method can be read with the</span>
 <span class="sd">        :py:func:`~.load_UniformGridData` function.</span>
@@ -1868,7 +1871,7 @@
             <span class="k">return</span> <span class="n">percentiles</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
         <span class="k">return</span> <span class="n">percentiles</span></div>
 
-<div class="viewcode-block" id="UniformGridData.partial_derived"><a class="viewcode-back" href="../../grid_data_ref.html#kuibit.grid_data.UniformGridData.partial_derived">[docs]</a>    <span class="k">def</span> <span class="nf">partial_derived</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">direction</span><span class="p">,</span> <span class="n">order</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+<div class="viewcode-block" id="UniformGridData.partial_differentiated"><a class="viewcode-back" href="../../grid_data_ref.html#kuibit.grid_data.UniformGridData.partial_differentiated">[docs]</a>    <span class="k">def</span> <span class="nf">partial_differentiated</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">direction</span><span class="p">,</span> <span class="n">order</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Return a :py:class:`~.UniformGridData` that is the numerical</span>
 <span class="sd">        order-differentiation of the present grid_data along a given direction.</span>
 <span class="sd">        (``order`` = number of derivatives, ie ``order=2`` is second derivative)</span>
@@ -1923,11 +1926,11 @@
 
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="p">[</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">partial_derived</span><span class="p">(</span><span class="n">direction</span><span class="p">,</span> <span class="n">order</span><span class="o">=</span><span class="n">order</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">partial_differentiated</span><span class="p">(</span><span class="n">direction</span><span class="p">,</span> <span class="n">order</span><span class="o">=</span><span class="n">order</span><span class="p">)</span>
             <span class="k">for</span> <span class="n">direction</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">num_dimensions</span><span class="p">)</span>
         <span class="p">]</span></div>
 
-<div class="viewcode-block" id="UniformGridData.partial_derive"><a class="viewcode-back" href="../../grid_data_ref.html#kuibit.grid_data.UniformGridData.partial_derive">[docs]</a>    <span class="k">def</span> <span class="nf">partial_derive</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dimension</span><span class="p">,</span> <span class="n">order</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+<div class="viewcode-block" id="UniformGridData.partial_differentiate"><a class="viewcode-back" href="../../grid_data_ref.html#kuibit.grid_data.UniformGridData.partial_differentiate">[docs]</a>    <span class="k">def</span> <span class="nf">partial_differentiate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dimension</span><span class="p">,</span> <span class="n">order</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Derive the data with numerical finite difference along a given direction</span>
 <span class="sd">        (``order`` = number of derivatives, ie ``order=2`` is second derivative).</span>
 
@@ -1943,7 +1946,7 @@
 <span class="sd">        :type direction: int</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_apply_to_self</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">partial_derived</span><span class="p">,</span> <span class="n">dimension</span><span class="p">,</span> <span class="n">order</span><span class="o">=</span><span class="n">order</span><span class="p">)</span></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_apply_to_self</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">partial_differentiated</span><span class="p">,</span> <span class="n">dimension</span><span class="p">,</span> <span class="n">order</span><span class="o">=</span><span class="n">order</span><span class="p">)</span></div>
 
     <span class="k">def</span> <span class="nf">_apply_unary</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">function</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Apply a unary function to the data.</span>
@@ -2828,7 +2831,7 @@
             <span class="k">for</span> <span class="n">dim</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">num_dimensions</span><span class="p">)</span>
         <span class="p">]</span>
 
-<div class="viewcode-block" id="HierarchicalGridData.partial_derived"><a class="viewcode-back" href="../../grid_data_ref.html#kuibit.grid_data.HierarchicalGridData.partial_derived">[docs]</a>    <span class="k">def</span> <span class="nf">partial_derived</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">direction</span><span class="p">,</span> <span class="n">order</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+<div class="viewcode-block" id="HierarchicalGridData.partial_differentiated"><a class="viewcode-back" href="../../grid_data_ref.html#kuibit.grid_data.HierarchicalGridData.partial_differentiated">[docs]</a>    <span class="k">def</span> <span class="nf">partial_differentiated</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">direction</span><span class="p">,</span> <span class="n">order</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Return a :py:class:`~.HierarchicalGridData` that is the numerical</span>
 <span class="sd">        order-differentiation of the present grid_data along a given direction.</span>
 <span class="sd">        (order = number of derivatives, ie ``order=2`` is second derivative)</span>
@@ -2849,7 +2852,7 @@
 
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_call_component_method</span><span class="p">(</span>
-            <span class="s2">&quot;partial_derived&quot;</span><span class="p">,</span> <span class="n">direction</span><span class="p">,</span> <span class="n">order</span><span class="o">=</span><span class="n">order</span>
+            <span class="s2">&quot;partial_differentiated&quot;</span><span class="p">,</span> <span class="n">direction</span><span class="p">,</span> <span class="n">order</span><span class="o">=</span><span class="n">order</span>
         <span class="p">)</span></div>
 
 <div class="viewcode-block" id="HierarchicalGridData.gradient"><a class="viewcode-back" href="../../grid_data_ref.html#kuibit.grid_data.HierarchicalGridData.gradient">[docs]</a>    <span class="k">def</span> <span class="nf">gradient</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">order</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
@@ -2874,7 +2877,7 @@
             <span class="s2">&quot;gradient&quot;</span><span class="p">,</span> <span class="n">method_returns_list</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">order</span><span class="o">=</span><span class="n">order</span>
         <span class="p">)</span></div>
 
-<div class="viewcode-block" id="HierarchicalGridData.partial_derive"><a class="viewcode-back" href="../../grid_data_ref.html#kuibit.grid_data.HierarchicalGridData.partial_derive">[docs]</a>    <span class="k">def</span> <span class="nf">partial_derive</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">direction</span><span class="p">,</span> <span class="n">order</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+<div class="viewcode-block" id="HierarchicalGridData.partial_differentiate"><a class="viewcode-back" href="../../grid_data_ref.html#kuibit.grid_data.HierarchicalGridData.partial_differentiate">[docs]</a>    <span class="k">def</span> <span class="nf">partial_differentiate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">direction</span><span class="p">,</span> <span class="n">order</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Apply a numerical differentiatin along the specified direction.</span>
 
 <span class="sd">        The derivative is calulated as centered differencing in the interior</span>
@@ -2893,7 +2896,7 @@
 
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_apply_to_self</span><span class="p">(</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">partial_derived</span><span class="p">,</span> <span class="n">direction</span><span class="p">,</span> <span class="n">order</span><span class="o">=</span><span class="n">order</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">partial_differentiated</span><span class="p">,</span> <span class="n">direction</span><span class="p">,</span> <span class="n">order</span><span class="o">=</span><span class="n">order</span>
         <span class="p">)</span></div>
 
 <div class="viewcode-block" id="HierarchicalGridData.sliced"><a class="viewcode-back" href="../../grid_data_ref.html#kuibit.grid_data.HierarchicalGridData.sliced">[docs]</a>    <span class="k">def</span> <span class="nf">sliced</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cut</span><span class="p">,</span> <span class="n">resample</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
@@ -3031,7 +3034,7 @@
     </div>
     <div class="footer" role="contentinfo">
         &#169; Copyright 2020-2021, Gabriele Bozzola.
-      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 3.5.3.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 3.5.2.
     </div>
   </body>
 </html>
