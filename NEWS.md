@@ -1,6 +1,6 @@
 # Changelog
 
-##  Version 1.0.0b1 (currently in development)
+## Version 1.0.0 (11 April 2021)
 
 #### General
 - Improvements to documentation and docstrings
@@ -18,3 +18,5 @@
 #### Breaking changes
 - `remove_duplicate_iters` was renamed to `remove_duplicated_iters`
 - `_derive` methods are renamed to`_differentiate`
+
+## Version 1.0.0b0 (11 January 2021)
