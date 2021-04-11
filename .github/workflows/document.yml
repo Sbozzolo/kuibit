@@ -1,0 +1,64 @@
+name: Document
+
+on: [push]
+
+jobs:
+
+  Test:
+    runs-on:
+        ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 1
+
+      - name: Set up Python 3.7
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.7
+
+      - name: Install Poetry
+        uses: snok/install-poetry@v1.1.0
+        with:
+          virtualenvs-create: true
+          virtualenvs-in-project: true
+
+      - name: Load cached Poetry virtualenv
+        uses: actions/cache@v2
+        id: cached-poetry-dependencies
+        with:
+          path: .venv
+          key: venv-${{ runner.os }}-${{ hashFiles('**/poetry.lock') }}
+
+      - name: Install Dependencies
+        run: poetry install -E full
+        if: steps.cached-poetry-dependencies.outputs.cache-hit != 'true'
+
+      - name: Produce documentation
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y pandoc
+          sudo apt-get install -y xvfb
+          cd docs/
+          xvfb-run poetry run make html
+          cd ..
+
+      - name: Commit documentation changes
+        run: |
+          git clone https://github.com/sbozzolo/PostCactus.git --branch gh-pages --single-branch gh-pages
+          cp -r docs/_build/html/* gh-pages/
+          cd gh-pages
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git add .
+          git commit -m "Update documentation" -a || true
+          # The above command will fail if no changes were present, so we ignore
+          # the return code.
+      - name: Push changes
+        uses: ad-m/github-push-action@master
+        with:
+          branch: gh-pages
+          # force: true
+          directory: gh-pages
+          github_token: ${{ secrets.GITHUB_TOKEN }}
