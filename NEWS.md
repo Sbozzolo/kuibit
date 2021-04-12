@@ -1,5 +1,11 @@
 # Changelog
 
+## Version 1.0.1 (Under development)
+
+#### Bug fixes
+- Fix bug that, under certain circumstances, resulted in `cactus_grid_function`
+  not correctly indexing all the 3D data files
+
 ## Version 1.0.0 (11 April 2021)
 
 #### General
@@ -20,3 +26,5 @@
 - `_derive` methods are renamed to`_differentiate`
 
 ## Version 1.0.0b0 (11 January 2021)
+
+Initial release

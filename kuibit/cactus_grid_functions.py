@@ -242,7 +242,7 @@ class BaseOneGridFunction(ABC):
             # of those 3D files, so we collect them
             if (min_iteration, max_iteration) == (ret[-1][0], ret[-1][1]):
                 ret[-1][2].append(path)
-                break
+                continue
 
             max_iteration_in_ret = ret[-1][1]
             if max_iteration > max_iteration_in_ret:
