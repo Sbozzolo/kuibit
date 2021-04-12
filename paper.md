@@ -35,18 +35,18 @@ barrier in learning how to use the tool.
 # Statement of need
 
 The `Einstein Toolkit` is a software for numerical simulations based on the
-`Cactus` computational framework and designed to be accessible for both users
-and developers. Numerical-relativity simulations require large and complex
-codes, which have to run on the world’s largest supercomputers. `Einstein
-Toolkit` significantly reduces this complexity and improves accessibility by
-splitting infrastructure code from physics one. On one side, there is memory
-management, parallelization, grid operations, and all the other low-level
-details that are needed to successfully perform a simulation but do not strictly
-depend on the physical system under consideration. On the other, there are the
-physics modules, which implement the scientific aspects of the simulation. Codes
-are developed by domain-experts and researchers can focus on their goals without
-having to worry about the technical details of the implementation. This makes
-the `Einstein Toolkit` easier to use and extend.
+`Cactus` computational framework [@cactuscode] and designed to be accessible for
+both users and developers. Numerical-relativity simulations require large and
+complex codes, which have to run on the world’s largest supercomputers.
+`Einstein Toolkit` significantly reduces this complexity and improves
+accessibility by splitting infrastructure code from physics one. On one side,
+there is memory management, parallelization, grid operations, and all the other
+low-level details that are needed to successfully perform a simulation but do
+not strictly depend on the physical system under consideration. On the other,
+there are the physics modules, which implement the scientific aspects of the
+simulation. Codes are developed by domain-experts and researchers can focus on
+their goals without having to worry about the technical details of the
+implementation. This makes the `Einstein Toolkit` easier to use and extend.
 
 Despite the advancements made by the `Einstein Toolkit`, there is still a big
 leap between running a simulation and obtaining scientific results. The output
@@ -124,7 +124,7 @@ O'odham people to reach the fruit of the Saguaro cacti during the harvesting
 season.
 
 [^1]: While `kuibit` is designed for the `Einstein Toolkit`, most of its
-capabilities will work also for all the other codes based on `Cactus`. For
-instance, it is known that `kuibit` can be used to analyze `Illinois GRMHD`
-[@illinoisgrmhd] simulations.
+capabilities will work also for all the other codes based on `Cactus`
+[@cactuscode]. For instance, it is known that `kuibit` can be used to analyze
+`Illinois GRMHD` [@illinoisgrmhd] simulations.
 
