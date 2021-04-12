@@ -105,7 +105,7 @@ def merge_uniform_grids(grids, component=-1):
         raise TypeError("merge_uniform_grids takes a list")
 
     if not all(isinstance(g, gd.UniformGrid) for g in grids):
-        raise TypeError("merge_uniform_grids works only UniformGrid")
+        raise TypeError("merge_uniform_grids works only with UniformGrid")
 
     # Check that all the grids have the same refinement levels
     ref_levels = {g.ref_level for g in grids}
@@ -119,7 +119,7 @@ def merge_uniform_grids(grids, component=-1):
     dx = [g.dx for g in grids]
 
     if not np.allclose(dx, dx[0]):
-        raise ValueError("Can only merge grids on with same dx.")
+        raise ValueError("Can only merge grids with the same spacing.")
 
     # Find the bounding box
     x0, x1 = common_bounding_box(grids)
