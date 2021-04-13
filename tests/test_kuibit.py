@@ -17,9 +17,12 @@
 
 import unittest
 
-from kuibit import __version__
+from kuibit import __version__, __bibtex__
 
 
 class Testkuibit(unittest.TestCase):
     def test_version(self):
         self.assertEqual(__version__, "1.0.0")
+
+    def test_bibtex(self):
+        self.assertIn("version = {1.0.0}", __bibtex__)
