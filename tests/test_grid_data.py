@@ -1178,6 +1178,49 @@ class TestHierarchicalGridData(unittest.TestCase):
         hg3 = gd.HierarchicalGridData(self.grid_data_two_comp)
         self.assertEqual(hg3.grid_data_dict[0], self.grid_data_two_comp)
 
+    def test_check_ref_factors(self):
+
+        # Check a good grid, with refinement factors that are a constant
+        # multiple of the finest refinement level.
+        fine = gdu.sample_function(
+            lambda x, y: x * y, [101, 101], [0, 0], [3, 3], ref_level=3
+        )
+        coarse = gdu.sample_function(
+            lambda x, y: x * y, [51, 51], [0, 0], [3, 3], ref_level=2
+        )
+        very_coarse = gdu.sample_function(
+            lambda x, y: x * y, [26, 26], [0, 0], [3, 3], ref_level=1
+        )
+
+        self.assertTrue(
+            gd.HierarchicalGridData(
+                [fine, coarse, very_coarse]
+            )._check_ref_factors()
+        )
+
+        # Now a case with non integer refinement factors.
+        almost_coarse = gdu.sample_function(
+            lambda x, y: x * y, [56, 56], [0, 0], [3, 3], ref_level=2
+        )
+        self.assertFalse(
+            gd.HierarchicalGridData([fine, almost_coarse])._check_ref_factors()
+        )
+
+        # Finally a case with non constant
+        very_fine = gdu.sample_function(
+            lambda x, y: x * y, [401, 401], [0, 0], [3, 3], ref_level=4
+        )
+        self.assertFalse(
+            gd.HierarchicalGridData(
+                [very_fine, fine, coarse]
+            )._check_ref_factors()
+        )
+
+        # Check case with only one refinement level
+        self.assertTrue(
+            gd.HierarchicalGridData([very_fine])._check_ref_factors()
+        )
+
     def test__getitem__(self):
 
         hg = gd.HierarchicalGridData(self.grid_data)

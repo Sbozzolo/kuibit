@@ -1900,7 +1900,9 @@ class UniformGridData(BaseNumerical):
         :type direction: int
 
         """
-        self._apply_to_self(self.partial_differentiated, dimension, order=order)
+        self._apply_to_self(
+            self.partial_differentiated, dimension, order=order
+        )
 
     def _apply_unary(self, function):
         """Apply a unary function to the data.
@@ -2070,6 +2072,76 @@ class HierarchicalGridData(BaseNumerical):
             ref_level: self._try_merge_components(comps)
             for ref_level, comps in components.items()
         }
+
+        # Check if the refinement factor is a constant integer
+        self.are_ref_factors_integral = self._check_ref_factors()
+
+    def _check_ref_factors(self):
+        """Check if all the grids have dx that is an integer multiple of dx_finest.
+
+        :returns: Whether dx/dx_finest if integer for all the components.
+        :rtype: bool
+
+        """
+        if len(self.refinement_levels) == 1:
+            return True
+
+        def is_integer(x):
+            return np.allclose(x - np.rint(comp_ref_factor), 0)
+
+        # ref_factors is a dictionary that has as keys the number of refinement
+        # level and as values a NumPy array with the refinement factor for that
+        # level. We will loop over all the components and use this dictionary to
+        # check if we have variable refinement factors across levels.
+        ref_factors = {}
+
+        # Next, we loop over all the components and check if their dx is an
+        # integral multiple of dx_finest
+        for comp in self.all_components:
+
+            ref_level = comp.ref_level
+            comp_ref_factor = comp.dx / self.finest_dx
+
+            if not is_integer(comp_ref_factor):
+                return False
+
+            # On a given refinement level, the refinement factors have to be
+            # the same because HierarchicalGridData works only with grids
+            # with same dx at a given level. So, here can simply overwrite
+            # the value that we have.
+            ref_factors[ref_level] = comp_ref_factor
+
+        # Now we loop over the refinement factors to check that they are always
+        # the same. We compute what is the refinement factor that we expect
+        # looking at the coarsest and finest levels, then we check that this
+        # is indeed the one we observe on each level.
+        #
+        # Consider the case we have three levels.
+        # Level 3 (finest) has dx = [2, 2]
+        # Level 2 has dx = [6, 6]
+        # Level 1 has dx = [18, 18]
+        #
+        # Here what we do is we take dx_coarse / dx_fine = [9, 9], and take the
+        # power of 1/(3 - 1) = 1/2 = sqrt, so we obtain [3, 3]. This is how the
+        # dx grows on each level.
+        expected_base_ref_factor = (ref_factors[self.num_coarsest_level]) ** (
+            1 / (self.num_finest_level - self.num_coarsest_level)
+        )
+
+        for ref_level, ref_factor in ref_factors.items():
+            # Then, we find on each level what is the expected refinement factor
+            # given the base one. For the previous example we would have:
+            # Level 1: [3, 3] ** (3 - 1) = [9, 9]
+            # Level 2: [3, 3] ** (3 - 2) = [3, 3]
+            # Level 3: [3, 3] ** (3 - 3) = [1, 1]
+            expected_ref_factor = expected_base_ref_factor ** (
+                self.num_finest_level - ref_level
+            )
+            if not np.allclose(ref_factor, expected_ref_factor):
+                return False
+
+        # All integers and constant
+        return True
 
     @staticmethod
     def _fill_grid_with_components(grid, components):
@@ -2675,6 +2747,7 @@ class HierarchicalGridData(BaseNumerical):
         """
         ret = f(*args, **kwargs)
         self.grid_data_dict = ret.grid_data_dict
+        self.are_ref_factors_integral = ret.are_ref_factors_integral
 
     def _apply_binary(self, other, function):
         """Apply a binary function to the data of ``self`` and ``other``.
