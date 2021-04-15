@@ -2310,8 +2310,23 @@ class HierarchicalGridData(BaseNumerical):
         return self[self.num_coarsest_level][0]
 
     @property
+    def _a_component(self):
+        """Return the a component of the hierarchy.
+
+        It is useful to understand various properties that are shared
+        by all the components, e.g. the dtype.
+
+        Using this method is faster than :py:func:`~.first_component`.
+
+        :returns: First component of the coarsest level.
+        :rtype: `:py:class:~UniformGridData`
+
+        """
+        return next(iter(self.grid_data_dict.values()))[0]
+
+    @property
     def dtype(self):
-        return self.first_component.dtype
+        return self._a_component.dtype
 
     @property
     def shape(self):
@@ -2398,7 +2413,7 @@ class HierarchicalGridData(BaseNumerical):
         :returns:  Number of dimensions.
         :rtype:   int
         """
-        return self.first_component.num_dimensions
+        return self._a_component.num_dimensions
 
     @property
     def num_extended_dimensions(self):
@@ -2407,7 +2422,7 @@ class HierarchicalGridData(BaseNumerical):
         :returns:  Number of dimensions with more than one gridpoint.
         :rtype:   int
         """
-        return self.first_component.num_extended_dimensions
+        return self._a_component.num_extended_dimensions
 
     @property
     def time(self):
@@ -2760,7 +2775,7 @@ class HierarchicalGridData(BaseNumerical):
                 f"method_name has to be a string (but it is {method_name})"
             )
 
-        if not hasattr(self.first_component, method_name):
+        if not hasattr(self._a_component, method_name):
             raise ValueError(
                 f"UniformGridData does not have a method with name {method_name}"
             )
