@@ -2437,9 +2437,10 @@ class HierarchicalGridData(BaseNumerical):
 
     def __eq__(self, other):
         """Check for equality."""
-        if not isinstance(other, HierarchicalGridData):
-            return False
-        if self.shape != other.shape:
+        if (
+            not isinstance(other, HierarchicalGridData)
+            or self.shape != other.shape
+        ):
             return False
 
         return self.all_components == other.all_components
