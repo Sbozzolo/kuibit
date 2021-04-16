@@ -135,3 +135,42 @@ def add_figure_to_parser(parser, default_figname=None):
         action='store_true',
         help="Save figure as TikZ figure"
     )
+
+def add_horizon_to_parser(parser, color="k", edge_color="w", alpha=1):
+    """Add parameters that have to do with a apparent horizons to a given parser.
+
+    This function edits parser in place.
+
+    :param default_figname: Default name of the output figure.
+    :type default_figname: str
+    :param parser: Argparse parser (generated with init_argparse())
+    :type parser: configargparse.ArgumentParser
+
+    """
+    ah_group = parser.add_argument_group("Horizon options")
+    ah_group.add_argument(
+        "--ah-show", action="store_true", help="Plot apparent horizons."
+    )
+    ah_group.add_argument(
+        "--ah-color",
+        default=color,
+        help="Color name for horizons (default is '%(default)s').",
+    )
+    ah_group.add_argument(
+        "--ah-edge-color",
+        default=edge_color,
+        help="Color name for horizons boundary (default is '%(default)s').",
+    )
+    ah_group.add_argument(
+        "--ah-alpha",
+        type=float,
+        default=alpha,
+        help="Alpha (transparency) for apparent horizons (default: %(default)s)",
+    )
+    ah_group.add_argument(
+        "--ah-time-tolerance",
+        type=float,
+        default=0.1,
+        help="Tolerance for matching horizon time [simulation units] (default is '%(default)s').",
+    )
+    return parser
