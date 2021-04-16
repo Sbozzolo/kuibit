@@ -11,6 +11,9 @@ the `-c` flag.
 
 #### Features
 - Added method to compute the linear momentum lost by gravitational waves
+- Now the method `save` in `UniformGridData` supports `.npz` files. This is the
+  recommend and fastest way to save a `UniformGridData` to disk.
+- The function `load_UniformGridData` can now read `.npz` files.
 
 #### Bug fixes
 - Fix bug that, under certain circumstances, resulted in `cactus_grid_function`
@@ -20,6 +23,7 @@ the `-c` flag.
 
 #### General
 - Improvements to documentation and docstrings
+
 #### Features
 - Added `nanmax`, `nanmix`, `abs_nanmax`, `abs_nanmin` to `BaseNumerical`
 - Added support for HDF5 grid arrays
@@ -29,8 +33,10 @@ the `-c` flag.
 - Added `shape_outline_at_time` in `cactus_horizon`
 - Added `compute_horizons_separation` in `cactus_horizon`
 - Added `ignore_symlinks` to `SimDir`
+
 #### Bug fixes
 - `cactus_horizons` and `cactus_multiploes` now remove duplicate iterations
+
 #### Breaking changes
 - `remove_duplicate_iters` was renamed to `remove_duplicated_iters`
 - `_derive` methods are renamed to`_differentiate`

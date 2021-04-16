@@ -37,6 +37,7 @@ import ast  # To read metadata in ASCII files
 import re
 from bz2 import open as bopen
 from gzip import open as gopen
+from os.path import splitext
 
 import numpy as np
 
@@ -138,7 +139,9 @@ def merge_uniform_grids(grids, component=-1):
 def load_UniformGridData(path, *args, **kwargs):
     """Load file to :py:class:`~.UniformGridData`.
 
-    The file has to start with the following pattern:
+    The file can be a (optionally compressed) ASCII file or a ``.npz``.
+
+    In the first case, the file has to start with the following pattern:
     # shape: {shape}
     # x0: {x0}
     # dx: {dx}
@@ -160,82 +163,88 @@ def load_UniformGridData(path, *args, **kwargs):
     # Note, this function is not tested in test_grid_data_utils but in
     # test_grid_data.
 
-    # We read the header to fill in the grid information
-    # The colon separates data from description
-    metadata = {
-        "shape": None,
-        "x0": None,
-        "dx": None,
-        "ref_level": None,
-        "component": None,
-        "num_ghost": None,
-        "time": None,
-        "iteration": None,
-    }
-    lines_to_read = len(metadata.keys())
+    # Let us start with the easy case, the .npz file
+    if splitext(path)[-1] == ".npz":
+        # We read everything, then we split off the data and rename
+        # what is left as metadata
+        grid_details = np.load(path)
+        data = grid_details["data"]
+        metadata = {
+            key: value for key, value in grid_details.items() if key != "data"
+        }
+    else:  # ASCII
+        # We read the header to fill in the grid information
+        # The colon separates data from description
+        metadata = {
+            "shape": None,
+            "x0": None,
+            "dx": None,
+            "ref_level": None,
+            "component": None,
+            "num_ghost": None,
+            "time": None,
+            "iteration": None,
+        }
+        lines_to_read = len(metadata.keys())
 
-    # We try to understand if the file is compressed
-    # 1. (.+?) matches any character in a non-greedy way
-    #    (which means, if we find .gz or .bz2 we don't match that)
-    # 2. (\.(gz|bz2))? matches if we have compression
-    # 3. ^ $ means that we match the entire name
-    rx_filename = re.compile(r"^(.+?)(\.(gz|bz2))?$")
+        # We try to understand if the file is compressed
+        # 1. (.+?) matches any character in a non-greedy way
+        #    (which means, if we find .gz or .bz2 we don't match that)
+        # 2. (\.(gz|bz2))? matches if we have compression
+        # 3. ^ $ means that we match the entire name
+        rx_filename = re.compile(r"^(.+?)(\.(gz|bz2))?$")
 
-    filename_match = rx_filename.match(path)
+        filename_match = rx_filename.match(path)
 
-    # What function to use to open the file?
-    # What mode?
-    decompressor = {
-        None: (open, "r"),
-        "gz": (gopen, "rt"),
-        "bz2": (bopen, "rt"),
-    }
+        # What function to use to open the file?
+        # What mode?
+        decompressor = {
+            None: (open, "r"),
+            "gz": (gopen, "rt"),
+            "bz2": (bopen, "rt"),
+        }
 
-    opener, open_mode = decompressor[filename_match.group(3)]
+        opener, open_mode = decompressor[filename_match.group(3)]
 
-    with opener(path, open_mode) as f:
-        # Here we read the first lines_to_read into header
-        header = [f.readline().strip() for _ in range(lines_to_read)]
+        with opener(path, open_mode) as f:
+            # Here we read the first lines_to_read into header
+            header = [f.readline().strip() for _ in range(lines_to_read)]
 
-    # The metadata looks like
-    # # shape: [50 50 50]
-    # # x0: [-10. -10. -10.]
-    # # dx: [0.40816327 0.40816327 0.40816327]
-    # # ref_level: -1
-    # # component: -1
-    # # num_ghost: [0 0 0]
-    # # time: None
-    # # iteration: None
+        # The metadata looks like
+        # # shape: [50 50 50]
+        # # x0: [-10. -10. -10.]
+        # # dx: [0.40816327 0.40816327 0.40816327]
+        # # ref_level: -1
+        # # component: -1
+        # # num_ghost: [0 0 0]
+        # # time: None
+        # # iteration: None
 
-    for line in header:
-        # TODO (REFACTORING): Make this into a regex
-        #
-        # At the moment, we are assuming specific spacing in the line.
-        # We can make this much more robust by using a regular expression
-        # instead.
+        for line in header:
+            # TODO (REFACTORING): Make this into a regex
+            #
+            # At the moment, we are assuming specific spacing in the line.
+            # We can make this much more robust by using a regular expression
+            # instead.
 
-        # We read what is after the colon (with space)
-        var_data = line.split(": ")
+            # We read what is after the colon (with space)
+            var_data = line.split(": ")
 
-        # The first part of var_data contains the var_name
-        # (Note the space)
-        var_name = var_data[0].split("# ")[-1]
+            # The first part of var_data contains the var_name
+            # (Note the space)
+            var_name = var_data[0].split("# ")[-1]
 
-        # Next we evaluate the second part of var_data as a Python literal
-        # using ast, we save this into metadata
-        metadata[var_name] = ast.literal_eval(var_data[-1])
+            # Next we evaluate the second part of var_data as a Python literal
+            # using ast, we save this into metadata
+            metadata[var_name] = ast.literal_eval(var_data[-1])
 
-    # We remove the shape and x0 keys from metadata so that we can pass
-    # directly the dictionary to the constructor
-    shape = metadata["shape"][:]  # (We need to copy the list)
-    x0 = metadata["x0"][:]
+        data = np.loadtxt(path).reshape(metadata["shape"])
 
+    # We remove the shape key from metadata because it is not needed
     del metadata["shape"]
-    del metadata["x0"]
 
-    data = np.loadtxt(path).reshape(shape)
     # skipcq: PYL:E1124
-    return gd.UniformGridData.from_grid_structure(data, x0, **metadata)
+    return gd.UniformGridData.from_grid_structure(data, **metadata)
 
 
 def sample_function_from_uniformgrid(function, grid):

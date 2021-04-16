@@ -35,6 +35,7 @@ Similarly, a :py:class:`~.HierarchicalGridData` contains multiple
 :py:class:`~.UniformGridData`.
 
 """
+from os.path import splitext
 
 import numpy as np
 from scipy import interpolate, linalg
@@ -893,15 +894,20 @@ class UniformGridData(BaseNumerical):
         return np.transpose(self.data)
 
     def save(self, file_name, *args, **kwargs):
-        """Saves into data and grid information in ASCII file.
+        """Save data and grid information to a file.
 
-        This method supports (and encourages) compression of the data. To enable
-        compression, just append ``bz`` or ``gz`` to the extension.
+        Unless the file extension is ``npz``, the output file will ASCII. In
+        this case, compression is supported. To enable compression, just append
+        ``bz`` or ``gz`` to the extension. All the unknown arguments are passed
+        to ``np.savetxt``. The backend used in this case does not support
+        writing 3D or larger arrays to disk as ASCII, so all the arrays are
+        reshaped to 1D.
 
-        All the unknown arguments are passed to ``np.savetxt``.
+        If the file extension is ``npz``, then save the grid with this
+        NumPy-specific format (compressed).
 
-        The backend used by the method does not support writing 3D or larger
-        arrays to disk as ASCII, so all the arrays are reshaped to 1D.
+        If you look for performance, use ``npz``, if you want a file that you
+        can easily read everywhere, use ASCII.
 
         The file output with this method can be read with the
         :py:func:`~.load_UniformGridData` function.
@@ -910,6 +916,28 @@ class UniformGridData(BaseNumerical):
         :type file_name: str
 
         """
+        if splitext(file_name)[-1] == ".npz":
+            # Time and iterations could be None, in that case, we don't add them
+            others = {}
+            if self.time is not None:
+                others.update({"time": self.time})
+            if self.iteration is not None:
+                others.update({"iteration": self.iteration})
+            np.savez_compressed(
+                file_name,
+                shape=self.shape,
+                x0=self.x0,
+                dx=self.dx,
+                ref_level=self.ref_level,
+                component=self.component,
+                num_ghost=self.num_ghost,
+                data=self.data,
+                **others,
+            )
+            return
+
+        # ASCII file
+        #
         # In the header we save all the metadata for the grid.
         # We will use colons to read the data from the comment
         header = f"shape: {list(self.shape)}\n"
