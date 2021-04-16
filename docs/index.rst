@@ -46,7 +46,7 @@ For a full list of available features, see the :doc:`features page <features>`.
   ``QuasiLocalMeasures`` and ``AHFinderDirect``.
 - Handle unit conversion, in particular from geometrized to physical
   (:py:mod:`~.unitconv`).
-- [EXPERIMENTAL] Write command-line scripts (:py:mod:`~.argparse_helper`).
+- Write command-line scripts (:py:mod:`~.argparse_helper`).
 
 
 Installation
