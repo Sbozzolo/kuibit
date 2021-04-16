@@ -1,6 +1,13 @@
 # Changelog
 
-## Version 1.0.1 (Under development)
+## Version 1.1.0 (Under development)
+
+#### New module: argparse_helper
+
+The `argparse_helper` module collects functions to set up arguments for
+command-line scripts. It comes with options for working with figure, grid data,
+and horizons. Options can be stored in text files and read passing the path to
+the `-c` flag.
 
 #### Bug fixes
 - Fix bug that, under certain circumstances, resulted in `cactus_grid_function`
