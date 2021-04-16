@@ -43,6 +43,11 @@ def init_argparse(*args, **kwargs):
     )
     parser.add_argument("--datadir", default=".", help="Data directory")
     parser.add_argument("--outdir", default=".", help="Output directory")
+    parser.add_argument(
+        "--ignore-symlinks",
+        action="store_true",
+        help="Ignore symlinks in the data directory",
+    )
     return parser
 
 
