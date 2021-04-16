@@ -18,6 +18,25 @@
 """The :py:mod:`~.argparse_helper` module provides helper functions to write
 scripts that are controlled by command-line arguments or configuration files.
 
+The intended way to use this module is, schematically
+
+.. code-block:: python
+
+    from kuibit import argparse_helper as kah
+
+    parser = kah.init_argparse(desc="Description")
+    # Next we add everything we need
+    kah.add_figure_to_parser(parser)
+
+    # Specific arguments
+    parser.add_argument("--arg1", help="Specific argument")
+
+    # Finally
+    args = kah.get_args(parser)
+
+    # args is Namespace that contains all the arguments provided via
+    # command-line, configuration file, or environment variable
+
 """
 import sys
 
@@ -30,7 +49,9 @@ import configargparse
 def init_argparse(*args, **kwargs):
     """Initialize a new argparse with given arguments.
 
-    :returns: Argparse parser
+    Unknown arguments are passed to ``configargparse.ArgParser``.
+
+    :returns: Argparse parser.
     :rtype: configargparse.ArgumentParser
 
     """
@@ -54,11 +75,15 @@ def init_argparse(*args, **kwargs):
 def get_args(parser, args=None):
     """Process argparse arguments.
 
-    If args is None, the command line arguments are used.
-    Otherwise, args is used (useful for testing and debugging).
+    If ``args`` is None, the command line arguments are used. Otherwise,
+    ``args`` is used (useful for testing and debugging).
 
-    :returns: Arguments as read from command line or from args
+    :param args: List of command-line options.
+    :type args: list
+
+    :returns: Arguments as read from command line or from args.
     :rtype: argparse Namespace
+
     """
 
     if args is None:
@@ -68,27 +93,37 @@ def get_args(parser, args=None):
 
 
 def add_grid_to_parser(parser, dimensions=2):
-    """Add parameters that have to do with grid configurations to a given
-    parser.
+    """Add parameters that have to do with grid configurations to the given parser.
 
-    This function edits parser in place.
+    This function edits ``parser`` in place.
 
-    :param parser: Argparse parser
+    The options added are:
+
+    - ``resolution``
+    - ``x0 (origin)``
+    - ``x1 (corner)
+    - ``axis`` (for ``dimension = 1``)
+    - ``plane`` (for ``dimension = 2``)
+
+    :param parser: Argparse parser to which the grid options have to be added.
     :type parser: configargparse.ArgumentParser
-    :param dimensions: Number of dimensions to consider.
+
+    :param dimensions: Number of grid dimensions to consider (1, 2, or 3).
     :type dimensions: int
 
     """
     if dimensions not in (1, 2, 3):
-        raise ValueError("dimensions has to be 1, 2, or 3")
+        raise ValueError("The number of dimensions has to be 1, 2, or 3")
 
     parser.add_argument(
         "--resolution",
         type=int,
         default=500,
         help=(
-            "Resolution of the image in number of points "
-            + "(default: %(default)s)"
+            (
+                "Resolution of the grid in number of points "
+                "(default: %(default)s)"
+            )
         ),
     )
 
@@ -107,6 +142,15 @@ def add_grid_to_parser(parser, dimensions=2):
         default=[1] * dimensions,
     )
 
+    if dimensions == 1:
+        parser.add_argument(
+            "--axis",
+            type=str,
+            choices=["x", "y", "z"],
+            default="x",
+            help="Axis to plot (default: %(default)s)",
+        )
+
     if dimensions == 2:
         parser.add_argument(
             "--plane",
@@ -120,11 +164,17 @@ def add_grid_to_parser(parser, dimensions=2):
 def add_figure_to_parser(parser, default_figname=None):
     """Add parameters that have to do with a figure as output to a given parser.
 
-    This function edits parser in place.
+    This function edits ''parser'' in place.
+
+    The options added are:
+
+    - ``figname``
+    - ``fig-extension
+    - ``as-tikz
 
     :param default_figname: Default name of the output figure.
     :type default_figname: str
-    :param parser: Argparse parser (generated with init_argparse())
+    :param parser: Argparse parser (generated with :py:func:`~.init_argparse`).
     :type parser: configargparse.ArgumentParser
 
     """
@@ -148,13 +198,30 @@ def add_figure_to_parser(parser, default_figname=None):
     )
 
 
-def add_horizon_to_parser(parser, color="k", edge_color="w", alpha=1):
+def add_horizon_to_parser(
+    parser, color="k", edge_color="w", alpha=1, time_tolerance=0.1
+):
     """Add parameters that have to do with a apparent horizons to a given parser.
 
-    This function edits parser in place.
+    This function edits ``parser`` in place.
 
-    :param default_figname: Default name of the output figure.
-    :type default_figname: str
+    The options added are:
+
+    - ``ah-show``
+    - ``ah-color``
+    - ``ah-edge-color``
+    - ``ah-alpha``
+    - ``ah-time-tolerance``
+
+    :param color: Color of the horizons.
+    :type color: anything accepted by the drawing package
+    :param edge_color: Color of the edge of the horizons.
+    :type edge_color: anything accepted by the drawing package
+    :param alpha: Number between 0 and 1 that identifies the opacity of the
+                  horizon.
+    :type alpha: float
+    :param time_tolerance: Time tolerance allowed for finding an horizon.
+    :type time_tolerance: float
     :param parser: Argparse parser (generated with init_argparse())
     :type parser: configargparse.ArgumentParser
 
@@ -182,7 +249,8 @@ def add_horizon_to_parser(parser, color="k", edge_color="w", alpha=1):
     ah_group.add_argument(
         "--ah-time-tolerance",
         type=float,
-        default=0.1,
-        help="Tolerance for matching horizon time [simulation units] (default is '%(default)s').",
+        default=time_tolerance,
+        help="Tolerance for matching horizon time [simulation units]"
+        " (default is '%(default)s').",
     )
     return parser
