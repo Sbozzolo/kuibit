@@ -144,10 +144,9 @@ def add_figure_to_parser(parser, default_figname=None):
         "in which case the extension is .tikz",
     )
     parser.add_argument(
-        "--as-tikz",
-        action='store_true',
-        help="Save figure as TikZ figure"
+        "--as-tikz", action="store_true", help="Save figure as TikZ figure"
     )
+
 
 def add_horizon_to_parser(parser, color="k", edge_color="w", alpha=1):
     """Add parameters that have to do with a apparent horizons to a given parser.
