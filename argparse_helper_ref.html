@@ -6,7 +6,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Reference on kuibit.argparse_helper &#8212; kuibit 1.0.0b0 documentation</title>
+    <title>Reference on kuibit.argparse_helper &#8212; kuibit 1.0.0 documentation</title>
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <link rel="stylesheet" href="_static/bizstyle.css" type="text/css" />
     
@@ -18,8 +18,7 @@
     <script src="_static/bizstyle.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="Reference on kuibit.utils" href="utils_ref.html" />
-    <link rel="prev" title="Reference on kuibit.visualize_matplotlib" href="visualize_matplotlib_ref.html" />
+    <link rel="prev" title="Reference on kuibit.unitconv" href="unitconv_ref.html" />
     <meta name="viewport" content="width=device-width,initial-scale=1.0" />
     <!--[if lt IE 9]>
     <script src="_static/css3-mediaqueries.js"></script>
@@ -35,12 +34,9 @@
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="right" >
-          <a href="utils_ref.html" title="Reference on kuibit.utils"
-             accesskey="N">next</a> |</li>
-        <li class="right" >
-          <a href="visualize_matplotlib_ref.html" title="Reference on kuibit.visualize_matplotlib"
+          <a href="unitconv_ref.html" title="Reference on kuibit.unitconv"
              accesskey="P">previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">kuibit 1.0.0b0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="index.html">kuibit 1.0.0 documentation</a> &#187;</li>
         <li class="nav-item nav-item-this"><a href="">Reference on kuibit.argparse_helper</a></li> 
       </ul>
     </div>  
@@ -54,16 +50,39 @@
 <span id="reference-on-kuibit-argparse-helper"></span><h1>Reference on kuibit.argparse_helper<a class="headerlink" href="#module-kuibit.argparse_helper" title="Permalink to this headline">¶</a></h1>
 <p>The <a class="reference internal" href="#module-kuibit.argparse_helper" title="kuibit.argparse_helper"><code class="xref py py-mod docutils literal notranslate"><span class="pre">argparse_helper</span></code></a> module provides helper functions to write
 scripts that are controlled by command-line arguments or configuration files.</p>
+<p>The intended way to use this module is, schematically</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">kuibit</span> <span class="kn">import</span> <span class="n">argparse_helper</span> <span class="k">as</span> <span class="n">kah</span>
+
+<span class="n">parser</span> <span class="o">=</span> <span class="n">kah</span><span class="o">.</span><span class="n">init_argparse</span><span class="p">(</span><span class="n">desc</span><span class="o">=</span><span class="s2">&quot;Description&quot;</span><span class="p">)</span>
+<span class="c1"># Next we add everything we need</span>
+<span class="n">kah</span><span class="o">.</span><span class="n">add_figure_to_parser</span><span class="p">(</span><span class="n">parser</span><span class="p">)</span>
+
+<span class="c1"># Specific arguments</span>
+<span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s2">&quot;--arg1&quot;</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Specific argument&quot;</span><span class="p">)</span>
+
+<span class="c1"># Finally</span>
+<span class="n">args</span> <span class="o">=</span> <span class="n">kah</span><span class="o">.</span><span class="n">get_args</span><span class="p">(</span><span class="n">parser</span><span class="p">)</span>
+
+<span class="c1"># args is Namespace that contains all the arguments provided via</span>
+<span class="c1"># command-line, configuration file, or environment variable</span>
+</pre></div>
+</div>
 <dl class="py function">
 <dt id="kuibit.argparse_helper.add_figure_to_parser">
 <code class="sig-prename descclassname"><span class="pre">kuibit.argparse_helper.</span></code><code class="sig-name descname"><span class="pre">add_figure_to_parser</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parser</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">default_figname</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/kuibit/argparse_helper.html#add_figure_to_parser"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kuibit.argparse_helper.add_figure_to_parser" title="Permalink to this definition">¶</a></dt>
 <dd><p>Add parameters that have to do with a figure as output to a given parser.</p>
-<p>This function edits parser in place.</p>
+<p>This function edits ‘’parser’’ in place.</p>
+<p>The options added are:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">figname</span></code></p></li>
+<li><p><a href="#id1"><span class="problematic" id="id2">``</span></a>fig-extension</p></li>
+<li><p><a href="#id3"><span class="problematic" id="id4">``</span></a>as-tikz</p></li>
+</ul>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>default_figname</strong> (<em>str</em>) – Default name of the output figure.</p></li>
-<li><p><strong>parser</strong> (<em>configargparse.ArgumentParser</em>) – Argparse parser (generated with init_argparse())</p></li>
+<li><p><strong>parser</strong> (<em>configargparse.ArgumentParser</em>) – Argparse parser (generated with <a class="reference internal" href="#kuibit.argparse_helper.init_argparse" title="kuibit.argparse_helper.init_argparse"><code class="xref py py-func docutils literal notranslate"><span class="pre">init_argparse()</span></code></a>).</p></li>
 </ul>
 </dd>
 </dl>
@@ -72,14 +91,21 @@ scripts that are controlled by command-line arguments or configuration files.</p
 <dl class="py function">
 <dt id="kuibit.argparse_helper.add_grid_to_parser">
 <code class="sig-prename descclassname"><span class="pre">kuibit.argparse_helper.</span></code><code class="sig-name descname"><span class="pre">add_grid_to_parser</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parser</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dimensions</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/kuibit/argparse_helper.html#add_grid_to_parser"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kuibit.argparse_helper.add_grid_to_parser" title="Permalink to this definition">¶</a></dt>
-<dd><p>Add parameters that have to do with grid configurations to a given
-parser.</p>
-<p>This function edits parser in place.</p>
+<dd><p>Add parameters that have to do with grid configurations to the given parser.</p>
+<p>This function edits <code class="docutils literal notranslate"><span class="pre">parser</span></code> in place.</p>
+<p>The options added are:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">resolution</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">x0</span> <span class="pre">(origin)</span></code></p></li>
+<li><p><a href="#id5"><span class="problematic" id="id6">``</span></a>x1 (corner)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">axis</span></code> (for <code class="docutils literal notranslate"><span class="pre">dimension</span> <span class="pre">=</span> <span class="pre">1</span></code>)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">plane</span></code> (for <code class="docutils literal notranslate"><span class="pre">dimension</span> <span class="pre">=</span> <span class="pre">2</span></code>)</p></li>
+</ul>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>parser</strong> (<em>configargparse.ArgumentParser</em>) – Argparse parser</p></li>
-<li><p><strong>dimensions</strong> (<em>int</em>) – Number of dimensions to consider.</p></li>
+<li><p><strong>parser</strong> (<em>configargparse.ArgumentParser</em>) – Argparse parser to which the grid options have to be added.</p></li>
+<li><p><strong>dimensions</strong> (<em>int</em>) – Number of grid dimensions to consider (1, 2, or 3).</p></li>
 </ul>
 </dd>
 </dl>
@@ -87,13 +113,25 @@ parser.</p>
 
 <dl class="py function">
 <dt id="kuibit.argparse_helper.add_horizon_to_parser">
-<code class="sig-prename descclassname"><span class="pre">kuibit.argparse_helper.</span></code><code class="sig-name descname"><span class="pre">add_horizon_to_parser</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parser</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">color</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'k'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">edge_color</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'w'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alpha</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/kuibit/argparse_helper.html#add_horizon_to_parser"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kuibit.argparse_helper.add_horizon_to_parser" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname"><span class="pre">kuibit.argparse_helper.</span></code><code class="sig-name descname"><span class="pre">add_horizon_to_parser</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parser</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">color</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'k'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">edge_color</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'w'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alpha</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">time_tolerance</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.1</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/kuibit/argparse_helper.html#add_horizon_to_parser"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kuibit.argparse_helper.add_horizon_to_parser" title="Permalink to this definition">¶</a></dt>
 <dd><p>Add parameters that have to do with a apparent horizons to a given parser.</p>
-<p>This function edits parser in place.</p>
+<p>This function edits <code class="docutils literal notranslate"><span class="pre">parser</span></code> in place.</p>
+<p>The options added are:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">ah-show</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">ah-color</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">ah-edge-color</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">ah-alpha</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">ah-time-tolerance</span></code></p></li>
+</ul>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>default_figname</strong> (<em>str</em>) – Default name of the output figure.</p></li>
+<li><p><strong>color</strong> (<em>anything accepted by the drawing package</em>) – Color of the horizons.</p></li>
+<li><p><strong>edge_color</strong> (<em>anything accepted by the drawing package</em>) – Color of the edge of the horizons.</p></li>
+<li><p><strong>alpha</strong> (<em>float</em>) – Number between 0 and 1 that identifies the opacity of the
+horizon.</p></li>
+<li><p><strong>time_tolerance</strong> (<em>float</em>) – Time tolerance allowed for finding an horizon.</p></li>
 <li><p><strong>parser</strong> (<em>configargparse.ArgumentParser</em>) – Argparse parser (generated with init_argparse())</p></li>
 </ul>
 </dd>
@@ -104,14 +142,17 @@ parser.</p>
 <dt id="kuibit.argparse_helper.get_args">
 <code class="sig-prename descclassname"><span class="pre">kuibit.argparse_helper.</span></code><code class="sig-name descname"><span class="pre">get_args</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parser</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">args</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/kuibit/argparse_helper.html#get_args"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kuibit.argparse_helper.get_args" title="Permalink to this definition">¶</a></dt>
 <dd><p>Process argparse arguments.</p>
-<p>If args is None, the command line arguments are used.
-Otherwise, args is used (useful for testing and debugging).</p>
+<p>If <code class="docutils literal notranslate"><span class="pre">args</span></code> is None, the command line arguments are used. Otherwise,
+<code class="docutils literal notranslate"><span class="pre">args</span></code> is used (useful for testing and debugging).</p>
 <dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p>Arguments as read from command line or from args</p>
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>args</strong> (<em>list</em>) – List of command-line options.</p>
 </dd>
-<dt class="field-even">Return type</dt>
-<dd class="field-even"><p>argparse Namespace</p>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Arguments as read from command line or from args.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>argparse Namespace</p>
 </dd>
 </dl>
 </dd></dl>
@@ -120,9 +161,10 @@ Otherwise, args is used (useful for testing and debugging).</p>
 <dt id="kuibit.argparse_helper.init_argparse">
 <code class="sig-prename descclassname"><span class="pre">kuibit.argparse_helper.</span></code><code class="sig-name descname"><span class="pre">init_argparse</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/kuibit/argparse_helper.html#init_argparse"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kuibit.argparse_helper.init_argparse" title="Permalink to this definition">¶</a></dt>
 <dd><p>Initialize a new argparse with given arguments.</p>
+<p>Unknown arguments are passed to <code class="docutils literal notranslate"><span class="pre">configargparse.ArgParser</span></code>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p>Argparse parser</p>
+<dd class="field-odd"><p>Argparse parser.</p>
 </dd>
 <dt class="field-even">Return type</dt>
 <dd class="field-even"><p>configargparse.ArgumentParser</p>
@@ -143,11 +185,8 @@ Otherwise, args is used (useful for testing and debugging).</p>
               <img class="logo" src="_static/logo.png" alt="Logo"/>
             </a></p>
   <h4>Previous topic</h4>
-  <p class="topless"><a href="visualize_matplotlib_ref.html"
-                        title="previous chapter">Reference on kuibit.visualize_matplotlib</a></p>
-  <h4>Next topic</h4>
-  <p class="topless"><a href="utils_ref.html"
-                        title="next chapter">Reference on kuibit.utils</a></p>
+  <p class="topless"><a href="unitconv_ref.html"
+                        title="previous chapter">Reference on kuibit.unitconv</a></p>
 <div id="searchbox" style="display: none" role="search">
   <h3 id="searchlabel">Quick search</h3>
     <div class="searchformwrapper">
@@ -172,12 +211,9 @@ Otherwise, args is used (useful for testing and debugging).</p>
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="right" >
-          <a href="utils_ref.html" title="Reference on kuibit.utils"
-             >next</a> |</li>
-        <li class="right" >
-          <a href="visualize_matplotlib_ref.html" title="Reference on kuibit.visualize_matplotlib"
+          <a href="unitconv_ref.html" title="Reference on kuibit.unitconv"
              >previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">kuibit 1.0.0b0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="index.html">kuibit 1.0.0 documentation</a> &#187;</li>
         <li class="nav-item nav-item-this"><a href="">Reference on kuibit.argparse_helper</a></li> 
       </ul>
     </div>

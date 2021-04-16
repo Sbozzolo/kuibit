@@ -6,7 +6,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>kuibit.cactus_waves &#8212; kuibit 1.0.0b0 documentation</title>
+    <title>kuibit.cactus_waves &#8212; kuibit 1.0.0 documentation</title>
     <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
     <link rel="stylesheet" href="../../_static/bizstyle.css" type="text/css" />
     
@@ -32,7 +32,7 @@
         <li class="right" >
           <a href="../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../index.html">kuibit 1.0.0b0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">kuibit 1.0.0 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="../index.html" accesskey="U">Module code</a> &#187;</li>
         <li class="nav-item nav-item-this"><a href="">kuibit.cactus_waves</a></li> 
       </ul>
@@ -47,6 +47,9 @@
 <span></span><span class="ch">#!/usr/bin/env python3</span>
 
 <span class="c1"># Copyright (C) 2020-2021 Gabriele Bozzola</span>
+<span class="c1">#</span>
+<span class="c1"># Inspired by code originally developed by Wolfgang Kastaun. See, GitHub,</span>
+<span class="c1"># wokast/PyCactus/PostCactus/cactus_multipoles.py</span>
 <span class="c1">#</span>
 <span class="c1"># This program is free software; you can redistribute it and/or modify it under</span>
 <span class="c1"># the terms of the GNU General Public License as published by the Free Software</span>
@@ -233,7 +236,7 @@
 <span class="sd">             -     i h_\times^{lm}(r,t) = \int_{-\infty}^t \mathrm{d}u</span>
 <span class="sd">                    \int_{-\infty}^u \mathrm{d}v\, \Psi_4^{lm}(r,v)</span>
 
-<span class="sd">        The return value is the complex :py:class:`~.TimeSeries` ``(r * h_plus - i r * h_cross)``.</span>
+<span class="sd">        The return value is the complex :py:class:`~.TimeSeries` ``(r * h_plus + i r * h_cross)``.</span>
 
 <span class="sd">        It is always important to have a function that goes smoothly to zero</span>
 <span class="sd">        before taking Fourier transform (to avoid spectral leakage and</span>
@@ -642,129 +645,7 @@
 <span class="sd">                  as a function of time.</span>
 <span class="sd">        :rtype: :py:class:`~TimeSeries`</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_total_torque_z</span><span class="p">(</span><span class="n">pcut</span><span class="p">,</span> <span class="n">l_max</span><span class="o">=</span><span class="n">l_max</span><span class="p">)</span><span class="o">.</span><span class="n">integrated</span><span class="p">()</span></div>
-
-<div class="viewcode-block" id="GravitationalWavesOneDet.get_force_z_lm"><a class="viewcode-back" href="../../cactus_waves_ref.html#kuibit.cactus_waves.GravitationalWavesOneDet.get_force_z_lm">[docs]</a>    <span class="k">def</span> <span class="nf">get_force_z_lm</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mult_l</span><span class="p">,</span> <span class="n">mult_m</span><span class="p">,</span> <span class="n">pcut</span><span class="p">):</span>
-        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Return the instantaneous linear momentum along the z direction</span>
-<span class="sd">        lost in the mode (l, m).</span>
-
-<span class="sd">        This is computed with Eq. (3.15) in Ruiz 2008.</span>
-
-<span class="sd">        :param mult_l: l multipole moment.</span>
-<span class="sd">        :type mult_t: int</span>
-<span class="sd">        :param mult_m: m multipole moment.</span>
-<span class="sd">        :type mult_m: int</span>
-<span class="sd">        :param pcut: Period that enters the fixed-frequency integration.</span>
-<span class="sd">                     Typically, the longest physical period in the signal.</span>
-<span class="sd">        :type pcut: float</span>
-
-<span class="sd">        :returns: Instantaneous force along the z axis in the mode ``(l, m)``</span>
-<span class="sd">                  as a function of time.</span>
-<span class="sd">        :rtype: :py:class:`~TimeSeries`</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-
-        <span class="c1"># Needed only for Px and Py</span>
-
-        <span class="c1"># def a_lm(el, em):</span>
-        <span class="c1">#     return np.sqrt((el - em) * (el + em + 1)) / (el * (el + 1))</span>
-
-        <span class="c1"># def b_lm(el, em):</span>
-        <span class="c1">#     return 1 / (2 * el) * np.sqrt(((el - 2) * (el + 2) * (el + em) * (el + em - 1))/((2 * el - 1) * (2 * el + 1)))</span>
-
-        <span class="k">def</span> <span class="nf">c_lm</span><span class="p">(</span><span class="n">el</span><span class="p">,</span> <span class="n">em</span><span class="p">):</span>
-            <span class="n">num</span> <span class="o">=</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">em</span>
-            <span class="n">den</span> <span class="o">=</span> <span class="n">el</span> <span class="o">*</span> <span class="p">(</span><span class="n">el</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
-            <span class="k">return</span> <span class="n">num</span> <span class="o">/</span> <span class="n">den</span>
-
-        <span class="k">def</span> <span class="nf">d_lm</span><span class="p">(</span><span class="n">el</span><span class="p">,</span> <span class="n">em</span><span class="p">):</span>
-            <span class="n">num</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">((</span><span class="n">el</span> <span class="o">-</span> <span class="mi">2</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="n">el</span> <span class="o">+</span> <span class="mi">2</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="n">el</span> <span class="o">-</span> <span class="n">em</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="n">el</span> <span class="o">+</span> <span class="n">em</span><span class="p">))</span>
-            <span class="n">den</span> <span class="o">=</span> <span class="n">el</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">((</span><span class="mi">2</span> <span class="o">*</span> <span class="n">el</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">el</span> <span class="o">+</span> <span class="mi">1</span><span class="p">))</span>
-            <span class="k">return</span> <span class="n">num</span> <span class="o">/</span> <span class="n">den</span>
-
-        <span class="c1"># Pz_int1 = \int psi4_lm</span>
-        <span class="c1"># Pz_int2 = \int [(c_lm * conj(psi4_lm)</span>
-        <span class="c1">#                + d_lm * conj(psi_(l-1)m)</span>
-        <span class="c1">#                + d_(l+1)m * conj(psi_(l+1)m))]</span>
-        <span class="c1">#         = \int conj(A + B + C)</span>
-        <span class="c1">#</span>
-        <span class="c1"># (We move the conjugate outside given that all the coefficients</span>
-        <span class="c1">#  are real)</span>
-        <span class="n">Pz_int1</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_fixed_frequency_integrated</span><span class="p">(</span>
-            <span class="bp">self</span><span class="p">[(</span><span class="n">mult_l</span><span class="p">,</span> <span class="n">mult_m</span><span class="p">)],</span> <span class="n">pcut</span><span class="p">,</span> <span class="n">order</span><span class="o">=</span><span class="mi">1</span>
-        <span class="p">)</span>
-
-        <span class="n">A</span> <span class="o">=</span> <span class="n">c_lm</span><span class="p">(</span><span class="n">mult_l</span><span class="p">,</span> <span class="n">mult_m</span><span class="p">)</span> <span class="o">*</span> <span class="bp">self</span><span class="p">[(</span><span class="n">mult_l</span><span class="p">,</span> <span class="n">mult_m</span><span class="p">)]</span>
-        <span class="k">if</span> <span class="p">(</span><span class="n">mult_l</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="n">mult_m</span><span class="p">)</span> <span class="ow">in</span> <span class="bp">self</span><span class="p">:</span>
-            <span class="n">B</span> <span class="o">=</span> <span class="n">d_lm</span><span class="p">(</span><span class="n">mult_l</span><span class="p">,</span> <span class="n">mult_m</span><span class="p">)</span> <span class="o">*</span> <span class="bp">self</span><span class="p">[(</span><span class="n">mult_l</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="n">mult_m</span><span class="p">)]</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">B</span> <span class="o">=</span> <span class="n">ts</span><span class="o">.</span><span class="n">TimeSeries</span><span class="p">(</span><span class="n">A</span><span class="o">.</span><span class="n">t</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros_like</span><span class="p">(</span><span class="n">A</span><span class="o">.</span><span class="n">y</span><span class="p">))</span>
-
-        <span class="k">if</span> <span class="p">(</span><span class="n">mult_l</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">mult_m</span><span class="p">)</span> <span class="ow">in</span> <span class="bp">self</span><span class="p">:</span>
-            <span class="n">C</span> <span class="o">=</span> <span class="n">d_lm</span><span class="p">(</span><span class="n">mult_l</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">mult_m</span><span class="p">)</span> <span class="o">*</span> <span class="bp">self</span><span class="p">[(</span><span class="n">mult_l</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">mult_m</span><span class="p">)]</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">C</span> <span class="o">=</span> <span class="n">ts</span><span class="o">.</span><span class="n">TimeSeries</span><span class="p">(</span><span class="n">A</span><span class="o">.</span><span class="n">t</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros_like</span><span class="p">(</span><span class="n">A</span><span class="o">.</span><span class="n">y</span><span class="p">))</span>
-
-        <span class="n">Pz_int2</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_fixed_frequency_integrated</span><span class="p">(</span>
-            <span class="n">np</span><span class="o">.</span><span class="n">conj</span><span class="p">(</span><span class="n">A</span> <span class="o">+</span> <span class="n">B</span> <span class="o">+</span> <span class="n">C</span><span class="p">),</span> <span class="n">pcut</span><span class="p">,</span> <span class="n">order</span><span class="o">=</span><span class="mi">1</span>
-        <span class="p">)</span>
-
-        <span class="c1"># The imaginary part is zero, so we make the signal real</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">dist</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">/</span> <span class="p">(</span><span class="mi">16</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="n">Pz_int1</span> <span class="o">*</span> <span class="n">Pz_int2</span><span class="p">)</span><span class="o">.</span><span class="n">real</span><span class="p">()</span></div>
-
-<div class="viewcode-block" id="GravitationalWavesOneDet.get_linear_momentum_z_lm"><a class="viewcode-back" href="../../cactus_waves_ref.html#kuibit.cactus_waves.GravitationalWavesOneDet.get_linear_momentum_z_lm">[docs]</a>    <span class="k">def</span> <span class="nf">get_linear_momentum_z_lm</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mult_l</span><span class="p">,</span> <span class="n">mult_m</span><span class="p">,</span> <span class="n">pcut</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Return the cumulative linear momentum lost along the z direction</span>
-<span class="sd">        in the mode (l, m).</span>
-
-<span class="sd">        :param mult_l: l multipole moment.</span>
-<span class="sd">        :type mult_t: int</span>
-<span class="sd">        :param mult_m: m multipole moment.</span>
-<span class="sd">        :type mult_m: int</span>
-<span class="sd">        :param pcut: Period that enters the fixed-frequency integration.</span>
-<span class="sd">                     Typically, the longest physical period in the signal.</span>
-<span class="sd">        :type pcut: float</span>
-
-<span class="sd">        :returns: Linear momentum along the z direction lost up to the time t</span>
-<span class="sd">                  in the mode ``(l, m)`` as a function of time.</span>
-<span class="sd">        :rtype: :py:class:`~TimeSeries`</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_force_z_lm</span><span class="p">(</span><span class="n">mult_l</span><span class="p">,</span> <span class="n">mult_m</span><span class="p">,</span> <span class="n">pcut</span><span class="p">)</span><span class="o">.</span><span class="n">integrated</span><span class="p">()</span></div>
-
-<div class="viewcode-block" id="GravitationalWavesOneDet.get_total_force_z"><a class="viewcode-back" href="../../cactus_waves_ref.html#kuibit.cactus_waves.GravitationalWavesOneDet.get_total_force_z">[docs]</a>    <span class="k">def</span> <span class="nf">get_total_force_z</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pcut</span><span class="p">,</span> <span class="n">l_max</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Return the total force along the z direction in all the modes</span>
-<span class="sd">        up to ``l_max``.</span>
-
-<span class="sd">        :param pcut: Period that enters the fixed-frequency integration.</span>
-<span class="sd">                     Typically, the longest physical period in the signal.</span>
-<span class="sd">        :type pcut: float</span>
-<span class="sd">        :param l_max: Ignore multipoles with l &gt; l_max</span>
-<span class="sd">        :type l_max: int</span>
-
-<span class="sd">        :returns: Instantaneous total force along the z direction in the</span>
-<span class="sd">                  modes up to  ``l_max`` as a function of time.</span>
-<span class="sd">        :rtype: :py:class:`~TimeSeries`</span>
-
-<span class="sd">        &quot;&quot;&quot;</span>
-
-        <span class="k">def</span> <span class="nf">forclm</span><span class="p">(</span><span class="n">_1</span><span class="p">,</span> <span class="n">mult_l</span><span class="p">,</span> <span class="n">mult_m</span><span class="p">,</span> <span class="n">_2</span><span class="p">):</span>
-            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_force_z_lm</span><span class="p">(</span><span class="n">mult_l</span><span class="p">,</span> <span class="n">mult_m</span><span class="p">,</span> <span class="n">pcut</span><span class="p">)</span>
-
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">total_function_on_available_lm</span><span class="p">(</span><span class="n">forclm</span><span class="p">,</span> <span class="n">l_max</span><span class="o">=</span><span class="n">l_max</span><span class="p">)</span></div>
-
-<div class="viewcode-block" id="GravitationalWavesOneDet.get_total_linear_momentum_z"><a class="viewcode-back" href="../../cactus_waves_ref.html#kuibit.cactus_waves.GravitationalWavesOneDet.get_total_linear_momentum_z">[docs]</a>    <span class="k">def</span> <span class="nf">get_total_linear_momentum_z</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pcut</span><span class="p">,</span> <span class="n">l_max</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Return the cumulative linear momentum lost in all the modes up to ``l_max``.</span>
-
-<span class="sd">         :param pcut: Period that enters the fixed-frequency integration.</span>
-<span class="sd">                      Typically, the longest physical period in the signal.</span>
-<span class="sd">         :type pcut: float</span>
-<span class="sd">         :param l_max: Ignore multipoles with l &gt; l_max</span>
-<span class="sd">         :type l_max: int</span>
-
-<span class="sd">        :returns: Cumulative total linear momentum along the z direction lost</span>
-<span class="sd">                  up to time in the modes up to  ``l_max`` as a function of time.</span>
-<span class="sd">         :rtype: :py:class:`~TimeSeries`</span>
-
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_total_force_z</span><span class="p">(</span><span class="n">pcut</span><span class="p">,</span> <span class="n">l_max</span><span class="p">)</span><span class="o">.</span><span class="n">integrated</span><span class="p">()</span></div></div>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_total_torque_z</span><span class="p">(</span><span class="n">pcut</span><span class="p">,</span> <span class="n">l_max</span><span class="o">=</span><span class="n">l_max</span><span class="p">)</span><span class="o">.</span><span class="n">integrated</span><span class="p">()</span></div></div>
 
 
 <div class="viewcode-block" id="ElectromagneticWavesOneDet"><a class="viewcode-back" href="../../cactus_waves_ref.html#kuibit.cactus_waves.ElectromagneticWavesOneDet">[docs]</a><span class="k">class</span> <span class="nc">ElectromagneticWavesOneDet</span><span class="p">(</span><span class="n">mp</span><span class="o">.</span><span class="n">MultipoleOneDet</span><span class="p">):</span>
@@ -1164,7 +1045,7 @@
         <li class="right" >
           <a href="../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../index.html">kuibit 1.0.0b0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">kuibit 1.0.0 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="../index.html" >Module code</a> &#187;</li>
         <li class="nav-item nav-item-this"><a href="">kuibit.cactus_waves</a></li> 
       </ul>

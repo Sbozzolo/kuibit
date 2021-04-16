@@ -6,7 +6,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>kuibit.argparse_helper &#8212; kuibit 1.0.0b0 documentation</title>
+    <title>kuibit.argparse_helper &#8212; kuibit 1.0.0 documentation</title>
     <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
     <link rel="stylesheet" href="../../_static/bizstyle.css" type="text/css" />
     
@@ -32,7 +32,7 @@
         <li class="right" >
           <a href="../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../index.html">kuibit 1.0.0b0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">kuibit 1.0.0 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="../index.html" accesskey="U">Module code</a> &#187;</li>
         <li class="nav-item nav-item-this"><a href="">kuibit.argparse_helper</a></li> 
       </ul>
@@ -64,6 +64,25 @@
 <span class="sd">&quot;&quot;&quot;The :py:mod:`~.argparse_helper` module provides helper functions to write</span>
 <span class="sd">scripts that are controlled by command-line arguments or configuration files.</span>
 
+<span class="sd">The intended way to use this module is, schematically</span>
+
+<span class="sd">.. code-block:: python</span>
+
+<span class="sd">    from kuibit import argparse_helper as kah</span>
+
+<span class="sd">    parser = kah.init_argparse(desc=&quot;Description&quot;)</span>
+<span class="sd">    # Next we add everything we need</span>
+<span class="sd">    kah.add_figure_to_parser(parser)</span>
+
+<span class="sd">    # Specific arguments</span>
+<span class="sd">    parser.add_argument(&quot;--arg1&quot;, help=&quot;Specific argument&quot;)</span>
+
+<span class="sd">    # Finally</span>
+<span class="sd">    args = kah.get_args(parser)</span>
+
+<span class="sd">    # args is Namespace that contains all the arguments provided via</span>
+<span class="sd">    # command-line, configuration file, or environment variable</span>
+
 <span class="sd">&quot;&quot;&quot;</span>
 <span class="kn">import</span> <span class="nn">sys</span>
 
@@ -76,7 +95,9 @@
 <div class="viewcode-block" id="init_argparse"><a class="viewcode-back" href="../../argparse_helper_ref.html#kuibit.argparse_helper.init_argparse">[docs]</a><span class="k">def</span> <span class="nf">init_argparse</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Initialize a new argparse with given arguments.</span>
 
-<span class="sd">    :returns: Argparse parser</span>
+<span class="sd">    Unknown arguments are passed to ``configargparse.ArgParser``.</span>
+
+<span class="sd">    :returns: Argparse parser.</span>
 <span class="sd">    :rtype: configargparse.ArgumentParser</span>
 
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -100,11 +121,15 @@
 <div class="viewcode-block" id="get_args"><a class="viewcode-back" href="../../argparse_helper_ref.html#kuibit.argparse_helper.get_args">[docs]</a><span class="k">def</span> <span class="nf">get_args</span><span class="p">(</span><span class="n">parser</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Process argparse arguments.</span>
 
-<span class="sd">    If args is None, the command line arguments are used.</span>
-<span class="sd">    Otherwise, args is used (useful for testing and debugging).</span>
+<span class="sd">    If ``args`` is None, the command line arguments are used. Otherwise,</span>
+<span class="sd">    ``args`` is used (useful for testing and debugging).</span>
 
-<span class="sd">    :returns: Arguments as read from command line or from args</span>
+<span class="sd">    :param args: List of command-line options.</span>
+<span class="sd">    :type args: list</span>
+
+<span class="sd">    :returns: Arguments as read from command line or from args.</span>
 <span class="sd">    :rtype: argparse Namespace</span>
+
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">if</span> <span class="n">args</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
@@ -114,27 +139,37 @@
 
 
 <div class="viewcode-block" id="add_grid_to_parser"><a class="viewcode-back" href="../../argparse_helper_ref.html#kuibit.argparse_helper.add_grid_to_parser">[docs]</a><span class="k">def</span> <span class="nf">add_grid_to_parser</span><span class="p">(</span><span class="n">parser</span><span class="p">,</span> <span class="n">dimensions</span><span class="o">=</span><span class="mi">2</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Add parameters that have to do with grid configurations to a given</span>
-<span class="sd">    parser.</span>
+    <span class="sd">&quot;&quot;&quot;Add parameters that have to do with grid configurations to the given parser.</span>
 
-<span class="sd">    This function edits parser in place.</span>
+<span class="sd">    This function edits ``parser`` in place.</span>
 
-<span class="sd">    :param parser: Argparse parser</span>
+<span class="sd">    The options added are:</span>
+
+<span class="sd">    - ``resolution``</span>
+<span class="sd">    - ``x0 (origin)``</span>
+<span class="sd">    - ``x1 (corner)</span>
+<span class="sd">    - ``axis`` (for ``dimension = 1``)</span>
+<span class="sd">    - ``plane`` (for ``dimension = 2``)</span>
+
+<span class="sd">    :param parser: Argparse parser to which the grid options have to be added.</span>
 <span class="sd">    :type parser: configargparse.ArgumentParser</span>
-<span class="sd">    :param dimensions: Number of dimensions to consider.</span>
+
+<span class="sd">    :param dimensions: Number of grid dimensions to consider (1, 2, or 3).</span>
 <span class="sd">    :type dimensions: int</span>
 
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="n">dimensions</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">):</span>
-        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;dimensions has to be 1, 2, or 3&quot;</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;The number of dimensions has to be 1, 2, or 3&quot;</span><span class="p">)</span>
 
     <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span>
         <span class="s2">&quot;--resolution&quot;</span><span class="p">,</span>
         <span class="nb">type</span><span class="o">=</span><span class="nb">int</span><span class="p">,</span>
         <span class="n">default</span><span class="o">=</span><span class="mi">500</span><span class="p">,</span>
         <span class="n">help</span><span class="o">=</span><span class="p">(</span>
-            <span class="s2">&quot;Resolution of the image in number of points &quot;</span>
-            <span class="o">+</span> <span class="s2">&quot;(default: </span><span class="si">%(default)s</span><span class="s2">)&quot;</span>
+            <span class="p">(</span>
+                <span class="s2">&quot;Resolution of the grid in number of points &quot;</span>
+                <span class="s2">&quot;(default: </span><span class="si">%(default)s</span><span class="s2">)&quot;</span>
+            <span class="p">)</span>
         <span class="p">),</span>
     <span class="p">)</span>
 
@@ -153,6 +188,15 @@
         <span class="n">default</span><span class="o">=</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="n">dimensions</span><span class="p">,</span>
     <span class="p">)</span>
 
+    <span class="k">if</span> <span class="n">dimensions</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span>
+            <span class="s2">&quot;--axis&quot;</span><span class="p">,</span>
+            <span class="nb">type</span><span class="o">=</span><span class="nb">str</span><span class="p">,</span>
+            <span class="n">choices</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;x&quot;</span><span class="p">,</span> <span class="s2">&quot;y&quot;</span><span class="p">,</span> <span class="s2">&quot;z&quot;</span><span class="p">],</span>
+            <span class="n">default</span><span class="o">=</span><span class="s2">&quot;x&quot;</span><span class="p">,</span>
+            <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Axis to plot (default: </span><span class="si">%(default)s</span><span class="s2">)&quot;</span><span class="p">,</span>
+        <span class="p">)</span>
+
     <span class="k">if</span> <span class="n">dimensions</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
         <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span>
             <span class="s2">&quot;--plane&quot;</span><span class="p">,</span>
@@ -166,11 +210,17 @@
 <div class="viewcode-block" id="add_figure_to_parser"><a class="viewcode-back" href="../../argparse_helper_ref.html#kuibit.argparse_helper.add_figure_to_parser">[docs]</a><span class="k">def</span> <span class="nf">add_figure_to_parser</span><span class="p">(</span><span class="n">parser</span><span class="p">,</span> <span class="n">default_figname</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Add parameters that have to do with a figure as output to a given parser.</span>
 
-<span class="sd">    This function edits parser in place.</span>
+<span class="sd">    This function edits &#39;&#39;parser&#39;&#39; in place.</span>
+
+<span class="sd">    The options added are:</span>
+
+<span class="sd">    - ``figname``</span>
+<span class="sd">    - ``fig-extension</span>
+<span class="sd">    - ``as-tikz</span>
 
 <span class="sd">    :param default_figname: Default name of the output figure.</span>
 <span class="sd">    :type default_figname: str</span>
-<span class="sd">    :param parser: Argparse parser (generated with init_argparse())</span>
+<span class="sd">    :param parser: Argparse parser (generated with :py:func:`~.init_argparse`).</span>
 <span class="sd">    :type parser: configargparse.ArgumentParser</span>
 
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -190,17 +240,34 @@
         <span class="s2">&quot;in which case the extension is .tikz&quot;</span><span class="p">,</span>
     <span class="p">)</span>
     <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span>
-        <span class="s2">&quot;--as-tikz&quot;</span><span class="p">,</span> <span class="n">action</span><span class="o">=</span><span class="s2">&quot;store_true&quot;</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Save figure as TikZ figure.&quot;</span>
+        <span class="s2">&quot;--as-tikz&quot;</span><span class="p">,</span> <span class="n">action</span><span class="o">=</span><span class="s2">&quot;store_true&quot;</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Save figure as TikZ figure&quot;</span>
     <span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="add_horizon_to_parser"><a class="viewcode-back" href="../../argparse_helper_ref.html#kuibit.argparse_helper.add_horizon_to_parser">[docs]</a><span class="k">def</span> <span class="nf">add_horizon_to_parser</span><span class="p">(</span><span class="n">parser</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;k&quot;</span><span class="p">,</span> <span class="n">edge_color</span><span class="o">=</span><span class="s2">&quot;w&quot;</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+<div class="viewcode-block" id="add_horizon_to_parser"><a class="viewcode-back" href="../../argparse_helper_ref.html#kuibit.argparse_helper.add_horizon_to_parser">[docs]</a><span class="k">def</span> <span class="nf">add_horizon_to_parser</span><span class="p">(</span>
+    <span class="n">parser</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;k&quot;</span><span class="p">,</span> <span class="n">edge_color</span><span class="o">=</span><span class="s2">&quot;w&quot;</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">time_tolerance</span><span class="o">=</span><span class="mf">0.1</span>
+<span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Add parameters that have to do with a apparent horizons to a given parser.</span>
 
-<span class="sd">    This function edits parser in place.</span>
+<span class="sd">    This function edits ``parser`` in place.</span>
 
-<span class="sd">    :param default_figname: Default name of the output figure.</span>
-<span class="sd">    :type default_figname: str</span>
+<span class="sd">    The options added are:</span>
+
+<span class="sd">    - ``ah-show``</span>
+<span class="sd">    - ``ah-color``</span>
+<span class="sd">    - ``ah-edge-color``</span>
+<span class="sd">    - ``ah-alpha``</span>
+<span class="sd">    - ``ah-time-tolerance``</span>
+
+<span class="sd">    :param color: Color of the horizons.</span>
+<span class="sd">    :type color: anything accepted by the drawing package</span>
+<span class="sd">    :param edge_color: Color of the edge of the horizons.</span>
+<span class="sd">    :type edge_color: anything accepted by the drawing package</span>
+<span class="sd">    :param alpha: Number between 0 and 1 that identifies the opacity of the</span>
+<span class="sd">                  horizon.</span>
+<span class="sd">    :type alpha: float</span>
+<span class="sd">    :param time_tolerance: Time tolerance allowed for finding an horizon.</span>
+<span class="sd">    :type time_tolerance: float</span>
 <span class="sd">    :param parser: Argparse parser (generated with init_argparse())</span>
 <span class="sd">    :type parser: configargparse.ArgumentParser</span>
 
@@ -228,8 +295,9 @@
     <span class="n">ah_group</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span>
         <span class="s2">&quot;--ah-time-tolerance&quot;</span><span class="p">,</span>
         <span class="nb">type</span><span class="o">=</span><span class="nb">float</span><span class="p">,</span>
-        <span class="n">default</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span>
-        <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Tolerance for matching horizon time [simulation units] (default is &#39;</span><span class="si">%(default)s</span><span class="s2">&#39;).&quot;</span><span class="p">,</span>
+        <span class="n">default</span><span class="o">=</span><span class="n">time_tolerance</span><span class="p">,</span>
+        <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Tolerance for matching horizon time [simulation units]&quot;</span>
+        <span class="s2">&quot; (default is &#39;</span><span class="si">%(default)s</span><span class="s2">&#39;).&quot;</span><span class="p">,</span>
     <span class="p">)</span>
     <span class="k">return</span> <span class="n">parser</span></div>
 </pre></div>
@@ -266,7 +334,7 @@
         <li class="right" >
           <a href="../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../index.html">kuibit 1.0.0b0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">kuibit 1.0.0 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="../index.html" >Module code</a> &#187;</li>
         <li class="nav-item nav-item-this"><a href="">kuibit.argparse_helper</a></li> 
       </ul>
