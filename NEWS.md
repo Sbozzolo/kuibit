@@ -9,6 +9,9 @@ command-line scripts. It comes with options for working with figure, grid data,
 and horizons. Options can be stored in text files and read passing the path to
 the `-c` flag.
 
+#### General
+- Added `bins` examples: `save_resampled_grid_data`
+
 #### Features
 - Added method to compute the linear momentum lost by gravitational waves
 - Now the method `save` in `UniformGridData` supports `.npz` files. This is the
