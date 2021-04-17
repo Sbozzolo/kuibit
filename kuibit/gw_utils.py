@@ -275,14 +275,14 @@ def ra_dec_to_theta_phi(right_ascension, declination, time_utc):
     # The Greenwich sidereal time theta_G is calculated by
     # the formula at https://en.wikipedia.org/wiki/Sidereal_time
 
-    base_posix_date = datetime.datetime.strptime(
+    base_date = datetime.datetime.strptime(
         "2000-01-01 12:00:00", "%Y-%m-%d %H:%M:%S"
-    ).timestamp()
-    posix_date = datetime.datetime.strptime(
+    )
+    date = datetime.datetime.strptime(
         time_utc, "%Y-%m-%d %H:%M:%S"
-    ).timestamp()
+    )
     # Days between DATE and 2000-01-01 12:00
-    D = (posix_date - base_posix_date) / 86400
+    D = (date - base_date).total_seconds() / 86400
     theta_G = 18.697374558 + 24.06570982441908 * D
     # theta_G mod 24h
     theta_G = theta_G - np.floor(theta_G / 24.0) * 24

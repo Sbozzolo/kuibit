@@ -33,6 +33,7 @@ orders of magnitude faster.
 - Fixed bug that, under certain circumstances, resulted in `cactus_grid_function`
   not correctly indexing all the 3D data files
 - Fixed a test that was triggering the wrong error.
+- Fixed a bug that made `ra_dec_to_theta_phi` depend on the local time
 
 #### Breaking changes
 - `finest_level_component_at_point` is now `finest_component_at_point` and
