@@ -2300,13 +2300,8 @@ class HierarchicalGridData(BaseNumerical):
             x_tilde = to_tilde(coordinate)
 
             if any(
-                [
-                    (
-                        (point_dim < border_dim[0])
-                        or (point_dim >= border_dim[-1])
-                    )
-                    for point_dim, border_dim in zip(x_tilde, boundaries_tilde)
-                ]
+                ((point_dim < border_dim[0]) or (point_dim >= border_dim[-1]))
+                for point_dim, border_dim in zip(x_tilde, boundaries_tilde)
             ):
                 raise ValueError(f"{coordinate} outside the grid")
 

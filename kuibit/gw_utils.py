@@ -90,13 +90,13 @@ def luminosity_distance_to_redshift(
     H0 = uc.H0_SI  # 1/s
     c = uc.C_SI  # m/s
 
-    def DL_integral(z):
-        return 1 / np.sqrt(Omega_m * (1 + z) ** 3 + Omega_L)
-
-    def z_to_DL(z):
-        return c / H0 * (1 + z) * integrate.quad(DL_integral, 0, z)[0]
-
     def function_to_root_find(z):
+        def z_to_DL(z):
+            def DL_integral(z):
+                return 1 / np.sqrt(Omega_m * (1 + z) ** 3 + Omega_L)
+
+            return c / H0 * (1 + z) * integrate.quad(DL_integral, 0, z)[0]
+
         return np.abs(distance_in_m - z_to_DL(z))
 
     redshift = optimize.root(function_to_root_find, initial_guess)
@@ -130,20 +130,19 @@ def sYlm(ss, ll, mm, theta, phi):
     """
     # Code by Christian Reisswig
 
-    # Coefficient function for spin-weighted spherical harmonics
-    def sYlm_Cslm(local_s, local_l, local_m):
-        return np.sqrt(
-            local_l
-            * local_l
-            * (4.0 * local_l * local_l - 1.0)
-            / (
-                (local_l * local_l - local_m * local_m)
-                * (local_l * local_l - local_s * local_s)
-            )
-        )
-
     # Recursion function for spin-weighted spherical harmonics
     def s_lambda_lm(local_s, local_l, local_m, x):
+        # Coefficient function for spin-weighted spherical harmonics
+        def sYlm_Cslm(local_s, local_l, local_m):
+            return np.sqrt(
+                local_l
+                * local_l
+                * (4.0 * local_l * local_l - 1.0)
+                / (
+                    (local_l * local_l - local_m * local_m)
+                    * (local_l * local_l - local_s * local_s)
+                )
+            )
 
         Pm = np.power(-0.5, local_m)
 
@@ -278,9 +277,7 @@ def ra_dec_to_theta_phi(right_ascension, declination, time_utc):
     base_date = datetime.datetime.strptime(
         "2000-01-01 12:00:00", "%Y-%m-%d %H:%M:%S"
     )
-    date = datetime.datetime.strptime(
-        time_utc, "%Y-%m-%d %H:%M:%S"
-    )
+    date = datetime.datetime.strptime(time_utc, "%Y-%m-%d %H:%M:%S")
     # Days between DATE and 2000-01-01 12:00
     D = (date - base_date).total_seconds() / 86400
     theta_G = 18.697374558 + 24.06570982441908 * D
