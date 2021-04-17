@@ -136,13 +136,13 @@
     <span class="n">H0</span> <span class="o">=</span> <span class="n">uc</span><span class="o">.</span><span class="n">H0_SI</span>  <span class="c1"># 1/s</span>
     <span class="n">c</span> <span class="o">=</span> <span class="n">uc</span><span class="o">.</span><span class="n">C_SI</span>  <span class="c1"># m/s</span>
 
-    <span class="k">def</span> <span class="nf">DL_integral</span><span class="p">(</span><span class="n">z</span><span class="p">):</span>
-        <span class="k">return</span> <span class="mi">1</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">Omega_m</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="n">z</span><span class="p">)</span> <span class="o">**</span> <span class="mi">3</span> <span class="o">+</span> <span class="n">Omega_L</span><span class="p">)</span>
-
-    <span class="k">def</span> <span class="nf">z_to_DL</span><span class="p">(</span><span class="n">z</span><span class="p">):</span>
-        <span class="k">return</span> <span class="n">c</span> <span class="o">/</span> <span class="n">H0</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="n">z</span><span class="p">)</span> <span class="o">*</span> <span class="n">integrate</span><span class="o">.</span><span class="n">quad</span><span class="p">(</span><span class="n">DL_integral</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">z</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
-
     <span class="k">def</span> <span class="nf">function_to_root_find</span><span class="p">(</span><span class="n">z</span><span class="p">):</span>
+        <span class="k">def</span> <span class="nf">z_to_DL</span><span class="p">(</span><span class="n">z</span><span class="p">):</span>
+            <span class="k">def</span> <span class="nf">DL_integral</span><span class="p">(</span><span class="n">z</span><span class="p">):</span>
+                <span class="k">return</span> <span class="mi">1</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">Omega_m</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="n">z</span><span class="p">)</span> <span class="o">**</span> <span class="mi">3</span> <span class="o">+</span> <span class="n">Omega_L</span><span class="p">)</span>
+
+            <span class="k">return</span> <span class="n">c</span> <span class="o">/</span> <span class="n">H0</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="n">z</span><span class="p">)</span> <span class="o">*</span> <span class="n">integrate</span><span class="o">.</span><span class="n">quad</span><span class="p">(</span><span class="n">DL_integral</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">z</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+
         <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">distance_in_m</span> <span class="o">-</span> <span class="n">z_to_DL</span><span class="p">(</span><span class="n">z</span><span class="p">))</span>
 
     <span class="n">redshift</span> <span class="o">=</span> <span class="n">optimize</span><span class="o">.</span><span class="n">root</span><span class="p">(</span><span class="n">function_to_root_find</span><span class="p">,</span> <span class="n">initial_guess</span><span class="p">)</span>
@@ -176,20 +176,19 @@
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="c1"># Code by Christian Reisswig</span>
 
-    <span class="c1"># Coefficient function for spin-weighted spherical harmonics</span>
-    <span class="k">def</span> <span class="nf">sYlm_Cslm</span><span class="p">(</span><span class="n">local_s</span><span class="p">,</span> <span class="n">local_l</span><span class="p">,</span> <span class="n">local_m</span><span class="p">):</span>
-        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span>
-            <span class="n">local_l</span>
-            <span class="o">*</span> <span class="n">local_l</span>
-            <span class="o">*</span> <span class="p">(</span><span class="mf">4.0</span> <span class="o">*</span> <span class="n">local_l</span> <span class="o">*</span> <span class="n">local_l</span> <span class="o">-</span> <span class="mf">1.0</span><span class="p">)</span>
-            <span class="o">/</span> <span class="p">(</span>
-                <span class="p">(</span><span class="n">local_l</span> <span class="o">*</span> <span class="n">local_l</span> <span class="o">-</span> <span class="n">local_m</span> <span class="o">*</span> <span class="n">local_m</span><span class="p">)</span>
-                <span class="o">*</span> <span class="p">(</span><span class="n">local_l</span> <span class="o">*</span> <span class="n">local_l</span> <span class="o">-</span> <span class="n">local_s</span> <span class="o">*</span> <span class="n">local_s</span><span class="p">)</span>
-            <span class="p">)</span>
-        <span class="p">)</span>
-
     <span class="c1"># Recursion function for spin-weighted spherical harmonics</span>
     <span class="k">def</span> <span class="nf">s_lambda_lm</span><span class="p">(</span><span class="n">local_s</span><span class="p">,</span> <span class="n">local_l</span><span class="p">,</span> <span class="n">local_m</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
+        <span class="c1"># Coefficient function for spin-weighted spherical harmonics</span>
+        <span class="k">def</span> <span class="nf">sYlm_Cslm</span><span class="p">(</span><span class="n">local_s</span><span class="p">,</span> <span class="n">local_l</span><span class="p">,</span> <span class="n">local_m</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span>
+                <span class="n">local_l</span>
+                <span class="o">*</span> <span class="n">local_l</span>
+                <span class="o">*</span> <span class="p">(</span><span class="mf">4.0</span> <span class="o">*</span> <span class="n">local_l</span> <span class="o">*</span> <span class="n">local_l</span> <span class="o">-</span> <span class="mf">1.0</span><span class="p">)</span>
+                <span class="o">/</span> <span class="p">(</span>
+                    <span class="p">(</span><span class="n">local_l</span> <span class="o">*</span> <span class="n">local_l</span> <span class="o">-</span> <span class="n">local_m</span> <span class="o">*</span> <span class="n">local_m</span><span class="p">)</span>
+                    <span class="o">*</span> <span class="p">(</span><span class="n">local_l</span> <span class="o">*</span> <span class="n">local_l</span> <span class="o">-</span> <span class="n">local_s</span> <span class="o">*</span> <span class="n">local_s</span><span class="p">)</span>
+                <span class="p">)</span>
+            <span class="p">)</span>
 
         <span class="n">Pm</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">power</span><span class="p">(</span><span class="o">-</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">local_m</span><span class="p">)</span>
 
@@ -324,9 +323,7 @@
     <span class="n">base_date</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">strptime</span><span class="p">(</span>
         <span class="s2">&quot;2000-01-01 12:00:00&quot;</span><span class="p">,</span> <span class="s2">&quot;%Y-%m-</span><span class="si">%d</span><span class="s2"> %H:%M:%S&quot;</span>
     <span class="p">)</span>
-    <span class="n">date</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">strptime</span><span class="p">(</span>
-        <span class="n">time_utc</span><span class="p">,</span> <span class="s2">&quot;%Y-%m-</span><span class="si">%d</span><span class="s2"> %H:%M:%S&quot;</span>
-    <span class="p">)</span>
+    <span class="n">date</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">strptime</span><span class="p">(</span><span class="n">time_utc</span><span class="p">,</span> <span class="s2">&quot;%Y-%m-</span><span class="si">%d</span><span class="s2"> %H:%M:%S&quot;</span><span class="p">)</span>
     <span class="c1"># Days between DATE and 2000-01-01 12:00</span>
     <span class="n">D</span> <span class="o">=</span> <span class="p">(</span><span class="n">date</span> <span class="o">-</span> <span class="n">base_date</span><span class="p">)</span><span class="o">.</span><span class="n">total_seconds</span><span class="p">()</span> <span class="o">/</span> <span class="mi">86400</span>
     <span class="n">theta_G</span> <span class="o">=</span> <span class="mf">18.697374558</span> <span class="o">+</span> <span class="mf">24.06570982441908</span> <span class="o">*</span> <span class="n">D</span>
