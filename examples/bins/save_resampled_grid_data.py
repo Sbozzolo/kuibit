@@ -25,10 +25,11 @@ from kuibit.simdir import SimDir
 
 if __name__ == "__main__":
 
-    desc = f"""{sys.argv[0]} dumps a specific grid variable resampled to a given
-grid into a file. Saving as .npz files guarantees the best performances. """
+    desc = f"""{os.path.basename(sys.argv[0])} dumps a specific grid variable
+    resampled to a given grid into a file. Saving as .npz files guarantees
+    the best performances. """
 
-    parser = kah.init_argparse(__doc__)
+    parser = kah.init_argparse(description=desc)
     parser.add_argument(
         "--variable", type=str, required=True, help="Variable to save."
     )
