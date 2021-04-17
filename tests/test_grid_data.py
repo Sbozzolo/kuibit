@@ -724,8 +724,7 @@ class TestUniformGridData(unittest.TestCase):
             sin_data_complex._nearest_neighbor_interpolation(
                 np.array([1000]),
                 ext=2,
-            ),
-
+            )
         # Test on a point outside the grid with the lookup table and
         # ext = 1
         self.assertEqual(

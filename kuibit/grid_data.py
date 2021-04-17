@@ -1160,8 +1160,9 @@ class UniformGridData(BaseNumerical):
         # or index larger than the shape (number of points)
         outside_indices = np.logical_or(
             np.any(indices_arr < 0, axis=-1),
-            np.any(indices_arr >= self.shape, axis=1),
+            np.any(indices_arr >= self.shape),
         )
+
         if ext == 2:
             if np.any(outside_indices):
                 # For ext = 2, we simply have the raise an error if we have
