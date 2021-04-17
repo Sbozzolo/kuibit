@@ -81,6 +81,7 @@
 <span class="sd">:py:class:`~.UniformGridData`.</span>
 
 <span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">from</span> <span class="nn">bisect</span> <span class="kn">import</span> <span class="n">bisect_right</span>
 <span class="kn">from</span> <span class="nn">os.path</span> <span class="kn">import</span> <span class="n">splitext</span>
 
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
@@ -549,9 +550,9 @@
 
         <span class="c1"># However, this happens to be not the fastest. This method is called a</span>
         <span class="c1"># huge number of times when in HierarchicalGridData methods, because it</span>
-        <span class="c1"># is the main method to find which grid contains a given point.</span>
-        <span class="c1"># (method finest_level_component_at_point). So, it is better to have</span>
-        <span class="c1"># a less pythonic method that fails as soon as possible.</span>
+        <span class="c1"># is the main method to find which grid contains a given point. (method</span>
+        <span class="c1"># finest_component_at_point). So, it is better to have a less pythonic</span>
+        <span class="c1"># method that fails as soon as possible.</span>
         <span class="k">for</span> <span class="n">dim</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">num_dimensions</span><span class="p">):</span>
             <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">lowest_vertex</span><span class="p">[</span><span class="n">dim</span><span class="p">]</span>
@@ -1206,8 +1207,9 @@
         <span class="c1"># or index larger than the shape (number of points)</span>
         <span class="n">outside_indices</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">logical_or</span><span class="p">(</span>
             <span class="n">np</span><span class="o">.</span><span class="n">any</span><span class="p">(</span><span class="n">indices_arr</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">,</span> <span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">),</span>
-            <span class="n">np</span><span class="o">.</span><span class="n">any</span><span class="p">(</span><span class="n">indices_arr</span> <span class="o">&gt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">),</span>
+            <span class="n">np</span><span class="o">.</span><span class="n">any</span><span class="p">(</span><span class="n">indices_arr</span> <span class="o">&gt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">shape</span><span class="p">),</span>
         <span class="p">)</span>
+
         <span class="k">if</span> <span class="n">ext</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">any</span><span class="p">(</span><span class="n">outside_indices</span><span class="p">):</span>
                 <span class="c1"># For ext = 2, we simply have the raise an error if we have</span>
@@ -2147,8 +2149,11 @@
             <span class="k">for</span> <span class="n">ref_level</span><span class="p">,</span> <span class="n">comps</span> <span class="ow">in</span> <span class="n">components</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
         <span class="p">}</span>
 
-        <span class="c1"># Check if the refinement factor is a constant integer</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">are_ref_factors_integral</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_check_ref_factors</span><span class="p">()</span>
+        <span class="c1"># Map between coordinates and which component to use when computing</span>
+        <span class="c1"># values. self._component_mapping is a function that takes a point and</span>
+        <span class="c1"># returns the associated component. The reason this is an attribute is</span>
+        <span class="c1"># to save it and avoid re-computing the mapping all the time</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_component_mapping</span> <span class="o">=</span> <span class="kc">None</span>
 
     <span class="k">def</span> <span class="nf">_check_ref_factors</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Check if all the grids have dx that is an integer multiple of dx_finest.</span>
@@ -2217,9 +2222,153 @@
         <span class="c1"># All integers and constant</span>
         <span class="k">return</span> <span class="kc">True</span>
 
+    <span class="k">def</span> <span class="nf">_compute_component_mapping</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Scan the grid structure and prepare a map between points and components.</span>
+
+<span class="sd">        :returns: Function that maps a point to the UniformGridData at highest</span>
+<span class="sd">                  resolution that contains that point.</span>
+<span class="sd">        :rtype: callable</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># If refinement factors are not nice powers, then we cannot use this</span>
+        <span class="c1"># method.</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_check_ref_factors</span><span class="p">():</span>
+            <span class="k">return</span> <span class="kc">None</span>
+
+        <span class="c1"># NOTE: (GB) This algorithm is from PostCactus (in</span>
+        <span class="c1"># grid_data.BrickCoords). I don&#39;t understand it, but it works. All the</span>
+        <span class="c1"># comments are mine, and maybe they don&#39;t make any sense.</span>
+
+        <span class="c1"># We can do this operation only if the various grids have dx that is all</span>
+        <span class="c1"># multiple of dx_finest. This is checked by_check_ref_factors.</span>
+        <span class="c1">#</span>
+        <span class="c1"># First, we define a dx that is half a minimum cell and we are going to</span>
+        <span class="c1"># use the lowest component number among the highest refinement level as</span>
+        <span class="c1"># our &quot;coordinate system&quot;. We call this new coordinate system the</span>
+        <span class="c1"># &quot;tilde&quot; coordinate system. In the tilde coordinate system, the all the</span>
+        <span class="c1"># cells have integer coordinate.</span>
+
+        <span class="c1"># Create local copies of some variables, so that we don&#39;t have to</span>
+        <span class="c1"># compute them multiple times. We also sort in the opposite order, with</span>
+        <span class="c1"># highest resolution first</span>
+        <span class="n">all_components</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">all_components</span><span class="p">,</span>
+            <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">comp</span><span class="p">:</span> <span class="p">(</span><span class="o">-</span><span class="n">comp</span><span class="o">.</span><span class="n">ref_level</span><span class="p">,</span> <span class="o">-</span><span class="n">comp</span><span class="o">.</span><span class="n">component</span><span class="p">),</span>
+        <span class="p">)</span>
+
+        <span class="n">half_dx_finest</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">finest_dx</span> <span class="o">/</span> <span class="mf">2.0</span>
+        <span class="n">origin</span> <span class="o">=</span> <span class="bp">self</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">num_finest_level</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">x0</span>
+
+        <span class="k">def</span> <span class="nf">to_tilde</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
+            <span class="sd">&quot;&quot;&quot;Convert a coordinate to tilde coordinate system (based on the first</span>
+<span class="sd">            finest component).</span>
+
+<span class="sd">            :param x: Coordinate.</span>
+<span class="sd">            :type x: NumPy array</span>
+<span class="sd">            :returns: Index in the coordinate system based on the first finest</span>
+<span class="sd">                      component.</span>
+<span class="sd">            :rtype: NumPy array</span>
+
+<span class="sd">            &quot;&quot;&quot;</span>
+            <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">rint</span><span class="p">((</span><span class="n">x</span> <span class="o">-</span> <span class="n">origin</span><span class="p">)</span> <span class="o">/</span> <span class="n">half_dx_finest</span><span class="p">)</span>
+
+        <span class="c1"># Now we find where all the origins of the components fall in this new</span>
+        <span class="c1"># coordinate system</span>
+        <span class="n">origins_tilde</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span>
+            <span class="p">[</span><span class="n">to_tilde</span><span class="p">(</span><span class="n">comp</span><span class="o">.</span><span class="n">grid</span><span class="o">.</span><span class="n">lowest_vertex</span><span class="p">)</span> <span class="k">for</span> <span class="n">comp</span> <span class="ow">in</span> <span class="n">all_components</span><span class="p">]</span>
+        <span class="p">)</span>
+        <span class="n">corners_tilde</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span>
+            <span class="p">[</span><span class="n">to_tilde</span><span class="p">(</span><span class="n">comp</span><span class="o">.</span><span class="n">grid</span><span class="o">.</span><span class="n">highest_vertex</span><span class="p">)</span> <span class="k">for</span> <span class="n">comp</span> <span class="ow">in</span> <span class="n">all_components</span><span class="p">]</span>
+        <span class="p">)</span>
+
+        <span class="c1"># origins and corners tilde are NumPy arrays with N D-dimensional</span>
+        <span class="c1"># elements. N is the number of components, D is the dimensionality of</span>
+        <span class="c1"># the grid.</span>
+
+        <span class="c1"># Next, we group together all the origins and consider only the unique</span>
+        <span class="c1"># points along each direction. unique_origins_tilde</span>
+        <span class="c1"># (unique_corners_tilde) is a D-dimensional list</span>
+        <span class="n">unique_origins_tilde</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="nb">set</span><span class="p">(</span><span class="n">orig</span><span class="p">)</span> <span class="k">for</span> <span class="n">orig</span> <span class="ow">in</span> <span class="n">np</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="n">origins_tilde</span><span class="p">)</span>
+        <span class="p">]</span>
+        <span class="n">unique_corners_tilde</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="nb">set</span><span class="p">(</span><span class="n">corn</span><span class="p">)</span> <span class="k">for</span> <span class="n">corn</span> <span class="ow">in</span> <span class="n">np</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="n">corners_tilde</span><span class="p">)</span>
+        <span class="p">]</span>
+
+        <span class="c1"># Now we collect all the boundaries (origins and corners)</span>
+        <span class="n">boundaries_tilde</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="nb">sorted</span><span class="p">(</span><span class="n">orig</span><span class="o">.</span><span class="n">union</span><span class="p">(</span><span class="n">corn</span><span class="p">))</span>
+            <span class="k">for</span> <span class="n">orig</span><span class="p">,</span> <span class="n">corn</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">unique_origins_tilde</span><span class="p">,</span> <span class="n">unique_corners_tilde</span><span class="p">)</span>
+        <span class="p">]</span>
+
+        <span class="k">def</span> <span class="nf">x_tilde_to_component</span><span class="p">(</span><span class="n">x_tilde</span><span class="p">):</span>
+            <span class="sd">&quot;&quot;&quot;Given a point in the tilde coordinates, return the indices of</span>
+<span class="sd">            boundaries_tilde that contain that point</span>
+
+<span class="sd">            :returns: Multi-index (one index for each direction) that identifies</span>
+<span class="sd">                      the block in ``boundaries_tilde`` that contains the</span>
+<span class="sd">                      point.</span>
+<span class="sd">            :rtype: tuple</span>
+<span class="sd">            &quot;&quot;&quot;</span>
+            <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span>
+                <span class="n">bisect_right</span><span class="p">(</span><span class="n">boundary_dim</span><span class="p">,</span> <span class="n">x_tilde_dim</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span>
+                <span class="k">for</span> <span class="n">boundary_dim</span><span class="p">,</span> <span class="n">x_tilde_dim</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">boundaries_tilde</span><span class="p">,</span> <span class="n">x_tilde</span><span class="p">)</span>
+            <span class="p">)</span>
+
+        <span class="c1"># Now we go back and find where all the origins and corners are</span>
+        <span class="n">boundary_origins_tilde</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="n">x_tilde_to_component</span><span class="p">(</span><span class="n">orig</span><span class="p">)</span> <span class="k">for</span> <span class="n">orig</span> <span class="ow">in</span> <span class="n">origins_tilde</span>
+        <span class="p">]</span>
+        <span class="n">boundary_corners_tilde</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="n">x_tilde_to_component</span><span class="p">(</span><span class="n">corn</span><span class="p">)</span> <span class="k">for</span> <span class="n">corn</span> <span class="ow">in</span> <span class="n">corners_tilde</span>
+        <span class="p">]</span>
+
+        <span class="c1"># And the last step is to find what is the finest refinement level</span>
+        <span class="c1"># available on each block</span>
+
+        <span class="n">finest_map</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span>
+            <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">boundaries_tilde</span><span class="p">]),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">int32</span>
+        <span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">component_index</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">boundary_origins_tilde</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">):</span>
+            <span class="n">slicer</span> <span class="o">=</span> <span class="p">[</span>
+                <span class="nb">slice</span><span class="p">(</span><span class="n">orig</span><span class="p">,</span> <span class="n">corn</span><span class="p">)</span>
+                <span class="k">for</span> <span class="n">orig</span><span class="p">,</span> <span class="n">corn</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span>
+                    <span class="n">boundary_origins_tilde</span><span class="p">[</span><span class="n">component_index</span><span class="p">],</span>
+                    <span class="n">boundary_corners_tilde</span><span class="p">[</span><span class="n">component_index</span><span class="p">],</span>
+                <span class="p">)</span>
+            <span class="p">]</span>
+            <span class="n">finest_map</span><span class="p">[</span><span class="nb">tuple</span><span class="p">(</span><span class="n">slicer</span><span class="p">)]</span> <span class="o">=</span> <span class="n">component_index</span>
+
+        <span class="k">def</span> <span class="nf">get_component</span><span class="p">(</span><span class="n">coordinate</span><span class="p">):</span>
+            <span class="sd">&quot;&quot;&quot;Map a coordinate to the component that contains it.&quot;&quot;&quot;</span>
+            <span class="n">x_tilde</span> <span class="o">=</span> <span class="n">to_tilde</span><span class="p">(</span><span class="n">coordinate</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="nb">any</span><span class="p">(</span>
+                <span class="p">[</span>
+                    <span class="p">(</span>
+                        <span class="p">(</span><span class="n">point_dim</span> <span class="o">&lt;</span> <span class="n">border_dim</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+                        <span class="ow">or</span> <span class="p">(</span><span class="n">point_dim</span> <span class="o">&gt;=</span> <span class="n">border_dim</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+                    <span class="p">)</span>
+                    <span class="k">for</span> <span class="n">point_dim</span><span class="p">,</span> <span class="n">border_dim</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">x_tilde</span><span class="p">,</span> <span class="n">boundaries_tilde</span><span class="p">)</span>
+                <span class="p">]</span>
+            <span class="p">):</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">coordinate</span><span class="si">}</span><span class="s2"> outside the grid&quot;</span><span class="p">)</span>
+
+            <span class="c1"># The list comprehension is over the various dimensions</span>
+            <span class="n">component_index</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span>
+                <span class="n">bisect_right</span><span class="p">(</span><span class="n">boundary_dim</span><span class="p">,</span> <span class="n">x_tilde_dim</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span>
+                <span class="k">for</span> <span class="n">boundary_dim</span><span class="p">,</span> <span class="n">x_tilde_dim</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">boundaries_tilde</span><span class="p">,</span> <span class="n">x_tilde</span><span class="p">)</span>
+            <span class="p">)</span>
+
+            <span class="k">return</span> <span class="n">all_components</span><span class="p">[</span><span class="n">finest_map</span><span class="p">[</span><span class="n">component_index</span><span class="p">]]</span>
+
+        <span class="k">return</span> <span class="n">get_component</span>
+
     <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">_fill_grid_with_components</span><span class="p">(</span><span class="n">grid</span><span class="p">,</span> <span class="n">components</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Given a grid, try to fill it with the components, returning a</span>
+        <span class="sd">&quot;&quot;&quot;Given a grid, try to fill it with the components, return eturning a</span>
 <span class="sd">        :py:class:`~.UniformGridData` and the indices that actually were used in</span>
 <span class="sd">        filling the grid.</span>
 
@@ -2606,47 +2755,79 @@
 
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">all_components</span> <span class="o">==</span> <span class="n">other</span><span class="o">.</span><span class="n">all_components</span>
 
-    <span class="k">def</span> <span class="nf">_finest_level_component_at_point_core</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">coordinate</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Return the number and the component index of the most refined level that</span>
-<span class="sd">        contains the given coordinate assuming a valid input coordinate.</span>
+    <span class="k">def</span> <span class="nf">_finest_component_at_point_mapping</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">coordinate</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Return the component of the most refined level that contains the given</span>
+<span class="sd">        coordinate assuming a valid input coordinate using the component mapping.</span>
+
+<span class="sd">        This routine works only with grids in which the spacings are</span>
+<span class="sd">        commensurable.</span>
 
 <span class="sd">        :param coordinate: Point.</span>
 <span class="sd">        :type coordinate: tuple or NumPy array with the same dimension</span>
 
-<span class="sd">        :returns: Most refined level (and component) that contains the</span>
-<span class="sd">        coordinate.</span>
-<span class="sd">        :rtype: tuple of ints</span>
+<span class="sd">        :returns: Component with highest resolution at point</span>
+<span class="sd">        :rtype: :py:class:`~.UniformGridData`</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_component_mapping</span><span class="p">(</span><span class="n">coordinate</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_finest_component_at_point_general</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">coordinate</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Return the component of the most refined level that contains the given</span>
+<span class="sd">        coordinate assuming a valid input coordinate.</span>
+
+<span class="sd">        This routine works with all the grids.</span>
+
+<span class="sd">        :param coordinate: Point.</span>
+<span class="sd">        :type coordinate: tuple or NumPy array with the same dimension</span>
+
+<span class="sd">        :returns: Component with highest resolution at point</span>
+<span class="sd">        :rtype: :py:class:`~.UniformGridData`</span>
+
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1"># We walk from the finest level to the coarsest. If we find the point,</span>
         <span class="c1"># re return it. If we find nothing, we raise error.</span>
         <span class="k">for</span> <span class="n">ref_level</span><span class="p">,</span> <span class="n">comp</span><span class="p">,</span> <span class="n">grid_data</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">iter_from_finest</span><span class="p">():</span>
             <span class="k">if</span> <span class="n">coordinate</span> <span class="ow">in</span> <span class="n">grid_data</span><span class="o">.</span><span class="n">grid</span><span class="p">:</span>
-                <span class="k">return</span> <span class="n">ref_level</span><span class="p">,</span> <span class="n">comp</span>
+                <span class="k">return</span> <span class="bp">self</span><span class="p">[</span><span class="n">ref_level</span><span class="p">][</span><span class="n">comp</span><span class="p">]</span>
 
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">coordinate</span><span class="si">}</span><span class="s2"> outside the grid&quot;</span><span class="p">)</span>
 
-<div class="viewcode-block" id="HierarchicalGridData.finest_level_component_at_point"><a class="viewcode-back" href="../../grid_data_ref.html#kuibit.grid_data.HierarchicalGridData.finest_level_component_at_point">[docs]</a>    <span class="k">def</span> <span class="nf">finest_level_component_at_point</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">coordinate</span><span class="p">):</span>
+<div class="viewcode-block" id="HierarchicalGridData.finest_component_at_point"><a class="viewcode-back" href="../../grid_data_ref.html#kuibit.grid_data.HierarchicalGridData.finest_component_at_point">[docs]</a>    <span class="k">def</span> <span class="nf">finest_component_at_point</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">coordinate</span><span class="p">,</span> <span class="n">no_checks</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Return the number and the component index of the most</span>
 <span class="sd">        refined level that contains the given coordinate.</span>
 
 <span class="sd">        :param coordinate: Point.</span>
 <span class="sd">        :type coordinate: tuple or NumPy array with the same dimension</span>
+<span class="sd">        :param no_checks: Do not perform sanity checks on the input (for</span>
+<span class="sd">                          speed).</span>
+<span class="sd">        :type no_checks: bool</span>
 
-<span class="sd">        :returns: Most refined level (and component) that contains the</span>
-<span class="sd">                  coordinate.</span>
-<span class="sd">        :rtype: tuple of ints</span>
-
+<span class="sd">        :returns: Component with highest resolution at point</span>
+<span class="sd">        :rtype: :py:class:`~.UniformGridData`</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">coordinate</span><span class="p">,</span> <span class="s2">&quot;__len__&quot;</span><span class="p">):</span>
-            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">coordinate</span><span class="si">}</span><span class="s2"> is not a valid point&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">no_checks</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">coordinate</span><span class="p">,</span> <span class="s2">&quot;__len__&quot;</span><span class="p">):</span>
+                <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">coordinate</span><span class="si">}</span><span class="s2"> is not a valid point&quot;</span><span class="p">)</span>
 
-        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">coordinate</span><span class="p">)</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">num_dimensions</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-                <span class="sa">f</span><span class="s2">&quot;The input point has dimension </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">coordinate</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span>
-                <span class="sa">f</span><span class="s2">&quot; but the data has dimension </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">num_dimensions</span><span class="si">}</span><span class="s2">&quot;</span>
-            <span class="p">)</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">coordinate</span><span class="p">)</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">num_dimensions</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s2">&quot;The input point has dimension </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">coordinate</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span>
+                    <span class="sa">f</span><span class="s2">&quot; but the data has dimension </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">num_dimensions</span><span class="si">}</span><span class="s2">&quot;</span>
+                <span class="p">)</span>
 
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_finest_level_component_at_point_core</span><span class="p">(</span><span class="n">coordinate</span><span class="p">)</span></div>
+        <span class="c1"># If we don&#39;t have self._component_mapping, we should try to compute it.</span>
+        <span class="c1"># If we get back None, it means that it cannot be computed for this</span>
+        <span class="c1"># grid. Here it is the perfectly place where to use the walrus operator.</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_component_mapping</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_component_mapping</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_compute_component_mapping</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_component_mapping</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">finder</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_finest_component_at_point_mapping</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">finder</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_finest_component_at_point_general</span>
+
+        <span class="c1"># finder is the function that returns the component given the coordinate</span>
+        <span class="k">return</span> <span class="n">finder</span><span class="p">(</span><span class="n">coordinate</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="HierarchicalGridData.evaluate_with_spline"><a class="viewcode-back" href="../../grid_data_ref.html#kuibit.grid_data.HierarchicalGridData.evaluate_with_spline">[docs]</a>    <span class="k">def</span> <span class="nf">evaluate_with_spline</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">ext</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">piecewise_constant</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Evaluate the spline on the points ``x``.</span>
@@ -2686,6 +2867,9 @@
         <span class="c1"># NOTE: The following algorithm is not the fastest but it doesn&#39;t matter</span>
         <span class="c1">#       too much because UniformGridData.evaluate_with_spline dominates</span>
         <span class="c1">#       the execution time.</span>
+        <span class="c1">#</span>
+        <span class="c1">#       Note also that is it tested by testing finest_component_at_point</span>
+        <span class="c1">#       (and not directly)</span>
 
         <span class="c1"># Next, we organize points depending on the component/refinement level</span>
         <span class="c1"># they belong.</span>
@@ -2695,17 +2879,26 @@
         <span class="c1"># with the index of the points in points_arr. We need the indices because</span>
         <span class="c1"># we need to put back the values where they were, since we are going to</span>
         <span class="c1"># take bit and pieces of the array.</span>
+        <span class="c1">#</span>
+        <span class="c1"># Then, we have another mapping level_comps_data that has as keys the</span>
+        <span class="c1"># same keys as level_comps, but values the actual component</span>
+        <span class="c1"># (UniformGridData) that has to be used for the calculation</span>
         <span class="n">level_comps</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">level_comps_data</span> <span class="o">=</span> <span class="p">{}</span>
         <span class="k">for</span> <span class="n">index</span><span class="p">,</span> <span class="n">point</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">points_arr</span><span class="p">):</span>
-            <span class="n">ref_level</span><span class="p">,</span> <span class="n">comp</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_finest_level_component_at_point_core</span><span class="p">(</span><span class="n">point</span><span class="p">)</span>
+            <span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">finest_component_at_point</span><span class="p">(</span><span class="n">point</span><span class="p">,</span> <span class="n">no_checks</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+            <span class="n">ref_level</span><span class="p">,</span> <span class="n">comp</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">ref_level</span><span class="p">,</span> <span class="n">data</span><span class="o">.</span><span class="n">component</span>
             <span class="n">level_comps</span><span class="o">.</span><span class="n">setdefault</span><span class="p">((</span><span class="n">ref_level</span><span class="p">,</span> <span class="n">comp</span><span class="p">),</span> <span class="p">[])</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">index</span><span class="p">)</span>
+            <span class="n">level_comps_data</span><span class="o">.</span><span class="n">setdefault</span><span class="p">((</span><span class="n">ref_level</span><span class="p">,</span> <span class="n">comp</span><span class="p">),</span> <span class="n">data</span><span class="p">)</span>
 
         <span class="c1"># Now, we can evaluate the points using the methods of UniformGridData.</span>
         <span class="c1"># We collect all results in a new array that is initially full of zeros</span>
         <span class="n">ret</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">points_arr</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">dtype</span><span class="p">)</span>
         <span class="k">for</span> <span class="p">(</span><span class="n">ref_level</span><span class="p">,</span> <span class="n">comp</span><span class="p">),</span> <span class="n">points_indices</span> <span class="ow">in</span> <span class="n">level_comps</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
             <span class="n">points</span> <span class="o">=</span> <span class="n">points_arr</span><span class="p">[</span><span class="n">level_comps</span><span class="p">[</span><span class="n">ref_level</span><span class="p">,</span> <span class="n">comp</span><span class="p">]]</span>
-            <span class="n">evaluated_points</span> <span class="o">=</span> <span class="bp">self</span><span class="p">[</span><span class="n">ref_level</span><span class="p">][</span><span class="n">comp</span><span class="p">]</span><span class="o">.</span><span class="n">evaluate_with_spline</span><span class="p">(</span>
+            <span class="n">evaluated_points</span> <span class="o">=</span> <span class="n">level_comps_data</span><span class="p">[</span>
+                <span class="p">(</span><span class="n">ref_level</span><span class="p">,</span> <span class="n">comp</span><span class="p">)</span>
+            <span class="p">]</span><span class="o">.</span><span class="n">evaluate_with_spline</span><span class="p">(</span>
                 <span class="n">points</span><span class="p">,</span> <span class="n">ext</span><span class="o">=</span><span class="n">ext</span><span class="p">,</span> <span class="n">piecewise_constant</span><span class="o">=</span><span class="n">piecewise_constant</span>
             <span class="p">)</span>
             <span class="n">ret</span><span class="p">[</span><span class="n">points_indices</span><span class="p">]</span> <span class="o">=</span> <span class="n">evaluated_points</span>
@@ -2821,7 +3014,8 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">ret</span> <span class="o">=</span> <span class="n">f</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">grid_data_dict</span> <span class="o">=</span> <span class="n">ret</span><span class="o">.</span><span class="n">grid_data_dict</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">are_ref_factors_integral</span> <span class="o">=</span> <span class="n">ret</span><span class="o">.</span><span class="n">are_ref_factors_integral</span>
+        <span class="c1"># We need to invalidate the _component_mapping (it may have changed)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_component_mapping</span> <span class="o">=</span> <span class="kc">None</span>
 
     <span class="k">def</span> <span class="nf">_apply_binary</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">,</span> <span class="n">function</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Apply a binary function to the data of ``self`` and ``other``.</span>
@@ -2835,10 +3029,10 @@
 <span class="sd">        :rtype: :py:class:`~.HierarchicalGridData`</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="c1"># We only know what how to h</span>
+        <span class="c1"># We only know what how to combine HierarhicalGridData</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)):</span>
-            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">refinement_levels</span> <span class="o">!=</span> <span class="n">other</span><span class="o">.</span><span class="n">refinement_levels</span><span class="p">:</span>
-                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Refinement levels incompatible&quot;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">shape</span> <span class="o">!=</span> <span class="n">other</span><span class="o">.</span><span class="n">shape</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Grid structure incompatible&quot;</span><span class="p">)</span>
             <span class="n">new_data</span> <span class="o">=</span> <span class="p">[</span>
                 <span class="n">function</span><span class="p">(</span><span class="n">data_self</span><span class="p">,</span> <span class="n">data_other</span><span class="p">)</span>
                 <span class="k">for</span> <span class="n">data_self</span><span class="p">,</span> <span class="n">data_other</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span>
