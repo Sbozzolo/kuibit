@@ -656,8 +656,9 @@ class TestUniformGridData(unittest.TestCase):
         # treated differently
         grid_file_npz_ti = "test_save_grid_ti.dat.npz"
 
-        grid_data_ti = gdu.sample_function(square, [100, 200], [0, 1], [1, 2],
-                                           time=1, iteration=2)
+        grid_data_ti = gdu.sample_function(
+            square, [100, 200], [0, 1], [1, 2], time=1, iteration=2
+        )
 
         grid_data_ti.save(grid_file_npz_ti)
         loaded_npz_ti = gdu.load_UniformGridData(grid_file_npz_ti)
@@ -666,7 +667,6 @@ class TestUniformGridData(unittest.TestCase):
 
         # Clean up file
         os.remove(grid_file_npz_ti)
-
 
     def test_splines(self):
 
@@ -1503,7 +1503,9 @@ class TestHierarchicalGridData(unittest.TestCase):
         self.assertEqual(np.amax(np.abs(zero2[0][0].data)), 0)
         self.assertEqual(np.amax(np.abs(zero2[0][1].data)), 0)
 
-    def test_finest_level_component_at_point(self):
+    def test_finest_component_at_point(self):
+
+        # Using the component mapping
 
         hg = gd.HierarchicalGridData(
             self.grid_data + [self.expected_data_level2]
@@ -1511,29 +1513,54 @@ class TestHierarchicalGridData(unittest.TestCase):
 
         # Input is not a valid point
         with self.assertRaises(TypeError):
-            hg.finest_level_component_at_point(0)
+            hg.finest_component_at_point(0)
 
         # Dimensionality mismatch
         with self.assertRaises(ValueError):
-            hg.finest_level_component_at_point([0])
+            hg.finest_component_at_point([0])
 
         # Point outside the grid
         with self.assertRaises(ValueError):
-            hg.finest_level_component_at_point([1000, 200])
+            hg.finest_component_at_point([1000, 200])
 
-        self.assertEqual(hg.finest_level_component_at_point([3, 4]), (2, 0))
+        self.assertEqual(hg.finest_component_at_point([3, 4]), hg[2][0])
 
         # Test with multiple components
         hg3 = gd.HierarchicalGridData(self.grid_data_two_comp)
-        self.assertCountEqual(
-            hg3.finest_level_component_at_point([3, 4]), (0, 0)
-        )
+        self.assertEqual(hg3.finest_component_at_point([3, 4]), hg3[0][0])
         # Test on edge of the two components
-        self.assertCountEqual(
-            hg3.finest_level_component_at_point([3, 5]), (0, 0)
+        self.assertEqual(hg3.finest_component_at_point([3, 5]), hg3[0][0])
+        self.assertEqual(hg3.finest_component_at_point([4, 6]), hg3[0][1])
+
+        # Using the general method. The general method kicks in when the
+        # refinement levels do not have integral refinement factors
+        data = gdu.sample_function(
+            lambda x, y: x * (x + y),
+            shape=[15, 20],
+            x0=[0.5, 1.5],
+            x1=[2.5, 4.5],
+            ref_level=1,
         )
-        self.assertCountEqual(
-            hg3.finest_level_component_at_point([4, 6]), (0, 1)
+
+        hg_general = gd.HierarchicalGridData(self.grid_data_two_comp + [data])
+
+        # Input is not a valid point
+        with self.assertRaises(TypeError):
+            hg_general.finest_component_at_point(0)
+
+        # Dimensionality mismatch
+        with self.assertRaises(ValueError):
+            hg_general.finest_component_at_point([0])
+
+        # Point outside the grid
+        with self.assertRaises(ValueError):
+            hg_general.finest_component_at_point([1000, 200])
+
+        self.assertEqual(
+            hg_general.finest_component_at_point([2, 4]), hg_general[1][0]
+        )
+        self.assertEqual(
+            hg_general.finest_component_at_point([3, 4]), hg_general[0][0]
         )
 
     def test_call_evalute_with_spline(self):

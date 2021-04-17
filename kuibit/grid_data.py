@@ -35,6 +35,7 @@ Similarly, a :py:class:`~.HierarchicalGridData` contains multiple
 :py:class:`~.UniformGridData`.
 
 """
+from bisect import bisect_right
 from os.path import splitext
 
 import numpy as np
@@ -503,9 +504,9 @@ class UniformGrid:
 
         # However, this happens to be not the fastest. This method is called a
         # huge number of times when in HierarchicalGridData methods, because it
-        # is the main method to find which grid contains a given point.
-        # (method finest_level_component_at_point). So, it is better to have
-        # a less pythonic method that fails as soon as possible.
+        # is the main method to find which grid contains a given point. (method
+        # finest_component_at_point). So, it is better to have a less pythonic
+        # method that fails as soon as possible.
         for dim in range(self.num_dimensions):
             if not (
                 self.lowest_vertex[dim]
@@ -2102,8 +2103,11 @@ class HierarchicalGridData(BaseNumerical):
             for ref_level, comps in components.items()
         }
 
-        # Check if the refinement factor is a constant integer
-        self.are_ref_factors_integral = self._check_ref_factors()
+        # Map between coordinates and which component to use when computing
+        # values. self._component_mapping is a function that takes a point and
+        # returns the associated component. The reason this is an attribute is
+        # to save it and avoid re-computing the mapping all the time
+        self._component_mapping = None
 
     def _check_ref_factors(self):
         """Check if all the grids have dx that is an integer multiple of dx_finest.
@@ -2172,9 +2176,153 @@ class HierarchicalGridData(BaseNumerical):
         # All integers and constant
         return True
 
+    def _compute_component_mapping(self):
+        """Scan the grid structure and prepare a map between points and components.
+
+        :returns: Function that maps a point to the UniformGridData at highest
+                  resolution that contains that point.
+        :rtype: callable
+
+        """
+
+        # If refinement factors are not nice powers, then we cannot use this
+        # method.
+        if not self._check_ref_factors():
+            return None
+
+        # NOTE: (GB) This algorithm is from PostCactus (in
+        # grid_data.BrickCoords). I don't understand it, but it works. All the
+        # comments are mine, and maybe they don't make any sense.
+
+        # We can do this operation only if the various grids have dx that is all
+        # multiple of dx_finest. This is checked by_check_ref_factors.
+        #
+        # First, we define a dx that is half a minimum cell and we are going to
+        # use the lowest component number among the highest refinement level as
+        # our "coordinate system". We call this new coordinate system the
+        # "tilde" coordinate system. In the tilde coordinate system, the all the
+        # cells have integer coordinate.
+
+        # Create local copies of some variables, so that we don't have to
+        # compute them multiple times. We also sort in the opposite order, with
+        # highest resolution first
+        all_components = sorted(
+            self.all_components,
+            key=lambda comp: (-comp.ref_level, -comp.component),
+        )
+
+        half_dx_finest = self.finest_dx / 2.0
+        origin = self[self.num_finest_level][0].x0
+
+        def to_tilde(x):
+            """Convert a coordinate to tilde coordinate system (based on the first
+            finest component).
+
+            :param x: Coordinate.
+            :type x: NumPy array
+            :returns: Index in the coordinate system based on the first finest
+                      component.
+            :rtype: NumPy array
+
+            """
+            return np.rint((x - origin) / half_dx_finest)
+
+        # Now we find where all the origins of the components fall in this new
+        # coordinate system
+        origins_tilde = np.array(
+            [to_tilde(comp.grid.lowest_vertex) for comp in all_components]
+        )
+        corners_tilde = np.array(
+            [to_tilde(comp.grid.highest_vertex) for comp in all_components]
+        )
+
+        # origins and corners tilde are NumPy arrays with N D-dimensional
+        # elements. N is the number of components, D is the dimensionality of
+        # the grid.
+
+        # Next, we group together all the origins and consider only the unique
+        # points along each direction. unique_origins_tilde
+        # (unique_corners_tilde) is a D-dimensional list
+        unique_origins_tilde = [
+            set(orig) for orig in np.transpose(origins_tilde)
+        ]
+        unique_corners_tilde = [
+            set(corn) for corn in np.transpose(corners_tilde)
+        ]
+
+        # Now we collect all the boundaries (origins and corners)
+        boundaries_tilde = [
+            sorted(orig.union(corn))
+            for orig, corn in zip(unique_origins_tilde, unique_corners_tilde)
+        ]
+
+        def x_tilde_to_component(x_tilde):
+            """Given a point in the tilde coordinates, return the indices of
+            boundaries_tilde that contain that point
+
+            :returns: Multi-index (one index for each direction) that identifies
+                      the block in ``boundaries_tilde`` that contains the
+                      point.
+            :rtype: tuple
+            """
+            return tuple(
+                bisect_right(boundary_dim, x_tilde_dim) - 1
+                for boundary_dim, x_tilde_dim in zip(boundaries_tilde, x_tilde)
+            )
+
+        # Now we go back and find where all the origins and corners are
+        boundary_origins_tilde = [
+            x_tilde_to_component(orig) for orig in origins_tilde
+        ]
+        boundary_corners_tilde = [
+            x_tilde_to_component(corn) for corn in corners_tilde
+        ]
+
+        # And the last step is to find what is the finest refinement level
+        # available on each block
+
+        finest_map = np.zeros(
+            np.array([len(x) - 1 for x in boundaries_tilde]), dtype=np.int32
+        )
+
+        for component_index in range(len(boundary_origins_tilde) - 1, -1, -1):
+            slicer = [
+                slice(orig, corn)
+                for orig, corn in zip(
+                    boundary_origins_tilde[component_index],
+                    boundary_corners_tilde[component_index],
+                )
+            ]
+            finest_map[tuple(slicer)] = component_index
+
+        def get_component(coordinate):
+            """Map a coordinate to the component that contains it."""
+            x_tilde = to_tilde(coordinate)
+
+            if any(
+                [
+                    (
+                        (point_dim < border_dim[0])
+                        or (point_dim >= border_dim[-1])
+                    )
+                    for point_dim, border_dim in zip(x_tilde, boundaries_tilde)
+                ]
+            ):
+                raise ValueError(f"{coordinate} outside the grid")
+
+            # The list comprehension is over the various dimensions
+            component_index = tuple(
+                bisect_right(boundary_dim, x_tilde_dim) - 1
+                for boundary_dim, x_tilde_dim in zip(boundaries_tilde, x_tilde)
+            )
+
+            return all_components[finest_map[component_index]]
+
+        return get_component
+
     @staticmethod
     def _fill_grid_with_components(grid, components):
-        """Given a grid, try to fill it with the components, returning a
+        """Given a grid, try to fill it with the components, return eturning a
         :py:class:`~.UniformGridData` and the indices that actually were used in
         filling the grid.
 
@@ -2561,47 +2709,79 @@ class HierarchicalGridData(BaseNumerical):
 
         return self.all_components == other.all_components
 
-    def _finest_level_component_at_point_core(self, coordinate):
-        """Return the number and the component index of the most refined level that
-        contains the given coordinate assuming a valid input coordinate.
+    def _finest_component_at_point_mapping(self, coordinate):
+        """Return the component of the most refined level that contains the given
+        coordinate assuming a valid input coordinate using the component mapping.
+
+        This routine works only with grids in which the spacings are
+        commensurable.
 
         :param coordinate: Point.
         :type coordinate: tuple or NumPy array with the same dimension
 
-        :returns: Most refined level (and component) that contains the
-        coordinate.
-        :rtype: tuple of ints
+        :returns: Component with highest resolution at point
+        :rtype: :py:class:`~.UniformGridData`
+
+        """
+        return self._component_mapping(coordinate)
+
+    def _finest_component_at_point_general(self, coordinate):
+        """Return the component of the most refined level that contains the given
+        coordinate assuming a valid input coordinate.
+
+        This routine works with all the grids.
+
+        :param coordinate: Point.
+        :type coordinate: tuple or NumPy array with the same dimension
+
+        :returns: Component with highest resolution at point
+        :rtype: :py:class:`~.UniformGridData`
+
         """
         # We walk from the finest level to the coarsest. If we find the point,
         # re return it. If we find nothing, we raise error.
         for ref_level, comp, grid_data in self.iter_from_finest():
             if coordinate in grid_data.grid:
-                return ref_level, comp
+                return self[ref_level][comp]
 
         raise ValueError(f"{coordinate} outside the grid")
 
-    def finest_level_component_at_point(self, coordinate):
+    def finest_component_at_point(self, coordinate, no_checks=False):
         """Return the number and the component index of the most
         refined level that contains the given coordinate.
 
         :param coordinate: Point.
         :type coordinate: tuple or NumPy array with the same dimension
+        :param no_checks: Do not perform sanity checks on the input (for
+                          speed).
+        :type no_checks: bool
 
-        :returns: Most refined level (and component) that contains the
-                  coordinate.
-        :rtype: tuple of ints
-
+        :returns: Component with highest resolution at point
+        :rtype: :py:class:`~.UniformGridData`
         """
-        if not hasattr(coordinate, "__len__"):
-            raise TypeError(f"{coordinate} is not a valid point")
+        if not no_checks:
+            if not hasattr(coordinate, "__len__"):
+                raise TypeError(f"{coordinate} is not a valid point")
 
-        if len(coordinate) != self.num_dimensions:
-            raise ValueError(
-                f"The input point has dimension {len(coordinate)}"
-                f" but the data has dimension {self.num_dimensions}"
-            )
+            if len(coordinate) != self.num_dimensions:
+                raise ValueError(
+                    f"The input point has dimension {len(coordinate)}"
+                    f" but the data has dimension {self.num_dimensions}"
+                )
 
-        return self._finest_level_component_at_point_core(coordinate)
+        # If we don't have self._component_mapping, we should try to compute it.
+        # If we get back None, it means that it cannot be computed for this
+        # grid. Here it is the perfectly place where to use the walrus operator.
+        if self._component_mapping is None:
+            self._component_mapping = self._compute_component_mapping()
+
+        if self._component_mapping is not None:
+            finder = self._finest_component_at_point_mapping
+        else:
+            finder = self._finest_component_at_point_general
+
+        # finder is the function that returns the component given the coordinate
+        return finder(coordinate)
 
     def evaluate_with_spline(self, x, ext=2, piecewise_constant=False):
         """Evaluate the spline on the points ``x``.
@@ -2641,6 +2821,9 @@ class HierarchicalGridData(BaseNumerical):
         # NOTE: The following algorithm is not the fastest but it doesn't matter
         #       too much because UniformGridData.evaluate_with_spline dominates
         #       the execution time.
+        #
+        #       Note also that is it tested by testing finest_component_at_point
+        #       (and not directly)
 
         # Next, we organize points depending on the component/refinement level
         # they belong.
@@ -2650,17 +2833,26 @@ class HierarchicalGridData(BaseNumerical):
         # with the index of the points in points_arr. We need the indices because
         # we need to put back the values where they were, since we are going to
         # take bit and pieces of the array.
+        #
+        # Then, we have another mapping level_comps_data that has as keys the
+        # same keys as level_comps, but values the actual component
+        # (UniformGridData) that has to be used for the calculation
         level_comps = {}
+        level_comps_data = {}
         for index, point in enumerate(points_arr):
-            ref_level, comp = self._finest_level_component_at_point_core(point)
+            data = self.finest_component_at_point(point, no_checks=True)
+            ref_level, comp = data.ref_level, data.component
             level_comps.setdefault((ref_level, comp), []).append(index)
+            level_comps_data.setdefault((ref_level, comp), data)
 
         # Now, we can evaluate the points using the methods of UniformGridData.
         # We collect all results in a new array that is initially full of zeros
         ret = np.zeros(len(points_arr), dtype=self.dtype)
         for (ref_level, comp), points_indices in level_comps.items():
             points = points_arr[level_comps[ref_level, comp]]
-            evaluated_points = self[ref_level][comp].evaluate_with_spline(
+            evaluated_points = level_comps_data[
+                (ref_level, comp)
+            ].evaluate_with_spline(
                 points, ext=ext, piecewise_constant=piecewise_constant
             )
             ret[points_indices] = evaluated_points
@@ -2776,7 +2968,8 @@ class HierarchicalGridData(BaseNumerical):
         """
         ret = f(*args, **kwargs)
         self.grid_data_dict = ret.grid_data_dict
-        self.are_ref_factors_integral = ret.are_ref_factors_integral
+        # We need to invalidate the _component_mapping (it may have changed)
+        self._component_mapping = None
 
     def _apply_binary(self, other, function):
         """Apply a binary function to the data of ``self`` and ``other``.
@@ -2790,10 +2983,10 @@ class HierarchicalGridData(BaseNumerical):
         :rtype: :py:class:`~.HierarchicalGridData`
 
         """
-        # We only know what how to h
+        # We only know what how to combine HierarhicalGridData
         if isinstance(other, type(self)):
-            if self.refinement_levels != other.refinement_levels:
-                raise ValueError("Refinement levels incompatible")
+            if self.shape != other.shape:
+                raise ValueError("Grid structure incompatible")
             new_data = [
                 function(data_self, data_other)
                 for data_self, data_other in zip(
