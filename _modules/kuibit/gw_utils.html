@@ -321,14 +321,14 @@
     <span class="c1"># The Greenwich sidereal time theta_G is calculated by</span>
     <span class="c1"># the formula at https://en.wikipedia.org/wiki/Sidereal_time</span>
 
-    <span class="n">base_posix_date</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">strptime</span><span class="p">(</span>
+    <span class="n">base_date</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">strptime</span><span class="p">(</span>
         <span class="s2">&quot;2000-01-01 12:00:00&quot;</span><span class="p">,</span> <span class="s2">&quot;%Y-%m-</span><span class="si">%d</span><span class="s2"> %H:%M:%S&quot;</span>
-    <span class="p">)</span><span class="o">.</span><span class="n">timestamp</span><span class="p">()</span>
-    <span class="n">posix_date</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">strptime</span><span class="p">(</span>
+    <span class="p">)</span>
+    <span class="n">date</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">strptime</span><span class="p">(</span>
         <span class="n">time_utc</span><span class="p">,</span> <span class="s2">&quot;%Y-%m-</span><span class="si">%d</span><span class="s2"> %H:%M:%S&quot;</span>
-    <span class="p">)</span><span class="o">.</span><span class="n">timestamp</span><span class="p">()</span>
+    <span class="p">)</span>
     <span class="c1"># Days between DATE and 2000-01-01 12:00</span>
-    <span class="n">D</span> <span class="o">=</span> <span class="p">(</span><span class="n">posix_date</span> <span class="o">-</span> <span class="n">base_posix_date</span><span class="p">)</span> <span class="o">/</span> <span class="mi">86400</span>
+    <span class="n">D</span> <span class="o">=</span> <span class="p">(</span><span class="n">date</span> <span class="o">-</span> <span class="n">base_date</span><span class="p">)</span><span class="o">.</span><span class="n">total_seconds</span><span class="p">()</span> <span class="o">/</span> <span class="mi">86400</span>
     <span class="n">theta_G</span> <span class="o">=</span> <span class="mf">18.697374558</span> <span class="o">+</span> <span class="mf">24.06570982441908</span> <span class="o">*</span> <span class="n">D</span>
     <span class="c1"># theta_G mod 24h</span>
     <span class="n">theta_G</span> <span class="o">=</span> <span class="n">theta_G</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">floor</span><span class="p">(</span><span class="n">theta_G</span> <span class="o">/</span> <span class="mf">24.0</span><span class="p">)</span> <span class="o">*</span> <span class="mi">24</span>
