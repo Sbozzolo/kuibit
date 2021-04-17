@@ -105,8 +105,6 @@ Usage
 Tutorials
 ---------
 
-You can additional examples in the folder ``example_bins``.
-
 .. toctree::
    :maxdepth: 1
 
@@ -117,7 +115,16 @@ You can additional examples in the folder ``example_bins``.
    tutorials/cactus_horizons.ipynb
    tutorials/gravitational_waves.ipynb
 
-In addition to these tutorials, you can find real world examples in the
+Examples
+---------
+
+.. toctree::
+   :maxdepth: 1
+
+   examples/save_resampled_grid_data.rst
+
+
+In addition to these examples, you can find other real world examples in the
 `examples <https://github.com/Sbozzolo/kuibit/tree/experimental/examples>`_
 folder of the ``experimental`` branch. See the section `Experimental branch and
 examples
