@@ -20,7 +20,7 @@ Einstein Toolkit (or any Cactus-based code).
 
 """
 
-__version__ = "1.0.0"
+__version__ = "1.1.0"
 
 __bibtex__ = """\
 @article{kuibit,
@@ -34,7 +34,6 @@ __bibtex__ = """\
   author = {Gabriele Bozzola},
   title = {kuibit: Analyzing Einstein Toolkit simulations with Python},
   journal = {Journal of Open Source Software},
-  version = {1.0.0},
   archivePrefix = {arXiv},
   eprint = {2104.06376},
   primaryClass = {gr-qc}

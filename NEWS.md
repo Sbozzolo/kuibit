@@ -1,6 +1,6 @@
 # Changelog
 
-## Version 1.1.0 (Under development)
+## Version 1.1.0 (18 April 2021)
 
 #### New module: argparse_helper
 

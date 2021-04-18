@@ -147,7 +147,6 @@ consider citing `kuibit` if you find the software useful. You can use the follow
   author = {Gabriele Bozzola},
   title = {kuibit: Analyzing Einstein Toolkit simulations with Python},
   journal = {Journal of Open Source Software},
-  version = {1.0.0},
   archivePrefix = {arXiv},
   eprint = {2104.06376},
   primaryClass = {gr-qc}
