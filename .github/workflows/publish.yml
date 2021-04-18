@@ -1,0 +1,42 @@
+name: Publish
+
+on:
+  release:
+    types: [published]
+
+jobs:
+
+  Publish:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 1
+
+      - name: Set up Python 3.7
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.7
+
+      - name: Install Poetry
+        uses: snok/install-poetry@v1.1.0
+        with:
+          virtualenvs-create: true
+          virtualenvs-in-project: true
+
+      - name: Load cached Poetry virtualenv
+        uses: actions/cache@v2
+        id: cached-poetry-dependencies
+        with:
+          path: .venv
+          key: venv-${{ runner.os }}-${{ hashFiles('**/poetry.lock') }}
+
+      - name: Build
+        run: poetry build
+
+      - name: Publish to PyPI
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          password: ${{ secrets.PYPI_API_TOKEN }}
+          repository_url: https://test.pypi.org/legacy/

@@ -31,6 +31,10 @@ how to use `kuibit`. The examples included are:
 * `print_available_timeseries.py`
 * `save_resampled_grid_data.py`
 
+#### General
+
+- Releases are now automatically pushed to PyPI.
+
 #### Features
 - Added method to compute the linear momentum lost by gravitational waves
 - Now the method `save` in `UniformGridData` supports `.npz` files. This is the
