@@ -9,6 +9,25 @@ certainly speed-up the resolution of the bug.
 You can also join us in the [Telegram channel](https://t.me/kuibit) for help or
 discussions.
 
+## Examples
+
+`kuibit` comes with a lot of scripts that are ready to be used and to be
+studied. These examples are extremely important and useful. These examples
+enable people to obtain results quickly, so we welcome all the contributions you
+can make in this respect. If you ran an analysis and want to contribute your
+code so that other people can use it, that would be awesome.
+
+The steps to add a new example are:
+1. Add the file to the `examples` folder
+2. Add a brief description of what the code does in the `README` of that folder,
+   along with the last version/commit of `kuibit` that is known to run the
+   example successfully.
+3. Create a `rst` file in `docs/examples` where you briefly describe the example
+   (it can be the same description as the `README`).
+4. Add a link to this `rst` file in `docs/index.rst`.
+5. Add entry to the `NEWS.md` file
+
+
 ## New features/improvements
 
 We always welcome new features of general improvements in the code. If you have

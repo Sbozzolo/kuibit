@@ -25,7 +25,7 @@ from kuibit.simdir import SimDir
 
 if __name__ == "__main__":
 
-    desc = f"""{os.path.basename(sys.argv[0])} dumps a specific grid variable
+    desc = f"""{kah.get_program_name()} dumps a specific grid variable
     resampled to a given grid into a file. Saving as .npz files guarantees
     the best performances. """
 

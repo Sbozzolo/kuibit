@@ -20,8 +20,16 @@ boundaries are at 1, 2, and 6), the older algorithm will be used. For large
 towers of refinement levels and hundreds of MPI processes, the new algorithm is
 orders of magnitude faster.
 
-#### General
-- Added `bins` examples: `save_resampled_grid_data`
+#### Examples
+
+Now `kuibit` comes with runnable examples. These are production-grade codes that
+you can immediately use for your simulations. They are a great way to learn about
+how to use `kuibit`. The examples included are:
+
+* `print_ah_formation_time.py`
+* `print_available_iterations.py`
+* `print_available_timeseries.py`
+* `save_resampled_grid_data.py`
 
 #### Features
 - Added method to compute the linear momentum lost by gravitational waves

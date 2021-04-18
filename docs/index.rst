@@ -121,6 +121,9 @@ Examples
 .. toctree::
    :maxdepth: 1
 
+   examples/print_ah_formation_time.rst
+   examples/print_available_iterations.rst
+   examples/print_available_timeseries.rst
    examples/save_resampled_grid_data.rst
 
 
@@ -129,7 +132,8 @@ In addition to these examples, you can find other real world examples in the
 folder of the ``experimental`` branch. See the section `Experimental branch and
 examples
 <https://github.com/Sbozzolo/kuibit/#experimental-branch-and-examples>`_ for
-more information.
+more information. All these codes are ready to be used for real scientific
+applications.
 
 
 Reference material (classes, functions, ...)
