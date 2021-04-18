@@ -107,3 +107,8 @@ class TestArgparseHelper(unittest.TestCase):
         self.assertEqual(args.ah_edge_color, "r")
         self.assertEqual(args.ah_alpha, 0.5)
         self.assertEqual(args.ah_time_tolerance, 1)
+
+    def test_program_name(self):
+        sys.argv = ["/tmp/program_name.py", "--datadir", "test"]
+
+        self.assertEqual(kah.get_program_name(), "program_name.py")

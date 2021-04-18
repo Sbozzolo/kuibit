@@ -38,6 +38,7 @@ The intended way to use this module is, schematically
     # command-line, configuration file, or environment variable
 
 """
+import os
 import sys
 
 import configargparse
@@ -254,3 +255,12 @@ def add_horizon_to_parser(
         " (default is '%(default)s').",
     )
     return parser
+
+
+def get_program_name():
+    """Return the name of the current script.
+
+    :returns: Name of file executing the code.
+    :rtype: str
+    """
+    return os.path.basename(sys.argv[0])
