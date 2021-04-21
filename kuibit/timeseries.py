@@ -115,33 +115,13 @@ def remove_duplicated_iters(t, y):
 def unfold_phase(phase):
     """Remove phase jumps to get a continuous (unfolded) phase.
 
-    :param phase:     Phase wrapped around 2 pi.
+    :param phase:     Phase wrapped around the provided jump.
     :type phase:      1D NumPy array
 
     :returns:         Phase plus multiples of pi chosen to minimize jumps.
     :rtype:           1D NumPy array
     """
-    # TODO (FEATURE): Generalize to allow arbitrary jumps.
-    #
-    #  This is trivially done by adding an argument jump with default
-    #       value of 2 pi.
-
-    # num_phase is how many time we reach 2 pi
-    num_phase = phase / (2 * np.pi)
-    # wind is the winding number, how many time we have went over 2 * np.pi
-    wind = np.zeros_like(phase)
-    # wind[0] = 0. Then, we find the jumps, when the phase goes from 2 pi to 0
-    # (or anything with the same offset). Since we divided by 2 pi, a jump is
-    # when nph goes from 1 to 0. np.rint allows us to identify the offest of 2
-    # pi: when the difference between phase[:-1] - phase[1:] is greater than 2
-    # pi, this will be rounded up to 1, when it is smaller, it is rounded down
-    # to 0. For example, if phase[i] = np.pi + eps and phase[i+1] = -np.pi,
-    # then, this is a jump and np.rint rounds to 1.
-    wind[1:] = np.rint(num_phase[:-1] - num_phase[1:])
-    # Finally, we collect how many jumps have occurred. This is the winding
-    # number and tell us how many 2 pi we have to add.
-    wind = np.cumsum(wind)
-    return phase + (2 * np.pi) * wind
+    return np.unwrap(phase)
 
 
 def combine_ts(series, prefer_late=True):
