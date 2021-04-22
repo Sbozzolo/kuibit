@@ -22,7 +22,7 @@ from kuibit import __version__, __bibtex__
 
 class Testkuibit(unittest.TestCase):
     def test_version(self):
-        self.assertEqual(__version__, "1.1.0")
+        self.assertEqual(__version__, "1.1.1")
 
     def test_bibtex(self):
         self.assertIn("Gabriele Bozzola", __bibtex__)

@@ -20,7 +20,7 @@ Einstein Toolkit (or any Cactus-based code).
 
 """
 
-__version__ = "1.1.0"
+__version__ = "1.1.1"
 
 __bibtex__ = """\
 @article{kuibit,

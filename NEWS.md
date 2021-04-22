@@ -1,6 +1,6 @@
 # Changelog
 
-## Version 1.1.1 (Under development)
+## Version 1.1.1 (22 April 2022)
 
 #### Bug fixes
 - Fixed corner in `__str__` in `UniformGrid`
