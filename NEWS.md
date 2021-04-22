@@ -1,9 +1,11 @@
 # Changelog
 
-## Version 1.2.0 (Under development)
+## Version 1.1.1 (Under development)
 
 #### Bug fixes
 - Fixed corner in `__str__` in `UniformGrid`
+- Fixed `_finest_component_at_point_mapping` for some points for which floor and
+  rounding lead to different results.
 
 ## Version 1.1.0 (18 April 2021)
 
