@@ -161,33 +161,13 @@
 <div class="viewcode-block" id="unfold_phase"><a class="viewcode-back" href="../../timeseries_ref.html#kuibit.timeseries.unfold_phase">[docs]</a><span class="k">def</span> <span class="nf">unfold_phase</span><span class="p">(</span><span class="n">phase</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Remove phase jumps to get a continuous (unfolded) phase.</span>
 
-<span class="sd">    :param phase:     Phase wrapped around 2 pi.</span>
+<span class="sd">    :param phase:     Phase wrapped around the provided jump.</span>
 <span class="sd">    :type phase:      1D NumPy array</span>
 
 <span class="sd">    :returns:         Phase plus multiples of pi chosen to minimize jumps.</span>
 <span class="sd">    :rtype:           1D NumPy array</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="c1"># TODO (FEATURE): Generalize to allow arbitrary jumps.</span>
-    <span class="c1">#</span>
-    <span class="c1">#  This is trivially done by adding an argument jump with default</span>
-    <span class="c1">#       value of 2 pi.</span>
-
-    <span class="c1"># num_phase is how many time we reach 2 pi</span>
-    <span class="n">num_phase</span> <span class="o">=</span> <span class="n">phase</span> <span class="o">/</span> <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">)</span>
-    <span class="c1"># wind is the winding number, how many time we have went over 2 * np.pi</span>
-    <span class="n">wind</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros_like</span><span class="p">(</span><span class="n">phase</span><span class="p">)</span>
-    <span class="c1"># wind[0] = 0. Then, we find the jumps, when the phase goes from 2 pi to 0</span>
-    <span class="c1"># (or anything with the same offset). Since we divided by 2 pi, a jump is</span>
-    <span class="c1"># when nph goes from 1 to 0. np.rint allows us to identify the offest of 2</span>
-    <span class="c1"># pi: when the difference between phase[:-1] - phase[1:] is greater than 2</span>
-    <span class="c1"># pi, this will be rounded up to 1, when it is smaller, it is rounded down</span>
-    <span class="c1"># to 0. For example, if phase[i] = np.pi + eps and phase[i+1] = -np.pi,</span>
-    <span class="c1"># then, this is a jump and np.rint rounds to 1.</span>
-    <span class="n">wind</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">rint</span><span class="p">(</span><span class="n">num_phase</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">num_phase</span><span class="p">[</span><span class="mi">1</span><span class="p">:])</span>
-    <span class="c1"># Finally, we collect how many jumps have occurred. This is the winding</span>
-    <span class="c1"># number and tell us how many 2 pi we have to add.</span>
-    <span class="n">wind</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">cumsum</span><span class="p">(</span><span class="n">wind</span><span class="p">)</span>
-    <span class="k">return</span> <span class="n">phase</span> <span class="o">+</span> <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">)</span> <span class="o">*</span> <span class="n">wind</span></div>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">unwrap</span><span class="p">(</span><span class="n">phase</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="combine_ts"><a class="viewcode-back" href="../../timeseries_ref.html#kuibit.timeseries.combine_ts">[docs]</a><span class="k">def</span> <span class="nf">combine_ts</span><span class="p">(</span><span class="n">series</span><span class="p">,</span> <span class="n">prefer_late</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>

@@ -752,7 +752,7 @@
 <span class="s2">x0               = </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">x0</span><span class="si">}</span><span class="s2"></span>
 <span class="s2">x0/dx            = </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">x0</span><span class="o">/</span><span class="bp">self</span><span class="o">.</span><span class="n">dx</span><span class="si">}</span><span class="s2"></span>
 <span class="s2">x1               = </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">x1</span><span class="si">}</span><span class="s2"></span>
-<span class="s2">x1/dx            = </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">x0</span><span class="o">/</span><span class="bp">self</span><span class="o">.</span><span class="n">dx</span><span class="si">}</span><span class="s2"></span>
+<span class="s2">x1/dx            = </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">x1</span><span class="o">/</span><span class="bp">self</span><span class="o">.</span><span class="n">dx</span><span class="si">}</span><span class="s2"></span>
 <span class="s2">Volume           = </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">volume</span><span class="si">}</span><span class="s2"></span>
 <span class="s2">dx               = </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">dx</span><span class="si">}</span><span class="s2"></span>
 <span class="s2">Time             = </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">time</span><span class="si">}</span><span class="s2"></span>
@@ -2254,11 +2254,11 @@
         <span class="c1"># highest resolution first</span>
         <span class="n">all_components</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">all_components</span><span class="p">,</span>
-            <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">comp</span><span class="p">:</span> <span class="p">(</span><span class="o">-</span><span class="n">comp</span><span class="o">.</span><span class="n">ref_level</span><span class="p">,</span> <span class="o">-</span><span class="n">comp</span><span class="o">.</span><span class="n">component</span><span class="p">),</span>
+            <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">comp</span><span class="p">:</span> <span class="p">(</span><span class="o">-</span><span class="n">comp</span><span class="o">.</span><span class="n">ref_level</span><span class="p">,</span> <span class="n">comp</span><span class="o">.</span><span class="n">component</span><span class="p">),</span>
         <span class="p">)</span>
 
-        <span class="n">half_dx_finest</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">finest_dx</span> <span class="o">/</span> <span class="mf">2.0</span>
-        <span class="n">origin</span> <span class="o">=</span> <span class="bp">self</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">num_finest_level</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">x0</span>
+        <span class="n">half_dx_finest</span> <span class="o">=</span> <span class="n">all_components</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">dx</span> <span class="o">/</span> <span class="mf">2.0</span>
+        <span class="n">origin</span> <span class="o">=</span> <span class="n">all_components</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">x0</span>
 
         <span class="k">def</span> <span class="nf">to_tilde</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
             <span class="sd">&quot;&quot;&quot;Convert a coordinate to tilde coordinate system (based on the first</span>
@@ -2343,7 +2343,10 @@
 
         <span class="k">def</span> <span class="nf">get_component</span><span class="p">(</span><span class="n">coordinate</span><span class="p">):</span>
             <span class="sd">&quot;&quot;&quot;Map a coordinate to the component that contains it.&quot;&quot;&quot;</span>
-            <span class="n">x_tilde</span> <span class="o">=</span> <span class="n">to_tilde</span><span class="p">(</span><span class="n">coordinate</span><span class="p">)</span>
+
+            <span class="c1"># This is like to_tilde, but we floor instead of rounding.</span>
+            <span class="c1"># God knows why.</span>
+            <span class="n">x_tilde</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">floor</span><span class="p">((</span><span class="n">coordinate</span> <span class="o">-</span> <span class="n">origin</span><span class="p">)</span> <span class="o">/</span> <span class="n">half_dx_finest</span><span class="p">)</span>
 
             <span class="k">if</span> <span class="nb">any</span><span class="p">(</span>
                 <span class="p">((</span><span class="n">point_dim</span> <span class="o">&lt;</span> <span class="n">border_dim</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="ow">or</span> <span class="p">(</span><span class="n">point_dim</span> <span class="o">&gt;=</span> <span class="n">border_dim</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]))</span>
