@@ -17,7 +17,6 @@
 
 import logging
 import os
-import sys
 
 from kuibit import argparse_helper as kah
 
