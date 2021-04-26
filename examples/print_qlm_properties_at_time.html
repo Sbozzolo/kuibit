@@ -64,6 +64,114 @@ P^2 = \sum_{i} P^i P^i\,,\]</div>
 <p>where <span class="math notranslate nohighlight">\(P^i\)</span> is the Weinberg linear momentum. This choice is motivated by
 the fact that this value coincides with the one set in <code class="docutils literal notranslate"><span class="pre">TwoPunctures</span></code>.</p>
 <p>Known to work with commit/release: <code class="docutils literal notranslate"><span class="pre">1.1.0</span></code></p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="ch">#!/usr/bin/env python3</span>
+
+<span class="c1"># Copyright (C) 2021 Gabriele Bozzola</span>
+<span class="c1">#</span>
+<span class="c1"># This program is free software; you can redistribute it and/or modify it under</span>
+<span class="c1"># the terms of the GNU General Public License as published by the Free Software</span>
+<span class="c1"># Foundation; either version 3 of the License, or (at your option) any later</span>
+<span class="c1"># version.</span>
+<span class="c1">#</span>
+<span class="c1"># This program is distributed in the hope that it will be useful, but WITHOUT</span>
+<span class="c1"># ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS</span>
+<span class="c1"># FOR A PARTICULAR PURPOSE. See the GNU General Public License for more</span>
+<span class="c1"># details.</span>
+<span class="c1">#</span>
+<span class="c1"># You should have received a copy of the GNU General Public License along with</span>
+<span class="c1"># this program; if not, see &lt;https://www.gnu.org/licenses/&gt;.</span>
+
+<span class="kn">from</span> <span class="nn">math</span> <span class="kn">import</span> <span class="n">sqrt</span>
+<span class="kn">import</span> <span class="nn">logging</span>
+
+<span class="kn">from</span> <span class="nn">kuibit.simdir</span> <span class="kn">import</span> <span class="n">SimDir</span>
+<span class="kn">from</span> <span class="nn">kuibit</span> <span class="kn">import</span> <span class="n">argparse_helper</span> <span class="k">as</span> <span class="n">kah</span>
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+
+    <span class="n">desc</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;&quot;&quot;</span><span class="si">{</span><span class="n">kah</span><span class="o">.</span><span class="n">get_program_name</span><span class="p">()</span><span class="si">}</span><span class="s2"> prints some of the interesting properties (as from</span>
+<span class="s2">QuasiLocalMeasures) for a given horizon at a given time. Cubic splines are used</span>
+<span class="s2">to interpolate between timesteps.&quot;&quot;&quot;</span>
+
+    <span class="n">parser</span> <span class="o">=</span> <span class="n">kah</span><span class="o">.</span><span class="n">init_argparse</span><span class="p">(</span><span class="n">desc</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span>
+        <span class="s2">&quot;--qlm-index&quot;</span><span class="p">,</span>
+        <span class="n">required</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="nb">type</span><span class="o">=</span><span class="nb">int</span><span class="p">,</span>
+        <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Index of the horizon according to QuasiLocalMeasures.&quot;</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span>
+        <span class="s2">&quot;--time&quot;</span><span class="p">,</span>
+        <span class="nb">type</span><span class="o">=</span><span class="nb">float</span><span class="p">,</span>
+        <span class="n">default</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+        <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Time to consider.&quot;</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span>
+        <span class="s2">&quot;--estimate-gamma&quot;</span><span class="p">,</span>
+        <span class="n">action</span><span class="o">=</span><span class="s2">&quot;store_true&quot;</span><span class="p">,</span>
+        <span class="n">help</span><span class="o">=</span><span class="p">(</span>
+            <span class="s2">&quot;Estimate the Lorentz factor using qlm_w_momentum. &quot;</span>
+            <span class="s2">&quot;Ignore this if you do not know the details&quot;</span>
+        <span class="p">),</span>
+    <span class="p">)</span>
+    <span class="n">args</span> <span class="o">=</span> <span class="n">kah</span><span class="o">.</span><span class="n">get_args</span><span class="p">(</span><span class="n">parser</span><span class="p">)</span>
+
+    <span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">args</span><span class="o">.</span><span class="n">verbose</span><span class="p">:</span>
+        <span class="n">logging</span><span class="o">.</span><span class="n">basicConfig</span><span class="p">(</span><span class="nb">format</span><span class="o">=</span><span class="s2">&quot;</span><span class="si">%(asctime)s</span><span class="s2"> - </span><span class="si">%(message)s</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">setLevel</span><span class="p">(</span><span class="n">logging</span><span class="o">.</span><span class="n">DEBUG</span><span class="p">)</span>
+
+    <span class="n">sim</span> <span class="o">=</span> <span class="n">SimDir</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">datadir</span><span class="p">,</span> <span class="n">ignore_symlinks</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">ignore_symlinks</span><span class="p">)</span>
+    <span class="n">sim_hor</span> <span class="o">=</span> <span class="n">sim</span><span class="o">.</span><span class="n">horizons</span>
+
+    <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span>
+        <span class="sa">f</span><span class="s2">&quot;QuasiLocalMeasures horizons available: </span><span class="si">{</span><span class="n">sim_hor</span><span class="o">.</span><span class="n">available_qlm_horizons</span><span class="si">}</span><span class="s2">&quot;</span>
+    <span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">args</span><span class="o">.</span><span class="n">qlm_index</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">sim_hor</span><span class="o">.</span><span class="n">available_qlm_horizons</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;QuasiLocalMeasures index </span><span class="si">{</span><span class="n">args</span><span class="o">.</span><span class="n">qlm_index</span><span class="si">}</span><span class="s2"> is not available&quot;</span>
+        <span class="p">)</span>
+
+    <span class="c1"># We set the second index to 0 because we are only interested in the</span>
+    <span class="c1"># QuasiLocalMeasures</span>
+    <span class="n">horizon</span> <span class="o">=</span> <span class="n">sim_hor</span><span class="p">[</span><span class="n">args</span><span class="o">.</span><span class="n">qlm_index</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>
+
+    <span class="n">time</span> <span class="o">=</span> <span class="n">args</span><span class="o">.</span><span class="n">time</span>
+
+    <span class="n">irr_mass</span> <span class="o">=</span> <span class="n">horizon</span><span class="p">[</span><span class="s2">&quot;irreducible_mass&quot;</span><span class="p">](</span><span class="n">time</span><span class="p">)</span>
+
+    <span class="nb">print</span><span class="p">(</span>
+        <span class="sa">f</span><span class="s2">&quot;&quot;&quot;</span><span class="se">\</span>
+<span class="s2">Time:               </span><span class="si">{</span><span class="n">time</span><span class="si">:</span><span class="s2">4.5f</span><span class="si">}</span><span class="s2"></span>
+<span class="s2">Irreducible mass:   </span><span class="si">{</span><span class="n">irr_mass</span><span class="si">:</span><span class="s2">4.5f</span><span class="si">}</span><span class="s2"></span>
+<span class="s2">Christodoulou mass: </span><span class="si">{</span><span class="n">horizon</span><span class="p">[</span><span class="s1">&#39;mass&#39;</span><span class="p">](</span><span class="n">time</span><span class="p">)</span><span class="si">:</span><span class="s2">4.5f</span><span class="si">}</span><span class="s2"></span>
+<span class="s2">Angular momentum:   </span><span class="si">{</span><span class="n">horizon</span><span class="p">[</span><span class="s1">&#39;spin&#39;</span><span class="p">](</span><span class="n">time</span><span class="p">)</span><span class="si">:</span><span class="s2">4.5f</span><span class="si">}</span><span class="s2">&quot;&quot;&quot;</span>
+    <span class="p">)</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Charge:             </span><span class="si">{</span><span class="n">horizon</span><span class="p">[</span><span class="s1">&#39;charge&#39;</span><span class="p">](</span><span class="n">time</span><span class="p">)</span><span class="si">:</span><span class="s2">4.5f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+        <span class="k">pass</span>
+
+    <span class="k">if</span> <span class="n">args</span><span class="o">.</span><span class="n">estimate_gamma</span><span class="p">:</span>
+        <span class="c1"># Estimate gamma, the Lorentz factor</span>
+        <span class="c1">#</span>
+        <span class="c1"># We use the Weinberg momentum because it matches exactly the one in</span>
+        <span class="c1"># TwoPunctures. Probably it does not make sense after t = 0.</span>
+        <span class="c1">#</span>
+        <span class="n">momentum_sq</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">horizon</span><span class="p">[</span><span class="s2">&quot;w_momentum_x&quot;</span><span class="p">](</span><span class="n">time</span><span class="p">)</span> <span class="o">*</span> <span class="n">horizon</span><span class="p">[</span><span class="s2">&quot;w_momentum_x&quot;</span><span class="p">](</span><span class="n">time</span><span class="p">)</span>
+            <span class="o">+</span> <span class="n">horizon</span><span class="p">[</span><span class="s2">&quot;w_momentum_y&quot;</span><span class="p">](</span><span class="n">time</span><span class="p">)</span> <span class="o">*</span> <span class="n">horizon</span><span class="p">[</span><span class="s2">&quot;w_momentum_y&quot;</span><span class="p">](</span><span class="n">time</span><span class="p">)</span>
+            <span class="o">+</span> <span class="n">horizon</span><span class="p">[</span><span class="s2">&quot;w_momentum_z&quot;</span><span class="p">](</span><span class="n">time</span><span class="p">)</span> <span class="o">*</span> <span class="n">horizon</span><span class="p">[</span><span class="s2">&quot;w_momentum_z&quot;</span><span class="p">](</span><span class="n">time</span><span class="p">)</span>
+        <span class="p">)</span>
+
+        <span class="n">gamma</span> <span class="o">=</span> <span class="n">sqrt</span><span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="n">momentum_sq</span> <span class="o">/</span> <span class="p">(</span><span class="n">irr_mass</span> <span class="o">*</span> <span class="n">irr_mass</span><span class="p">))</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Gamma:              </span><span class="si">{</span><span class="n">gamma</span><span class="si">:</span><span class="s2">4.5f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
 </div>
 
 
