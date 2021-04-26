@@ -2922,7 +2922,9 @@ class HierarchicalGridData(BaseNumerical):
 
             For most practical purposes, using this function is an overkill.
             This can be a very expensive operation and require a lot of memory.
-            Prefer :py:meth:`to_UniformGridData` when possible.
+            Prefer :py:meth:`to_UniformGridData` when possible. The only real
+            reasonable application of this function is with small simluations or
+            1D data.
 
         :param resample: If True, resample the data with multilinear interpolation,
                          otherwise, use nearest neighbors.
