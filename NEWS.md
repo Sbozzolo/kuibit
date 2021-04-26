@@ -1,5 +1,9 @@
 # Changelog
 
+#### New examples
+
+* `print_qlm_properties_at_time.py`
+
 ## Version 1.1.1 (22 April 2021)
 
 #### Bug fixes
