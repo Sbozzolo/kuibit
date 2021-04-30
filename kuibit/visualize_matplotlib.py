@@ -102,6 +102,8 @@ def setup_matplotlib(params=None):
             "xtick.minor.visible": True,
             "ytick.minor.visible": True,
             "image.cmap": "inferno",
+            "legend.fancybox": False,
+            "legend.edgecolor": "inherit",
         }
     )
 
