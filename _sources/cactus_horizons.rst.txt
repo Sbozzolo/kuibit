@@ -26,6 +26,10 @@ QLM index 0 and AH index 1. The result of this operation is a
 notation (e.g., ``hor['mass']``), to access the AH ones you can access them via
 the ``ah`` attribute (e.g., ``hor.ah.area``, or ``hor.ah['area']``).
 
+If you only need (or have) one of the two, you can access the relevant
+information with :py:meth:`~.get_apparent_horizon` or
+:py:meth:`~.get_qlm_horizon`.
+
 You can access the shape of an horizon from :py:class:`~.OneHorizon` with the
 the method :py:meth:`~.shape_at_iteration`. This returns three lists of
 with the various 3D patches that form each horizon. In case you are only
