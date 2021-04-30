@@ -26,7 +26,8 @@ if __name__ == "__main__":
 
     desc = f"""{kah.get_program_name()} dumps a specific grid variable
     resampled to a given grid into a file. Saving as .npz files guarantees
-    the best performances. """
+    the best performances. For 3D data, the default resolution will lead to
+    long processing times. """
 
     parser = kah.init_argparse(description=desc)
     parser.add_argument(
