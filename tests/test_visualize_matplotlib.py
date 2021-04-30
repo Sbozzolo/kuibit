@@ -18,6 +18,8 @@
 import os
 import unittest
 
+from unittest.mock import patch
+
 # We use the agg backend because it should work everywhere
 import matplotlib
 
@@ -41,14 +43,18 @@ class TestVisualizeMatplotlib(unittest.TestCase):
 
         self.assertEqual(matplotlib.rcParams["font.size"], 16)
 
-    def test__preprocess_plot_functions(self):
+        # Test with optional argument
+        viz.setup_matplotlib({"font.size": 18})
+        self.assertEqual(matplotlib.rcParams["font.size"], 18)
+
+    def test_preprocess_plot_functions(self):
 
         # We test preprocess_plot with a function that returns the argument, so
         # we can check that they are what we expect
         def func(data, **kwargs):
             return data, kwargs
 
-        dec_func = viz._preprocess_plot(func)
+        dec_func = viz.preprocess_plot(func)
 
         # Default
         self.assertIs(dec_func("")[1]["axis"], plt.gca())
@@ -60,7 +66,7 @@ class TestVisualizeMatplotlib(unittest.TestCase):
         # Passing figure
         self.assertIs(dec_func("", figure=self.fig)[1]["figure"], self.fig)
 
-        dec_func_grid = viz._preprocess_plot_grid(func)
+        dec_func_grid = viz.preprocess_plot_grid(func)
 
         # Check data not provided
         with self.assertRaises(TypeError):
@@ -185,7 +191,9 @@ class TestVisualizeMatplotlib(unittest.TestCase):
 
     def test_plot_grid(self):
 
-        ugd = gdu.sample_function(lambda x, y: x + y, [100, 20], [0, 1], [2, 5])
+        ugd = gdu.sample_function(
+            lambda x, y: x + y, [100, 20], [0, 1], [2, 5]
+        )
 
         # Unknown plot type
         with self.assertRaises(ValueError):
@@ -193,8 +201,9 @@ class TestVisualizeMatplotlib(unittest.TestCase):
 
         self.assertTrue(
             isinstance(
-                viz.plot_contourf(ugd, xlabel="x", ylabel="y",
-                                  colorbar=True, label="test"),
+                viz.plot_contourf(
+                    ugd, xlabel="x", ylabel="y", colorbar=True, label="test"
+                ),
                 matplotlib.contour.QuadContourSet,
             )
         )
@@ -225,7 +234,9 @@ class TestVisualizeMatplotlib(unittest.TestCase):
 
     def test_plot_colorbar(self):
 
-        ugd = gdu.sample_function(lambda x, y: x + y, [100, 20], [0, 1], [2, 5])
+        ugd = gdu.sample_function(
+            lambda x, y: x + y, [100, 20], [0, 1], [2, 5]
+        )
 
         cf = viz.plot_contourf(ugd, xlabel="x", ylabel="y", colorbar=False)
 
@@ -244,22 +255,50 @@ class TestVisualizeMatplotlib(unittest.TestCase):
 
         self.assertTrue(
             isinstance(
-                viz.plot_horizon_shape(shape)[0],
+                viz.plot_horizon(shape)[0],
                 matplotlib.patches.Polygon,
             )
         )
 
         with self.assertRaises(ValueError):
-            viz.plot_horizon_shape_on_plane_at_iteration(ah, 0, "bob")
+            viz.plot_horizon_on_plane_at_iteration(ah, 0, "bob")
 
         with self.assertRaises(ValueError):
-            viz.plot_horizon_shape_on_plane_at_time(ah, 0, "bob")
+            viz.plot_horizon_on_plane_at_time(ah, 0, "bob")
 
-    def test_add_text_to_figure_corner(self):
+        self.assertTrue(
+            np.allclose(
+                viz.plot_horizon(shape)[0].xy,
+                viz.plot_horizon_on_plane_at_iteration(ah, 0, "xy")[0].xy,
+            )
+        )
+
+    def test_add_text_to_corner(self):
+
+        with self.assertRaises(ValueError):
+            viz._process_anchor_info("BW", 0.02)
+
+        expected_out = 0.98, 0.02, "bottom", "right"
+
+        self.assertCountEqual(
+            viz._process_anchor_info("SE", 0.02), expected_out
+        )
+
+        expected_out = 0.5, 0.98, "top", None
+
+        self.assertCountEqual(
+            viz._process_anchor_info("N", 0.02), expected_out
+        )
+
+        expected_out = 0.02, 0.5, None, "left"
+
+        self.assertCountEqual(
+            viz._process_anchor_info("W", 0.02), expected_out
+        )
 
         self.assertTrue(
             isinstance(
-                viz.add_text_to_figure_corner("test"),
+                viz.add_text_to_corner("test"),
                 matplotlib.text.Text,
             )
         )
@@ -270,7 +309,7 @@ class TestVisualizeMatplotlib(unittest.TestCase):
         ax = plt.figure().gca(projection="3d")
         self.assertTrue(
             isinstance(
-                viz.add_text_to_figure_corner("test", axis=ax),
+                viz.add_text_to_corner("test", axis=ax),
                 matplotlib.text.Text,
             )
         )
@@ -279,11 +318,11 @@ class TestVisualizeMatplotlib(unittest.TestCase):
 
         plt.plot([1, 1], [2, 2])
         # Test matplotlib
-        viz.save("test", "pdf")
+        viz.save("test.pdf")
         self.assertTrue(os.path.exists("test.pdf"))
         os.remove("test.pdf")
 
         # Test tikzplotlib
-        viz.save("test", "pdf", as_tikz=True)
+        viz.save("test.tikz")
         self.assertTrue(os.path.exists("test.tikz"))
         os.remove("test.tikz")

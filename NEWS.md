@@ -1,5 +1,16 @@
 # Changelog
 
+## Version 1.2.0 (Under development)
+
+#### New module: visualize_matplotlib
+
+The `visualize_matplotlib` module aims to simplify common visualization tasks
+with `matplotlib`. At the moment, it mainly supports visualizing grid data and
+apparent horizons outlines. The public functions in `visualize_matplotlib` try
+to be as general as possible: if you pass some grid objects, they will try to
+figure out how to plot it. Nonetheless, you should read the documentation and
+the docstrings of the various functions.
+
 #### New examples
 
 * `print_qlm_properties_at_time.py`

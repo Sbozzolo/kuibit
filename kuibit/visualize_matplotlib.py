@@ -1,6 +1,9 @@
 #!/usr/bin/env python3
 
-# Copyright (C) 2020-2021 Gabriele Bozzola, Wolfgang Kastaun
+# Copyright (C) 2020-2021 Gabriele Bozzola
+#
+# Inspired by code originally developed by Wolfgang Kastaun. See, GitHub,
+# wokast/PyCactus/PostCactus/visualize.py
 #
 # This program is free software; you can redistribute it and/or modify it under
 # the terms of the GNU General Public License as published by the Free Software
@@ -15,10 +18,47 @@
 # You should have received a copy of the GNU General Public License along with
 # this program; if not, see <https://www.gnu.org/licenses/>.
 
-"""The :py:mod:`~.visualize_matplotlib` module provides functions to plot
-``kuibit`` objects with matplotlib.
+"""The :py:mod:`~.visualize_matplotlib` module provides methods to plot
+``kuibit`` objects with matplotlib and other convenience functions.
+
+Utilities:
+
+- :py:func:`~.setup_matplotlib` adjusts the configuration in matplotlib.
+- :py:func:`~.add_text_to_corner` adds a label near an edge or a corner of
+  a figure (useful for annotations like time).
+- :py:func:`~.save` saves the figure, optionally with tikzplotlib.
+
+Two decorators:
+
+- :py:func:`~.preprocess_plot`. The goal of this is to add support to the
+  keyword arguments ``figure`` and ``axis``. If you decorate a function with
+  :py:func:`~.preprocess_plot` and the function takes those two arguments, then
+  the decorator will automatically check if the arguments were passed and if not
+  set the correct default.
+
+- :py:func:`~.preprocess_plot_grid`. This decorator takes some form of grid data
+  and returns a NumPy array (and other useful quantities). Functions decorated
+  with :py:func:`~.preprocess_plot_grid` automatically gain support for
+  :py:class:`~.HierarchicalGridData` and :py:class:`~.UniformGridData`, so they
+  only need to worry about plotting NumPy arrays. Functions have to take a
+  positional argument ``data`` and a keyword argument ``coordinates``.
+
+Grid data:
+
+- :py:func:`~.plot_color` to plot directly some data with its value.
+- :py:func:`~.plot_contourf` to draw a filled contour plot using the data.
+
+Horizons:
+
+
+
+Most of the functions here take optional arguments ``figure`` and ``axis``. You
+can specify them, or the current ones will be used.
 
 """
+
+import itertools
+import os
 import warnings
 
 import matplotlib
@@ -28,17 +68,25 @@ import tikzplotlib
 from mpl_toolkits.axes_grid1 import make_axes_locatable
 from mpl_toolkits.mplot3d import Axes3D
 
-from postcactus import grid_data as gd
-from postcactus.cactus_grid_functions import BaseOneGridFunction
+from kuibit import grid_data as gd
+from kuibit.cactus_grid_functions import BaseOneGridFunction
+
+# UTILITIES
 
 
-def setup_matplotlib():
+def setup_matplotlib(params=None):
     """Setup matplotlib with some reasonable defaults for better plots.
 
-    Matplotlib behaves differently on different machines. With this, we make
-    sure that we set all the relevant paramters that we care of.
+    If ``params`` is provided, add these parameters to matplotlib's settings
+    (``params`` updates ``matplotlib.rcParams``).
 
-    This is highly opinionated.
+    Matplotlib behaves differently on different machines. With this, we make
+    sure that we set all the relevant paramters that we care of to the value we
+    prefer. The default values are highly opinionated.
+
+    :param params: Parameters to update matplotlib with.
+    :type params: dict
+
     """
 
     matplotlib.rcParams.update(
@@ -57,8 +105,11 @@ def setup_matplotlib():
         }
     )
 
+    if params is not None:
+        matplotlib.rcParams.update(params)
 
-def _preprocess_plot(func):
+
+def preprocess_plot(func):
     """Decorator to set-up plot functions.
 
     When we plot anything, there is always some boilerplate that has to be
@@ -92,48 +143,58 @@ def _preprocess_plot(func):
     return inner
 
 
-def _preprocess_plot_grid(func):
+def preprocess_plot_grid(func):
     """Decorator to set-up plot functions that plot grid data.
 
-    This dectorator exends _preprocess_plot for specific functions.
+    This decorator extends :py:func:`~.preprocess_plot` for specific functions.
 
     1. It handles differt types to plot what intuitively one would want to
        plot.
-    1a. If the data is a numpy array with shape 2, just pass the data,
+    1a. If the data is a NumPy array with shape 2, just pass the data,
         otherwise raise an error
-    1b. If the data is a numpy array, just pass the data.
-    1c. If data is UniformGridData, pass the data and the coordinates.
-    1d. If data is HierarchicalGridData, read resample it to the given grid,
-        then pass do 1c.
-    1e. If data is a BaseOneGridFunction, we read the iteration and pass to
-        1d.
+    1b. If the data is a NumPy array, just pass the data.
+    1c. If data is :py:class:`~.UniformGridData`, pass the data and the
+        coordinates.
+    1d. If data is :py:class:`~.HierarchicalGridData`, read resample it to
+        the given grid, then pass do 1c.
+    1e. If data is a :py:class:`~.BaseOneGridFunction`, we read the iteration
+        and pass to 1d.
 
     func has to take as keyword arguments (in addition to the ones in
-    _preprocess_plot):
-    1. 'data'. data will be passed as a numpy array, unless it is
+    :py:func`~.preprocess_plot`):
+    1. 'data'. data will be passed as a NumPy array, unless it is
                already so.
-    2. 'coordinates=None'. coordinates will be passed as a list of numpy
-                           arrays, unless it is not None. Each numpy
+    2. 'coordinates=None'. coordinates will be passed as a list of NumPy
+                           arrays, unless it is not None. Each NumPy
                            array is the coordinates along one axis.
 
     """
 
-    @_preprocess_plot
+    @preprocess_plot
     def inner(data, *args, **kwargs):
         # The flow is: We check if data is BaseOneGridFunction or derived. If
         # yes, we read the requested iteration. Then, we check if data is
         # HierachicalGridData, if yes, we resample to UniformGridData. Then we
         # work with UniformGridData and handle coordinates, finally we work
-        # with numpy arrays, which is what we pass to the function.
+        # with NumPy arrays, which is what we pass to the function.
 
-        def not_in_kwargs_or_None(attr):
+        def attr_not_available(attr):
             """This is a helper function to see if the user passed an attribute
             or if the attribute is None
             """
             return attr not in kwargs or kwargs[attr] is None
 
+        def default_or_kwargs(attr, default):
+            """Return default if the attribute is not available in kwargs, otherwise return
+            the attribute
+
+            """
+            if attr_not_available(attr):
+                return default
+            return kwargs[attr]
+
         if isinstance(data, BaseOneGridFunction):
-            if not_in_kwargs_or_None("iteration"):
+            if attr_not_available("iteration"):
                 raise TypeError(
                     "Data has multiple iterations, specify what do you want to plot"
                 )
@@ -142,26 +203,15 @@ def _preprocess_plot_grid(func):
             data = data[kwargs["iteration"]]
 
         if isinstance(data, gd.HierarchicalGridData):
-            if not_in_kwargs_or_None("shape"):
+            if attr_not_available("shape"):
                 raise TypeError(
                     "The data must be resampled but the shape was not provided"
                 )
 
             # If x0 or x1 are None, we use the ones of the grid
-            if not_in_kwargs_or_None("x0"):
-                x0 = data.x0
-            else:
-                x0 = kwargs["x0"]
-
-            if not_in_kwargs_or_None("x1"):
-                x1 = data.x1
-            else:
-                x1 = kwargs["x1"]
-
-            if not_in_kwargs_or_None("resample"):
-                resample = False
-            else:
-                resample = kwargs["resample"]
+            x0 = default_or_kwargs("x0", data.x0)
+            x1 = default_or_kwargs("x1", data.x1)
+            resample = default_or_kwargs("resample", False)
 
             # Overwrite data with UniformGridData
             data = data.to_UniformGridData(
@@ -173,59 +223,166 @@ def _preprocess_plot_grid(func):
             if "coordinates" in kwargs and kwargs["coordinates"] is not None:
                 warnings.warn(
                     "Ignoring provided coordinates (data is UniformGridData)."
-                    " To specify boundaries use x0 and x1."
+                    " To specify boundaries, use x0 and x1."
                 )
-            resampling = False
 
-            if not_in_kwargs_or_None("x0"):
-                x0 = data.x0
-            else:
-                x0 = kwargs["x0"]
-                resampling = True
+            # If x0 or x1 are None, we use the ones of the grid
+            x0 = default_or_kwargs("x0", data.x0)
+            x1 = default_or_kwargs("x1", data.x1)
+            # If x0 or x1 are provided, then we resample. So, we don't resample
+            # only if x0 AND x1 are not provided.
+            resampling = not (
+                attr_not_available("x0") and attr_not_available("x1")
+            )
 
-            if not_in_kwargs_or_None("x1"):
-                x1 = data.x1
-            else:
-                x1 = kwargs["x1"]
-                resampling = True
-
-            if resampling and not_in_kwargs_or_None("shape"):
+            if resampling and attr_not_available("shape"):
                 raise TypeError(
                     "The data must be resampled but the shape was not provided"
                 )
 
             if resampling:
+                resample = default_or_kwargs("resample", False)
                 new_grid = gd.UniformGrid(shape=kwargs["shape"], x0=x0, x1=x1)
-                data = data.resampled(new_grid)
+                data = data.resampled(
+                    new_grid, piecewise_constant=(not resample)
+                )
 
             kwargs["coordinates"] = data.coordinates_from_grid()
-            # Overwrite data with numpy array
+            # Overwrite data with NumPy array
             data = data.data_xyz
 
-        if isinstance(data, np.ndarray):
-            if data.ndim != 2:
-                raise ValueError("Only 2-dimensional data can be plotted")
+        if isinstance(data, np.ndarray) and data.ndim != 2:
+            raise ValueError("Only 2-dimensional data can be plotted")
 
-        # TODO: Check that coordinates are good
+        # TODO: Check that coordinates are compatible with data
 
         # We remove what we don't need from kwargs, so that it is not
         # accidentally passed to the function
-        if "shape" in kwargs:
-            del kwargs["shape"]
-        if "x0" in kwargs:
-            del kwargs["x0"]
-        if "x1" in kwargs:
-            del kwargs["x1"]
-        if "iteration" in kwargs:
-            del kwargs["iteration"]
-        if "resample" in kwargs:
-            del kwargs["resample"]
+        def remove_attributes(*attributes):
+            for attr in attributes:
+                if attr in kwargs:
+                    del kwargs[attr]
+
+        remove_attributes("shape", "x0", "x1", "iteration", "resample")
+
         return func(data, *args, **kwargs)
 
     return inner
 
 
+def _process_anchor_info(anchor, offset):
+    """Prepare the correct arguments for text_function in
+    :py:func:`~.add_text_to_corner`
+
+    :param anchor: Where to place the text? This is defined
+                 via cardinal points (e.g., NW for top left).
+    :type anchor: str
+    :param offset: How far from the edge to put the text? In percentage
+                   of the entire figure.
+    :type offset: float
+
+    :returns: Horizontal position, vertical position, horizontal alignment
+             vertical alignment.
+    :rtype: tuple
+
+    """
+    # This function has been split off add_text_to_corner only because it is
+    # easier to test this way.
+    possible_combinations = [
+        n1 + n2 for n1, n2 in itertools.product("NSWE", repeat=2) if n1 != n2
+    ] + ["N", "S", "W", "E"]
+
+    if anchor not in possible_combinations:
+        raise ValueError("Given anchor is invalid. Use cardinal points.")
+
+    # Now we have to parse the cardinal points to find where
+    # to put the
+
+    ver_al = None
+    ver_pos = 0.5
+    if "S" in anchor:
+        ver_al = "bottom"
+        ver_pos = offset
+    elif "N" in anchor:
+        ver_al = "top"
+        ver_pos = 1 - offset
+
+    hor_al = None
+    hor_pos = 0.5
+    if "E" in anchor:
+        hor_al = "right"
+        hor_pos = 1 - offset
+    elif "W" in anchor:
+        hor_al = "left"
+        hor_pos = offset
+
+    return hor_pos, ver_pos, hor_al, ver_al
+
+
+@preprocess_plot
+def add_text_to_corner(text, anchor="SE", figure=None, axis=None, offset=0.02):
+    """Add text to a figure.
+
+    Specify the location of the label using cardinal points (NSWE).
+    For example, SE is bottom right.
+
+    :param anchor: Where to place the text? This is defined
+                 via cardinal points (e.g., NW for top left).
+    :type anchor: str
+    :param offset: How far from the edge to put the text? In percentage
+                   of the entire figure.
+    :type offset: float
+    """
+
+    # text_function is the correct function to use depending if we are working
+    # with 2D or 3D plots.
+
+    text_function = axis.text2D if isinstance(axis, Axes3D) else axis.text
+
+    hor_pos, ver_pos, hor_al, ver_al = _process_anchor_info(anchor, offset)
+
+    return text_function(
+        hor_pos,
+        ver_pos,
+        text,
+        horizontalalignment=hor_al,
+        verticalalignment=ver_al,
+        transform=figure.transFigure,
+    )
+
+
+@preprocess_plot
+def save(
+    outputpath,
+    figure=None,
+    axis=None,
+    **kwargs,
+):
+    """Save figure to the given location.
+
+    If the file extension is ``.tikz``, the file will be saved with
+    ``tikzplotlib``.
+
+    Unknown arguments are passed to the ``matplotlib.savefig`` or
+    ``tikzplotlib.save`` (depending on the extension).
+
+    :param outputpath:  Output path with or without extension. If the
+                        extension is ``.tikz``, the file is saved with
+                        ``tikzplotlib``.
+    :type outputpath:  str
+
+    """
+    if os.path.splitext(outputpath)[-1] == ".tikz":
+        tikzplotlib.save(outputpath, **kwargs)
+    else:
+        plt.savefig(outputpath, **kwargs)
+
+
+# GRID FUNCTIONS
+
+
 def _vmin_vmax_extend(data, vmin=None, vmax=None):
+    """Helper function to decide what to do with the colorbar (to extend it or not?)."""
 
     colorbar_extend = "neither"
 
@@ -247,8 +404,8 @@ def _vmin_vmax_extend(data, vmin=None, vmax=None):
     return vmin, vmax, colorbar_extend
 
 
-# All the difficult stuff is in _preprocess_plot_grid
-@_preprocess_plot_grid
+# All the difficult stuff is in preprocess_plot_grid
+@preprocess_plot_grid
 def _plot_grid(
     data,
     plot_type="color",
@@ -263,34 +420,30 @@ def _plot_grid(
     vmin=None,
     vmax=None,
     aspect_ratio="equal",
-    **kwargs
+    **kwargs,
 ):
-    """Plot 2D grid from numpy array, UniformGridData, HierarhicalGridData,
-    or OneGridFunction with different types of plots.
+    """Backend of the :py:func:`~.plot_color` and similar functions.
 
-    The type of plot is specified by the variable plot_type.
+    The type of plot is specified by the variable ``plot_type``.
 
-    plot_type can be 'color', 'contourf'
+    Unknown arguments are passed to
+    ``imshow`` if plot is color
+    ``contourf`` if plot is contourf.
 
-    When type = color you can provide an interpolation parameter.
-
-    It is preferable not to use this function directly, but to define more
-    intuitive interfaces.
-
-    Read the full documentation to see how to use this function.
-
-    If logscale is True, vmin and vmax are the log10 of the variable.
+    :param plot_type: Type of plot. It can be: 'color', 'contourf'.
+    :type plot_type: str
     """
 
-    known_plot_types = ["color", "contourf"]
+    _known_plot_types = ("color", "contourf")
 
-    if plot_type not in known_plot_types:
+    if plot_type not in _known_plot_types:
         raise ValueError(
-            f"Unknown plot_type {plot_type} (Options available {known_plot_types})"
+            f"Unknown plot_type {plot_type} (Options available {_known_plot_types})"
         )
 
-    # Considering all the effort put in _preprocess_plot_grid, we we can plot
-    # as we were plotting normal numpy arrays.
+    # Considering all the effort put in preprocess_plot_grid, we we can plot
+    # as we were plotting normal NumPy arrays.
+
     if logscale:
         # We mask the values that are smaller or equal than 0
         data = np.ma.log10(data)
@@ -314,14 +467,20 @@ def _plot_grid(
         if coordinates is None:
             grid = None
         else:
-            # TODO: Not very pythonic way to write this...
-            dx = coordinates[0][1] - coordinates[0][0]
-            dy = coordinates[1][1] - coordinates[1][0]
+            # We assume equally-spaced points.
+
+            # TODO: (Refactoring)
+            #
+            # This is not a very pythonic way to write this...
+
+            X, Y = coordinates
+
+            dx, dy = X[1] - X[0], Y[1] - Y[0]
             grid = [
-                coordinates[0][0] - 0.5 * dx,
-                coordinates[0][-1] + 0.5 * dx,
-                coordinates[1][0] - 0.5 * dy,
-                coordinates[1][-1] + 0.5 * dy,
+                X[0] - 0.5 * dx,
+                X[-1] + 0.5 * dx,
+                Y[0] - 0.5 * dy,
+                Y[-1] + 0.5 * dy,
             ]
 
         image = axis.imshow(
@@ -330,58 +489,260 @@ def _plot_grid(
     elif plot_type == "contourf":
         if coordinates is None:
             raise ValueError(
-                "You must provide the coordiantes with plot_type = contourf"
+                f"You must provide the coordiantes with plot_type = {plot_type}"
             )
         image = axis.contourf(
             *coordinates, data, extend=colorbar_extend, **kwargs
         )
 
     if colorbar:
-        plot_colorbar(image, axis=axis, label=label)
+        plot_colorbar(image, figure=figure, axis=axis, label=label)
     return image
 
 
 def plot_contourf(data, **kwargs):
+    """Plot the given data drawing filled contours.
+
+    You can pass (everything is processed by :py:func:`~.preprocess_plot_grid` so
+    that at the end we have a 2D NumPy array):
+    - A 2D NumPy array,
+    - A :py:class:`~.UniformGridData`,
+    - A :py:class:`~.HierarchicalGridData`,
+    - A :py:class:`~.BaseOneGridFunction`.
+
+    Depending on what you pass, you might need additional arguments.
+
+    If you pass a :py:class:`~.BaseOneGridFunction`, you need also to pass
+    ``iteration``, and ``shape``. If you pass
+    :py:class:`~.HierarchicalGridData`, you also need to pass ``shape``. In all
+    cases you can also pass ``x0`` and ``x1`` to define origin and corner of the
+    grid. You can pass the option ``resample=True`` if you want to do bilinear
+    resampling at the grid data level, otherwise, nearest neighbor resampling is
+    done. When you pass the NumPy array, you also have to pass the
+    ``coordinates``.
+
+    All the unknown arguments are passed to ``contourf``.
+
+    .. note
+
+       Read the documentation for a concise table on what arguments are
+       supported.
+
+    :param data: Data that has to be plotted. The function expects a 2D NumPy
+                 array, but the decorator :py:func:`~.preprocess_plot_grid`
+                 allows it to take different kind of data.
+    :type data: 2D NumPy array, or object that can be cast to 2D NumPy array.
+
+    :param x0: Lowermost leftmost coordinate to plot. If passed, resampling will
+               be performed.
+    :type x0: 2D array or list
+
+    :param x1: Uppermost rightmost coordinate to plot. If passed, resampling will
+               be performed.
+    :type x1: 2D array or list
+
+    :param coordiantes: Coordinates to use for the plot. Used only if data is a
+                        NumPy array.
+    :type coordinates: 2D array or list
+
+    :param shape: Resolution of the image. This parameter is used if resampling
+                  is needed or requested.
+    :type shape: tuple or list
+
+    :param iteration: Iteration to plot. Relevant only if data is a
+                      :py:class:`~.BaseOneGridData`.
+    :type iteration: int
+
+    :param resample: If resampling has to be done, do bilinear resampling at the
+                     level of the grid data. If not passed, use nearest neighbors.
+    :type resample: bool
+
+    :param logscale: If True, take the log10 of the data before plotting.
+    :type logscale: bool
+
+    :param colorbar: If True, add a colorbar.
+    :type colorbar: bool
+
+    :param vmin: Remove all the data below this value. If logscale, this has to
+                 be the log10.
+    :type vmin: float
+    :param vmax: Remove all the data above this value. If logscale, this has to
+                 be the log10.
+    :type vmax: float
+
+    :param xlabel: Label of the x axis. If None (or not passed), no label is
+                   placed.
+    :type xlabel: str
+
+    :param ylabel: Label of the y axis. If None (or not passed), no label is
+                   placed.
+    :type ylabel: str
+
+    :param aspect_ratio: Aspect ratio of the plot, as passed to the function
+                         ``set_aspect_ratio`` in matplotlib.
+    :type aspect_ratio: str
+
+    :param figure: If passed, plot on this figure. If not passed (or if None),
+                   use the current figure.
+    :type figure: ``matplotlib.pyplot.figure``
+
+    :param axis: If passed, plot on this axis. If not passed (or if None), use
+                 the current axis.
+    :type axis: ``matplotlib.pyplot.axis``
+
+    :param kwargs: All the unknown arguments are passed to ``imshow``.
+    :type kwargs: dict
+
+    """
     # This function is a convinence function around _plot_grid.
     return _plot_grid(data, plot_type="contourf", **kwargs)
 
 
 def plot_color(data, **kwargs):
+    """Plot the given data.
+
+    You can pass (everything is processed by :py:func:`~.preprocess_plot_grid` so
+    that at the end we have a 2D NumPy array):
+    - A 2D NumPy array,
+    - A :py:class:`~.UniformGridData`,
+    - A :py:class:`~.HierarchicalGridData`,
+    - A :py:class:`~.BaseOneGridFunction`.
+
+    Depending on what you pass, you might need additional arguments.
+
+    If you pass a :py:class:`~.BaseOneGridFunction`, you need also to pass
+    ``iteration``, and ``shape``. If you pass
+    :py:class:`~.HierarchicalGridData`, you also need to pass ``shape``. In all
+    cases you can also pass ``x0`` and ``x1`` to define origin and corner of the
+    grid. You can pass the option ``resample=True`` if you want to do bilinear
+    resampling at the grid data level, otherwise, nearest neighbor resampling is
+    done. When you pass the NumPy array, passing ``coordinates`` will argument
+    will make sure that those coordinates are used.
+
+    All the unknown arguments are passed to ``imshow``.
+
+    .. note
+
+       Read the documentation for a concise table on what arguments are
+       supported.
+
+    :param data: Data that has to be plotted. The function expects a 2D NumPy
+                 array, but the decorator :py:func:`~.preprocess_plot_grid`
+                 allows it to take different kind of data.
+    :type data: 2D NumPy array, or object that can be cast to 2D NumPy array.
+
+    :param x0: Lowermost leftmost coordinate to plot. If passed, resampling will
+               be performed.
+    :type x0: 2D array or list
+
+    :param x1: Uppermost rightmost coordinate to plot. If passed, resampling will
+               be performed.
+    :type x1: 2D array or list
+
+    :param coordiantes: Coordinates to use for the plot. Used only if data is a
+                        NumPy array.
+    :type coordinates: 2D array or list
+
+    :param shape: Resolution of the image. This parameter is used if resampling
+                  is needed or requested.
+    :type shape: tuple or list
+
+    :param iteration: Iteration to plot. Relevant only if data is a
+                      :py:class:`~.BaseOneGridData`.
+    :type iteration: int
+
+    :param resample: If resampling has to be done, do bilinear resampling at the
+                     level of the grid data. If not passed, use nearest neighbors.
+    :type resample: bool
+
+    :param logscale: If True, take the log10 of the data before plotting.
+    :type logscale: bool
+
+    :param colorbar: If True, add a colorbar.
+    :type colorbar: bool
+
+    :param vmin: Remove all the data below this value. If logscale, this has to
+                 be the log10.
+    :type vmin: float
+    :param vmax: Remove all the data above this value. If logscale, this has to
+                 be the log10.
+    :type vmax: float
+
+    :param xlabel: Label of the x axis. If None (or not passed), no label is
+                   placed.
+    :type xlabel: str
+
+    :param ylabel: Label of the y axis. If None (or not passed), no label is
+                   placed.
+    :type ylabel: str
+
+    :param aspect_ratio: Aspect ratio of the plot, as passed to the function
+                         ``set_aspect_ratio`` in matplotlib.
+    :type aspect_ratio: str
+
+    :param figure: If passed, plot on this figure. If not passed (or if None),
+                   use the current figure.
+    :type figure: ``matplotlib.pyplot.figure``
+
+    :param axis: If passed, plot on this axis. If not passed (or if None), use
+                 the current axis.
+    :type axis: ``matplotlib.pyplot.axis``
+
+    :param kwargs: All the unknown arguments are passed to ``imshow``.
+    :type kwargs: dict
+
+    """
     # This function is a convinence function around _plot_grid.
     return _plot_grid(data, plot_type="color", **kwargs)
 
 
-@_preprocess_plot
-def plot_colorbar(mpl_artist, figure=None, axis=None, label=None, **kwargs):
-    """Add a colorbar to an existing image (as produced by plot_contourf)."""
+@preprocess_plot
+def plot_colorbar(
+    mpl_artist,
+    figure=None,
+    axis=None,
+    label=None,
+    where="right",
+    size="5%",
+    pad=0.25,
+    **kwargs,
+):
+    """Add a colorbar to an existing image.
+
+    :param mpl_artist: Image from which to generate the colorbar.
+    :type mpl_artist: ``matplotlib.cm.ScalarMappable``
+    :param figure: If passed, plot on this figure. If not passed (or if None),
+                   use the current figure.
+    :type figure: ``matplotlib.pyplot.figure``
+
+    :param axis: If passed, plot on this axis. If not passed (or if None), use
+                 the current axis.
+    :type axis: ``matplotlib.pyplot.axis``
+    :param label: Label to place near the colorbar.
+    :type label: str
+    :param where: Where to place the colorbar (left, right, bottom, top).
+    :type where: str
+    :param size: Width of the colorbar with respect to ``axis``.
+    :type size: float
+    :param pad: Pad between the colorbar and ``axis``.
+    :type pad: float
+
+    """
     # The next two lines guarantee that the colorbar is the same size as
     # the plot. From https://stackoverflow.com/a/18195921
     divider = make_axes_locatable(axis)
-    cax = divider.append_axes("right", size="5%", pad=0.25)
+    cax = divider.append_axes(where, size=size, pad=pad)
     cb = plt.colorbar(mpl_artist, cax=cax, **kwargs)
     if label is not None:
         cb.set_label(label)
     return cb
 
 
-@_preprocess_plot
-def add_text_to_figure_corner(text, figure=None, axis=None):
-    """Add text to the bottom right corner of a figure."""
-
-    text_function = axis.text2D if isinstance(axis, Axes3D) else axis.text
-
-    return text_function(
-        0.98,
-        0.02,
-        text,
-        horizontalalignment="right",
-        verticalalignment="bottom",
-        transform=figure.transFigure,
-    )
+# HORIZONS
 
 
-@_preprocess_plot
-def plot_horizon_shape(
+@preprocess_plot
+def plot_horizon(
     shape,
     color=None,
     edgecolor=None,
@@ -392,8 +753,10 @@ def plot_horizon_shape(
 ):
     """Plot outline of horizon in 2D.
 
-    :param shape: Shape of the horizon as returned by `~.shape_outline_at_iteration` or
-                  `~.shape_outline_at_time`.
+    Unknown arguments are passed to the ``fill`` function.
+
+    :param shape: Shape of the horizon as returned by
+                  `~.shape_outline_at_iteration` or `~.shape_outline_at_time`.
     :type shape: two NumPy arrays
     :param color: Color of the interior of the horizon.
     :type color: color as supported by Matplotlib
@@ -401,12 +764,84 @@ def plot_horizon_shape(
     :type edgecolor: color as supported by Matplotlib
     :param alpha:  Opacity of the horizon.
     :type alpha:  float
+
     """
-    return axis.fill(*shape, color=color, edgecolor=edgecolor, alpha=alpha)
+    return axis.fill(
+        *shape, color=color, edgecolor=edgecolor, alpha=alpha, **kwargs
+    )
 
 
-@_preprocess_plot
-def plot_horizon_shape_on_plane_at_iteration(
+@preprocess_plot
+def _plot_horizon_on_plane(
+    horizon,
+    plot_type="iteration",
+    iteration=None,
+    time=None,
+    plane="xy",
+    time_tolerance=1e-10,
+    color=None,
+    edgecolor=None,
+    alpha=None,
+    figure=None,
+    axis=None,
+    **kwargs,
+):
+    """Backend for :py:func:`~.plot_horizon_on_plane_at_iteration` and
+    :py:func:`~.plot_horizon_on_plane_at_time`.
+
+    Unknown arguments are passed to :py:func:`~.plot_horizon`.
+
+    :param horizon: Horizon to plot.
+    :type horizon: :py:class:`~.OneHorizon`
+    :param iteration: Iteration to plot.
+    :type iteration: int
+    :param plane: Plane where to plot (options: `xy`, `xz`, `yz`)
+    :type plane: str
+    :param time: Time to plot.
+    :type time: float
+    :param time_tolerance: Tolerance in the determination of the time.
+    :type time_tolerance: float
+    :param color: Color of the interior of the horizon.
+    :type color: color as supported by Matplotlib
+    :param edgecolor: Color of the edge of the horizon.
+    :type edgecolor: color as supported by Matplotlib
+    :param alpha:  Opacity of the horizon.
+    :type alpha:  float
+    :param figure: If passed, plot on this figure. If not passed (or if None),
+                   use the current figure.
+    :type figure: ``matplotlib.pyplot.figure``
+    :param axis: If passed, plot on this axis. If not passed (or if None), use
+                 the current axis.
+    :type axis: ``matplotlib.pyplot.axis``
+    """
+
+    cut = {
+        "xy": (None, None, 0),
+        "xz": (None, 0, None),
+        "yz": (0, None, None),
+    }
+
+    if plane not in cut.keys():
+        raise ValueError(f"Plane has to be one of {list(cut.keys())}")
+
+    if plot_type == "iteration":
+        shape = horizon.shape_outline_at_iteration(iteration, cut[plane])
+    elif plot_type == "time":
+        shape = horizon.shape_outline_at_time(time, cut[plane], tolerance=time_tolerance)
+
+    return plot_horizon(
+        shape,
+        color=color,
+        edgecolor=edgecolor,
+        alpha=alpha,
+        figure=figure,
+        axis=axis,
+        **kwargs,
+    )
+
+
+@preprocess_plot
+def plot_horizon_on_plane_at_iteration(
     horizon,
     iteration,
     plane,
@@ -418,6 +853,19 @@ def plot_horizon_shape_on_plane_at_iteration(
     **kwargs,
 ):
     """Plot outline of horizon in 2D on a given plane at a given iteration.
+
+    Unknown arguments are passed to :py:func:`~.plot_horizon`.
+
+    .. warning::
+
+       When you take a cross section (an outline) of an horizon, ``kuibit``
+       finds points that are within a threshold to the plane that cuts the
+       surface. However, the way points are distributed on apparent horizons is
+       highly non-uniform. So, if you are cutting the horizon along an axis that
+       is not one of the coordinate ones (for the horizon), it is likely that
+       too few points will be close enough to the intersecting plane, resulting
+       in a malformed or absent outline. In some distant future, ``kuibit`` will
+       perform interpolations to solve this problem.
 
     :param horizon: Horizon to plot.
     :type horizon: :py:class:`~.OneHorizon`
@@ -431,20 +879,18 @@ def plot_horizon_shape_on_plane_at_iteration(
     :type edgecolor: color as supported by Matplotlib
     :param alpha:  Opacity of the horizon.
     :type alpha:  float
+    :param figure: If passed, plot on this figure. If not passed (or if None),
+                   use the current figure.
+    :type figure: ``matplotlib.pyplot.figure``
+    :param axis: If passed, plot on this axis. If not passed (or if None), use
+                 the current axis.
+    :type axis: ``matplotlib.pyplot.axis``
     """
-
-    cut = {
-        "xy": (None, None, 0),
-        "xz": (None, 0, None),
-        "yz": (0, None, None),
-    }
-
-    if plane not in cut.keys():
-        raise ValueError(f"Plane has to be one of {list(cut.keys())}")
-
-    shape = horizon.shape_outline_at_iteration(iteration, cut[plane])
-    return plot_horizon_shape(
-        shape,
+    return _plot_horizon_on_plane(
+        horizon,
+        plot_type="iteration",
+        plane=plane,
+        iteration=iteration,
         color=color,
         edgecolor=edgecolor,
         alpha=alpha,
@@ -454,12 +900,12 @@ def plot_horizon_shape_on_plane_at_iteration(
     )
 
 
-@_preprocess_plot
-def plot_horizon_shape_on_plane_at_time(
+@preprocess_plot
+def plot_horizon_on_plane_at_time(
     horizon,
     time,
     plane,
-    tolerance=1e-10,
+    time_tolerance=1e-10,
     color=None,
     edgecolor=None,
     alpha=None,
@@ -469,12 +915,25 @@ def plot_horizon_shape_on_plane_at_time(
 ):
     """Plot outline of horizon in 2D on a given plane at a given time.
 
+    Unknown arguments are passed to :py:func:`~.plot_horizon`.
+
+    .. warning::
+
+       When you take a cross section (an outline) of an horizon, ``kuibit``
+       finds points that are within a threshold to the plane that cuts the
+       surface. However, the way points are distributed on apparent horizons is
+       highly non-uniform. So, if you are cutting the horizon along an axis that
+       is not one of the coordinate ones (for the horizon), it is likely that
+       too few points will be close enough to the intersecting plane, resulting
+       in a malformed or absent outline. In some distant future, ``kuibit`` will
+       perform interpolations to solve this problem.
+
     :param horizon: Horizon to plot.
     :type horizon: :py:class:`~.OneHorizon`
     :param time: Time to plot.
     :type time: float
-    :param tolerance: Tolerance in the determination of the time.
-    :type tolerance: float
+    :param time_tolerance: Tolerance in the determination of the time.
+    :type time_tolerance: float
     :param plane: Plane where to plot (options: `xy`, `xz`, `yz`)
     :type plane: str
     :param color: Color of the interior of the horizon.
@@ -483,20 +942,20 @@ def plot_horizon_shape_on_plane_at_time(
     :type edgecolor: color as supported by Matplotlib
     :param alpha:  Opacity of the horizon.
     :type alpha:  float
+    :param figure: If passed, plot on this figure. If not passed (or if None),
+                   use the current figure.
+    :type figure: ``matplotlib.pyplot.figure``
+    :param axis: If passed, plot on this axis. If not passed (or if None), use
+                 the current axis.
+    :type axis: ``matplotlib.pyplot.axis``
     """
 
-    cut = {
-        "xy": (None, None, 0),
-        "xz": (None, 0, None),
-        "yz": (0, None, None),
-    }
-
-    if plane not in cut.keys():
-        raise ValueError(f"Plane has to be one of {list(cut.keys())}")
-
-    shape = horizon.shape_outline_at_time(time, cut[plane], tolerance)
-    return plot_horizon_shape(
-        shape,
+    return _plot_horizon_on_plane(
+        horizon,
+        plane=plane,
+        plot_type="time",
+        time_tolerance=time_tolerance,
+        time=time,
         color=color,
         edgecolor=edgecolor,
         alpha=alpha,
@@ -504,36 +963,3 @@ def plot_horizon_shape_on_plane_at_time(
         axis=axis,
         **kwargs,
     )
-
-
-@_preprocess_plot
-def save(
-    outputpath,
-    figure_extension,
-    as_tikz=False,
-    figure=None,
-    axis=None,
-    **kwargs
-):
-    """Save figure to outputpath.
-
-    If as_tikz is True, save it as TikZ file.
-
-    :param outputpath:  Output path without extension.
-    :type outputpath:  str
-    :param figure_extension: Extension of the figure to save.
-                             This is ignored when as_tikz=True.
-    :type figure_extension:  str
-    :param as_tikz: Save figure with tikzplotlib instead of
-                    matplotlib. Output will have extension .tikz
-    :type as_tikz:  bool
-
-
-    """
-
-    if as_tikz:
-        figurepath = f"{outputpath}.tikz"
-        tikzplotlib.save(figurepath, **kwargs)
-    else:
-        figurepath = f"{outputpath}.{figure_extension}"
-        plt.savefig(figurepath, **kwargs)
