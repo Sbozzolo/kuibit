@@ -63,14 +63,7 @@ to interpolate between timesteps."""
         f"QuasiLocalMeasures horizons available: {sim_hor.available_qlm_horizons}"
     )
 
-    if args.qlm_index not in sim_hor.available_qlm_horizons:
-        raise ValueError(
-            f"QuasiLocalMeasures index {args.qlm_index} is not available"
-        )
-
-    # We set the second index to 0 because we are only interested in the
-    # QuasiLocalMeasures
-    horizon = sim_hor[args.qlm_index, 0]
+    horizon = sim_hor.get_qlm_horizon(args.qlm_index)
 
     time = args.time
 

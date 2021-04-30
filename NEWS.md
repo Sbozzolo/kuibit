@@ -15,6 +15,10 @@ the docstrings of the various functions.
 
 * `print_qlm_properties_at_time.py`
 
+#### Features
+
+- New methods `get_apparent_horizon` and `get_qlm_horizon` in `HorizonsDir`.
+
 ## Version 1.1.1 (22 April 2021)
 
 #### Bug fixes

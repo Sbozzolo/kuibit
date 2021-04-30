@@ -207,6 +207,32 @@ class TestHorizonsDir(unittest.TestCase):
                 self.qlm_shape._shape_files[1],
             )
 
+    def test_get_apparent_horizon(self):
+
+        # Horizon not available
+        with self.assertRaises(KeyError):
+            self.hor.get_apparent_horizon(6)
+
+        # Check that we have the variables that we expect
+        self.assertCountEqual(
+            self.hor.get_apparent_horizon(1)._ah_vars, self.hor._ah_vars[1]
+        )
+        self.assertCountEqual(
+            self.hor.get_apparent_horizon(1)._shape_files,
+            self.hor._shape_files[1],
+        )
+
+    def test_get_qlm_horizon(self):
+
+        # Horizon not available
+        with self.assertRaises(KeyError):
+            self.hor.get_qlm_horizon(6)
+
+        # Check that we have the variables that we expect
+        self.assertCountEqual(
+            self.hor.get_qlm_horizon(0)._qlm_vars, self.hor._qlm_vars[0]
+        )
+
 
 class TestOneHorizon(unittest.TestCase):
     def setUp(self):

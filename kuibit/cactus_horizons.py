@@ -858,6 +858,34 @@ class HorizonsDir:
         :rtype: list"""
         return sorted(list(self._ah_vars.keys()))
 
+    def get_apparent_horizon(self, ah):
+        """Return a :py:func:`~.OneHorizon` corresponding to an horizon as
+        found by AHFinderDirect.
+
+        :param ah: AHFinderDirect index.
+        :type ah: int
+
+        :returns: Apparent horizon.
+        :rtype: :py:func:`~.OneHorizon`
+        """
+        if ah not in self.available_apparent_horizons:
+            raise KeyError(f"AH horizon {ah} not available")
+        return self[(-1, ah)]
+
+    def get_qlm_horizon(self, qlm):
+        """Return a :py:func:`~.OneHorizon` corresponding to an horizon as
+        analyzed by QuasiLocalMeasures.
+
+        :param qlm: QuasiLocalMeasures index.
+        :type qlm: int
+
+        :returns: QuasiLocalMeasures horizon.
+        :rtype: :py:func:`~.OneHorizon`
+        """
+        if qlm not in self.available_qlm_horizons:
+            raise KeyError(f"QLM horizon {qlm} not available")
+        return self[(qlm, -1)]
+
     def __getitem__(self, key):
         if not isinstance(key, (tuple, list)):
             raise TypeError("You have to provide both the QLM and AH indices")
@@ -873,7 +901,7 @@ class HorizonsDir:
             qlm_index not in self.available_qlm_horizons
             and ah_index not in self.available_apparent_horizons
         ):
-            raise KeyError(f"Horizon {key} in not found")
+            raise KeyError(f"Horizon {key} is not found (QLM and AH absent)")
 
         # With get we return an empty dictionary if we don't have the index
         return OneHorizon(

@@ -59,10 +59,7 @@ if __name__ == "__main__":
         f"Apparent horizons available: {sim_hor.available_apparent_horizons}"
     )
 
-    if args.horizon not in sim_hor.available_apparent_horizons:
-        raise ValueError(f"Apparent horizons {args.horizon} is not available")
-
-    time_found = sim_hor[0, args.horizon].formation_time
+    time_found = sim_hor.get_apparent_horizon(args.horizon).formation_time
 
     if args.parsable:
         print(f"{time_found}")
