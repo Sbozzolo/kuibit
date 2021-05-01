@@ -246,6 +246,14 @@ matrix-indexed).
    for an explanation.)
 
 
+When working with 1D grid data, you can transform the
+:py:class:`~.UniformGridData` into a :py:class:`~.GridSeries`. This is different
+type of object that shares the same properties and infrastructure as
+:py:class:`~.TimeSeries` and :py:class:`~.FrequencySeries`.
+:py:class:`~.GridSeries` are typically simpler and more direct to use (for
+example, you can plot them directly with ``plt.plot(rho)``).
+
+
 HierarchicalGridData
 --------------------
 

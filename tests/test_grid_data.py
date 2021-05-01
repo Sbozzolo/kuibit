@@ -1100,6 +1100,27 @@ class TestUniformGridData(unittest.TestCase):
 
         self.assertEqual(expected_c, prod_data_complex.fourier_transform())
 
+    def test_to_GridSeries(self):
+
+        # Not 1D
+        prod_data_complex = gdu.sample_function(
+            lambda x, y: (1 + 1j) * x * (y + 2), [11, 21], [0, 10], [10, 30]
+        )
+        with self.assertRaises(ValueError):
+            prod_data_complex.to_GridSeries()
+
+        prod_data_complex_1D = gdu.sample_function(
+            lambda x: (1 + 1j) * x, [11], [0], [10]
+        )
+
+        coords = np.linspace(0, 10, 11)
+
+        expected_gridseries = gd.GridSeries(coords, (1 + 1j) * coords)
+
+        self.assertEqual(
+            prod_data_complex_1D.to_GridSeries(), expected_gridseries
+        )
+
 
 class TestHierarchicalGridData(unittest.TestCase):
     def setUp(self):

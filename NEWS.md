@@ -11,6 +11,14 @@ to be as general as possible: if you pass some grid objects, they will try to
 figure out how to plot it. Nonetheless, you should read the documentation and
 the docstrings of the various functions.
 
+#### New class: GridSeries
+
+`GridSeries` is a new class to describe 1D grid data. This class utilizes the
+same infrastructure used by `TimeSeries` and `FrequencySeries` to represent a
+single-valued function. `UniformGridData` can be transformed into `GridSeries`
+with the method `to_GridSeries`. The main reason you would want to do this is
+because `GridSeries` are leaner and more direct to use.
+
 #### General
 - Improvements to documentation, docstrings, and tutorials
 
