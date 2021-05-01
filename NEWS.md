@@ -11,6 +11,9 @@ to be as general as possible: if you pass some grid objects, they will try to
 figure out how to plot it. Nonetheless, you should read the documentation and
 the docstrings of the various functions.
 
+#### General
+- Improvements to documentation, docstrings, and tutorials
+
 #### New examples
 
 * `print_qlm_properties_at_time.py`
