@@ -46,7 +46,7 @@
    "cell_type": "markdown",
    "metadata": {},
    "source": [
-    "As we see, `kuibit` found some horizons. `kuibit` looks for data from `QuasiLocalMeasures` and `AHFinderDirect`. These two thorns use different indexing systems, and, at the moment, you must provide both to uniquely indentify an horizon."
+    "As we see, `kuibit` found some horizons. `kuibit` looks for data from `QuasiLocalMeasures` and `AHFinderDirect`. These two thorns use different indexing systems, and, at the moment, you must provide both to uniquely indentify an horizon. If you need information from only one of the two (e.g., you want to plot the apparent horizon), you can also use the functions `get_apparent_horizon` and `get_qlm_horizon`."
    ]
   },
   {
@@ -158,7 +158,9 @@
    "cell_type": "markdown",
    "metadata": {},
    "source": [
-    "In case you want to work with a 2D slice, of the shape, you can use the method `shape_outline_at_iteration` and specify how to cut the shape."
+    "In case you want to work with a 2D slice, of the shape, you can use the method `shape_outline_at_iteration` and specify how to cut the shape. \n",
+    "\n",
+    "Note that the the distributions of points is not uniform across the horizon and `kuibit` does not do any interpolation across points. Therefore, there are values of `cut` that will lead to a malformed horizon. It is recommended to use cuts that are along the principal directions."
    ]
   },
   {
@@ -169,7 +171,43 @@
    "source": [
     "cut = [None, None, 0]  # Equatorial plane (z=0)\n",
     "\n",
-    "plt.fill(*h1.shape_outline_at_iteration(0, cut))"
+    "shape = h1.shape_outline_at_iteration(0, cut)\n",
+    "\n",
+    "plt.fill(*shape)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "You can also use the module `visualize_matplotlib` to plot the horizon in 2D. If you already have the shape, you can use `plot_horizon`."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "from kuibit import visualize_matplotlib as viz\n",
+    "\n",
+    "viz.plot_horizon(shape, color='r', edgecolor='b')"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "Alternatively, you can use the higher level functions `plot_horizon_on_plane_at_iteration` or `plot_horizon_on_plane_at_time`. These take directly a `OneHorizon` object and the desired iteration/time."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "viz.plot_horizon_on_plane_at_time(h1, time=0, plane=\"xy\", color='g')"
    ]
   }
  ],
@@ -189,7 +227,7 @@
    "name": "python",
    "nbconvert_exporter": "python",
    "pygments_lexer": "ipython3",
-   "version": "3.7.8"
+   "version": "3.8.8"
   }
  },
  "nbformat": 4,

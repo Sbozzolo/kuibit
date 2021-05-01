@@ -38,6 +38,13 @@
    "cell_type": "markdown",
    "metadata": {},
    "source": [
+    "## `UniformGrid`"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
     "To generate data, we start from preparing a grid. `kuibit` follows the conventions in `Carpet` and identifies a grid with (1) the number of points along each direction, (2) the coordinate of left bottom cell, (3) the spacing or the coordinate of the top right cell.\n",
     "In addition, `UniformGrid` can contain additional information, like the number of refinement level, or the time. These grids are always cell-centered.\n",
     "\n",
@@ -128,6 +135,13 @@
    "cell_type": "markdown",
    "metadata": {},
    "source": [
+    "## `UniformGridData`"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
     "`UniformGridData` are much more interesting. `UniformGridData` packages a\n",
     "`UniformGrid` and some data in the same object and provides many useful\n",
     "functionalities.\n",
@@ -161,7 +175,9 @@
     "transposing the actual physical quantity, because `data` is a matrix stored by rows, \n",
     "so, the first index does not label the x coordiante, but the y. \n",
     "We provide the aliaxs `data_xyz`, which is the the tranposed of `data`. This is ready to be plotted. \n",
-    "Here we plot the various quantities directly so we can see how to access the data. `PostCactus.visualize` contains methods to streamline these operations.\n"
+    "\n",
+    "\n",
+    "In this tutorial, we plot the various quantities directly. This is to understand to access the data and what is the fundamental structure of these objects. However, `kuibit` comes with plottings methods too. The `visualize_matplotlib` module contains multiple functions to make 2D plots. We touch upon this at the end of this tutorial."
    ]
   },
   {
@@ -260,8 +276,20 @@
    "source": [
     "Being able to resample `UniformGridData` means that even if it is not possible to directly\n",
     "combine objects with different grids, you can always resample them to a common grid, and then\n",
-    "perform the operation.\n",
-    "\n",
+    "perform the operation."
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "## `HierarchicalGridData`"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
     "Now that we have some familiarity with `UniformGridData`, we can move to the most important\n",
     "object, `HierarchicalGridData`. The relevance of this class is due to the fact that simulation\n",
     "data is represented with `HierarchicalGridData` objects.\n",
@@ -357,7 +385,9 @@
    "cell_type": "markdown",
    "metadata": {},
    "source": [
-    "We cannot plot directly this object, because it is a complicated object. To plot it, we have to merge the refinement levels to a single `UniformGridData`. We can do this with `merge_refinement_levels()`. "
+    "We cannot plot directly this object, because it is a complicated object. To plot it, we have to merge the refinement levels to a single `UniformGridData`. We can do this with `merge_refinement_levels()`. \n",
+    "\n",
+    "Note that `merge_refinement_levels` is a very expensive operation and that it is provided only for small datasets or for one-dimensional data. "
    ]
   },
   {
@@ -427,6 +457,66 @@
     "print(along_y.grid)\n",
     "plt.plot(*along_y.coordinates_meshgrid(), along_y.data)"
    ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "When working with a one-dimensional array, you can consider converting it to a `GridSeries` with the method `to_GridSeries`. That is: instead of using the entire infrastructure for grid data, you can use the infrastructure for series (e.g., `TimeSeries`). The main advantage is that the series infrastrcture is more direct and lean. For example, you can plot directly with `plt.plot()`."
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "## `visualize_matplotlib`"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "In this tutorial we plotted all the quantities directly accessing the data. This is a pedagogical choice: you need to know how things work to be able to take full advantage of `kuibit`. However, most often the methods in the module `visualize_matplotlib` will be enough.\n",
+    "\n",
+    "The main functions to plot 2D data are: `plot_color` and `plot_contourf`. These take all sorts of inputs, and you should read the documentation. For example, we can plot a `UniformGridData` (the function will behave similarly with `HierarchicalGridData` or NumPy arrays)."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "import kuibit.visualize_matplotlib as viz\n",
+    "\n",
+    "viz.plot_color(funky_data)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "If we are only interested in a smaller region (and setting other parameters):"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "viz.plot_color(funky_data, x0=[8,8], x1=[10,10], \n",
+    "               shape=[50, 50], colorbar=True, \n",
+    "               logscale=True, xlabel=\"x\", ylabel=\"y\",\n",
+    "               interpolation=\"bicubic\")"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "The method `plot_contourf` works in the same way."
+   ]
   }
  ],
  "metadata": {
@@ -445,7 +535,7 @@
    "name": "python",
    "nbconvert_exporter": "python",
    "pygments_lexer": "ipython3",
-   "version": "3.7.8"
+   "version": "3.8.8"
   },
   "name": "grid_data.ipynb"
  },

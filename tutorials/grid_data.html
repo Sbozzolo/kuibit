@@ -304,6 +304,8 @@ div.rendered_html tbody tr:hover {
 </pre></div>
 </div>
 </div>
+<div class="section" id="UniformGrid">
+<h2><code class="docutils literal notranslate"><span class="pre">UniformGrid</span></code><a class="headerlink" href="#UniformGrid" title="Permalink to this headline">¶</a></h2>
 <p>To generate data, we start from preparing a grid. <code class="docutils literal notranslate"><span class="pre">kuibit</span></code> follows the conventions in <code class="docutils literal notranslate"><span class="pre">Carpet</span></code> and identifies a grid with (1) the number of points along each direction, (2) the coordinate of left bottom cell, (3) the spacing or the coordinate of the top right cell. In addition, <code class="docutils literal notranslate"><span class="pre">UniformGrid</span></code> can contain additional information, like the number of refinement level, or the time. These grids are always cell-centered.</p>
 <p>Let us create a 2D grid:</p>
 <div class="nbinput nblast docutils container">
@@ -420,6 +422,9 @@ Is [-140, 50] in the grid?: False
    92.   93.   94.   95.   96.   97.   98.   99.  100.]
 </pre></div></div>
 </div>
+</div>
+<div class="section" id="UniformGridData">
+<h2><code class="docutils literal notranslate"><span class="pre">UniformGridData</span></code><a class="headerlink" href="#UniformGridData" title="Permalink to this headline">¶</a></h2>
 <p><code class="docutils literal notranslate"><span class="pre">UniformGridData</span></code> are much more interesting. <code class="docutils literal notranslate"><span class="pre">UniformGridData</span></code> packages a <code class="docutils literal notranslate"><span class="pre">UniformGrid</span></code> and some data in the same object and provides many useful functionalities.</p>
 <p>Let us create some fake data to explore the capabilities. A simple way to generate a <code class="docutils literal notranslate"><span class="pre">UniformGridData</span></code> from a function is with <code class="docutils literal notranslate"><span class="pre">sample_function</span></code>.</p>
 <div class="nbinput nblast docutils container">
@@ -436,7 +441,8 @@ Is [-140, 50] in the grid?: False
 </div>
 </div>
 <p>We can visualize this data with matplotlib <code class="docutils literal notranslate"><span class="pre">contourf</span></code>. To do this, we need the coordinates as meshgrid, and we need the actual data. To get the first, we use the <code class="docutils literal notranslate"><span class="pre">coordinates_meshgrid</span></code> method, for the second, we access directly the data with the <code class="docutils literal notranslate"><span class="pre">data</span></code> attribute. This is stored as a numpy array. Often, we want to plot these objects. Using <code class="docutils literal notranslate"><span class="pre">data</span></code> directly would lead to transposing the actual physical quantity, because <code class="docutils literal notranslate"><span class="pre">data</span></code> is a matrix stored by rows, so, the first index does not label
-the x coordiante, but the y. We provide the aliaxs <code class="docutils literal notranslate"><span class="pre">data_xyz</span></code>, which is the the tranposed of <code class="docutils literal notranslate"><span class="pre">data</span></code>. This is ready to be plotted. Here we plot the various quantities directly so we can see how to access the data. <code class="docutils literal notranslate"><span class="pre">PostCactus.visualize</span></code> contains methods to streamline these operations.</p>
+the x coordiante, but the y. We provide the aliaxs <code class="docutils literal notranslate"><span class="pre">data_xyz</span></code>, which is the the tranposed of <code class="docutils literal notranslate"><span class="pre">data</span></code>. This is ready to be plotted.</p>
+<p>In this tutorial, we plot the various quantities directly. This is to understand to access the data and what is the fundamental structure of these objects. However, <code class="docutils literal notranslate"><span class="pre">kuibit</span></code> comes with plottings methods too. The <code class="docutils literal notranslate"><span class="pre">visualize_matplotlib</span></code> module contains multiple functions to make 2D plots. We touch upon this at the end of this tutorial.</p>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
 </pre></div>
@@ -454,14 +460,14 @@ the x coordiante, but the y. We provide the aliaxs <code class="docutils literal
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-&lt;matplotlib.colorbar.Colorbar at 0x7f458be49110&gt;
+&lt;matplotlib.colorbar.Colorbar at 0x7fe43d917d50&gt;
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="../_images/tutorials_grid_data_15_1.png" src="../_images/tutorials_grid_data_15_1.png" />
+<img alt="../_images/tutorials_grid_data_17_1.png" src="../_images/tutorials_grid_data_17_1.png" />
 </div>
 </div>
 <p><code class="docutils literal notranslate"><span class="pre">UniformGridData</span></code> support all the mathematical operations we may want, for instance.</p>
@@ -482,14 +488,14 @@ the x coordiante, but the y. We provide the aliaxs <code class="docutils literal
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-&lt;matplotlib.colorbar.Colorbar at 0x7f458bd1e950&gt;
+&lt;matplotlib.colorbar.Colorbar at 0x7fe43551f610&gt;
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="../_images/tutorials_grid_data_17_1.png" src="../_images/tutorials_grid_data_17_1.png" />
+<img alt="../_images/tutorials_grid_data_19_1.png" src="../_images/tutorials_grid_data_19_1.png" />
 </div>
 </div>
 <p><code class="docutils literal notranslate"><span class="pre">UniformGridData</span></code> can be interpolated with splines to evalute data everywhere, even where there was no data. With this, we can make <code class="docutils literal notranslate"><span class="pre">UniformGridData</span></code> callable objects:</p>
@@ -543,14 +549,14 @@ The norm2 of funky_data is 20417.836
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-[&lt;matplotlib.lines.Line2D at 0x7f458bc95dd0&gt;]
+[&lt;matplotlib.lines.Line2D at 0x7fe435442890&gt;]
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="../_images/tutorials_grid_data_21_2.png" src="../_images/tutorials_grid_data_21_2.png" />
+<img alt="../_images/tutorials_grid_data_23_2.png" src="../_images/tutorials_grid_data_23_2.png" />
 </div>
 </div>
 <p>It is not possible to combine directly two <code class="docutils literal notranslate"><span class="pre">UniformGridData</span></code> with different associated grids, but it is always possible to resample the objects so that they have a common grid.</p>
@@ -573,17 +579,20 @@ The norm2 of funky_data is 20417.836
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-&lt;matplotlib.colorbar.Colorbar at 0x7f458bbef090&gt;
+&lt;matplotlib.colorbar.Colorbar at 0x7fe4353fcfd0&gt;
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="../_images/tutorials_grid_data_23_1.png" src="../_images/tutorials_grid_data_23_1.png" />
+<img alt="../_images/tutorials_grid_data_25_1.png" src="../_images/tutorials_grid_data_25_1.png" />
 </div>
 </div>
 <p>Being able to resample <code class="docutils literal notranslate"><span class="pre">UniformGridData</span></code> means that even if it is not possible to directly combine objects with different grids, you can always resample them to a common grid, and then perform the operation.</p>
+</div>
+<div class="section" id="HierarchicalGridData">
+<h2><code class="docutils literal notranslate"><span class="pre">HierarchicalGridData</span></code><a class="headerlink" href="#HierarchicalGridData" title="Permalink to this headline">¶</a></h2>
 <p>Now that we have some familiarity with <code class="docutils literal notranslate"><span class="pre">UniformGridData</span></code>, we can move to the most important object, <code class="docutils literal notranslate"><span class="pre">HierarchicalGridData</span></code>. The relevance of this class is due to the fact that simulation data is represented with <code class="docutils literal notranslate"><span class="pre">HierarchicalGridData</span></code> objects.</p>
 <p>A <code class="docutils literal notranslate"><span class="pre">HierarchicalGridData</span></code> is a collection of <code class="docutils literal notranslate"><span class="pre">UniformGridData</span></code>, or (or more) for each refinement level.</p>
 <p>Let us prepare some fake data.</p>
@@ -672,6 +681,7 @@ more_funk of (2, 3) is 2.565
 </pre></div></div>
 </div>
 <p>We cannot plot directly this object, because it is a complicated object. To plot it, we have to merge the refinement levels to a single <code class="docutils literal notranslate"><span class="pre">UniformGridData</span></code>. We can do this with <code class="docutils literal notranslate"><span class="pre">merge_refinement_levels()</span></code>.</p>
+<p>Note that <code class="docutils literal notranslate"><span class="pre">merge_refinement_levels</span></code> is a very expensive operation and that it is provided only for small datasets or for one-dimensional data.</p>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[17]:
 </pre></div>
@@ -689,14 +699,14 @@ more_funk of (2, 3) is 2.565
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-&lt;matplotlib.colorbar.Colorbar at 0x7f458bad6a50&gt;
+&lt;matplotlib.colorbar.Colorbar at 0x7fe4352d6810&gt;
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="../_images/tutorials_grid_data_32_1.png" src="../_images/tutorials_grid_data_32_1.png" />
+<img alt="../_images/tutorials_grid_data_36_1.png" src="../_images/tutorials_grid_data_36_1.png" />
 </div>
 </div>
 <p>As you noticed, we enabled the <code class="docutils literal notranslate"><span class="pre">resample</span></code> option. With this option the coarser refinement levels are interpolated to the new finer grid using multilinear interpolation.</p>
@@ -718,14 +728,14 @@ more_funk of (2, 3) is 2.565
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-&lt;matplotlib.colorbar.Colorbar at 0x7f458b9ca9d0&gt;
+&lt;matplotlib.colorbar.Colorbar at 0x7fe4351c9590&gt;
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="../_images/tutorials_grid_data_34_1.png" src="../_images/tutorials_grid_data_34_1.png" />
+<img alt="../_images/tutorials_grid_data_38_1.png" src="../_images/tutorials_grid_data_38_1.png" />
 </div>
 </div>
 <p><code class="docutils literal notranslate"><span class="pre">HierachicalGridData</span></code> objects have a lot of information that is accessible as a property.</p>
@@ -749,7 +759,7 @@ more_funk of (2, 3) is 2.565
 Available refinement levels: [0, 1, 2]
 Spacing of the coarsest: [1. 1.]
 Spacing of the finest: [0.33333333 0.33333333]
-Finest level: &lt;kuibit.grid_data.UniformGridData object at 0x7f458bbc3d90&gt;
+Finest level: &lt;kuibit.grid_data.UniformGridData object at 0x7fe4353b01d0&gt;
 </pre></div></div>
 </div>
 <p>Often, we want to look at a specific cut of the data. <code class="docutils literal notranslate"><span class="pre">UniformGridData</span></code> can be sliced easily. Just prepare a <code class="docutils literal notranslate"><span class="pre">cut</span></code> array with <code class="docutils literal notranslate"><span class="pre">None</span></code> where you want to keep the dimension, and the coordiante of where you want to slice. For example, here we extract the line with <code class="docutils literal notranslate"><span class="pre">y=0.7</span></code>.</p>
@@ -790,15 +800,79 @@ Iteration        = None
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-[&lt;matplotlib.lines.Line2D at 0x7f458b951210&gt;]
+[&lt;matplotlib.lines.Line2D at 0x7fe435175bd0&gt;]
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="../_images/tutorials_grid_data_38_2.png" src="../_images/tutorials_grid_data_38_2.png" />
+<img alt="../_images/tutorials_grid_data_42_2.png" src="../_images/tutorials_grid_data_42_2.png" />
 </div>
+</div>
+<p>When working with a one-dimensional array, you can consider converting it to a <code class="docutils literal notranslate"><span class="pre">GridSeries</span></code> with the method <code class="docutils literal notranslate"><span class="pre">to_GridSeries</span></code>. That is: instead of using the entire infrastructure for grid data, you can use the infrastructure for series (e.g., <code class="docutils literal notranslate"><span class="pre">TimeSeries</span></code>). The main advantage is that the series infrastrcture is more direct and lean. For example, you can plot directly with <code class="docutils literal notranslate"><span class="pre">plt.plot()</span></code>.</p>
+</div>
+<div class="section" id="visualize_matplotlib">
+<h2><code class="docutils literal notranslate"><span class="pre">visualize_matplotlib</span></code><a class="headerlink" href="#visualize_matplotlib" title="Permalink to this headline">¶</a></h2>
+<p>In this tutorial we plotted all the quantities directly accessing the data. This is a pedagogical choice: you need to know how things work to be able to take full advantage of <code class="docutils literal notranslate"><span class="pre">kuibit</span></code>. However, most often the methods in the module <code class="docutils literal notranslate"><span class="pre">visualize_matplotlib</span></code> will be enough.</p>
+<p>The main functions to plot 2D data are: <code class="docutils literal notranslate"><span class="pre">plot_color</span></code> and <code class="docutils literal notranslate"><span class="pre">plot_contourf</span></code>. These take all sorts of inputs, and you should read the documentation. For example, we can plot a <code class="docutils literal notranslate"><span class="pre">UniformGridData</span></code> (the function will behave similarly with <code class="docutils literal notranslate"><span class="pre">HierarchicalGridData</span></code> or NumPy arrays).</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[21]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">kuibit.visualize_matplotlib</span> <span class="k">as</span> <span class="nn">viz</span>
+
+<span class="n">viz</span><span class="o">.</span><span class="n">plot_color</span><span class="p">(</span><span class="n">funky_data</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[21]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+&lt;matplotlib.image.AxesImage at 0x7fe430baa610&gt;
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/tutorials_grid_data_46_1.png" src="../_images/tutorials_grid_data_46_1.png" />
+</div>
+</div>
+<p>If we are only interested in a smaller region (and setting other parameters):</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[22]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">viz</span><span class="o">.</span><span class="n">plot_color</span><span class="p">(</span><span class="n">funky_data</span><span class="p">,</span> <span class="n">x0</span><span class="o">=</span><span class="p">[</span><span class="mi">8</span><span class="p">,</span><span class="mi">8</span><span class="p">],</span> <span class="n">x1</span><span class="o">=</span><span class="p">[</span><span class="mi">10</span><span class="p">,</span><span class="mi">10</span><span class="p">],</span>
+               <span class="n">shape</span><span class="o">=</span><span class="p">[</span><span class="mi">50</span><span class="p">,</span> <span class="mi">50</span><span class="p">],</span> <span class="n">colorbar</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+               <span class="n">logscale</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">xlabel</span><span class="o">=</span><span class="s2">&quot;x&quot;</span><span class="p">,</span> <span class="n">ylabel</span><span class="o">=</span><span class="s2">&quot;y&quot;</span><span class="p">,</span>
+               <span class="n">interpolation</span><span class="o">=</span><span class="s2">&quot;bicubic&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[22]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+&lt;matplotlib.image.AxesImage at 0x7fe430b916d0&gt;
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/tutorials_grid_data_48_1.png" src="../_images/tutorials_grid_data_48_1.png" />
+</div>
+</div>
+<p>The method <code class="docutils literal notranslate"><span class="pre">plot_contourf</span></code> works in the same way.</p>
 </div>
 </div>
 
@@ -812,6 +886,17 @@ Iteration        = None
             <p class="logo"><a href="../index.html">
               <img class="logo" src="../_static/logo.png" alt="Logo"/>
             </a></p>
+  <h3><a href="../index.html">Table of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Working with grid data</a><ul>
+<li><a class="reference internal" href="#UniformGrid"><code class="docutils literal notranslate"><span class="pre">UniformGrid</span></code></a></li>
+<li><a class="reference internal" href="#UniformGridData"><code class="docutils literal notranslate"><span class="pre">UniformGridData</span></code></a></li>
+<li><a class="reference internal" href="#HierarchicalGridData"><code class="docutils literal notranslate"><span class="pre">HierarchicalGridData</span></code></a></li>
+<li><a class="reference internal" href="#visualize_matplotlib"><code class="docutils literal notranslate"><span class="pre">visualize_matplotlib</span></code></a></li>
+</ul>
+</li>
+</ul>
+
   <h4>Previous topic</h4>
   <p class="topless"><a href="timeseries.html"
                         title="previous chapter">Working with time series, frequency series, and unit conversion</a></p>
