@@ -326,3 +326,17 @@ class TestVisualizeMatplotlib(unittest.TestCase):
         viz.save("test.tikz")
         self.assertTrue(os.path.exists("test.tikz"))
         os.remove("test.tikz")
+
+    def test_save_from_dir_name_ext(self):
+
+        plt.plot([1, 1], [2, 2])
+        # Test without dot in the ext
+        viz.save_from_dir_filename_ext(".", "test", "pdf")
+        self.assertTrue(os.path.exists("test.pdf"))
+        os.remove("test.pdf")
+
+        # Test with dot in the ext
+        viz.save_from_dir_filename_ext(".", "test", ".pdf")
+        self.assertTrue(os.path.exists("test.pdf"))
+        os.remove("test.pdf")
+

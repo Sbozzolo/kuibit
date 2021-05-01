@@ -370,12 +370,61 @@ def save(
                         extension is ``.tikz``, the file is saved with
                         ``tikzplotlib``.
     :type outputpath:  str
+    :param figure: If passed, plot on this figure. If not passed (or if None),
+                   use the current figure.
+    :type figure: ``matplotlib.pyplot.figure``
+
+    :param axis: If passed, plot on this axis. If not passed (or if None), use
+                 the current axis.
+    :type axis: ``matplotlib.pyplot.axis``
 
     """
     if os.path.splitext(outputpath)[-1] == ".tikz":
         tikzplotlib.save(outputpath, **kwargs)
     else:
         plt.savefig(outputpath, **kwargs)
+
+
+@preprocess_plot
+def save_from_dir_filename_ext(
+    output_dir,
+    file_name,
+    file_ext,
+    figure=None,
+    axis=None,
+    **kwargs,
+):
+    """Save figure to a location defined by a folder, a name, and an extension.
+
+    If the ``file_ext`` is ``tikz``, the file will be saved with
+    ``tikzplotlib``.
+
+    Unknown arguments are passed to the ``matplotlib.savefig`` or
+    ``tikzplotlib.save`` (depending on the extension).
+
+    :param output_dir: Path of a directory where to save the figure
+    :type output_dir: str
+    :param file_name: Name of the file.
+    :type file_name: str
+    :param file_extension: Extension of the file, with or without dot.
+    :type file_extension: str
+    :param figure: If passed, plot on this figure. If not passed (or if None),
+                   use the current figure.
+    :type figure: ``matplotlib.pyplot.figure``
+
+    :param axis: If passed, plot on this axis. If not passed (or if None), use
+                 the current axis.
+    :type axis: ``matplotlib.pyplot.axis``
+
+    """
+    ext = file_ext if file_ext[0] == "." else f".{file_ext}"
+    outputpath = os.path.join(output_dir, f"{file_name}{ext}")
+    return save(
+        outputpath,
+        figure=figure,
+        axis=axis,
+        **kwargs,
+    )
 
 
 # GRID FUNCTIONS
@@ -827,7 +876,9 @@ def _plot_horizon_on_plane(
     if plot_type == "iteration":
         shape = horizon.shape_outline_at_iteration(iteration, cut[plane])
     elif plot_type == "time":
-        shape = horizon.shape_outline_at_time(time, cut[plane], tolerance=time_tolerance)
+        shape = horizon.shape_outline_at_time(
+            time, cut[plane], tolerance=time_tolerance
+        )
 
     return plot_horizon(
         shape,
