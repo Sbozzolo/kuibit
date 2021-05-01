@@ -68,14 +68,14 @@ half of this page.</p>
 <div class="section" id="uniformgrid">
 <h2>UniformGrid<a class="headerlink" href="#uniformgrid" title="Permalink to this headline">¶</a></h2>
 <p>The most basic concept that we need to work with grid function is the concept of
-<a class="reference internal" href="grid_data_ref.html#kuibit.grid_data.UniformGrid" title="kuibit.grid_data.UniformGrid"><code class="xref py py-class docutils literal notranslate"><span class="pre">UniformGrid</span></code></a>, which represents an uniform cell-centered Cartesian
+<code class="xref py py-class docutils literal notranslate"><span class="pre">UniformGrid</span></code>, which represents an uniform cell-centered Cartesian
 grid in arbitrary number of dimensions. An object of type
-<a class="reference internal" href="grid_data_ref.html#kuibit.grid_data.UniformGrid" title="kuibit.grid_data.UniformGrid"><code class="xref py py-class docutils literal notranslate"><span class="pre">UniformGrid</span></code></a> is immutable and is defined by the location of the
+<code class="xref py py-class docutils literal notranslate"><span class="pre">UniformGrid</span></code> is immutable and is defined by the location of the
 origin of the grid, by the number of points along each dimension, and by either
-the opposite corner or the spacing. <a class="reference internal" href="grid_data_ref.html#kuibit.grid_data.UniformGrid" title="kuibit.grid_data.UniformGrid"><code class="xref py py-class docutils literal notranslate"><span class="pre">UniformGrid</span></code></a> are important
+the opposite corner or the spacing. <code class="xref py py-class docutils literal notranslate"><span class="pre">UniformGrid</span></code> are important
 because they are are the building blocks of grids with refinement levels and
 because they are the most natural grid to plot.</p>
-<p>Let’s see how to define a <a class="reference internal" href="grid_data_ref.html#kuibit.grid_data.UniformGrid" title="kuibit.grid_data.UniformGrid"><code class="xref py py-class docutils literal notranslate"><span class="pre">UniformGrid</span></code></a>:</p>
+<p>Let’s see how to define a <code class="xref py py-class docutils literal notranslate"><span class="pre">UniformGrid</span></code>:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">kuibit.grid_data</span> <span class="k">as</span> <span class="nn">gd</span>
 
 <span class="n">box</span> <span class="o">=</span> <span class="n">gd</span><span class="o">.</span><span class="n">UniformGrid</span><span class="p">(</span>
@@ -97,11 +97,11 @@ can specify the size of each cell by providing the <code class="docutils literal
             <span class="p">)</span>
 </pre></div>
 </div>
-<p><a class="reference internal" href="grid_data_ref.html#kuibit.grid_data.UniformGrid" title="kuibit.grid_data.UniformGrid"><code class="xref py py-class docutils literal notranslate"><span class="pre">UniformGrid</span></code></a> are used as part of grids with refinement levels, so
+<p><code class="xref py py-class docutils literal notranslate"><span class="pre">UniformGrid</span></code> are used as part of grids with refinement levels, so
 they can house additional information, like <code class="docutils literal notranslate"><span class="pre">time</span></code>, <code class="docutils literal notranslate"><span class="pre">num_ghost</span></code>,
 <code class="docutils literal notranslate"><span class="pre">ref_level</span></code>. In most cases, it is not necessary to work directly with these
 quantities.</p>
-<p>Some useful attributes to know about <a class="reference internal" href="grid_data_ref.html#kuibit.grid_data.UniformGrid" title="kuibit.grid_data.UniformGrid"><code class="xref py py-class docutils literal notranslate"><span class="pre">UniformGrid</span></code></a> are:
+<p>Some useful attributes to know about <code class="xref py py-class docutils literal notranslate"><span class="pre">UniformGrid</span></code> are:
 - <code class="docutils literal notranslate"><span class="pre">x0</span></code> and <code class="docutils literal notranslate"><span class="pre">x1</span></code> return the two corners of the grid,
 - <code class="docutils literal notranslate"><span class="pre">dx</span></code> or <code class="docutils literal notranslate"><span class="pre">delta</span></code> return the cell size,
 - <code class="docutils literal notranslate"><span class="pre">dv</span></code> returns the volume of a cell, and <code class="docutils literal notranslate"><span class="pre">volume</span></code> returns the
@@ -120,7 +120,7 @@ The operation considers the size of the cell, for example</p>
 <span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">]</span> <span class="ow">in</span> <span class="n">box</span>  <span class="c1"># False</span>
 </pre></div>
 </div>
-<p>The <a class="reference internal" href="grid_data_ref.html#kuibit.grid_data.UniformGrid.contains" title="kuibit.grid_data.UniformGrid.contains"><code class="xref py py-meth docutils literal notranslate"><span class="pre">contains()</span></code></a> is syntactic sugar for the same operation.</p>
+<p>The <code class="xref py py-meth docutils literal notranslate"><span class="pre">contains()</span></code> is syntactic sugar for the same operation.</p>
 <p>To obtain all the coordinates in the grid, you can use the
 <code class="xref py py-meth docutils literal notranslate"><span class="pre">coordinates()</span></code> method. This can be used in three
 different ways. When called with no arguments, the output is a list of 1D
@@ -132,21 +132,21 @@ value is a list of coordinates with the same shape of the grid itself, each
 element of this list is the value of that coordinate over the grid. This last
 one is the most useful way to do computations that involve the coordinates. You
 can obtained the coordinate as a list of coordinates along each direction also
-with the method <a class="reference internal" href="grid_data_ref.html#kuibit.grid_data.UniformGrid.coordinates_1d" title="kuibit.grid_data.UniformGrid.coordinates_1d"><code class="xref py py-meth docutils literal notranslate"><span class="pre">coordinates_1d()</span></code></a>.</p>
+with the method <code class="xref py py-meth docutils literal notranslate"><span class="pre">coordinates_1d()</span></code>.</p>
 <p>To obtain a coordinate from a multidimensional index, just use the bracket
 operator (<code class="docutils literal notranslate"><span class="pre">box[i,</span> <span class="pre">j]</span></code>).</p>
-<p><a class="reference internal" href="grid_data_ref.html#kuibit.grid_data.UniformGrid" title="kuibit.grid_data.UniformGrid"><code class="xref py py-class docutils literal notranslate"><span class="pre">UniformGrid</span></code></a> may have dimensions that are only one point (e.g.,
+<p><code class="xref py py-class docutils literal notranslate"><span class="pre">UniformGrid</span></code> may have dimensions that are only one point (e.g.,
 when simulating a plane). We call <code class="docutils literal notranslate"><span class="pre">extended_dimensions</span></code> those that have more
-than one grid point. You can return a new <a class="reference internal" href="grid_data_ref.html#kuibit.grid_data.UniformGrid" title="kuibit.grid_data.UniformGrid"><code class="xref py py-class docutils literal notranslate"><span class="pre">UniformGrid</span></code></a> with removed
+than one grid point. You can return a new <code class="xref py py-class docutils literal notranslate"><span class="pre">UniformGrid</span></code> with removed
 all the dimensions that are not extended using the method
 <code class="docutils literal notranslate"><span class="pre">flat_dimensions_removed</span></code>.</p>
-<p>You return a new <a class="reference internal" href="grid_data_ref.html#kuibit.grid_data.UniformGrid" title="kuibit.grid_data.UniformGrid"><code class="xref py py-class docutils literal notranslate"><span class="pre">UniformGrid</span></code></a> with coordinates shifted with
-<a class="reference internal" href="grid_data_ref.html#kuibit.grid_data.UniformGrid.shifted" title="kuibit.grid_data.UniformGrid.shifted"><code class="xref py py-meth docutils literal notranslate"><span class="pre">shifted()</span></code></a>. You can also remove the ghost zones with
+<p>You return a new <code class="xref py py-class docutils literal notranslate"><span class="pre">UniformGrid</span></code> with coordinates shifted with
+<code class="xref py py-meth docutils literal notranslate"><span class="pre">shifted()</span></code>. You can also remove the ghost zones with
 <code class="xref py py-meth docutils literal notranslate"><span class="pre">ghost_zones_removed()</span></code>. This will return a new
-<a class="reference internal" href="grid_data_ref.html#kuibit.grid_data.UniformGrid" title="kuibit.grid_data.UniformGrid"><code class="xref py py-class docutils literal notranslate"><span class="pre">UniformGrid</span></code></a> with no ghost zones.</p>
-<p>You can also print a <a class="reference internal" href="grid_data_ref.html#kuibit.grid_data.UniformGrid" title="kuibit.grid_data.UniformGrid"><code class="xref py py-class docutils literal notranslate"><span class="pre">UniformGrid</span></code></a> object to have a full overview
+<code class="xref py py-class docutils literal notranslate"><span class="pre">UniformGrid</span></code> with no ghost zones.</p>
+<p>You can also print a <code class="xref py py-class docutils literal notranslate"><span class="pre">UniformGrid</span></code> object to have a full overview
 of the properties of the grid.</p>
-<p>The functions <a class="reference internal" href="grid_data_ref.html#kuibit.grid_data.UniformGrid.coordinates_to_indices" title="kuibit.grid_data.UniformGrid.coordinates_to_indices"><code class="xref py py-meth docutils literal notranslate"><span class="pre">coordinates_to_indices()</span></code></a> and
+<p>The functions <code class="xref py py-meth docutils literal notranslate"><span class="pre">coordinates_to_indices()</span></code> and
 <code class="xref py py-meth docutils literal notranslate"><span class="pre">indices_to_coordiantes()</span></code> can be used to convert from indices to
 coordinates for the considered grid. You can pass single points, or collection
 of points. If you provide coordinates, the returned indices will be those of the
@@ -155,9 +155,9 @@ closest grid points.</p>
 <div class="section" id="uniformgriddata">
 <h2>UniformGridData<a class="headerlink" href="#uniformgriddata" title="Permalink to this headline">¶</a></h2>
 <p>Once we have a grid, we can define data on it. <a class="reference internal" href="grid_data_ref.html#kuibit.grid_data.UniformGridData" title="kuibit.grid_data.UniformGridData"><code class="xref py py-class docutils literal notranslate"><span class="pre">UniformGridData</span></code></a>
-packs together a <a class="reference internal" href="grid_data_ref.html#kuibit.grid_data.UniformGrid" title="kuibit.grid_data.UniformGrid"><code class="xref py py-class docutils literal notranslate"><span class="pre">UniformGrid</span></code></a> and data defined on it. This is the
+packs together a <code class="xref py py-class docutils literal notranslate"><span class="pre">UniformGrid</span></code> and data defined on it. This is the
 most basic form of a grid function. There are two ways to define
-<a class="reference internal" href="grid_data_ref.html#kuibit.grid_data.UniformGridData" title="kuibit.grid_data.UniformGridData"><code class="xref py py-class docutils literal notranslate"><span class="pre">UniformGridData</span></code></a>, first from a <a class="reference internal" href="grid_data_ref.html#kuibit.grid_data.UniformGrid" title="kuibit.grid_data.UniformGrid"><code class="xref py py-class docutils literal notranslate"><span class="pre">UniformGrid</span></code></a> and a
+<a class="reference internal" href="grid_data_ref.html#kuibit.grid_data.UniformGridData" title="kuibit.grid_data.UniformGridData"><code class="xref py py-class docutils literal notranslate"><span class="pre">UniformGridData</span></code></a>, first from a <code class="xref py py-class docutils literal notranslate"><span class="pre">UniformGrid</span></code> and a
 NumPy array with matching shape, or from the details of the grid along with
 the data (again, as a NumPy array with matching shape):</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">box</span> <span class="o">=</span> <span class="n">gd</span><span class="o">.</span><span class="n">UniformGrid</span><span class="p">([</span><span class="mi">101</span><span class="p">,</span> <span class="mi">201</span><span class="p">],</span> <span class="n">x0</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">delta</span><span class="o">=</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span>
@@ -223,7 +223,7 @@ function can either be relative (percentuals, as 0.01, 0.5, or so, if you enable
 <code class="docutils literal notranslate"><span class="pre">relative=True</span></code>), or the actual number of points.</p>
 <p>You can resample the data to a new grid using the function
 <a class="reference internal" href="grid_data_ref.html#kuibit.grid_data.UniformGridData.resampled" title="kuibit.grid_data.UniformGridData.resampled"><code class="xref py py-meth docutils literal notranslate"><span class="pre">resampled()</span></code></a>, which takes as input a
-<a class="reference internal" href="grid_data_ref.html#kuibit.grid_data.UniformGrid" title="kuibit.grid_data.UniformGrid"><code class="xref py py-class docutils literal notranslate"><span class="pre">UniformGrid</span></code></a> and returns a new <a class="reference internal" href="grid_data_ref.html#kuibit.grid_data.UniformGridData" title="kuibit.grid_data.UniformGridData"><code class="xref py py-class docutils literal notranslate"><span class="pre">UniformGridData</span></code></a>
+<code class="xref py py-class docutils literal notranslate"><span class="pre">UniformGrid</span></code> and returns a new <a class="reference internal" href="grid_data_ref.html#kuibit.grid_data.UniformGridData" title="kuibit.grid_data.UniformGridData"><code class="xref py py-class docutils literal notranslate"><span class="pre">UniformGridData</span></code></a>
 resampled on the new grid. If the new grid is outside the old one, you can
 either raise an error, of fill the points outside with zeros. This behavior is
 controlled by the flag <code class="docutils literal notranslate"><span class="pre">ext</span></code>. When <code class="docutils literal notranslate"><span class="pre">ext=1</span></code>, zeros are returned, when it is
@@ -257,6 +257,12 @@ natural mapping between coordinates and indices you have to transpose the
 data! (See, <a class="reference external" href="https://eli.thegreenplace.net/2014/meshgrids-and-disambiguating-rows-and-columns-from-cartesian-coordinates/">this blog post</a>
 for an explanation.)</p>
 </div>
+<p>When working with 1D grid data, you can transform the
+<a class="reference internal" href="grid_data_ref.html#kuibit.grid_data.UniformGridData" title="kuibit.grid_data.UniformGridData"><code class="xref py py-class docutils literal notranslate"><span class="pre">UniformGridData</span></code></a> into a <a class="reference internal" href="grid_data_ref.html#kuibit.grid_data.GridSeries" title="kuibit.grid_data.GridSeries"><code class="xref py py-class docutils literal notranslate"><span class="pre">GridSeries</span></code></a>. This is different
+type of object that shares the same properties and infrastructure as
+<a class="reference internal" href="timeseries_ref.html#kuibit.timeseries.TimeSeries" title="kuibit.timeseries.TimeSeries"><code class="xref py py-class docutils literal notranslate"><span class="pre">TimeSeries</span></code></a> and <a class="reference internal" href="frequencyseries_ref.html#kuibit.frequencyseries.FrequencySeries" title="kuibit.frequencyseries.FrequencySeries"><code class="xref py py-class docutils literal notranslate"><span class="pre">FrequencySeries</span></code></a>.
+<a class="reference internal" href="grid_data_ref.html#kuibit.grid_data.GridSeries" title="kuibit.grid_data.GridSeries"><code class="xref py py-class docutils literal notranslate"><span class="pre">GridSeries</span></code></a> are typically simpler and more direct to use (for
+example, you can plot them directly with <code class="docutils literal notranslate"><span class="pre">plt.plot(rho)</span></code>).</p>
 </div>
 <div class="section" id="hierarchicalgriddata">
 <h2>HierarchicalGridData<a class="headerlink" href="#hierarchicalgriddata" title="Permalink to this headline">¶</a></h2>
