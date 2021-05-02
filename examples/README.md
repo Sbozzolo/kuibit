@@ -14,6 +14,7 @@ them).
 
 | Name                           | Description                                                                                                                                                                                          |
 |--------------------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `plot_timeseries`              | Plots any timeseries among the ones output by IOASCII (e.g., scalars, reductions).                                                                                                                   |
 | `plot_total_luminosity`        | Plots the combined electromagnetic and gravitational-wave luminosity as measured from a given detector with Phi2 and Psi4.                                                                           |
 | `print_ah_formation_time`      | Prints the time when the given apparent horizon was first found.                                                                                                                                     |
 | `print_available_iterations`   | Given a variable, prints which iterations are available across all the data and all the dimensions. Optionally, you can specify only one dimension. This script is useful for writing shell scripts. |
