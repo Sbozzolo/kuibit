@@ -126,6 +126,7 @@ Examples
    examples/plot_em_energy.rst
    examples/plot_gw_energy.rst
    examples/plot_gw_linear_momentum.rst
+   examples/plot_psi4_lm.rst
    examples/plot_strain_lm.rst
    examples/plot_timeseries.rst
    examples/plot_total_luminosity.rst

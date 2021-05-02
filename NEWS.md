@@ -21,6 +21,7 @@ the docstrings of the various functions.
 * `plot_gw_energy.py`
 * `plot_gw_linear_momentum.py`
 * `plot_physical_time_per_hour.py`
+* `plot_psi4_lm.py`
 * `plot_strain_lm.py`
 * `plot_timeseries.py`
 * `plot_total_luminosity.py`
