@@ -18,6 +18,7 @@ the docstrings of the various functions.
 
 * `plot_ah_separation.py`
 * `plot_gw_energy.py`
+* `plot_gw_linear_momentum.py`
 * `plot_physical_time_per_hour.py`
 * `plot_timeseries.py`
 * `plot_total_luminosity.py`
