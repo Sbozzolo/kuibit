@@ -122,12 +122,22 @@ Examples
 .. toctree::
    :maxdepth: 1
 
+   examples/plot_timeseries.rst
    examples/plot_total_luminosity.rst
    examples/print_ah_formation_time.rst
    examples/print_available_iterations.rst
    examples/print_available_timeseries.rst
    examples/print_qlm_properties_at_time.rst
    examples/save_resampled_grid_data.rst
+
+Note that all these examples contain a significant fraction of boilerplate that
+is needed to keep them general and immediately useful. When learning `kuibit`,
+you can ignore all of this.
+
+You can immediately start doing science without writing one line of code using
+these examples. The scripts provided can be used for plotting, extracting
+gravitational waves, or other useful information. We recommend downloading these
+codes in a folder and that that folder to your ``$PATH``.
 
 
 In addition to these examples, you can find other real world examples in the

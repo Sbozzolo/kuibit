@@ -15,7 +15,7 @@ discussions.
 studied. These examples are extremely important and useful. These examples
 enable people to obtain results quickly, so we welcome all the contributions you
 can make in this respect. If you ran an analysis and want to contribute your
-code so that other people can use it, that would be awesome.
+code for other people to use it, that would be awesome.
 
 The steps to add a new example are:
 1. Add the file to the `examples` folder
@@ -26,6 +26,10 @@ The steps to add a new example are:
    (it can be the same description as the `README`).
 4. Add a link to this `rst` file in `docs/index.rst`.
 5. Add entry to the `NEWS.md` file
+
+The examples are not tested. Therefore, it is best to include directly in
+`kuibit` everything that is more complicated than a few lines of code. We can
+work together to make that happen.
 
 
 ## New features/improvements
