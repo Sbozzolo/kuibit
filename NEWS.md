@@ -16,6 +16,7 @@ the docstrings of the various functions.
 
 #### New examples
 
+* `plot_physical_time_per_hour.py`
 * `plot_timeseries.py`
 * `plot_total_luminosity.py`
 * `print_qlm_properties_at_time.py`

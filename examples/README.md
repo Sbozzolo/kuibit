@@ -14,6 +14,7 @@ them).
 
 | Name                           | Description                                                                                                                                                                                          |
 |--------------------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `plot_physical_time_per_hour`  | Plots the computational speed of the simulation by plotting how much physical time is simulated in one hour and one day.                                                                                         |
 | `plot_timeseries`              | Plots any timeseries among the ones output by IOASCII (e.g., scalars, reductions).                                                                                                                   |
 | `plot_total_luminosity`        | Plots the combined electromagnetic and gravitational-wave luminosity as measured from a given detector with Phi2 and Psi4.                                                                           |
 | `print_ah_formation_time`      | Prints the time when the given apparent horizon was first found.                                                                                                                                     |
