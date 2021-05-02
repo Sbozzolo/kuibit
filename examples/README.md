@@ -14,6 +14,7 @@ them).
 
 | Name                           | Description                                                                                                                                                                                          |
 |--------------------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `plot_1d_vars`                 | Plots one or more 1D grid functions output by Carpet. Optionally take logarithm and/or absolute value.                                                                                               |
 | `plot_ah_radius`               | Plots the coordinate radius of a given horizon as a function of time.                                                                                                                                |
 | `plot_ah_separation`           | Plots the coordinate separation between the centroids of two given apparent horizons as a function of time.                                                                                          |
 | `plot_constraints`             | Plots given reductions for the constraints (Hamiltonian, momentum, ...) as a function of time.                                                                                                       |

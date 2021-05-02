@@ -24,6 +24,7 @@ because `GridSeries` are leaner and more direct to use.
 
 #### New examples
 
+* `plot_1d_vars.py`
 * `plot_ah_radius.py`
 * `plot_ah_separation.py`
 * `plot_constraints.py`
