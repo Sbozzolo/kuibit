@@ -124,6 +124,7 @@ Examples
 
    examples/plot_ah_radius.rst
    examples/plot_ah_separation.rst
+   examples/plot_constraints.rst
    examples/plot_em_energy.rst
    examples/plot_grid_var.rst
    examples/plot_gw_energy.rst
