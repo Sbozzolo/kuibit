@@ -16,6 +16,7 @@ the docstrings of the various functions.
 
 #### New examples
 
+* `plot_ah_radius.py`
 * `plot_ah_separation.py`
 * `plot_em_energy.py`
 * `plot_gw_energy.py`
