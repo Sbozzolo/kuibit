@@ -14,9 +14,10 @@ them).
 
 | Name                           | Description                                                                                                                                                                                          |
 |--------------------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| `plot_ah_radius`               | Plots the coordinate radius of a given horizon as a function of time.                                                                                          |
+| `plot_ah_radius`               | Plots the coordinate radius of a given horizon as a function of time.                                                                                                                                |
 | `plot_ah_separation`           | Plots the coordinate separation between the centroids of two given apparent horizons as a function of time.                                                                                          |
 | `plot_em_energy`               | Plots the electromagnetic-wave luminosity and energy as measured by a given detector using Phi2 as a function of time.                                                                               |
+| `plot_grid_var`                | Plots a 2D grid function among the ones output by Carpet on a given region. Optionally take logarithm or absolute value.                                                                             |
 | `plot_gw_energy`               | Plots the gravitational-wave luminosity and energy as measured by a given detector as a function of time.                                                                                            |
 | `plot_gw_linear_momentum`      | Plots the linear momentum lost by gravitational-wave as measured by a given detector as a function of time.                                                                                          |
 | `plot_physical_time_per_hour`  | Plots the computational speed of the simulation by plotting how much physical time is simulated in one hour and one day.                                                                             |

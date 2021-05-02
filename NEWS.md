@@ -19,6 +19,7 @@ the docstrings of the various functions.
 * `plot_ah_radius.py`
 * `plot_ah_separation.py`
 * `plot_em_energy.py`
+* `plot_grid_var.py`
 * `plot_gw_energy.py`
 * `plot_gw_linear_momentum.py`
 * `plot_physical_time_per_hour.py`
