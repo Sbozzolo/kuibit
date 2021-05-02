@@ -273,6 +273,13 @@ class TestVisualizeMatplotlib(unittest.TestCase):
             )
         )
 
+        self.assertTrue(
+            np.allclose(
+                viz.plot_horizon(shape)[0].xy,
+                viz.plot_horizon_on_plane_at_time(ah, 0, "xy")[0].xy,
+            )
+        )
+
     def test_add_text_to_corner(self):
 
         with self.assertRaises(ValueError):
