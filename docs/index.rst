@@ -122,6 +122,7 @@ Examples
 .. toctree::
    :maxdepth: 1
 
+   examples/plot_ah_separation.rst
    examples/plot_timeseries.rst
    examples/plot_total_luminosity.rst
    examples/print_ah_formation_time.rst
