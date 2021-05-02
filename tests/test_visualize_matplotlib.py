@@ -340,3 +340,18 @@ class TestVisualizeMatplotlib(unittest.TestCase):
         self.assertTrue(os.path.exists("test.pdf"))
         os.remove("test.pdf")
 
+    def test_figname(self):
+
+        # Instead of testing with an argparse.Namespace, we create a tiny class
+        # here with the attribute figname
+
+        class TestFigname:
+            def __init__(self, figname):
+                self.figname = figname
+
+        name = "bob"
+        # Test with None
+        self.assertEqual(viz.get_figname(TestFigname(None), name), name)
+
+        # Test with name
+        self.assertEqual(viz.get_figname(TestFigname(name), "lol"), name)

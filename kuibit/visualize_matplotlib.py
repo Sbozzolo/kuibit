@@ -427,6 +427,26 @@ def save_from_dir_filename_ext(
     )
 
 
+def get_figname(args, default):
+    """Return the figure name checking if the user has passed one.
+
+    If it is defined, return ``args.figname``, otherwise return default.
+
+    :param args: Options provided by the user.
+    :type args: `argparse.Namespace`
+    :param default: Default name if ``figname`` is not in ``args``.
+    :type default: str
+
+    :returns: Name of the output figure.
+    :rtype: str
+
+    """
+    if args.figname is None:
+        return default
+    # figname is not None
+    return args.figname
+
+
 # GRID FUNCTIONS
 
 
