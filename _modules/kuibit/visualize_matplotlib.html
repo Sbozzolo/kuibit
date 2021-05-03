@@ -418,12 +418,81 @@
 <span class="sd">                        extension is ``.tikz``, the file is saved with</span>
 <span class="sd">                        ``tikzplotlib``.</span>
 <span class="sd">    :type outputpath:  str</span>
+<span class="sd">    :param figure: If passed, plot on this figure. If not passed (or if None),</span>
+<span class="sd">                   use the current figure.</span>
+<span class="sd">    :type figure: ``matplotlib.pyplot.figure``</span>
+
+<span class="sd">    :param axis: If passed, plot on this axis. If not passed (or if None), use</span>
+<span class="sd">                 the current axis.</span>
+<span class="sd">    :type axis: ``matplotlib.pyplot.axis``</span>
 
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">splitext</span><span class="p">(</span><span class="n">outputpath</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;.tikz&quot;</span><span class="p">:</span>
         <span class="n">tikzplotlib</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">outputpath</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="n">plt</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="n">outputpath</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+
+<span class="nd">@preprocess_plot</span>
+<span class="k">def</span> <span class="nf">save_from_dir_filename_ext</span><span class="p">(</span>
+    <span class="n">output_dir</span><span class="p">,</span>
+    <span class="n">file_name</span><span class="p">,</span>
+    <span class="n">file_ext</span><span class="p">,</span>
+    <span class="n">figure</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">axis</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+<span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Save figure to a location defined by a folder, a name, and an extension.</span>
+
+<span class="sd">    If the ``file_ext`` is ``tikz``, the file will be saved with</span>
+<span class="sd">    ``tikzplotlib``.</span>
+
+<span class="sd">    Unknown arguments are passed to the ``matplotlib.savefig`` or</span>
+<span class="sd">    ``tikzplotlib.save`` (depending on the extension).</span>
+
+<span class="sd">    :param output_dir: Path of a directory where to save the figure</span>
+<span class="sd">    :type output_dir: str</span>
+<span class="sd">    :param file_name: Name of the file.</span>
+<span class="sd">    :type file_name: str</span>
+<span class="sd">    :param file_extension: Extension of the file, with or without dot.</span>
+<span class="sd">    :type file_extension: str</span>
+<span class="sd">    :param figure: If passed, plot on this figure. If not passed (or if None),</span>
+<span class="sd">                   use the current figure.</span>
+<span class="sd">    :type figure: ``matplotlib.pyplot.figure``</span>
+
+<span class="sd">    :param axis: If passed, plot on this axis. If not passed (or if None), use</span>
+<span class="sd">                 the current axis.</span>
+<span class="sd">    :type axis: ``matplotlib.pyplot.axis``</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">ext</span> <span class="o">=</span> <span class="n">file_ext</span> <span class="k">if</span> <span class="n">file_ext</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;.&quot;</span> <span class="k">else</span> <span class="sa">f</span><span class="s2">&quot;.</span><span class="si">{</span><span class="n">file_ext</span><span class="si">}</span><span class="s2">&quot;</span>
+    <span class="n">outputpath</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">output_dir</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">file_name</span><span class="si">}{</span><span class="n">ext</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">save</span><span class="p">(</span>
+        <span class="n">outputpath</span><span class="p">,</span>
+        <span class="n">figure</span><span class="o">=</span><span class="n">figure</span><span class="p">,</span>
+        <span class="n">axis</span><span class="o">=</span><span class="n">axis</span><span class="p">,</span>
+        <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+    <span class="p">)</span>
+
+
+<div class="viewcode-block" id="get_figname"><a class="viewcode-back" href="../../visualize_matplotlib_ref.html#kuibit.visualize_matplotlib.get_figname">[docs]</a><span class="k">def</span> <span class="nf">get_figname</span><span class="p">(</span><span class="n">args</span><span class="p">,</span> <span class="n">default</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Return the figure name checking if the user has passed one.</span>
+
+<span class="sd">    If it is defined, return ``args.figname``, otherwise return default.</span>
+
+<span class="sd">    :param args: Options provided by the user.</span>
+<span class="sd">    :type args: `argparse.Namespace`</span>
+<span class="sd">    :param default: Default name if ``figname`` is not in ``args``.</span>
+<span class="sd">    :type default: str</span>
+
+<span class="sd">    :returns: Name of the output figure.</span>
+<span class="sd">    :rtype: str</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">args</span><span class="o">.</span><span class="n">figname</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">default</span>
+    <span class="c1"># figname is not None</span>
+    <span class="k">return</span> <span class="n">args</span><span class="o">.</span><span class="n">figname</span></div>
 
 
 <span class="c1"># GRID FUNCTIONS</span>
