@@ -1,8 +1,9 @@
-# Examples of working problems built with `kuibit`
+# Examples of working programs built with `kuibit`
 
 In this directory, we collect working programs built with `kuibit`. You can use
-these scripts as good examples of ``kuibit`` usage (or you can directly use
-them).
+these scripts as good examples of ``kuibit`` usage. These codes are ready to be
+used, so we recommend downloading them and adjusting your environment variables
+so that your shell can find them (e.g., `$PATH`).
 
 > :warning: While `kuibit` is tested at each commit to ensure that nothing
 >           breaks, these codes are not. If you find one that does not work,
