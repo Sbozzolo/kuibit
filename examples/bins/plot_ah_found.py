@@ -22,37 +22,29 @@ import matplotlib.pyplot as plt
 from kuibit import argparse_helper as kah
 from kuibit.simdir import SimDir
 from kuibit.visualize_matplotlib import (
+    add_text_to_corner,
     save_from_dir_filename_ext,
     setup_matplotlib,
     get_figname,
 )
 
+
 if __name__ == "__main__":
     setup_matplotlib()
 
-    desc = """{kah.get_program_name()} plots the coordinate radius of a given apparent
-    horizon as a function of time. If --dx is passed, then add a y-axis
-    indicating the number of points that resolve the radius, assuming that it is
-    all covered by the given resolution."""
+    desc = f"""{kah.get_program_name()} plots the times intervals at which the different given
+    apparent horizons were found. """
 
     parser = kah.init_argparse(desc)
     kah.add_figure_to_parser(parser)
 
     parser.add_argument(
         "-a",
-        "--horizon",
+        "--horizons",
         type=int,
         required=True,
-        help="Apparent horizons to plot.",
-    )
-
-    parser.add_argument(
-        "--dx",
-        type=float,
-        help=(
-            "Grid resolution where the horizon is,"
-            " assuming the entire horizon has this resolution."
-        ),
+        help="Apparent horizons to plot",
+        nargs="+",
     )
 
     args = kah.get_args(parser)
@@ -65,46 +57,42 @@ if __name__ == "__main__":
         logging.basicConfig(format="%(asctime)s - %(message)s")
         logger.setLevel(logging.DEBUG)
 
-    ah = args.horizon
-    figname = get_figname(args, default=f"ah_{ah}_radius")
+    horizons = "_".join([str(h) for h in args.horizons])
+    figname = get_figname(args, default=f"ah_{horizons}_found")
     logger.debug(f"Figname: {figname}")
 
     sim = SimDir(args.datadir, ignore_symlinks=args.ignore_symlinks)
     logger.debug("Prepared SimDir")
+
     sim_hor = sim.horizons
 
     logger.debug(
         f"Apparent horizons available: {sim_hor.available_apparent_horizons}"
     )
 
-    # Check that the horizons are available
-    if ah not in sim_hor.available_apparent_horizons:
-        raise ValueError(f"Apparent horizons {ah} is not available")
-
-    logger.debug("Reading horizons and computing radius")
-    # We can use any index for the qlm index, it will be thrown away
-    horizon = sim_hor.get_apparent_horizon(ah).ah
+    for ah in args.horizons:
+        if ah in sim_hor.available_apparent_horizons:
+            logger.debug(f"Reading horizon {ah}")
+            # We can use any index for the qlm index, it will be thrown away
+            current_horizon = sim_hor.get_apparent_horizon(ah)
+            time_found = current_horizon.ah.cctk_iteration.t
+            # We prepare an array with the same length of time_found and with
+            # constant value of ah
+            ah_num = [ah] * len(time_found)
+            plt.scatter(time_found, ah_num, marker="o", s=0.1)
 
     # Plot
     logger.debug("Plotting")
-    plt.ylabel(f"Radius of horizon {ah}")
+    plt.ylabel("Apparent horizon")
     plt.xlabel("Time")
-    plt.plot(horizon.mean_radius, label="Mean radius")
-    plt.plot(horizon.min_radius, label="Min radius")
-    plt.plot(horizon.max_radius, label="Max radius")
-    plt.legend()
 
-    if args.dx:
-        logger.debug("Adding resolution y axis")
-        plt.twinx()
-        plt.plot(horizon.mean_radius / args.dx)
-        plt.plot(horizon.min_radius / args.dx)
-        plt.plot(horizon.max_radius / args.dx)
-        plt.ylabel("Number of points on radius")
+    # Fix ticks
+    plt.gca().tick_params(axis="y", which="minor", left=False)
+    plt.ylim(min(args.horizons) - 1, max(args.horizons) + 1)
+    plt.yticks(args.horizons)
 
     logger.debug("Plotted")
 
     logger.debug("Saving")
     save_from_dir_filename_ext(args.outdir, figname, args.fig_extension)
     logger.debug("DONE")
-

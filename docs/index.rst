@@ -123,6 +123,7 @@ Examples
    :maxdepth: 1
 
    examples/plot_1d_vars.rst
+   examples/plot_ah_found.rst
    examples/plot_ah_radius.rst
    examples/plot_ah_separation.rst
    examples/plot_constraints.rst
