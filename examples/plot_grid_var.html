@@ -78,9 +78,6 @@ available in matplotlib.</p>
 <span class="c1"># this program; if not, see &lt;https://www.gnu.org/licenses/&gt;.</span>
 
 <span class="kn">import</span> <span class="nn">logging</span>
-<span class="kn">import</span> <span class="nn">os</span>
-
-<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
 
 <span class="kn">from</span> <span class="nn">kuibit</span> <span class="kn">import</span> <span class="n">argparse_helper</span> <span class="k">as</span> <span class="n">kah</span>
 <span class="kn">from</span> <span class="nn">kuibit.simdir</span> <span class="kn">import</span> <span class="n">SimDir</span>
@@ -88,7 +85,7 @@ available in matplotlib.</p>
     <span class="n">add_text_to_corner</span><span class="p">,</span>
     <span class="n">get_figname</span><span class="p">,</span>
     <span class="n">plot_color</span><span class="p">,</span>
-    <span class="n">plot_horizon_shape_on_plane_at_iteration</span><span class="p">,</span>
+    <span class="n">plot_horizon_on_plane_at_iteration</span><span class="p">,</span>
     <span class="n">save_from_dir_filename_ext</span><span class="p">,</span>
     <span class="n">setup_matplotlib</span><span class="p">,</span>
 <span class="p">)</span>
@@ -96,16 +93,16 @@ available in matplotlib.</p>
 <span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
     <span class="n">setup_matplotlib</span><span class="p">()</span>
 
-    <span class="n">desc</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;{kah.get_program_name()} plot a given grid function.</span>
+    <span class="n">desc</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;&quot;&quot;</span><span class="si">{</span><span class="n">kah</span><span class="o">.</span><span class="n">get_program_name</span><span class="p">()</span><span class="si">}</span><span class="s2"> plot a given grid function.</span>
 
-<span class="s2">    By default, no interpolation is performed so the image may look pixelated.</span>
-<span class="s2">    There are two available modes of interpolation. The first is activated</span>
-<span class="s2">    with --multilinear-interpolation. With this, the data from the simulation</span>
-<span class="s2">    is interpolated with a multilinear interpolation onto the plotting grid.</span>
-<span class="s2">    This is accurate and uses all the information available, but it is slow.</span>
-<span class="s2">    A second way to perform interpolation is passing a --interpolation-method</span>
-<span class="s2">    argument (e.g., bicubic). With this, the plotting data is interpolated.</span>
-<span class="s2">    This is much faster but is not as accurate.&quot;&quot;&quot;</span>
+<span class="s2">By default, no interpolation is performed so the image may look pixelated.</span>
+<span class="s2">There are two available modes of interpolation. The first is activated</span>
+<span class="s2">with --multilinear-interpolation. With this, the data from the simulation</span>
+<span class="s2">is interpolated with a multilinear interpolation onto the plotting grid.</span>
+<span class="s2">This is accurate and uses all the information available, but it is slow.</span>
+<span class="s2">A second way to perform interpolation is passing a --interpolation-method</span>
+<span class="s2">argument (e.g., bicubic). With this, the plotting data is interpolated.</span>
+<span class="s2">This is much faster but it is not as accurate.&quot;&quot;&quot;</span>
 
     <span class="n">parser</span> <span class="o">=</span> <span class="n">kah</span><span class="o">.</span><span class="n">init_argparse</span><span class="p">(</span><span class="n">desc</span><span class="p">)</span>
     <span class="n">kah</span><span class="o">.</span><span class="n">add_grid_to_parser</span><span class="p">(</span><span class="n">parser</span><span class="p">,</span> <span class="n">dimensions</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
@@ -236,7 +233,7 @@ available in matplotlib.</p>
     <span class="k">if</span> <span class="n">args</span><span class="o">.</span><span class="n">ah_show</span><span class="p">:</span>
         <span class="k">for</span> <span class="n">ah</span> <span class="ow">in</span> <span class="n">sim</span><span class="o">.</span><span class="n">horizons</span><span class="o">.</span><span class="n">available_apparent_horizons</span><span class="p">:</span>
             <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Plotting apparent horizon </span><span class="si">{</span><span class="n">ah</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-            <span class="n">plot_horizon_shape_on_plane_at_iteration</span><span class="p">(</span>
+            <span class="n">plot_horizon_on_plane_at_iteration</span><span class="p">(</span>
                 <span class="n">sim</span><span class="o">.</span><span class="n">horizons</span><span class="o">.</span><span class="n">get_apparent_horizon</span><span class="p">(</span><span class="n">ah</span><span class="p">),</span>
                 <span class="n">iteration</span><span class="p">,</span>
                 <span class="n">args</span><span class="o">.</span><span class="n">plane</span><span class="p">,</span>
