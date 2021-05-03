@@ -19,14 +19,15 @@ import logging
 import os
 
 import matplotlib.pyplot as plt
+
 from kuibit import argparse_helper as kah
 from kuibit.simdir import SimDir
 from kuibit.visualize_matplotlib import (
     add_text_to_corner,
+    get_figname,
     plot_color,
     save_from_dir_filename_ext,
     setup_matplotlib,
-    get_figname,
 )
 
 if __name__ == "__main__":
@@ -101,7 +102,6 @@ if __name__ == "__main__":
         logging.basicConfig(format="%(asctime)s - %(message)s")
         logger.setLevel(logging.DEBUG)
 
-
     var_names = "_".join(args.variables)
     figname = get_figname(args, default=f"{var_names}_{args.axis}")
 
@@ -156,7 +156,6 @@ if __name__ == "__main__":
     plt.xlabel(args.axis)
     plt.ylim(ymin=args.vmin, ymax=args.vmax)
     plt.xlim(xmin=args.xmin, xmax=args.xmax)
-
 
     logger.debug("Saving")
     save_from_dir_filename_ext(args.outdir, figname, args.fig_extension)

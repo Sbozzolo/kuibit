@@ -15,8 +15,8 @@
 # You should have received a copy of the GNU General Public License along with
 # this program; if not, see <https://www.gnu.org/licenses/>.
 
-from kuibit.simdir import SimDir
 from kuibit import argparse_helper as kah
+from kuibit.simdir import SimDir
 
 if __name__ == "__main__":
 

@@ -19,7 +19,6 @@ import logging
 import os
 
 from kuibit import argparse_helper as kah
-
 from kuibit.simdir import SimDir
 
 if __name__ == "__main__":

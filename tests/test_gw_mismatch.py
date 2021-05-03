@@ -16,10 +16,10 @@
 # this program; if not, see <https://www.gnu.org/licenses/>.
 
 import sys
-from importlib import reload
 import unittest
-from unittest.mock import patch
 import warnings
+from importlib import reload
+from unittest.mock import patch
 
 import numpy as np
 
@@ -325,10 +325,9 @@ class TestGWMismatch(unittest.TestCase):
         try:
             with warnings.catch_warnings():
                 warnings.simplefilter("ignore")
-                from pycbc.waveform import get_td_waveform
+                from pycbc.filter import match, overlap
                 from pycbc.types import timeseries as pycbcts
-                from pycbc.filter import overlap
-                from pycbc.filter import match
+                from pycbc.waveform import get_td_waveform
             fmin_gw = 50
             fmax_gw = 100
             delta_t = 1 / 4096

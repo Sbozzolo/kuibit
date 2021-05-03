@@ -51,11 +51,8 @@ import warnings
 import numpy as np
 
 from kuibit.attr_dict import pythonize_name_dict
-from kuibit.timeseries import (
-    remove_duplicated_iters,
-    combine_ts,
-)
 from kuibit.series import sample_common
+from kuibit.timeseries import combine_ts, remove_duplicated_iters
 
 
 def compute_horizons_separation(horizon1, horizon2, resample=True):

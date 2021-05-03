@@ -19,12 +19,13 @@ import logging
 import os
 
 import matplotlib.pyplot as plt
+
 from kuibit import argparse_helper as kah
 from kuibit.simdir import SimDir
 from kuibit.visualize_matplotlib import (
+    get_figname,
     save_from_dir_filename_ext,
     setup_matplotlib,
-    get_figname,
 )
 
 if __name__ == "__main__":
@@ -61,8 +62,7 @@ if __name__ == "__main__":
         logger.setLevel(logging.DEBUG)
 
     figname = get_figname(
-        args,
-        default=f"gw_linear momentum_z_det{args.detector_num}"
+        args, default=f"gw_linear momentum_z_det{args.detector_num}"
     )
     logger.debug(f"Using figname {figname}")
 

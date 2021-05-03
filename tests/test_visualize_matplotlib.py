@@ -17,7 +17,6 @@
 
 import os
 import unittest
-
 from unittest.mock import patch
 
 # We use the agg backend because it should work everywhere
@@ -27,11 +26,11 @@ matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import numpy as np
 
-from kuibit.simdir import SimDir
-from kuibit import visualize_matplotlib as viz
+from kuibit import cactus_grid_functions as cgf
 from kuibit import grid_data as gd
 from kuibit import grid_data_utils as gdu
-from kuibit import cactus_grid_functions as cgf
+from kuibit import visualize_matplotlib as viz
+from kuibit.simdir import SimDir
 
 
 class TestVisualizeMatplotlib(unittest.TestCase):

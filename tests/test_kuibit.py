@@ -17,7 +17,7 @@
 
 import unittest
 
-from kuibit import __version__, __bibtex__
+from kuibit import __bibtex__, __version__
 
 
 class Testkuibit(unittest.TestCase):

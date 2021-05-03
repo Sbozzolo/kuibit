@@ -19,14 +19,14 @@ import logging
 import os
 
 import matplotlib.pyplot as plt
+
 from kuibit import argparse_helper as kah
 from kuibit.simdir import SimDir
 from kuibit.visualize_matplotlib import (
+    get_figname,
     save_from_dir_filename_ext,
     setup_matplotlib,
-    get_figname,
 )
-
 
 if __name__ == "__main__":
     setup_matplotlib()
@@ -46,7 +46,6 @@ if __name__ == "__main__":
     if args.verbose:
         logging.basicConfig(format="%(asctime)s - %(message)s")
         logger.setLevel(logging.DEBUG)
-
 
     figname = get_figname(args, default="physical_time_per_hour")
     logger.debug(f"Using figname {figname}")

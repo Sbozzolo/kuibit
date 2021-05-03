@@ -39,10 +39,10 @@ from os.path import splitext
 import numpy as np
 from scipy import interpolate, linalg
 
-from kuibit.uniform_grid import UniformGrid
 from kuibit import grid_data_utils as gdu
 from kuibit.numerical import BaseNumerical
 from kuibit.series import BaseSeries
+from kuibit.uniform_grid import UniformGrid
 
 
 class GridSeries(BaseSeries):

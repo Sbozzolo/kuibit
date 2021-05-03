@@ -239,9 +239,9 @@ class TestFrequencySeries(unittest.TestCase):
             with warnings.catch_warnings():
                 warnings.simplefilter("ignore")
 
-                from pycbc.types import timeseries as pycbcts
-                from pycbc.types import frequencyseries as pycbcfs
                 from pycbc.filter import overlap
+                from pycbc.types import frequencyseries as pycbcfs
+                from pycbc.types import timeseries as pycbcts
 
             ts1_pcbc = pycbcts.TimeSeries(values1, delta_t=times[1] - times[0])
             ts2_pcbc = pycbcts.TimeSeries(values2, delta_t=times[1] - times[0])
