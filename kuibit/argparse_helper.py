@@ -171,7 +171,6 @@ def add_figure_to_parser(parser, default_figname=None):
 
     - ``figname``
     - ``fig-extension
-    - ``as-tikz
 
     :param default_figname: Default name of the output figure.
     :type default_figname: str
@@ -193,9 +192,6 @@ def add_figure_to_parser(parser, default_figname=None):
         help="Extension of the output figure (default: %(default)s)."
         " This is ignored when the output is a TikZ figure, "
         "in which case the extension is .tikz",
-    )
-    parser.add_argument(
-        "--as-tikz", action="store_true", help="Save figure as TikZ figure"
     )
 
 

@@ -91,7 +91,6 @@ class TestArgparseHelper(unittest.TestCase):
 
         self.assertEqual(args.figname, "figure")
         self.assertEqual(args.fig_extension, "png")
-        self.assertFalse(args.as_tikz)
 
     def test_add_horizon_to_parser(self):
 
