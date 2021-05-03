@@ -25,4 +25,4 @@ class Testkuibit(unittest.TestCase):
         self.assertEqual(__version__, "1.1.1")
 
     def test_bibtex(self):
-        self.assertIn("Gabriele Bozzola", __bibtex__)
+        self.assertIn("Bozzola", __bibtex__)

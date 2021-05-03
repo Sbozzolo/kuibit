@@ -134,22 +134,25 @@ comments to improve the code and the documentation.
 
 `kuibit` is built and maintained by the dedication of one graduate student. Please,
 consider citing `kuibit` if you find the software useful. You can use the following
-`bibtex` key.
+`bibtex` key (as provided by ADSABS).
 ``` bibtex
 @article{kuibit,
-  doi = {10.21105/joss.03099},
-  url = {https://doi.org/10.21105/joss.03099},
-  year = {2021},
-  publisher = {The Open Journal},
-  volume = {6},
-  number = {60},
-  pages = {3099},
-  author = {Gabriele Bozzola},
-  title = {kuibit: Analyzing Einstein Toolkit simulations with Python},
-  journal = {Journal of Open Source Software},
-  archivePrefix = {arXiv},
-  eprint = {2104.06376},
-  primaryClass = {gr-qc}
+       author = {{Bozzola}, Gabriele},
+        title = "{kuibit: Analyzing Einstein Toolkit simulations with Python}",
+      journal = {The Journal of Open Source Software},
+     keywords = {numerical relativity, Python, Einstein Toolkit, astrophysics, Cactus, General Relativity and Quantum Cosmology, Astrophysics - High Energy Astrophysical Phenomena},
+         year = 2021,
+        month = apr,
+       volume = {6},
+       number = {60},
+          eid = {3099},
+        pages = {3099},
+          doi = {10.21105/joss.03099},
+archivePrefix = {arXiv},
+       eprint = {2104.06376},
+ primaryClass = {gr-qc},
+       adsurl = {https://ui.adsabs.harvard.edu/abs/2021JOSS....6.3099B},
+      adsnote = {Provided by the SAO/NASA Astrophysics Data System}
 }
 ```
 You can find this entry in Python with `from kuibit import __bibtex__`.
