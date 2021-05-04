@@ -322,7 +322,7 @@ def _process_anchor_info(anchor, offset):
 
 
 @preprocess_plot
-def add_text_to_corner(text, anchor="SE", figure=None, axis=None, offset=0.02):
+def add_text_to_corner(text, anchor="SE", figure=None, axis=None, offset=0.01):
     """Add text to a figure.
 
     Specify the location of the label using cardinal points (NSWE).
