@@ -77,7 +77,7 @@ if __name__ == "__main__":
         constraint_names = [
             ["H", "M1", "M2", "M3"],  # McLachlan
             ["hc", "mc", "my", "mz"],  # Lean
-            ["hamc", "momcx", "momxy", "momcz", "divE"],  # ProcaConstraints
+            ["hamc", "momcx", "momcy", "momcz", "divE"],  # ProcaConstraints
         ]
 
         logger.debug("Plotting")
