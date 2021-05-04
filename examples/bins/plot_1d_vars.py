@@ -16,7 +16,6 @@
 # this program; if not, see <https://www.gnu.org/licenses/>.
 
 import logging
-import os
 
 import matplotlib.pyplot as plt
 
@@ -25,7 +24,6 @@ from kuibit.simdir import SimDir
 from kuibit.visualize_matplotlib import (
     add_text_to_corner,
     get_figname,
-    plot_color,
     save_from_dir_filename_ext,
     setup_matplotlib,
 )
@@ -33,7 +31,8 @@ from kuibit.visualize_matplotlib import (
 if __name__ == "__main__":
     setup_matplotlib()
 
-    desc = f"""{kah.get_program_name()} plots or more 1D grid functions output by Carpet."""
+    desc = f"""\
+{kah.get_program_name()} plots or more 1D grid functions output by Carpet."""
 
     parser = kah.init_argparse(desc)
     kah.add_figure_to_parser(parser)

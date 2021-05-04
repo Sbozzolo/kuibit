@@ -16,13 +16,13 @@
 # this program; if not, see <https://www.gnu.org/licenses/>.
 
 import logging
-import os
 
 import matplotlib.pyplot as plt
 
 from kuibit import argparse_helper as kah
 from kuibit.simdir import SimDir
 from kuibit.visualize_matplotlib import (
+    add_text_to_corner,
     get_figname,
     save_from_dir_filename_ext,
     setup_matplotlib,
@@ -31,9 +31,10 @@ from kuibit.visualize_matplotlib import (
 if __name__ == "__main__":
     setup_matplotlib()
 
-    desc = f"""{kah.get_program_name()} plots, for a given detector, the electromagnetic
-    luminosity and cumulative energy as a function of time as computed from
-    Phi2. """
+    desc = f"""\
+{kah.get_program_name()} plots, for a given detector, the electromagnetic
+luminosity and cumulative energy as a function of time as computed from Phi2.
+"""
 
     parser = kah.init_argparse(desc)
     kah.add_figure_to_parser(parser)
@@ -80,6 +81,10 @@ if __name__ == "__main__":
     ax2.set_xlabel(r"Time - Detector distance $(t - r)$")
     ax1.set_ylabel(r"$dE\slash dt (t)$")
     ax2.set_ylabel(r"$E^{<t}(t)$")
+
+    add_text_to_corner(f"Det {args.detector_num}", anchor="SW", offset=0.005)
+    add_text_to_corner(fr"$r = {radius:.3f}$", offset=0.005)
+
     logger.debug("Plotted")
 
     logger.debug("Saving")

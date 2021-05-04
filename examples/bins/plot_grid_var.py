@@ -31,7 +31,8 @@ from kuibit.visualize_matplotlib import (
 if __name__ == "__main__":
     setup_matplotlib()
 
-    desc = f"""{kah.get_program_name()} plot a given grid function.
+    desc = f"""\
+{kah.get_program_name()} plot a given grid function.
 
 By default, no interpolation is performed so the image may look pixelated.
 There are two available modes of interpolation. The first is activated

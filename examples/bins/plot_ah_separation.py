@@ -32,8 +32,9 @@ from kuibit.visualize_matplotlib import (
 if __name__ == "__main__":
     setup_matplotlib()
 
-    desc = f"""{kah.get_program_name()} plots the coordinate separation between
-    the centroids of two given apparent horizons."""
+    desc = f"""\
+{kah.get_program_name()} plots the coordinate separation between the centroids
+of two given apparent horizons."""
 
     parser = kah.init_argparse(desc)
     kah.add_figure_to_parser(parser)

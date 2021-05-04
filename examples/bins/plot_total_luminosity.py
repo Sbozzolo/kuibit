@@ -22,6 +22,7 @@ import matplotlib.pyplot as plt
 from kuibit import argparse_helper as kah
 from kuibit.simdir import SimDir
 from kuibit.visualize_matplotlib import (
+    add_text_to_corner,
     get_figname,
     save_from_dir_filename_ext,
     setup_matplotlib,
@@ -30,9 +31,9 @@ from kuibit.visualize_matplotlib import (
 if __name__ == "__main__":
     setup_matplotlib()
 
-    desc = f"""{kah.get_program_name()} plots the gravitational-wave plus
-    the electromagnetic-wave luminosity as a function of time for a given
-    detector. """
+    desc = f"""\
+{kah.get_program_name()} plots the gravitational-wave plus the
+electromagnetic-wave luminosity as a function of time for a given detector."""
 
     parser = kah.init_argparse(desc)
     kah.add_figure_to_parser(parser)
@@ -82,6 +83,10 @@ if __name__ == "__main__":
     plt.plot((power_gw + power_em).time_shifted(-radius))
     plt.xlabel(r"Time - Detector distance $(t - r)$")
     plt.ylabel(r"$dE\slash dt (t)$")
+
+    add_text_to_corner(f"Det {args.detector_num}", anchor="SW", offset=0.005)
+    add_text_to_corner(fr"$r = {radius:.3f}$", offset=0.005)
+
     logger.debug("Plotted")
 
     logger.debug("Saving")

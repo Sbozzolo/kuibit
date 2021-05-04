@@ -16,7 +16,6 @@
 # this program; if not, see <https://www.gnu.org/licenses/>.
 
 import logging
-import os
 
 import matplotlib.pyplot as plt
 
@@ -31,8 +30,9 @@ from kuibit.visualize_matplotlib import (
 if __name__ == "__main__":
     setup_matplotlib()
 
-    desc = f"""{kah.get_program_name()} plots how much physical time is being simulated per
-    wall-time hour and day."""
+    desc = f"""\
+{kah.get_program_name()} plots how much physical time is being simulated per
+wall-time hour and day."""
 
     parser = kah.init_argparse(desc)
     kah.add_figure_to_parser(parser)

@@ -16,13 +16,13 @@
 # this program; if not, see <https://www.gnu.org/licenses/>.
 
 import logging
-import os
 
 import matplotlib.pyplot as plt
 
 from kuibit import argparse_helper as kah
 from kuibit.simdir import SimDir
 from kuibit.visualize_matplotlib import (
+    add_text_to_corner,
     get_figname,
     save_from_dir_filename_ext,
     setup_matplotlib,
@@ -31,9 +31,10 @@ from kuibit.visualize_matplotlib import (
 if __name__ == "__main__":
     setup_matplotlib()
 
-    desc = f"""{kah.get_program_name()} plots the instantaneous and cumulative linear
-    momentum lost via emission of gravitational-wave as a function of time for a
-    given detector. """
+    desc = f"""\
+{kah.get_program_name()} plots the instantaneous and cumulative linear momentum
+lost via emission of gravitational-wave as a function of time for a given
+detector. """
 
     parser = kah.init_argparse(desc)
     kah.add_figure_to_parser(parser)
@@ -92,6 +93,10 @@ if __name__ == "__main__":
     ax2.set_xlabel(r"Time - Detector distance $(t - r)$")
     ax1.set_ylabel(r"$dP^z\slash dt (t)$")
     ax2.set_ylabel(r"$P^z_{<t}(t)$")
+
+    add_text_to_corner(f"Det {args.detector_num}", anchor="SW", offset=0.005)
+    add_text_to_corner(fr"$r = {radius:.3f}$", offset=0.005)
+
     logger.debug("Plotted")
 
     logger.debug("Saving")

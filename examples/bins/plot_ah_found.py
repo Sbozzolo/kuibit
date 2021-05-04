@@ -16,14 +16,12 @@
 # this program; if not, see <https://www.gnu.org/licenses/>.
 
 import logging
-import os
 
 import matplotlib.pyplot as plt
 
 from kuibit import argparse_helper as kah
 from kuibit.simdir import SimDir
 from kuibit.visualize_matplotlib import (
-    add_text_to_corner,
     get_figname,
     save_from_dir_filename_ext,
     setup_matplotlib,
@@ -32,8 +30,8 @@ from kuibit.visualize_matplotlib import (
 if __name__ == "__main__":
     setup_matplotlib()
 
-    desc = f"""{kah.get_program_name()} plots the times intervals at which the different given
-    apparent horizons were found. """
+    desc = f"""\
+{kah.get_program_name()} plots the times intervals at which the different given apparent horizons were found. """
 
     parser = kah.init_argparse(desc)
     kah.add_figure_to_parser(parser)
