@@ -103,6 +103,8 @@ if __name__ == "__main__":
         plt.plot(horizon.max_radius / args.dx)
         plt.ylabel("Number of points on radius")
 
+    add_text_to_corner(f"AH {ah}", anchor="N")
+
     logger.debug("Plotted")
 
     logger.debug("Saving")

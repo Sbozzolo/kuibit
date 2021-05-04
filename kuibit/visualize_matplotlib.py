@@ -343,13 +343,15 @@ def add_text_to_corner(text, anchor="SE", figure=None, axis=None, offset=0.01):
 
     hor_pos, ver_pos, hor_al, ver_al = _process_anchor_info(anchor, offset)
 
+    kwargs = {}
+    if hor_al is not None:
+        kwargs.update({"horizontalalignment": hor_al})
+
+    if ver_al is not None:
+        kwargs.update({"verticalalignment": ver_al})
+
     return text_function(
-        hor_pos,
-        ver_pos,
-        text,
-        horizontalalignment=hor_al,
-        verticalalignment=ver_al,
-        transform=figure.transFigure,
+        hor_pos, ver_pos, text, transform=figure.transFigure, **kwargs
     )
 
 
