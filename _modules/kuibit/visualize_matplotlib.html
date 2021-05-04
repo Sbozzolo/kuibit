@@ -368,7 +368,7 @@
 
 
 <span class="nd">@preprocess_plot</span>
-<span class="k">def</span> <span class="nf">add_text_to_corner</span><span class="p">(</span><span class="n">text</span><span class="p">,</span> <span class="n">anchor</span><span class="o">=</span><span class="s2">&quot;SE&quot;</span><span class="p">,</span> <span class="n">figure</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">offset</span><span class="o">=</span><span class="mf">0.02</span><span class="p">):</span>
+<span class="k">def</span> <span class="nf">add_text_to_corner</span><span class="p">(</span><span class="n">text</span><span class="p">,</span> <span class="n">anchor</span><span class="o">=</span><span class="s2">&quot;SE&quot;</span><span class="p">,</span> <span class="n">figure</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">offset</span><span class="o">=</span><span class="mf">0.01</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Add text to a figure.</span>
 
 <span class="sd">    Specify the location of the label using cardinal points (NSWE).</span>
@@ -389,13 +389,19 @@
 
     <span class="n">hor_pos</span><span class="p">,</span> <span class="n">ver_pos</span><span class="p">,</span> <span class="n">hor_al</span><span class="p">,</span> <span class="n">ver_al</span> <span class="o">=</span> <span class="n">_process_anchor_info</span><span class="p">(</span><span class="n">anchor</span><span class="p">,</span> <span class="n">offset</span><span class="p">)</span>
 
+    <span class="n">kwargs</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">if</span> <span class="n">hor_pos</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">kwargs</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="s2">&quot;horizontalalignment&quot;</span><span class="p">:</span> <span class="n">ver_al</span><span class="p">})</span>
+
+    <span class="k">if</span> <span class="n">ver_pos</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">kwargs</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="s2">&quot;verticalalignment&quot;</span><span class="p">:</span> <span class="n">ver_al</span><span class="p">})</span>
+
     <span class="k">return</span> <span class="n">text_function</span><span class="p">(</span>
         <span class="n">hor_pos</span><span class="p">,</span>
         <span class="n">ver_pos</span><span class="p">,</span>
         <span class="n">text</span><span class="p">,</span>
-        <span class="n">horizontalalignment</span><span class="o">=</span><span class="n">hor_al</span><span class="p">,</span>
-        <span class="n">verticalalignment</span><span class="o">=</span><span class="n">ver_al</span><span class="p">,</span>
         <span class="n">transform</span><span class="o">=</span><span class="n">figure</span><span class="o">.</span><span class="n">transFigure</span><span class="p">,</span>
+        <span class="o">**</span><span class="n">kwargs</span>
     <span class="p">)</span>
 
 
