@@ -77,13 +77,13 @@ measured from a given detector as a function of time. <code class="docutils lite
 <span class="kn">import</span> <span class="nn">logging</span>
 
 <span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
-
 <span class="kn">from</span> <span class="nn">kuibit</span> <span class="kn">import</span> <span class="n">argparse_helper</span> <span class="k">as</span> <span class="n">kah</span>
 <span class="kn">from</span> <span class="nn">kuibit.simdir</span> <span class="kn">import</span> <span class="n">SimDir</span>
 <span class="kn">from</span> <span class="nn">kuibit.visualize_matplotlib</span> <span class="kn">import</span> <span class="p">(</span>
     <span class="n">add_text_to_corner</span><span class="p">,</span>
     <span class="n">get_figname</span><span class="p">,</span>
     <span class="n">save_from_dir_filename_ext</span><span class="p">,</span>
+    <span class="n">set_axis_limits_from_args</span><span class="p">,</span>
     <span class="n">setup_matplotlib</span><span class="p">,</span>
 <span class="p">)</span>
 
@@ -96,7 +96,7 @@ measured from a given detector as a function of time. <code class="docutils lite
 <span class="s2">&quot;&quot;&quot;</span>
 
     <span class="n">parser</span> <span class="o">=</span> <span class="n">kah</span><span class="o">.</span><span class="n">init_argparse</span><span class="p">(</span><span class="n">desc</span><span class="p">)</span>
-    <span class="n">kah</span><span class="o">.</span><span class="n">add_figure_to_parser</span><span class="p">(</span><span class="n">parser</span><span class="p">)</span>
+    <span class="n">kah</span><span class="o">.</span><span class="n">add_figure_to_parser</span><span class="p">(</span><span class="n">parser</span><span class="p">,</span> <span class="n">add_limits</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
     <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span>
         <span class="s2">&quot;--detector-num&quot;</span><span class="p">,</span>
@@ -144,6 +144,7 @@ measured from a given detector as a function of time. <code class="docutils lite
     <span class="n">add_text_to_corner</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Det </span><span class="si">{</span><span class="n">args</span><span class="o">.</span><span class="n">detector_num</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">anchor</span><span class="o">=</span><span class="s2">&quot;SW&quot;</span><span class="p">,</span> <span class="n">offset</span><span class="o">=</span><span class="mf">0.005</span><span class="p">)</span>
     <span class="n">add_text_to_corner</span><span class="p">(</span><span class="sa">fr</span><span class="s2">&quot;$r = </span><span class="si">{</span><span class="n">radius</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2">$&quot;</span><span class="p">,</span> <span class="n">offset</span><span class="o">=</span><span class="mf">0.005</span><span class="p">)</span>
 
+    <span class="n">set_axis_limits_from_args</span><span class="p">(</span><span class="n">args</span><span class="p">)</span>
     <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Plotted&quot;</span><span class="p">)</span>
 
     <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Saving&quot;</span><span class="p">)</span>

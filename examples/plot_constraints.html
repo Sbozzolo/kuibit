@@ -76,7 +76,6 @@ solvers.</p>
 <span class="kn">import</span> <span class="nn">logging</span>
 
 <span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
-
 <span class="kn">from</span> <span class="nn">kuibit</span> <span class="kn">import</span> <span class="n">argparse_helper</span> <span class="k">as</span> <span class="n">kah</span>
 <span class="kn">from</span> <span class="nn">kuibit.simdir</span> <span class="kn">import</span> <span class="n">SimDir</span>
 <span class="kn">from</span> <span class="nn">kuibit.visualize_matplotlib</span> <span class="kn">import</span> <span class="p">(</span>
@@ -91,7 +90,7 @@ solvers.</p>
 <span class="s2">{kah.get_program_name()} plots given reductions of the constraints.&quot;&quot;&quot;</span>
 
     <span class="n">parser</span> <span class="o">=</span> <span class="n">kah</span><span class="o">.</span><span class="n">init_argparse</span><span class="p">(</span><span class="n">desc</span><span class="p">)</span>
-    <span class="n">kah</span><span class="o">.</span><span class="n">add_figure_to_parser</span><span class="p">(</span><span class="n">parser</span><span class="p">)</span>
+    <span class="n">kah</span><span class="o">.</span><span class="n">add_figure_to_parser</span><span class="p">(</span><span class="n">parser</span><span class="p">,</span> <span class="n">add_limits</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
     <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span>
         <span class="s2">&quot;--reductions&quot;</span><span class="p">,</span>
         <span class="n">default</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;norm2&quot;</span><span class="p">,</span> <span class="s2">&quot;maximum&quot;</span><span class="p">],</span>
@@ -135,7 +134,7 @@ solvers.</p>
         <span class="n">constraint_names</span> <span class="o">=</span> <span class="p">[</span>
             <span class="p">[</span><span class="s2">&quot;H&quot;</span><span class="p">,</span> <span class="s2">&quot;M1&quot;</span><span class="p">,</span> <span class="s2">&quot;M2&quot;</span><span class="p">,</span> <span class="s2">&quot;M3&quot;</span><span class="p">],</span>  <span class="c1"># McLachlan</span>
             <span class="p">[</span><span class="s2">&quot;hc&quot;</span><span class="p">,</span> <span class="s2">&quot;mc&quot;</span><span class="p">,</span> <span class="s2">&quot;my&quot;</span><span class="p">,</span> <span class="s2">&quot;mz&quot;</span><span class="p">],</span>  <span class="c1"># Lean</span>
-            <span class="p">[</span><span class="s2">&quot;hamc&quot;</span><span class="p">,</span> <span class="s2">&quot;momcx&quot;</span><span class="p">,</span> <span class="s2">&quot;momxy&quot;</span><span class="p">,</span> <span class="s2">&quot;momcz&quot;</span><span class="p">,</span> <span class="s2">&quot;divE&quot;</span><span class="p">],</span>  <span class="c1"># ProcaConstraints</span>
+            <span class="p">[</span><span class="s2">&quot;hamc&quot;</span><span class="p">,</span> <span class="s2">&quot;momcx&quot;</span><span class="p">,</span> <span class="s2">&quot;momcy&quot;</span><span class="p">,</span> <span class="s2">&quot;momcz&quot;</span><span class="p">,</span> <span class="s2">&quot;divE&quot;</span><span class="p">],</span>  <span class="c1"># ProcaConstraints</span>
         <span class="p">]</span>
 
         <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Plotting&quot;</span><span class="p">)</span>
@@ -145,6 +144,7 @@ solvers.</p>
                     <span class="n">plot_constraint</span><span class="p">(</span><span class="n">constraint</span><span class="p">,</span> <span class="n">reduction</span><span class="p">)</span>
 
         <span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">()</span>
+        <span class="n">set_axis_limits_from_args</span><span class="p">(</span><span class="n">args</span><span class="p">)</span>
         <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Plotted&quot;</span><span class="p">)</span>
 
         <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Saving&quot;</span><span class="p">)</span>

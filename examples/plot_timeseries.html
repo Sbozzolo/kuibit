@@ -74,12 +74,12 @@ scalars, reductions, …).</p>
 <span class="kn">import</span> <span class="nn">logging</span>
 
 <span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
-
 <span class="kn">from</span> <span class="nn">kuibit</span> <span class="kn">import</span> <span class="n">argparse_helper</span> <span class="k">as</span> <span class="n">kah</span>
 <span class="kn">from</span> <span class="nn">kuibit.simdir</span> <span class="kn">import</span> <span class="n">SimDir</span>
 <span class="kn">from</span> <span class="nn">kuibit.visualize_matplotlib</span> <span class="kn">import</span> <span class="p">(</span>
     <span class="n">get_figname</span><span class="p">,</span>
     <span class="n">save_from_dir_filename_ext</span><span class="p">,</span>
+    <span class="n">set_axis_limits_from_args</span><span class="p">,</span>
     <span class="n">setup_matplotlib</span><span class="p">,</span>
 <span class="p">)</span>
 
@@ -91,7 +91,7 @@ scalars, reductions, …).</p>
 <span class="s2">&quot;&quot;&quot;</span>
 
     <span class="n">parser</span> <span class="o">=</span> <span class="n">kah</span><span class="o">.</span><span class="n">init_argparse</span><span class="p">(</span><span class="n">desc</span><span class="p">)</span>
-    <span class="n">kah</span><span class="o">.</span><span class="n">add_figure_to_parser</span><span class="p">(</span><span class="n">parser</span><span class="p">)</span>
+    <span class="n">kah</span><span class="o">.</span><span class="n">add_figure_to_parser</span><span class="p">(</span><span class="n">parser</span><span class="p">,</span> <span class="n">add_limits</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
     <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span>
         <span class="s2">&quot;--variable&quot;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="nb">str</span><span class="p">,</span> <span class="n">required</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Variable to plot.&quot;</span>
@@ -151,6 +151,7 @@ scalars, reductions, …).</p>
         <span class="n">plt</span><span class="o">.</span><span class="n">xscale</span><span class="p">(</span><span class="s2">&quot;log&quot;</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">args</span><span class="o">.</span><span class="n">logyaxis</span><span class="p">:</span>
         <span class="n">plt</span><span class="o">.</span><span class="n">yscale</span><span class="p">(</span><span class="s2">&quot;log&quot;</span><span class="p">)</span>
+    <span class="n">set_axis_limits_from_args</span><span class="p">(</span><span class="n">args</span><span class="p">)</span>
     <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Plotted&quot;</span><span class="p">)</span>
 
     <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Saving&quot;</span><span class="p">)</span>

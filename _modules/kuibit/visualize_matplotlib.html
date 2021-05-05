@@ -73,6 +73,11 @@
 <span class="sd">- :py:func:`~.add_text_to_corner` adds a label near an edge or a corner of</span>
 <span class="sd">  a figure (useful for annotations like time).</span>
 <span class="sd">- :py:func:`~.save` saves the figure, optionally with tikzplotlib.</span>
+<span class="sd">- :py:func:`~.save_from_dir_filename_ext` saves the figure and assembles the</span>
+<span class="sd">  name automatically from the output directory, file name and extension.</span>
+<span class="sd">- :py:func:`~.set_axis_limits` sets the range on the two axes of a given axis.</span>
+<span class="sd">  :py:func:`~.set_axis_limits_from_args` does the same but reading the data</span>
+<span class="sd">  from a given ``args`` (from ``ArgParse``).</span>
 
 <span class="sd">Two decorators:</span>
 
@@ -96,7 +101,11 @@
 
 <span class="sd">Horizons:</span>
 
-
+<span class="sd">- :py:func:`~.plot_horizon` to plot a given shape in 2D.</span>
+<span class="sd">- :py:func:`~.plot_horizon_on_plane_at_iteration` to plot a given horizon</span>
+<span class="sd">   at a given iteration in 2D.</span>
+<span class="sd">- :py:func:`~.plot_horizon_on_plane_at_time` to plot a given horizon</span>
+<span class="sd">   at a given time in 2D.</span>
 
 <span class="sd">Most of the functions here take optional arguments ``figure`` and ``axis``. You</span>
 <span class="sd">can specify them, or the current ones will be used.</span>
@@ -474,6 +483,70 @@
         <span class="n">figure</span><span class="o">=</span><span class="n">figure</span><span class="p">,</span>
         <span class="n">axis</span><span class="o">=</span><span class="n">axis</span><span class="p">,</span>
         <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+    <span class="p">)</span>
+
+
+<span class="nd">@preprocess_plot</span>
+<span class="k">def</span> <span class="nf">set_axis_limits</span><span class="p">(</span>
+    <span class="n">xmin</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">xmax</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">ymin</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">ymax</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">figure</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">axis</span><span class="o">=</span><span class="kc">None</span>
+<span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Set limits on the two axes of axis.</span>
+
+<span class="sd">    :param xmin: Minimum on the horizontal axis.</span>
+<span class="sd">    :type xmin: float</span>
+<span class="sd">    :param xmax: Maximum on the horizontal axis.</span>
+<span class="sd">    :type xmax: float</span>
+<span class="sd">    :param ymin: Minimum on the horizontal axis.</span>
+<span class="sd">    :type ymin: float</span>
+<span class="sd">    :param ymax: Maximum on the vertical axis.</span>
+<span class="sd">    :type ymax: float</span>
+
+<span class="sd">    :param figure: If passed, plot on this figure. If not passed (or if None),</span>
+<span class="sd">                   use the current figure.</span>
+<span class="sd">    :type figure: ``matplotlib.pyplot.figure``</span>
+
+<span class="sd">    :param axis: If passed, plot on this axis. If not passed (or if None), use</span>
+<span class="sd">                 the current axis.</span>
+<span class="sd">    :type axis: ``matplotlib.pyplot.axis``</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">axis</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">xlim</span><span class="o">=</span><span class="p">(</span><span class="n">xmin</span><span class="p">,</span> <span class="n">xmax</span><span class="p">),</span> <span class="n">ylim</span><span class="o">=</span><span class="p">(</span><span class="n">ymin</span><span class="p">,</span> <span class="n">ymax</span><span class="p">))</span>
+
+
+<span class="nd">@preprocess_plot</span>
+<span class="k">def</span> <span class="nf">set_axis_limits_from_args</span><span class="p">(</span>
+        <span class="n">args</span><span class="p">,</span>
+        <span class="n">figure</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">axis</span><span class="o">=</span><span class="kc">None</span>
+<span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Set limits on the two axes of axis with data read from ``args``.</span>
+
+<span class="sd">    It uses the ``xmin``, ``xmax``, ``ymin``, ``ymax`` attributes.</span>
+
+<span class="sd">    :param args: Options provided by the user.</span>
+<span class="sd">    :type args: `argparse.Namespace`</span>
+
+<span class="sd">    :param figure: If passed, plot on this figure. If not passed (or if None),</span>
+<span class="sd">                   use the current figure.</span>
+<span class="sd">    :type figure: ``matplotlib.pyplot.figure``</span>
+
+<span class="sd">    :param axis: If passed, plot on this axis. If not passed (or if None), use</span>
+<span class="sd">                 the current axis.</span>
+<span class="sd">    :type axis: ``matplotlib.pyplot.axis``</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">set_axis_limits</span><span class="p">(</span>
+        <span class="n">xmin</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">xmin</span><span class="p">,</span>
+        <span class="n">xmax</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">xmax</span><span class="p">,</span>
+        <span class="n">ymin</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">ymin</span><span class="p">,</span>
+        <span class="n">ymax</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">ymax</span><span class="p">,</span>
+        <span class="n">figure</span><span class="o">=</span><span class="n">figure</span><span class="p">,</span>
+        <span class="n">axis</span><span class="o">=</span><span class="n">axis</span>
     <span class="p">)</span>
 
 

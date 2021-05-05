@@ -208,7 +208,7 @@
         <span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="add_figure_to_parser"><a class="viewcode-back" href="../../argparse_helper_ref.html#kuibit.argparse_helper.add_figure_to_parser">[docs]</a><span class="k">def</span> <span class="nf">add_figure_to_parser</span><span class="p">(</span><span class="n">parser</span><span class="p">,</span> <span class="n">default_figname</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<div class="viewcode-block" id="add_figure_to_parser"><a class="viewcode-back" href="../../argparse_helper_ref.html#kuibit.argparse_helper.add_figure_to_parser">[docs]</a><span class="k">def</span> <span class="nf">add_figure_to_parser</span><span class="p">(</span><span class="n">parser</span><span class="p">,</span> <span class="n">default_figname</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">add_limits</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Add parameters that have to do with a figure as output to a given parser.</span>
 
 <span class="sd">    This function edits &#39;&#39;parser&#39;&#39; in place.</span>
@@ -218,8 +218,17 @@
 <span class="sd">    - ``figname``</span>
 <span class="sd">    - ``fig-extension</span>
 
+<span class="sd">    If ``add_limits`` is True, then also add:</span>
+
+<span class="sd">    - ``xmin``</span>
+<span class="sd">    - ``xmax``</span>
+<span class="sd">    - ``ymin``</span>
+<span class="sd">    - ``ymax``</span>
+
 <span class="sd">    :param default_figname: Default name of the output figure.</span>
 <span class="sd">    :type default_figname: str</span>
+<span class="sd">    :param add_limits: Add ``xmin``, ``xmax``, ``ymin``, ``ymax``.</span>
+<span class="sd">    :type add_limits: bool</span>
 <span class="sd">    :param parser: Argparse parser (generated with :py:func:`~.init_argparse`).</span>
 <span class="sd">    :type parser: configargparse.ArgumentParser</span>
 
@@ -235,10 +244,29 @@
         <span class="nb">type</span><span class="o">=</span><span class="nb">str</span><span class="p">,</span>
         <span class="n">default</span><span class="o">=</span><span class="s2">&quot;png&quot;</span><span class="p">,</span>
         <span class="n">env_var</span><span class="o">=</span><span class="s2">&quot;KBIT_FIG_EXTENSION&quot;</span><span class="p">,</span>
-        <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Extension of the output figure (default: </span><span class="si">%(default)s</span><span class="s2">).&quot;</span>
-        <span class="s2">&quot; This is ignored when the output is a TikZ figure, &quot;</span>
-        <span class="s2">&quot;in which case the extension is .tikz&quot;</span><span class="p">,</span>
-    <span class="p">)</span></div>
+        <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Extension of the output figure (default: </span><span class="si">%(default)s</span><span class="s2">).&quot;</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="k">if</span> <span class="n">add_limits</span><span class="p">:</span>
+        <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span>
+            <span class="s2">&quot;--xmin&quot;</span><span class="p">,</span>
+            <span class="nb">type</span><span class="o">=</span><span class="nb">float</span><span class="p">,</span>
+            <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Minimum value of the horizontal axis.&quot;</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span>
+            <span class="s2">&quot;--xmax&quot;</span><span class="p">,</span>
+            <span class="nb">type</span><span class="o">=</span><span class="nb">float</span><span class="p">,</span>
+            <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Maximum value of the horizontal axis.&quot;</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span>
+            <span class="s2">&quot;--ymin&quot;</span><span class="p">,</span>
+            <span class="nb">type</span><span class="o">=</span><span class="nb">float</span><span class="p">,</span>
+            <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Minimum value of the vertical axis.&quot;</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span>
+            <span class="s2">&quot;--ymax&quot;</span><span class="p">,</span>
+            <span class="nb">type</span><span class="o">=</span><span class="nb">float</span><span class="p">,</span>
+            <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Maximum value of the vertical axis.&quot;</span><span class="p">,</span>
+        <span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="add_horizon_to_parser"><a class="viewcode-back" href="../../argparse_helper_ref.html#kuibit.argparse_helper.add_horizon_to_parser">[docs]</a><span class="k">def</span> <span class="nf">add_horizon_to_parser</span><span class="p">(</span>
