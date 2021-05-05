@@ -22,7 +22,7 @@ For a full list of available features, see the :doc:`features page <features>`.
 
 - Read and organize simulation data (:py:mod:`~.simdir`). Checkpoints and
   restarts are handled transparently.
-- Work with scalar data as produced by ``CarpetASCII``
+- Work with scalar data as produced by ``CarpetIOASCII``
   (:py:mod:`~.cactus_scalars`).
 - Analyze the multipolar decompositions output by ``Multipoles``
   (:py:mod:`~.cactus_multipoles`).
