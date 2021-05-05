@@ -162,7 +162,7 @@ def add_grid_to_parser(parser, dimensions=2):
         )
 
 
-def add_figure_to_parser(parser, default_figname=None):
+def add_figure_to_parser(parser, default_figname=None, add_limits=False):
     """Add parameters that have to do with a figure as output to a given parser.
 
     This function edits ''parser'' in place.
@@ -172,8 +172,17 @@ def add_figure_to_parser(parser, default_figname=None):
     - ``figname``
     - ``fig-extension
 
+    If ``add_limits`` is True, then also add:
+
+    - ``xmin``
+    - ``xmax``
+    - ``ymin``
+    - ``ymax``
+
     :param default_figname: Default name of the output figure.
     :type default_figname: str
+    :param add_limits: Add ``xmin``, ``xmax``, ``ymin``, ``ymax``.
+    :type add_limits: bool
     :param parser: Argparse parser (generated with :py:func:`~.init_argparse`).
     :type parser: configargparse.ArgumentParser
 
@@ -189,10 +198,29 @@ def add_figure_to_parser(parser, default_figname=None):
         type=str,
         default="png",
         env_var="KBIT_FIG_EXTENSION",
-        help="Extension of the output figure (default: %(default)s)."
-        " This is ignored when the output is a TikZ figure, "
-        "in which case the extension is .tikz",
+        help="Extension of the output figure (default: %(default)s).",
     )
+    if add_limits:
+        parser.add_argument(
+            "--xmin",
+            type=float,
+            help="Minimum value of the horizontal axis.",
+        )
+        parser.add_argument(
+            "--xmax",
+            type=float,
+            help="Maximum value of the horizontal axis.",
+        )
+        parser.add_argument(
+            "--ymin",
+            type=float,
+            help="Minimum value of the vertical axis.",
+        )
+        parser.add_argument(
+            "--ymax",
+            type=float,
+            help="Maximum value of the vertical axis.",
+        )
 
 
 def add_horizon_to_parser(

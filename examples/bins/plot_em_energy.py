@@ -18,13 +18,13 @@
 import logging
 
 import matplotlib.pyplot as plt
-
 from kuibit import argparse_helper as kah
 from kuibit.simdir import SimDir
 from kuibit.visualize_matplotlib import (
     add_text_to_corner,
     get_figname,
     save_from_dir_filename_ext,
+    set_axis_limits_from_args,
     setup_matplotlib,
 )
 
@@ -37,7 +37,7 @@ luminosity and cumulative energy as a function of time as computed from Phi2.
 """
 
     parser = kah.init_argparse(desc)
-    kah.add_figure_to_parser(parser)
+    kah.add_figure_to_parser(parser, add_limits=True)
 
     parser.add_argument(
         "--detector-num",
@@ -85,6 +85,7 @@ luminosity and cumulative energy as a function of time as computed from Phi2.
     add_text_to_corner(f"Det {args.detector_num}", anchor="SW", offset=0.005)
     add_text_to_corner(fr"$r = {radius:.3f}$", offset=0.005)
 
+    set_axis_limits_from_args(args)
     logger.debug("Plotted")
 
     logger.debug("Saving")

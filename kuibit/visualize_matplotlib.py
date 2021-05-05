@@ -27,6 +27,11 @@ Utilities:
 - :py:func:`~.add_text_to_corner` adds a label near an edge or a corner of
   a figure (useful for annotations like time).
 - :py:func:`~.save` saves the figure, optionally with tikzplotlib.
+- :py:func:`~.save_from_dir_filename_ext` saves the figure and assembles the
+  name automatically from the output directory, file name and extension.
+- :py:func:`~.set_axis_limits` sets the range on the two axes of a given axis.
+  :py:func:`~.set_axis_limits_from_args` does the same but reading the data
+  from a given ``args`` (from ``ArgParse``).
 
 Two decorators:
 
@@ -50,7 +55,11 @@ Grid data:
 
 Horizons:
 
-
+- :py:func:`~.plot_horizon` to plot a given shape in 2D.
+- :py:func:`~.plot_horizon_on_plane_at_iteration` to plot a given horizon
+   at a given iteration in 2D.
+- :py:func:`~.plot_horizon_on_plane_at_time` to plot a given horizon
+   at a given time in 2D.
 
 Most of the functions here take optional arguments ``figure`` and ``axis``. You
 can specify them, or the current ones will be used.
@@ -428,6 +437,70 @@ def save_from_dir_filename_ext(
         figure=figure,
         axis=axis,
         **kwargs,
+    )
+
+
+@preprocess_plot
+def set_axis_limits(
+    xmin=None,
+    xmax=None,
+    ymin=None,
+    ymax=None,
+    figure=None,
+    axis=None
+):
+    """Set limits on the two axes of axis.
+
+    :param xmin: Minimum on the horizontal axis.
+    :type xmin: float
+    :param xmax: Maximum on the horizontal axis.
+    :type xmax: float
+    :param ymin: Minimum on the horizontal axis.
+    :type ymin: float
+    :param ymax: Maximum on the vertical axis.
+    :type ymax: float
+
+    :param figure: If passed, plot on this figure. If not passed (or if None),
+                   use the current figure.
+    :type figure: ``matplotlib.pyplot.figure``
+
+    :param axis: If passed, plot on this axis. If not passed (or if None), use
+                 the current axis.
+    :type axis: ``matplotlib.pyplot.axis``
+
+    """
+    axis.set(xlim=(xmin, xmax), ylim=(ymin, ymax))
+
+
+@preprocess_plot
+def set_axis_limits_from_args(
+        args,
+        figure=None,
+        axis=None
+):
+    """Set limits on the two axes of axis with data read from ``args``.
+
+    It uses the ``xmin``, ``xmax``, ``ymin``, ``ymax`` attributes.
+
+    :param args: Options provided by the user.
+    :type args: `argparse.Namespace`
+
+    :param figure: If passed, plot on this figure. If not passed (or if None),
+                   use the current figure.
+    :type figure: ``matplotlib.pyplot.figure``
+
+    :param axis: If passed, plot on this axis. If not passed (or if None), use
+                 the current axis.
+    :type axis: ``matplotlib.pyplot.axis``
+
+    """
+    set_axis_limits(
+        xmin=args.xmin,
+        xmax=args.xmax,
+        ymin=args.ymin,
+        ymax=args.ymax,
+        figure=figure,
+        axis=axis
     )
 
 

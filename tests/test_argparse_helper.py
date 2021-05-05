@@ -85,12 +85,14 @@ class TestArgparseHelper(unittest.TestCase):
 
     def test_add_figure_to_parser(self):
 
-        kah.add_figure_to_parser(self.parser, default_figname="figure")
-        # The [] essentially means "use defaults"
-        args = kah.get_args(self.parser, [])
+        kah.add_figure_to_parser(
+            self.parser, default_figname="figure", add_limits=True
+        )
+        args = kah.get_args(self.parser, ["--xmin", "0.5"])
 
         self.assertEqual(args.figname, "figure")
         self.assertEqual(args.fig_extension, "png")
+        self.assertEqual(args.xmin, 0.5)
 
     def test_add_horizon_to_parser(self):
 

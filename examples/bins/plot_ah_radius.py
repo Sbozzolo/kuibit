@@ -18,13 +18,13 @@
 import logging
 
 import matplotlib.pyplot as plt
-
 from kuibit import argparse_helper as kah
 from kuibit.simdir import SimDir
 from kuibit.visualize_matplotlib import (
     add_text_to_corner,
     get_figname,
     save_from_dir_filename_ext,
+    set_axis_limits_from_args,
     setup_matplotlib,
 )
 
@@ -37,7 +37,7 @@ indicating the number of points that resolve the radius, assuming that it is
 all covered by the given resolution."""
 
     parser = kah.init_argparse(desc)
-    kah.add_figure_to_parser(parser)
+    kah.add_figure_to_parser(parser, add_limits=True)
 
     parser.add_argument(
         "-a",
@@ -105,6 +105,7 @@ all covered by the given resolution."""
 
     add_text_to_corner(f"AH {ah}", anchor="SW", offset=0.005)
 
+    set_axis_limits_from_args(args)
     logger.debug("Plotted")
 
     logger.debug("Saving")

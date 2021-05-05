@@ -18,13 +18,13 @@
 import logging
 
 import matplotlib.pyplot as plt
-
 from kuibit import argparse_helper as kah
 from kuibit.simdir import SimDir
 from kuibit.visualize_matplotlib import (
     add_text_to_corner,
     get_figname,
     save_from_dir_filename_ext,
+    set_axis_limits_from_args,
     setup_matplotlib,
 )
 
@@ -35,7 +35,7 @@ if __name__ == "__main__":
 {kah.get_program_name()} plots or more 1D grid functions output by Carpet."""
 
     parser = kah.init_argparse(desc)
-    kah.add_figure_to_parser(parser)
+    kah.add_figure_to_parser(parser, add_limits=True)
 
     parser.add_argument(
         "--variables",
@@ -52,32 +52,6 @@ if __name__ == "__main__":
     )
     parser.add(
         "--logscale", help="Use a logarithmic y scale.", action="store_true"
-    )
-    parser.add(
-        "--vmin",
-        help=(
-            "Minimum value of the variable. "
-            "If logscale is True, this has to be the log."
-        ),
-        type=float,
-    )
-    parser.add(
-        "--vmax",
-        help=(
-            "Maximum value of the variable. "
-            "If logscale is True, this has to be the log."
-        ),
-        type=float,
-    )
-    parser.add(
-        "--xmin",
-        help=("Minimum coordinate."),
-        type=float,
-    )
-    parser.add(
-        "--xmax",
-        help=("Maximum coordinate."),
-        type=float,
     )
     parser.add_argument(
         "--absolute",
@@ -147,14 +121,14 @@ if __name__ == "__main__":
 
         logger.debug(f"Plotting variable {variable}")
         plt.plot(data, label=label)
+        set_axis_limits_from_args(args)
         logger.debug("Plotted")
 
     add_text_to_corner(fr"$t = {time:.3f}$")
 
     plt.legend()
     plt.xlabel(args.axis)
-    plt.ylim(ymin=args.vmin, ymax=args.vmax)
-    plt.xlim(xmin=args.xmin, xmax=args.xmax)
+    set_axis_limits_from_args(args)
 
     logger.debug("Saving")
     save_from_dir_filename_ext(args.outdir, figname, args.fig_extension)

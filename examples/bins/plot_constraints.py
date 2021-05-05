@@ -18,10 +18,10 @@
 import logging
 
 import matplotlib.pyplot as plt
-
 from kuibit import argparse_helper as kah
 from kuibit.simdir import SimDir
 from kuibit.visualize_matplotlib import (
+    set_axis_limits_from_args,
     save_from_dir_filename_ext,
     setup_matplotlib,
 )
@@ -33,7 +33,7 @@ if __name__ == "__main__":
 {kah.get_program_name()} plots given reductions of the constraints."""
 
     parser = kah.init_argparse(desc)
-    kah.add_figure_to_parser(parser)
+    kah.add_figure_to_parser(parser, add_limits=True)
     parser.add_argument(
         "--reductions",
         default=["norm2", "maximum"],
@@ -87,6 +87,7 @@ if __name__ == "__main__":
                     plot_constraint(constraint, reduction)
 
         plt.legend()
+        set_axis_limits_from_args(args)
         logger.debug("Plotted")
 
         logger.debug("Saving")

@@ -18,16 +18,15 @@
 import logging
 
 import matplotlib.pyplot as plt
-
 from kuibit import argparse_helper as kah
 from kuibit.cactus_horizons import compute_horizons_separation
 from kuibit.simdir import SimDir
 from kuibit.visualize_matplotlib import (
     get_figname,
     save_from_dir_filename_ext,
+    set_axis_limits_from_args,
     setup_matplotlib,
 )
-
 
 if __name__ == "__main__":
     setup_matplotlib()
@@ -37,7 +36,7 @@ if __name__ == "__main__":
 of two given apparent horizons."""
 
     parser = kah.init_argparse(desc)
-    kah.add_figure_to_parser(parser)
+    kah.add_figure_to_parser(parser, add_limits=True)
 
     parser.add_argument(
         "-a",
@@ -87,6 +86,7 @@ of two given apparent horizons."""
     plt.plot(separation)
     plt.ylabel("Coordinate separation")
     plt.xlabel("Time")
+    set_axis_limits_from_args(args)
     logger.debug("Plotted")
 
     logger.debug("Saving")
