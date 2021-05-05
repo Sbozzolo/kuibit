@@ -145,11 +145,11 @@ def preprocess_plot(func):
 
     """
 
-    def inner(data, *args, **kwargs):
+    def inner(*args, **kwargs):
         # Setdetault addes the key if it is not already there
         kwargs.setdefault("axis", plt.gca())
         kwargs.setdefault("figure", plt.gcf())
-        return func(data, *args, **kwargs)
+        return func(*args, **kwargs)
 
     return inner
 
