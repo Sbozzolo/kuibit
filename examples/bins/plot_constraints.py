@@ -29,7 +29,7 @@ from kuibit.visualize_matplotlib import (
 if __name__ == "__main__":
     setup_matplotlib()
 
-    desc = """\
+    desc = f"""\
 {kah.get_program_name()} plots given reductions of the constraints."""
 
     parser = kah.init_argparse(desc)

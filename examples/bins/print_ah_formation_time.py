@@ -22,7 +22,7 @@ from kuibit.simdir import SimDir
 
 if __name__ == "__main__":
 
-    desc = """{kah.get_program_name()} prints the time at which the given horizon
+    desc = f"""{kah.get_program_name()} prints the time at which the given horizon
     was first found."""
 
     parser = kah.init_argparse(desc)
