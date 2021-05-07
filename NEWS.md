@@ -34,6 +34,7 @@ because `GridSeries` are leaner and more direct to use.
 * `plot_gw_energy.py`
 * `plot_gw_linear_momentum.py`
 * `plot_physical_time_per_hour.py`
+* `plot_phi_lm.py`
 * `plot_psi4_lm.py`
 * `plot_strain_lm.py`
 * `plot_timeseries.py`

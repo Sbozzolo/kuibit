@@ -32,24 +32,33 @@ if __name__ == "__main__":
     setup_matplotlib()
 
     desc = f"""\
-{kah.get_program_name()} plots the multipolar decomposition of Psi4 as measured
-by a given detector and a given l and m."""
+{kah.get_program_name()} plots the multipolar decomposition of one of the Phi
+Newman-Penrose constants for Maxwell/Proca as measured by a given detector and
+at a given l and m."""
 
     parser = kah.init_argparse(desc)
     kah.add_figure_to_parser(parser, add_limits=True)
 
     parser.add_argument(
-        "--detector-num",
+        "--phi-num",
         type=int,
-        required=True,
-        help="Number of the spherical surface over which to read Psi4.",
+        choices=[0, 1, 2],
+        default=1,
+        help="Why Phi to plot? Phi0, Phi1, or Phi2?",
     )
 
     parser.add_argument(
-        "--mult-l", type=int, default=2, help="Multipole number l."
+        "--detector-num",
+        type=int,
+        required=True,
+        help="Number of the spherical surface over which to read Phi.",
+    )
+
+    parser.add_argument(
+        "--mult-l", type=int, default=0, help="Multipole number l."
     )
     parser.add_argument(
-        "--mult-m", type=int, default=2, help="Multipole number m."
+        "--mult-m", type=int, default=0, help="Multipole number m."
     )
 
     args = kah.get_args(parser)
@@ -62,15 +71,24 @@ by a given detector and a given l and m."""
         logging.basicConfig(format="%(asctime)s - %(message)s")
         logger.setLevel(logging.DEBUG)
 
+    phi_num = args.phi_num
+    var_name = f"Phi{phi_num}"
+
     figname = get_figname(
-        args, default=f"Psi4_{args.mult_l}{args.mult_m}_det{args.detector_num}"
+        args,
+        default=f"{var_name}_{args.mult_l}{args.mult_m}_det{args.detector_num}",
     )
     logger.debug(f"Using figname {figname}")
 
     sim = SimDir(args.datadir, ignore_symlinks=args.ignore_symlinks)
     logger.debug("Prepared SimDir")
 
-    reader = sim.gravitationalwaves
+    reader_mult = sim.multipoles
+
+    if var_name not in reader_mult:
+        raise ValueError(f"{var_name} not available")
+
+    reader = reader_mult[var_name]
 
     radius = reader.radii[args.detector_num]
     logger.debug(f"Using radius: {radius}")
@@ -82,25 +100,27 @@ by a given detector and a given l and m."""
             f"Multipole {args.mult_l}, {args.mult_m} not available"
         )
 
-    psi4 = detector[args.mult_l, args.mult_m]
+    phi = detector[args.mult_l, args.mult_m]
 
-    logger.debug("Plotting Psi4")
+    logger.debug(f"Plotting {var_name}")
 
     plt.plot(
-        psi4.real(), label=fr"$\Re \Psi_4^{{{args.mult_l}{args.mult_l}}}$"
+        phi.real(),
+        label=fr"$\Re \Phi_{phi_num}^{{{args.mult_l}{args.mult_l}}}$",
     )
     plt.plot(
-        psi4.imag(), label=fr"$\Im \Psi_4^{{{args.mult_l}{args.mult_l}}}$"
+        phi.imag(),
+        label=fr"$\Im \Phi_{phi_num}^{{{args.mult_l}{args.mult_l}}}$",
     )
 
     plt.legend()
     plt.xlabel("Time")
-    plt.ylabel(r"$r \Psi_4$")
+    plt.ylabel(fr"$r \Phi_{phi_num}$")
+    set_axis_limits_from_args(args)
 
     add_text_to_corner(f"Det {args.detector_num}", anchor="SW", offset=0.005)
     add_text_to_corner(fr"$r = {radius:.3f}$", anchor="NE", offset=0.005)
 
-    set_axis_limits_from_args(args)
     logger.debug("Plotted")
 
     logger.debug("Saving")
