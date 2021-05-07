@@ -102,6 +102,7 @@ Usage
    unitconv.rst
    visualize_matplotlib.rst
    argparse_helper.rst
+   utils.rst
 
 Tutorials
 ---------
@@ -185,6 +186,7 @@ Reference material (classes, functions, ...)
    unitconv_ref.rst
    visualize_matplotlib_ref.rst
    argparse_helper_ref.rst
+   utils_ref.rst
 
 What is a kuibit?
 -----------------
