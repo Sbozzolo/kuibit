@@ -91,6 +91,7 @@ extrapolate waves to infinity.</p></li>
 (<a class="reference internal" href="unitconv_ref.html#module-kuibit.unitconv" title="kuibit.unitconv"><code class="xref py py-mod docutils literal notranslate"><span class="pre">unitconv</span></code></a>).</p></li>
 <li><p>Write command-line scripts (<a class="reference internal" href="argparse_helper_ref.html#module-kuibit.argparse_helper" title="kuibit.argparse_helper"><code class="xref py py-mod docutils literal notranslate"><span class="pre">argparse_helper</span></code></a>).</p></li>
 <li><p>Visualize data with <code class="docutils literal notranslate"><span class="pre">matplotlib</span></code> (<a class="reference internal" href="visualize_matplotlib_ref.html#module-kuibit.visualize_matplotlib" title="kuibit.visualize_matplotlib"><code class="xref py py-mod docutils literal notranslate"><span class="pre">visualize_matplotlib</span></code></a>).</p></li>
+<li><p>Make movies with  <a class="reference external" href="https://github.com/Sbozzolo/motionpicture">motionpicture</a>.</p></li>
 </ul>
 </div>
 <div class="section" id="installation">
@@ -132,7 +133,6 @@ more information.</p>
 <li class="toctree-l1"><a class="reference internal" href="unitconv.html">Unit conversion and constants</a></li>
 <li class="toctree-l1"><a class="reference internal" href="visualize_matplotlib.html">Visualizing data with matplotlib</a></li>
 <li class="toctree-l1"><a class="reference internal" href="argparse_helper.html">Building command-line scripts</a></li>
-<li class="toctree-l1"><a class="reference internal" href="utils.html">Various utilities</a></li>
 </ul>
 </div>
 </div>
@@ -162,6 +162,7 @@ more information.</p>
 <li class="toctree-l1"><a class="reference internal" href="examples/plot_grid_var.html">plot_grid_var.py</a></li>
 <li class="toctree-l1"><a class="reference internal" href="examples/plot_gw_energy.html">plot_gw_energy.py</a></li>
 <li class="toctree-l1"><a class="reference internal" href="examples/plot_gw_linear_momentum.html">plot_gw_linear_momentum.py</a></li>
+<li class="toctree-l1"><a class="reference internal" href="examples/plot_phi_lm.html">plot_phi_lm.py</a></li>
 <li class="toctree-l1"><a class="reference internal" href="examples/plot_psi4_lm.html">plot_psi4_lm.py</a></li>
 <li class="toctree-l1"><a class="reference internal" href="examples/plot_strain_lm.html">plot_strain_lm.py</a></li>
 <li class="toctree-l1"><a class="reference internal" href="examples/plot_timeseries.html">plot_timeseries.py</a></li>
@@ -174,7 +175,7 @@ more information.</p>
 </ul>
 </div>
 <p>Note that all these examples contain a significant fraction of boilerplate that
-is needed to keep them general and immediately useful. When learning <cite>kuibit</cite>,
+is needed to keep them general and immediately useful. When learning <code class="docutils literal notranslate"><span class="pre">kuibit</span></code>,
 you can ignore all of this.</p>
 <p>You can immediately start doing science without writing one line of code using
 these examples. The scripts provided can be used for plotting, extracting
@@ -210,7 +211,6 @@ applications.</p>
 <li class="toctree-l1"><a class="reference internal" href="unitconv_ref.html">Reference on kuibit.unitconv</a></li>
 <li class="toctree-l1"><a class="reference internal" href="visualize_matplotlib_ref.html">Reference on kuibit.visualize_matplotlib</a></li>
 <li class="toctree-l1"><a class="reference internal" href="argparse_helper_ref.html">Reference on kuibit.argparse_helper</a></li>
-<li class="toctree-l1"><a class="reference internal" href="utils_ref.html">Reference on kuibit.utils</a></li>
 </ul>
 </div>
 </div>
@@ -236,17 +236,22 @@ documentation.</p>
 consider citing <code class="docutils literal notranslate"><span class="pre">kuibit</span></code> if you find the software useful. You can use the following
 <code class="docutils literal notranslate"><span class="pre">bibtex</span></code> key.</p>
 <div class="highlight-bibtex notranslate"><div class="highlight"><pre><span></span><span class="nc">@article</span><span class="p">{</span><span class="nl">kuibit</span><span class="p">,</span>
-  <span class="na">doi</span> <span class="p">=</span> <span class="s">{10.21105/joss.03099}</span><span class="p">,</span>
-  <span class="na">url</span> <span class="p">=</span> <span class="s">{https://doi.org/10.21105/joss.03099}</span><span class="p">,</span>
-  <span class="na">year</span> <span class="p">=</span> <span class="s">{2021}</span><span class="p">,</span>
-  <span class="na">publisher</span> <span class="p">=</span> <span class="s">{The Open Journal}</span><span class="p">,</span>
-  <span class="na">volume</span> <span class="p">=</span> <span class="s">{6}</span><span class="p">,</span>
-  <span class="na">number</span> <span class="p">=</span> <span class="s">{60}</span><span class="p">,</span>
-  <span class="na">pages</span> <span class="p">=</span> <span class="s">{3099}</span><span class="p">,</span>
-  <span class="na">author</span> <span class="p">=</span> <span class="s">{Gabriele Bozzola}</span><span class="p">,</span>
-  <span class="na">title</span> <span class="p">=</span> <span class="s">{kuibit: Analyzing Einstein Toolkit simulations with Python}</span><span class="p">,</span>
-  <span class="na">journal</span> <span class="p">=</span> <span class="s">{Journal of Open Source Software}</span><span class="p">,</span>
-  <span class="na">version</span> <span class="p">=</span> <span class="s">{1.0.0}</span>
+       <span class="na">author</span> <span class="p">=</span> <span class="s">{{Bozzola}, Gabriele}</span><span class="p">,</span>
+        <span class="na">title</span> <span class="p">=</span> <span class="s">&quot;{kuibit: Analyzing Einstein Toolkit simulations with Python}&quot;</span><span class="p">,</span>
+      <span class="na">journal</span> <span class="p">=</span> <span class="s">{The Journal of Open Source Software}</span><span class="p">,</span>
+     <span class="na">keywords</span> <span class="p">=</span> <span class="s">{numerical relativity, Python, Einstein Toolkit, astrophysics, Cactus, General Relativity and Quantum Cosmology, Astrophysics - High Energy Astrophysical Phenomena}</span><span class="p">,</span>
+         <span class="na">year</span> <span class="p">=</span> <span class="m">2021</span><span class="p">,</span>
+        <span class="na">month</span> <span class="p">=</span> <span class="nv">apr</span><span class="p">,</span>
+       <span class="na">volume</span> <span class="p">=</span> <span class="s">{6}</span><span class="p">,</span>
+       <span class="na">number</span> <span class="p">=</span> <span class="s">{60}</span><span class="p">,</span>
+          <span class="na">eid</span> <span class="p">=</span> <span class="s">{3099}</span><span class="p">,</span>
+        <span class="na">pages</span> <span class="p">=</span> <span class="s">{3099}</span><span class="p">,</span>
+          <span class="na">doi</span> <span class="p">=</span> <span class="s">{10.21105/joss.03099}</span><span class="p">,</span>
+<span class="na">archivePrefix</span> <span class="p">=</span> <span class="s">{arXiv}</span><span class="p">,</span>
+       <span class="na">eprint</span> <span class="p">=</span> <span class="s">{2104.06376}</span><span class="p">,</span>
+ <span class="na">primaryClass</span> <span class="p">=</span> <span class="s">{gr-qc}</span><span class="p">,</span>
+       <span class="na">adsurl</span> <span class="p">=</span> <span class="s">{https://ui.adsabs.harvard.edu/abs/2021JOSS....6.3099B}</span><span class="p">,</span>
+      <span class="na">adsnote</span> <span class="p">=</span> <span class="s">{Provided by the SAO/NASA Astrophysics Data System}</span>
 <span class="p">}</span>
 </pre></div>
 </div>

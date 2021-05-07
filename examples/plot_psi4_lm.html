@@ -21,7 +21,7 @@
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="plot_strain_lm.py" href="plot_strain_lm.html" />
-    <link rel="prev" title="plot_gw_linear_momentum.py" href="plot_gw_linear_momentum.html" />
+    <link rel="prev" title="plot_phi_lm.py" href="plot_phi_lm.html" />
     <meta name="viewport" content="width=device-width,initial-scale=1.0" />
     <!--[if lt IE 9]>
     <script src="_static/css3-mediaqueries.js"></script>
@@ -40,7 +40,7 @@
           <a href="plot_strain_lm.html" title="plot_strain_lm.py"
              accesskey="N">next</a> |</li>
         <li class="right" >
-          <a href="plot_gw_linear_momentum.html" title="plot_gw_linear_momentum.py"
+          <a href="plot_phi_lm.html" title="plot_phi_lm.py"
              accesskey="P">previous</a> |</li>
         <li class="nav-item nav-item-0"><a href="../index.html">kuibit 1.1.1 documentation</a> &#187;</li>
         <li class="nav-item nav-item-this"><a href="">plot_psi4_lm.py</a></li> 
@@ -56,7 +56,7 @@
 <h1>plot_psi4_lm.py<a class="headerlink" href="#plot-psi4-lm-py" title="Permalink to this headline">¶</a></h1>
 <p><code class="docutils literal notranslate"><span class="pre">plot_psi4_lm</span></code> plots the real and imaginary parts of a given (l, m)
 mode of <span class="math notranslate nohighlight">\(\Psi_4\)</span> as measured by a given detector.</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="ch">#!/usr/bin/env python3</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">n</span>  <span class="c1">#!/usr/bin/env python3</span>
 
 <span class="c1"># Copyright (C) 2020-2021 Gabriele Bozzola</span>
 <span class="c1">#</span>
@@ -79,6 +79,7 @@ mode of <span class="math notranslate nohighlight">\(\Psi_4\)</span> as measured
 <span class="kn">from</span> <span class="nn">kuibit</span> <span class="kn">import</span> <span class="n">argparse_helper</span> <span class="k">as</span> <span class="n">kah</span>
 <span class="kn">from</span> <span class="nn">kuibit.simdir</span> <span class="kn">import</span> <span class="n">SimDir</span>
 <span class="kn">from</span> <span class="nn">kuibit.visualize_matplotlib</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">add_text_to_corner</span><span class="p">,</span>
     <span class="n">get_figname</span><span class="p">,</span>
     <span class="n">save_from_dir_filename_ext</span><span class="p">,</span>
     <span class="n">set_axis_limits_from_args</span><span class="p">,</span>
@@ -88,8 +89,8 @@ mode of <span class="math notranslate nohighlight">\(\Psi_4\)</span> as measured
 <span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
     <span class="n">setup_matplotlib</span><span class="p">()</span>
 
-    <span class="n">desc</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;</span><span class="se">\</span>
-<span class="s2">{kah.get_program_name()} plots the multipolar decomposition of Psi4 as measured</span>
+    <span class="n">desc</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;&quot;&quot;</span><span class="se">\</span>
+<span class="si">{</span><span class="n">kah</span><span class="o">.</span><span class="n">get_program_name</span><span class="p">()</span><span class="si">}</span><span class="s2"> plots the multipolar decomposition of Psi4 as measured</span>
 <span class="s2">by a given detector and a given l and m.&quot;&quot;&quot;</span>
 
     <span class="n">parser</span> <span class="o">=</span> <span class="n">kah</span><span class="o">.</span><span class="n">init_argparse</span><span class="p">(</span><span class="n">desc</span><span class="p">)</span>
@@ -153,6 +154,10 @@ mode of <span class="math notranslate nohighlight">\(\Psi_4\)</span> as measured
     <span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">()</span>
     <span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s2">&quot;Time&quot;</span><span class="p">)</span>
     <span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;$r \Psi_4$&quot;</span><span class="p">)</span>
+
+    <span class="n">add_text_to_corner</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Det </span><span class="si">{</span><span class="n">args</span><span class="o">.</span><span class="n">detector_num</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">anchor</span><span class="o">=</span><span class="s2">&quot;SW&quot;</span><span class="p">,</span> <span class="n">offset</span><span class="o">=</span><span class="mf">0.005</span><span class="p">)</span>
+    <span class="n">add_text_to_corner</span><span class="p">(</span><span class="sa">fr</span><span class="s2">&quot;$r = </span><span class="si">{</span><span class="n">radius</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2">$&quot;</span><span class="p">,</span> <span class="n">anchor</span><span class="o">=</span><span class="s2">&quot;NE&quot;</span><span class="p">,</span> <span class="n">offset</span><span class="o">=</span><span class="mf">0.005</span><span class="p">)</span>
+
     <span class="n">set_axis_limits_from_args</span><span class="p">(</span><span class="n">args</span><span class="p">)</span>
     <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Plotted&quot;</span><span class="p">)</span>
 
@@ -174,8 +179,8 @@ mode of <span class="math notranslate nohighlight">\(\Psi_4\)</span> as measured
               <img class="logo" src="../_static/logo.png" alt="Logo"/>
             </a></p>
   <h4>Previous topic</h4>
-  <p class="topless"><a href="plot_gw_linear_momentum.html"
-                        title="previous chapter">plot_gw_linear_momentum.py</a></p>
+  <p class="topless"><a href="plot_phi_lm.html"
+                        title="previous chapter">plot_phi_lm.py</a></p>
   <h4>Next topic</h4>
   <p class="topless"><a href="plot_strain_lm.html"
                         title="next chapter">plot_strain_lm.py</a></p>
@@ -206,7 +211,7 @@ mode of <span class="math notranslate nohighlight">\(\Psi_4\)</span> as measured
           <a href="plot_strain_lm.html" title="plot_strain_lm.py"
              >next</a> |</li>
         <li class="right" >
-          <a href="plot_gw_linear_momentum.html" title="plot_gw_linear_momentum.py"
+          <a href="plot_phi_lm.html" title="plot_phi_lm.py"
              >previous</a> |</li>
         <li class="nav-item nav-item-0"><a href="../index.html">kuibit 1.1.1 documentation</a> &#187;</li>
         <li class="nav-item nav-item-this"><a href="">plot_psi4_lm.py</a></li> 
