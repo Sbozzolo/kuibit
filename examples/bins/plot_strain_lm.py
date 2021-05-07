@@ -31,7 +31,7 @@ from kuibit.visualize_matplotlib import (
 if __name__ == "__main__":
     setup_matplotlib()
 
-    desc = """\
+    desc = f"""\
 {kah.get_program_name()} plots the (l,m) gravitational-wave strain. Optionally,
 a window function can be applied to the data before performing the integration.
 To do this, use the --window flag passing the name of a method defined in
@@ -130,7 +130,7 @@ the order as they appear in the TimeSeries method."""
     plt.ylabel(fr"$r_{{\mathrm{{ex}}}} h^{{{args.mult_l}{args.mult_l}}}$")
 
     add_text_to_corner(f"Det {args.detector_num}", anchor="SW", offset=0.005)
-    add_text_to_corner(fr"$r = {radius:.3f}$", offset=0.005)
+    add_text_to_corner(fr"$r = {radius:.3f}$", anchor="NE", offset=0.005)
 
     set_axis_limits_from_args(args)
     logger.debug("Plotted")

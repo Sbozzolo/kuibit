@@ -85,7 +85,7 @@ electromagnetic-wave luminosity as a function of time for a given detector."""
     plt.ylabel(r"$dE\slash dt (t)$")
 
     add_text_to_corner(f"Det {args.detector_num}", anchor="SW", offset=0.005)
-    add_text_to_corner(fr"$r = {radius:.3f}$", offset=0.005)
+    add_text_to_corner(fr"$r = {radius:.3f}$", anchor="NE", offset=0.005)
 
     set_axis_limits_from_args(args)
     logger.debug("Plotted")
