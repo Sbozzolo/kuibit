@@ -154,9 +154,14 @@ Horizons
 Visualize
 ---------
 
-Experimental features may change in the future.
+- Automatically configure ``matplotlib`` with default options.
+- Visualize grid data in 2D.
+- Visualize apparent horizons in 2D.
+- Visualize time and frequency series.
+- Save figures as LaTeX files.
+- Make movies with `motionpicture`_.
 
-- Visualize grid data.
+.. _motionpicture: https://github.com/Sbozzolo/motionpicture
 
 Utilities
 ------------
