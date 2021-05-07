@@ -28,6 +28,10 @@ from kuibit.visualize_matplotlib import (
     setup_matplotlib,
 )
 
+# NOTE: This example is also implemented in a movie file with the same name. If
+#       you update this file, you probably want to update the movie file as
+#       well.
+
 if __name__ == "__main__":
     setup_matplotlib()
 
@@ -60,7 +64,7 @@ This is much faster but it is not as accurate."""
     parser.add_argument(
         "--multilinear-interpolate",
         action="store_true",
-        help="Whether to interpolate to smooth data with multinear"
+        help="Whether to interpolate to smooth data with multilinear"
         " interpolation before plotting.",
     )
     parser.add_argument(
