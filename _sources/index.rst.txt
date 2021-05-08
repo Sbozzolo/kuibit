@@ -105,6 +105,7 @@ Usage
    unitconv.rst
    visualize_matplotlib.rst
    argparse_helper.rst
+   motionpicture.rst
 
 Tutorials
 ---------
@@ -122,29 +123,6 @@ Tutorials
 Examples
 ---------
 
-.. toctree::
-   :maxdepth: 1
-
-   examples/plot_1d_vars.rst
-   examples/plot_ah_found.rst
-   examples/plot_ah_radius.rst
-   examples/plot_ah_separation.rst
-   examples/plot_constraints.rst
-   examples/plot_em_energy.rst
-   examples/plot_grid_var.rst
-   examples/plot_gw_energy.rst
-   examples/plot_gw_linear_momentum.rst
-   examples/plot_phi_lm.rst
-   examples/plot_psi4_lm.rst
-   examples/plot_strain_lm.rst
-   examples/plot_timeseries.rst
-   examples/plot_total_luminosity.rst
-   examples/print_ah_formation_time.rst
-   examples/print_available_iterations.rst
-   examples/print_available_timeseries.rst
-   examples/print_qlm_properties_at_time.rst
-   examples/save_resampled_grid_data.rst
-
 Note that all these examples contain a significant fraction of boilerplate that
 is needed to keep them general and immediately useful. When learning ``kuibit``,
 you can ignore all of this.
@@ -154,7 +132,6 @@ these examples. The scripts provided can be used for plotting, extracting
 gravitational waves, or other useful information. We recommend downloading these
 codes in a folder and that that folder to your ``$PATH``.
 
-
 In addition to these examples, you can find other real world examples in the
 `examples <https://github.com/Sbozzolo/kuibit/tree/experimental/examples>`_
 folder of the ``experimental`` branch. See the section `Experimental branch and
@@ -163,6 +140,46 @@ examples
 more information. All these codes are ready to be used for real scientific
 applications.
 
+Scripts
+^^^^^^^
+
+.. toctree::
+   :maxdepth: 1
+
+   examples/bins/plot_1d_vars.rst
+   examples/bins/plot_ah_found.rst
+   examples/bins/plot_ah_radius.rst
+   examples/bins/plot_ah_separation.rst
+   examples/bins/plot_constraints.rst
+   examples/bins/plot_em_energy.rst
+   examples/bins/plot_grid_var.rst
+   examples/bins/plot_gw_energy.rst
+   examples/bins/plot_gw_linear_momentum.rst
+   examples/bins/plot_phi_lm.rst
+   examples/bins/plot_physical_time.rst
+   examples/bins/plot_psi4_lm.rst
+   examples/bins/plot_strain_lm.rst
+   examples/bins/plot_timeseries.rst
+   examples/bins/plot_total_luminosity.rst
+   examples/bins/print_ah_formation_time.rst
+   examples/bins/print_available_iterations.rst
+   examples/bins/print_available_timeseries.rst
+   examples/bins/print_qlm_properties_at_time.rst
+   examples/bins/save_resampled_grid_data.rst
+
+Movies
+^^^^^^
+
+`motionpicture`_ is a Python library to make animations used by ``kuibit``. To
+learn more about ``motionpicture`` and how to use it, read the :doc:`quick
+introduction to motionpicture <motionpicture>`.
+
+.. _motionpicture: https://github.com/Sbozzolo/motionpicture
+
+.. toctree::
+   :maxdepth: 1
+
+   examples/mopi_movies/grid_var.rst
 
 Reference material (classes, functions, ...)
 ---------------------------------------------
