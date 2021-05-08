@@ -5,5 +5,5 @@ save_resampled_grid_data.py
 and saves it to a file. This script is useful to move data from a cluster to
 your local machine (especially for 3D visualization).
 
-.. literalinclude:: ../../examples/bins/save_resampled_grid_data.py
+.. literalinclude:: ../../../examples/bins/save_resampled_grid_data.py
   :language: python

@@ -5,5 +5,5 @@ plot_gw_energy.py
 measured from a given detector as a function of time.
 
 
-.. literalinclude:: ../../examples/bins/plot_gw_energy.py
+.. literalinclude:: ../../../examples/bins/plot_gw_energy.py
   :language: python

@@ -11,6 +11,18 @@ to be as general as possible: if you pass some grid objects, they will try to
 figure out how to plot it. Nonetheless, you should read the documentation and
 the docstrings of the various functions.
 
+#### `motionpicture`
+
+Making movies is a critical step in analyzing a simulation. Now, `kuibit` comes
+with [motionpicture](https://github.com/Sbozzolo/motionpicture), a Python tool
+to assist you animate your data. `motionpicture` provides all the infrastructure
+needed to render multiple frames and glue them together, so, all you need to
+worry is how to render one single frame. Importantly, `motionpicture` supports
+parallel rendering, which can dramatically speed up the time needed to produce a
+video. Check out the
+[grid_var](https://github.com/Sbozzolo/kuibit/blob/master/examples/mopi_movies/grid_var)
+example to see how easy it is to make a movie.
+
 #### New class: GridSeries
 
 `GridSeries` is a new class to describe 1D grid data. This class utilizes the
@@ -23,6 +35,8 @@ because `GridSeries` are leaner and more direct to use.
 - Improvements to documentation, docstrings, and tutorials
 
 #### New examples
+
+Scripts:
 
 * `plot_1d_vars.py`
 * `plot_ah_found.py`
@@ -40,6 +54,10 @@ because `GridSeries` are leaner and more direct to use.
 * `plot_timeseries.py`
 * `plot_total_luminosity.py`
 * `print_qlm_properties_at_time.py`
+
+Movies:
+
+* `grid_var`
 
 #### Features
 

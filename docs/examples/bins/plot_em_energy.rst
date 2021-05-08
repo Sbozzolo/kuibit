@@ -5,5 +5,5 @@ plot_em_energy.py
 measured from a given detector as a function of time. ``plot_em_energy`` uses
 :math:`\Phi_2`.
 
-.. literalinclude:: ../../examples/bins/plot_em_energy.py
+.. literalinclude:: ../../../examples/bins/plot_em_energy.py
   :language: python

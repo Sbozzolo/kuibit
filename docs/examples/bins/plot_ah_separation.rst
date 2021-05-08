@@ -5,5 +5,5 @@ plot_ah_separation.py
 horizons as a function of time.
 
 
-.. literalinclude:: ../../examples/bins/plot_ah_separation.py
+.. literalinclude:: ../../../examples/bins/plot_ah_separation.py
   :language: python

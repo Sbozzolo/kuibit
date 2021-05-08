@@ -7,5 +7,5 @@ arguments a window function to apply before performing the integration. The
 accepted values are the names of the methods in the class
 :py:class:`~.TimeSeries`.
 
-.. literalinclude:: ../../examples/bins/plot_strain_lm.py
+.. literalinclude:: ../../../examples/bins/plot_strain_lm.py
   :language: python

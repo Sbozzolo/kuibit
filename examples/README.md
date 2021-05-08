@@ -11,7 +11,7 @@ so that your shell can find them (e.g., `$PATH`).
 
 ## Scripts available
 
-### Utilities
+### Plotting
 
 | Name                           | Description                                                                                                                                                                                          |
 |--------------------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
@@ -30,8 +30,39 @@ so that your shell can find them (e.g., `$PATH`).
 | `plot_psi4_lm`                 | Plots the (l,m) mode of Psi4 as measured from a given detector.                                                                                                                                      |
 | `plot_strain_lm`               | Plots the (l,m) mode of the gravitational-wave strain as measured from a given detector from Psi4.                                                                                                   |
 | `plot_total_luminosity`        | Plots the combined electromagnetic and gravitational-wave luminosity as measured from a given detector with Phi2 and Psi4.                                                                           |
+
+### Utilities
+
+| Name                           | Description                                                                                                                                                                                          |
+|--------------------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | `print_ah_formation_time`      | Prints the time when the given apparent horizon was first found.                                                                                                                                     |
 | `print_available_iterations`   | Given a variable, prints which iterations are available across all the data and all the dimensions. Optionally, you can specify only one dimension. This script is useful for writing shell scripts. |
 | `print_available_timeseries`   | Prints all the various timeseries found in the data (reductions, scalars, ...). This script is useful for exploring the data available in a simulation.                                              |
 | `print_qlm_properties_at_time` | Prints some of the interesting properties (as from QuasiLocalMeasures) for a given horizon at a given time. Optionally estimates the Lorentz factor.                                                 |
 | `save_reasampled_grid_data`    | Reads a grid function, resamples it to a given grid, and saves it to a file. This script is useful to move data from a cluster to your local machine (especially for 3D visualization)               |
+
+
+## Movie files
+
+`kuibit` plays nicely with
+[motionpicture](https://github.com/Sbozzolo/kuibit/blob/master/examples/mopi_movies/grid_var),
+a Python program to make animations. The following examples can be immediately
+be used, for example, to make a movie of the logarithm of `rho_b` on the XY
+plane:
+
+``` sh
+mopi -m grid_var --resolution 500 --plane xy --variable rho_b --colorbar --interpolation-method bicubic --vmin -7 --vmax -1 --parallel --outdir movie --logscale -x0 -30 -30 -x1 30 30
+```
+
+`motionpicture` requires `ffmpeg` to produce the final video. If it is not
+available, `motionpicture` will only produce the frames. See
+
+We recommend defining a `MOPI_MOVIES_DIR` environment variable and putting all
+the files there. See
+[motionpicture](https://sbozzolo.github.io/kuibit/motionpicture.html) for a
+quick-start guide.
+
+| Name       | Description                                |
+|------------|--------------------------------------------|
+| `grid_var` | Plot a given 2D variable on a given plane. |
+

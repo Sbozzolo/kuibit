@@ -14,5 +14,5 @@ also computes the Lorentz factor with the following formula:
 where :math:`P^i` is the Weinberg linear momentum. This choice is motivated by
 the fact that this value coincides with the one set in ``TwoPunctures``.
 
-.. literalinclude:: ../../examples/bins/print_qlm_properties_at_time.py
+.. literalinclude:: ../../../examples/bins/print_qlm_properties_at_time.py
   :language: python

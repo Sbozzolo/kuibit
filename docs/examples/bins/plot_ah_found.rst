@@ -5,5 +5,5 @@ plot_ah_found.py
 found.
 
 
-.. literalinclude:: ../../examples/bins/plot_ah_found.py
+.. literalinclude:: ../../../examples/bins/plot_ah_found.py
   :language: python

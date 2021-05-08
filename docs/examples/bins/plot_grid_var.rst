@@ -10,5 +10,5 @@ interpolation in two different ways: one at the level of the data (slower, but
 more accurate), and the other at the level of the image using the interpolations
 available in matplotlib.
 
-.. literalinclude:: ../../examples/bins/plot_grid_var.py
+.. literalinclude:: ../../../examples/bins/plot_grid_var.py
   :language: python
