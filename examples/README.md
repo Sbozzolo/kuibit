@@ -2,14 +2,18 @@
 
 In this directory, we collect working programs built with `kuibit`. You can use
 these scripts as good examples of ``kuibit`` usage. These codes are ready to be
-used, so we recommend downloading them and adjusting your environment variables
-so that your shell can find them (e.g., `$PATH`).
+used, check out our
+[recommendations](https://sbozzolo.github.io/kuibit/recommendation_examples.rst)
+to get the most of out these examples.
 
 > :warning: While `kuibit` is tested at each commit to ensure that nothing
 >           breaks, these codes are not. If you find one that does not work,
 >           please report it and we will fix that.
 
 ## Scripts available
+
+You can achieve a lot using these scripts. We recommend downloading them and
+placing them in you `$PATH` so that they can be used for your simulations.
 
 ### Plotting
 

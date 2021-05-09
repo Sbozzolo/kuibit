@@ -1,13 +1,12 @@
 name: Publish
 
-on:
-  release:
-    types: [published]
+on: [push]
 
 jobs:
 
   Publish:
     runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/')
 
     steps:
       - uses: actions/checkout@v2
@@ -39,3 +38,20 @@ jobs:
         uses: pypa/gh-action-pypi-publish@release/v1
         with:
           password: ${{ secrets.PYPI_API_TOKEN }}
+
+      - name: Create example tarball
+        run: tar cvzf examples.tar.gz examples/
+
+      # What we do here is print everything before the second occurent of the
+      # word Version. This is going to be the release message.
+      - name: Create changelog entry
+        run: |
+          awk -v N=2 '{print}/Version/&&--N<=0{exit}' NEWS.md | head -n -2 | tail -n +3 > ${{ github.workflow }}-CHANGELOG.txt
+
+      - name: Release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: examples.tar.gz
+          body_path: ${{ github.workflow }}-CHANGELOG.txt
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

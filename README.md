@@ -20,10 +20,12 @@ Toolkit largely inspired by
 `kuibit` can read simulation data and represent it with high-level classes. For
 a list of features available, look at the [official
 documentation](https://sbozzolo.github.io/kuibit). For examples and tools that
-are ready to be used, read the [Experimental branch and examples
-section](https://github.com/Sbozzolo/kuibit/#experimental-branch-and-examples).
-The [testimonials page](https://sbozzolo.github.io/kuibit/testimonials.html)
-collects short reviews about `kuibit`.
+are ready to be used, you can download the archive that is attached to the
+[release](https://github.com/sbozzolo/kuibit/releases/latest/download/examples.tar.gz),
+or you can look the [relevant section of the
+documentation](https://sbozzolo.github.io/kuibit/#id1). The [testimonials
+page](https://sbozzolo.github.io/kuibit/testimonials.html) collects short
+reviews about `kuibit`.
 
 ## Installation
 
@@ -99,20 +101,6 @@ coverage html
 ```
 This will produce a directory with the html files containing the analysis of
 the coverage of the tests.
-
-## Experimental branch and examples
-
-The git repo of `kuibit` has an `experimental` branch, which contains the
-version of `kuibit` that is currently under development (which will become
-`1.1.0`). The main new features added are new modules to produce visualizations
-and to write non-interactive scripts. The branch also collects a large number of
-real-world scripts in the folder
-[examples](https://github.com/Sbozzolo/kuibit/tree/experimental/examples). When
-using `kuibit 1.1.0`, these codes are ready to be used for scientific analyses.
-However, given that the scripts rely on the `experimental` features only for
-parsing command-line arguments and to produce visualizations, the codes are also
-an excellent material to learn how to use the current stable version of
-`kuibit`.
 
 ## What is a _kuibit_?
 

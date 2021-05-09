@@ -79,12 +79,10 @@ place where to discuss it. Alternatively, you can also open an issue on GitHub.
 Frequently asked questions are collected in the page :ref:`faq:Frequently Asked
 Questions`.
 
-In addition to the tutorials that are presented in this page, real-world
-examples can be found `examples
+In addition to the tutorials and examples that are presented in this page,
+real-world examples can be found `examples
 <https://github.com/Sbozzolo/kuibit/tree/experimental/examples>`_ folder of the
-``experimental`` branch. See the section `Experimental branch and examples
-<https://github.com/Sbozzolo/kuibit/#experimental-branch-and-examples>`_ for
-more information.
+``experimental`` branch.
 
 Usage
 -----
@@ -123,22 +121,20 @@ Tutorials
 Examples
 ---------
 
+Below you will find a list of examples to perform more or less common analysis.
+You can immediately start doing science without writing one line of code using
+these examples. The scripts provided can be used for plotting, extracting
+gravitational waves, or other useful information. To get the most out of these
+examples, check out the :doc:`recommendations on how to
+use the examples <recommendation_examples>` page.
+
 Note that all these examples contain a significant fraction of boilerplate that
 is needed to keep them general and immediately useful. When learning ``kuibit``,
 you can ignore all of this.
 
-You can immediately start doing science without writing one line of code using
-these examples. The scripts provided can be used for plotting, extracting
-gravitational waves, or other useful information. We recommend downloading these
-codes in a folder and that that folder to your ``$PATH``.
-
-In addition to these examples, you can find other real world examples in the
-`examples <https://github.com/Sbozzolo/kuibit/tree/experimental/examples>`_
-folder of the ``experimental`` branch. See the section `Experimental branch and
-examples
-<https://github.com/Sbozzolo/kuibit/#experimental-branch-and-examples>`_ for
-more information. All these codes are ready to be used for real scientific
-applications.
+You can download these examples as archive from the `GitHub release page
+<https://github.com/sbozzolo/kuibit/releases/latest/download/examples.tar.gz>`_,
+which is automatically updated with each release.
 
 Scripts
 ^^^^^^^
