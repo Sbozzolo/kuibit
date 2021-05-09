@@ -36,6 +36,6 @@ $(window).resize(function(){
         $("li.nav-item-0 a").text("Top");
     }
     else {
-        $("li.nav-item-0 a").text("kuibit 1.1.1 documentation");
+        $("li.nav-item-0 a").text("kuibit 1.2.0b0 documentation");
     }
 });
