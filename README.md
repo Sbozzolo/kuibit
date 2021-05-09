@@ -17,15 +17,20 @@ license](https://img.shields.io/badge/License-GPLv3-blue.svg)](http://perso.cran
 `kuibit` is a Python library to analyze simulations performed with the Einstein
 Toolkit largely inspired by
 [PostCactus](https://github.com/wokast/PyCactus/tree/master/PostCactus).
-`kuibit` can read simulation data and represent it with high-level classes. For
-a list of features available, look at the [official
-documentation](https://sbozzolo.github.io/kuibit). For examples and tools that
-are ready to be used, you can download the archive that is attached to the
-[release](https://github.com/sbozzolo/kuibit/releases/latest/download/examples.tar.gz),
-or you can look the [relevant section of the
-documentation](https://sbozzolo.github.io/kuibit/#id1). The [testimonials
-page](https://sbozzolo.github.io/kuibit/testimonials.html) collects short
-reviews about `kuibit`.
+`kuibit` can read simulation data and represent it with high-level classes. This
+page is mainly intended for developers. Documentation for users is available
+[here](https://sbozzolo.github.io/kuibit).
+
+### Quick links
+
+- [Official documentation](https://sbozzolo.github.io/kuibit)
+- [Tutorials](https://sbozzolo.github.io/kuibit/#tutorials)
+- [Examples](https://sbozzolo.github.io/kuibit/#id1)
+- [Archive with most recent examples and tools](https://github.com/sbozzolo/kuibit/releases/latest/download/examples.tar.gz)
+- [Changelog](https://github.com/Sbozzolo/kuibit/releases)
+- [What people say about kuibit](https://sbozzolo.github.io/kuibit/testimonials.html)
+- [Users/developers group chat](https://t.me/kuibit)
+
 
 ## Installation
 
