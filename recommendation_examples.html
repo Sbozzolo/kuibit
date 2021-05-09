@@ -1,0 +1,159 @@
+
+
+<!doctype html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Recommendations on how to use the examples &#8212; kuibit 1.1.1 documentation</title>
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="_static/bizstyle.css" type="text/css" />
+    
+    <script id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/doctools.js"></script>
+    <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="_static/bizstyle.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0" />
+    <!--[if lt IE 9]>
+    <script src="_static/css3-mediaqueries.js"></script>
+    <![endif]-->
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">kuibit 1.1.1 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">Recommendations on how to use the examples</a></li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="recommendations-on-how-to-use-the-examples">
+<h1>Recommendations on how to use the examples<a class="headerlink" href="#recommendations-on-how-to-use-the-examples" title="Permalink to this headline">¶</a></h1>
+<p><code class="docutils literal notranslate"><span class="pre">kuibit</span></code> comes with lots of examples, most in the form of scripts. All the
+examples are ready to be used for scientific applications. They are general
+enough so that you can immediately start using them for your shell. For
+instance, you can make quick plots without writing a single line of code. In
+this page, we describe how to set-up the examples in such a way that takes
+advantage of all the features implemented. You can follow along the steps,
+starting from the folder where you with to install the examples.</p>
+<div class="section" id="acquire-the-examples">
+<h2>0. Acquire the examples<a class="headerlink" href="#acquire-the-examples" title="Permalink to this headline">¶</a></h2>
+<p>Every time a new version of <code class="docutils literal notranslate"><span class="pre">kuibit</span></code> is released, a new archive with the most
+updated examples is created by GitHub actions. This is available in the <a class="reference external" href="https://github.com/sbozzolo/kuibit/releases/latest/download/examples.tar.gz">GitHub
+release page</a>.
+This is the simplest way to download all the available examples.</p>
+<p>You can grab the latest copy with</p>
+<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>curl -O https://github.com/sbozzolo/kuibit/releases/latest/download/examples.tar.gz
+</pre></div>
+</div>
+<p>Unpack the archive:</p>
+<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>tar -xvzf examples.tar.gz
+</pre></div>
+</div>
+</div>
+<div class="section" id="set-up-paths">
+<h2>1. Set up PATHS<a class="headerlink" href="#set-up-paths" title="Permalink to this headline">¶</a></h2>
+<p>It is convenient to be able to access the codes from anywhere in the file
+system. For that, you need to set up some environment variables. For the
+scripts, this is the <code class="docutils literal notranslate"><span class="pre">$PATH</span></code> variable. For <code class="docutils literal notranslate"><span class="pre">bash</span></code> and <code class="docutils literal notranslate"><span class="pre">zsh</span></code>, you
+will have to add a line like this to your <code class="docutils literal notranslate"><span class="pre">.bashrc</span></code> or <code class="docutils literal notranslate"><span class="pre">.zshrc</span></code>:</p>
+<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span><span class="nb">export</span> <span class="nv">PATH</span><span class="o">=</span><span class="s2">&quot;FOLDER/examples/bins:</span><span class="nv">$PATH</span><span class="s2">&quot;</span>
+</pre></div>
+</div>
+<p>where <code class="docutils literal notranslate"><span class="pre">FOLDER</span></code> is the folder where you decided to install the examples.</p>
+<p>Next, we need to set up the path for <code class="docutils literal notranslate"><span class="pre">motionpicture</span></code> (see, <a class="reference internal" href="motionpicture.html"><span class="doc">quick
+introduction to motionpicture</span></a>). For that, we need to define the
+variable <code class="docutils literal notranslate"><span class="pre">MOPI_MOVIES_DIR</span></code>. In the same way, this can be achieved with the
+following line:</p>
+<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span><span class="nb">export</span> <span class="nv">MOPI_MOVIES_DIR</span><span class="o">=</span><span class="s2">&quot;FOLDER/examples/mopi_movies&quot;</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="set-up-tab-completion">
+<h2>2. Set up tab completion<a class="headerlink" href="#set-up-tab-completion" title="Permalink to this headline">¶</a></h2>
+<dl class="simple">
+<dt>The examples use <a class="reference external" href="https://kislyuk.github.io/argcomplete/">argcomplete</a> to</dt><dd><p>enable tab completions on the available flags. For <code class="docutils literal notranslate"><span class="pre">bash</span></code>, you can run
+<code class="docutils literal notranslate"><span class="pre">activate-global-python-argcomplete</span> <span class="pre">--user</span></code> and start a new shell to enjoy
+tab completion. For <code class="docutils literal notranslate"><span class="pre">zsh</span></code>, you have enable support for <code class="docutils literal notranslate"><span class="pre">bash</span></code> completion
+scripts.</p>
+</dd>
+</dl>
+<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>autoload -U bashcompinit
+bashcompinit
+</pre></div>
+</div>
+<p>Then, you have register each single script:</p>
+<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span><span class="k">for</span> f <span class="k">in</span> <span class="k">$(</span>ls <span class="s2">&quot;bins&quot;</span><span class="k">)</span><span class="p">;</span> <span class="k">do</span> <span class="nb">eval</span> <span class="s2">&quot;</span><span class="k">$(</span>register-python-argcomplete <span class="nv">$f</span><span class="k">)</span><span class="s2">&quot;</span><span class="p">;</span> <span class="k">done</span>
+</pre></div>
+</div>
+</div>
+</div>
+
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="index.html">
+              <img class="logo" src="_static/logo.png" alt="Logo"/>
+            </a></p>
+  <h3><a href="index.html">Table of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Recommendations on how to use the examples</a><ul>
+<li><a class="reference internal" href="#acquire-the-examples">0. Acquire the examples</a></li>
+<li><a class="reference internal" href="#set-up-paths">1. Set up PATHS</a></li>
+<li><a class="reference internal" href="#set-up-tab-completion">2. Set up tab completion</a></li>
+</ul>
+</li>
+</ul>
+
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">kuibit 1.1.1 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">Recommendations on how to use the examples</a></li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2020-2021, Gabriele Bozzola.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 3.5.4.
+    </div>
+  </body>
+</html>
