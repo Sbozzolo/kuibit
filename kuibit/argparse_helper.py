@@ -41,6 +41,7 @@ The intended way to use this module is, schematically
 import os
 import sys
 
+import argcomplete
 import configargparse
 
 # We use configargparse instead of argparse because it gives us much more
@@ -90,6 +91,8 @@ def get_args(parser, args=None):
     if args is None:
         # Remove the name of the program from the list of arguments
         args = sys.argv[1:]
+
+    argcomplete.autocomplete(parser)
     return parser.parse_args(args)
 
 
