@@ -40,6 +40,7 @@ because `GridSeries` are leaner and more direct to use.
 Scripts:
 
 * `plot_1d_vars.py`
+* `plot_ah_coordinate_velocity.py`
 * `plot_ah_found.py`
 * `plot_ah_radius.py`
 * `plot_ah_separation.py`

@@ -17,23 +17,24 @@ placing them in you `$PATH` so that they can be used for your simulations.
 
 ### Plotting
 
-| Name                           | Description                                                                                                                                                                                          |
-|--------------------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| `plot_1d_vars`                 | Plots one or more 1D grid functions output by Carpet. Optionally take logarithm and/or absolute value.                                                                                               |
-| `plot_ah_found`                | Plots the times at which the given apparent horizons were found.                                                                                                                                     |
-| `plot_ah_radius`               | Plots the coordinate radius of a given horizon as a function of time.                                                                                                                                |
-| `plot_ah_separation`           | Plots the coordinate separation between the centroids of two given apparent horizons as a function of time.                                                                                          |
-| `plot_constraints`             | Plots given reductions for the constraints (Hamiltonian, momentum, ...) as a function of time.                                                                                                       |
-| `plot_em_energy`               | Plots the electromagnetic-wave luminosity and energy as measured by a given detector using Phi2 as a function of time.                                                                               |
-| `plot_grid_var`                | Plots a 2D grid function among the ones output by Carpet on a given region. Optionally take logarithm or absolute value.                                                                             |
-| `plot_gw_energy`               | Plots the gravitational-wave luminosity and energy as measured by a given detector as a function of time.                                                                                            |
-| `plot_gw_linear_momentum`      | Plots the linear momentum lost by gravitational-wave as measured by a given detector as a function of time.                                                                                          |
-| `plot_physical_time_per_hour`  | Plots the computational speed of the simulation by plotting how much physical time is simulated in one hour and one day.                                                                             |
-| `plot_timeseries`              | Plots any timeseries among the ones output by IOASCII (e.g., scalars, reductions).                                                                                                                   |
-| `plot_phi_lm`                  | Plots the (l,m) mode of one of Phi0, Phi1, or Phi2 as measured from a given detector.                                                                                                                |
-| `plot_psi4_lm`                 | Plots the (l,m) mode of Psi4 as measured from a given detector.                                                                                                                                      |
-| `plot_strain_lm`               | Plots the (l,m) mode of the gravitational-wave strain as measured from a given detector from Psi4.                                                                                                   |
-| `plot_total_luminosity`        | Plots the combined electromagnetic and gravitational-wave luminosity as measured from a given detector with Phi2 and Psi4.                                                                           |
+| Name                          | Description                                                                                                                |
+|-------------------------------|----------------------------------------------------------------------------------------------------------------------------|
+| `plot_1d_vars`                | Plots one or more 1D grid functions output by Carpet. Optionally take logarithm and/or absolute value.                     |
+| `plot_ah_coordinate_velocity` | Plots the coordinate velocities of a given horizon.                                                                        |
+| `plot_ah_found`               | Plots the times at which the given apparent horizons were found.                                                           |
+| `plot_ah_radius`              | Plots the coordinate radius of a given horizon as a function of time.                                                      |
+| `plot_ah_separation`          | Plots the coordinate separation between the centroids of two given apparent horizons as a function of time.                |
+| `plot_constraints`            | Plots given reductions for the constraints (Hamiltonian, momentum, ...) as a function of time.                             |
+| `plot_em_energy`              | Plots the electromagnetic-wave luminosity and energy as measured by a given detector using Phi2 as a function of time.     |
+| `plot_grid_var`               | Plots a 2D grid function among the ones output by Carpet on a given region. Optionally take logarithm or absolute value.   |
+| `plot_gw_energy`              | Plots the gravitational-wave luminosity and energy as measured by a given detector as a function of time.                  |
+| `plot_gw_linear_momentum`     | Plots the linear momentum lost by gravitational-wave as measured by a given detector as a function of time.                |
+| `plot_physical_time_per_hour` | Plots the computational speed of the simulation by plotting how much physical time is simulated in one hour and one day.   |
+| `plot_timeseries`             | Plots any timeseries among the ones output by IOASCII (e.g., scalars, reductions).                                         |
+| `plot_phi_lm`                 | Plots the (l,m) mode of one of Phi0, Phi1, or Phi2 as measured from a given detector.                                      |
+| `plot_psi4_lm`                | Plots the (l,m) mode of Psi4 as measured from a given detector.                                                            |
+| `plot_strain_lm`              | Plots the (l,m) mode of the gravitational-wave strain as measured from a given detector from Psi4.                         |
+| `plot_total_luminosity`       | Plots the combined electromagnetic and gravitational-wave luminosity as measured from a given detector with Phi2 and Psi4. |
 
 ### Utilities
 
