@@ -58,10 +58,10 @@ following line:
 ------------------------------
 
 The examples use `argcomplete <https://kislyuk.github.io/argcomplete/>`_ to
- enable tab completions on the available flags. For ``bash``, you can run
- ``activate-global-python-argcomplete --user`` and start a new shell to enjoy
- tab completion. For ``zsh``, you have enable support for ``bash`` completion
- scripts.
+enable tab completions on the available flags. For ``bash``, you can run
+``activate-global-python-argcomplete --user`` and start a new shell to enjoy tab
+completion. For ``zsh``, you have enable support for ``bash`` completion
+scripts.
 
 ..  code-block:: sh
 
