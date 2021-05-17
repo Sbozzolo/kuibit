@@ -84,7 +84,6 @@ all covered by the given resolution."""
         raise ValueError(f"Apparent horizons {ah} is not available")
 
     logger.debug("Reading horizons and computing radius")
-    # We can use any index for the qlm index, it will be thrown away
     horizon = sim_hor.get_apparent_horizon(ah).ah
 
     # Plot
