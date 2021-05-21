@@ -33,10 +33,14 @@ def mopi_add_custom_options(parser):
     # These are the custom options that mopi will see.
 
     parser.add_argument("--datadir", default=".", help="Data directory.")
+    kah.add_horizon_to_parser(parser)
+    parser.add_argument(
+        "--ignore-symlinks",
+        action="store_true",
+        help="Ignore symlinks in the data directory",
+    )
     kah.add_grid_to_parser(parser, dimensions=2)
     kah.add_figure_to_parser(parser)
-    kah.add_horizon_to_parser(parser)
-
     parser.add_argument(
         "--variable", type=str, required=True, help="Variable to plot."
     )
