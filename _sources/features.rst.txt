@@ -10,7 +10,7 @@ example, if an objects smells like a dictionary, you should be able to ask for
 ``keys()``, or iteratate over it, or see if an element is contained with the
 ``in`` keyword.
 
-Here we review all the available features as of version ``3.0.0b1``.
+Here we review all the available features as of version ``1.2.0``.
 
 General
 -------
