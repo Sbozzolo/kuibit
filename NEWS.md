@@ -34,6 +34,7 @@ because `GridSeries` are leaner and more direct to use.
 #### General
 - Improvements to documentation, docstrings, and tutorials
 - Examples are now automatically packaged and uploaded upon release
+- New YouTube series, `Using kuibit`
 
 #### New examples
 
