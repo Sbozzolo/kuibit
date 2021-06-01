@@ -1452,36 +1452,41 @@
                     <span class="c1"># These would be matched here, so we will exclude the case in</span>
                     <span class="c1"># which the thorn name is volume_integrals and the var name</span>
                     <span class="c1"># is vacuum or GRMHD.</span>
-                    <span class="n">thorn_name</span> <span class="o">=</span> <span class="n">matched_ascii</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
-                    <span class="n">var_name</span> <span class="o">=</span> <span class="n">matched_ascii</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
-                    <span class="k">if</span> <span class="n">thorn_name</span> <span class="o">==</span> <span class="s2">&quot;volume_integrals&quot;</span> <span class="ow">and</span> <span class="p">(</span>
-                        <span class="n">var_name</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;GRMHD&quot;</span><span class="p">,</span> <span class="s2">&quot;vacuum&quot;</span><span class="p">)</span>
-                    <span class="p">):</span>
-                        <span class="k">continue</span>
-
-                    <span class="c1"># TODO (FEATURE): Avoid reading headers twice</span>
                     <span class="c1">#</span>
-                    <span class="c1"># Here we scan the headers, we should not do this work again</span>
-                    <span class="c1"># when we deal with the single variables.</span>
+                    <span class="c1"># Same with the file carpet-grid.asc</span>
+                    <span class="c1">#</span>
+                    <span class="c1"># To deal with all of these, we wrap everything in a try</span>
+                    <span class="c1"># except block, and keep only the variables that do not</span>
+                    <span class="c1"># throw errors.</span>
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="n">thorn_name</span> <span class="o">=</span> <span class="n">matched_ascii</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+                        <span class="n">var_name</span> <span class="o">=</span> <span class="n">matched_ascii</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
 
-                    <span class="c1"># The last group is where compression information is. It</span>
-                    <span class="c1"># could be None.</span>
-                    <span class="n">compression_method</span> <span class="o">=</span> <span class="n">matched_ascii</span><span class="o">.</span><span class="n">groups</span><span class="p">()[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
-                    <span class="n">opener</span><span class="p">,</span> <span class="n">opener_mode</span> <span class="o">=</span> <span class="n">OneGridFunctionASCII</span><span class="o">.</span><span class="n">_decompressor</span><span class="p">[</span>
-                        <span class="n">compression_method</span>
-                    <span class="p">]</span>
-                    <span class="n">_</span><span class="p">,</span> <span class="n">column_description</span> <span class="o">=</span> <span class="n">scan_header</span><span class="p">(</span>
-                        <span class="n">f</span><span class="p">,</span>
-                        <span class="n">one_file_per_group</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-                        <span class="n">extended_format</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-                        <span class="n">opener</span><span class="o">=</span><span class="n">opener</span><span class="p">,</span>
-                        <span class="n">opener_mode</span><span class="o">=</span><span class="n">opener_mode</span><span class="p">,</span>
-                    <span class="p">)</span>
-                    <span class="k">for</span> <span class="n">variable_name</span> <span class="ow">in</span> <span class="n">column_description</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
-                        <span class="n">var_list</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_vars_ascii</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span>
-                            <span class="n">variable_name</span><span class="p">,</span> <span class="nb">set</span><span class="p">()</span>
+                        <span class="c1"># TODO (FEATURE): Avoid reading headers twice</span>
+                        <span class="c1">#</span>
+                        <span class="c1"># Here we scan the headers, we should not do this work again</span>
+                        <span class="c1"># when we deal with the single variables.</span>
+
+                        <span class="c1"># The last group is where compression information is. It</span>
+                        <span class="c1"># could be None.</span>
+                        <span class="n">compression_method</span> <span class="o">=</span> <span class="n">matched_ascii</span><span class="o">.</span><span class="n">groups</span><span class="p">()[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+                        <span class="n">opener</span><span class="p">,</span> <span class="n">opener_mode</span> <span class="o">=</span> <span class="n">OneGridFunctionASCII</span><span class="o">.</span><span class="n">_decompressor</span><span class="p">[</span>
+                            <span class="n">compression_method</span>
+                        <span class="p">]</span>
+                        <span class="n">_</span><span class="p">,</span> <span class="n">column_description</span> <span class="o">=</span> <span class="n">scan_header</span><span class="p">(</span>
+                            <span class="n">f</span><span class="p">,</span>
+                            <span class="n">one_file_per_group</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                            <span class="n">extended_format</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                            <span class="n">opener</span><span class="o">=</span><span class="n">opener</span><span class="p">,</span>
+                            <span class="n">opener_mode</span><span class="o">=</span><span class="n">opener_mode</span><span class="p">,</span>
                         <span class="p">)</span>
-                        <span class="n">var_list</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+                        <span class="k">for</span> <span class="n">variable_name</span> <span class="ow">in</span> <span class="n">column_description</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+                            <span class="n">var_list</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_vars_ascii</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span>
+                                <span class="n">variable_name</span><span class="p">,</span> <span class="nb">set</span><span class="p">()</span>
+                            <span class="p">)</span>
+                            <span class="n">var_list</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+                    <span class="k">except</span> <span class="ne">RuntimeError</span><span class="p">:</span>
+                        <span class="k">pass</span>
 
         <span class="c1"># What pythonize_name_dict does is to make the various variables</span>
         <span class="c1"># accessible as attributes, e.g. self.fields.rho</span>

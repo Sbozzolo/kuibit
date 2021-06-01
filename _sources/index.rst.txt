@@ -11,6 +11,9 @@ a high-level and intuitive way, and provides some commonly used routines in
 numerical-relativity (e.g., computing the strain of gravitational waves).
 A video introduction about ``kuibit`` can be found on
 `YouTube <https://www.youtube.com/watch?v=7-F2xh-m31A>`_.
+The YouTube series
+`Using kuibit <https://www.youtube.com/playlist?list=PLIVVtc6RlFxpi3BiF6KTWd3z4TTQ5hY06>`_
+contains video tutorials on ``kuibit``.
 
 The :doc:`testimonials page <testimonials>` collects short user's reviews about
 ``kuibit``.
@@ -117,6 +120,11 @@ Tutorials
    tutorials/cactus_grid_functions.ipynb
    tutorials/cactus_horizons.ipynb
    tutorials/gravitational_waves.ipynb
+
+The YouTube series
+`Using kuibit <https://www.youtube.com/playlist?list=PLIVVtc6RlFxpi3BiF6KTWd3z4TTQ5hY06>`_
+contains video tutorials on ``kuibit``. Each video is focused on a single topic.
+
 
 Examples
 ---------
