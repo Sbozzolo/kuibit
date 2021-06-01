@@ -1,6 +1,6 @@
 # Changelog
 
-## Version 1.2.0 (Under development)
+## Version 1.2.0 (1 June 2021)
 
 #### New module: visualize_matplotlib
 
