@@ -62,6 +62,9 @@ Movies:
 
 * `grid_var`
 
+#### Bug fixes
+- Fixed header recognition for `carpet-grid.asc` (#22)
+
 #### Features
 
 - New methods `get_apparent_horizon` and `get_qlm_horizon` in `HorizonsDir`.

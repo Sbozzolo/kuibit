@@ -1406,36 +1406,38 @@ class AllGridFunctions:
                     # These would be matched here, so we will exclude the case in
                     # which the thorn name is volume_integrals and the var name
                     # is vacuum or GRMHD.
-                    thorn_name = matched_ascii.group(2)
-                    var_name = matched_ascii.group(3)
-                    if thorn_name == "volume_integrals" and (
-                        var_name in ("GRMHD", "vacuum")
-                    ):
-                        continue
-
-                    # TODO (FEATURE): Avoid reading headers twice
                     #
-                    # Here we scan the headers, we should not do this work again
-                    # when we deal with the single variables.
+                    # Same with the file carpet-grid.asc
+                    #
+                    # To deal with all of these, we wrap everything in a try
+                    # except block, and keep only the variables that do not
+                    # throw errors.
+                    try:
+                        # TODO (FEATURE): Avoid reading headers twice
+                        #
+                        # Here we scan the headers, we should not do this work again
+                        # when we deal with the single variables.
 
-                    # The last group is where compression information is. It
-                    # could be None.
-                    compression_method = matched_ascii.groups()[-1]
-                    opener, opener_mode = OneGridFunctionASCII._decompressor[
-                        compression_method
-                    ]
-                    _, column_description = scan_header(
-                        f,
-                        one_file_per_group=True,
-                        extended_format=True,
-                        opener=opener,
-                        opener_mode=opener_mode,
-                    )
-                    for variable_name in column_description.keys():
-                        var_list = self._vars_ascii.setdefault(
-                            variable_name, set()
+                        # The last group is where compression information is. It
+                        # could be None.
+                        compression_method = matched_ascii.groups()[-1]
+                        opener, opener_mode = OneGridFunctionASCII._decompressor[
+                            compression_method
+                        ]
+                        _, column_description = scan_header(
+                            f,
+                            one_file_per_group=True,
+                            extended_format=True,
+                            opener=opener,
+                            opener_mode=opener_mode,
                         )
-                        var_list.add(f)
+                        for variable_name in column_description.keys():
+                            var_list = self._vars_ascii.setdefault(
+                                variable_name, set()
+                            )
+                            var_list.add(f)
+                    except RuntimeError:
+                        pass
 
         # What pythonize_name_dict does is to make the various variables
         # accessible as attributes, e.g. self.fields.rho
