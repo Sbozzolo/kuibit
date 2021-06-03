@@ -82,11 +82,6 @@ place where to discuss it. Alternatively, you can also open an issue on GitHub.
 Frequently asked questions are collected in the page :ref:`faq:Frequently Asked
 Questions`.
 
-In addition to the tutorials and examples that are presented in this page,
-real-world examples can be found `examples
-<https://github.com/Sbozzolo/kuibit/tree/experimental/examples>`_ folder of the
-``experimental`` branch.
-
 Usage
 -----
 
