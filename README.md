@@ -25,7 +25,7 @@ page is mainly intended for developers. Documentation for users is available
 
 - [Official documentation](https://sbozzolo.github.io/kuibit)
 - [Tutorials](https://sbozzolo.github.io/kuibit/#tutorials)
-- [Examples](https://sbozzolo.github.io/kuibit/#id1)
+- [Examples](https://sbozzolo.github.io/kuibit/#examples)
 - [Archive with most recent examples and tools](https://github.com/sbozzolo/kuibit/releases/latest/download/examples.tar.gz)
 - [Changelog](https://github.com/Sbozzolo/kuibit/releases)
 - [What people say about kuibit](https://sbozzolo.github.io/kuibit/testimonials.html)
