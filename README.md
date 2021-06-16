@@ -154,3 +154,6 @@ archivePrefix = {arXiv},
 }
 ```
 You can find this entry in Python with `from kuibit import __bibtex__`.
+
+`kuibit` is built with `NumPy`, `SciPy`, and `h5py`, and optionally uses
+`matplotlib`, `mayavi`, and `numba`. Consider citing these packages too.

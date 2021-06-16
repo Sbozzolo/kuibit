@@ -254,3 +254,6 @@ consider citing ``kuibit`` if you find the software useful. You can use the foll
            adsurl = {https://ui.adsabs.harvard.edu/abs/2021JOSS....6.3099B},
           adsnote = {Provided by the SAO/NASA Astrophysics Data System}
     }
+
+``kuibit`` is built with ``NumPy``, ``SciPy``, and ``h5py``, and optionally uses
+``matplotlib``, ``mayavi``, and ``numba``. Consider citing these packages too.
