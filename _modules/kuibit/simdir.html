@@ -180,7 +180,8 @@
 
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="nf">_sanitize_path</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">):</span>
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_sanitize_path</span><span class="p">(</span><span class="n">path</span><span class="p">):</span>
         <span class="c1"># Make sure to have complete paths with respect to the current folder</span>
         <span class="n">abs_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">expanduser</span><span class="p">(</span><span class="n">path</span><span class="p">))</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">(</span><span class="n">abs_path</span><span class="p">):</span>
@@ -195,12 +196,6 @@
 <span class="sd">        :param max_depth: Maximum recursion depth to scan.</span>
 <span class="sd">        :type max_depth: int</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-
-        <span class="bp">self</span><span class="o">.</span><span class="n">dirs</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">parfiles</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">logfiles</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">errfiles</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">allfiles</span> <span class="o">=</span> <span class="p">[]</span>
 
         <span class="k">def</span> <span class="nf">listdir_process_symlinks</span><span class="p">(</span><span class="n">path</span><span class="p">):</span>
             <span class="sd">&quot;&quot;&quot;Return a list of files in path. If self.ignore_symlinks, exclude the</span>
@@ -270,8 +265,14 @@
 
         <span class="bp">self</span><span class="o">.</span><span class="n">has_parfile</span> <span class="o">=</span> <span class="nb">bool</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parfiles</span><span class="p">)</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="n">max_depth</span><span class="o">=</span><span class="mi">8</span><span class="p">,</span> <span class="n">ignored_dirs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-                 <span class="n">ignore_symlinks</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">pickle_file</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">path</span><span class="p">,</span>
+        <span class="n">max_depth</span><span class="o">=</span><span class="mi">8</span><span class="p">,</span>
+        <span class="n">ignored_dirs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">ignore_symlinks</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">pickle_file</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Constructor.</span>
 
 <span class="sd">        :param path:      Path to output of the simulation.</span>
@@ -306,6 +307,13 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">ignored_dirs</span> <span class="o">=</span> <span class="n">ignored_dirs</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">ignore_symlinks</span> <span class="o">=</span> <span class="n">ignore_symlinks</span>
 
+        <span class="bp">self</span><span class="o">.</span><span class="n">dirs</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">parfiles</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">logfiles</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">errfiles</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">allfiles</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">has_parfile</span> <span class="o">=</span> <span class="kc">False</span>
+
         <span class="k">if</span> <span class="p">(</span><span class="n">pickle_file</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span><span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">pickle_file</span><span class="p">)):</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_populate</span><span class="p">()</span>
         <span class="k">else</span><span class="p">:</span>
@@ -318,8 +326,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">pickle_file</span> <span class="o">=</span> <span class="n">pickle_file</span>
 
     <span class="k">def</span> <span class="nf">_populate</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Scan the folders and populate basic attributes.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="sd">&quot;&quot;&quot;Scan the folders and populate basic attributes.&quot;&quot;&quot;</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_scan_folders</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">max_depth</span><span class="p">)</span>
 
@@ -331,8 +338,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">__horizons</span> <span class="o">=</span> <span class="kc">None</span>
 
 <div class="viewcode-block" id="SimDir.rescan"><a class="viewcode-back" href="../../simdir_ref.html#kuibit.simdir.SimDir.rescan">[docs]</a>    <span class="k">def</span> <span class="nf">rescan</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Reset the SimDir and rescan all the files.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="sd">&quot;&quot;&quot;Reset the SimDir and rescan all the files.&quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_populate</span><span class="p">()</span></div>
 
     <span class="nd">@property</span>
@@ -436,8 +442,7 @@
         <span class="k">return</span> <span class="n">header</span> <span class="o">+</span> <span class="n">ts_ret</span> <span class="o">+</span> <span class="n">mp_ret</span> <span class="o">+</span> <span class="n">gw_ret</span> <span class="o">+</span> <span class="n">em_ret</span> <span class="o">+</span> <span class="n">gf_ret</span> <span class="o">+</span> <span class="n">hor_ret</span>
 
     <span class="k">def</span> <span class="fm">__enter__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;This is classed when the object is used as a context manager.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="sd">&quot;&quot;&quot;This is classed when the object is used as a context manager.&quot;&quot;&quot;</span>
         <span class="c1"># All the work in done in __init__</span>
         <span class="k">return</span> <span class="bp">self</span>
 
