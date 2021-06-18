@@ -24,10 +24,38 @@ In case the directory structure is very deep (more than 8 levels), you can
 specify the option ``max_depth`` to increase the default.
 
 If you want to ignore specific folders (by default ``SIMFACTORY``, ``report``,
-``movies``, ``tmp``, ``temp``), you can provide the ``ignore`` argument.
+``movies``, ``tmp``, ``temp``), you can provide the ``ignored_dirs`` argument.
 
 By default, symlinks are ignored. You can change this behavior by passing the
 keyword argument ``ignore_symlinks=False``.
+
+SimDir and pickles
+------------------------
+
+``kuibit`` tries to do as much lazy-loading as possible. For examples, files are
+opened only when needed. When analyzing simulations it is useful to save the
+work done by ``kuibit`` to avoid re-doing the same operations over and over.
+This can be done with pickles. ``SimDir`` can be used as a context manager and
+the progresses can be loaded and saved from files. For example:
+
+.. code-block:: python
+
+     with SimDir("path_of_simulation", pickle_file="simdir.pickle") as sim:
+        # do operations
+
+In this case, if ``pickle_file`` exists, it will be loaded (ignoring all the other
+arguments passed to ``SimDir``), and it will be kept updated with the additional
+work done by ``kuibit``. If ``pickle_file`` does not exist, the ``SimDir`` will be
+created as usual as a ``pickle_file`` will be generated.
+
+.. warning::
+
+   When using pickles, no consistency check with the current state of the
+   simulation is performed. If the simulation changes (e.g., new checkpoints are
+   added), this will result in errors. In that case, a new pickle file must be
+   produced or the data has to be refreshed (with the method
+   :py:meth:`~.rescan`). When the version of ``kuibit`` changes, a new pickle
+   file has to be regenerated.
 
 Using SimDir objects
 --------------------

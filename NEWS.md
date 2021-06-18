@@ -2,10 +2,38 @@
 
 ## Version 1.3.0 (Under development)
 
+#### `SimDir` can now be cached in pickle files
+
+`kuibit` tries to do as much lazy-loading as possible. For examples, files are
+opened only when needed. When analyzing simulations it is useful to save the
+work done by `kuibit` to avoid re-doing the same operations over and over. It is
+now possible to do this using pickle files. `SimDir` can now be used as a
+context manager and the progresses can be loaded and saved from files. For
+example:
+
+```python
+with SimDir("path_of_simulation", pickle_file="simdir.pickle") as sim:
+    # do operations
+```
+
+In this case, if `pickle_file` exists, it will be loaded (ignoring all the other
+arguments passed to `SimDir`), and it will be kept updated with the additional
+work done by `kuibit`. If `pickle_file` does not exist, the `SimDir` will be
+created as usual as a `pickle_file` will be generated.
+
+It is important to stress that, when using pickles, no consistency check with
+the current state of the simulation is performed. If the simulation changes
+(e.g., new checkpoints are added), this will result in errors. In that case, a
+new pickle file must be produced.
+
+
 #### General
 - `SimDir` can be saved to disk with the method `save` and read with the
    function `load_SimDir`. This is useful to work with a simulation that has
    finished.
+
+#### Breaking changes
+- The `ignore` parameter in `SimDir` has been renamed to `ignored_dirs`.
 
 ## Version 1.2.0 (1 June 2021)
 

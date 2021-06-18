@@ -55,20 +55,59 @@ from kuibit import (
 def load_SimDir(path):
     """Load file produced with :py:meth:`~.SimDir.save`.
 
+    Pickles have to be regenerated if the version of ``kuibit`` changes.
+
     :param path: Pickle file as produced by :py:meth:`~.SimDir.save`.
     :type path: str
 
     :returns: SimDir
     :rtype: :py:class:`~.SimDir`
+
     """
     with open(path, "rb") as file_:
-        return pickle.load(file_)
+        sim = pickle.load(file_)
 
-    return pickle.load(path)
+    if not isinstance(sim, SimDir):
+        raise RuntimeError(f"File {path} does not contain a SimDir")
+
+    return sim
 
 
 class SimDir:
     """This class represents a Cactus simulation directory.
+
+    :py:class:`~.SimDir` can be used as a context manager. For instance:
+
+    .. code-block
+
+       with SimDir(sim_path) as sim:
+            print(sim)
+
+    By itself, this is not very useful. It becomes more useful in conjunction
+    with using pickles. Pickles are used to save the work done and resume it
+    later. Since ``kuibit`` does a lot of lazy-loading, it can be useful to save
+    the operations performed to disk and restart from them. For example, when
+    initializing a :py:class:`~.SimDir`, the files have to be scanned and
+    organized. It is pointless to this all the times if the simulation has not
+    changed. For this, we use pickles.
+
+    .. code-block
+
+       with SimDir(sim_path, pickle_file="sim.pickle") as sim:
+            print(sim)
+
+    What happens here is that if ``pickle_file`` exists, it will be loaded. If
+    it does not exist, it will be created. Using context managers here is useful
+    because it automatically saves all the progress done. Alternatively, one
+    has to call the :py:meth:`~.save` method manually.
+
+    .. warning::
+
+       When using pickles, it is important to make sure that the underlying data
+       does not change, as the new/changed data will be not considered. To
+       refresh :py:class:`~.SimDir`, you can always use the :py:meth:`~.rescan`
+       method. Pickles have to be regenerated from scratch if the version of
+       ``kuibit`` changes.
 
     Data is searched recursively in all subfolders. No particular folder
     structure (e.g. ``simfactory`` style) is assumed. The following attributes
@@ -97,9 +136,11 @@ class SimDir:
 
     def _sanitize_path(self, path):
         # Make sure to have complete paths with respect to the current folder
-        self.path = os.path.abspath(os.path.expanduser(path))
-        if not os.path.isdir(self.path):
+        abs_path = os.path.abspath(os.path.expanduser(path))
+        if not os.path.isdir(abs_path):
             raise RuntimeError(f"Folder does not exist: {path}")
+
+        return abs_path
 
     def _scan_folders(self, max_depth):
         """Scan all the folders in self.path up to depth ``max_depth``
@@ -132,9 +173,9 @@ class SimDir:
 
         def walk_rec(path, level=0):
             """Walk_rec is a recursive function that steps down all the
-            subdirectories (except the ones with name defined in self.ignore)
-            up to max_depth and add to self.allfiles the files found in the
-            directories.
+            subdirectories (except the ones with name defined in
+            self.ignored_dirs) up to max_depth and add to self.allfiles the
+            files found in the directories.
 
             """
             if level >= max_depth:
@@ -151,11 +192,11 @@ class SimDir:
                 filter(os.path.isdir, all_files_in_path)
             )
 
-            # We ignore the ones in self.ignore
+            # We ignore the ones in self.ignored_dirs
             directories_to_scan = [
                 p
                 for p in directories_in_path
-                if (os.path.basename(p) not in self.ignore)
+                if (os.path.basename(p) not in self.ignored_dirs)
             ]
 
             # Apply walk_rec to all the subdirectory, but with level increased
@@ -183,32 +224,58 @@ class SimDir:
 
         self.has_parfile = bool(self.parfiles)
 
-    def __init__(self, path, max_depth=8, ignore=None, ignore_symlinks=True):
+    def __init__(self, path, max_depth=8, ignored_dirs=None,
+                 ignore_symlinks=True, pickle_file=None):
         """Constructor.
 
         :param path:      Path to output of the simulation.
         :type path:       str
         :param max_depth: Maximum recursion depth for subfolders.
         :type max_depth:  int
-        :param ignore: Names of folders to ignore (e.g. SIMFACTORY).
-        :type ignore:  set
+        :param ignored_dirs: Names of folders to ignore (e.g. SIMFACTORY).
+        :type ignored_dirs:  set
         :param ignore_symlink: If True, do not consider symlinks.
         :type ignore_symlink: bool
+        :param pickle_file: If ``pickle_file`` is not None, do not scan the
+                            folders and load the pickle file. All the other
+                            parameters are ignored.
+        :type pickle_file: bool
 
         Parfiles (``*.par``) will be searched in all data directories and the
-        top-level SIMFACTORY/par folder, if it exists. The parfile in the
-        latter folder, if available, or else the oldest parfile in any of
-        the data directories, will be used to extract the simulation
-        parameters. Logfiles (``*.out``) and errorfiles (``*.err``) will be
-        searched for in all data directories.
-        """
-        if ignore is None:
-            ignore = {"SIMFACTORY", "report", "movies", "tmp", "temp"}
+        top-level SIMFACTORY/par folder, if it exists. The parfile in the latter
+        folder, if available, or else the oldest parfile in any of the data
+        directories, will be used to extract the simulation parameters. Logfiles
+        (``*.out``) and errorfiles (``*.err``) will be searched for in all data
+        directories.
 
-        self.ignore = ignore
+        """
+        if ignored_dirs is None:
+            ignored_dirs = {"SIMFACTORY", "report", "movies", "tmp", "temp"}
+
+        # We update self.path in _sanitize_path to make sure it is an absolute
+        # path
+        self.path = self._sanitize_path(str(path))
+
+        self.max_depth = int(max_depth)
+        self.ignored_dirs = ignored_dirs
         self.ignore_symlinks = ignore_symlinks
-        self._sanitize_path(str(path))
-        self._scan_folders(int(max_depth))
+
+        if (pickle_file is None) or (not os.path.exists(pickle_file)):
+            self._populate()
+        else:
+            sim = load_SimDir(pickle_file)
+            # Overwrite all the local variables
+            self.__dict__ = sim.__dict__
+
+        # We set this later, so that if it was read from the pickle, we override
+        # it in such a way that we have consistency.
+        self.pickle_file = pickle_file
+
+    def _populate(self):
+        """Scan the folders and populate basic attributes.
+        """
+
+        self._scan_folders(self.max_depth)
 
         self.__timeseries = None
         self.__multipoles = None
@@ -216,6 +283,11 @@ class SimDir:
         self.__electromagneticwaves = None
         self.__gridfunctions = None
         self.__horizons = None
+
+    def rescan(self):
+        """Reset the SimDir and rescan all the files.
+        """
+        self._populate()
 
     @property
     def timeseries(self):
@@ -316,6 +388,21 @@ class SimDir:
         hor_ret = f"{self.horizons}"
 
         return header + ts_ret + mp_ret + gw_ret + em_ret + gf_ret + hor_ret
+
+    def __enter__(self):
+        """This is classed when the object is used as a context manager.
+        """
+        # All the work in done in __init__
+        return self
+
+    def __exit__(self, _1, _2, _3):
+        """Save the SimDir to disk as pickle.
+
+        This is called when the object is used as a context manager.
+
+        """
+        if self.pickle_file is not None:
+            self.save(self.pickle_file)
 
     def save(self, path):
         """Save this object as a pickle.
