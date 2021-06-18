@@ -56,8 +56,8 @@ from kuibit.cactus_ascii_utils import scan_header
 class OneScalar:
     """Read scalar data produced by CarpetASCII.
 
-    CactusScalarASCII is a dictionary-like object with keys the variables and
-    values the :py:class:`~.TimeSeries`.
+    :py:class:`~.OneScalar` is a dictionary-like object with keys the variables
+    and values the :py:class:`~.TimeSeries`.
 
     Single variable per file or single file per group are supported. In the
     latter case, the header is inspected to understand the content of the file.
@@ -130,9 +130,14 @@ class OneScalar:
         :type path: str
         """
         self.path = str(path)
-        # The _vars dictionary contains a mapping between the various variables
+        # The _vars_columns dictionary contains a mapping between the various variables
         # and the column numbers in which they are stored.
+        self._vars_columns = {}
+
+        # The _vars dictionary maps variables with the TimeSeries. It is used to
+        # cached loaded data.
         self._vars = {}
+
         self.folder, filename = os.path.split(self.path)
 
         filename_match = self._rx_filename.match(filename)
@@ -172,7 +177,7 @@ class OneScalar:
             variable_name = variable_name1
             if index_in_brackets is not None:
                 variable_name += index_in_brackets
-            self._vars = {variable_name: None}
+            self._vars_columns = {variable_name: None}
 
     def _scan_header(self):
         # Call scan_header with the right argument
@@ -193,10 +198,12 @@ class OneScalar:
         )
 
         if self._is_one_file_per_group:
-            self._vars.update(columns_info)
+            self._vars_columns.update(columns_info)
         else:
             # There is only one data_column
-            self._vars = {list(self._vars.keys())[0]: columns_info}
+            self._vars_columns = {
+                list(self._vars_columns.keys())[0]: columns_info
+            }
 
         self._was_header_scanned = True
 
@@ -216,9 +223,9 @@ class OneScalar:
             self._scan_header()
 
         if variable not in self:
-            raise ValueError(f"{variable} not available")
+            raise KeyError(f"{variable} not available")
 
-        column_number = self._vars[variable]
+        column_number = self._vars_columns[variable]
         t, y = np.loadtxt(
             self.path,
             unpack=True,
@@ -229,10 +236,13 @@ class OneScalar:
         return ts.remove_duplicated_iters(t, y)
 
     def __getitem__(self, key):
-        return self.load(key)
+        if key not in self._vars:
+            # Error checking is done in __load__
+            self._vars[key] = self.load(key)
+        return self._vars[key]
 
     def __contains__(self, key):
-        return key in self._vars
+        return key in self._vars_columns
 
     def keys(self):
         """Return the list of variables available.
@@ -241,7 +251,7 @@ class OneScalar:
         :rtype:   dict_keys
 
         """
-        return self._vars.keys()
+        return self._vars_columns.keys()
 
 
 class AllScalars:
@@ -273,39 +283,50 @@ class AllScalars:
         # TODO: Is it necessary to have the folder level?
         # Probably not, so remove it
 
-        # _vars is like _vars['variable']['folder'] -> CactusScalarASCII(f)
-        # _vars['variable'] is a dictionary with as keys the folders where
-        # to find the files associated to the variable and the reduction
-        # reduction_type
-        self._vars = {}
+        # _vars_readers is like _vars_readers['variable']['folder'] ->
+        # OneScalar(f) _vars_readers['variable'] is a dictionary with as keys
+        # the folders where to find the files associated to the variable and the
+        # reduction reduction_type
+        #
+        # OneScalar objects act as readers.
+        self._vars_readers = {}
         for file_ in allfiles:
             # We only save those that variables are well-behaved
             try:
                 cactusascii_file = OneScalar(file_)
                 if cactusascii_file.reduction_type == reduction_type:
                     for var in list(cactusascii_file.keys()):
-                        # We add to the _vars dictionary the mapping:
+                        # We add to the _vars_readers dictionary the mapping:
                         # [var][folder] to OneScalar(f)
                         folder = cactusascii_file.folder
-                        self._vars.setdefault(var, {})[
+                        self._vars_readers.setdefault(var, {})[
                             folder
                         ] = cactusascii_file
             except RuntimeError:
                 pass
 
+        # We cache the results in _vars, a dictionary with keys the variables
+        # and values the timeseries.
+        self._vars = {}
+
         # What pythonize_name_dict does is to make the various variables
         # accessible as attributes, e.g. self.fields.rho
         self.fields = pythonize_name_dict(list(self.keys()), self.__getitem__)
 
-    @lru_cache(128)
     def __getitem__(self, key):
-        # We read all the files associated to variable key
-        folders = self._vars[key]
-        series = [f.load(key) for f in folders.values()]
-        return ts.combine_ts(series)
+        if key not in self:
+            raise KeyError(f"{key} not available")
+
+        if key not in self._vars:
+            # We read all the files associated to variable key
+            folders = self._vars_readers[key]
+            series = [f[key] for f in folders.values()]
+            self._vars[key] = ts.combine_ts(series)
+
+        return self._vars[key]
 
     def __contains__(self, key):
-        return key in self._vars
+        return key in self._vars_readers
 
     def keys(self):
         """Return the available variables corresponding to the given reduction.
@@ -314,7 +335,7 @@ class AllScalars:
         :rtype:   dict_keys
 
         """
-        return self._vars.keys()
+        return self._vars_readers.keys()
 
     def get(self, key, default=None):
         """Return variable if available, else return the default value.

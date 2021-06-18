@@ -121,14 +121,14 @@ class TestAllGridFunctions(unittest.TestCase):
 
         # Here we can we find all the variables
         self.assertCountEqual(
-            list(self.gf._vars_ascii.keys()),
+            list(self.gf._vars_ascii_files.keys()),
             ["rho_b", "P", "vx", "vy", "vz", "rho_star"],
         )
 
         # Here we also have the grid arrays in
         # diskdiagnostics-integrated_quantities.xy.h5
         self.assertCountEqual(
-            list(self.gf._vars_h5.keys()),
+            list(self.gf._vars_h5_files.keys()),
             [
                 "rho_b",
                 "P",

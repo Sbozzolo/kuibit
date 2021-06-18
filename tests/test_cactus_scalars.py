@@ -45,7 +45,7 @@ class TestCactusScalar(unittest.TestCase):
         self.assertFalse(asc._is_one_file_per_group)
         self.assertFalse(asc._was_header_scanned)
         self.assertEqual(asc.reduction_type, "maximum")
-        self.assertDictEqual(asc._vars, {"vel[0]": None})
+        self.assertDictEqual(asc._vars_columns, {"vel[0]": None})
 
         # no reduction, scalar, one file per group
         path = "tests/tov/output-0000/static_tov/carpet-timing..asc"
@@ -53,10 +53,12 @@ class TestCactusScalar(unittest.TestCase):
 
         self.assertTrue(asc_carp._is_one_file_per_group)
         self.assertTrue(asc_carp._was_header_scanned)
-        self.assertIn("current_physical_time_per_hour", asc_carp._vars)
-        self.assertEqual(asc_carp._vars["current_physical_time_per_hour"], 13)
-        self.assertIn("time_total", asc_carp._vars)
-        self.assertEqual(asc_carp._vars["time_total"], 14)
+        self.assertIn("current_physical_time_per_hour", asc_carp._vars_columns)
+        self.assertEqual(
+            asc_carp._vars_columns["current_physical_time_per_hour"], 13
+        )
+        self.assertIn("time_total", asc_carp._vars_columns)
+        self.assertEqual(asc_carp._vars_columns["time_total"], 14)
         self.assertIs(asc_carp.reduction_type, "scalar")
 
         # Compressed, scalar, one file per group
@@ -67,13 +69,13 @@ class TestCactusScalar(unittest.TestCase):
         self.assertTrue(asc_gz._was_header_scanned)
         self.assertEqual(asc_gz.reduction_type, "minimum")
         self.assertEqual(asc_gz._compression_method, "gz")
-        self.assertDictEqual(asc_gz._vars, {"eps": 2})
+        self.assertDictEqual(asc_gz._vars_columns, {"eps": 2})
 
         # Compressed, scalar, one file per group
         path = "tests/tov/output-0000/static_tov/hydrobase-eps.minimum.asc.bz2"
         asc_bz = cs.OneScalar(path)
         self.assertEqual(asc_bz._compression_method, "bz2")
-        self.assertDictEqual(asc_bz._vars, {"eps": 2})
+        self.assertDictEqual(asc_bz._vars_columns, {"eps": 2})
 
     def test_OneScalar_magic_methods(self):
 
@@ -151,7 +153,7 @@ class TestCactusScalar(unittest.TestCase):
         )
 
         # Value not existing
-        with self.assertRaises(ValueError):
+        with self.assertRaises(KeyError):
             asc_carp.load("bubu")
 
         # Test scanning header
@@ -192,13 +194,16 @@ class TestCactusScalar(unittest.TestCase):
             "vel[2]",
         ]
 
-        self.assertCountEqual(reader._vars, vars_tov)
+        self.assertCountEqual(reader._vars_readers, vars_tov)
 
         self.assertCountEqual(reader.keys(), vars_tov)
 
         self.assertTrue(
             reader.__str__().startswith("Available average timeseries:\n[")
         )
+
+        with self.assertRaises(KeyError):
+            reader["BOB"]
 
     def test_AllScalars_magic_methods(self):
 

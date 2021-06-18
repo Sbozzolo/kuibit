@@ -197,74 +197,90 @@ class SimDir:
         self._sanitize_path(str(path))
         self._scan_folders(int(max_depth))
 
+        self.__timeseries = None
+        self.__multipoles = None
+        self.__gravitationalwaves = None
+        self.__electromagneticwaves = None
+        self.__gridfunctions = None
+        self.__horizons = None
+
     @property
-    # We only need to keep it 1 in memory: it is the only possible!
-    @lru_cache(1)
-    def ts(self):
+    def timeseries(self):
         """Return all the available timeseries in the data.
 
         :returns: Interface to all the timeseries in the directory.
         :rtype: :py:class:`~.ScalarsDir`
         """
-        return cactus_scalars.ScalarsDir(self)
+        if self.__timeseries is None:
+            self.__timeseries = cactus_scalars.ScalarsDir(self)
+        return self.__timeseries
 
-    timeseries = ts
+    ts = timeseries
 
     @property
-    @lru_cache(1)
     def multipoles(self):
         """Return all the available multipole data.
 
         :returns: Interface to all the multipole data in the directory.
         :rtype: :py:class:`~.MultipolesDir`
         """
-        return cactus_multipoles.MultipolesDir(self)
+        if self.__multipoles is None:
+            self.__multipoles = cactus_multipoles.MultipolesDir(self)
+        return self.__multipoles
 
     @property
-    @lru_cache(1)
     def gravitationalwaves(self):
         """Return all the available ``Psi4`` data.
 
         :returns: Interface to all the ``Psi4`` data in the directory.
         :rtype: :py:class:`~.GravitationalWavesDir`
         """
-        return cactus_waves.GravitationalWavesDir(self)
+        if self.__gravitationalwaves is None:
+            self.__gravitationalwaves = cactus_waves.GravitationalWavesDir(
+                self
+            )
+        return self.__gravitationalwaves
 
     gws = gravitationalwaves
 
     @property
-    @lru_cache(1)
     def electromagneticwaves(self):
         """Return all the available ``Phi2`` data.
 
         :returns: Interface to all the ``Phi2`` data in the directory.
         :rtype: :py:class:`~.ElectromagneticWavesDir`
         """
-        return cactus_waves.ElectromagneticWavesDir(self)
+        if self.__electromagneticwaves is None:
+            self.__electromagneticwaves = cactus_waves.ElectromagneticWavesDir(
+                self
+            )
+        return self.__electromagneticwaves
 
     emws = electromagneticwaves
 
     @property
-    @lru_cache(1)
     def gridfunctions(self):
         """Return all the available grid data.
 
         :returns: Interface to all the grid data in the directory.
         :rtype: :py:class:`~.GridFunctionsDir`
         """
-        return cactus_grid_functions.GridFunctionsDir(self)
+        if self.__gridfunctions is None:
+            self.__gridfunctions = cactus_grid_functions.GridFunctionsDir(self)
+        return self.__gridfunctions
 
     gf = gridfunctions
 
     @property
-    @lru_cache(1)
     def horizons(self):
         """Return all the available horizon data.
 
         :returns: Interface to all the horizon data in the directory.
         :rtype: :py:class:`~.HorizonsDir`
         """
-        return cactus_horizons.HorizonsDir(self)
+        if self.__horizons is None:
+            self.__horizons = cactus_horizons.HorizonsDir(self)
+        return self.__horizons
 
     def __str__(self):
         header = f"Indexed {len(self.allfiles)} files"

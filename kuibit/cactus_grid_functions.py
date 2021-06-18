@@ -1332,8 +1332,13 @@ class AllGridFunctions:
 
         # Variable files is a dictionary, the keys are the variables, the
         # values the set of files associated to that variable
-        self._vars_ascii = {}
-        self._vars_h5 = {}
+        self._vars_ascii_files = {}
+        self._vars_h5_files = {}
+
+        # _vars contains the actual data. It is used to cache results. _vars is
+        # a dictionary with keys the variables and values OneGridFunction (H5 or
+        # ASCII)
+        self._vars = {}
 
         rx_h5 = re.compile(h5_pattern)
         rx_ascii = re.compile(ascii_pattern)
@@ -1360,7 +1365,9 @@ class AllGridFunctions:
                 # in group3.
                 if matched_h5.group(1) is None:
                     variable_name = matched_h5.group(3)
-                    var_list = self._vars_h5.setdefault(variable_name, set())
+                    var_list = self._vars_h5_files.setdefault(
+                        variable_name, set()
+                    )
                     var_list.add(f)
                 else:
                     # We have to open the file to understand which variables
@@ -1378,7 +1385,7 @@ class AllGridFunctions:
                             if not group_matched:
                                 continue
                             variable_name = group_matched.group(2)
-                            var_list = self._vars_h5.setdefault(
+                            var_list = self._vars_h5_files.setdefault(
                                 variable_name, set()
                             )
                             var_list.add(f)
@@ -1389,7 +1396,7 @@ class AllGridFunctions:
                 # are available.
                 if matched_ascii.group(1) is None:
                     variable_name = matched_ascii.group(3)
-                    var_list = self._vars_ascii.setdefault(
+                    var_list = self._vars_ascii_files.setdefault(
                         variable_name, set()
                     )
                     var_list.add(f)
@@ -1421,7 +1428,10 @@ class AllGridFunctions:
                         # The last group is where compression information is. It
                         # could be None.
                         compression_method = matched_ascii.groups()[-1]
-                        opener, opener_mode = OneGridFunctionASCII._decompressor[
+                        (
+                            opener,
+                            opener_mode,
+                        ) = OneGridFunctionASCII._decompressor[
                             compression_method
                         ]
                         _, column_description = scan_header(
@@ -1432,7 +1442,7 @@ class AllGridFunctions:
                             opener_mode=opener_mode,
                         )
                         for variable_name in column_description.keys():
-                            var_list = self._vars_ascii.setdefault(
+                            var_list = self._vars_ascii_files.setdefault(
                                 variable_name, set()
                             )
                             var_list.add(f)
@@ -1443,25 +1453,33 @@ class AllGridFunctions:
         # accessible as attributes, e.g. self.fields.rho
         self.fields = pythonize_name_dict(list(self.keys()), self.__getitem__)
 
-    @lru_cache(128)
     def __getitem__(self, key):
+
         var_name = str(key)
-        # We prefer h5
-        if var_name in self._vars_h5:
-            return OneGridFunctionH5(self._vars_h5[var_name], var_name)
 
-        if var_name in self._vars_ascii:
-            if self.num_ghost is None:
-                warnings.warn(
-                    "You are using ASCII files, which have no information"
-                    " about ghost zone information. Set the attribute num_ghost"
-                    " of this object to properly account for the ghost zones. "
+        if var_name not in self:
+            raise KeyError(f"Variable {key} not present in simulation data")
+
+        if var_name not in self._vars:
+            # We prefer h5
+            if var_name in self._vars_h5_files:
+                self._vars[var_name] = OneGridFunctionH5(
+                    self._vars_h5_files[var_name], var_name
                 )
-            return OneGridFunctionASCII(
-                self._vars_ascii[var_name], var_name, num_ghost=self.num_ghost
-            )
+            elif var_name in self._vars_ascii_files:
+                if self.num_ghost is None:
+                    warnings.warn(
+                        "You are using ASCII files, which have no information"
+                        " about ghost zone information. Set the attribute num_ghost"
+                        " of this object to properly account for the ghost zones. "
+                    )
+                self._vars[var_name] = OneGridFunctionASCII(
+                    self._vars_ascii_files[var_name],
+                    var_name,
+                    num_ghost=self.num_ghost,
+                )
 
-        raise KeyError(f"Variable {key} not present in simulation data")
+        return self._vars[var_name]
 
     @property
     def num_ghost(self):
@@ -1504,7 +1522,7 @@ class AllGridFunctions:
         """Return the list of all the available variables."""
         # We merge the dictionaries and return the keys.
         # This automatically takes care of making sure that they keys are unique.
-        return {**self._vars_h5, **self._vars_ascii}.keys()
+        return {**self._vars_h5_files, **self._vars_ascii_files}.keys()
 
     def __str__(self):
         ret = "\nAvailable grid data of dimension "
@@ -1524,9 +1542,9 @@ class AllGridFunctions:
         allfiles = set()
         # We collect all the files by merging the lists into a set. The
         # set will automatically remove repeated entries.
-        for file_list in self._vars_h5.values():
+        for file_list in self._vars_h5_files.values():
             allfiles.update(file_list)
-        for file_list in self._vars_ascii.values():
+        for file_list in self._vars_ascii_files.values():
             allfiles.update(file_list)
         return allfiles
 
