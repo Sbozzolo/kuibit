@@ -134,7 +134,8 @@ class SimDir:
 
     """
 
-    def _sanitize_path(self, path):
+    @staticmethod
+    def _sanitize_path(path):
         # Make sure to have complete paths with respect to the current folder
         abs_path = os.path.abspath(os.path.expanduser(path))
         if not os.path.isdir(abs_path):
@@ -149,12 +150,6 @@ class SimDir:
         :param max_depth: Maximum recursion depth to scan.
         :type max_depth: int
         """
-
-        self.dirs = []
-        self.parfiles = []
-        self.logfiles = []
-        self.errfiles = []
-        self.allfiles = []
 
         def listdir_process_symlinks(path):
             """Return a list of files in path. If self.ignore_symlinks, exclude the
@@ -224,8 +219,14 @@ class SimDir:
 
         self.has_parfile = bool(self.parfiles)
 
-    def __init__(self, path, max_depth=8, ignored_dirs=None,
-                 ignore_symlinks=True, pickle_file=None):
+    def __init__(
+        self,
+        path,
+        max_depth=8,
+        ignored_dirs=None,
+        ignore_symlinks=True,
+        pickle_file=None,
+    ):
         """Constructor.
 
         :param path:      Path to output of the simulation.
@@ -260,6 +261,19 @@ class SimDir:
         self.ignored_dirs = ignored_dirs
         self.ignore_symlinks = ignore_symlinks
 
+        self.dirs = []
+        self.parfiles = []
+        self.logfiles = []
+        self.errfiles = []
+        self.allfiles = []
+        self.has_parfile = False
+        self.__timeseries = None
+        self.__multipoles = None
+        self.__gravitationalwaves = None
+        self.__electromagneticwaves = None
+        self.__gridfunctions = None
+        self.__horizons = None
+
         if (pickle_file is None) or (not os.path.exists(pickle_file)):
             self._populate()
         else:
@@ -272,8 +286,7 @@ class SimDir:
         self.pickle_file = pickle_file
 
     def _populate(self):
-        """Scan the folders and populate basic attributes.
-        """
+        """Scan the folders and populate basic attributes."""
 
         self._scan_folders(self.max_depth)
 
@@ -285,8 +298,7 @@ class SimDir:
         self.__horizons = None
 
     def rescan(self):
-        """Reset the SimDir and rescan all the files.
-        """
+        """Reset the SimDir and rescan all the files."""
         self._populate()
 
     @property
@@ -390,8 +402,7 @@ class SimDir:
         return header + ts_ret + mp_ret + gw_ret + em_ret + gf_ret + hor_ret
 
     def __enter__(self):
-        """This is classed when the object is used as a context manager.
-        """
+        """This is classed when the object is used as a context manager."""
         # All the work in done in __init__
         return self
 
