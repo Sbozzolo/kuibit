@@ -15,6 +15,7 @@
 # You should have received a copy of the GNU General Public License along with
 # this program; if not, see <https://www.gnu.org/licenses/>.
 
+import os
 import unittest
 
 from kuibit import simdir as sd
@@ -88,3 +89,15 @@ class TestSimDir(unittest.TestCase):
         # Test symlink
         sim_with_symlink = sd.SimDir("tests/tov", ignore_symlinks=False)
         self.assertEqual(len(sim_with_symlink.allfiles), 447)
+
+    def test_pickle(self):
+
+        path = "/tmp/sim.pickle"
+
+        self.sim.save(path)
+
+        loaded_sim = sd.load_SimDir(path)
+
+        self.assertCountEqual(self.sim.__dict__, loaded_sim.__dict__)
+
+        os.remove(path)

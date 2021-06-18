@@ -1,5 +1,12 @@
 # Changelog
 
+## Version 1.3.0 (Under development)
+
+#### General
+- `SimDir` can be saved to disk with the method `save` and read with the
+   function `load_SimDir`. This is useful to work with a simulation that has
+   finished.
+
 ## Version 1.2.0 (1 June 2021)
 
 #### New module: visualize_matplotlib

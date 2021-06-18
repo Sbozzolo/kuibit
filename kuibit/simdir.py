@@ -35,15 +35,13 @@ In case of uncertainty, it is always possible to print :py:class:`~.SimDir`,
 or any of its attributes, to obtain a message with the available content of
 such attribute.
 
+The function :py:func:`~.load_SimDir` can be used to load a :py:class:`~.SimDir`
+saved with the method :py:meth:`~.save`.
+
 """
 
 import os
-
-# TODO (FUTURE): cached_property is the decorator we are looking for.
-#
-# We ideally would like to use cached_property, but it is in Python 3.8,
-# and currently we only support 3.6.
-from functools import lru_cache
+import pickle
 
 from kuibit import (
     cactus_grid_functions,
@@ -52,6 +50,21 @@ from kuibit import (
     cactus_scalars,
     cactus_waves,
 )
+
+
+def load_SimDir(path):
+    """Load file produced with :py:meth:`~.SimDir.save`.
+
+    :param path: Pickle file as produced by :py:meth:`~.SimDir.save`.
+    :type path: str
+
+    :returns: SimDir
+    :rtype: :py:class:`~.SimDir`
+    """
+    with open(path, "rb") as file_:
+        return pickle.load(file_)
+
+    return pickle.load(path)
 
 
 class SimDir:
@@ -303,3 +316,15 @@ class SimDir:
         hor_ret = f"{self.horizons}"
 
         return header + ts_ret + mp_ret + gw_ret + em_ret + gf_ret + hor_ret
+
+    def save(self, path):
+        """Save this object as a pickle.
+
+        The object can be loaded with the function :py:func:`~.load_SimDir`.
+
+        :param path: Path where to save the file.
+        :type path: str
+
+        """
+        with open(path, "wb") as file_:
+            pickle.dump(self, file_, protocol=pickle.HIGHEST_PROTOCOL)
