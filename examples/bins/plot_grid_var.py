@@ -123,71 +123,76 @@ This is much faster but it is not as accurate."""
     figname = get_figname(args, default=f"{args.variable}_{args.plane}")
 
     logger.debug(f"Reading variable {args.variable}")
-    sim = SimDir(args.datadir, ignore_symlinks=args.ignore_symlinks)
-    logger.debug("Prepared SimDir")
-    reader = sim.gridfunctions[args.plane]
-    logger.debug(f"Variables available {reader}")
-    var = reader[args.variable]
-    logger.debug(f"Read variable {args.variable}")
+    with SimDir(
+        args.datadir,
+        ignore_symlinks=args.ignore_symlinks,
+        pickle_file=args.pickle_file,
+    ) as sim:
 
-    if iteration == -1:
-        iteration = var.available_iterations[-1]
+        logger.debug("Prepared SimDir")
+        reader = sim.gridfunctions[args.plane]
+        logger.debug(f"Variables available {reader}")
+        var = reader[args.variable]
+        logger.debug(f"Read variable {args.variable}")
 
-    time = var.time_at_iteration(iteration)
+        if iteration == -1:
+            iteration = var.available_iterations[-1]
 
-    logger.debug(f"Using iteration {iteration} (time = {time})")
+        time = var.time_at_iteration(iteration)
 
-    logger.debug(
-        f"Plotting on grid with x0 = {x0}, x1 = {x1}, shape = {shape}"
-    )
+        logger.debug(f"Using iteration {iteration} (time = {time})")
 
-    if args.absolute:
-        data = abs(var[iteration])
-        variable = f"abs({args.variable})"
-    else:
-        data = var[iteration]
-        variable = args.variable
+        logger.debug(
+            f"Plotting on grid with x0 = {x0}, x1 = {x1}, shape = {shape}"
+        )
 
-    if args.logscale:
-        label = f"log10({variable})"
-    else:
-        label = variable
+        if args.absolute:
+            data = abs(var[iteration])
+            variable = f"abs({args.variable})"
+        else:
+            data = var[iteration]
+            variable = args.variable
 
-    logger.debug(f"Using label {label}")
+        if args.logscale:
+            label = f"log10({variable})"
+        else:
+            label = variable
 
-    logger.debug("Resampling and plotting")
-    plot_color(
-        data,
-        x0=x0,
-        x1=x1,
-        shape=shape,
-        xlabel=args.plane[0],
-        ylabel=args.plane[1],
-        resample=args.multilinear_interpolate,
-        colorbar=args.colorbar,
-        logscale=args.logscale,
-        vmin=args.vmin,
-        vmax=args.vmax,
-        label=label,
-        interpolation=args.interpolation_method,
-    )
+        logger.debug(f"Using label {label}")
 
-    add_text_to_corner(fr"$t = {time:.3f}$")
+        logger.debug("Resampling and plotting")
+        plot_color(
+            data,
+            x0=x0,
+            x1=x1,
+            shape=shape,
+            xlabel=args.plane[0],
+            ylabel=args.plane[1],
+            resample=args.multilinear_interpolate,
+            colorbar=args.colorbar,
+            logscale=args.logscale,
+            vmin=args.vmin,
+            vmax=args.vmax,
+            label=label,
+            interpolation=args.interpolation_method,
+        )
 
-    if args.ah_show:
-        for ah in sim.horizons.available_apparent_horizons:
-            logger.debug(f"Plotting apparent horizon {ah}")
-            plot_horizon_on_plane_at_iteration(
-                sim.horizons.get_apparent_horizon(ah),
-                iteration,
-                args.plane,
-                color=args.ah_color,
-                edgecolor=args.ah_edge_color,
-                alpha=args.ah_alpha,
-            )
+        add_text_to_corner(fr"$t = {time:.3f}$")
 
-    logger.debug("Plotted")
+        if args.ah_show:
+            for ah in sim.horizons.available_apparent_horizons:
+                logger.debug(f"Plotting apparent horizon {ah}")
+                plot_horizon_on_plane_at_iteration(
+                    sim.horizons.get_apparent_horizon(ah),
+                    iteration,
+                    args.plane,
+                    color=args.ah_color,
+                    edgecolor=args.ah_edge_color,
+                    alpha=args.ah_alpha,
+                )
 
-    logger.debug("Saving")
-    save_from_dir_filename_ext(args.outdir, figname, args.fig_extension)
-    logger.debug("DONE")
+        logger.debug("Plotted")
+
+        logger.debug("Saving")
+        save_from_dir_filename_ext(args.outdir, figname, args.fig_extension)
+        logger.debug("DONE")

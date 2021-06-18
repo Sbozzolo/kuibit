@@ -104,20 +104,25 @@ if __name__ == "__main__":
         logger.setLevel(logging.DEBUG)
 
     logger.debug(f"Reading variable {args.variable}")
-    sim = SimDir(args.datadir, ignore_symlinks=args.ignore_symlinks)
-    reader = sim.gridfunctions[args.type]
-    logger.debug(f"Variables available {reader}")
-    var = reader[args.variable]
-    logger.debug(f"Read variable {args.variable}")
+    with SimDir(
+        args.datadir,
+        ignore_symlinks=args.ignore_symlinks,
+        pickle_file=args.pickle_file,
+    ) as sim:
 
-    if iteration == -1:
-        iteration = var.available_iterations[-1]
+        reader = sim.gridfunctions[args.type]
+        logger.debug(f"Variables available {reader}")
+        var = reader[args.variable]
+        logger.debug(f"Read variable {args.variable}")
 
-    logger.debug(f"Reading {iteration} and resampling")
+        if iteration == -1:
+            iteration = var.available_iterations[-1]
 
-    data = var[iteration].to_UniformGridData(
-        shape, x0, x1, iteration=iteration
-    )
+        logger.debug(f"Reading {iteration} and resampling")
 
-    logger.debug(f"Saving to {output_path}")
-    data.save(output_path)
+        data = var[iteration].to_UniformGridData(
+            shape, x0, x1, iteration=iteration
+        )
+
+        logger.debug(f"Saving to {output_path}")
+        data.save(output_path)

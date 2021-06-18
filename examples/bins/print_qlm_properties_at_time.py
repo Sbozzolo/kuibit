@@ -57,45 +57,50 @@ to interpolate between timesteps."""
         logging.basicConfig(format="%(asctime)s - %(message)s")
         logger.setLevel(logging.DEBUG)
 
-    sim = SimDir(args.datadir, ignore_symlinks=args.ignore_symlinks)
-    sim_hor = sim.horizons
+    with SimDir(
+        args.datadir,
+        ignore_symlinks=args.ignore_symlinks,
+        pickle_file=args.pickle_file,
+    ) as sim:
 
-    logger.debug(
-        f"QuasiLocalMeasures horizons available: {sim_hor.available_qlm_horizons}"
-    )
+        sim_hor = sim.horizons
 
-    horizon = sim_hor.get_qlm_horizon(args.qlm_index)
+        logger.debug(
+            f"QuasiLocalMeasures horizons available: {sim_hor.available_qlm_horizons}"
+        )
 
-    time = args.time
+        horizon = sim_hor.get_qlm_horizon(args.qlm_index)
 
-    irr_mass = horizon["irreducible_mass"](time)
+        time = args.time
 
-    print(
-        f"""\
+        irr_mass = horizon["irreducible_mass"](time)
+
+        print(
+            f"""\
 QuasiLocalMeasures index: {args.qlm_index}
 Time:                     {time:4.5f}
 Irreducible mass:         {irr_mass:4.5f}
 Christodoulou mass:       {horizon['mass'](time):4.5f}
 Angular momentum:         {horizon['spin'](time):4.5f}"""
-    )
-
-    try:
-        print(f"Charge:                   {horizon['charge'](time):4.5f}")
-    except KeyError:
-        pass
-
-    if args.estimate_gamma:
-        # Estimate gamma, the Lorentz factor
-        #
-        # We use the Weinberg momentum because it matches exactly the one in
-        # TwoPunctures. Probably it does not make sense after t = 0.
-        #
-        momentum_sq = (
-            horizon["w_momentum_x"](time) * horizon["w_momentum_x"](time)
-            + horizon["w_momentum_y"](time) * horizon["w_momentum_y"](time)
-            + horizon["w_momentum_z"](time) * horizon["w_momentum_z"](time)
         )
 
-        gamma = sqrt(1 + momentum_sq / (irr_mass * irr_mass))
+        try:
+            print(f"Charge:                   {horizon['charge'](time):4.5f}")
+        except KeyError:
+            pass
 
-        print(f"Gamma:                    {gamma:4.5f}")
+        if args.estimate_gamma:
+            # Estimate gamma, the Lorentz factor
+            #
+            # We use the Weinberg momentum because it matches exactly the one in
+            # TwoPunctures. Probably it does not make sense after t = 0.
+            #
+            momentum_sq = (
+                horizon["w_momentum_x"](time) * horizon["w_momentum_x"](time)
+                + horizon["w_momentum_y"](time) * horizon["w_momentum_y"](time)
+                + horizon["w_momentum_z"](time) * horizon["w_momentum_z"](time)
+            )
+
+            gamma = sqrt(1 + momentum_sq / (irr_mass * irr_mass))
+
+            print(f"Gamma:                    {gamma:4.5f}")

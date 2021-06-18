@@ -81,49 +81,56 @@ at a given l and m."""
     )
     logger.debug(f"Using figname {figname}")
 
-    sim = SimDir(args.datadir, ignore_symlinks=args.ignore_symlinks)
-    logger.debug("Prepared SimDir")
+    with SimDir(
+        args.datadir,
+        ignore_symlinks=args.ignore_symlinks,
+        pickle_file=args.pickle_file,
+    ) as sim:
 
-    reader_mult = sim.multipoles
+        logger.debug("Prepared SimDir")
 
-    if var_name not in reader_mult:
-        raise ValueError(f"{var_name} not available")
+        reader_mult = sim.multipoles
 
-    reader = reader_mult[var_name]
+        if var_name not in reader_mult:
+            raise ValueError(f"{var_name} not available")
 
-    radius = reader.radii[args.detector_num]
-    logger.debug(f"Using radius: {radius}")
-    detector = reader[radius]
+        reader = reader_mult[var_name]
 
-    if (args.mult_l, args.mult_m) not in detector.available_lm:
-        logger.debug(f"Available multipoles {detector.available_lm}")
-        raise ValueError(
-            f"Multipole {args.mult_l}, {args.mult_m} not available"
+        radius = reader.radii[args.detector_num]
+        logger.debug(f"Using radius: {radius}")
+        detector = reader[radius]
+
+        if (args.mult_l, args.mult_m) not in detector.available_lm:
+            logger.debug(f"Available multipoles {detector.available_lm}")
+            raise ValueError(
+                f"Multipole {args.mult_l}, {args.mult_m} not available"
+            )
+
+        phi = detector[args.mult_l, args.mult_m]
+
+        logger.debug(f"Plotting {var_name}")
+
+        plt.plot(
+            phi.real(),
+            label=fr"$\Re \Phi_{phi_num}^{{{args.mult_l}{args.mult_l}}}$",
+        )
+        plt.plot(
+            phi.imag(),
+            label=fr"$\Im \Phi_{phi_num}^{{{args.mult_l}{args.mult_l}}}$",
         )
 
-    phi = detector[args.mult_l, args.mult_m]
+        plt.legend()
+        plt.xlabel("Time")
+        plt.ylabel(fr"$r \Phi_{phi_num}$")
+        set_axis_limits_from_args(args)
 
-    logger.debug(f"Plotting {var_name}")
+        add_text_to_corner(
+            f"Det {args.detector_num}", anchor="SW", offset=0.005
+        )
+        add_text_to_corner(fr"$r = {radius:.3f}$", anchor="NE", offset=0.005)
 
-    plt.plot(
-        phi.real(),
-        label=fr"$\Re \Phi_{phi_num}^{{{args.mult_l}{args.mult_l}}}$",
-    )
-    plt.plot(
-        phi.imag(),
-        label=fr"$\Im \Phi_{phi_num}^{{{args.mult_l}{args.mult_l}}}$",
-    )
+        logger.debug("Plotted")
 
-    plt.legend()
-    plt.xlabel("Time")
-    plt.ylabel(fr"$r \Phi_{phi_num}$")
-    set_axis_limits_from_args(args)
-
-    add_text_to_corner(f"Det {args.detector_num}", anchor="SW", offset=0.005)
-    add_text_to_corner(fr"$r = {radius:.3f}$", anchor="NE", offset=0.005)
-
-    logger.debug("Plotted")
-
-    logger.debug("Saving")
-    save_from_dir_filename_ext(args.outdir, figname, args.fig_extension)
-    logger.debug("DONE")
+        logger.debug("Saving")
+        save_from_dir_filename_ext(args.outdir, figname, args.fig_extension)
+        logger.debug("DONE")

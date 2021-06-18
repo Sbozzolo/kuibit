@@ -71,43 +71,48 @@ all covered by the given resolution."""
     figname = get_figname(args, default=f"ah_{ah}_radius")
     logger.debug(f"Figname: {figname}")
 
-    sim = SimDir(args.datadir, ignore_symlinks=args.ignore_symlinks)
-    logger.debug("Prepared SimDir")
-    sim_hor = sim.horizons
+    with SimDir(
+        args.datadir,
+        ignore_symlinks=args.ignore_symlinks,
+        pickle_file=args.pickle_file,
+    ) as sim:
 
-    logger.debug(
-        f"Apparent horizons available: {sim_hor.available_apparent_horizons}"
-    )
+        logger.debug("Prepared SimDir")
+        sim_hor = sim.horizons
 
-    # Check that the horizons are available
-    if ah not in sim_hor.available_apparent_horizons:
-        raise ValueError(f"Apparent horizons {ah} is not available")
+        logger.debug(
+            f"Apparent horizons available: {sim_hor.available_apparent_horizons}"
+        )
 
-    logger.debug("Reading horizons and computing radius")
-    horizon = sim_hor.get_apparent_horizon(ah).ah
+        # Check that the horizons are available
+        if ah not in sim_hor.available_apparent_horizons:
+            raise ValueError(f"Apparent horizons {ah} is not available")
 
-    # Plot
-    logger.debug("Plotting")
-    plt.ylabel(f"Radius of horizon {ah}")
-    plt.xlabel("Time")
-    plt.plot(horizon.mean_radius, label="Mean radius")
-    plt.plot(horizon.min_radius, label="Min radius")
-    plt.plot(horizon.max_radius, label="Max radius")
-    plt.legend()
+        logger.debug("Reading horizons and computing radius")
+        horizon = sim_hor.get_apparent_horizon(ah).ah
 
-    if args.dx:
-        logger.debug("Adding resolution y axis")
-        plt.twinx()
-        plt.plot(horizon.mean_radius / args.dx)
-        plt.plot(horizon.min_radius / args.dx)
-        plt.plot(horizon.max_radius / args.dx)
-        plt.ylabel("Number of points on radius")
+        # Plot
+        logger.debug("Plotting")
+        plt.ylabel(f"Radius of horizon {ah}")
+        plt.xlabel("Time")
+        plt.plot(horizon.mean_radius, label="Mean radius")
+        plt.plot(horizon.min_radius, label="Min radius")
+        plt.plot(horizon.max_radius, label="Max radius")
+        plt.legend()
 
-    add_text_to_corner(f"AH {ah}", anchor="SW", offset=0.005)
+        if args.dx:
+            logger.debug("Adding resolution y axis")
+            plt.twinx()
+            plt.plot(horizon.mean_radius / args.dx)
+            plt.plot(horizon.min_radius / args.dx)
+            plt.plot(horizon.max_radius / args.dx)
+            plt.ylabel("Number of points on radius")
 
-    set_axis_limits_from_args(args)
-    logger.debug("Plotted")
+        add_text_to_corner(f"AH {ah}", anchor="SW", offset=0.005)
 
-    logger.debug("Saving")
-    save_from_dir_filename_ext(args.outdir, figname, args.fig_extension)
-    logger.debug("DONE")
+        set_axis_limits_from_args(args)
+        logger.debug("Plotted")
+
+        logger.debug("Saving")
+        save_from_dir_filename_ext(args.outdir, figname, args.fig_extension)
+        logger.debug("DONE")

@@ -60,39 +60,44 @@ if __name__ == "__main__":
     figname = get_figname(args, default=f"ah_{horizons}_found")
     logger.debug(f"Figname: {figname}")
 
-    sim = SimDir(args.datadir, ignore_symlinks=args.ignore_symlinks)
-    logger.debug("Prepared SimDir")
+    with SimDir(
+        args.datadir,
+        ignore_symlinks=args.ignore_symlinks,
+        pickle_file=args.pickle_file,
+    ) as sim:
 
-    sim_hor = sim.horizons
+        logger.debug("Prepared SimDir")
 
-    logger.debug(
-        f"Apparent horizons available: {sim_hor.available_apparent_horizons}"
-    )
+        sim_hor = sim.horizons
 
-    for ah in args.horizons:
-        if ah in sim_hor.available_apparent_horizons:
-            logger.debug(f"Reading horizon {ah}")
-            # We can use any index for the qlm index, it will be thrown away
-            current_horizon = sim_hor.get_apparent_horizon(ah)
-            time_found = current_horizon.ah.cctk_iteration.t
-            # We prepare an array with the same length of time_found and with
-            # constant value of ah
-            ah_num = [ah] * len(time_found)
-            plt.scatter(time_found, ah_num, marker="o", s=0.1)
+        logger.debug(
+            f"Apparent horizons available: {sim_hor.available_apparent_horizons}"
+        )
 
-    # Plot
-    logger.debug("Plotting")
-    plt.ylabel("Apparent horizon")
-    plt.xlabel("Time")
+        for ah in args.horizons:
+            if ah in sim_hor.available_apparent_horizons:
+                logger.debug(f"Reading horizon {ah}")
+                # We can use any index for the qlm index, it will be thrown away
+                current_horizon = sim_hor.get_apparent_horizon(ah)
+                time_found = current_horizon.ah.cctk_iteration.t
+                # We prepare an array with the same length of time_found and with
+                # constant value of ah
+                ah_num = [ah] * len(time_found)
+                plt.scatter(time_found, ah_num, marker="o", s=0.1)
 
-    # Fix ticks
-    plt.gca().tick_params(axis="y", which="minor", left=False)
-    plt.ylim(min(args.horizons) - 1, max(args.horizons) + 1)
-    plt.yticks(args.horizons)
+        # Plot
+        logger.debug("Plotting")
+        plt.ylabel("Apparent horizon")
+        plt.xlabel("Time")
 
-    set_axis_limits_from_args(args)
-    logger.debug("Plotted")
+        # Fix ticks
+        plt.gca().tick_params(axis="y", which="minor", left=False)
+        plt.ylim(min(args.horizons) - 1, max(args.horizons) + 1)
+        plt.yticks(args.horizons)
 
-    logger.debug("Saving")
-    save_from_dir_filename_ext(args.outdir, figname, args.fig_extension)
-    logger.debug("DONE")
+        set_axis_limits_from_args(args)
+        logger.debug("Plotted")
+
+        logger.debug("Saving")
+        save_from_dir_filename_ext(args.outdir, figname, args.fig_extension)
+        logger.debug("DONE")

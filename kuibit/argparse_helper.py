@@ -71,6 +71,8 @@ def init_argparse(*args, **kwargs):
         action="store_true",
         help="Ignore symlinks in the data directory",
     )
+    parser.add_argument("--pickle-file",
+                        help="Read/write SimDir to this file")
     return parser
 
 

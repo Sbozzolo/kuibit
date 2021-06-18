@@ -31,6 +31,7 @@ new pickle file must be produced.
 - `SimDir` can be saved to disk with the method `save` and read with the
    function `load_SimDir`. This is useful to work with a simulation that has
    finished.
+- Examples can now use pickles.
 
 #### Breaking changes
 - The `ignore` parameter in `SimDir` has been renamed to `ignored_dirs`.

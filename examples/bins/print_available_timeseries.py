@@ -25,6 +25,9 @@ if __name__ == "__main__":
     available to kuibit in the given data folder."""
     parser = kah.init_argparse(desc)
     args = kah.get_args(parser)
-    print(
-        SimDir(args.datadir, ignore_symlinks=args.ignore_symlinks).timeseries
-    )
+    with SimDir(
+        args.datadir,
+        ignore_symlinks=args.ignore_symlinks,
+        pickle_file=args.pickle_file,
+    ) as sim:
+        print(sim.timeseries)

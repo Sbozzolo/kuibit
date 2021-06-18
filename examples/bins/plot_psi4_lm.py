@@ -68,42 +68,49 @@ by a given detector and a given l and m."""
     )
     logger.debug(f"Using figname {figname}")
 
-    sim = SimDir(args.datadir, ignore_symlinks=args.ignore_symlinks)
-    logger.debug("Prepared SimDir")
+    with SimDir(
+        args.datadir,
+        ignore_symlinks=args.ignore_symlinks,
+        pickle_file=args.pickle_file,
+    ) as sim:
 
-    reader = sim.gravitationalwaves
+        logger.debug("Prepared SimDir")
 
-    radius = reader.radii[args.detector_num]
-    logger.debug(f"Using radius: {radius}")
-    detector = reader[radius]
+        reader = sim.gravitationalwaves
 
-    if (args.mult_l, args.mult_m) not in detector.available_lm:
-        logger.debug(f"Available multipoles {detector.available_lm}")
-        raise ValueError(
-            f"Multipole {args.mult_l}, {args.mult_m} not available"
+        radius = reader.radii[args.detector_num]
+        logger.debug(f"Using radius: {radius}")
+        detector = reader[radius]
+
+        if (args.mult_l, args.mult_m) not in detector.available_lm:
+            logger.debug(f"Available multipoles {detector.available_lm}")
+            raise ValueError(
+                f"Multipole {args.mult_l}, {args.mult_m} not available"
+            )
+
+        psi4 = detector[args.mult_l, args.mult_m]
+
+        logger.debug("Plotting Psi4")
+
+        plt.plot(
+            psi4.real(), label=fr"$\Re \Psi_4^{{{args.mult_l}{args.mult_l}}}$"
+        )
+        plt.plot(
+            psi4.imag(), label=fr"$\Im \Psi_4^{{{args.mult_l}{args.mult_l}}}$"
         )
 
-    psi4 = detector[args.mult_l, args.mult_m]
+        plt.legend()
+        plt.xlabel("Time")
+        plt.ylabel(r"$r \Psi_4$")
 
-    logger.debug("Plotting Psi4")
+        add_text_to_corner(
+            f"Det {args.detector_num}", anchor="SW", offset=0.005
+        )
+        add_text_to_corner(fr"$r = {radius:.3f}$", anchor="NE", offset=0.005)
 
-    plt.plot(
-        psi4.real(), label=fr"$\Re \Psi_4^{{{args.mult_l}{args.mult_l}}}$"
-    )
-    plt.plot(
-        psi4.imag(), label=fr"$\Im \Psi_4^{{{args.mult_l}{args.mult_l}}}$"
-    )
+        set_axis_limits_from_args(args)
+        logger.debug("Plotted")
 
-    plt.legend()
-    plt.xlabel("Time")
-    plt.ylabel(r"$r \Psi_4$")
-
-    add_text_to_corner(f"Det {args.detector_num}", anchor="SW", offset=0.005)
-    add_text_to_corner(fr"$r = {radius:.3f}$", anchor="NE", offset=0.005)
-
-    set_axis_limits_from_args(args)
-    logger.debug("Plotted")
-
-    logger.debug("Saving")
-    save_from_dir_filename_ext(args.outdir, figname, args.fig_extension)
-    logger.debug("DONE")
+        logger.debug("Saving")
+        save_from_dir_filename_ext(args.outdir, figname, args.fig_extension)
+        logger.debug("DONE")

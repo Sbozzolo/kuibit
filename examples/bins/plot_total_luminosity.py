@@ -67,30 +67,37 @@ electromagnetic-wave luminosity as a function of time for a given detector."""
     )
     logger.debug(f"Using figname {figname}")
 
-    sim = SimDir(args.datadir, ignore_symlinks=args.ignore_symlinks)
-    logger.debug("Prepared SimDir")
+    with SimDir(
+        args.datadir,
+        ignore_symlinks=args.ignore_symlinks,
+        pickle_file=args.pickle_file,
+    ) as sim:
 
-    radius = sim.gravitationalwaves.radii[args.detector_num]
-    logger.debug(f"Using radius {radius}")
+        logger.debug("Prepared SimDir")
 
-    logger.debug("Computing GW power")
-    power_gw = sim.gravitationalwaves[radius].get_total_power(args.pcut)
-    logger.debug("Computed GW power")
-    logger.debug("Computing EM power")
-    power_em = sim.electromagneticwaves[radius].get_total_power()
-    logger.debug("Computed EM power")
+        radius = sim.gravitationalwaves.radii[args.detector_num]
+        logger.debug(f"Using radius {radius}")
 
-    logger.debug("Plotting")
-    plt.plot((power_gw + power_em).time_shifted(-radius))
-    plt.xlabel(r"Time - Detector distance $(t - r)$")
-    plt.ylabel(r"$dE\slash dt (t)$")
+        logger.debug("Computing GW power")
+        power_gw = sim.gravitationalwaves[radius].get_total_power(args.pcut)
+        logger.debug("Computed GW power")
+        logger.debug("Computing EM power")
+        power_em = sim.electromagneticwaves[radius].get_total_power()
+        logger.debug("Computed EM power")
 
-    add_text_to_corner(f"Det {args.detector_num}", anchor="SW", offset=0.005)
-    add_text_to_corner(fr"$r = {radius:.3f}$", anchor="NE", offset=0.005)
+        logger.debug("Plotting")
+        plt.plot((power_gw + power_em).time_shifted(-radius))
+        plt.xlabel(r"Time - Detector distance $(t - r)$")
+        plt.ylabel(r"$dE\slash dt (t)$")
 
-    set_axis_limits_from_args(args)
-    logger.debug("Plotted")
+        add_text_to_corner(
+            f"Det {args.detector_num}", anchor="SW", offset=0.005
+        )
+        add_text_to_corner(fr"$r = {radius:.3f}$", anchor="NE", offset=0.005)
 
-    logger.debug("Saving")
-    save_from_dir_filename_ext(args.outdir, figname, args.fig_extension)
-    logger.debug("DONE")
+        set_axis_limits_from_args(args)
+        logger.debug("Plotted")
+
+        logger.debug("Saving")
+        save_from_dir_filename_ext(args.outdir, figname, args.fig_extension)
+        logger.debug("DONE")

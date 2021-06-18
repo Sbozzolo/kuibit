@@ -98,7 +98,11 @@ class MOPIMovie:
 
         # TODO: Automatically compute min and max if they are not specified.
 
-        self.sim = SimDir(args.datadir, ignore_symlinks=args.ignore_symlinks)
+        self.sim = SimDir(
+            args.datadir,
+            ignore_symlinks=args.ignore_symlinks,
+            pickle_file=args.pickle_file,
+        )
         self.x0, self.x1, self.res = args.origin, args.corner, args.resolution
         self.shape = [self.res, self.res]
         self.reader = self.sim.gridfunctions[args.plane]

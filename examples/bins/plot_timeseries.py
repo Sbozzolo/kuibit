@@ -81,24 +81,29 @@ if __name__ == "__main__":
     logger.debug(f"Using figname {figname}")
 
     logger.debug(f"Reading variable {args.variable}")
-    sim = SimDir(args.datadir, ignore_symlinks=args.ignore_symlinks)
-    logger.debug("Prepared SimDir")
-    reader = sim.timeseries[args.reduction]
-    logger.debug(f"Available variables {reader}")
-    var = reader[args.variable]
-    logger.debug(f"Read variable {args.variable}")
+    with SimDir(
+        args.datadir,
+        ignore_symlinks=args.ignore_symlinks,
+        pickle_file=args.pickle_file,
+    ) as sim:
 
-    logger.debug("Plotting timeseries")
-    plt.plot(var)
-    plt.xlabel("Time")
-    plt.ylabel(f"{red} {args.variable}")
-    if args.logxaxis:
-        plt.xscale("log")
-    if args.logyaxis:
-        plt.yscale("log")
-    set_axis_limits_from_args(args)
-    logger.debug("Plotted")
+        logger.debug("Prepared SimDir")
+        reader = sim.timeseries[args.reduction]
+        logger.debug(f"Available variables {reader}")
+        var = reader[args.variable]
+        logger.debug(f"Read variable {args.variable}")
 
-    logger.debug("Saving")
-    save_from_dir_filename_ext(args.outdir, figname, args.fig_extension)
-    logger.debug("DONE")
+        logger.debug("Plotting timeseries")
+        plt.plot(var)
+        plt.xlabel("Time")
+        plt.ylabel(f"{red} {args.variable}")
+        if args.logxaxis:
+            plt.xscale("log")
+        if args.logyaxis:
+            plt.yscale("log")
+        set_axis_limits_from_args(args)
+        logger.debug("Plotted")
+
+        logger.debug("Saving")
+        save_from_dir_filename_ext(args.outdir, figname, args.fig_extension)
+        logger.debug("DONE")

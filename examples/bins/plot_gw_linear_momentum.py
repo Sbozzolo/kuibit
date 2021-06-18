@@ -68,39 +68,46 @@ detector. """
     )
     logger.debug(f"Using figname {figname}")
 
-    sim = SimDir(args.datadir, ignore_symlinks=args.ignore_symlinks)
-    logger.debug("Prepared SimDir")
+    with SimDir(
+        args.datadir,
+        ignore_symlinks=args.ignore_symlinks,
+        pickle_file=args.pickle_file,
+    ) as sim:
 
-    radius = sim.gravitationalwaves.radii[args.detector_num]
-    logger.debug(f"Using radius: {radius}")
+        logger.debug("Prepared SimDir")
 
-    logger.debug("Computing linear momentum")
-    linmom = sim.gravitationalwaves[radius].get_total_linear_momentum_z(
-        args.pcut
-    )
-    logger.debug("Computed linear momentum")
+        radius = sim.gravitationalwaves.radii[args.detector_num]
+        logger.debug(f"Using radius: {radius}")
 
-    logger.debug("Computing force")
-    force_z = sim.gravitationalwaves[radius].get_total_force_z(args.pcut)
-    logger.debug("Computed force")
+        logger.debug("Computing linear momentum")
+        linmom = sim.gravitationalwaves[radius].get_total_linear_momentum_z(
+            args.pcut
+        )
+        logger.debug("Computed linear momentum")
 
-    logger.debug("Plotting")
+        logger.debug("Computing force")
+        force_z = sim.gravitationalwaves[radius].get_total_force_z(args.pcut)
+        logger.debug("Computed force")
 
-    fig, (ax1, ax2) = plt.subplots(2, sharex=True)
+        logger.debug("Plotting")
 
-    ax1.plot(force_z.time_shifted(-radius))
-    # We set P = 0 at t - r = 0
-    ax2.plot(linmom.time_shifted(-radius) - linmom(radius))
-    ax2.set_xlabel(r"Time - Detector distance $(t - r)$")
-    ax1.set_ylabel(r"$dP^z\slash dt (t)$")
-    ax2.set_ylabel(r"$P^z_{<t}(t)$")
+        fig, (ax1, ax2) = plt.subplots(2, sharex=True)
 
-    add_text_to_corner(f"Det {args.detector_num}", anchor="SW", offset=0.005)
-    add_text_to_corner(fr"$r = {radius:.3f}$", anchor="NE", offset=0.005)
+        ax1.plot(force_z.time_shifted(-radius))
+        # We set P = 0 at t - r = 0
+        ax2.plot(linmom.time_shifted(-radius) - linmom(radius))
+        ax2.set_xlabel(r"Time - Detector distance $(t - r)$")
+        ax1.set_ylabel(r"$dP^z\slash dt (t)$")
+        ax2.set_ylabel(r"$P^z_{<t}(t)$")
 
-    set_axis_limits_from_args(args)
-    logger.debug("Plotted")
+        add_text_to_corner(
+            f"Det {args.detector_num}", anchor="SW", offset=0.005
+        )
+        add_text_to_corner(fr"$r = {radius:.3f}$", anchor="NE", offset=0.005)
 
-    logger.debug("Saving")
-    save_from_dir_filename_ext(args.outdir, figname, args.fig_extension)
-    logger.debug("DONE")
+        set_axis_limits_from_args(args)
+        logger.debug("Plotted")
+
+        logger.debug("Saving")
+        save_from_dir_filename_ext(args.outdir, figname, args.fig_extension)
+        logger.debug("DONE")

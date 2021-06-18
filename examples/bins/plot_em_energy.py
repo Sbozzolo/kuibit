@@ -58,37 +58,44 @@ luminosity and cumulative energy as a function of time as computed from Phi2.
     figname = get_figname(args, default=f"em_energy_det{args.detector_num}")
     logger.debug(f"Using figname {figname}")
 
-    sim = SimDir(args.datadir, ignore_symlinks=args.ignore_symlinks)
-    logger.debug("Prepared SimDir")
+    with SimDir(
+        args.datadir,
+        ignore_symlinks=args.ignore_symlinks,
+        pickle_file=args.pickle_file,
+    ) as sim:
 
-    radius = sim.electromagneticwaves.radii[args.detector_num]
-    logger.debug(f"Using radius: {radius}")
+        logger.debug("Prepared SimDir")
 
-    logger.debug("Computing energy")
-    energy = sim.electromagneticwaves[radius].get_total_energy()
-    logger.debug("Computed energy")
+        radius = sim.electromagneticwaves.radii[args.detector_num]
+        logger.debug(f"Using radius: {radius}")
 
-    logger.debug("Computing power")
-    power = sim.electromagneticwaves[radius].get_total_power()
-    logger.debug("Computed power")
+        logger.debug("Computing energy")
+        energy = sim.electromagneticwaves[radius].get_total_energy()
+        logger.debug("Computed energy")
 
-    logger.debug("Plotting")
+        logger.debug("Computing power")
+        power = sim.electromagneticwaves[radius].get_total_power()
+        logger.debug("Computed power")
 
-    fig, (ax1, ax2) = plt.subplots(2, sharex=True)
+        logger.debug("Plotting")
 
-    ax1.plot(power.time_shifted(-radius))
-    # We set E = 0 at t - r = 0
-    ax2.plot(energy.time_shifted(-radius) - energy(radius))
-    ax2.set_xlabel(r"Time - Detector distance $(t - r)$")
-    ax1.set_ylabel(r"$dE\slash dt (t)$")
-    ax2.set_ylabel(r"$E^{<t}(t)$")
+        fig, (ax1, ax2) = plt.subplots(2, sharex=True)
 
-    add_text_to_corner(f"Det {args.detector_num}", anchor="SW", offset=0.005)
-    add_text_to_corner(fr"$r = {radius:.3f}$", anchor="NE", offset=0.005)
+        ax1.plot(power.time_shifted(-radius))
+        # We set E = 0 at t - r = 0
+        ax2.plot(energy.time_shifted(-radius) - energy(radius))
+        ax2.set_xlabel(r"Time - Detector distance $(t - r)$")
+        ax1.set_ylabel(r"$dE\slash dt (t)$")
+        ax2.set_ylabel(r"$E^{<t}(t)$")
 
-    set_axis_limits_from_args(args)
-    logger.debug("Plotted")
+        add_text_to_corner(
+            f"Det {args.detector_num}", anchor="SW", offset=0.005
+        )
+        add_text_to_corner(fr"$r = {radius:.3f}$", anchor="NE", offset=0.005)
 
-    logger.debug("Saving")
-    save_from_dir_filename_ext(args.outdir, figname, args.fig_extension)
-    logger.debug("DONE")
+        set_axis_limits_from_args(args)
+        logger.debug("Plotted")
+
+        logger.debug("Saving")
+        save_from_dir_filename_ext(args.outdir, figname, args.fig_extension)
+        logger.debug("DONE")

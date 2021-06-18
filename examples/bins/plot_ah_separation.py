@@ -63,33 +63,38 @@ of two given apparent horizons."""
     )
     logger.debug(f"Using figname {figname}")
 
-    sim = SimDir(args.datadir, ignore_symlinks=args.ignore_symlinks)
-    logger.debug("Prepared SimDir")
-    sim_hor = sim.horizons
+    with SimDir(
+        args.datadir,
+        ignore_symlinks=args.ignore_symlinks,
+        pickle_file=args.pickle_file,
+    ) as sim:
 
-    logger.debug(
-        f"Apparent horizons available: {sim_hor.available_apparent_horizons}"
-    )
+        logger.debug("Prepared SimDir")
+        sim_hor = sim.horizons
 
-    # Check that the horizons are available
-    for ah in args.horizons:
-        if ah not in sim_hor.available_apparent_horizons:
-            raise ValueError(f"Apparent horizons {ah} is not available")
+        logger.debug(
+            f"Apparent horizons available: {sim_hor.available_apparent_horizons}"
+        )
 
-    logger.debug("Reading horizons and computing separation")
+        # Check that the horizons are available
+        for ah in args.horizons:
+            if ah not in sim_hor.available_apparent_horizons:
+                raise ValueError(f"Apparent horizons {ah} is not available")
 
-    h1 = sim_hor.get_apparent_horizon(args.horizons[0])
-    h2 = sim_hor.get_apparent_horizon(args.horizons[1])
+        logger.debug("Reading horizons and computing separation")
 
-    separation = compute_horizons_separation(h1, h2, resample=True)
+        h1 = sim_hor.get_apparent_horizon(args.horizons[0])
+        h2 = sim_hor.get_apparent_horizon(args.horizons[1])
 
-    logger.debug("Plotting separation")
-    plt.plot(separation)
-    plt.ylabel("Coordinate separation")
-    plt.xlabel("Time")
-    set_axis_limits_from_args(args)
-    logger.debug("Plotted")
+        separation = compute_horizons_separation(h1, h2, resample=True)
 
-    logger.debug("Saving")
-    save_from_dir_filename_ext(args.outdir, figname, args.fig_extension)
-    logger.debug("DONE")
+        logger.debug("Plotting separation")
+        plt.plot(separation)
+        plt.ylabel("Coordinate separation")
+        plt.xlabel("Time")
+        set_axis_limits_from_args(args)
+        logger.debug("Plotted")
+
+        logger.debug("Saving")
+        save_from_dir_filename_ext(args.outdir, figname, args.fig_extension)
+        logger.debug("DONE")

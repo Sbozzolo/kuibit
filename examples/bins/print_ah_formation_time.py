@@ -52,16 +52,23 @@ if __name__ == "__main__":
         logging.basicConfig(format="%(asctime)s - %(message)s")
         logger.setLevel(logging.DEBUG)
 
-    sim = SimDir(args.datadir, ignore_symlinks=args.ignore_symlinks)
-    sim_hor = sim.horizons
+    with SimDir(
+        args.datadir,
+        ignore_symlinks=args.ignore_symlinks,
+        pickle_file=args.pickle_file,
+    ) as sim:
 
-    logger.debug(
-        f"Apparent horizons available: {sim_hor.available_apparent_horizons}"
-    )
+        sim_hor = sim.horizons
 
-    time_found = sim_hor.get_apparent_horizon(args.horizon).formation_time
+        logger.debug(
+            f"Apparent horizons available: {sim_hor.available_apparent_horizons}"
+        )
 
-    if args.parsable:
-        print(f"{time_found}")
-    else:
-        print(f"Horizon {args.horizon} was first found at time {time_found}")
+        time_found = sim_hor.get_apparent_horizon(args.horizon).formation_time
+
+        if args.parsable:
+            print(f"{time_found}")
+        else:
+            print(
+                f"Horizon {args.horizon} was first found at time {time_found}"
+            )

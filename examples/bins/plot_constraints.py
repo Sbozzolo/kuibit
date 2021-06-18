@@ -50,49 +50,62 @@ if __name__ == "__main__":
         logging.basicConfig(format="%(asctime)s - %(message)s")
         logger.setLevel(logging.DEBUG)
 
-    sim = SimDir(args.datadir, ignore_symlinks=args.ignore_symlinks)
-    logger.debug("Prepared SimDir")
+    with SimDir(
+        args.datadir,
+        ignore_symlinks=args.ignore_symlinks,
+        pickle_file=args.pickle_file,
+    ) as sim:
 
-    reader = sim.timeseries
-    logger.debug(f"Variables available {reader}")
+        logger.debug("Prepared SimDir")
 
-    def plot_constraint(constraint_, reduction_):
-        logger.debug(f"Reading {reduction_} of {constraint_}")
-        var = reader[reduction_][constraint_]
-        logger.debug(f"Read {reduction_} of {constraint_}")
-        plt.semilogy(abs(var), label=f"{reduction_}(|{constraint_}|)")
-        logger.debug(f"Plotted {reduction_} of {constraint_}")
+        reader = sim.timeseries
+        logger.debug(f"Variables available {reader}")
 
-    for reduction in args.reductions:
-        logger.debug(f"Working with reduction: {reduction}")
+        def plot_constraint(constraint_, reduction_):
+            logger.debug(f"Reading {reduction_} of {constraint_}")
+            var = reader[reduction_][constraint_]
+            logger.debug(f"Read {reduction_} of {constraint_}")
+            plt.semilogy(abs(var), label=f"{reduction_}(|{constraint_}|)")
+            logger.debug(f"Plotted {reduction_} of {constraint_}")
 
-        plt.clf()
+        for reduction in args.reductions:
+            logger.debug(f"Working with reduction: {reduction}")
 
-        if args.figname is None:
-            figname = f"constraints_{reduction}"
-        else:
-            figname = args.figname + f"_{reduction}"
+            plt.clf()
 
-        # We have multiple choices depending on the code used to compute the
-        # constraint
-        constraint_names = [
-            ["H", "M1", "M2", "M3"],  # McLachlan
-            ["hc", "mc", "my", "mz"],  # Lean
-            ["hamc", "momcx", "momcy", "momcz", "divE"],  # ProcaConstraints
-        ]
+            if args.figname is None:
+                figname = f"constraints_{reduction}"
+            else:
+                figname = args.figname + f"_{reduction}"
 
-        logger.debug("Plotting")
-        for names in constraint_names:
-            for constraint in names:
-                if constraint in reader[reduction]:
-                    plot_constraint(constraint, reduction)
+            # We have multiple choices depending on the code used to compute the
+            # constraint
+            constraint_names = [
+                ["H", "M1", "M2", "M3"],  # McLachlan
+                ["hc", "mc", "my", "mz"],  # Lean
+                [
+                    "hamc",
+                    "momcx",
+                    "momcy",
+                    "momcz",
+                    "divE",
+                ],  # ProcaConstraints
+            ]
 
-        plt.legend()
-        set_axis_limits_from_args(args)
-        logger.debug("Plotted")
+            logger.debug("Plotting")
+            for names in constraint_names:
+                for constraint in names:
+                    if constraint in reader[reduction]:
+                        plot_constraint(constraint, reduction)
 
-        logger.debug("Saving")
-        save_from_dir_filename_ext(args.outdir, figname, args.fig_extension)
-        logger.debug("Saved")
+            plt.legend()
+            set_axis_limits_from_args(args)
+            logger.debug("Plotted")
 
-    logger.debug("Done")
+            logger.debug("Saving")
+            save_from_dir_filename_ext(
+                args.outdir, figname, args.fig_extension
+            )
+            logger.debug("Saved")
+
+        logger.debug("Done")
