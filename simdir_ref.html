@@ -65,10 +65,32 @@ the output, indexed by the type of reduction that produced them (for example,
 <p>In case of uncertainty, it is always possible to print <a class="reference internal" href="#kuibit.simdir.SimDir" title="kuibit.simdir.SimDir"><code class="xref py py-class docutils literal notranslate"><span class="pre">SimDir</span></code></a>,
 or any of its attributes, to obtain a message with the available content of
 such attribute.</p>
+<p>The function <a class="reference internal" href="#kuibit.simdir.load_SimDir" title="kuibit.simdir.load_SimDir"><code class="xref py py-func docutils literal notranslate"><span class="pre">load_SimDir()</span></code></a> can be used to load a <a class="reference internal" href="#kuibit.simdir.SimDir" title="kuibit.simdir.SimDir"><code class="xref py py-class docutils literal notranslate"><span class="pre">SimDir</span></code></a>
+saved with the method <a class="reference internal" href="frequencyseries_ref.html#kuibit.frequencyseries.FrequencySeries.save" title="kuibit.frequencyseries.FrequencySeries.save"><code class="xref py py-meth docutils literal notranslate"><span class="pre">save()</span></code></a>.</p>
 <dl class="py class">
 <dt id="kuibit.simdir.SimDir">
-<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">kuibit.simdir.</span></code><code class="sig-name descname"><span class="pre">SimDir</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_depth</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">8</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ignore</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ignore_symlinks</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/kuibit/simdir.html#SimDir"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kuibit.simdir.SimDir" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">kuibit.simdir.</span></code><code class="sig-name descname"><span class="pre">SimDir</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_depth</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">8</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ignored_dirs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ignore_symlinks</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pickle_file</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/kuibit/simdir.html#SimDir"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kuibit.simdir.SimDir" title="Permalink to this definition">¶</a></dt>
 <dd><p>This class represents a Cactus simulation directory.</p>
+<p><a class="reference internal" href="#kuibit.simdir.SimDir" title="kuibit.simdir.SimDir"><code class="xref py py-class docutils literal notranslate"><span class="pre">SimDir</span></code></a> can be used as a context manager. For instance:</p>
+<p>By itself, this is not very useful. It becomes more useful in conjunction
+with using pickles. Pickles are used to save the work done and resume it
+later. Since <code class="docutils literal notranslate"><span class="pre">kuibit</span></code> does a lot of lazy-loading, it can be useful to save
+the operations performed to disk and restart from them. For example, when
+initializing a <a class="reference internal" href="#kuibit.simdir.SimDir" title="kuibit.simdir.SimDir"><code class="xref py py-class docutils literal notranslate"><span class="pre">SimDir</span></code></a>, the files have to be scanned and
+organized. It is pointless to this all the times if the simulation has not
+changed. For this, we use pickles.</p>
+<p>What happens here is that if <code class="docutils literal notranslate"><span class="pre">pickle_file</span></code> exists, it will be loaded. If
+it does not exist, it will be created. Using context managers here is useful
+because it automatically saves all the progress done. Alternatively, one
+has to call the <a class="reference internal" href="#kuibit.simdir.SimDir.save" title="kuibit.simdir.SimDir.save"><code class="xref py py-meth docutils literal notranslate"><span class="pre">save()</span></code></a> method manually.</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>When using pickles, it is important to make sure that the underlying data
+does not change, as the new/changed data will be not considered. To
+refresh <a class="reference internal" href="#kuibit.simdir.SimDir" title="kuibit.simdir.SimDir"><code class="xref py py-class docutils literal notranslate"><span class="pre">SimDir</span></code></a>, you can always use the <a class="reference internal" href="#kuibit.simdir.SimDir.rescan" title="kuibit.simdir.SimDir.rescan"><code class="xref py py-meth docutils literal notranslate"><span class="pre">rescan()</span></code></a>
+method. Pickles have to be regenerated from scratch if the version of
+<code class="docutils literal notranslate"><span class="pre">kuibit</span></code> changes.</p>
+</div>
 <p>Data is searched recursively in all subfolders. No particular folder
 structure (e.g. <code class="docutils literal notranslate"><span class="pre">simfactory</span></code> style) is assumed. The following attributes
 allow access to the supported data types:</p>
@@ -102,17 +124,20 @@ decomposition, see
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>path</strong> (<em>str</em>) – Path to output of the simulation.</p></li>
 <li><p><strong>max_depth</strong> (<em>int</em>) – Maximum recursion depth for subfolders.</p></li>
-<li><p><strong>ignore</strong> (<em>set</em>) – Names of folders to ignore (e.g. SIMFACTORY).</p></li>
+<li><p><strong>ignored_dirs</strong> (<em>set</em>) – Names of folders to ignore (e.g. SIMFACTORY).</p></li>
 <li><p><strong>ignore_symlink</strong> (<em>bool</em>) – If True, do not consider symlinks.</p></li>
+<li><p><strong>pickle_file</strong> (<em>bool</em>) – If <code class="docutils literal notranslate"><span class="pre">pickle_file</span></code> is not None, do not scan the
+folders and load the pickle file. All the other
+parameters are ignored.</p></li>
 </ul>
 </dd>
 </dl>
 <p>Parfiles (<code class="docutils literal notranslate"><span class="pre">*.par</span></code>) will be searched in all data directories and the
-top-level SIMFACTORY/par folder, if it exists. The parfile in the
-latter folder, if available, or else the oldest parfile in any of
-the data directories, will be used to extract the simulation
-parameters. Logfiles (<code class="docutils literal notranslate"><span class="pre">*.out</span></code>) and errorfiles (<code class="docutils literal notranslate"><span class="pre">*.err</span></code>) will be
-searched for in all data directories.</p>
+top-level SIMFACTORY/par folder, if it exists. The parfile in the latter
+folder, if available, or else the oldest parfile in any of the data
+directories, will be used to extract the simulation parameters. Logfiles
+(<code class="docutils literal notranslate"><span class="pre">*.out</span></code>) and errorfiles (<code class="docutils literal notranslate"><span class="pre">*.err</span></code>) will be searched for in all data
+directories.</p>
 <dl class="py method">
 <dt id="kuibit.simdir.SimDir.electromagneticwaves">
 <em class="property"><span class="pre">property</span> </em><code class="sig-name descname"><span class="pre">electromagneticwaves</span></code><a class="headerlink" href="#kuibit.simdir.SimDir.electromagneticwaves" title="Permalink to this definition">¶</a></dt>
@@ -226,6 +251,24 @@ searched for in all data directories.</p>
 </dd></dl>
 
 <dl class="py method">
+<dt id="kuibit.simdir.SimDir.rescan">
+<code class="sig-name descname"><span class="pre">rescan</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/kuibit/simdir.html#SimDir.rescan"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kuibit.simdir.SimDir.rescan" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reset the SimDir and rescan all the files.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="kuibit.simdir.SimDir.save">
+<code class="sig-name descname"><span class="pre">save</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/kuibit/simdir.html#SimDir.save"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kuibit.simdir.SimDir.save" title="Permalink to this definition">¶</a></dt>
+<dd><p>Save this object as a pickle.</p>
+<p>The object can be loaded with the function <a class="reference internal" href="#kuibit.simdir.load_SimDir" title="kuibit.simdir.load_SimDir"><code class="xref py py-func docutils literal notranslate"><span class="pre">load_SimDir()</span></code></a>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>path</strong> (<em>str</em>) – Path where to save the file.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
 <dt id="kuibit.simdir.SimDir.timeseries">
 <em class="property"><span class="pre">property</span> </em><code class="sig-name descname"><span class="pre">timeseries</span></code><a class="headerlink" href="#kuibit.simdir.SimDir.timeseries" title="Permalink to this definition">¶</a></dt>
 <dd><p>Return all the available timeseries in the data.</p>
@@ -253,6 +296,24 @@ searched for in all data directories.</p>
 </dl>
 </dd></dl>
 
+</dd></dl>
+
+<dl class="py function">
+<dt id="kuibit.simdir.load_SimDir">
+<code class="sig-prename descclassname"><span class="pre">kuibit.simdir.</span></code><code class="sig-name descname"><span class="pre">load_SimDir</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/kuibit/simdir.html#load_SimDir"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kuibit.simdir.load_SimDir" title="Permalink to this definition">¶</a></dt>
+<dd><p>Load file produced with <a class="reference internal" href="#kuibit.simdir.SimDir.save" title="kuibit.simdir.SimDir.save"><code class="xref py py-meth docutils literal notranslate"><span class="pre">save()</span></code></a>.</p>
+<p>Pickles have to be regenerated if the version of <code class="docutils literal notranslate"><span class="pre">kuibit</span></code> changes.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>path</strong> (<em>str</em>) – Pickle file as produced by <a class="reference internal" href="#kuibit.simdir.SimDir.save" title="kuibit.simdir.SimDir.save"><code class="xref py py-meth docutils literal notranslate"><span class="pre">save()</span></code></a>.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>SimDir</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="#kuibit.simdir.SimDir" title="kuibit.simdir.SimDir"><code class="xref py py-class docutils literal notranslate"><span class="pre">SimDir</span></code></a></p>
+</dd>
+</dl>
 </dd></dl>
 
 </div>

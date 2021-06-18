@@ -108,30 +108,35 @@ speed.</p>
     <span class="n">figname</span> <span class="o">=</span> <span class="n">get_figname</span><span class="p">(</span><span class="n">args</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="s2">&quot;physical_time_per_hour&quot;</span><span class="p">)</span>
     <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Using figname </span><span class="si">{</span><span class="n">figname</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 
-    <span class="n">sim</span> <span class="o">=</span> <span class="n">SimDir</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">datadir</span><span class="p">,</span> <span class="n">ignore_symlinks</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">ignore_symlinks</span><span class="p">)</span>
-    <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Prepared SimDir&quot;</span><span class="p">)</span>
+    <span class="k">with</span> <span class="n">SimDir</span><span class="p">(</span>
+        <span class="n">args</span><span class="o">.</span><span class="n">datadir</span><span class="p">,</span>
+        <span class="n">ignore_symlinks</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">ignore_symlinks</span><span class="p">,</span>
+        <span class="n">pickle_file</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">pickle_file</span><span class="p">,</span>
+    <span class="p">)</span> <span class="k">as</span> <span class="n">sim</span><span class="p">:</span>
 
-    <span class="k">if</span> <span class="s2">&quot;physical_time_per_hour&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">sim</span><span class="o">.</span><span class="n">ts</span><span class="o">.</span><span class="n">scalar</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;physical_time_per_hour not available&quot;</span><span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Prepared SimDir&quot;</span><span class="p">)</span>
 
-    <span class="n">phys_time</span> <span class="o">=</span> <span class="n">sim</span><span class="o">.</span><span class="n">ts</span><span class="o">.</span><span class="n">scalar</span><span class="p">[</span><span class="s2">&quot;physical_time_per_hour&quot;</span><span class="p">]</span>
+        <span class="k">if</span> <span class="s2">&quot;physical_time_per_hour&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">sim</span><span class="o">.</span><span class="n">ts</span><span class="o">.</span><span class="n">scalar</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;physical_time_per_hour not available&quot;</span><span class="p">)</span>
 
-    <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Plotting physical_time_per_hour&quot;</span><span class="p">)</span>
+        <span class="n">phys_time</span> <span class="o">=</span> <span class="n">sim</span><span class="o">.</span><span class="n">ts</span><span class="o">.</span><span class="n">scalar</span><span class="p">[</span><span class="s2">&quot;physical_time_per_hour&quot;</span><span class="p">]</span>
 
-    <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">phys_time</span><span class="p">)</span>
-    <span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s2">&quot;Simulation Time&quot;</span><span class="p">)</span>
-    <span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s2">&quot;Simulated physical time per hour&quot;</span><span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Plotting physical_time_per_hour&quot;</span><span class="p">)</span>
 
-    <span class="c1"># Adding a second y axis</span>
-    <span class="n">plt</span><span class="o">.</span><span class="n">twinx</span><span class="p">()</span>
-    <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">phys_time</span> <span class="o">*</span> <span class="mi">24</span><span class="p">)</span>
-    <span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;Simulated physical time per day&quot;</span><span class="p">)</span>
-    <span class="n">set_axis_limits_from_args</span><span class="p">(</span><span class="n">args</span><span class="p">)</span>
-    <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Plotted&quot;</span><span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">phys_time</span><span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s2">&quot;Simulation Time&quot;</span><span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s2">&quot;Simulated physical time per hour&quot;</span><span class="p">)</span>
 
-    <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Saving&quot;</span><span class="p">)</span>
-    <span class="n">save_from_dir_filename_ext</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">outdir</span><span class="p">,</span> <span class="n">figname</span><span class="p">,</span> <span class="n">args</span><span class="o">.</span><span class="n">fig_extension</span><span class="p">)</span>
-    <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;DONE&quot;</span><span class="p">)</span>
+        <span class="c1"># Adding a second y axis</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">twinx</span><span class="p">()</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">phys_time</span> <span class="o">*</span> <span class="mi">24</span><span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;Simulated physical time per day&quot;</span><span class="p">)</span>
+        <span class="n">set_axis_limits_from_args</span><span class="p">(</span><span class="n">args</span><span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Plotted&quot;</span><span class="p">)</span>
+
+        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Saving&quot;</span><span class="p">)</span>
+        <span class="n">save_from_dir_filename_ext</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">outdir</span><span class="p">,</span> <span class="n">figname</span><span class="p">,</span> <span class="n">args</span><span class="o">.</span><span class="n">fig_extension</span><span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;DONE&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>

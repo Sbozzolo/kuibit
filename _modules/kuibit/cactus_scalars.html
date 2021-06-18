@@ -102,8 +102,8 @@
 <div class="viewcode-block" id="OneScalar"><a class="viewcode-back" href="../../cactus_scalars_ref.html#kuibit.cactus_scalars.OneScalar">[docs]</a><span class="k">class</span> <span class="nc">OneScalar</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;Read scalar data produced by CarpetASCII.</span>
 
-<span class="sd">    CactusScalarASCII is a dictionary-like object with keys the variables and</span>
-<span class="sd">    values the :py:class:`~.TimeSeries`.</span>
+<span class="sd">    :py:class:`~.OneScalar` is a dictionary-like object with keys the variables</span>
+<span class="sd">    and values the :py:class:`~.TimeSeries`.</span>
 
 <span class="sd">    Single variable per file or single file per group are supported. In the</span>
 <span class="sd">    latter case, the header is inspected to understand the content of the file.</span>
@@ -176,9 +176,14 @@
 <span class="sd">        :type path: str</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">path</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
-        <span class="c1"># The _vars dictionary contains a mapping between the various variables</span>
+        <span class="c1"># The _vars_columns dictionary contains a mapping between the various variables</span>
         <span class="c1"># and the column numbers in which they are stored.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_vars_columns</span> <span class="o">=</span> <span class="p">{}</span>
+
+        <span class="c1"># The _vars dictionary maps variables with the TimeSeries. It is used to</span>
+        <span class="c1"># cached loaded data.</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_vars</span> <span class="o">=</span> <span class="p">{}</span>
+
         <span class="bp">self</span><span class="o">.</span><span class="n">folder</span><span class="p">,</span> <span class="n">filename</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">path</span><span class="p">)</span>
 
         <span class="n">filename_match</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_rx_filename</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
@@ -218,7 +223,7 @@
             <span class="n">variable_name</span> <span class="o">=</span> <span class="n">variable_name1</span>
             <span class="k">if</span> <span class="n">index_in_brackets</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="n">variable_name</span> <span class="o">+=</span> <span class="n">index_in_brackets</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_vars</span> <span class="o">=</span> <span class="p">{</span><span class="n">variable_name</span><span class="p">:</span> <span class="kc">None</span><span class="p">}</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_vars_columns</span> <span class="o">=</span> <span class="p">{</span><span class="n">variable_name</span><span class="p">:</span> <span class="kc">None</span><span class="p">}</span>
 
     <span class="k">def</span> <span class="nf">_scan_header</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="c1"># Call scan_header with the right argument</span>
@@ -239,10 +244,12 @@
         <span class="p">)</span>
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_is_one_file_per_group</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_vars</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">columns_info</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_vars_columns</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">columns_info</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="c1"># There is only one data_column</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_vars</span> <span class="o">=</span> <span class="p">{</span><span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_vars</span><span class="o">.</span><span class="n">keys</span><span class="p">())[</span><span class="mi">0</span><span class="p">]:</span> <span class="n">columns_info</span><span class="p">}</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_vars_columns</span> <span class="o">=</span> <span class="p">{</span>
+                <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_vars_columns</span><span class="o">.</span><span class="n">keys</span><span class="p">())[</span><span class="mi">0</span><span class="p">]:</span> <span class="n">columns_info</span>
+            <span class="p">}</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_was_header_scanned</span> <span class="o">=</span> <span class="kc">True</span>
 
@@ -262,9 +269,9 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">_scan_header</span><span class="p">()</span>
 
         <span class="k">if</span> <span class="n">variable</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">variable</span><span class="si">}</span><span class="s2"> not available&quot;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">variable</span><span class="si">}</span><span class="s2"> not available&quot;</span><span class="p">)</span>
 
-        <span class="n">column_number</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_vars</span><span class="p">[</span><span class="n">variable</span><span class="p">]</span>
+        <span class="n">column_number</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_vars_columns</span><span class="p">[</span><span class="n">variable</span><span class="p">]</span>
         <span class="n">t</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">loadtxt</span><span class="p">(</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">path</span><span class="p">,</span>
             <span class="n">unpack</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
@@ -275,10 +282,13 @@
         <span class="k">return</span> <span class="n">ts</span><span class="o">.</span><span class="n">remove_duplicated_iters</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span></div>
 
     <span class="k">def</span> <span class="fm">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">):</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">key</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_vars</span><span class="p">:</span>
+            <span class="c1"># Error checking is done in __load__</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_vars</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_vars</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
 
     <span class="k">def</span> <span class="fm">__contains__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">):</span>
-        <span class="k">return</span> <span class="n">key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_vars</span>
+        <span class="k">return</span> <span class="n">key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_vars_columns</span>
 
 <div class="viewcode-block" id="OneScalar.keys"><a class="viewcode-back" href="../../cactus_scalars_ref.html#kuibit.cactus_scalars.OneScalar.keys">[docs]</a>    <span class="k">def</span> <span class="nf">keys</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Return the list of variables available.</span>
@@ -287,7 +297,7 @@
 <span class="sd">        :rtype:   dict_keys</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_vars</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span></div></div>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_vars_columns</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span></div></div>
 
 
 <div class="viewcode-block" id="AllScalars"><a class="viewcode-back" href="../../cactus_scalars_ref.html#kuibit.cactus_scalars.AllScalars">[docs]</a><span class="k">class</span> <span class="nc">AllScalars</span><span class="p">:</span>
@@ -319,39 +329,50 @@
         <span class="c1"># TODO: Is it necessary to have the folder level?</span>
         <span class="c1"># Probably not, so remove it</span>
 
-        <span class="c1"># _vars is like _vars[&#39;variable&#39;][&#39;folder&#39;] -&gt; CactusScalarASCII(f)</span>
-        <span class="c1"># _vars[&#39;variable&#39;] is a dictionary with as keys the folders where</span>
-        <span class="c1"># to find the files associated to the variable and the reduction</span>
-        <span class="c1"># reduction_type</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_vars</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="c1"># _vars_readers is like _vars_readers[&#39;variable&#39;][&#39;folder&#39;] -&gt;</span>
+        <span class="c1"># OneScalar(f) _vars_readers[&#39;variable&#39;] is a dictionary with as keys</span>
+        <span class="c1"># the folders where to find the files associated to the variable and the</span>
+        <span class="c1"># reduction reduction_type</span>
+        <span class="c1">#</span>
+        <span class="c1"># OneScalar objects act as readers.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_vars_readers</span> <span class="o">=</span> <span class="p">{}</span>
         <span class="k">for</span> <span class="n">file_</span> <span class="ow">in</span> <span class="n">allfiles</span><span class="p">:</span>
             <span class="c1"># We only save those that variables are well-behaved</span>
             <span class="k">try</span><span class="p">:</span>
                 <span class="n">cactusascii_file</span> <span class="o">=</span> <span class="n">OneScalar</span><span class="p">(</span><span class="n">file_</span><span class="p">)</span>
                 <span class="k">if</span> <span class="n">cactusascii_file</span><span class="o">.</span><span class="n">reduction_type</span> <span class="o">==</span> <span class="n">reduction_type</span><span class="p">:</span>
                     <span class="k">for</span> <span class="n">var</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="n">cactusascii_file</span><span class="o">.</span><span class="n">keys</span><span class="p">()):</span>
-                        <span class="c1"># We add to the _vars dictionary the mapping:</span>
+                        <span class="c1"># We add to the _vars_readers dictionary the mapping:</span>
                         <span class="c1"># [var][folder] to OneScalar(f)</span>
                         <span class="n">folder</span> <span class="o">=</span> <span class="n">cactusascii_file</span><span class="o">.</span><span class="n">folder</span>
-                        <span class="bp">self</span><span class="o">.</span><span class="n">_vars</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="n">var</span><span class="p">,</span> <span class="p">{})[</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">_vars_readers</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="n">var</span><span class="p">,</span> <span class="p">{})[</span>
                             <span class="n">folder</span>
                         <span class="p">]</span> <span class="o">=</span> <span class="n">cactusascii_file</span>
             <span class="k">except</span> <span class="ne">RuntimeError</span><span class="p">:</span>
                 <span class="k">pass</span>
 
+        <span class="c1"># We cache the results in _vars, a dictionary with keys the variables</span>
+        <span class="c1"># and values the timeseries.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_vars</span> <span class="o">=</span> <span class="p">{}</span>
+
         <span class="c1"># What pythonize_name_dict does is to make the various variables</span>
         <span class="c1"># accessible as attributes, e.g. self.fields.rho</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">fields</span> <span class="o">=</span> <span class="n">pythonize_name_dict</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">keys</span><span class="p">()),</span> <span class="bp">self</span><span class="o">.</span><span class="fm">__getitem__</span><span class="p">)</span>
 
-    <span class="nd">@lru_cache</span><span class="p">(</span><span class="mi">128</span><span class="p">)</span>
     <span class="k">def</span> <span class="fm">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">):</span>
-        <span class="c1"># We read all the files associated to variable key</span>
-        <span class="n">folders</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_vars</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
-        <span class="n">series</span> <span class="o">=</span> <span class="p">[</span><span class="n">f</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">key</span><span class="p">)</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">folders</span><span class="o">.</span><span class="n">values</span><span class="p">()]</span>
-        <span class="k">return</span> <span class="n">ts</span><span class="o">.</span><span class="n">combine_ts</span><span class="p">(</span><span class="n">series</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">key</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s2"> not available&quot;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">key</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_vars</span><span class="p">:</span>
+            <span class="c1"># We read all the files associated to variable key</span>
+            <span class="n">folders</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_vars_readers</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
+            <span class="n">series</span> <span class="o">=</span> <span class="p">[</span><span class="n">f</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">folders</span><span class="o">.</span><span class="n">values</span><span class="p">()]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_vars</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">ts</span><span class="o">.</span><span class="n">combine_ts</span><span class="p">(</span><span class="n">series</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_vars</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
 
     <span class="k">def</span> <span class="fm">__contains__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">):</span>
-        <span class="k">return</span> <span class="n">key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_vars</span>
+        <span class="k">return</span> <span class="n">key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_vars_readers</span>
 
 <div class="viewcode-block" id="AllScalars.keys"><a class="viewcode-back" href="../../cactus_scalars_ref.html#kuibit.cactus_scalars.AllScalars.keys">[docs]</a>    <span class="k">def</span> <span class="nf">keys</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Return the available variables corresponding to the given reduction.</span>
@@ -360,7 +381,7 @@
 <span class="sd">        :rtype:   dict_keys</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_vars</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span></div>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_vars_readers</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span></div>
 
 <div class="viewcode-block" id="AllScalars.get"><a class="viewcode-back" href="../../cactus_scalars_ref.html#kuibit.cactus_scalars.AllScalars.get">[docs]</a>    <span class="k">def</span> <span class="nf">get</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Return variable if available, else return the default value.</span>

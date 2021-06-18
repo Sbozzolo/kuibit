@@ -108,19 +108,26 @@ found.</p>
         <span class="n">logging</span><span class="o">.</span><span class="n">basicConfig</span><span class="p">(</span><span class="nb">format</span><span class="o">=</span><span class="s2">&quot;</span><span class="si">%(asctime)s</span><span class="s2"> - </span><span class="si">%(message)s</span><span class="s2">&quot;</span><span class="p">)</span>
         <span class="n">logger</span><span class="o">.</span><span class="n">setLevel</span><span class="p">(</span><span class="n">logging</span><span class="o">.</span><span class="n">DEBUG</span><span class="p">)</span>
 
-    <span class="n">sim</span> <span class="o">=</span> <span class="n">SimDir</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">datadir</span><span class="p">,</span> <span class="n">ignore_symlinks</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">ignore_symlinks</span><span class="p">)</span>
-    <span class="n">sim_hor</span> <span class="o">=</span> <span class="n">sim</span><span class="o">.</span><span class="n">horizons</span>
+    <span class="k">with</span> <span class="n">SimDir</span><span class="p">(</span>
+        <span class="n">args</span><span class="o">.</span><span class="n">datadir</span><span class="p">,</span>
+        <span class="n">ignore_symlinks</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">ignore_symlinks</span><span class="p">,</span>
+        <span class="n">pickle_file</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">pickle_file</span><span class="p">,</span>
+    <span class="p">)</span> <span class="k">as</span> <span class="n">sim</span><span class="p">:</span>
 
-    <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span>
-        <span class="sa">f</span><span class="s2">&quot;Apparent horizons available: </span><span class="si">{</span><span class="n">sim_hor</span><span class="o">.</span><span class="n">available_apparent_horizons</span><span class="si">}</span><span class="s2">&quot;</span>
-    <span class="p">)</span>
+        <span class="n">sim_hor</span> <span class="o">=</span> <span class="n">sim</span><span class="o">.</span><span class="n">horizons</span>
 
-    <span class="n">time_found</span> <span class="o">=</span> <span class="n">sim_hor</span><span class="o">.</span><span class="n">get_apparent_horizon</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">horizon</span><span class="p">)</span><span class="o">.</span><span class="n">formation_time</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;Apparent horizons available: </span><span class="si">{</span><span class="n">sim_hor</span><span class="o">.</span><span class="n">available_apparent_horizons</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="p">)</span>
 
-    <span class="k">if</span> <span class="n">args</span><span class="o">.</span><span class="n">parsable</span><span class="p">:</span>
-        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">time_found</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-    <span class="k">else</span><span class="p">:</span>
-        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Horizon </span><span class="si">{</span><span class="n">args</span><span class="o">.</span><span class="n">horizon</span><span class="si">}</span><span class="s2"> was first found at time </span><span class="si">{</span><span class="n">time_found</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="n">time_found</span> <span class="o">=</span> <span class="n">sim_hor</span><span class="o">.</span><span class="n">get_apparent_horizon</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">horizon</span><span class="p">)</span><span class="o">.</span><span class="n">formation_time</span>
+
+        <span class="k">if</span> <span class="n">args</span><span class="o">.</span><span class="n">parsable</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">time_found</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;Horizon </span><span class="si">{</span><span class="n">args</span><span class="o">.</span><span class="n">horizon</span><span class="si">}</span><span class="s2"> was first found at time </span><span class="si">{</span><span class="n">time_found</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="p">)</span>
 </pre></div>
 </div>
 </div>

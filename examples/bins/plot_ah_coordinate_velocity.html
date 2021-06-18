@@ -116,42 +116,47 @@ axis for a given apparent horizon.</p>
     <span class="n">figname</span> <span class="o">=</span> <span class="n">get_figname</span><span class="p">(</span><span class="n">args</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;ah_</span><span class="si">{</span><span class="n">horizons</span><span class="si">}</span><span class="s2">_found&quot;</span><span class="p">)</span>
     <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Figname: </span><span class="si">{</span><span class="n">figname</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 
-    <span class="n">sim</span> <span class="o">=</span> <span class="n">SimDir</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">datadir</span><span class="p">,</span> <span class="n">ignore_symlinks</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">ignore_symlinks</span><span class="p">)</span>
-    <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Prepared SimDir&quot;</span><span class="p">)</span>
+    <span class="k">with</span> <span class="n">SimDir</span><span class="p">(</span>
+        <span class="n">args</span><span class="o">.</span><span class="n">datadir</span><span class="p">,</span>
+        <span class="n">ignore_symlinks</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">ignore_symlinks</span><span class="p">,</span>
+        <span class="n">pickle_file</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">pickle_file</span><span class="p">,</span>
+    <span class="p">)</span> <span class="k">as</span> <span class="n">sim</span><span class="p">:</span>
 
-    <span class="n">sim_hor</span> <span class="o">=</span> <span class="n">sim</span><span class="o">.</span><span class="n">horizons</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Prepared SimDir&quot;</span><span class="p">)</span>
 
-    <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span>
-        <span class="sa">f</span><span class="s2">&quot;Apparent horizons available: </span><span class="si">{</span><span class="n">sim_hor</span><span class="o">.</span><span class="n">available_apparent_horizons</span><span class="si">}</span><span class="s2">&quot;</span>
-    <span class="p">)</span>
+        <span class="n">sim_hor</span> <span class="o">=</span> <span class="n">sim</span><span class="o">.</span><span class="n">horizons</span>
 
-    <span class="k">for</span> <span class="n">ah</span> <span class="ow">in</span> <span class="n">args</span><span class="o">.</span><span class="n">horizons</span><span class="p">:</span>
-        <span class="k">if</span> <span class="n">ah</span> <span class="ow">in</span> <span class="n">sim_hor</span><span class="o">.</span><span class="n">available_apparent_horizons</span><span class="p">:</span>
-            <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Reading horizon </span><span class="si">{</span><span class="n">ah</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-            <span class="c1"># We can use any index for the qlm index, it will be thrown away</span>
-            <span class="n">current_horizon</span> <span class="o">=</span> <span class="n">sim_hor</span><span class="o">.</span><span class="n">get_apparent_horizon</span><span class="p">(</span><span class="n">ah</span><span class="p">)</span>
-            <span class="n">time_found</span> <span class="o">=</span> <span class="n">current_horizon</span><span class="o">.</span><span class="n">ah</span><span class="o">.</span><span class="n">cctk_iteration</span><span class="o">.</span><span class="n">t</span>
-            <span class="c1"># We prepare an array with the same length of time_found and with</span>
-            <span class="c1"># constant value of ah</span>
-            <span class="n">ah_num</span> <span class="o">=</span> <span class="p">[</span><span class="n">ah</span><span class="p">]</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">time_found</span><span class="p">)</span>
-            <span class="n">plt</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">time_found</span><span class="p">,</span> <span class="n">ah_num</span><span class="p">,</span> <span class="n">marker</span><span class="o">=</span><span class="s2">&quot;o&quot;</span><span class="p">,</span> <span class="n">s</span><span class="o">=</span><span class="mf">0.1</span><span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;Apparent horizons available: </span><span class="si">{</span><span class="n">sim_hor</span><span class="o">.</span><span class="n">available_apparent_horizons</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="p">)</span>
 
-    <span class="c1"># Plot</span>
-    <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Plotting&quot;</span><span class="p">)</span>
-    <span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s2">&quot;Apparent horizon&quot;</span><span class="p">)</span>
-    <span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s2">&quot;Time&quot;</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">ah</span> <span class="ow">in</span> <span class="n">args</span><span class="o">.</span><span class="n">horizons</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">ah</span> <span class="ow">in</span> <span class="n">sim_hor</span><span class="o">.</span><span class="n">available_apparent_horizons</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Reading horizon </span><span class="si">{</span><span class="n">ah</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                <span class="c1"># We can use any index for the qlm index, it will be thrown away</span>
+                <span class="n">current_horizon</span> <span class="o">=</span> <span class="n">sim_hor</span><span class="o">.</span><span class="n">get_apparent_horizon</span><span class="p">(</span><span class="n">ah</span><span class="p">)</span>
+                <span class="n">time_found</span> <span class="o">=</span> <span class="n">current_horizon</span><span class="o">.</span><span class="n">ah</span><span class="o">.</span><span class="n">cctk_iteration</span><span class="o">.</span><span class="n">t</span>
+                <span class="c1"># We prepare an array with the same length of time_found and with</span>
+                <span class="c1"># constant value of ah</span>
+                <span class="n">ah_num</span> <span class="o">=</span> <span class="p">[</span><span class="n">ah</span><span class="p">]</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">time_found</span><span class="p">)</span>
+                <span class="n">plt</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">time_found</span><span class="p">,</span> <span class="n">ah_num</span><span class="p">,</span> <span class="n">marker</span><span class="o">=</span><span class="s2">&quot;o&quot;</span><span class="p">,</span> <span class="n">s</span><span class="o">=</span><span class="mf">0.1</span><span class="p">)</span>
 
-    <span class="c1"># Fix ticks</span>
-    <span class="n">plt</span><span class="o">.</span><span class="n">gca</span><span class="p">()</span><span class="o">.</span><span class="n">tick_params</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="s2">&quot;y&quot;</span><span class="p">,</span> <span class="n">which</span><span class="o">=</span><span class="s2">&quot;minor&quot;</span><span class="p">,</span> <span class="n">left</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
-    <span class="n">plt</span><span class="o">.</span><span class="n">ylim</span><span class="p">(</span><span class="nb">min</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">horizons</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="nb">max</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">horizons</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
-    <span class="n">plt</span><span class="o">.</span><span class="n">yticks</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">horizons</span><span class="p">)</span>
+        <span class="c1"># Plot</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Plotting&quot;</span><span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s2">&quot;Apparent horizon&quot;</span><span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s2">&quot;Time&quot;</span><span class="p">)</span>
 
-    <span class="n">set_axis_limits_from_args</span><span class="p">(</span><span class="n">args</span><span class="p">)</span>
-    <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Plotted&quot;</span><span class="p">)</span>
+        <span class="c1"># Fix ticks</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">gca</span><span class="p">()</span><span class="o">.</span><span class="n">tick_params</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="s2">&quot;y&quot;</span><span class="p">,</span> <span class="n">which</span><span class="o">=</span><span class="s2">&quot;minor&quot;</span><span class="p">,</span> <span class="n">left</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">ylim</span><span class="p">(</span><span class="nb">min</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">horizons</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="nb">max</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">horizons</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">yticks</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">horizons</span><span class="p">)</span>
 
-    <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Saving&quot;</span><span class="p">)</span>
-    <span class="n">save_from_dir_filename_ext</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">outdir</span><span class="p">,</span> <span class="n">figname</span><span class="p">,</span> <span class="n">args</span><span class="o">.</span><span class="n">fig_extension</span><span class="p">)</span>
-    <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;DONE&quot;</span><span class="p">)</span>
+        <span class="n">set_axis_limits_from_args</span><span class="p">(</span><span class="n">args</span><span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Plotted&quot;</span><span class="p">)</span>
+
+        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Saving&quot;</span><span class="p">)</span>
+        <span class="n">save_from_dir_filename_ext</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">outdir</span><span class="p">,</span> <span class="n">figname</span><span class="p">,</span> <span class="n">args</span><span class="o">.</span><span class="n">fig_extension</span><span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;DONE&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>

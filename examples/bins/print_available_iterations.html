@@ -95,30 +95,35 @@ specify only one dimension. This script is useful for writing shell scripts.</p>
     <span class="p">)</span>
     <span class="n">args</span> <span class="o">=</span> <span class="n">kah</span><span class="o">.</span><span class="n">get_args</span><span class="p">(</span><span class="n">parser</span><span class="p">)</span>
 
-    <span class="n">reader</span> <span class="o">=</span> <span class="n">SimDir</span><span class="p">(</span>
-        <span class="n">args</span><span class="o">.</span><span class="n">datadir</span><span class="p">,</span> <span class="n">ignore_symlinks</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">ignore_symlinks</span>
-    <span class="p">)</span><span class="o">.</span><span class="n">gridfunctions</span>
+    <span class="k">with</span> <span class="n">SimDir</span><span class="p">(</span>
+        <span class="n">args</span><span class="o">.</span><span class="n">datadir</span><span class="p">,</span>
+        <span class="n">ignore_symlinks</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">ignore_symlinks</span><span class="p">,</span>
+        <span class="n">pickle_file</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">pickle_file</span><span class="p">,</span>
+    <span class="p">)</span> <span class="k">as</span> <span class="n">sim</span><span class="p">:</span>
+        <span class="n">reader</span> <span class="o">=</span> <span class="n">sim</span><span class="o">.</span><span class="n">gridfunctions</span>
 
-    <span class="c1"># We loop over dimensions</span>
-    <span class="k">if</span> <span class="n">args</span><span class="o">.</span><span class="n">dimension</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="k">if</span> <span class="n">args</span><span class="o">.</span><span class="n">variable</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">reader</span><span class="p">[</span><span class="n">args</span><span class="o">.</span><span class="n">dimension</span><span class="p">]:</span>
-            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span>
-                <span class="sa">f</span><span class="s2">&quot;Variable </span><span class="si">{</span><span class="n">args</span><span class="o">.</span><span class="n">variable</span><span class="si">}</span><span class="s2"> of dimension </span><span class="si">{</span><span class="n">args</span><span class="o">.</span><span class="n">dimension</span><span class="si">}</span><span class="s2"> not available&quot;</span>
-            <span class="p">)</span>
-        <span class="k">for</span> <span class="n">it</span> <span class="ow">in</span> <span class="n">reader</span><span class="p">[</span><span class="n">args</span><span class="o">.</span><span class="n">dimension</span><span class="p">][</span><span class="n">args</span><span class="o">.</span><span class="n">variable</span><span class="p">]</span><span class="o">.</span><span class="n">available_iterations</span><span class="p">:</span>
-            <span class="nb">print</span><span class="p">(</span><span class="n">it</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="s2">&quot; &quot;</span><span class="p">)</span>
-        <span class="nb">print</span><span class="p">()</span>
-    <span class="k">else</span><span class="p">:</span>
-        <span class="c1"># First we check that we have the variable</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="nb">any</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">variable</span> <span class="ow">in</span> <span class="n">reader</span><span class="p">[</span><span class="n">dim</span><span class="p">]</span> <span class="k">for</span> <span class="n">dim</span> <span class="ow">in</span> <span class="n">dimensions</span><span class="p">):</span>
-            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Variable </span><span class="si">{</span><span class="n">args</span><span class="o">.</span><span class="n">variable</span><span class="si">}</span><span class="s2"> not available&quot;</span><span class="p">)</span>
-        <span class="c1"># Okay, we have something</span>
-        <span class="k">for</span> <span class="n">dim</span> <span class="ow">in</span> <span class="n">dimensions</span><span class="p">:</span>
-            <span class="k">if</span> <span class="n">args</span><span class="o">.</span><span class="n">variable</span> <span class="ow">in</span> <span class="n">reader</span><span class="p">[</span><span class="n">dim</span><span class="p">]:</span>
-                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;# </span><span class="si">{</span><span class="n">dim</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-                <span class="k">for</span> <span class="n">it</span> <span class="ow">in</span> <span class="n">reader</span><span class="p">[</span><span class="n">dim</span><span class="p">][</span><span class="n">args</span><span class="o">.</span><span class="n">variable</span><span class="p">]</span><span class="o">.</span><span class="n">available_iterations</span><span class="p">:</span>
-                    <span class="nb">print</span><span class="p">(</span><span class="n">it</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="s2">&quot; &quot;</span><span class="p">)</span>
-                <span class="nb">print</span><span class="p">()</span>
+        <span class="c1"># We loop over dimensions</span>
+        <span class="k">if</span> <span class="n">args</span><span class="o">.</span><span class="n">dimension</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">args</span><span class="o">.</span><span class="n">variable</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">reader</span><span class="p">[</span><span class="n">args</span><span class="o">.</span><span class="n">dimension</span><span class="p">]:</span>
+                <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s2">&quot;Variable </span><span class="si">{</span><span class="n">args</span><span class="o">.</span><span class="n">variable</span><span class="si">}</span><span class="s2"> of dimension </span><span class="si">{</span><span class="n">args</span><span class="o">.</span><span class="n">dimension</span><span class="si">}</span><span class="s2"> not available&quot;</span>
+                <span class="p">)</span>
+            <span class="k">for</span> <span class="n">it</span> <span class="ow">in</span> <span class="n">reader</span><span class="p">[</span><span class="n">args</span><span class="o">.</span><span class="n">dimension</span><span class="p">][</span>
+                <span class="n">args</span><span class="o">.</span><span class="n">variable</span>
+            <span class="p">]</span><span class="o">.</span><span class="n">available_iterations</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="n">it</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="s2">&quot; &quot;</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># First we check that we have the variable</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="nb">any</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">variable</span> <span class="ow">in</span> <span class="n">reader</span><span class="p">[</span><span class="n">dim</span><span class="p">]</span> <span class="k">for</span> <span class="n">dim</span> <span class="ow">in</span> <span class="n">dimensions</span><span class="p">):</span>
+                <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Variable </span><span class="si">{</span><span class="n">args</span><span class="o">.</span><span class="n">variable</span><span class="si">}</span><span class="s2"> not available&quot;</span><span class="p">)</span>
+            <span class="c1"># Okay, we have something</span>
+            <span class="k">for</span> <span class="n">dim</span> <span class="ow">in</span> <span class="n">dimensions</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">args</span><span class="o">.</span><span class="n">variable</span> <span class="ow">in</span> <span class="n">reader</span><span class="p">[</span><span class="n">dim</span><span class="p">]:</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;# </span><span class="si">{</span><span class="n">dim</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                    <span class="k">for</span> <span class="n">it</span> <span class="ow">in</span> <span class="n">reader</span><span class="p">[</span><span class="n">dim</span><span class="p">][</span><span class="n">args</span><span class="o">.</span><span class="n">variable</span><span class="p">]</span><span class="o">.</span><span class="n">available_iterations</span><span class="p">:</span>
+                        <span class="nb">print</span><span class="p">(</span><span class="n">it</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="s2">&quot; &quot;</span><span class="p">)</span>
+                    <span class="nb">print</span><span class="p">()</span>
 </pre></div>
 </div>
 </div>

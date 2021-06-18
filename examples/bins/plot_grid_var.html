@@ -185,74 +185,79 @@ available in matplotlib.</p>
     <span class="n">figname</span> <span class="o">=</span> <span class="n">get_figname</span><span class="p">(</span><span class="n">args</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">args</span><span class="o">.</span><span class="n">variable</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">args</span><span class="o">.</span><span class="n">plane</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 
     <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Reading variable </span><span class="si">{</span><span class="n">args</span><span class="o">.</span><span class="n">variable</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-    <span class="n">sim</span> <span class="o">=</span> <span class="n">SimDir</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">datadir</span><span class="p">,</span> <span class="n">ignore_symlinks</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">ignore_symlinks</span><span class="p">)</span>
-    <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Prepared SimDir&quot;</span><span class="p">)</span>
-    <span class="n">reader</span> <span class="o">=</span> <span class="n">sim</span><span class="o">.</span><span class="n">gridfunctions</span><span class="p">[</span><span class="n">args</span><span class="o">.</span><span class="n">plane</span><span class="p">]</span>
-    <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Variables available </span><span class="si">{</span><span class="n">reader</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-    <span class="n">var</span> <span class="o">=</span> <span class="n">reader</span><span class="p">[</span><span class="n">args</span><span class="o">.</span><span class="n">variable</span><span class="p">]</span>
-    <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Read variable </span><span class="si">{</span><span class="n">args</span><span class="o">.</span><span class="n">variable</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="k">with</span> <span class="n">SimDir</span><span class="p">(</span>
+        <span class="n">args</span><span class="o">.</span><span class="n">datadir</span><span class="p">,</span>
+        <span class="n">ignore_symlinks</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">ignore_symlinks</span><span class="p">,</span>
+        <span class="n">pickle_file</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">pickle_file</span><span class="p">,</span>
+    <span class="p">)</span> <span class="k">as</span> <span class="n">sim</span><span class="p">:</span>
 
-    <span class="k">if</span> <span class="n">iteration</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
-        <span class="n">iteration</span> <span class="o">=</span> <span class="n">var</span><span class="o">.</span><span class="n">available_iterations</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Prepared SimDir&quot;</span><span class="p">)</span>
+        <span class="n">reader</span> <span class="o">=</span> <span class="n">sim</span><span class="o">.</span><span class="n">gridfunctions</span><span class="p">[</span><span class="n">args</span><span class="o">.</span><span class="n">plane</span><span class="p">]</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Variables available </span><span class="si">{</span><span class="n">reader</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="n">var</span> <span class="o">=</span> <span class="n">reader</span><span class="p">[</span><span class="n">args</span><span class="o">.</span><span class="n">variable</span><span class="p">]</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Read variable </span><span class="si">{</span><span class="n">args</span><span class="o">.</span><span class="n">variable</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 
-    <span class="n">time</span> <span class="o">=</span> <span class="n">var</span><span class="o">.</span><span class="n">time_at_iteration</span><span class="p">(</span><span class="n">iteration</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">iteration</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
+            <span class="n">iteration</span> <span class="o">=</span> <span class="n">var</span><span class="o">.</span><span class="n">available_iterations</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
 
-    <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Using iteration </span><span class="si">{</span><span class="n">iteration</span><span class="si">}</span><span class="s2"> (time = </span><span class="si">{</span><span class="n">time</span><span class="si">}</span><span class="s2">)&quot;</span><span class="p">)</span>
+        <span class="n">time</span> <span class="o">=</span> <span class="n">var</span><span class="o">.</span><span class="n">time_at_iteration</span><span class="p">(</span><span class="n">iteration</span><span class="p">)</span>
 
-    <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span>
-        <span class="sa">f</span><span class="s2">&quot;Plotting on grid with x0 = </span><span class="si">{</span><span class="n">x0</span><span class="si">}</span><span class="s2">, x1 = </span><span class="si">{</span><span class="n">x1</span><span class="si">}</span><span class="s2">, shape = </span><span class="si">{</span><span class="n">shape</span><span class="si">}</span><span class="s2">&quot;</span>
-    <span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Using iteration </span><span class="si">{</span><span class="n">iteration</span><span class="si">}</span><span class="s2"> (time = </span><span class="si">{</span><span class="n">time</span><span class="si">}</span><span class="s2">)&quot;</span><span class="p">)</span>
 
-    <span class="k">if</span> <span class="n">args</span><span class="o">.</span><span class="n">absolute</span><span class="p">:</span>
-        <span class="n">data</span> <span class="o">=</span> <span class="nb">abs</span><span class="p">(</span><span class="n">var</span><span class="p">[</span><span class="n">iteration</span><span class="p">])</span>
-        <span class="n">variable</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;abs(</span><span class="si">{</span><span class="n">args</span><span class="o">.</span><span class="n">variable</span><span class="si">}</span><span class="s2">)&quot;</span>
-    <span class="k">else</span><span class="p">:</span>
-        <span class="n">data</span> <span class="o">=</span> <span class="n">var</span><span class="p">[</span><span class="n">iteration</span><span class="p">]</span>
-        <span class="n">variable</span> <span class="o">=</span> <span class="n">args</span><span class="o">.</span><span class="n">variable</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;Plotting on grid with x0 = </span><span class="si">{</span><span class="n">x0</span><span class="si">}</span><span class="s2">, x1 = </span><span class="si">{</span><span class="n">x1</span><span class="si">}</span><span class="s2">, shape = </span><span class="si">{</span><span class="n">shape</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="p">)</span>
 
-    <span class="k">if</span> <span class="n">args</span><span class="o">.</span><span class="n">logscale</span><span class="p">:</span>
-        <span class="n">label</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;log10(</span><span class="si">{</span><span class="n">variable</span><span class="si">}</span><span class="s2">)&quot;</span>
-    <span class="k">else</span><span class="p">:</span>
-        <span class="n">label</span> <span class="o">=</span> <span class="n">variable</span>
+        <span class="k">if</span> <span class="n">args</span><span class="o">.</span><span class="n">absolute</span><span class="p">:</span>
+            <span class="n">data</span> <span class="o">=</span> <span class="nb">abs</span><span class="p">(</span><span class="n">var</span><span class="p">[</span><span class="n">iteration</span><span class="p">])</span>
+            <span class="n">variable</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;abs(</span><span class="si">{</span><span class="n">args</span><span class="o">.</span><span class="n">variable</span><span class="si">}</span><span class="s2">)&quot;</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">data</span> <span class="o">=</span> <span class="n">var</span><span class="p">[</span><span class="n">iteration</span><span class="p">]</span>
+            <span class="n">variable</span> <span class="o">=</span> <span class="n">args</span><span class="o">.</span><span class="n">variable</span>
 
-    <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Using label </span><span class="si">{</span><span class="n">label</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">args</span><span class="o">.</span><span class="n">logscale</span><span class="p">:</span>
+            <span class="n">label</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;log10(</span><span class="si">{</span><span class="n">variable</span><span class="si">}</span><span class="s2">)&quot;</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">label</span> <span class="o">=</span> <span class="n">variable</span>
 
-    <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Resampling and plotting&quot;</span><span class="p">)</span>
-    <span class="n">plot_color</span><span class="p">(</span>
-        <span class="n">data</span><span class="p">,</span>
-        <span class="n">x0</span><span class="o">=</span><span class="n">x0</span><span class="p">,</span>
-        <span class="n">x1</span><span class="o">=</span><span class="n">x1</span><span class="p">,</span>
-        <span class="n">shape</span><span class="o">=</span><span class="n">shape</span><span class="p">,</span>
-        <span class="n">xlabel</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">plane</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
-        <span class="n">ylabel</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">plane</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>
-        <span class="n">resample</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">multilinear_interpolate</span><span class="p">,</span>
-        <span class="n">colorbar</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">colorbar</span><span class="p">,</span>
-        <span class="n">logscale</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">logscale</span><span class="p">,</span>
-        <span class="n">vmin</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">vmin</span><span class="p">,</span>
-        <span class="n">vmax</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">vmax</span><span class="p">,</span>
-        <span class="n">label</span><span class="o">=</span><span class="n">label</span><span class="p">,</span>
-        <span class="n">interpolation</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">interpolation_method</span><span class="p">,</span>
-    <span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Using label </span><span class="si">{</span><span class="n">label</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 
-    <span class="n">add_text_to_corner</span><span class="p">(</span><span class="sa">fr</span><span class="s2">&quot;$t = </span><span class="si">{</span><span class="n">time</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2">$&quot;</span><span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Resampling and plotting&quot;</span><span class="p">)</span>
+        <span class="n">plot_color</span><span class="p">(</span>
+            <span class="n">data</span><span class="p">,</span>
+            <span class="n">x0</span><span class="o">=</span><span class="n">x0</span><span class="p">,</span>
+            <span class="n">x1</span><span class="o">=</span><span class="n">x1</span><span class="p">,</span>
+            <span class="n">shape</span><span class="o">=</span><span class="n">shape</span><span class="p">,</span>
+            <span class="n">xlabel</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">plane</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+            <span class="n">ylabel</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">plane</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>
+            <span class="n">resample</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">multilinear_interpolate</span><span class="p">,</span>
+            <span class="n">colorbar</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">colorbar</span><span class="p">,</span>
+            <span class="n">logscale</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">logscale</span><span class="p">,</span>
+            <span class="n">vmin</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">vmin</span><span class="p">,</span>
+            <span class="n">vmax</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">vmax</span><span class="p">,</span>
+            <span class="n">label</span><span class="o">=</span><span class="n">label</span><span class="p">,</span>
+            <span class="n">interpolation</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">interpolation_method</span><span class="p">,</span>
+        <span class="p">)</span>
 
-    <span class="k">if</span> <span class="n">args</span><span class="o">.</span><span class="n">ah_show</span><span class="p">:</span>
-        <span class="k">for</span> <span class="n">ah</span> <span class="ow">in</span> <span class="n">sim</span><span class="o">.</span><span class="n">horizons</span><span class="o">.</span><span class="n">available_apparent_horizons</span><span class="p">:</span>
-            <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Plotting apparent horizon </span><span class="si">{</span><span class="n">ah</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-            <span class="n">plot_horizon_on_plane_at_iteration</span><span class="p">(</span>
-                <span class="n">sim</span><span class="o">.</span><span class="n">horizons</span><span class="o">.</span><span class="n">get_apparent_horizon</span><span class="p">(</span><span class="n">ah</span><span class="p">),</span>
-                <span class="n">iteration</span><span class="p">,</span>
-                <span class="n">args</span><span class="o">.</span><span class="n">plane</span><span class="p">,</span>
-                <span class="n">color</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">ah_color</span><span class="p">,</span>
-                <span class="n">edgecolor</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">ah_edge_color</span><span class="p">,</span>
-                <span class="n">alpha</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">ah_alpha</span><span class="p">,</span>
-            <span class="p">)</span>
+        <span class="n">add_text_to_corner</span><span class="p">(</span><span class="sa">fr</span><span class="s2">&quot;$t = </span><span class="si">{</span><span class="n">time</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2">$&quot;</span><span class="p">)</span>
 
-    <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Plotted&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">args</span><span class="o">.</span><span class="n">ah_show</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">ah</span> <span class="ow">in</span> <span class="n">sim</span><span class="o">.</span><span class="n">horizons</span><span class="o">.</span><span class="n">available_apparent_horizons</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Plotting apparent horizon </span><span class="si">{</span><span class="n">ah</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                <span class="n">plot_horizon_on_plane_at_iteration</span><span class="p">(</span>
+                    <span class="n">sim</span><span class="o">.</span><span class="n">horizons</span><span class="o">.</span><span class="n">get_apparent_horizon</span><span class="p">(</span><span class="n">ah</span><span class="p">),</span>
+                    <span class="n">iteration</span><span class="p">,</span>
+                    <span class="n">args</span><span class="o">.</span><span class="n">plane</span><span class="p">,</span>
+                    <span class="n">color</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">ah_color</span><span class="p">,</span>
+                    <span class="n">edgecolor</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">ah_edge_color</span><span class="p">,</span>
+                    <span class="n">alpha</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">ah_alpha</span><span class="p">,</span>
+                <span class="p">)</span>
 
-    <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Saving&quot;</span><span class="p">)</span>
-    <span class="n">save_from_dir_filename_ext</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">outdir</span><span class="p">,</span> <span class="n">figname</span><span class="p">,</span> <span class="n">args</span><span class="o">.</span><span class="n">fig_extension</span><span class="p">)</span>
-    <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;DONE&quot;</span><span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Plotted&quot;</span><span class="p">)</span>
+
+        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Saving&quot;</span><span class="p">)</span>
+        <span class="n">save_from_dir_filename_ext</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">outdir</span><span class="p">,</span> <span class="n">figname</span><span class="p">,</span> <span class="n">args</span><span class="o">.</span><span class="n">fig_extension</span><span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;DONE&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>

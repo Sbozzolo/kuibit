@@ -65,6 +65,39 @@
    "cell_type": "markdown",
    "metadata": {},
    "source": [
+    "## SimDir and pickles"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "`SimDir` performs some operations only when they needed. This work has be done every time the Python interpreter is killed. In some cases, it is useful to save the progress to files, resulting in faster execution times. This can be done with pickles. The simplest way to do so is as follows."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "with sd.SimDir(\"../../tests/tov\", pickle_file=\"/tmp/sim.pickle\"):\n",
+    "    print(sim)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "When this code is run, `kuibit` checks if a pickle file exists in `/tmp/sim.pickle`. If yes, it will load it, effectively \"resuming a previous session\". At the end of the `with` block, the file is updated with the new work done. If the file did not exist initially, it will be created.\n",
+    "\n",
+    "It is important to be careful when working with pickles as the risk of stale objects is high. If the data is changing (e.g., new restarts are added), it is likely that it will result in errors. "
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
     "## Cactus_scalars\n",
     "The [cactus_scalars](../cactus_scalars.rst) module understands ASCII files as output by CarpetASCII. It supports all the reductions (maximum, minimum, ...), 0d files, as well as scalar data. Using regular expression on the header of the file, `cactus_scalars` can process one variable per file and multiple variables per file. In `SimDir`, you can access scalars with the `ts` or `timeseries` attributes. "
    ]
@@ -137,7 +170,7 @@
    "name": "python",
    "nbconvert_exporter": "python",
    "pygments_lexer": "ipython3",
-   "version": "3.7.8"
+   "version": "3.8.7"
   }
  },
  "nbformat": 4,

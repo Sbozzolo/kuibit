@@ -108,52 +108,65 @@ solvers.</p>
         <span class="n">logging</span><span class="o">.</span><span class="n">basicConfig</span><span class="p">(</span><span class="nb">format</span><span class="o">=</span><span class="s2">&quot;</span><span class="si">%(asctime)s</span><span class="s2"> - </span><span class="si">%(message)s</span><span class="s2">&quot;</span><span class="p">)</span>
         <span class="n">logger</span><span class="o">.</span><span class="n">setLevel</span><span class="p">(</span><span class="n">logging</span><span class="o">.</span><span class="n">DEBUG</span><span class="p">)</span>
 
-    <span class="n">sim</span> <span class="o">=</span> <span class="n">SimDir</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">datadir</span><span class="p">,</span> <span class="n">ignore_symlinks</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">ignore_symlinks</span><span class="p">)</span>
-    <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Prepared SimDir&quot;</span><span class="p">)</span>
+    <span class="k">with</span> <span class="n">SimDir</span><span class="p">(</span>
+        <span class="n">args</span><span class="o">.</span><span class="n">datadir</span><span class="p">,</span>
+        <span class="n">ignore_symlinks</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">ignore_symlinks</span><span class="p">,</span>
+        <span class="n">pickle_file</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">pickle_file</span><span class="p">,</span>
+    <span class="p">)</span> <span class="k">as</span> <span class="n">sim</span><span class="p">:</span>
 
-    <span class="n">reader</span> <span class="o">=</span> <span class="n">sim</span><span class="o">.</span><span class="n">timeseries</span>
-    <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Variables available </span><span class="si">{</span><span class="n">reader</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Prepared SimDir&quot;</span><span class="p">)</span>
 
-    <span class="k">def</span> <span class="nf">plot_constraint</span><span class="p">(</span><span class="n">constraint_</span><span class="p">,</span> <span class="n">reduction_</span><span class="p">):</span>
-        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Reading </span><span class="si">{</span><span class="n">reduction_</span><span class="si">}</span><span class="s2"> of </span><span class="si">{</span><span class="n">constraint_</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-        <span class="n">var</span> <span class="o">=</span> <span class="n">reader</span><span class="p">[</span><span class="n">reduction_</span><span class="p">][</span><span class="n">constraint_</span><span class="p">]</span>
-        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Read </span><span class="si">{</span><span class="n">reduction_</span><span class="si">}</span><span class="s2"> of </span><span class="si">{</span><span class="n">constraint_</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-        <span class="n">plt</span><span class="o">.</span><span class="n">semilogy</span><span class="p">(</span><span class="nb">abs</span><span class="p">(</span><span class="n">var</span><span class="p">),</span> <span class="n">label</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">reduction_</span><span class="si">}</span><span class="s2">(|</span><span class="si">{</span><span class="n">constraint_</span><span class="si">}</span><span class="s2">|)&quot;</span><span class="p">)</span>
-        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Plotted </span><span class="si">{</span><span class="n">reduction_</span><span class="si">}</span><span class="s2"> of </span><span class="si">{</span><span class="n">constraint_</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="n">reader</span> <span class="o">=</span> <span class="n">sim</span><span class="o">.</span><span class="n">timeseries</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Variables available </span><span class="si">{</span><span class="n">reader</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 
-    <span class="k">for</span> <span class="n">reduction</span> <span class="ow">in</span> <span class="n">args</span><span class="o">.</span><span class="n">reductions</span><span class="p">:</span>
-        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Working with reduction: </span><span class="si">{</span><span class="n">reduction</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="k">def</span> <span class="nf">plot_constraint</span><span class="p">(</span><span class="n">constraint_</span><span class="p">,</span> <span class="n">reduction_</span><span class="p">):</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Reading </span><span class="si">{</span><span class="n">reduction_</span><span class="si">}</span><span class="s2"> of </span><span class="si">{</span><span class="n">constraint_</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="n">var</span> <span class="o">=</span> <span class="n">reader</span><span class="p">[</span><span class="n">reduction_</span><span class="p">][</span><span class="n">constraint_</span><span class="p">]</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Read </span><span class="si">{</span><span class="n">reduction_</span><span class="si">}</span><span class="s2"> of </span><span class="si">{</span><span class="n">constraint_</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="n">plt</span><span class="o">.</span><span class="n">semilogy</span><span class="p">(</span><span class="nb">abs</span><span class="p">(</span><span class="n">var</span><span class="p">),</span> <span class="n">label</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">reduction_</span><span class="si">}</span><span class="s2">(|</span><span class="si">{</span><span class="n">constraint_</span><span class="si">}</span><span class="s2">|)&quot;</span><span class="p">)</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Plotted </span><span class="si">{</span><span class="n">reduction_</span><span class="si">}</span><span class="s2"> of </span><span class="si">{</span><span class="n">constraint_</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 
-        <span class="n">plt</span><span class="o">.</span><span class="n">clf</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">reduction</span> <span class="ow">in</span> <span class="n">args</span><span class="o">.</span><span class="n">reductions</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Working with reduction: </span><span class="si">{</span><span class="n">reduction</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 
-        <span class="k">if</span> <span class="n">args</span><span class="o">.</span><span class="n">figname</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">figname</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;constraints_</span><span class="si">{</span><span class="n">reduction</span><span class="si">}</span><span class="s2">&quot;</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">figname</span> <span class="o">=</span> <span class="n">args</span><span class="o">.</span><span class="n">figname</span> <span class="o">+</span> <span class="sa">f</span><span class="s2">&quot;_</span><span class="si">{</span><span class="n">reduction</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="n">plt</span><span class="o">.</span><span class="n">clf</span><span class="p">()</span>
 
-        <span class="c1"># We have multiple choices depending on the code used to compute the</span>
-        <span class="c1"># constraint</span>
-        <span class="n">constraint_names</span> <span class="o">=</span> <span class="p">[</span>
-            <span class="p">[</span><span class="s2">&quot;H&quot;</span><span class="p">,</span> <span class="s2">&quot;M1&quot;</span><span class="p">,</span> <span class="s2">&quot;M2&quot;</span><span class="p">,</span> <span class="s2">&quot;M3&quot;</span><span class="p">],</span>  <span class="c1"># McLachlan</span>
-            <span class="p">[</span><span class="s2">&quot;hc&quot;</span><span class="p">,</span> <span class="s2">&quot;mc&quot;</span><span class="p">,</span> <span class="s2">&quot;my&quot;</span><span class="p">,</span> <span class="s2">&quot;mz&quot;</span><span class="p">],</span>  <span class="c1"># Lean</span>
-            <span class="p">[</span><span class="s2">&quot;hamc&quot;</span><span class="p">,</span> <span class="s2">&quot;momcx&quot;</span><span class="p">,</span> <span class="s2">&quot;momcy&quot;</span><span class="p">,</span> <span class="s2">&quot;momcz&quot;</span><span class="p">,</span> <span class="s2">&quot;divE&quot;</span><span class="p">],</span>  <span class="c1"># ProcaConstraints</span>
-        <span class="p">]</span>
+            <span class="k">if</span> <span class="n">args</span><span class="o">.</span><span class="n">figname</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">figname</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;constraints_</span><span class="si">{</span><span class="n">reduction</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">figname</span> <span class="o">=</span> <span class="n">args</span><span class="o">.</span><span class="n">figname</span> <span class="o">+</span> <span class="sa">f</span><span class="s2">&quot;_</span><span class="si">{</span><span class="n">reduction</span><span class="si">}</span><span class="s2">&quot;</span>
 
-        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Plotting&quot;</span><span class="p">)</span>
-        <span class="k">for</span> <span class="n">names</span> <span class="ow">in</span> <span class="n">constraint_names</span><span class="p">:</span>
-            <span class="k">for</span> <span class="n">constraint</span> <span class="ow">in</span> <span class="n">names</span><span class="p">:</span>
-                <span class="k">if</span> <span class="n">constraint</span> <span class="ow">in</span> <span class="n">reader</span><span class="p">[</span><span class="n">reduction</span><span class="p">]:</span>
-                    <span class="n">plot_constraint</span><span class="p">(</span><span class="n">constraint</span><span class="p">,</span> <span class="n">reduction</span><span class="p">)</span>
+            <span class="c1"># We have multiple choices depending on the code used to compute the</span>
+            <span class="c1"># constraint</span>
+            <span class="n">constraint_names</span> <span class="o">=</span> <span class="p">[</span>
+                <span class="p">[</span><span class="s2">&quot;H&quot;</span><span class="p">,</span> <span class="s2">&quot;M1&quot;</span><span class="p">,</span> <span class="s2">&quot;M2&quot;</span><span class="p">,</span> <span class="s2">&quot;M3&quot;</span><span class="p">],</span>  <span class="c1"># McLachlan</span>
+                <span class="p">[</span><span class="s2">&quot;hc&quot;</span><span class="p">,</span> <span class="s2">&quot;mc&quot;</span><span class="p">,</span> <span class="s2">&quot;my&quot;</span><span class="p">,</span> <span class="s2">&quot;mz&quot;</span><span class="p">],</span>  <span class="c1"># Lean</span>
+                <span class="p">[</span>
+                    <span class="s2">&quot;hamc&quot;</span><span class="p">,</span>
+                    <span class="s2">&quot;momcx&quot;</span><span class="p">,</span>
+                    <span class="s2">&quot;momcy&quot;</span><span class="p">,</span>
+                    <span class="s2">&quot;momcz&quot;</span><span class="p">,</span>
+                    <span class="s2">&quot;divE&quot;</span><span class="p">,</span>
+                <span class="p">],</span>  <span class="c1"># ProcaConstraints</span>
+            <span class="p">]</span>
 
-        <span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">()</span>
-        <span class="n">set_axis_limits_from_args</span><span class="p">(</span><span class="n">args</span><span class="p">)</span>
-        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Plotted&quot;</span><span class="p">)</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Plotting&quot;</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">names</span> <span class="ow">in</span> <span class="n">constraint_names</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">constraint</span> <span class="ow">in</span> <span class="n">names</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">constraint</span> <span class="ow">in</span> <span class="n">reader</span><span class="p">[</span><span class="n">reduction</span><span class="p">]:</span>
+                        <span class="n">plot_constraint</span><span class="p">(</span><span class="n">constraint</span><span class="p">,</span> <span class="n">reduction</span><span class="p">)</span>
 
-        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Saving&quot;</span><span class="p">)</span>
-        <span class="n">save_from_dir_filename_ext</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">outdir</span><span class="p">,</span> <span class="n">figname</span><span class="p">,</span> <span class="n">args</span><span class="o">.</span><span class="n">fig_extension</span><span class="p">)</span>
-        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Saved&quot;</span><span class="p">)</span>
+            <span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">()</span>
+            <span class="n">set_axis_limits_from_args</span><span class="p">(</span><span class="n">args</span><span class="p">)</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Plotted&quot;</span><span class="p">)</span>
 
-    <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Done&quot;</span><span class="p">)</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Saving&quot;</span><span class="p">)</span>
+            <span class="n">save_from_dir_filename_ext</span><span class="p">(</span>
+                <span class="n">args</span><span class="o">.</span><span class="n">outdir</span><span class="p">,</span> <span class="n">figname</span><span class="p">,</span> <span class="n">args</span><span class="o">.</span><span class="n">fig_extension</span>
+            <span class="p">)</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Saved&quot;</span><span class="p">)</span>
+
+        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Done&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>

@@ -119,36 +119,41 @@ horizons as a function of time.</p>
     <span class="p">)</span>
     <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Using figname </span><span class="si">{</span><span class="n">figname</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 
-    <span class="n">sim</span> <span class="o">=</span> <span class="n">SimDir</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">datadir</span><span class="p">,</span> <span class="n">ignore_symlinks</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">ignore_symlinks</span><span class="p">)</span>
-    <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Prepared SimDir&quot;</span><span class="p">)</span>
-    <span class="n">sim_hor</span> <span class="o">=</span> <span class="n">sim</span><span class="o">.</span><span class="n">horizons</span>
+    <span class="k">with</span> <span class="n">SimDir</span><span class="p">(</span>
+        <span class="n">args</span><span class="o">.</span><span class="n">datadir</span><span class="p">,</span>
+        <span class="n">ignore_symlinks</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">ignore_symlinks</span><span class="p">,</span>
+        <span class="n">pickle_file</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">pickle_file</span><span class="p">,</span>
+    <span class="p">)</span> <span class="k">as</span> <span class="n">sim</span><span class="p">:</span>
 
-    <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span>
-        <span class="sa">f</span><span class="s2">&quot;Apparent horizons available: </span><span class="si">{</span><span class="n">sim_hor</span><span class="o">.</span><span class="n">available_apparent_horizons</span><span class="si">}</span><span class="s2">&quot;</span>
-    <span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Prepared SimDir&quot;</span><span class="p">)</span>
+        <span class="n">sim_hor</span> <span class="o">=</span> <span class="n">sim</span><span class="o">.</span><span class="n">horizons</span>
 
-    <span class="c1"># Check that the horizons are available</span>
-    <span class="k">for</span> <span class="n">ah</span> <span class="ow">in</span> <span class="n">args</span><span class="o">.</span><span class="n">horizons</span><span class="p">:</span>
-        <span class="k">if</span> <span class="n">ah</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">sim_hor</span><span class="o">.</span><span class="n">available_apparent_horizons</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Apparent horizons </span><span class="si">{</span><span class="n">ah</span><span class="si">}</span><span class="s2"> is not available&quot;</span><span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;Apparent horizons available: </span><span class="si">{</span><span class="n">sim_hor</span><span class="o">.</span><span class="n">available_apparent_horizons</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="p">)</span>
 
-    <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Reading horizons and computing separation&quot;</span><span class="p">)</span>
+        <span class="c1"># Check that the horizons are available</span>
+        <span class="k">for</span> <span class="n">ah</span> <span class="ow">in</span> <span class="n">args</span><span class="o">.</span><span class="n">horizons</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">ah</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">sim_hor</span><span class="o">.</span><span class="n">available_apparent_horizons</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Apparent horizons </span><span class="si">{</span><span class="n">ah</span><span class="si">}</span><span class="s2"> is not available&quot;</span><span class="p">)</span>
 
-    <span class="n">h1</span> <span class="o">=</span> <span class="n">sim_hor</span><span class="o">.</span><span class="n">get_apparent_horizon</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">horizons</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
-    <span class="n">h2</span> <span class="o">=</span> <span class="n">sim_hor</span><span class="o">.</span><span class="n">get_apparent_horizon</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">horizons</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Reading horizons and computing separation&quot;</span><span class="p">)</span>
 
-    <span class="n">separation</span> <span class="o">=</span> <span class="n">compute_horizons_separation</span><span class="p">(</span><span class="n">h1</span><span class="p">,</span> <span class="n">h2</span><span class="p">,</span> <span class="n">resample</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">h1</span> <span class="o">=</span> <span class="n">sim_hor</span><span class="o">.</span><span class="n">get_apparent_horizon</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">horizons</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="n">h2</span> <span class="o">=</span> <span class="n">sim_hor</span><span class="o">.</span><span class="n">get_apparent_horizon</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">horizons</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
 
-    <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Plotting separation&quot;</span><span class="p">)</span>
-    <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">separation</span><span class="p">)</span>
-    <span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s2">&quot;Coordinate separation&quot;</span><span class="p">)</span>
-    <span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s2">&quot;Time&quot;</span><span class="p">)</span>
-    <span class="n">set_axis_limits_from_args</span><span class="p">(</span><span class="n">args</span><span class="p">)</span>
-    <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Plotted&quot;</span><span class="p">)</span>
+        <span class="n">separation</span> <span class="o">=</span> <span class="n">compute_horizons_separation</span><span class="p">(</span><span class="n">h1</span><span class="p">,</span> <span class="n">h2</span><span class="p">,</span> <span class="n">resample</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
-    <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Saving&quot;</span><span class="p">)</span>
-    <span class="n">save_from_dir_filename_ext</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">outdir</span><span class="p">,</span> <span class="n">figname</span><span class="p">,</span> <span class="n">args</span><span class="o">.</span><span class="n">fig_extension</span><span class="p">)</span>
-    <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;DONE&quot;</span><span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Plotting separation&quot;</span><span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">separation</span><span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s2">&quot;Coordinate separation&quot;</span><span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s2">&quot;Time&quot;</span><span class="p">)</span>
+        <span class="n">set_axis_limits_from_args</span><span class="p">(</span><span class="n">args</span><span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Plotted&quot;</span><span class="p">)</span>
+
+        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Saving&quot;</span><span class="p">)</span>
+        <span class="n">save_from_dir_filename_ext</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">outdir</span><span class="p">,</span> <span class="n">figname</span><span class="p">,</span> <span class="n">args</span><span class="o">.</span><span class="n">fig_extension</span><span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;DONE&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>

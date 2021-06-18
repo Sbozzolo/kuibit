@@ -72,9 +72,34 @@ possibly contain multiple checkpoints and restarts.</p>
 <p>In case the directory structure is very deep (more than 8 levels), you can
 specify the option <code class="docutils literal notranslate"><span class="pre">max_depth</span></code> to increase the default.</p>
 <p>If you want to ignore specific folders (by default <code class="docutils literal notranslate"><span class="pre">SIMFACTORY</span></code>, <code class="docutils literal notranslate"><span class="pre">report</span></code>,
-<code class="docutils literal notranslate"><span class="pre">movies</span></code>, <code class="docutils literal notranslate"><span class="pre">tmp</span></code>, <code class="docutils literal notranslate"><span class="pre">temp</span></code>), you can provide the <code class="docutils literal notranslate"><span class="pre">ignore</span></code> argument.</p>
+<code class="docutils literal notranslate"><span class="pre">movies</span></code>, <code class="docutils literal notranslate"><span class="pre">tmp</span></code>, <code class="docutils literal notranslate"><span class="pre">temp</span></code>), you can provide the <code class="docutils literal notranslate"><span class="pre">ignored_dirs</span></code> argument.</p>
 <p>By default, symlinks are ignored. You can change this behavior by passing the
 keyword argument <code class="docutils literal notranslate"><span class="pre">ignore_symlinks=False</span></code>.</p>
+</div>
+<div class="section" id="simdir-and-pickles">
+<h2>SimDir and pickles<a class="headerlink" href="#simdir-and-pickles" title="Permalink to this headline">¶</a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">kuibit</span></code> tries to do as much lazy-loading as possible. For examples, files are
+opened only when needed. When analyzing simulations it is useful to save the
+work done by <code class="docutils literal notranslate"><span class="pre">kuibit</span></code> to avoid re-doing the same operations over and over.
+This can be done with pickles. <code class="docutils literal notranslate"><span class="pre">SimDir</span></code> can be used as a context manager and
+the progresses can be loaded and saved from files. For example:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">with</span> <span class="n">SimDir</span><span class="p">(</span><span class="s2">&quot;path_of_simulation&quot;</span><span class="p">,</span> <span class="n">pickle_file</span><span class="o">=</span><span class="s2">&quot;simdir.pickle&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">sim</span><span class="p">:</span>
+   <span class="c1"># do operations</span>
+</pre></div>
+</div>
+<p>In this case, if <code class="docutils literal notranslate"><span class="pre">pickle_file</span></code> exists, it will be loaded (ignoring all the other
+arguments passed to <code class="docutils literal notranslate"><span class="pre">SimDir</span></code>), and it will be kept updated with the additional
+work done by <code class="docutils literal notranslate"><span class="pre">kuibit</span></code>. If <code class="docutils literal notranslate"><span class="pre">pickle_file</span></code> does not exist, the <code class="docutils literal notranslate"><span class="pre">SimDir</span></code> will be
+created as usual as a <code class="docutils literal notranslate"><span class="pre">pickle_file</span></code> will be generated.</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>When using pickles, no consistency check with the current state of the
+simulation is performed. If the simulation changes (e.g., new checkpoints are
+added), this will result in errors. In that case, a new pickle file must be
+produced or the data has to be refreshed (with the method
+<a class="reference internal" href="simdir_ref.html#kuibit.simdir.SimDir.rescan" title="kuibit.simdir.SimDir.rescan"><code class="xref py py-meth docutils literal notranslate"><span class="pre">rescan()</span></code></a>). When the version of <code class="docutils literal notranslate"><span class="pre">kuibit</span></code> changes, a new pickle
+file has to be regenerated.</p>
+</div>
 </div>
 <div class="section" id="using-simdir-objects">
 <h2>Using SimDir objects<a class="headerlink" href="#using-simdir-objects" title="Permalink to this headline">¶</a></h2>
@@ -195,6 +220,7 @@ you what they are storing.</p>
   <ul>
 <li><a class="reference internal" href="#">Getting started with SimDir</a><ul>
 <li><a class="reference internal" href="#defining-a-simdir-object">Defining a SimDir object</a></li>
+<li><a class="reference internal" href="#simdir-and-pickles">SimDir and pickles</a></li>
 <li><a class="reference internal" href="#using-simdir-objects">Using SimDir objects</a></li>
 <li><a class="reference internal" href="#some-useful-conventions">Some useful conventions</a><ul>
 <li><a class="reference internal" href="#class-hierarchy">Class hierarchy</a></li>

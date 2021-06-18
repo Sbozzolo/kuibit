@@ -122,48 +122,53 @@ the fact that this value coincides with the one set in <code class="docutils lit
         <span class="n">logging</span><span class="o">.</span><span class="n">basicConfig</span><span class="p">(</span><span class="nb">format</span><span class="o">=</span><span class="s2">&quot;</span><span class="si">%(asctime)s</span><span class="s2"> - </span><span class="si">%(message)s</span><span class="s2">&quot;</span><span class="p">)</span>
         <span class="n">logger</span><span class="o">.</span><span class="n">setLevel</span><span class="p">(</span><span class="n">logging</span><span class="o">.</span><span class="n">DEBUG</span><span class="p">)</span>
 
-    <span class="n">sim</span> <span class="o">=</span> <span class="n">SimDir</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">datadir</span><span class="p">,</span> <span class="n">ignore_symlinks</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">ignore_symlinks</span><span class="p">)</span>
-    <span class="n">sim_hor</span> <span class="o">=</span> <span class="n">sim</span><span class="o">.</span><span class="n">horizons</span>
+    <span class="k">with</span> <span class="n">SimDir</span><span class="p">(</span>
+        <span class="n">args</span><span class="o">.</span><span class="n">datadir</span><span class="p">,</span>
+        <span class="n">ignore_symlinks</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">ignore_symlinks</span><span class="p">,</span>
+        <span class="n">pickle_file</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">pickle_file</span><span class="p">,</span>
+    <span class="p">)</span> <span class="k">as</span> <span class="n">sim</span><span class="p">:</span>
 
-    <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span>
-        <span class="sa">f</span><span class="s2">&quot;QuasiLocalMeasures horizons available: </span><span class="si">{</span><span class="n">sim_hor</span><span class="o">.</span><span class="n">available_qlm_horizons</span><span class="si">}</span><span class="s2">&quot;</span>
-    <span class="p">)</span>
+        <span class="n">sim_hor</span> <span class="o">=</span> <span class="n">sim</span><span class="o">.</span><span class="n">horizons</span>
 
-    <span class="n">horizon</span> <span class="o">=</span> <span class="n">sim_hor</span><span class="o">.</span><span class="n">get_qlm_horizon</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">qlm_index</span><span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;QuasiLocalMeasures horizons available: </span><span class="si">{</span><span class="n">sim_hor</span><span class="o">.</span><span class="n">available_qlm_horizons</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="p">)</span>
 
-    <span class="n">time</span> <span class="o">=</span> <span class="n">args</span><span class="o">.</span><span class="n">time</span>
+        <span class="n">horizon</span> <span class="o">=</span> <span class="n">sim_hor</span><span class="o">.</span><span class="n">get_qlm_horizon</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">qlm_index</span><span class="p">)</span>
 
-    <span class="n">irr_mass</span> <span class="o">=</span> <span class="n">horizon</span><span class="p">[</span><span class="s2">&quot;irreducible_mass&quot;</span><span class="p">](</span><span class="n">time</span><span class="p">)</span>
+        <span class="n">time</span> <span class="o">=</span> <span class="n">args</span><span class="o">.</span><span class="n">time</span>
 
-    <span class="nb">print</span><span class="p">(</span>
-        <span class="sa">f</span><span class="s2">&quot;&quot;&quot;</span><span class="se">\</span>
+        <span class="n">irr_mass</span> <span class="o">=</span> <span class="n">horizon</span><span class="p">[</span><span class="s2">&quot;irreducible_mass&quot;</span><span class="p">](</span><span class="n">time</span><span class="p">)</span>
+
+        <span class="nb">print</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;&quot;&quot;</span><span class="se">\</span>
 <span class="s2">QuasiLocalMeasures index: </span><span class="si">{</span><span class="n">args</span><span class="o">.</span><span class="n">qlm_index</span><span class="si">}</span><span class="s2"></span>
 <span class="s2">Time:                     </span><span class="si">{</span><span class="n">time</span><span class="si">:</span><span class="s2">4.5f</span><span class="si">}</span><span class="s2"></span>
 <span class="s2">Irreducible mass:         </span><span class="si">{</span><span class="n">irr_mass</span><span class="si">:</span><span class="s2">4.5f</span><span class="si">}</span><span class="s2"></span>
 <span class="s2">Christodoulou mass:       </span><span class="si">{</span><span class="n">horizon</span><span class="p">[</span><span class="s1">&#39;mass&#39;</span><span class="p">](</span><span class="n">time</span><span class="p">)</span><span class="si">:</span><span class="s2">4.5f</span><span class="si">}</span><span class="s2"></span>
 <span class="s2">Angular momentum:         </span><span class="si">{</span><span class="n">horizon</span><span class="p">[</span><span class="s1">&#39;spin&#39;</span><span class="p">](</span><span class="n">time</span><span class="p">)</span><span class="si">:</span><span class="s2">4.5f</span><span class="si">}</span><span class="s2">&quot;&quot;&quot;</span>
-    <span class="p">)</span>
-
-    <span class="k">try</span><span class="p">:</span>
-        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Charge:                   </span><span class="si">{</span><span class="n">horizon</span><span class="p">[</span><span class="s1">&#39;charge&#39;</span><span class="p">](</span><span class="n">time</span><span class="p">)</span><span class="si">:</span><span class="s2">4.5f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-    <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
-        <span class="k">pass</span>
-
-    <span class="k">if</span> <span class="n">args</span><span class="o">.</span><span class="n">estimate_gamma</span><span class="p">:</span>
-        <span class="c1"># Estimate gamma, the Lorentz factor</span>
-        <span class="c1">#</span>
-        <span class="c1"># We use the Weinberg momentum because it matches exactly the one in</span>
-        <span class="c1"># TwoPunctures. Probably it does not make sense after t = 0.</span>
-        <span class="c1">#</span>
-        <span class="n">momentum_sq</span> <span class="o">=</span> <span class="p">(</span>
-            <span class="n">horizon</span><span class="p">[</span><span class="s2">&quot;w_momentum_x&quot;</span><span class="p">](</span><span class="n">time</span><span class="p">)</span> <span class="o">*</span> <span class="n">horizon</span><span class="p">[</span><span class="s2">&quot;w_momentum_x&quot;</span><span class="p">](</span><span class="n">time</span><span class="p">)</span>
-            <span class="o">+</span> <span class="n">horizon</span><span class="p">[</span><span class="s2">&quot;w_momentum_y&quot;</span><span class="p">](</span><span class="n">time</span><span class="p">)</span> <span class="o">*</span> <span class="n">horizon</span><span class="p">[</span><span class="s2">&quot;w_momentum_y&quot;</span><span class="p">](</span><span class="n">time</span><span class="p">)</span>
-            <span class="o">+</span> <span class="n">horizon</span><span class="p">[</span><span class="s2">&quot;w_momentum_z&quot;</span><span class="p">](</span><span class="n">time</span><span class="p">)</span> <span class="o">*</span> <span class="n">horizon</span><span class="p">[</span><span class="s2">&quot;w_momentum_z&quot;</span><span class="p">](</span><span class="n">time</span><span class="p">)</span>
         <span class="p">)</span>
 
-        <span class="n">gamma</span> <span class="o">=</span> <span class="n">sqrt</span><span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="n">momentum_sq</span> <span class="o">/</span> <span class="p">(</span><span class="n">irr_mass</span> <span class="o">*</span> <span class="n">irr_mass</span><span class="p">))</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Charge:                   </span><span class="si">{</span><span class="n">horizon</span><span class="p">[</span><span class="s1">&#39;charge&#39;</span><span class="p">](</span><span class="n">time</span><span class="p">)</span><span class="si">:</span><span class="s2">4.5f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+            <span class="k">pass</span>
 
-        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Gamma:                    </span><span class="si">{</span><span class="n">gamma</span><span class="si">:</span><span class="s2">4.5f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">args</span><span class="o">.</span><span class="n">estimate_gamma</span><span class="p">:</span>
+            <span class="c1"># Estimate gamma, the Lorentz factor</span>
+            <span class="c1">#</span>
+            <span class="c1"># We use the Weinberg momentum because it matches exactly the one in</span>
+            <span class="c1"># TwoPunctures. Probably it does not make sense after t = 0.</span>
+            <span class="c1">#</span>
+            <span class="n">momentum_sq</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="n">horizon</span><span class="p">[</span><span class="s2">&quot;w_momentum_x&quot;</span><span class="p">](</span><span class="n">time</span><span class="p">)</span> <span class="o">*</span> <span class="n">horizon</span><span class="p">[</span><span class="s2">&quot;w_momentum_x&quot;</span><span class="p">](</span><span class="n">time</span><span class="p">)</span>
+                <span class="o">+</span> <span class="n">horizon</span><span class="p">[</span><span class="s2">&quot;w_momentum_y&quot;</span><span class="p">](</span><span class="n">time</span><span class="p">)</span> <span class="o">*</span> <span class="n">horizon</span><span class="p">[</span><span class="s2">&quot;w_momentum_y&quot;</span><span class="p">](</span><span class="n">time</span><span class="p">)</span>
+                <span class="o">+</span> <span class="n">horizon</span><span class="p">[</span><span class="s2">&quot;w_momentum_z&quot;</span><span class="p">](</span><span class="n">time</span><span class="p">)</span> <span class="o">*</span> <span class="n">horizon</span><span class="p">[</span><span class="s2">&quot;w_momentum_z&quot;</span><span class="p">](</span><span class="n">time</span><span class="p">)</span>
+            <span class="p">)</span>
+
+            <span class="n">gamma</span> <span class="o">=</span> <span class="n">sqrt</span><span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="n">momentum_sq</span> <span class="o">/</span> <span class="p">(</span><span class="n">irr_mass</span> <span class="o">*</span> <span class="n">irr_mass</span><span class="p">))</span>
+
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Gamma:                    </span><span class="si">{</span><span class="n">gamma</span><span class="si">:</span><span class="s2">4.5f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>

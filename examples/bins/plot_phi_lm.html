@@ -141,52 +141,59 @@ thorn <code class="docutils literal notranslate"><span class="pre">NPScalars_Pro
     <span class="p">)</span>
     <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Using figname </span><span class="si">{</span><span class="n">figname</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 
-    <span class="n">sim</span> <span class="o">=</span> <span class="n">SimDir</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">datadir</span><span class="p">,</span> <span class="n">ignore_symlinks</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">ignore_symlinks</span><span class="p">)</span>
-    <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Prepared SimDir&quot;</span><span class="p">)</span>
+    <span class="k">with</span> <span class="n">SimDir</span><span class="p">(</span>
+        <span class="n">args</span><span class="o">.</span><span class="n">datadir</span><span class="p">,</span>
+        <span class="n">ignore_symlinks</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">ignore_symlinks</span><span class="p">,</span>
+        <span class="n">pickle_file</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">pickle_file</span><span class="p">,</span>
+    <span class="p">)</span> <span class="k">as</span> <span class="n">sim</span><span class="p">:</span>
 
-    <span class="n">reader_mult</span> <span class="o">=</span> <span class="n">sim</span><span class="o">.</span><span class="n">multipoles</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Prepared SimDir&quot;</span><span class="p">)</span>
 
-    <span class="k">if</span> <span class="n">var_name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">reader_mult</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">var_name</span><span class="si">}</span><span class="s2"> not available&quot;</span><span class="p">)</span>
+        <span class="n">reader_mult</span> <span class="o">=</span> <span class="n">sim</span><span class="o">.</span><span class="n">multipoles</span>
 
-    <span class="n">reader</span> <span class="o">=</span> <span class="n">reader_mult</span><span class="p">[</span><span class="n">var_name</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">var_name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">reader_mult</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">var_name</span><span class="si">}</span><span class="s2"> not available&quot;</span><span class="p">)</span>
 
-    <span class="n">radius</span> <span class="o">=</span> <span class="n">reader</span><span class="o">.</span><span class="n">radii</span><span class="p">[</span><span class="n">args</span><span class="o">.</span><span class="n">detector_num</span><span class="p">]</span>
-    <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Using radius: </span><span class="si">{</span><span class="n">radius</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-    <span class="n">detector</span> <span class="o">=</span> <span class="n">reader</span><span class="p">[</span><span class="n">radius</span><span class="p">]</span>
+        <span class="n">reader</span> <span class="o">=</span> <span class="n">reader_mult</span><span class="p">[</span><span class="n">var_name</span><span class="p">]</span>
 
-    <span class="k">if</span> <span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">mult_l</span><span class="p">,</span> <span class="n">args</span><span class="o">.</span><span class="n">mult_m</span><span class="p">)</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">detector</span><span class="o">.</span><span class="n">available_lm</span><span class="p">:</span>
-        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Available multipoles </span><span class="si">{</span><span class="n">detector</span><span class="o">.</span><span class="n">available_lm</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-            <span class="sa">f</span><span class="s2">&quot;Multipole </span><span class="si">{</span><span class="n">args</span><span class="o">.</span><span class="n">mult_l</span><span class="si">}</span><span class="s2">, </span><span class="si">{</span><span class="n">args</span><span class="o">.</span><span class="n">mult_m</span><span class="si">}</span><span class="s2"> not available&quot;</span>
+        <span class="n">radius</span> <span class="o">=</span> <span class="n">reader</span><span class="o">.</span><span class="n">radii</span><span class="p">[</span><span class="n">args</span><span class="o">.</span><span class="n">detector_num</span><span class="p">]</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Using radius: </span><span class="si">{</span><span class="n">radius</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="n">detector</span> <span class="o">=</span> <span class="n">reader</span><span class="p">[</span><span class="n">radius</span><span class="p">]</span>
+
+        <span class="k">if</span> <span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">mult_l</span><span class="p">,</span> <span class="n">args</span><span class="o">.</span><span class="n">mult_m</span><span class="p">)</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">detector</span><span class="o">.</span><span class="n">available_lm</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Available multipoles </span><span class="si">{</span><span class="n">detector</span><span class="o">.</span><span class="n">available_lm</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;Multipole </span><span class="si">{</span><span class="n">args</span><span class="o">.</span><span class="n">mult_l</span><span class="si">}</span><span class="s2">, </span><span class="si">{</span><span class="n">args</span><span class="o">.</span><span class="n">mult_m</span><span class="si">}</span><span class="s2"> not available&quot;</span>
+            <span class="p">)</span>
+
+        <span class="n">phi</span> <span class="o">=</span> <span class="n">detector</span><span class="p">[</span><span class="n">args</span><span class="o">.</span><span class="n">mult_l</span><span class="p">,</span> <span class="n">args</span><span class="o">.</span><span class="n">mult_m</span><span class="p">]</span>
+
+        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Plotting </span><span class="si">{</span><span class="n">var_name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+        <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span>
+            <span class="n">phi</span><span class="o">.</span><span class="n">real</span><span class="p">(),</span>
+            <span class="n">label</span><span class="o">=</span><span class="sa">fr</span><span class="s2">&quot;$\Re \Phi_</span><span class="si">{</span><span class="n">phi_num</span><span class="si">}</span><span class="s2">^</span><span class="se">{{</span><span class="si">{</span><span class="n">args</span><span class="o">.</span><span class="n">mult_l</span><span class="si">}{</span><span class="n">args</span><span class="o">.</span><span class="n">mult_l</span><span class="si">}</span><span class="se">}}</span><span class="s2">$&quot;</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span>
+            <span class="n">phi</span><span class="o">.</span><span class="n">imag</span><span class="p">(),</span>
+            <span class="n">label</span><span class="o">=</span><span class="sa">fr</span><span class="s2">&quot;$\Im \Phi_</span><span class="si">{</span><span class="n">phi_num</span><span class="si">}</span><span class="s2">^</span><span class="se">{{</span><span class="si">{</span><span class="n">args</span><span class="o">.</span><span class="n">mult_l</span><span class="si">}{</span><span class="n">args</span><span class="o">.</span><span class="n">mult_l</span><span class="si">}</span><span class="se">}}</span><span class="s2">$&quot;</span><span class="p">,</span>
         <span class="p">)</span>
 
-    <span class="n">phi</span> <span class="o">=</span> <span class="n">detector</span><span class="p">[</span><span class="n">args</span><span class="o">.</span><span class="n">mult_l</span><span class="p">,</span> <span class="n">args</span><span class="o">.</span><span class="n">mult_m</span><span class="p">]</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">()</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s2">&quot;Time&quot;</span><span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="sa">fr</span><span class="s2">&quot;$r \Phi_</span><span class="si">{</span><span class="n">phi_num</span><span class="si">}</span><span class="s2">$&quot;</span><span class="p">)</span>
+        <span class="n">set_axis_limits_from_args</span><span class="p">(</span><span class="n">args</span><span class="p">)</span>
 
-    <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Plotting </span><span class="si">{</span><span class="n">var_name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="n">add_text_to_corner</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;Det </span><span class="si">{</span><span class="n">args</span><span class="o">.</span><span class="n">detector_num</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">anchor</span><span class="o">=</span><span class="s2">&quot;SW&quot;</span><span class="p">,</span> <span class="n">offset</span><span class="o">=</span><span class="mf">0.005</span>
+        <span class="p">)</span>
+        <span class="n">add_text_to_corner</span><span class="p">(</span><span class="sa">fr</span><span class="s2">&quot;$r = </span><span class="si">{</span><span class="n">radius</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2">$&quot;</span><span class="p">,</span> <span class="n">anchor</span><span class="o">=</span><span class="s2">&quot;NE&quot;</span><span class="p">,</span> <span class="n">offset</span><span class="o">=</span><span class="mf">0.005</span><span class="p">)</span>
 
-    <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span>
-        <span class="n">phi</span><span class="o">.</span><span class="n">real</span><span class="p">(),</span>
-        <span class="n">label</span><span class="o">=</span><span class="sa">fr</span><span class="s2">&quot;$\Re \Phi_</span><span class="si">{</span><span class="n">phi_num</span><span class="si">}</span><span class="s2">^</span><span class="se">{{</span><span class="si">{</span><span class="n">args</span><span class="o">.</span><span class="n">mult_l</span><span class="si">}{</span><span class="n">args</span><span class="o">.</span><span class="n">mult_l</span><span class="si">}</span><span class="se">}}</span><span class="s2">$&quot;</span><span class="p">,</span>
-    <span class="p">)</span>
-    <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span>
-        <span class="n">phi</span><span class="o">.</span><span class="n">imag</span><span class="p">(),</span>
-        <span class="n">label</span><span class="o">=</span><span class="sa">fr</span><span class="s2">&quot;$\Im \Phi_</span><span class="si">{</span><span class="n">phi_num</span><span class="si">}</span><span class="s2">^</span><span class="se">{{</span><span class="si">{</span><span class="n">args</span><span class="o">.</span><span class="n">mult_l</span><span class="si">}{</span><span class="n">args</span><span class="o">.</span><span class="n">mult_l</span><span class="si">}</span><span class="se">}}</span><span class="s2">$&quot;</span><span class="p">,</span>
-    <span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Plotted&quot;</span><span class="p">)</span>
 
-    <span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">()</span>
-    <span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s2">&quot;Time&quot;</span><span class="p">)</span>
-    <span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="sa">fr</span><span class="s2">&quot;$r \Phi_</span><span class="si">{</span><span class="n">phi_num</span><span class="si">}</span><span class="s2">$&quot;</span><span class="p">)</span>
-    <span class="n">set_axis_limits_from_args</span><span class="p">(</span><span class="n">args</span><span class="p">)</span>
-
-    <span class="n">add_text_to_corner</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Det </span><span class="si">{</span><span class="n">args</span><span class="o">.</span><span class="n">detector_num</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">anchor</span><span class="o">=</span><span class="s2">&quot;SW&quot;</span><span class="p">,</span> <span class="n">offset</span><span class="o">=</span><span class="mf">0.005</span><span class="p">)</span>
-    <span class="n">add_text_to_corner</span><span class="p">(</span><span class="sa">fr</span><span class="s2">&quot;$r = </span><span class="si">{</span><span class="n">radius</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2">$&quot;</span><span class="p">,</span> <span class="n">anchor</span><span class="o">=</span><span class="s2">&quot;NE&quot;</span><span class="p">,</span> <span class="n">offset</span><span class="o">=</span><span class="mf">0.005</span><span class="p">)</span>
-
-    <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Plotted&quot;</span><span class="p">)</span>
-
-    <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Saving&quot;</span><span class="p">)</span>
-    <span class="n">save_from_dir_filename_ext</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">outdir</span><span class="p">,</span> <span class="n">figname</span><span class="p">,</span> <span class="n">args</span><span class="o">.</span><span class="n">fig_extension</span><span class="p">)</span>
-    <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;DONE&quot;</span><span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Saving&quot;</span><span class="p">)</span>
+        <span class="n">save_from_dir_filename_ext</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">outdir</span><span class="p">,</span> <span class="n">figname</span><span class="p">,</span> <span class="n">args</span><span class="o">.</span><span class="n">fig_extension</span><span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;DONE&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
