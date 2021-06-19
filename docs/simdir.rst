@@ -57,6 +57,13 @@ created as usual as a ``pickle_file`` will be generated.
    :py:meth:`~.rescan`). When the version of ``kuibit`` changes, a new pickle
    file has to be regenerated.
 
+
+:py:class:`~.SimDir` objects can be saved to disk as pickles with the
+:py:meth:`~.save` method, which takes as argument the path of the file that
+has to be generated. The function :py:func:`~.load_SimDir` loads back this
+data.
+
+
 Using SimDir objects
 --------------------
 
