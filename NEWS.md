@@ -1,5 +1,13 @@
 # Changelog
 
+## Version 1.4.0 (Under Development)
+
+#### New module: visualize_mayavi
+
+The `visualize_mayavi` module provides functions to render 3D plots with
+`mayavi`. At the moment, only the basic infrastructure and simple plots with
+apparent horizons are available, but the more will be added in the future.
+
 ## Version 1.3.1 (4 November 2021)
 
 #### Bug fixes
@@ -32,6 +40,7 @@ the current state of the simulation is performed. If the simulation changes
 (e.g., new checkpoints are added), this will result in errors. In that case, a
 new pickle file must be produced.
 
+
 #### Masked data
 
 Numerical objects now support
@@ -59,6 +68,7 @@ array of booleans that identifies the valid data.
    with a given mask (as the one obtained with the `mask` method).
 
 #### General
+
 - `SimDir` can be saved to disk with the method `save` and read with the
    function `load_SimDir`. This is useful to work with a simulation that has
    finished.
@@ -87,6 +97,7 @@ array of booleans that identifies the valid data.
 - Added `reflection_symmetry_undone`.
 
 #### Breaking changes
+
 - The `ignore` parameter in `SimDir` has been renamed to `ignored_dirs`.
 - The `trim_ends` parameter in `cactus_waves` is now set to `False` by default.
 
