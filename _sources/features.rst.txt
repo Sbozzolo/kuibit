@@ -156,9 +156,11 @@ Visualize
 
 - Automatically configure ``matplotlib`` with default options.
 - Visualize grid data in 2D.
-- Visualize apparent horizons in 2D.
+- Visualize apparent horizons in 2D (with ``matplotlibt``) and 3D (with ``mayavi``).
 - Visualize time and frequency series.
-- Save figures as LaTeX files.
+- Visualize apparent horizon orbits in 3D with ``mayavi``.
+- Visualize quasi-local properties of apparent horizons as vectors in 3D with ``mayavi``.
+- Save 2D figures as LaTeX files.
 - Make movies with `motionpicture`_.
 
 .. _motionpicture: https://github.com/Sbozzolo/motionpicture

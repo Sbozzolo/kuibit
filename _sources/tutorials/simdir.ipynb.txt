@@ -78,11 +78,13 @@
   {
    "cell_type": "code",
    "execution_count": null,
-   "metadata": {},
+   "metadata": {
+    "scrolled": true
+   },
    "outputs": [],
    "source": [
-    "with sd.SimDir(\"../../tests/tov\", pickle_file=\"/tmp/sim.pickle\"):\n",
-    "    print(sim)"
+    "with sd.SimDir(\"../../tests/tov\", pickle_file=\"/tmp/sim.pickle\") as sim2:\n",
+    "    print(sim2)"
    ]
   },
   {
@@ -91,7 +93,19 @@
    "source": [
     "When this code is run, `kuibit` checks if a pickle file exists in `/tmp/sim.pickle`. If yes, it will load it, effectively \"resuming a previous session\". At the end of the `with` block, the file is updated with the new work done. If the file did not exist initially, it will be created.\n",
     "\n",
-    "It is important to be careful when working with pickles as the risk of stale objects is high. If the data is changing (e.g., new restarts are added), it is likely that it will result in errors. "
+    "It is important to be careful when working with pickles as the risk of stale objects is high. If the data is changing (e.g., new restarts are added), it is likely that it will result in errors. \n",
+    "\n",
+    "It is always possible to save the state of a `SimDir` using the `save` method and reads back the data with the `load_SimDir` function"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "sim.save(\"/tmp/saved.pickle\") # The filename can be anything\n",
+    "sim3 = sd.load_SimDir(\"/tmp/saved.pickle\")"
    ]
   },
   {
@@ -170,7 +184,7 @@
    "name": "python",
    "nbconvert_exporter": "python",
    "pygments_lexer": "ipython3",
-   "version": "3.8.7"
+   "version": "3.8.10"
   }
  },
  "nbformat": 4,

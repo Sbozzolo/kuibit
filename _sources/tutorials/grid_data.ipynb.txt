@@ -276,7 +276,34 @@
    "source": [
     "Being able to resample `UniformGridData` means that even if it is not possible to directly\n",
     "combine objects with different grids, you can always resample them to a common grid, and then\n",
-    "perform the operation."
+    "perform the operation.\n",
+    "\n",
+    "Often, it is useful to save a `UniformGridData` to disk. A common example is to resampled 3D grid data\n",
+    "on a cluster and move the much smaller saved file to a local computer or laptop.\n",
+    "\n",
+    "This can be achieved with the `save` method and the `load_UniformGridData` function."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "resampled_funky.save(\"/tmp/funky.npz\")\n",
+    "\n",
+    "from kuibit.grid_data_utils import load_UniformGridData\n",
+    "\n",
+    "loaded_data = load_UniformGridData(\"/tmp/funky.npz\")"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "The fastest format to save data in is `npz`, but this is not always portable. \n",
+    "The `save` method accepts many other formats, like `txt`, `dat`, and also compressed\n",
+    "ones (e.g., `txt.gz`)."
    ]
   },
   {
@@ -535,7 +562,7 @@
    "name": "python",
    "nbconvert_exporter": "python",
    "pygments_lexer": "ipython3",
-   "version": "3.8.8"
+   "version": "3.8.10"
   },
   "name": "grid_data.ipynb"
  },

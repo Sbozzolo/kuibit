@@ -100,6 +100,7 @@ Usage
    sensitivity_curves.rst
    unitconv.rst
    visualize_matplotlib.rst
+   visualize_mayavi.rst
    argparse_helper.rst
    motionpicture.rst
 
@@ -205,6 +206,7 @@ Reference material (classes, functions, ...)
    sensitivity_curves_ref.rst
    unitconv_ref.rst
    visualize_matplotlib_ref.rst
+   visualize_mayavi_ref.rst
    argparse_helper_ref.rst
 
 What is a kuibit?
