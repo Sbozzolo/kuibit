@@ -73,12 +73,12 @@ given apparent horizon as a function of time."""
             f"Apparent horizons available: {sim_hor.available_apparent_horizons}"
         )
 
-        # Check that the horizons are available
+        # Check that the horizon is available
         if ah not in sim_hor.available_apparent_horizons:
-            raise ValueError(f"Apparent horizons {ah} is not available")
+            raise ValueError(f"Apparent horizon {ah} is not available")
 
         logger.debug("Reading horizons and computing radius")
-        # We can use any index for the qlm index, it will be thrown away
+
         hor = sim_hor.get_apparent_horizon(ah).ah
 
         cen_x, cen_y, cen_z = hor.centroid_x, hor.centroid_y, hor.centroid_z
