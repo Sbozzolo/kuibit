@@ -18,15 +18,21 @@ There are two ways to do this:
 
 1. you create a new folder filled with files obtained by concatenating the
    corresponding files across different simulations restarts. For example, if
-   your simulation has 10 restarts, each one with the same file `rho.x.asc`, you
-   can concatenate all these files in a new `rho.x.asc` in the new folder. This
-   will decrease the file count by a factor of 10 (the number of restarts).
+   your simulation has 10 restarts, each one with the same file ``rho.x.asc``,
+   you can concatenate all these files in a new ``rho.x.asc`` in the new folder.
+   This will decrease the file count by a factor of 10 (the number of restarts).
 2. you create new folders only containing the data you want to study. Let us
    assume that you are only interested in gravitational wave data. You can
    create a new folder that follows the same structure of your simulation
    directory, and create links to the files you are interested in. Then, when
    you use ``kuibit`` from this second folder, there will be far fewer files to
    analyze.
+
+However, if your data is not changing, the best way to deal with this problem is
+with pickles: you can always load and save ``SimDir`` objects to reduce the
+amount of work that needs to be done (:py:meth:`SimDir.save`,
+:py:func:`~.load_SimDir`).
+
 
 merge_refinement_levels() is too slow and/or requires too much memory
 ---------------------------------------------------------------------
