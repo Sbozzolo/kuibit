@@ -634,6 +634,7 @@ def _plot_grid(
 
     if colorbar:
         plot_colorbar(image, figure=figure, axis=axis, label=label)
+
     return image
 
 
@@ -872,6 +873,11 @@ def plot_colorbar(
     cb = plt.colorbar(mpl_artist, cax=cax, **kwargs)
     if label is not None:
         cb.set_label(label)
+
+    # When we draw a colorbar, that changes the selected axis. We do not
+    # want that, so we select back the original one.
+    plt.sca(axis)
+
     return cb
 
 

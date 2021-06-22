@@ -36,6 +36,11 @@ new pickle file must be produced.
 #### Breaking changes
 - The `ignore` parameter in `SimDir` has been renamed to `ignored_dirs`.
 
+#### Bug fixes
+
+- `plot_colorbar` does not steal axis focus anymore.
+
+
 ## Version 1.2.0 (1 June 2021)
 
 #### New module: visualize_matplotlib
