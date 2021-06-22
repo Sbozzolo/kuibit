@@ -680,6 +680,7 @@
 
     <span class="k">if</span> <span class="n">colorbar</span><span class="p">:</span>
         <span class="n">plot_colorbar</span><span class="p">(</span><span class="n">image</span><span class="p">,</span> <span class="n">figure</span><span class="o">=</span><span class="n">figure</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="n">axis</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="n">label</span><span class="p">)</span>
+
     <span class="k">return</span> <span class="n">image</span>
 
 
@@ -918,6 +919,11 @@
     <span class="n">cb</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">colorbar</span><span class="p">(</span><span class="n">mpl_artist</span><span class="p">,</span> <span class="n">cax</span><span class="o">=</span><span class="n">cax</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">label</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">cb</span><span class="o">.</span><span class="n">set_label</span><span class="p">(</span><span class="n">label</span><span class="p">)</span>
+
+    <span class="c1"># When we draw a colorbar, that changes the selected axis. We do not</span>
+    <span class="c1"># want that, so we select back the original one.</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">sca</span><span class="p">(</span><span class="n">axis</span><span class="p">)</span>
+
     <span class="k">return</span> <span class="n">cb</span>
 
 
