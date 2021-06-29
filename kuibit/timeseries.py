@@ -306,23 +306,35 @@ class TimeSeries(BaseSeries):
 
     duration = time_length
 
-    def time_at_maximum(self):
-        """Return the time at which the timeseries is maximum in absolute
-        value.
+    def time_at_maximum(self, absolute=True):
+        """Return the time at which the timeseries is maximum.
 
-        :returns:  Time at absolute maximum.
+        :param absolute: Whether to take the absolute value of the
+                         data.
+        :type absolute: bool
+
+        :returns:  Time at maximum. If ``absolute`` is True, then
+                   time at absolute maximum.
         :rtype:    float
         """
-        return self.x_at_abs_maximum_y()
+        if absolute:
+            return self.x_at_abs_maximum_y()
+        return self.x_at_maximum_y()
 
-    def time_at_minimum(self):
-        """Return the time at which the timeseries is minimum in absolute
-        value.
+    def time_at_minimum(self, absolute=True):
+        """Return the time at which the timeseries is minimum.
 
-        :returns:  Time at absolute minimum.
+        :param absolute: Whether to take the absolute value of the
+                         data.
+        :type absolute: bool
+
+        :returns:  Time at minimum. If ``absolute`` is True, then
+                   time at absolute minimum.
         :rtype:    float
         """
-        return self.x_at_abs_minimum_y()
+        if absolute:
+            return self.x_at_abs_minimum_y()
+        return self.x_at_minimum_y()
 
     def aligned_at_minimum(self):
         """Return a new timeseries with absolute minimum at t=0.

@@ -301,6 +301,22 @@ class BaseSeries(BaseNumerical):
         """
         return issubclass(self.y.dtype.type, complex)
 
+    def x_at_maximum_y(self):
+        """Return the value of x when y is maximum.
+
+        :returns: Value of x when y is maximum.
+        :rtype: float
+        """
+        return self.x[np.argmax(self.y)]
+
+    def x_at_minimum_y(self):
+        """Return the value of x when y is minimum.
+
+        :returns: Value of x when y is minimum.
+        :rtype: float
+        """
+        return self.x[np.argmin(self.y)]
+
     def x_at_abs_maximum_y(self):
         """Return the value of x when abs(y) is maximum.
 

@@ -146,6 +146,13 @@ class TestTimeseries(unittest.TestCase):
         self.assertEqual(ts.TimeSeries(t, t + 1j * t).time_at_maximum(), 1)
         self.assertEqual(ts.TimeSeries(t, t + 1j * t).time_at_minimum(), 0)
 
+        self.assertEqual(
+            ts.TimeSeries(t, -t).time_at_maximum(absolute=False), 0
+        )
+        self.assertEqual(
+            ts.TimeSeries(t, -t).time_at_minimum(absolute=False), 1
+        )
+
     def test_align_maximum_minimum(self):
         t = np.linspace(0, 1, 100)
 
