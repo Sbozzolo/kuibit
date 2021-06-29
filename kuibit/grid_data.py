@@ -2670,6 +2670,46 @@ class HierarchicalGridData(BaseNumerical):
             "coordinates", method_returns_list=True
         )
 
+    def coordinates_at_maximum(self, absolute=True):
+        """Return the point with maximum value.
+
+        :returns:  Coordinate at where the value is maximum. If ``absolute``
+                   is True, then the absolute value is first taken.
+        :rtype:    1D NumPy array
+
+        """
+        comps = self.all_components
+
+        # We extract the maximum on each component, and find the maximum of the
+        # maxima
+        maxima = [
+            np.max(np.abs(comp.data) if absolute else np.max(comp.data))
+            for comp in comps
+        ]
+
+        comp_max = np.argmax(maxima)
+        return comps[comp_max].coordinates_at_maximum(absolute=absolute)
+
+    def coordinates_at_minimum(self, absolute=True):
+        """Return the point with minimum value.
+
+        :returns:  Coordinate at where the value is minimum. If ``absolute``
+                   is True, then the absolute value is first taken.
+        :rtype:    1D NumPy array
+
+        """
+        comps = self.all_components
+
+        # We extract the minimum on each component, and find the minimum of the
+        # minima
+        minima = [
+            np.min(np.abs(comp.data) if absolute else np.min(comp.data))
+            for comp in comps
+        ]
+
+        comp_min = np.argmin(minima)
+        return comps[comp_min].coordinates_at_minimum(absolute=absolute)
+
     def __str__(self):
         ret = "Available refinement levels (components):\n"
         for ref_level in self.refinement_levels:

@@ -1783,3 +1783,35 @@ class TestHierarchicalGridData(unittest.TestCase):
         hg.slice(cut)
 
         self.assertEqual(hg, expected_hg)
+
+    def test_coordinates_at(self):
+
+        # Here we are also testing _call_component_method
+
+        geom = gd.UniformGrid(
+            [8001, 3], x0=[0, 0], x1=[2 * np.pi, 1], ref_level=0
+        )
+        geom2 = gd.UniformGrid(
+            [10001, 3], x0=[0, 0], x1=[2 * np.pi, 1], ref_level=1
+        )
+
+        sin_wave1 = gdu.sample_function_from_uniformgrid(
+            lambda x, y: np.sin(x), geom
+        )
+
+        sin_wave2 = gdu.sample_function_from_uniformgrid(
+            lambda x, y: np.sin(x), geom2
+        )
+
+        sin_wave = gd.HierarchicalGridData([sin_wave1] + [sin_wave2])
+
+        # We are taking the abs
+        self.assertEqual(sin_wave.coordinates_at_minimum()[0], 0)
+
+        point = sin_wave.coordinates_at_maximum()
+
+        self.assertTrue(np.allclose(sin_wave(point), sin_wave.abs_max()))
+
+        point_min = sin_wave.coordinates_at_minimum(absolute=False)
+
+        self.assertTrue(np.allclose(sin_wave(point_min), sin_wave.min()))
