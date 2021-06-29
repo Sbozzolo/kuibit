@@ -257,3 +257,13 @@ consider citing ``kuibit`` if you find the software useful. You can use the foll
 
 ``kuibit`` is built with ``NumPy``, ``SciPy``, and ``h5py``, and optionally uses
 ``matplotlib``, ``mayavi``, and ``numba``. Consider citing these packages too.
+
+Disclaimer
+------------
+
+``kuibit`` is developed as professional tool that can be used for research to be
+published in peer-reviewed journals. As such, ``kuibit`` is tested to ensure
+that results are scientifically sound. However, we do not guarantee that the
+entirety of the software is correct and does what it is intended to do. Hence,
+users are strongly recommended to perform their independent validations and to
+report any problem.
