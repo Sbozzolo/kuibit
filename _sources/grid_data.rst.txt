@@ -338,6 +338,10 @@ numerical with finite difference. The result is a
 :py:class:`~.HierarchicalGridData` or a list of
 :py:class:`~.HierarchicalGridData` (for each direction).
 
+Both :py:class:`~.HierarchicalGridData` and :py:class:`~.UniformGridData` have
+several useful methods. For instance, :py:meth:`~.coordinates_at_maximum` can
+be used to find what is the coordinate where the data has its maximum.
+
 Reading data
 ------------
 

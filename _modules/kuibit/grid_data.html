@@ -1336,6 +1336,54 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">partial_differentiated</span><span class="p">,</span> <span class="n">dimension</span><span class="p">,</span> <span class="n">order</span><span class="o">=</span><span class="n">order</span>
         <span class="p">)</span></div>
 
+    <span class="k">def</span> <span class="nf">_coordinates_at</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">where</span><span class="p">,</span> <span class="n">absolute</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Return coordinates of a point in data as selected by the given function.</span>
+
+<span class="sd">        :param where: Function that extract a location in the data. The function</span>
+<span class="sd">                      has to return a tuple, identifying the point along each of</span>
+<span class="sd">                      the dimensions.</span>
+<span class="sd">        :type where: callable</span>
+
+<span class="sd">        :param absolute: Whether to take the absolute value of the data.</span>
+<span class="sd">        :type absolute: bool</span>
+
+<span class="sd">        :returns: Coordinate of the point identified by ``where``.</span>
+<span class="sd">        :rtype: 1D NumPy array</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">)</span> <span class="k">if</span> <span class="n">absolute</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span>
+        <span class="n">index</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">unravel_index</span><span class="p">(</span><span class="n">where</span><span class="p">(</span><span class="n">data</span><span class="p">),</span> <span class="n">data</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+
+        <span class="c1"># coordinates is a list, with the linear coordinates along each</span>
+        <span class="c1"># direction</span>
+        <span class="n">coordinates</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">coordinates_from_grid</span><span class="p">()</span>
+
+        <span class="c1"># We loop over the coordinates and extract the element of position</span>
+        <span class="c1"># &quot;pos&quot;. We collect the results in a NumPy array.</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span>
+            <span class="p">[</span><span class="n">coordinates</span><span class="p">[</span><span class="n">dim</span><span class="p">][</span><span class="n">pos</span><span class="p">]</span> <span class="k">for</span> <span class="n">dim</span><span class="p">,</span> <span class="n">pos</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">index</span><span class="p">)]</span>
+        <span class="p">)</span>
+
+<div class="viewcode-block" id="UniformGridData.coordinates_at_maximum"><a class="viewcode-back" href="../../grid_data_ref.html#kuibit.grid_data.UniformGridData.coordinates_at_maximum">[docs]</a>    <span class="k">def</span> <span class="nf">coordinates_at_maximum</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">absolute</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Return the point with maximum value.</span>
+
+<span class="sd">        :returns:  Coordinate at where the value is maximum. If ``absolute``</span>
+<span class="sd">                   is True, then the absolute value is first taken.</span>
+<span class="sd">        :rtype:    1D NumPy array</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_coordinates_at</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">argmax</span><span class="p">,</span> <span class="n">absolute</span><span class="o">=</span><span class="n">absolute</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="UniformGridData.coordinates_at_minimum"><a class="viewcode-back" href="../../grid_data_ref.html#kuibit.grid_data.UniformGridData.coordinates_at_minimum">[docs]</a>    <span class="k">def</span> <span class="nf">coordinates_at_minimum</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">absolute</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Return the point with minimum value.</span>
+
+<span class="sd">        :returns:  Coordinate at where the value is minimum. If ``absolute``</span>
+<span class="sd">                   is True, then the absolute value is first taken.</span>
+<span class="sd">        :rtype:    1D NumPy array</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_coordinates_at</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">argmin</span><span class="p">,</span> <span class="n">absolute</span><span class="o">=</span><span class="n">absolute</span><span class="p">)</span></div>
+
     <span class="k">def</span> <span class="nf">_apply_unary</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">function</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Apply a unary function to the data.</span>
 
@@ -2667,6 +2715,46 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_call_component_method</span><span class="p">(</span>
             <span class="s2">&quot;coordinates&quot;</span><span class="p">,</span> <span class="n">method_returns_list</span><span class="o">=</span><span class="kc">True</span>
         <span class="p">)</span></div>
+
+<div class="viewcode-block" id="HierarchicalGridData.coordinates_at_maximum"><a class="viewcode-back" href="../../grid_data_ref.html#kuibit.grid_data.HierarchicalGridData.coordinates_at_maximum">[docs]</a>    <span class="k">def</span> <span class="nf">coordinates_at_maximum</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">absolute</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Return the point with maximum value.</span>
+
+<span class="sd">        :returns:  Coordinate at where the value is maximum. If ``absolute``</span>
+<span class="sd">                   is True, then the absolute value is first taken.</span>
+<span class="sd">        :rtype:    1D NumPy array</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">comps</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">all_components</span>
+
+        <span class="c1"># We extract the maximum on each component, and find the maximum of the</span>
+        <span class="c1"># maxima</span>
+        <span class="n">maxima</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">comp</span><span class="o">.</span><span class="n">data</span><span class="p">)</span> <span class="k">if</span> <span class="n">absolute</span> <span class="k">else</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">comp</span><span class="o">.</span><span class="n">data</span><span class="p">))</span>
+            <span class="k">for</span> <span class="n">comp</span> <span class="ow">in</span> <span class="n">comps</span>
+        <span class="p">]</span>
+
+        <span class="n">comp_max</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argmax</span><span class="p">(</span><span class="n">maxima</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">comps</span><span class="p">[</span><span class="n">comp_max</span><span class="p">]</span><span class="o">.</span><span class="n">coordinates_at_maximum</span><span class="p">(</span><span class="n">absolute</span><span class="o">=</span><span class="n">absolute</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="HierarchicalGridData.coordinates_at_minimum"><a class="viewcode-back" href="../../grid_data_ref.html#kuibit.grid_data.HierarchicalGridData.coordinates_at_minimum">[docs]</a>    <span class="k">def</span> <span class="nf">coordinates_at_minimum</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">absolute</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Return the point with minimum value.</span>
+
+<span class="sd">        :returns:  Coordinate at where the value is minimum. If ``absolute``</span>
+<span class="sd">                   is True, then the absolute value is first taken.</span>
+<span class="sd">        :rtype:    1D NumPy array</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">comps</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">all_components</span>
+
+        <span class="c1"># We extract the minimum on each component, and find the minimum of the</span>
+        <span class="c1"># minima</span>
+        <span class="n">minima</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">comp</span><span class="o">.</span><span class="n">data</span><span class="p">)</span> <span class="k">if</span> <span class="n">absolute</span> <span class="k">else</span> <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">comp</span><span class="o">.</span><span class="n">data</span><span class="p">))</span>
+            <span class="k">for</span> <span class="n">comp</span> <span class="ow">in</span> <span class="n">comps</span>
+        <span class="p">]</span>
+
+        <span class="n">comp_min</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argmin</span><span class="p">(</span><span class="n">minima</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">comps</span><span class="p">[</span><span class="n">comp_min</span><span class="p">]</span><span class="o">.</span><span class="n">coordinates_at_minimum</span><span class="p">(</span><span class="n">absolute</span><span class="o">=</span><span class="n">absolute</span><span class="p">)</span></div>
 
     <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">ret</span> <span class="o">=</span> <span class="s2">&quot;Available refinement levels (components):</span><span class="se">\n</span><span class="s2">&quot;</span>
