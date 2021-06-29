@@ -47,6 +47,12 @@ new pickle file must be produced.
 - `plot_colorbar` does not steal axis focus anymore.
 
 
+#### New examples
+
+Scripts:
+
+* `print_grid_point.py`
+
 ## Version 1.2.0 (1 June 2021)
 
 #### New module: visualize_matplotlib
