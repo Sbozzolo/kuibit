@@ -37,7 +37,7 @@ new pickle file must be produced.
 - `time_at_maximum` and `time_at_minimum` in `TimeSeries` can now take the
   optional argument `absolute`.
 - Added `x_at_minimum_y` and `x_at_maximum_y` to `BaseNumerical`.
-
+- Added `coordinates_at_maximum` and `coordinates_at_minimum` for grid data.
 
 #### Breaking changes
 - The `ignore` parameter in `SimDir` has been renamed to `ignored_dirs`.

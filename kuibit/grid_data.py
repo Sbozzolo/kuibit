@@ -1290,6 +1290,54 @@ class UniformGridData(BaseNumerical):
             self.partial_differentiated, dimension, order=order
         )
 
+    def _coordinates_at(self, where, absolute):
+        """Return coordinates of a point in data as selected by the given function.
+
+        :param where: Function that extract a location in the data. The function
+                      has to return a tuple, identifying the point along each of
+                      the dimensions.
+        :type where: callable
+
+        :param absolute: Whether to take the absolute value of the data.
+        :type absolute: bool
+
+        :returns: Coordinate of the point identified by ``where``.
+        :rtype: 1D NumPy array
+
+        """
+        data = np.abs(self.data) if absolute else self.data
+        index = np.unravel_index(where(data), data.shape)
+
+        # coordinates is a list, with the linear coordinates along each
+        # direction
+        coordinates = self.coordinates_from_grid()
+
+        # We loop over the coordinates and extract the element of position
+        # "pos". We collect the results in a NumPy array.
+        return np.array(
+            [coordinates[dim][pos] for dim, pos in enumerate(index)]
+        )
+
+    def coordinates_at_maximum(self, absolute=True):
+        """Return the point with maximum value.
+
+        :returns:  Coordinate at where the value is maximum. If ``absolute``
+                   is True, then the absolute value is first taken.
+        :rtype:    1D NumPy array
+
+        """
+        return self._coordinates_at(np.argmax, absolute=absolute)
+
+    def coordinates_at_minimum(self, absolute=True):
+        """Return the point with minimum value.
+
+        :returns:  Coordinate at where the value is minimum. If ``absolute``
+                   is True, then the absolute value is first taken.
+        :rtype:    1D NumPy array
+
+        """
+        return self._coordinates_at(np.argmin, absolute=absolute)
+
     def _apply_unary(self, function):
         """Apply a unary function to the data.
 

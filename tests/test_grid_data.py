@@ -602,6 +602,23 @@ class TestUniformGridData(unittest.TestCase):
         grid_data.slice([None, None, 3], resample=False)
         self.assertEqual(grid_data, expected_no_z)
 
+    def test_coordinates_at(self):
+
+        grid_2d = gd.UniformGrid([10, 20], x0=[1, 2], dx=[1, 1])
+
+        data2d = gdu.sample_function_from_uniformgrid(
+            lambda x, y: -x * (y + 2), grid_2d
+        )
+
+        expected = [1, 2]
+
+        self.assertTrue(
+            np.allclose(
+                expected, data2d.coordinates_at_maximum(absolute=False)
+            )
+        )
+        self.assertTrue(np.allclose(expected, data2d.coordinates_at_minimum()))
+
     def test_save_load(self):
 
         grid_file = "test_save_grid.dat"
