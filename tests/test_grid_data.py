@@ -1707,7 +1707,7 @@ class TestHierarchicalGridData(unittest.TestCase):
         expected_str += "Spacing at finest level (0): [1. 1.]"
         self.assertEqual(expected_str, hg.__str__())
 
-    def test_partial_derivated(self):
+    def test_partial_differentiated(self):
         # Here we are also testing _call_component_method
 
         geom = gd.UniformGrid(
