@@ -165,6 +165,7 @@ Scripts
    examples/bins/print_ah_formation_time.rst
    examples/bins/print_available_iterations.rst
    examples/bins/print_available_timeseries.rst
+   examples/bins/print_grid_point.rst
    examples/bins/print_qlm_properties_at_time.rst
    examples/bins/save_resampled_grid_data.rst
 
