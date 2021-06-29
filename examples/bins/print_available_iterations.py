@@ -35,6 +35,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "--dimension",
         help="Print only for the given dimension.",
+        choices=dimensions,
     )
     args = kah.get_args(parser)
 
