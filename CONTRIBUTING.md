@@ -77,7 +77,7 @@ we write our TODO comments in the following way:
 ```
 
 `TYPE` has to be capitalized and has to be one of `FEATURE`, `FUTURE`,
-`REFACTORING`. The `FUTURE` keyword means that the TODO item
+`REFACTORING`, `PERFORMANCE`. The `FUTURE` keyword means that the TODO item
 depends on something else being accomplished, for example, an external
 dependency implementing some feature.
 
