@@ -2,8 +2,9 @@
 
 # Copyright (C) 2020-2021 Gabriele Bozzola
 #
-# Inspired by code originally developed by Wolfgang Kastaun. See, GitHub,
-# wokast/PyCactus/PostCactus/cactus_grid_ascii.py, cactus_grid_h5.py,
+# Inspired by code originally developed by Wolfgang Kastaun. This file may
+# contain algorithms and/or structures first implemented in
+# GitHub:wokast/PyCactus/PostCactus/cactus_grid_ascii.py, cactus_grid_h5.py,
 # cactus_grid_omni.py
 #
 # This program is free software; you can redistribute it and/or modify it under
