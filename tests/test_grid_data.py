@@ -1401,6 +1401,19 @@ class TestHierarchicalGridData(unittest.TestCase):
         hg4 = hg3.copy()
         self.assertEqual(hg3, hg4)
 
+    def test_is_complex(self):
+
+        hg_real = gd.HierarchicalGridData(self.grid_data_two_comp)
+
+        self.assertFalse(hg_real.is_complex())
+
+        hg_complex = gd.HierarchicalGridData(self.grid_data_two_comp)
+
+        # Make it complex
+        hg_complex[0][0] *= 1j
+
+        self.assertTrue(hg_complex.is_complex())
+
     def test_iter(self):
 
         hg1 = gd.HierarchicalGridData(self.grid_data)

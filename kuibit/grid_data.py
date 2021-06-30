@@ -2115,6 +2115,15 @@ class HierarchicalGridData(BaseNumerical):
         """
         return self.first_component.iteration
 
+    def is_complex(self):
+        """Return whether the data is complex.
+
+        :returns:  True if the data is complex, false if it is not.
+        :rtype:   bool
+
+        """
+        return any(comp.is_complex() for comp in self.all_components)
+
     def copy(self):
         """Return a deep copy.
 
