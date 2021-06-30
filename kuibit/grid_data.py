@@ -1915,6 +1915,12 @@ class HierarchicalGridData(BaseNumerical):
         :rtype: list of :py:class:`~.UniformGridData`
 
         """
+        # TODO: (PERFORMANCE) Optimize method called often
+        #
+        # This method is used every time we loop over all the components. Hence,
+        # it is called by several other methods. It is important to optimize it
+        # further to improve overall performance.
+
         all_components = []
         for comps in self.grid_data_dict.values():
             all_components.extend(comps)

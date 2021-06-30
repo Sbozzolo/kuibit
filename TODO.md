@@ -57,3 +57,4 @@ Python required to complete the task.
 * Add support for `logging`. [===]
 * Refactor code to correctly use `np.array` or `np.asarray` (not use `np.array`
   when is not needed). [==]
+* Improve performance of `HierarchicalGridData.all_components`. [==]
