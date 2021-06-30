@@ -1348,7 +1348,7 @@ class UniformGridData(BaseNumerical):
         """
         return self._coordinates_at(np.argmin, absolute=absolute)
 
-    def _apply_unary(self, function):
+    def _apply_unary(self, function, *args, **kwargs):
         """Apply a unary function to the data.
 
         :param function: Unary function.
@@ -1357,9 +1357,9 @@ class UniformGridData(BaseNumerical):
         :rtype:    :py:class:`~.UniformGridData`
 
         """
-        return type(self)(self.grid, function(self.data))
+        return type(self)(self.grid, function(self.data, *args, **kwargs))
 
-    def _apply_reduction(self, reduction):
+    def _apply_reduction(self, reduction, *args, **kwargs):
         """Apply a reduction to the data.
 
         :param function: Function to apply to the data.
@@ -1369,9 +1369,9 @@ class UniformGridData(BaseNumerical):
         :rtype: float
 
         """
-        return reduction(self.data)
+        return reduction(self.data, *args, **kwargs)
 
-    def _apply_binary(self, other, function):
+    def _apply_binary(self, other, function, *args, **kwargs):
         """This is an abstract function that is used to implement mathematical
         operations with other :py:class:`~.UniformGridData` (if they have the
         same grid) or scalars.
@@ -1399,11 +1399,15 @@ class UniformGridData(BaseNumerical):
                 and np.allclose(self.grid.dx, other.grid.dx, atol=1e-14)
             ):
                 raise ValueError("The objects do not have the same grid!")
-            return type(self)(self.grid, function(self.data, other.data))
+            return type(self)(
+                self.grid, function(self.data, other.data, *args, **kwargs)
+            )
 
         # If it is a number
         if isinstance(other, (int, float, complex)):
-            return type(self)(self.grid, function(self.data, other))
+            return type(self)(
+                self.grid, function(self.data, other, *args, **kwargs)
+            )
 
         # If we are here, it is because we cannot add the two objects
         raise TypeError("I don't know how to combine these objects")
@@ -2425,7 +2429,7 @@ class HierarchicalGridData(BaseNumerical):
         # We need to invalidate the _component_mapping (it may have changed)
         self._component_mapping = None
 
-    def _apply_binary(self, other, function):
+    def _apply_binary(self, other, function, *args, **kwargs):
         """Apply a binary function to the data of ``self`` and ``other``.
 
         :param function: Function to apply to all the data in the various
@@ -2442,7 +2446,7 @@ class HierarchicalGridData(BaseNumerical):
             if self.shape != other.shape:
                 raise ValueError("Grid structure incompatible")
             new_data = [
-                function(data_self, data_other)
+                function(data_self, data_other, *args, **kwargs)
                 for data_self, data_other in zip(
                     self.all_components, other.all_components
                 )
@@ -2451,14 +2455,15 @@ class HierarchicalGridData(BaseNumerical):
 
         if isinstance(other, (int, float, complex)):
             new_data = [
-                function(data_self, other) for data_self in self.all_components
+                function(data_self, other, *args, **kwargs)
+                for data_self in self.all_components
             ]
             return type(self)(new_data)
 
         # If we are here, it is because we cannot add the two objects
         raise TypeError("I don't know how to combine these objects")
 
-    def _apply_reduction(self, reduction):
+    def _apply_reduction(self, reduction, *args, **kwargs):
         """Apply a reduction to the data.
 
         :param function: Reduction to apply to all the data in the various
@@ -2477,13 +2482,15 @@ class HierarchicalGridData(BaseNumerical):
             np.array(
                 [
                     # skipcq: PYL-W0212
-                    data._apply_reduction(reduction)
+                    data._apply_reduction(reduction, *args, **kwargs)
                     for data in self.all_components
                 ]
-            )
+            ),
+            *args,
+            **kwargs,
         )
 
-    def _apply_unary(self, function):
+    def _apply_unary(self, function, *args, **kwargs):
         """Apply a unary function to the data.
 
         :param function: Function to apply to all the data in the various
@@ -2495,7 +2502,13 @@ class HierarchicalGridData(BaseNumerical):
         :rtype: :py:class:`~.HierarchicalGridData`
 
         """
-        new_data = [function(data) for data in self.all_components]
+        # Here we are accessing _apply_unary, which is a protected member, so
+        # we ignore potential complaints.
+        new_data = [
+            # skipcq: PYL-W0212
+            data._apply_unary(function, *args, **kwargs)
+            for data in self.all_components
+        ]
         return type(self)(new_data)
 
     def _call_component_method(

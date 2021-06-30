@@ -39,9 +39,12 @@ class BaseNumerical(ABC):
     operations in all the derived classes.
 
     The derived classes have to implement:
-    - _apply_unary(self, function) that returns function(self)
-    - _apply_binary(self, other, function) that returns function(self, other)
-    - _apply_reduction(self, function) that returns function(self)
+    - _apply_unary(self, function, *args, **kwargs)
+       that returns function(self, *args, **kwargs)
+    - _apply_binary(self, other, function, *args, **kwargs)
+       that returns function(self, other, *args, **kwargs)
+    - _apply_reduction(self, function, *args, **kwargs)
+       that returns function(self, *args, **kwargs)
 
     """
 

@@ -536,7 +536,7 @@ class BaseSeries(BaseNumerical):
             piecewise_constant=piecewise_constant,
         )
 
-    def _apply_binary(self, other, function):
+    def _apply_binary(self, other, function, *args, **kwargs):
         """This is an abstract function that is used to implement mathematical
         operations with other series (if they have the same x) or
         scalars.
@@ -562,12 +562,14 @@ class BaseSeries(BaseNumerical):
                 raise ValueError("The objects do not have the same x!")
             return type(self)(
                 self.x,
-                function(self.y, other.y),
+                function(self.y, other.y, *args, **kwargs),
                 True,
             )
         # If it is a number
         if isinstance(other, (int, float, complex)):
-            return type(self)(self.x, function(self.y, other), True)
+            return type(self)(
+                self.x, function(self.y, other, *args, **kwargs), True
+            )
 
         # If we are here, it is because we cannot add the two objects
         raise TypeError("I don't know how to combine these objects")
@@ -848,7 +850,7 @@ class BaseSeries(BaseNumerical):
     clip = crop
     clipped = cropped
 
-    def _apply_unary(self, function):
+    def _apply_unary(self, function, *args, **kwargs):
         """Apply a unary function to the data.
 
         :param function: Function to apply to the series.
@@ -858,9 +860,9 @@ class BaseSeries(BaseNumerical):
         :rtype: :py:class:`~.BaseSeries` or derived class
 
         """
-        return type(self)(self.x, function(self.y), True)
+        return type(self)(self.x, function(self.y, *args, **kwargs), True)
 
-    def _apply_reduction(self, reduction):
+    def _apply_reduction(self, reduction, *args, **kwargs):
         """Apply a reduction to the data.
 
         :param function: Function to apply to the series.
@@ -870,7 +872,7 @@ class BaseSeries(BaseNumerical):
         :rtype: float
 
         """
-        return reduction(self.y)
+        return reduction(self.y, *args, **kwargs)
 
 
 def sample_common(series, resample=False, piecewise_constant=False):
