@@ -46,6 +46,8 @@ class TestFrequencySeries(unittest.TestCase):
 
         self.FS_c = fs.FrequencySeries(self.f_c, self.fft_c)
 
+        self.FS_cm = fs.FrequencySeries(self.f_c, np.ma.log10(self.fft_c))
+
     def test_fmin_fmax_frange(self):
 
         self.assertAlmostEqual(self.FS.fmin, 0)
@@ -139,6 +141,10 @@ class TestFrequencySeries(unittest.TestCase):
         # real
         ts_r = self.FS.to_TimeSeries()
         self.assertTrue(np.allclose(ts_r.y, self.y))
+
+        # Masked
+        with self.assertRaises(RuntimeError):
+            self.FS_cm.to_TimeSeries()
 
     def test_inner_product(self):
 

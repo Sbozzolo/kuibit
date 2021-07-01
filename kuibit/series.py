@@ -34,6 +34,8 @@ takes a list of series and resamples them to their common points.
 
 """
 
+import warnings
+
 import numpy as np
 from scipy import integrate, interpolate, signal
 
@@ -249,6 +251,18 @@ class BaseSeries(BaseNumerical):
         return AttributeDictionary({"values": self.x})
 
     @property
+    def mask(self):
+        """Return where the data is valid (according to the mask).
+
+        :returns: Array of True/False of the same length of the data.
+                  False where the data is valid, true where is not.
+        :rtype: 1D array of bool
+        """
+        if self.is_masked():
+            return np.ma.getmask(self.y)
+        return np.zeros(len(self), dtype=bool)
+
+    @property
     def xmin(self):
         """Return the minimum of the independent variable x.
 
@@ -365,6 +379,9 @@ class BaseSeries(BaseNumerical):
             raise ValueError(
                 f"Too few points to compute a spline of order {k}"
             )
+
+        if self.is_masked():
+            raise RuntimeError("Splines with masked data are not supported.")
 
         self.spline_real = interpolate.splrep(
             self.x, self.y.real, k=k, s=s, *args, **kwargs
@@ -577,7 +594,7 @@ class BaseSeries(BaseNumerical):
     def __eq__(self, other):
         """Check for equality up to numerical precision."""
         if isinstance(other, type(self)):
-            return np.allclose(self.x, other.x, atol=1e-14) and np.allclose(
+            return np.allclose(self.x, other.x, atol=1e-14) and np.ma.allclose(
                 self.y, other.y, atol=1e-14
             )
         return False
@@ -608,6 +625,12 @@ class BaseSeries(BaseNumerical):
         :type file_name: str
 
         """
+        if self.is_masked():
+            warnings.warn(
+                "Discarding mask information.",
+                RuntimeWarning,
+            )
+
         if self.is_complex():
             np.savetxt(
                 file_name,
@@ -630,12 +653,55 @@ class BaseSeries(BaseNumerical):
         :returns: A new series with only finite values.
         :rtype: :py:class:`~.BaseSeries` or derived class
         """
-        msk = np.isfinite(self.y)
-        return type(self)(self.x[msk], self.y[msk], True)
+        mask = np.isfinite(self.y)
+        return type(self)(self.x[mask], self.y[mask], True)
 
     def nans_remove(self):
         """Filter out nans/infinite values."""
         self._apply_to_self(self.nans_removed)
+
+    def mask_removed(self):
+        """Remove masked value.
+
+        Return a new series with valid values only.
+
+        :returns: A new series with only valid values.
+        :rtype: :py:class:`~.BaseSeries` or derived class
+        """
+        if self.is_masked():
+            mask = np.invert(self.mask)
+            return type(self)(self.x[mask], self.y[mask], True)
+
+        # We can copy the spline
+        return self.copy()
+
+    def mask_remove(self):
+        """Remove masked values."""
+        self._apply_to_self(self.mask_removed)
+
+    def mask_applied(self, mask):
+        """Return a new series with given mask applied to the data.
+
+        The previous mask (if present) will be ignored.
+
+        :param mask: Array of booleans that identify where the data is invalid.
+                     This can be obtained with the method :py:meth:`~.mask`.
+        :type mask: 1D NumPy array
+
+        :returns: New series with mask applied.
+        :rtype: :py:class:`~.BaseSeries`
+
+        """
+        return type(self)(self.x, np.ma.MaskedArray(self.y, mask=mask), True)
+
+    def mask_apply(self, mask):
+        """Apply given mask.
+
+        :param mask: Array of booleans that identify where the data is invalid.
+                     This can be obtained with the method :py:meth:`~.mask`.
+        :type mask: 1D NumPy array
+        """
+        self._apply_to_self(self.mask_applied, mask)
 
     def integrated(self, dx=None):
         """Return a series that is the integral computed with method of
@@ -651,6 +717,11 @@ class BaseSeries(BaseNumerical):
         :rtype:    :py:class:`~.BaseSeries` or derived class
 
         """
+        if self.is_masked():
+            raise RuntimeError(
+                "Integration with masked data is not supported."
+            )
+
         # We pass self.x only if dx was not provided
         passing_x = self.x if dx is None else None
         return type(self)(
@@ -732,6 +803,11 @@ class BaseSeries(BaseNumerical):
         :rtype:    :py:class:`~.BaseSeries` or derived class
 
         """
+        if self.is_masked():
+            raise RuntimeError(
+                "Differentiation with masked data is not supported."
+            )
+
         ret_value = self.y
         for _num_deriv in range(order):
             ret_value = np.gradient(ret_value, self.x, edge_order=2)
@@ -773,6 +849,9 @@ class BaseSeries(BaseNumerical):
         :rtype:    :py:class:`~.BaseSeries` or derived class
 
         """
+        if self.is_masked():
+            raise RuntimeError("Smoothing with masked data is not supported.")
+
         if self.is_complex():
             return type(self)(
                 self.x,

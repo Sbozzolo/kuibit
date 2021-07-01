@@ -36,6 +36,7 @@ Similarly, a :py:class:`~.HierarchicalGridData` contains multiple
 """
 from bisect import bisect_right
 from os.path import splitext
+import warnings
 
 import numpy as np
 from scipy import interpolate, linalg
@@ -274,6 +275,12 @@ class UniformGridData(BaseNumerical):
         :type file_name: str
 
         """
+        if self.is_masked():
+            warnings.warn(
+                "Discarding mask information.",
+                RuntimeWarning,
+            )
+
         if splitext(file_name)[-1] == ".npz":
             # Time and iterations could be None, in that case, we don't add them
             others = {}
@@ -436,6 +443,9 @@ class UniformGridData(BaseNumerical):
         :type k:  int
 
         """
+
+        if self.is_masked():
+            raise RuntimeError("Splines with masked data are not supported.")
 
         coords = self.grid.coordinates()
 
@@ -867,6 +877,18 @@ class UniformGridData(BaseNumerical):
         """
         return issubclass(self.data.dtype.type, complex)
 
+    @property
+    def mask(self):
+        """Return where the data is valid (according to the mask).
+
+        :returns: Array of True/False of the same shape of the data.
+                  False where the data is valid, True where is not.
+        :rtype: array of bool
+        """
+        if self.is_masked():
+            return self.data.mask
+        return np.zeros(self.data.shape, dtype=bool)
+
     def is_masked(self):
         """Return whether the data is masked.
 
@@ -1221,6 +1243,30 @@ class UniformGridData(BaseNumerical):
             return percentiles[0]
         return percentiles
 
+    def mask_applied(self, mask):
+        """Return a new series with given mask applied to the data.
+
+        The previous mask (if present) will be ignored.
+
+        :param mask: Array of booleans that identify where the data is invalid.
+                     This can be obtained with the method :py:meth:`~.mask`.
+        :type mask: NumPy array
+
+        :returns: New grid data with mask applied.
+        :rtype: :py:class:`~.UniformGridData`
+
+        """
+        return type(self)(self.grid, np.ma.MaskedArray(self.data, mask=mask))
+
+    def mask_apply(self, mask):
+        """Apply given mask.
+
+        :param mask: Array of booleans that identify where the data is invalid.
+                     This can be obtained with the method :py:meth:`~.mask`.
+        :type mask: NumPy array
+        """
+        self._apply_to_self(self.mask_applied, mask)
+
     def partial_differentiated(self, direction, order=1):
         """Return a :py:class:`~.UniformGridData` that is the numerical
         order-differentiation of the present grid_data along a given direction.
@@ -1241,6 +1287,11 @@ class UniformGridData(BaseNumerical):
         :rtype:    :py:class:`~.UniformGridData`
 
         """
+        if self.is_masked():
+            raise RuntimeError(
+                "Differentiation with masked data is not supported."
+            )
+
         if direction < 0 or direction >= self.num_dimensions:
             raise ValueError(
                 f"Grid has {self.num_dimensions}, dimensions, "
@@ -1416,7 +1467,7 @@ class UniformGridData(BaseNumerical):
         if not isinstance(other, type(self)):
             return False
         return (
-            np.allclose(self.data, other.data, atol=1e-14)
+            np.ma.allclose(self.data, other.data, atol=1e-14)
             and self.grid == other.grid
         )
 
@@ -1433,6 +1484,11 @@ class UniformGridData(BaseNumerical):
         :rtype: :py:class:`~.UniformGridData`
 
         """
+        if self.is_masked():
+            raise RuntimeError(
+                "Fourier transform with masked data is not supported."
+            )
+
         fft_data = np.fft.fftshift(np.fft.fftn(self.data))
         # We extract the frequencies along each direction
         freqs = [
@@ -1777,6 +1833,11 @@ class HierarchicalGridData(BaseNumerical):
         # track of what indices have been filled with the input data.
         data = np.zeros(grid.shape, dtype=components[0].data.dtype)
         indices_used = np.zeros(grid.shape, dtype=components[0].data.dtype)
+
+        if any(
+            isinstance(comp.data, np.ma.MaskedArray) for comp in components
+        ):
+            data = np.ma.MaskedArray(data)
 
         for comp in components:
             # We find the index corresponding to x0 and x1 of the component
@@ -2138,6 +2199,16 @@ class HierarchicalGridData(BaseNumerical):
         """
         return any(comp.is_complex() for comp in self.all_components)
 
+    @property
+    def mask(self):
+        """Return where the data is valid (according to the mask).
+
+        :returns: List of arrays of True/False, one per component
+                  in the same order as :py:meth:`~.all_components`.
+        :rtype: list of arrays of bool
+        """
+        return [comp.mask for comp in self.all_components]
+
     def is_masked(self):
         """Return whether the data is masked.
 
@@ -2154,6 +2225,37 @@ class HierarchicalGridData(BaseNumerical):
         :rtype:    :py:class:`~.HierarchicalGridData`
         """
         return type(self)(self.all_components)
+
+    def mask_applied(self, mask):
+        """Return a new grid data with given mask applied to the data.
+
+        The previous mask (if present) will be ignored.
+
+        :param mask: List of arrays of booleans (one per component) that identify
+                     where the data is invalid.
+                     This can be obtained with the method :py:meth:`~.mask`.
+        :type mask: list of NumPy array
+
+        :returns: New grid data with mask applied.
+        :rtype: :py:class:`~.HierarchicalGridData`
+
+        """
+        return type(self)(
+            [
+                comp.mask_applied(mask_comp)
+                for comp, mask_comp in zip(self.all_components, mask)
+            ]
+        )
+
+    def mask_apply(self, mask):
+        """Apply given mask.
+
+        :param mask: List of arrays of booleans (one per component) that identify
+                     where the data is invalid.
+                     This can be obtained with the method :py:meth:`~.mask`.
+        :type mask: list of NumPy array
+        """
+        self._apply_to_self(self.mask_applied, mask)
 
     def __eq__(self, other):
         """Check for equality."""
@@ -2260,6 +2362,8 @@ class HierarchicalGridData(BaseNumerical):
         :rtype:   1D NumPy array or float
 
         """
+        if not piecewise_constant and self.is_masked():
+            raise RuntimeError("Splines with masked data are not supported.")
 
         if isinstance(x, UniformGrid):
             # The way we want the coordinates is like as an array with the same

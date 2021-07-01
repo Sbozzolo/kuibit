@@ -897,6 +897,11 @@ class TimeSeries(BaseSeries):
         :rtype: :py:class:`~.FrequencySeries`
 
         """
+        if self.is_masked():
+            raise RuntimeError(
+                "Fourier transform with masked data is not supported."
+            )
+
         if not self.is_regularly_sampled():
             warnings.warn(
                 "TimeSeries is not regularly samples. Resampling.",

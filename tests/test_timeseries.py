@@ -38,6 +38,10 @@ class TestTimeseries(unittest.TestCase):
         # Complex
         self.TS_c = ts.TimeSeries(self.times, self.values + 1j * self.values)
 
+        # Complex and masked
+        self.vals_cm = np.ma.log10(self.values + 1j * self.values)
+        self.TS_cm = ts.TimeSeries(self.times, self.vals_cm)
+
     # This is to make coverage happy and test the abstract methods
     # There's no real test here
     @mock.patch.multiple(numerical.BaseNumerical, __abstractmethods__=set())
@@ -134,9 +138,16 @@ class TestTimeseries(unittest.TestCase):
     def test_len(self):
         self.assertEqual(len(self.TS), 100)
 
+        self.assertEqual(len(self.TS_cm), 100)
+
     def test_iter(self):
         for t, y in self.TS:
             self.assertEqual((t, y), (self.TS.t[0], self.TS.y[0]))
+            break
+
+        # Masked
+        for t, y in self.TS_cm:
+            self.assertEqual((t, y), (self.TS_cm.t[0], self.TS_cm.y[0]))
             break
 
     def test_x_at_maximum_minimum_y(self):
@@ -146,11 +157,24 @@ class TestTimeseries(unittest.TestCase):
         self.assertEqual(ts.TimeSeries(t, t + 1j * t).time_at_maximum(), 1)
         self.assertEqual(ts.TimeSeries(t, t + 1j * t).time_at_minimum(), 0)
 
+        # Passing the absolute argument
         self.assertEqual(
             ts.TimeSeries(t, -t).time_at_maximum(absolute=False), 0
         )
         self.assertEqual(
             ts.TimeSeries(t, -t).time_at_minimum(absolute=False), 1
+        )
+
+        # Masked
+
+        # 0 should be one the points
+        t = np.linspace(-1, 1, 99)
+
+        self.assertAlmostEqual(
+            ts.TimeSeries(
+                t, np.ma.masked_greater_equal(t, 0)
+            ).time_at_minimum(),
+            0,
         )
 
     def test_align_maximum_minimum(self):
@@ -256,6 +280,25 @@ class TestTimeseries(unittest.TestCase):
         out += self.TS
         self.assertTrue(np.allclose(out.y, 2 + 2 * np.sin(times)))
 
+        # Everything should work with masked data too
+        out = self.TS_cm + ts.TimeSeries(times, values)
+
+        self.assertTrue(np.allclose(out.y, self.vals_cm + values))
+
+        # Scalar
+        out = self.TS_cm + 1
+        self.assertTrue(np.allclose(out.y, 1 + self.vals_cm))
+
+        out = 1 + self.TS_cm
+        self.assertTrue(np.allclose(out.y, 1 + self.vals_cm))
+
+        # Test iadd
+        out += 1
+        self.assertTrue(np.allclose(out.y, 2 + self.vals_cm))
+
+        out += self.TS_cm
+        self.assertTrue(np.allclose(out.y, 2 + 2 * self.vals_cm))
+
     def test_sub(self):
         # Errors are tested by test_apply_binary
 
@@ -292,6 +335,9 @@ class TestTimeseries(unittest.TestCase):
         self.assertTrue(
             np.allclose(self.TS.abs().y, np.abs(np.sin(self.times)))
         )
+
+        # Masked
+        self.assertTrue(np.allclose(self.TS_cm.abs().y, np.abs(self.vals_cm)))
 
     def test_mul(self):
         # Errors are tested by test_apply_binary
@@ -383,12 +429,8 @@ class TestTimeseries(unittest.TestCase):
 
     def test_is_masked(self):
 
-        times = np.linspace(-1, 1, 100)
-        values = np.ma.log10(times)
-        ts_masked = ts.TimeSeries(times, values)
-
         self.assertFalse(self.TS.is_masked())
-        self.assertTrue(ts_masked.is_masked())
+        self.assertTrue(self.TS_cm.is_masked())
 
     def test_unary_functions(self):
         def test_f(f):
@@ -589,6 +631,11 @@ class TestTimeseries(unittest.TestCase):
         self.assertTrue(np.allclose(loaded_compl[1], np.sin(times)))
         self.assertTrue(np.allclose(loaded_compl[2], np.sin(times)))
 
+        with self.assertWarns(RuntimeWarning):
+            path = "/tmp/tmp_kuibit_tmp.dat"
+            self.TS_cm.save("/tmp/tmp_kuibit_tmp.dat")
+            os.remove(path)
+
     def test_nans_remove(self):
 
         values = self.values[:]
@@ -638,6 +685,10 @@ class TestTimeseries(unittest.TestCase):
                 self.TS_c(other_times), other_values + 1j * other_values
             )
         )
+
+        # Masked data
+        with self.assertRaises(RuntimeError):
+            self.TS_cm(other_times)
 
         # Does the spline update?
         # Let's test with a method that changes the timeseries
@@ -760,6 +811,10 @@ class TestTimeseries(unittest.TestCase):
 
         self.assertTrue(np.allclose(sins.y, 1 - np.cos(times_long), atol=1e-4))
 
+        # Masked data
+        with self.assertRaises(RuntimeError):
+            self.TS_cm.integrated()
+
     def test_differentiate(self):
 
         times = np.linspace(0, 2 * np.pi, 1000)
@@ -826,6 +881,9 @@ class TestTimeseries(unittest.TestCase):
         sins.spline_differentiate()
 
         self.assertTrue(np.allclose(sins.y, np.cos(times), atol=1e-3))
+
+        with self.assertRaises(RuntimeError):
+            self.TS_cm.differentiated()
 
     def test_remove_duplicated_iters(self):
 
@@ -1059,6 +1117,43 @@ class TestTimeseries(unittest.TestCase):
 
         self.assertTrue(np.allclose(sins.y, expected_y))
 
+        with self.assertRaises(RuntimeError):
+            self.TS_cm.savgol_smoothed(1, 3)
+
+    def test_mask(self):
+
+        # Clean data
+        self.assertCountEqual(self.TS.mask, [False] * len(self.TS))
+
+        # Masked data
+        self.assertCountEqual(self.TS_cm.mask, self.TS_cm.y.mask)
+
+    def test_mask_remove(self):
+
+        # Test not masked data
+        ts_nomask = self.TS.copy()
+        ts_nomask.mask_remove()
+
+        self.assertTrue(np.allclose(ts_nomask.y, self.values))
+
+        t = np.linspace(-1, 1, 99)
+        ts_mask = ts.TimeSeries(t, np.ma.masked_less_equal(t, 0))
+
+        ts_mask.mask_remove()
+
+        self.assertTrue(np.allclose(t[50:], ts_mask.y))
+
+    def test_mask_apply(self):
+
+        ts_mask = ts.TimeSeries(
+            self.times, np.ma.masked_less_equal(self.times, 0)
+        )
+        ts_nomask = ts.TimeSeries(self.times, self.times)
+
+        ts_nomask.mask_apply(ts_mask.mask)
+
+        self.assertEqual(ts_mask, ts_nomask)
+
     def test_unfold_phase(self):
 
         y = np.append(
@@ -1106,6 +1201,10 @@ class TestTimeseries(unittest.TestCase):
         )
 
     def test_to_FrequencySeries(self):
+
+        # Masked data
+        with self.assertRaises(RuntimeError):
+            self.TS_cm.to_FrequencySeries()
 
         # Test complex
         dt = self.times[1] - self.times[0]

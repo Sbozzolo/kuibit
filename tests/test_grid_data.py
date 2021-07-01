@@ -20,6 +20,7 @@
 
 import os
 import unittest
+import warnings
 
 import numpy as np
 
@@ -381,6 +382,12 @@ class TestUniformGridData(unittest.TestCase):
     def setUp(self):
         self.geom = gd.UniformGrid([101, 51], x0=[0, 0], x1=[1, 0.5])
 
+        data = np.array([i * np.linspace(1, 5, 51) for i in range(101)])
+
+        self.ug_masked = gd.UniformGridData(
+            self.geom, np.ma.masked_greater(data, 10)
+        )
+
     def test_init(self):
 
         # Test invalid input
@@ -428,7 +435,7 @@ class TestUniformGridData(unittest.TestCase):
 
         self.assertTrue(ug_data_c.is_complex())
 
-    def test_is_complex(self):
+    def test_is_masked(self):
 
         data = np.array([i * np.linspace(1, 5, 51) for i in range(101)])
 
@@ -436,9 +443,38 @@ class TestUniformGridData(unittest.TestCase):
 
         self.assertFalse(ug_data.is_masked())
 
-        ug_data_m = gd.UniformGridData(self.geom, np.ma.MaskedArray(data))
+        self.assertTrue(self.ug_masked.is_masked())
 
-        self.assertTrue(ug_data_m.is_masked())
+    def test_mask(self):
+        self.assertTrue(
+            np.ma.allequal(self.ug_masked.mask, self.ug_masked.data.mask)
+        )
+
+        # No mask
+        data = np.array([i * np.linspace(1, 5, 51) for i in range(101)])
+
+        ug_data = gd.UniformGridData(self.geom, data)
+
+        self.assertTrue(
+            np.ma.allequal(ug_data.mask, np.zeros_like(data, dtype=bool))
+        )
+
+    def test_mask_apply(self):
+
+        data = np.array([i * np.linspace(1, 5, 51) for i in range(101)])
+
+        data_masked = np.ma.log10(data)
+
+        ug_data_mask = gd.UniformGridData(self.geom, data_masked)
+
+        # The log10 will produce warnings because of the zeros in the data
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore", category=RuntimeWarning)
+            ug_data_nomask = gd.UniformGridData(self.geom, np.log10(data))
+
+        ug_data_nomask.mask_apply(ug_data_mask.mask)
+
+        self.assertEqual(ug_data_mask, ug_data_nomask)
 
     def test_flat_dimensions_remove(self):
 
@@ -497,6 +533,10 @@ class TestUniformGridData(unittest.TestCase):
         self.assertTrue(
             np.allclose(-gradient[0].data, original_sin.data, atol=1e-3)
         )
+
+        # Masked data
+        with self.assertRaises(RuntimeError):
+            self.ug_masked.partial_differentiated(0)
 
     def test_ghost_zones_remove(self):
 
@@ -697,6 +737,11 @@ class TestUniformGridData(unittest.TestCase):
         # Clean up file
         os.remove(grid_file_npz_ti)
 
+        with self.assertWarns(RuntimeWarning):
+            path = "/tmp/tmp_kuibit.dat"
+            self.ug_masked.save(path)
+            os.remove(path)
+
     def test_splines(self):
 
         # Let's start with 1d.
@@ -850,6 +895,38 @@ class TestUniformGridData(unittest.TestCase):
         self.assertAlmostEqual(prod_data_flat((1, 1)), 2)
         # Vector
         self.assertCountEqual(prod_data_flat([(1, 1), (2, 1)]), [2, 4])
+
+        # Masked data
+        two_points = gdu.sample_function_from_uniformgrid(
+            lambda x, y: 1, gd.UniformGrid([2, 2], x0=[0, 0], dx=[1, 1])
+        )
+
+        two_points.data = np.ma.MaskedArray(
+            two_points.data, mask=[[True, True], [False, False]]
+        )
+
+        expected_out = np.ma.MaskedArray([1], mask=[True])
+
+        # One point
+        self.assertEqual(
+            two_points._nearest_neighbor_interpolation([[0.25, 0.25]]),
+            expected_out,
+        )
+
+        expected_out = np.ma.MaskedArray([1, 1], mask=[True, False])
+
+        # Two points
+        self.assertTrue(
+            np.ma.allequal(
+                two_points._nearest_neighbor_interpolation(
+                    [[0.25, 0.25], [0.8, 0.8]]
+                ),
+                expected_out,
+            )
+        )
+
+        with self.assertRaises(RuntimeError):
+            two_points._make_spline()
 
     def test_copy(self):
 
@@ -1129,6 +1206,10 @@ class TestUniformGridData(unittest.TestCase):
 
         self.assertEqual(expected_c, prod_data_complex.fourier_transform())
 
+        # Masked data
+        with self.assertRaises(RuntimeError):
+            self.ug_masked.fourier_transform()
+
     def test_to_GridSeries(self):
 
         # Not 1D
@@ -1253,6 +1334,15 @@ class TestHierarchicalGridData(unittest.TestCase):
         # Test a grid with two separate components
         hg3 = gd.HierarchicalGridData(self.grid_data_two_comp)
         self.assertEqual(hg3.grid_data_dict[0], self.grid_data_two_comp)
+
+        # Test with merged masked data
+        grid_data = self.grid_data[:]
+        # Make one of the data Masked, we will check that the entire
+        # data is masked
+        grid_data[0].data = np.ma.MaskedArray(grid_data[0].data)
+        hg_merged = gd.HierarchicalGridData(grid_data)
+
+        self.assertTrue(isinstance(hg_merged[0][0].data, np.ma.MaskedArray))
 
     def test_check_ref_factors(self):
 
@@ -1438,6 +1528,18 @@ class TestHierarchicalGridData(unittest.TestCase):
         hg_masked[0][0].data = np.ma.MaskedArray(hg_masked[0][0].data)
 
         self.assertTrue(hg_masked.is_masked())
+
+        # Test mask
+
+        self.assertTrue(
+            np.ma.allequal(hg_masked.mask[0], hg_masked[0][0].data.mask)
+        )
+
+        # Test apply_mask
+        hg_nomasked = gd.HierarchicalGridData(self.grid_data_two_comp)
+        hg_nomasked.mask_apply(hg_masked.mask)
+
+        self.assertEqual(hg_nomasked, hg_masked)
 
     def test_iter(self):
 
@@ -1669,6 +1771,16 @@ class TestHierarchicalGridData(unittest.TestCase):
         grid = gd.UniformGrid([3, 5], x0=[0, 1], x1=[2, 5])
         grid_data = gdu.sample_function_from_uniformgrid(product, grid)
         self.assertTrue(np.allclose(hg3(grid), grid_data.data))
+
+        # Test masked
+
+        hg_masked = gd.HierarchicalGridData(self.grid_data_two_comp)
+
+        # Make it masked
+        hg_masked[0][0].data = np.ma.MaskedArray(hg_masked[0][0].data)
+
+        with self.assertRaises(RuntimeError):
+            hg_masked([(2, 3)])
 
     def test_merge_refinement_levels(self):
         # This also tests to_UniformGridData

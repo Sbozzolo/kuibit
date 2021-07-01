@@ -49,15 +49,15 @@ class BaseNumerical(ABC):
     """
 
     @abstractmethod
-    def _apply_unary(self, function):
+    def _apply_unary(self, function, *args, **kwargs):
         raise NotImplementedError
 
     @abstractmethod
-    def _apply_binary(self, other, function):
+    def _apply_binary(self, other, function, *args, **kwargs):
         raise NotImplementedError
 
     @abstractmethod
-    def _apply_reduction(self, reduction):
+    def _apply_reduction(self, reduction, *args, **kwargs):
         raise NotImplementedError
 
     def __add__(self, other):
@@ -205,3 +205,106 @@ class BaseNumerical(ABC):
 
     def conjugate(self):
         return self._apply_unary(np.conjugate)
+
+    # Masked functions
+
+    def ma_sqrt(self):
+        return self._apply_unary(np.ma.sqrt)
+
+    def ma_log(self):
+        return self._apply_unary(np.ma.log)
+
+    def ma_log2(self):
+        return self._apply_unary(np.ma.log2)
+
+    def ma_log10(self):
+        return self._apply_unary(np.ma.log10)
+
+    def ma_tan(self):
+        return self._apply_unary(np.ma.tan)
+
+    def ma_arcsin(self):
+        return self._apply_unary(np.ma.arcsin)
+
+    def ma_arccos(self):
+        return self._apply_unary(np.ma.arccos)
+
+    def ma_arccosh(self):
+        return self._apply_unary(np.ma.arccosh)
+
+    def ma_arctanh(self):
+        return self._apply_unary(np.ma.arctanh)
+
+    # Create masks
+
+    def masked_equal(self, value):
+        """Return a new objected masked where data is equal to given value."""
+        return self._apply_unary(np.ma.masked_equal, value)
+
+    def mask_equal(self, value):
+        """Mask where data is equal to given value."""
+        self._apply_to_self(self.masked_equal, value)
+
+    def masked_greater(self, value):
+        """Return a new objected masked where data is greater to given value."""
+        return self._apply_unary(np.ma.masked_greater, value)
+
+    def mask_greater(self, value):
+        """Mask where data is greater to given value."""
+        self._apply_to_self(self.masked_greater, value)
+
+    def masked_greater_equal(self, value):
+        """Return a new objected masked where data is greater or equal to given value."""
+        return self._apply_unary(np.ma.masked_greater_equal, value)
+
+    def mask_greater_equal(self, value):
+        """Mask where data is greater or equal to given value."""
+        self._apply_to_self(self.masked_greater_equal, value)
+
+    def masked_inside(self, value1, value2):
+        """Return a new objected masked where data is inside the given values."""
+        return self._apply_unary(np.ma.masked_inside, value1, value2)
+
+    def mask_inside(self, value1, value2):
+        """Mask where data is inside the given values."""
+        self._apply_to_self(self.masked_inside, value1, value2)
+
+    def masked_invalid(self):
+        """Return a new objected masked where data is invalid (NaNs or infs)."""
+        return self._apply_unary(np.ma.masked_invalid)
+
+    def mask_invalid(self):
+        """Mask where data is invalid (NaNs of infs)."""
+        self._apply_to_self(self.masked_invalid)
+
+    def masked_less(self, value):
+        """Return a new objected masked where data is less to given value."""
+        return self._apply_unary(np.ma.masked_less, value)
+
+    def mask_less(self, value):
+        """Mask where data is less to given value."""
+        self._apply_to_self(self.masked_less, value)
+
+    def masked_less_equal(self, value):
+        """Return a new objected masked where data is less or equal to given value."""
+        return self._apply_unary(np.ma.masked_less_equal, value)
+
+    def mask_less_equal(self, value):
+        """Mask where data is less or equal to given value."""
+        self._apply_to_self(self.masked_less_equal, value)
+
+    def masked_not_equal(self, value):
+        """Return a new objected masked where data is not equal to given value."""
+        return self._apply_unary(np.ma.masked_not_equal, value)
+
+    def mask_not_equal(self, value):
+        """Mask where data is not equal to given value."""
+        self._apply_to_self(self.masked_not_equal, value)
+
+    def masked_outside(self, value1, value2):
+        """Return a new objected masked where data is outside the given values."""
+        return self._apply_unary(np.ma.masked_outside, value1, value2)
+
+    def mask_outside(self, value1, value2):
+        """Mask where data is outside the given values."""
+        self._apply_to_self(self.masked_outside, value1, value2)

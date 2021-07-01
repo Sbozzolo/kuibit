@@ -28,8 +28,29 @@ new pickle file must be produced.
 
 #### Masked data
 
+Numerical objects now support
+[mask](https://numpy.org/doc/stable/reference/maskedarray.generic.html), which
+can be used to ignore part of the data that satisfy certain conditions (for
+example, to exclude the atmosphere from GRMHD computations).
+
+Note that it is not possible to perform interpolation with masked data, so
+several methods will not work.
+
+Note also that we mask only the data, not the independent coordinate (e.g., the
+time in TimeSeries or the spatial coordinates in the UniformGridData). In case
+you need masked coordinates too, you can use the `mask` method to obtain an
+array of booleans that identifies the valid data.
+
 - `Series`, `UniformGridData`, `HierarhicalGridData` have a new method
   `is_masked`.
+- `Series`, `UniformGridData`, `HierarhicalGridData` have a new method
+  `mask` that identifies where data is invalid.
+- `Series`, `UniformGridData`, `HierarhicalGridData` have news methods to create
+  masked data (e.g., `mask_greater`). See complete list in documentation.
+- `Series` have new methods `mask_remove` and `mask_removed` to create objects
+   without masked data.
+- `Series` have new methods `mask_apply` and `mask_applyed` to create objects
+   with a given mask (as the one obtained with the `mask` method).
 
 #### General
 - `SimDir` can be saved to disk with the method `save` and read with the

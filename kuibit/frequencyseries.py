@@ -386,6 +386,11 @@ class FrequencySeries(BaseSeries):
         :rtype: :py:class:`.TimeSeries`
 
         """
+        if self.is_masked():
+            raise RuntimeError(
+                "Fourier transform with masked data is not supported."
+            )
+
         # If fmin >= 0, then, the signal was probably real to begin with.
         # We will restore the negative frequencies so that the operation
         # is the actual inverse of taking the dft.

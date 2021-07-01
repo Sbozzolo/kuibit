@@ -51,8 +51,8 @@ A table at the end of this document sums up these options. ``shape``, ``x0``,
 ``x1`` are all 2D lists or tuples.
 
 The functions take additional arguments (for example, the labels for the axes).
-Details can be found in the :ref:`visualize_matplotlib_ref:reference on
-material`.
+Details can be found in the reference material
+(:ref:`visualize_matplotlib_ref:Reference on kuibit.visualize_matplotlib`).
 
 Plots can be enanched by adding a colorbar with :py:mod:`~.plot_colorbar` (or
 passing the ``colorbar`` option).
