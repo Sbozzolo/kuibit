@@ -48,6 +48,7 @@ Time and frequency series are represented in an intuitive way. They
 - can be differentiated from splines, or with second-order finite differencing;
 - can be smoothed with the Savitzky-Golay filter;
 - can be cropped;
+- support masks;
 - can be resampled to the points common points with other series.
 
 Specifically timeseries, also support:
@@ -129,6 +130,7 @@ Grid Data
   - resampling using nearest neighors or splines on new grids;
   - Second-order finite-differencing along any dimension;
   - being resampled to ``UniformGridData`` (unigrid);
+  - masks;
   - abitrarily slicing with lower-dimensional cuts (e.g., equatorial plane from 3D data).
 
 - In addition to above ``UniformGridData`` support:
