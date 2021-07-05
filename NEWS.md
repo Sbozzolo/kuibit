@@ -72,6 +72,7 @@ array of booleans that identifies the valid data.
 #### Bug fixes
 
 - `plot_colorbar` does not steal axis focus anymore.
+- The legend in `plot_psi4_lm` was corrected.
 
 #### New examples
 

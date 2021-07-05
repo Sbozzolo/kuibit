@@ -93,10 +93,12 @@ by a given detector and a given l and m."""
         logger.debug("Plotting Psi4")
 
         plt.plot(
-            psi4.real(), label=fr"$\Re \Psi_4^{{{args.mult_l}{args.mult_l}}}$"
+            radius * psi4.real(),
+            label=fr"$r\Re\Psi_4^{{{args.mult_l}{args.mult_l}}}$",
         )
         plt.plot(
-            psi4.imag(), label=fr"$\Im \Psi_4^{{{args.mult_l}{args.mult_l}}}$"
+            radius * psi4.imag(),
+            label=fr"$r\Im\Psi_4^{{{args.mult_l}{args.mult_l}}}$",
         )
 
         plt.legend()
