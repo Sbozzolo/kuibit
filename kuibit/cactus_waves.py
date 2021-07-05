@@ -606,7 +606,7 @@ class GravitationalWavesOneDet(mp.MultipoleOneDet):
         r"""Return the instantaneous linear momentum along the z direction
         lost in the mode (l, m).
 
-        This is computed with Eq. (3.15) in Ruiz 2008.
+        This is computed with Eq. (3.15) in Ruiz 2008 (0707.4654).
 
         :param mult_l: l multipole moment.
         :type mult_t: int
