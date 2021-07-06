@@ -396,7 +396,7 @@ def save(
     if os.path.splitext(outputpath)[-1] == ".tikz":
         tikzplotlib.save(outputpath, **kwargs)
     else:
-        plt.savefig(outputpath, **kwargs)
+        figure.savefig(outputpath, **kwargs)
 
 
 @preprocess_plot
