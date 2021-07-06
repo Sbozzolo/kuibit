@@ -82,6 +82,7 @@ array of booleans that identifies the valid data.
 
 Scripts:
 
+* `plot_gw_angular_momentum.py`
 * `print_grid_point.py`
 
 ## Version 1.2.0 (1 June 2021)

@@ -155,6 +155,7 @@ Scripts
    examples/bins/plot_em_energy.rst
    examples/bins/plot_grid_var.rst
    examples/bins/plot_gw_energy.rst
+   examples/bins/plot_gw_angular_momentum.rst
    examples/bins/plot_gw_linear_momentum.rst
    examples/bins/plot_phi_lm.rst
    examples/bins/plot_physical_time.rst
