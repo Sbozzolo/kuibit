@@ -174,7 +174,8 @@ def add_figure_to_parser(parser, default_figname=None, add_limits=False):
     The options added are:
 
     - ``figname``
-    - ``fig-extension
+    - ``fig-extension``
+    - ``tikz-clean-figure``
 
     If ``add_limits`` is True, then also add:
 
@@ -203,6 +204,11 @@ def add_figure_to_parser(parser, default_figname=None, add_limits=False):
         default="png",
         env_var="KBIT_FIG_EXTENSION",
         help="Extension of the output figure (default: %(default)s).",
+    )
+    parser.add_argument(
+        "--tikz-clean-figure",
+        action="store_true",
+        help="Reduce the size of the figure when saving to a TikZ file.",
     )
     if add_limits:
         parser.add_argument(

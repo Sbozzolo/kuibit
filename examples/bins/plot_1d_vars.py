@@ -136,5 +136,10 @@ if __name__ == "__main__":
         set_axis_limits_from_args(args)
 
         logger.debug("Saving")
-        save_from_dir_filename_ext(args.outdir, figname, args.fig_extension)
+        save_from_dir_filename_ext(
+            args.outdir,
+            figname,
+            args.fig_extension,
+            tikz_clean_figure=args.tikz_clean_figure,
+        )
         logger.debug("DONE")

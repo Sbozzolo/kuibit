@@ -322,15 +322,37 @@ class TestVisualizeMatplotlib(unittest.TestCase):
 
     def test_save(self):
 
-        plt.plot([1, 1], [2, 2])
+        x = np.linspace(0, 1, 100)
+        y = np.sin(x)
+
+        plt.plot(x, y)
+
         # Test matplotlib
         viz.save("test.pdf")
         self.assertTrue(os.path.exists("test.pdf"))
         os.remove("test.pdf")
 
         # Test tikzplotlib
-        viz.save("test.tikz")
+        viz.save("test.tikz", include_disclaimer=False)
         self.assertTrue(os.path.exists("test.tikz"))
+
+        # We save the file size so that we can compare it to the "cleaned"
+        # version
+        file_size_og = os.stat("test.tikz").st_size
+
+        os.remove("test.tikz")
+
+        # Test with clean figure
+        viz.save(
+            "test.tikz",
+            tikz_clean_figure=True,
+            target_resolution=200,
+            include_disclaimer=False,
+        )
+        self.assertTrue(os.path.exists("test.tikz"))
+        # The cleaned file should be smaller
+        file_size_cleaned = os.stat("test.tikz").st_size
+        self.assertLess(file_size_cleaned, file_size_og)
         os.remove("test.tikz")
 
     def test_save_from_dir_name_ext(self):

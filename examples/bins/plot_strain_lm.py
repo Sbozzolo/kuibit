@@ -144,5 +144,10 @@ the order as they appear in the TimeSeries method."""
         logger.debug("Plotted")
 
         logger.debug("Saving")
-        save_from_dir_filename_ext(args.outdir, figname, args.fig_extension)
+        save_from_dir_filename_ext(
+            args.outdir,
+            figname,
+            args.fig_extension,
+            tikz_clean_figure=args.tikz_clean_figure,
+        )
         logger.debug("DONE")
