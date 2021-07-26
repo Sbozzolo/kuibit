@@ -41,6 +41,7 @@ placing them in you `$PATH` so that they can be used for your simulations.
 
 | Name                           | Description                                                                                                                                                                                          |
 |--------------------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `picklify`                     | Produces a pickle file for the given simulation. If the file already exists, overwrites it.                                                                                                            |
 | `print_ah_formation_time`      | Prints the time when the given apparent horizon was first found.                                                                                                                                     |
 | `print_available_iterations`   | Given a variable, prints which iterations are available across all the data and all the dimensions. Optionally, you can specify only one dimension. This script is useful for writing shell scripts. |
 | `print_available_timeseries`   | Prints all the various timeseries found in the data (reductions, scalars, ...). This script is useful for exploring the data available in a simulation.                                              |
@@ -58,7 +59,7 @@ be used, for example, to make a movie of the logarithm of `rho_b` on the XY
 plane:
 
 ``` sh
-mopi -m grid_var --resolution 500 --plane xy --variable rho_b --colorbar --interpolation-method bicubic --vmin -7 --vmax -1 --parallel --outdir movie --logscale -x0 -30 -30 -x1 30 30
+mopi -m grid_var --resolution 500 --plane xy --variable rho_b --colorbar --interpolation-method bicubic --logscale --vmin -7 --vmax -1 --parallel --outdir movie -x0 -30 -30 -x1 30 30
 ```
 
 `motionpicture` requires `ffmpeg` to produce the final video. If it is not

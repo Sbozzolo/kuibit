@@ -146,6 +146,7 @@ Scripts
 .. toctree::
    :maxdepth: 1
 
+   examples/bins/picklify.rst
    examples/bins/plot_1d_vars.rst
    examples/bins/plot_ah_coordinate_velocity.rst
    examples/bins/plot_ah_found.rst
