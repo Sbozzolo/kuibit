@@ -112,6 +112,11 @@ the order as they appear in the TimeSeries method."""
 
         logger.debug("Computing strain")
 
+        # We are going to do tuple unpacking, and we cannot unpack "None",
+        # so we overwrite the value with an empty list
+        if args.window_args is None:
+            args.window_args = []
+
         strain = detector.get_strain_lm(
             args.mult_l,
             args.mult_m,
