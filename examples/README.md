@@ -44,7 +44,7 @@ placing them in you `$PATH` so that they can be used for your simulations.
 | `print_ah_formation_time`      | Prints the time when the given apparent horizon was first found.                                                                                                                                     |
 | `print_available_iterations`   | Given a variable, prints which iterations are available across all the data and all the dimensions. Optionally, you can specify only one dimension. This script is useful for writing shell scripts. |
 | `print_available_timeseries`   | Prints all the various timeseries found in the data (reductions, scalars, ...). This script is useful for exploring the data available in a simulation.                                              |
-| `print_grid_point`             | Prints where is the maximum or minimum (optionally, the absolute one) for a given grid function at a given iteration.                                                                                |
+| `print_grid_point_minmax`      | Prints where is the maximum or minimum (optionally, the absolute one) for a given grid function at a given iteration.                                                                                |
 | `print_qlm_properties_at_time` | Prints some of the interesting properties (as from QuasiLocalMeasures) for a given horizon at a given time. Optionally estimates the Lorentz factor.                                                 |
 | `save_reasampled_grid_data`    | Reads a grid function, resamples it to a given grid, and saves it to a file. This script is useful to move data from a cluster to your local machine (especially for 3D visualization)               |
 
