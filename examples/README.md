@@ -27,6 +27,7 @@ placing them in you `$PATH` so that they can be used for your simulations.
 | `plot_constraints`            | Plots given reductions for the constraints (Hamiltonian, momentum, ...) as a function of time.                             |
 | `plot_em_energy`              | Plots the electromagnetic-wave luminosity and energy as measured by a given detector using Phi2 as a function of time.     |
 | `plot_grid_var`               | Plots a 2D grid function among the ones output by Carpet on a given region. Optionally take logarithm or absolute value.   |
+| `plot_grid_expr`              | Plots any given expression involving 2D grid functions. Strictly, it is a more general version of `plot_grid_var.py`.      |
 | `plot_gw_energy`              | Plots the gravitational-wave luminosity and energy as measured by a given detector as a function of time.                  |
 | `plot_gw_angular_momentum`    | Plots the angular momentum lost by gravitational-wave as measured by a given detector as a function of time.               |
 | `plot_gw_linear_momentum`     | Plots the linear momentum lost by gravitational-wave as measured by a given detector as a function of time.                |
