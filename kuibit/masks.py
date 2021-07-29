@@ -49,11 +49,15 @@ class _MaskedFunction:
 
 
 sqrt = _MaskedFunction("sqrt")
+exp = _MaskedFunction("exp")
 log = _MaskedFunction("log")
 log2 = _MaskedFunction("log2")
 log10 = _MaskedFunction("log10")
+sin = _MaskedFunction("sin")
+cos = _MaskedFunction("cos")
 tan = _MaskedFunction("tan")
 arcsin = _MaskedFunction("arcsin")
 arccos = _MaskedFunction("arccos")
+arctan = _MaskedFunction("arctan")
 arccosh = _MaskedFunction("arccosh")
 arctanh = _MaskedFunction("arctanh")

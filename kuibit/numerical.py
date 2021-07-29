@@ -211,6 +211,9 @@ class BaseNumerical(ABC):
     def ma_sqrt(self):
         return self._apply_unary(np.ma.sqrt)
 
+    def ma_exp(self):
+        return self._apply_unary(np.ma.exp)
+
     def ma_log(self):
         return self._apply_unary(np.ma.log)
 
@@ -220,6 +223,12 @@ class BaseNumerical(ABC):
     def ma_log10(self):
         return self._apply_unary(np.ma.log10)
 
+    def ma_sin(self):
+        return self._apply_unary(np.ma.sin)
+
+    def ma_cos(self):
+        return self._apply_unary(np.ma.cos)
+
     def ma_tan(self):
         return self._apply_unary(np.ma.tan)
 
@@ -228,6 +237,9 @@ class BaseNumerical(ABC):
 
     def ma_arccos(self):
         return self._apply_unary(np.ma.arccos)
+
+    def ma_arctan(self):
+        return self._apply_unary(np.ma.arctan)
 
     def ma_arccosh(self):
         return self._apply_unary(np.ma.arccosh)

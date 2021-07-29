@@ -86,12 +86,16 @@ class TestMasks(unittest.TestCase):
 
         for f in [
             "sqrt",
+            "exp",
             "log",
             "log2",
             "log10",
+            "sin",
+            "cos",
             "tan",
             "arcsin",
             "arccos",
+            "arctan",
             "arccosh",
             "arctanh",
         ]:
