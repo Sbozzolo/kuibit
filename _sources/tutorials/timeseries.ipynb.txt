@@ -51,7 +51,17 @@
    "cell_type": "markdown",
    "metadata": {},
    "source": [
-    "To access the times and the values, use ``gw.t`` and ``gw.y``. "
+    "To access the times and the values, use ``gw.t`` and ``gw.y``. You can also iterate over the series with a for loop yielding the elements `(t, y)` at each iteration of the loop. For example."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "for tt, yy in gw:\n",
+    "    print(tt, yy)"
    ]
   },
   {
@@ -395,6 +405,38 @@
    "source": [
     "The line is not on the maximum because we use a quadratic interpolation to find a more accurate location of the peak."
    ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "Sometimes, it is useful to ignore some data (or example, when we know that the data is invalid). `Series` objects support _masks_ to mark the points we want to ignore. Most functions work transparently with masks: for example, if you ask for the mean of a `Series`, the masked point will be ignored. Other functions do not support masks (most notably, splines). In that case, it is best to completely remove the masked points and work with clean data."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "# Let's mask all the point in the spectrum with value larger than 1e-27\n",
+    "\n",
+    "spectrum = gw_fft.abs()\n",
+    "\n",
+    "print(f\"Maximum without mask {spectrum.max():.3e}\")\n",
+    "\n",
+    "# Apply mask\n",
+    "spectrum.mask_greater(1e-27)\n",
+    "\n",
+    "print(f\"Maximum with mask {spectrum.max():.3e}\")\n",
+    "\n",
+    "print(f\"Length with mask {len(spectrum)}\")\n",
+    "\n",
+    "# Remove points\n",
+    "spectrum.mask_remove()\n",
+    "\n",
+    "print(f\"Length after having removed the masked points {len(spectrum)}\")"
+   ]
   }
  ],
  "metadata": {
@@ -413,7 +455,7 @@
    "name": "python",
    "nbconvert_exporter": "python",
    "pygments_lexer": "ipython3",
-   "version": "3.7.8"
+   "version": "3.8.10"
   },
   "name": "timeseries.ipynb"
  },

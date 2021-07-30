@@ -72,6 +72,9 @@ We follow this convention: methods with an name that is an imperative (e.g.,
 is a past-tense verb (e.g., ``zero_padded``) return a new object with the
 modification applied.
 
+``Series`` support masking data. Read the page on masks to learn more
+(:ref:`masks:Masking invalid data`).
+
 .. note::
 
    Every mathematical operation between different series will perform a check
@@ -115,6 +118,12 @@ is raised if ``ext=2``, or if ``ext=3``, the boundary value is returned.
    the limitations, and use splines only when you know that the representation
    is good.
 
+.. warning::
+
+   Splines are not supported for masked data. If you are working with masked
+   data, you should first removed the invalid values with
+   :py:meth:`~.mask_remove`.
+
 integrate
 ^^^^^^^^^
 
@@ -123,6 +132,12 @@ on the time intervals (trapezoid). The result is a new ``Series`` with the
 integral as a function of time. Optinally, one can provide ``dx``, which is the
 spacing in the independent variable. If provided, it will be used. This is
 especially convenient for evely spaced series, as computations will be faster
+
+.. warning::
+
+   Integration is not supported for masked data. If you are working with masked
+   data, you should first removed the invalid values with
+   :py:meth:`~.mask_remove`.
 
 differentiate, spline_differentiated
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -135,6 +150,13 @@ is applied ``order`` times to obtain a high-order derivative. On the other hand,
 You should not trust the values at the boundaries too much, you may want to crop
 it out.
 
+.. warning::
+
+   Differentiation is not supported for masked data. If you are working with
+   masked data, you should first removed the invalid values with
+   :py:meth:`~.mask_remove`.
+
+
 save
 ^^^^
 
@@ -142,6 +164,10 @@ Save the ``Series`` as an ASCII file with 2 columns :math:`(t, y)` for real
 valued data and 3 columns :math:`(t, \Re (y), \Im (y))` for complex-valued ones.
 The back-end is ``np.savetxt``, so you can provide additional arguments, like an
 header.
+
+.. warning::
+
+   Information about masks is lost.
 
 crop
 ^^^^
@@ -160,6 +186,12 @@ and only the "middle" point is chosen. Since 2nd (or 4th) order information is
 concerned at every point, the bias introduced in "moving average" approach at
 local maxima or minima, is circumvented. At the moment, this is the preferred
 way to smooth series.
+
+.. warning::
+
+   Smoothing is not supported for masked data. If you are working with masked
+   data, you should first removed the invalid values with
+   :py:meth:`~.mask_remove`.
 
 iter
 ^^^^

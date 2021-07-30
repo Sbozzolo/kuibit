@@ -6,7 +6,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>kuibit.visualize_matplotlib &#8212; kuibit 1.2.0 documentation</title>
+    <title>kuibit.visualize_matplotlib &#8212; kuibit 1.3.0-dev1 documentation</title>
     <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
     <link rel="stylesheet" href="../../_static/bizstyle.css" type="text/css" />
     
@@ -32,7 +32,7 @@
         <li class="right" >
           <a href="../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../index.html">kuibit 1.2.0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">kuibit 1.3.0-dev1 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="../index.html" accesskey="U">Module code</a> &#187;</li>
         <li class="nav-item nav-item-this"><a href="">kuibit.visualize_matplotlib</a></li> 
       </ul>
@@ -48,8 +48,9 @@
 
 <span class="c1"># Copyright (C) 2020-2021 Gabriele Bozzola</span>
 <span class="c1">#</span>
-<span class="c1"># Inspired by code originally developed by Wolfgang Kastaun. See, GitHub,</span>
-<span class="c1"># wokast/PyCactus/PostCactus/visualize.py</span>
+<span class="c1"># Inspired by code originally developed by Wolfgang Kastaun. This file may</span>
+<span class="c1"># contain algorithms and/or structures first implemented in</span>
+<span class="c1"># GitHub:wokast/PyCactus/PostCactus/visualize.py</span>
 <span class="c1">#</span>
 <span class="c1"># This program is free software; you can redistribute it and/or modify it under</span>
 <span class="c1"># the terms of the GNU General Public License as published by the Free Software</span>
@@ -415,6 +416,7 @@
     <span class="n">outputpath</span><span class="p">,</span>
     <span class="n">figure</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
     <span class="n">axis</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">tikz_clean_figure</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
     <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
 <span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Save figure to the given location.</span>
@@ -423,7 +425,9 @@
 <span class="sd">    ``tikzplotlib``.</span>
 
 <span class="sd">    Unknown arguments are passed to the ``matplotlib.savefig`` or</span>
-<span class="sd">    ``tikzplotlib.save`` (depending on the extension).</span>
+<span class="sd">    ``tikzplotlib.save`` (depending on the extension). In this second case, if</span>
+<span class="sd">    ``tikz_clean_figure = True``, unknown arguments are first passed to</span>
+<span class="sd">    ``tikzplotlib.clean_figure``.</span>
 
 <span class="sd">    :param outputpath:  Output path with or without extension. If the</span>
 <span class="sd">                        extension is ``.tikz``, the file is saved with</span>
@@ -433,15 +437,47 @@
 <span class="sd">                   use the current figure.</span>
 <span class="sd">    :type figure: ``matplotlib.pyplot.figure``</span>
 
+<span class="sd">    :param tikz_clean_figure: If ``tikzplotlib`` is begin used, reduce the size</span>
+<span class="sd">                              of the output ``tikz`` file. When this is set to</span>
+<span class="sd">                              True, unknown arguments are first passed to</span>
+<span class="sd">                              ``tikzplotlib.clean_figure``, then to</span>
+<span class="sd">                              ``tikzplotlib.save``. ``tikzplotlib.clean_figure``</span>
+<span class="sd">                              will change the given figure.</span>
+<span class="sd">    :type tikz_clean_figure: bool</span>
+
 <span class="sd">    :param axis: If passed, plot on this axis. If not passed (or if None), use</span>
 <span class="sd">                 the current axis.</span>
 <span class="sd">    :type axis: ``matplotlib.pyplot.axis``</span>
 
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">splitext</span><span class="p">(</span><span class="n">outputpath</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;.tikz&quot;</span><span class="p">:</span>
+
+        <span class="c1"># If clean_figure is True, we extract from kwargs those argument</span>
+        <span class="c1"># that tikzplotlib.clean_figure would take. For this, we need to</span>
+        <span class="c1"># know what argument that function takes.</span>
+        <span class="c1">#</span>
+        <span class="c1"># Form https://stackoverflow.com/a/40363565</span>
+        <span class="k">if</span> <span class="n">tikz_clean_figure</span><span class="p">:</span>
+            <span class="n">args_names</span> <span class="o">=</span> <span class="n">tikzplotlib</span><span class="o">.</span><span class="n">clean_figure</span><span class="o">.</span><span class="vm">__code__</span><span class="o">.</span><span class="n">co_varnames</span><span class="p">[</span>
+                <span class="p">:</span> <span class="n">tikzplotlib</span><span class="o">.</span><span class="n">clean_figure</span><span class="o">.</span><span class="vm">__code__</span><span class="o">.</span><span class="n">co_argcount</span>
+            <span class="p">]</span>
+
+            <span class="n">kwargs_clean_figure</span> <span class="o">=</span> <span class="p">{}</span>
+
+            <span class="c1"># We split kwargs in those that are supposed to be passed to</span>
+            <span class="c1"># clean_figure and those that have to be passed to save. For this,</span>
+            <span class="c1"># we iterate over the arguments taken by clean_figure, if they are</span>
+            <span class="c1"># in kwargs, then we move them to a new dictionary</span>
+            <span class="k">for</span> <span class="n">arg</span> <span class="ow">in</span> <span class="n">args_names</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">arg</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="p">:</span>
+                    <span class="n">kwargs_clean_figure</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="n">arg</span><span class="p">:</span> <span class="n">kwargs</span><span class="p">[</span><span class="n">arg</span><span class="p">]})</span>
+                    <span class="k">del</span> <span class="n">kwargs</span><span class="p">[</span><span class="n">arg</span><span class="p">]</span>
+
+            <span class="n">tikzplotlib</span><span class="o">.</span><span class="n">clean_figure</span><span class="p">(</span><span class="n">fig</span><span class="o">=</span><span class="n">figure</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs_clean_figure</span><span class="p">)</span>
+
         <span class="n">tikzplotlib</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">outputpath</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="n">plt</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="n">outputpath</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="n">figure</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="n">outputpath</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 
 
 <span class="nd">@preprocess_plot</span>
@@ -451,6 +487,7 @@
     <span class="n">file_ext</span><span class="p">,</span>
     <span class="n">figure</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
     <span class="n">axis</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">tikz_clean_figure</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
     <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
 <span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Save figure to a location defined by a folder, a name, and an extension.</span>
@@ -482,6 +519,7 @@
         <span class="n">outputpath</span><span class="p">,</span>
         <span class="n">figure</span><span class="o">=</span><span class="n">figure</span><span class="p">,</span>
         <span class="n">axis</span><span class="o">=</span><span class="n">axis</span><span class="p">,</span>
+        <span class="n">tikz_clean_figure</span><span class="o">=</span><span class="n">tikz_clean_figure</span><span class="p">,</span>
         <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
     <span class="p">)</span>
 
@@ -1188,7 +1226,7 @@
         <li class="right" >
           <a href="../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../index.html">kuibit 1.2.0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">kuibit 1.3.0-dev1 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="../index.html" >Module code</a> &#187;</li>
         <li class="nav-item nav-item-this"><a href="">kuibit.visualize_matplotlib</a></li> 
       </ul>

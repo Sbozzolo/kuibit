@@ -6,7 +6,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Working with grid data &#8212; kuibit 1.2.0 documentation</title>
+    <title>Working with grid data &#8212; kuibit 1.3.0-dev1 documentation</title>
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
     <link rel="stylesheet" href="../_static/bizstyle.css" type="text/css" />
     
@@ -15,6 +15,8 @@
     <script src="../_static/underscore.js"></script>
     <script src="../_static/doctools.js"></script>
     <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script type="text/x-mathjax-config">MathJax.Hub.Config({"tex2jax": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true, "ignoreClass": "document", "processClass": "math|output_area"}})</script>
     <script src="../_static/bizstyle.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
@@ -40,7 +42,7 @@
         <li class="right" >
           <a href="timeseries.html" title="Working with time series, frequency series, and unit conversion"
              accesskey="P">previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../index.html">kuibit 1.2.0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">kuibit 1.3.0-dev1 documentation</a> &#187;</li>
         <li class="nav-item nav-item-this"><a href="">Working with grid data</a></li> 
       </ul>
     </div>  
@@ -55,21 +57,35 @@
 /* CSS for nbsphinx extension */
 
 /* remove conflicting styling from Sphinx themes */
-div.nbinput.container,
-div.nbinput.container div.prompt,
-div.nbinput.container div.input_area,
-div.nbinput.container div[class*=highlight],
-div.nbinput.container div[class*=highlight] pre,
-div.nboutput.container,
-div.nboutput.container div.prompt,
-div.nboutput.container div.output_area,
-div.nboutput.container div[class*=highlight],
-div.nboutput.container div[class*=highlight] pre {
-    background: none;
+div.nbinput.container div.prompt *,
+div.nboutput.container div.prompt *,
+div.nbinput.container div.input_area pre,
+div.nboutput.container div.output_area pre,
+div.nbinput.container div.input_area .highlight,
+div.nboutput.container div.output_area .highlight {
     border: none;
-    padding: 0 0;
+    padding: 0;
     margin: 0;
     box-shadow: none;
+}
+
+div.nbinput.container > div[class*=highlight],
+div.nboutput.container > div[class*=highlight] {
+    margin: 0;
+}
+
+div.nbinput.container div.prompt *,
+div.nboutput.container div.prompt * {
+    background: none;
+}
+
+div.nboutput.container div.output_area .highlight,
+div.nboutput.container div.output_area pre {
+    background: unset;
+}
+
+div.nboutput.container div.output_area div.highlight {
+    color: unset;  /* override Pygments text color */
 }
 
 /* avoid gaps between output lines */
@@ -170,7 +186,7 @@ div.nboutput.container div.output_area {
 div.nbinput.container div.input_area {
     border: 1px solid #e0e0e0;
     border-radius: 2px;
-    background: #f5f5f5;
+    /*background: #f5f5f5;*/
 }
 
 /* override MathJax center alignment in output cells */
@@ -236,6 +252,7 @@ div.nboutput.container div.output_area.rendered_html,
 div.nboutput.container div.output_area > div.output_javascript,
 div.nboutput.container div.output_area:not(.rendered_html) > img{
     padding: 5px;
+    margin: 0;
 }
 
 /* fix copybtn overflow problem in chromium (needed for 'sphinx_copybutton') */
@@ -460,7 +477,7 @@ the x coordiante, but the y. We provide the aliaxs <code class="docutils literal
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-&lt;matplotlib.colorbar.Colorbar at 0x7f925e4c9290&gt;
+&lt;matplotlib.colorbar.Colorbar at 0x7f751e0ed710&gt;
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
@@ -488,7 +505,7 @@ the x coordiante, but the y. We provide the aliaxs <code class="docutils literal
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-&lt;matplotlib.colorbar.Colorbar at 0x7f92560e9950&gt;
+&lt;matplotlib.colorbar.Colorbar at 0x7f751dfcd190&gt;
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
@@ -569,7 +586,7 @@ The norm2 of funky_data is 20417.836
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-[&lt;matplotlib.lines.Line2D at 0x7f92560666d0&gt;]
+[&lt;matplotlib.lines.Line2D at 0x7f751df66350&gt;]
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
@@ -599,7 +616,7 @@ The norm2 of funky_data is 20417.836
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-&lt;matplotlib.colorbar.Colorbar at 0x7f9255facfd0&gt;
+&lt;matplotlib.colorbar.Colorbar at 0x7f751de918d0&gt;
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
@@ -735,7 +752,7 @@ more_funk of (2, 3) is 2.565
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-&lt;matplotlib.colorbar.Colorbar at 0x7f9255e47fd0&gt;
+&lt;matplotlib.colorbar.Colorbar at 0x7f751dd326d0&gt;
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
@@ -764,7 +781,7 @@ more_funk of (2, 3) is 2.565
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-&lt;matplotlib.colorbar.Colorbar at 0x7f9255d3add0&gt;
+&lt;matplotlib.colorbar.Colorbar at 0x7f751dca46d0&gt;
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
@@ -795,7 +812,7 @@ more_funk of (2, 3) is 2.565
 Available refinement levels: [0, 1, 2]
 Spacing of the coarsest: [1. 1.]
 Spacing of the finest: [0.33333333 0.33333333]
-Finest level: &lt;kuibit.grid_data.UniformGridData object at 0x7f9256037bd0&gt;
+Finest level: &lt;kuibit.grid_data.UniformGridData object at 0x7f751ddae8d0&gt;
 </pre></div></div>
 </div>
 <p>Often, we want to look at a specific cut of the data. <code class="docutils literal notranslate"><span class="pre">UniformGridData</span></code> can be sliced easily. Just prepare a <code class="docutils literal notranslate"><span class="pre">cut</span></code> array with <code class="docutils literal notranslate"><span class="pre">None</span></code> where you want to keep the dimension, and the coordiante of where you want to slice. For example, here we extract the line with <code class="docutils literal notranslate"><span class="pre">y=0.7</span></code>.</p>
@@ -836,7 +853,7 @@ Iteration        = None
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-[&lt;matplotlib.lines.Line2D at 0x7f9255cc5210&gt;]
+[&lt;matplotlib.lines.Line2D at 0x7f751dc5a050&gt;]
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
@@ -869,7 +886,7 @@ Iteration        = None
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-&lt;matplotlib.image.AxesImage at 0x7f9251776790&gt;
+&lt;matplotlib.image.AxesImage at 0x7f751966af90&gt;
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
@@ -898,7 +915,7 @@ Iteration        = None
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-&lt;matplotlib.image.AxesImage at 0x7f925590ed50&gt;
+&lt;matplotlib.image.AxesImage at 0x7f7519d98a90&gt;
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
@@ -968,7 +985,7 @@ Iteration        = None
         <li class="right" >
           <a href="timeseries.html" title="Working with time series, frequency series, and unit conversion"
              >previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../index.html">kuibit 1.2.0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">kuibit 1.3.0-dev1 documentation</a> &#187;</li>
         <li class="nav-item nav-item-this"><a href="">Working with grid data</a></li> 
       </ul>
     </div>

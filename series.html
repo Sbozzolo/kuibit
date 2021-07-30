@@ -6,7 +6,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Time and frequency series &#8212; kuibit 1.2.0 documentation</title>
+    <title>Time and frequency series &#8212; kuibit 1.3.0-dev1 documentation</title>
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <link rel="stylesheet" href="_static/bizstyle.css" type="text/css" />
     
@@ -42,7 +42,7 @@
         <li class="right" >
           <a href="simdir.html" title="Getting started with SimDir"
              accesskey="P">previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">kuibit 1.2.0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="index.html">kuibit 1.3.0-dev1 documentation</a> &#187;</li>
         <li class="nav-item nav-item-this"><a href="">Time and frequency series</a></li> 
       </ul>
     </div>  
@@ -109,6 +109,8 @@ We follow this convention: methods with an name that is an imperative (e.g.,
 <code class="docutils literal notranslate"><span class="pre">zero_pad</span></code>) modify the object does not return anything, methods with name that
 is a past-tense verb (e.g., <code class="docutils literal notranslate"><span class="pre">zero_padded</span></code>) return a new object with the
 modification applied.</p>
+<p><code class="docutils literal notranslate"><span class="pre">Series</span></code> support masking data. Read the page on masks to learn more
+(<a class="reference internal" href="masks.html#masking-invalid-data"><span class="std std-ref">Masking invalid data</span></a>).</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
 <p>Every mathematical operation between different series will perform a check
@@ -147,6 +149,12 @@ and they are especially unfit for discontinuous data. Be sure to understand
 the limitations, and use splines only when you know that the representation
 is good.</p>
 </div>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>Splines are not supported for masked data. If you are working with masked
+data, you should first removed the invalid values with
+<a class="reference internal" href="frequencyseries_ref.html#kuibit.frequencyseries.FrequencySeries.mask_remove" title="kuibit.frequencyseries.FrequencySeries.mask_remove"><code class="xref py py-meth docutils literal notranslate"><span class="pre">mask_remove()</span></code></a>.</p>
+</div>
 </div>
 <div class="section" id="integrate">
 <h3>integrate<a class="headerlink" href="#integrate" title="Permalink to this headline">¶</a></h3>
@@ -155,6 +163,12 @@ on the time intervals (trapezoid). The result is a new <code class="docutils lit
 integral as a function of time. Optinally, one can provide <code class="docutils literal notranslate"><span class="pre">dx</span></code>, which is the
 spacing in the independent variable. If provided, it will be used. This is
 especially convenient for evely spaced series, as computations will be faster</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>Integration is not supported for masked data. If you are working with masked
+data, you should first removed the invalid values with
+<a class="reference internal" href="frequencyseries_ref.html#kuibit.frequencyseries.FrequencySeries.mask_remove" title="kuibit.frequencyseries.FrequencySeries.mask_remove"><code class="xref py py-meth docutils literal notranslate"><span class="pre">mask_remove()</span></code></a>.</p>
+</div>
 </div>
 <div class="section" id="differentiate-spline-differentiated">
 <h3>differentiate, spline_differentiated<a class="headerlink" href="#differentiate-spline-differentiated" title="Permalink to this headline">¶</a></h3>
@@ -165,6 +179,12 @@ is applied <code class="docutils literal notranslate"><span class="pre">order</s
 <code class="docutils literal notranslate"><span class="pre">spline_differentiate</span></code> is typically and better behaved for nice enough timeseries.
 You should not trust the values at the boundaries too much, you may want to crop
 it out.</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>Differentiation is not supported for masked data. If you are working with
+masked data, you should first removed the invalid values with
+<a class="reference internal" href="frequencyseries_ref.html#kuibit.frequencyseries.FrequencySeries.mask_remove" title="kuibit.frequencyseries.FrequencySeries.mask_remove"><code class="xref py py-meth docutils literal notranslate"><span class="pre">mask_remove()</span></code></a>.</p>
+</div>
 </div>
 <div class="section" id="save">
 <h3>save<a class="headerlink" href="#save" title="Permalink to this headline">¶</a></h3>
@@ -172,6 +192,10 @@ it out.</p>
 valued data and 3 columns <span class="math notranslate nohighlight">\((t, \Re (y), \Im (y))\)</span> for complex-valued ones.
 The back-end is <code class="docutils literal notranslate"><span class="pre">np.savetxt</span></code>, so you can provide additional arguments, like an
 header.</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>Information about masks is lost.</p>
+</div>
 </div>
 <div class="section" id="crop">
 <h3>crop<a class="headerlink" href="#crop" title="Permalink to this headline">¶</a></h3>
@@ -188,6 +212,12 @@ and only the “middle” point is chosen. Since 2nd (or 4th) order information 
 concerned at every point, the bias introduced in “moving average” approach at
 local maxima or minima, is circumvented. At the moment, this is the preferred
 way to smooth series.</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>Smoothing is not supported for masked data. If you are working with masked
+data, you should first removed the invalid values with
+<a class="reference internal" href="frequencyseries_ref.html#kuibit.frequencyseries.FrequencySeries.mask_remove" title="kuibit.frequencyseries.FrequencySeries.mask_remove"><code class="xref py py-meth docutils literal notranslate"><span class="pre">mask_remove()</span></code></a>.</p>
+</div>
 </div>
 <div class="section" id="iter">
 <h3>iter<a class="headerlink" href="#iter" title="Permalink to this headline">¶</a></h3>
@@ -562,7 +592,7 @@ and <code class="docutils literal notranslate"><span class="pre">other</span></c
         <li class="right" >
           <a href="simdir.html" title="Getting started with SimDir"
              >previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">kuibit 1.2.0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="index.html">kuibit 1.3.0-dev1 documentation</a> &#187;</li>
         <li class="nav-item nav-item-this"><a href="">Time and frequency series</a></li> 
       </ul>
     </div>
