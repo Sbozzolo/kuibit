@@ -211,6 +211,9 @@ class GravitationalWavesOneDet(mp.MultipoleOneDet):
         general, a wise choise is to pick the longest physical period in the
         signal.
 
+        For more information on the fixed-frequency integration method, see
+        Reisswig 2011.
+
         Optionally, remove part of the output signal at both the beginning and
         the end. If ``trim_ends`` is True, ``pcut`` is removed. This is because
         those parts of the signal are typically not very accurate.
@@ -230,7 +233,7 @@ class GravitationalWavesOneDet(mp.MultipoleOneDet):
                           is equal to pcut.
         :type trim_ends: bool
 
-        :returns: :math:`r (h^+ - i rh^\times)`
+        :returns: :math:`r (h^+ - i h^\times)`
         :rtype: :py:class:`~.TimeSeries`
 
         """
@@ -306,7 +309,7 @@ class GravitationalWavesOneDet(mp.MultipoleOneDet):
         :param l_max: Ignore multipoles with ``l > l_max``
         :type l_max: int
 
-        :returns: :math:`r (h^+ - i rh^\times)`
+        :returns: :math:`r (h^+ - i h^\times)`
         :rtype: :py:class:`~.TimeSeries`
         """
 
@@ -390,7 +393,7 @@ class GravitationalWavesOneDet(mp.MultipoleOneDet):
         :param l_max: Ignore multipoles with l > l_max
         :type l_max: int
 
-        :returns: :math:`r (h^+ - i rh^\times)`
+        :returns: :math:`r (h^+ - i h^\times)`
         :rtype: Detectors of :py:class:`~.TimeSeries`
 
         """
