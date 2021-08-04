@@ -79,6 +79,7 @@ array of booleans that identifies the valid data.
 - The legend in `plot_psi4_lm` was corrected.
 - `visualize_matplotlib.save` now correctly supports the `figure` argument.
 - `plot_strain_lm.py` no longer crashes when `window_args` is not provided.
+- `HierarchicalGridData` now owns the components.
 
 #### New examples
 
@@ -88,13 +89,6 @@ Scripts:
 * `plot_grid_expr.py`
 * `plot_gw_angular_momentum.py`
 * `print_grid_point_minmax.py`
-
-
-## Version 1.2.1 (3 August 2021)
-
-#### Bug fixes
-
-- `OneGridFunction` no longer uses lru_cache for `HierarchicalGridData`.
 
 ## Version 1.2.0 (1 June 2021)
 

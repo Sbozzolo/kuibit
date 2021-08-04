@@ -1585,8 +1585,10 @@ class HierarchicalGridData(BaseNumerical):
 
         components = {}
 
+        # Organize the components and create a copy. In creating a copy we
+        # declare ownership of the UniformGridData
         for comp in uniform_grid_data_sorted:
-            components.setdefault(comp.ref_level, []).append(comp)
+            components.setdefault(comp.ref_level, []).append(comp.copy())
 
         self.grid_data_dict = {
             ref_level: self._try_merge_components(comps)
