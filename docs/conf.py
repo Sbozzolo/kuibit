@@ -23,7 +23,7 @@ copyright = '2020-2021, Gabriele Bozzola'
 author = 'Gabriele Bozzola'
 
 # The full version, including alpha/beta/rc tags
-release = '1.3.0-dev1'
+release = '1.3.0-dev2'
 
 
 # -- General configuration ---------------------------------------------------
