@@ -81,6 +81,7 @@ array of booleans that identifies the valid data.
 - `visualize_matplotlib.save` now correctly supports the `figure` argument.
 - `plot_strain_lm.py` no longer crashes when `window_args` is not provided.
 - `HierarchicalGridData` now owns the components.
+- Clear `OneGridFunction` cache in `grid_var` to avoid death by OOM.
 
 #### New examples
 
