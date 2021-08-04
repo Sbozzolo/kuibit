@@ -90,6 +90,12 @@ Scripts:
 * `print_grid_point_minmax.py`
 
 
+## Version 1.2.1 (3 August 2021)
+
+#### Bug fixes
+
+- `OneGridFunction` no longer uses lru_cache for `HierarchicalGridData`.
+
 ## Version 1.2.0 (1 June 2021)
 
 #### New module: visualize_matplotlib

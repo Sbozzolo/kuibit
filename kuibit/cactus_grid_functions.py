@@ -443,7 +443,6 @@ class BaseOneGridFunction(ABC):
         """
         return total_filesize(self.allfiles, unit=unit)
 
-    @lru_cache(128)
     def _read_iteration_as_HierarchicalGridData(self, iteration):
         """Return the data at the given iteration as a :py:class:`~.HierarchicalGridData`.
 
@@ -475,7 +474,6 @@ class BaseOneGridFunction(ABC):
             else None
         )
 
-    @lru_cache(128)
     def get_iteration(self, iteration, default=None):
         """Return the data at the given iteration as a :py:class:`~.HierarchicalGridData`.
         If the iteration is not available, return ``default``.
@@ -495,7 +493,6 @@ class BaseOneGridFunction(ABC):
             return default
         return self[iteration]
 
-    @lru_cache(128)
     def get_time(self, time, default=None):
         """Return the data at the given time as a :py:class:`~.HierarchicalGridData`.
         If the time is not available, return ``default``.
