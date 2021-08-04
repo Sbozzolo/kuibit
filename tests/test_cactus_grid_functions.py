@@ -507,3 +507,17 @@ class TestOneGridFunction(unittest.TestCase):
         # Test file with wrong name
         with self.assertRaises(RuntimeError):
             self.rho_star._parse_file("/tmp/wrongname")
+
+    def test_clear_cache(self):
+
+        # Read something
+        self.P[0]
+
+        # Check that we saved something
+        self.assertIsNotNone(self.P.alldata[self.P_file][0][0][0])
+
+        # Remove that something
+        self.P.clear_cache()
+
+        # Check that we are clear
+        self.assertIsNone(self.P.alldata[self.P_file][0][0][0])

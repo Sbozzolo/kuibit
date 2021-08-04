@@ -1201,6 +1201,23 @@ class OneGridFunctionH5(BaseOneGridFunction):
                 "output_ghost_points"
             )
 
+    def clear_cache(self):
+        """Remove all the cached entries.
+
+        Every time a component is read, :py:class:`~.OneGridFunctionsH5` caches
+        its value (reading can be expensive). In certain cases, this can lead to
+        an explosion in the size of this object. For example, when reading
+        several iterations to make a movie. This method removes all the cached
+        entries, keeping the size of the object under control.
+        """
+        for filename, file_reader in self.alldata.items():
+            for iteration, iteration_reader in file_reader.items():
+                for ref_level, ref_level_reader in iteration_reader.items():
+                    for component in ref_level_reader.keys():
+                        self.alldata[filename][iteration][ref_level][
+                            component
+                        ] = None
+
     def time_at_iteration(self, iteration):
         """Return the time corresponding to the provided iteration.
 

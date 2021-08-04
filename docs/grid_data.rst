@@ -519,6 +519,14 @@ can also be used to generate additional time frames between two outputs.
 :py:class:`~.OneGridFunctionH5` objects are iterable: you can loop over all
 the available iterations by iterating over the object.
 
+.. note::
+
+   :py:class:`~.OneGridFunctionH5` objects cache information to avoid expensive
+   read operations. This can lead to a growing memory usage in scripts when the
+   same object is used multiple times (for example, to render a video reading
+   multiple iterations). The method :py:meth:`~.clear_cache` can be used to free
+   up memory.
+
 .. warning::
 
    ``kuibit`` supports grid arrays, which are arrays with a fixed size,
