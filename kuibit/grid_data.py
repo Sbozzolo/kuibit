@@ -61,13 +61,17 @@ class GridSeries(BaseSeries):
     :type y: 1D NumPy array
     """
 
-    def __init__(self, x, y):
+    def __init__(self, x, y, _=None):
         """Constructor.
+
+        The third argument can be anything. It is required to ensure
+        compatibility with other series, but it is not used.
 
         :param x: Coordinates.
         :type x: 1D NumPy array
         :param y: Values.
         :type y: 1D NumPy array
+
         """
         super().__init__(x, y, guarantee_x_is_monotonic=True)
 
