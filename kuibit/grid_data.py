@@ -33,6 +33,11 @@ A :py:class:`~.UniformGridData` object contains a :py:class:`~.UniformGrid` one.
 Similarly, a :py:class:`~.HierarchicalGridData` contains multiple
 :py:class:`~.UniformGridData`.
 
+We also define :py:class:`~.GridSeries`. This is intended to be used for 1D grid
+data and it is a way to use the infrastructure for ``Series`` for grid data. The
+reason this is useful is that ``Series`` are much simpler and leaner to work
+with.
+
 """
 import warnings
 from bisect import bisect_right
