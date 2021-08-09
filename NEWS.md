@@ -26,6 +26,10 @@ the current state of the simulation is performed. If the simulation changes
 (e.g., new checkpoints are added), this will result in errors. In that case, a
 new pickle file must be produced.
 
+#### Masked data
+
+- `Series`, `UniformGridData`, `HierarhicalGridData` have a new method
+  `is_masked`.
 
 #### General
 - `SimDir` can be saved to disk with the method `save` and read with the
@@ -34,6 +38,7 @@ new pickle file must be produced.
 - Examples can now use pickles.
 
 #### Features
+
 - `time_at_maximum` and `time_at_minimum` in `TimeSeries` can now take the
   optional argument `absolute`.
 - Added `x_at_minimum_y` and `x_at_maximum_y` to `BaseNumerical`.
@@ -46,7 +51,6 @@ new pickle file must be produced.
 #### Bug fixes
 
 - `plot_colorbar` does not steal axis focus anymore.
-
 
 #### New examples
 

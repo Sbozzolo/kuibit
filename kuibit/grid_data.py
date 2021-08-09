@@ -866,6 +866,15 @@ class UniformGridData(BaseNumerical):
         """
         return issubclass(self.data.dtype.type, complex)
 
+    def is_masked(self):
+        """Return whether the data is masked.
+
+        :returns:  True if the data is masked, false if it is not.
+        :rtype:   bool
+
+        """
+        return isinstance(self.data, np.ma.MaskedArray)
+
     @property
     def dtype(self):
         return self.data.dtype
@@ -2123,6 +2132,15 @@ class HierarchicalGridData(BaseNumerical):
 
         """
         return any(comp.is_complex() for comp in self.all_components)
+
+    def is_masked(self):
+        """Return whether the data is masked.
+
+        :returns:  True if the data is masked, false if it is not.
+        :rtype:   bool
+
+        """
+        return any(comp.is_masked() for comp in self.all_components)
 
     def copy(self):
         """Return a deep copy.

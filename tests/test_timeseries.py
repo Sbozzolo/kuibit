@@ -381,6 +381,15 @@ class TestTimeseries(unittest.TestCase):
         self.assertFalse(self.TS.is_complex())
         self.assertTrue(self.TS_c.is_complex())
 
+    def test_is_masked(self):
+
+        times = np.linspace(-1, 1, 100)
+        values = np.ma.log10(times)
+        ts_masked = ts.TimeSeries(times, values)
+
+        self.assertFalse(self.TS.is_masked())
+        self.assertTrue(ts_masked.is_masked())
+
     def test_unary_functions(self):
         def test_f(f):
             times = np.linspace(np.pi / 3, np.pi / 2, 100)

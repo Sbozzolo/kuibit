@@ -428,6 +428,18 @@ class TestUniformGridData(unittest.TestCase):
 
         self.assertTrue(ug_data_c.is_complex())
 
+    def test_is_complex(self):
+
+        data = np.array([i * np.linspace(1, 5, 51) for i in range(101)])
+
+        ug_data = gd.UniformGridData(self.geom, data)
+
+        self.assertFalse(ug_data.is_masked())
+
+        ug_data_m = gd.UniformGridData(self.geom, np.ma.MaskedArray(data))
+
+        self.assertTrue(ug_data_m.is_masked())
+
     def test_flat_dimensions_remove(self):
 
         geom = gd.UniformGrid([101, 1], x0=[0, 0], dx=[0.01, 1])
@@ -1413,6 +1425,19 @@ class TestHierarchicalGridData(unittest.TestCase):
         hg_complex[0][0] *= 1j
 
         self.assertTrue(hg_complex.is_complex())
+
+    def test_is_masked(self):
+
+        hg = gd.HierarchicalGridData(self.grid_data_two_comp)
+
+        self.assertFalse(hg.is_masked())
+
+        hg_masked = gd.HierarchicalGridData(self.grid_data_two_comp)
+
+        # Make it masked
+        hg_masked[0][0].data = np.ma.MaskedArray(hg_masked[0][0].data)
+
+        self.assertTrue(hg_masked.is_masked())
 
     def test_iter(self):
 

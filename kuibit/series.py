@@ -301,6 +301,17 @@ class BaseSeries(BaseNumerical):
         """
         return issubclass(self.y.dtype.type, complex)
 
+    def is_masked(self):
+        """Return whether the x or y are masked.
+
+        :returns:  True if the x or y are masked, false if it is not.
+        :rtype:   bool
+
+        """
+        return isinstance(self.y, np.ma.MaskedArray) or isinstance(
+            self.x, np.ma.MaskedArray
+        )
+
     def x_at_maximum_y(self):
         """Return the value of x when y is maximum.
 
