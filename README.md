@@ -66,6 +66,14 @@ This is a standard virtual environment, which can be activated with the `activat
 scripts in the `bin` folder. Once you do that, you will be able to use `kuibit`
 for anywhere.
 
+As of version `1.3.0`, we adopt the following  philosophy for `git` branches:
+- `master` always corresponds to the latest stable version, the one available on
+  PyPI. Hotfixes are applied directly on master, and a new release is tagged.
+- `next` is where most of the development occurs. This corresponds to the next
+  version of `kuibit`. `next` often experiences rebasing.
+- Specific features that can be developed on their separate feature branch. This
+  will be merged into `next`.
+
 ## Help!
 
 Users and developers of ``kuibit`` meet in the [Telegram
