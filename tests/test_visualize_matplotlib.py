@@ -29,6 +29,7 @@ import numpy as np
 from kuibit import cactus_grid_functions as cgf
 from kuibit import grid_data as gd
 from kuibit import grid_data_utils as gdu
+from kuibit import masks as km
 from kuibit import visualize_matplotlib as viz
 from kuibit.simdir import SimDir
 
@@ -155,6 +156,17 @@ class TestVisualizeMatplotlib(unittest.TestCase):
             ylabel="y",
             resample=True,
         )
+
+        # Test with masked data
+
+        # HierarchicalGrid
+        hg_m = km.arcsin(gd.HierarchicalGridData([ugd]))
+        with self.assertWarns(Warning):
+            dec_func_grid(data=hg_m, shape=[10, 10])
+
+        ugd_m = km.arcsin(ugd)
+        with self.assertWarns(Warning):
+            dec_func_grid(data=ugd_m, shape=[10, 10], x0=[1, 3])
 
     def test_vmin_vmax_extend(self):
 

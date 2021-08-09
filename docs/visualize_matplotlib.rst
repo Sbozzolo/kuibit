@@ -54,6 +54,11 @@ The functions take additional arguments (for example, the labels for the axes).
 Details can be found in the reference material
 (:ref:`visualize_matplotlib_ref:Reference on kuibit.visualize_matplotlib`).
 
+.. warning::
+
+   Mask information will be lost upon resampling. If you want masks, you need to
+   provide the :py:class:`~.UniformGridData` you want to plot.
+
 Plots can be enanched by adding a colorbar with :py:mod:`~.plot_colorbar` (or
 passing the ``colorbar`` option).
 

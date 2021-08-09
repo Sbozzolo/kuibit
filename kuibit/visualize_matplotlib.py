@@ -226,6 +226,11 @@ def preprocess_plot_grid(func):
             resample = default_or_kwargs("resample", False)
 
             # Overwrite data with UniformGridData
+            if data.is_masked():
+                warnings.warn(
+                    "Mask information will be lost with the resampling"
+                )
+
             data = data.to_UniformGridData(
                 shape=kwargs["shape"], x0=x0, x1=x1, resample=resample
             )
@@ -255,6 +260,12 @@ def preprocess_plot_grid(func):
             if resampling:
                 resample = default_or_kwargs("resample", False)
                 new_grid = gd.UniformGrid(shape=kwargs["shape"], x0=x0, x1=x1)
+
+                if data.is_masked():
+                    warnings.warn(
+                        "Mask information will be lost with the resampling"
+                    )
+
                 data = data.resampled(
                     new_grid, piecewise_constant=(not resample)
                 )
