@@ -89,6 +89,7 @@ array of booleans that identifies the valid data.
 Scripts:
 
 * `picklify.py`
+* `plot_1d_slice.py`
 * `plot_grid_expr.py`
 * `plot_gw_angular_momentum.py`
 * `print_grid_point_minmax.py`
