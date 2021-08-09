@@ -103,8 +103,9 @@ class TestSimDir(unittest.TestCase):
 
         # Test load from pickle
 
-        loaded_sim2 = sd.SimDir("tests/tov", max_depth=0,
-                             pickle_file="/tmp/sim.pickle")
+        loaded_sim2 = sd.SimDir(
+            "tests/tov", max_depth=0, pickle_file="/tmp/sim.pickle"
+        )
 
         self.assertCountEqual(self.sim.__dict__, loaded_sim2.__dict__)
 

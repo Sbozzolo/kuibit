@@ -442,12 +442,7 @@ def save_from_dir_filename_ext(
 
 @preprocess_plot
 def set_axis_limits(
-    xmin=None,
-    xmax=None,
-    ymin=None,
-    ymax=None,
-    figure=None,
-    axis=None
+    xmin=None, xmax=None, ymin=None, ymax=None, figure=None, axis=None
 ):
     """Set limits on the two axes of axis.
 
@@ -473,11 +468,7 @@ def set_axis_limits(
 
 
 @preprocess_plot
-def set_axis_limits_from_args(
-        args,
-        figure=None,
-        axis=None
-):
+def set_axis_limits_from_args(args, figure=None, axis=None):
     """Set limits on the two axes of axis with data read from ``args``.
 
     It uses the ``xmin``, ``xmax``, ``ymin``, ``ymax`` attributes.
@@ -500,7 +491,7 @@ def set_axis_limits_from_args(
         ymin=args.ymin,
         ymax=args.ymax,
         figure=figure,
-        axis=axis
+        axis=axis,
     )
 
 
