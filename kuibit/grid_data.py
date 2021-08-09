@@ -905,7 +905,7 @@ class UniformGridData(BaseNumerical):
         :rtype:   bool
 
         """
-        return isinstance(self.data, np.ma.MaskedArray)
+        return np.ma.is_masked(self.data)
 
     @property
     def dtype(self):

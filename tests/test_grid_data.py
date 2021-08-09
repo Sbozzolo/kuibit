@@ -24,6 +24,7 @@ import warnings
 
 import numpy as np
 
+import kuibit.masks as km
 from kuibit import grid_data as gd
 from kuibit import grid_data_utils as gdu
 
@@ -1522,10 +1523,7 @@ class TestHierarchicalGridData(unittest.TestCase):
 
         self.assertFalse(hg.is_masked())
 
-        hg_masked = gd.HierarchicalGridData(self.grid_data_two_comp)
-
-        # Make it masked
-        hg_masked[0][0].data = np.ma.MaskedArray(hg_masked[0][0].data)
+        hg_masked = km.arcsin(gd.HierarchicalGridData(self.grid_data_two_comp))
 
         self.assertTrue(hg_masked.is_masked())
 
@@ -1773,11 +1771,7 @@ class TestHierarchicalGridData(unittest.TestCase):
         self.assertTrue(np.allclose(hg3(grid), grid_data.data))
 
         # Test masked
-
-        hg_masked = gd.HierarchicalGridData(self.grid_data_two_comp)
-
-        # Make it masked
-        hg_masked[0][0].data = np.ma.MaskedArray(hg_masked[0][0].data)
+        hg_masked = km.arcsin(gd.HierarchicalGridData(self.grid_data_two_comp))
 
         with self.assertRaises(RuntimeError):
             hg_masked([(2, 3)])

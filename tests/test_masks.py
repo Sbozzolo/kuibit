@@ -20,9 +20,9 @@ import unittest
 
 import numpy as np
 
-from kuibit import masks as ma
 from kuibit import grid_data as gd
 from kuibit import grid_data_utils as gdu
+from kuibit import masks as ma
 from kuibit import timeseries as ts
 
 
@@ -36,19 +36,23 @@ class TestMasks(unittest.TestCase):
 
         self.TS = ts.TimeSeries(x, y)
 
-        self.grid_2d = gd.UniformGrid([10, 20], x0=[0, 1], dx=[1, 1])
+        self.grid_2d = gd.UniformGrid([10, 20], x0=[0.5, 1], dx=[1, 1])
 
         self.ugd = gdu.sample_function_from_uniformgrid(
             lambda x, y: x * (y + 2), self.grid_2d
         )
 
-        grid_2d_1 = gd.UniformGrid([10, 20], x0=[0, 1], dx=[1, 1], ref_level=0)
+        grid_2d_1 = gd.UniformGrid(
+            [10, 20], x0=[0.5, 1], dx=[1, 1], ref_level=0
+        )
 
         self.ugd1 = gdu.sample_function_from_uniformgrid(
             lambda x, y: x * (y + 2), grid_2d_1
         )
 
-        grid_2d_2 = gd.UniformGrid([10, 20], x0=[1, 2], dx=[3, 4], ref_level=1)
+        grid_2d_2 = gd.UniformGrid(
+            [10, 20], x0=[1, 2], dx=[3, 0.4], ref_level=1
+        )
 
         self.ugd2 = gdu.sample_function_from_uniformgrid(
             lambda x, y: x * (y + 2), grid_2d_2
