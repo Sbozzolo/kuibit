@@ -74,6 +74,9 @@ As of version `1.3.0`, we adopt the following  philosophy for `git` branches:
 - Specific features that can be developed on their separate feature branch. This
   will be merged into `next`.
 
+The documentation of the development version is served at
+[sbozzolo.github.io/kuibit/dev](https://sbozzolo.github.io/kuibit/dev).
+
 ## Help!
 
 Users and developers of ``kuibit`` meet in the [Telegram
