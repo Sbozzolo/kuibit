@@ -6,9 +6,10 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>kuibit.visualize_matplotlib &#8212; kuibit 1.3.0-dev1 documentation</title>
+    <title>kuibit.visualize_matplotlib &#8212; kuibit 1.3.0-alpha0 documentation</title>
     <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
     <link rel="stylesheet" href="../../_static/bizstyle.css" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/css/custom.css" />
     
     <script id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
     <script src="../../_static/jquery.js"></script>
@@ -32,7 +33,7 @@
         <li class="right" >
           <a href="../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../index.html">kuibit 1.3.0-dev1 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">kuibit 1.3.0-alpha0 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="../index.html" accesskey="U">Module code</a> &#187;</li>
         <li class="nav-item nav-item-this"><a href="">kuibit.visualize_matplotlib</a></li> 
       </ul>
@@ -272,6 +273,11 @@
             <span class="n">resample</span> <span class="o">=</span> <span class="n">default_or_kwargs</span><span class="p">(</span><span class="s2">&quot;resample&quot;</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
 
             <span class="c1"># Overwrite data with UniformGridData</span>
+            <span class="k">if</span> <span class="n">data</span><span class="o">.</span><span class="n">is_masked</span><span class="p">():</span>
+                <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
+                    <span class="s2">&quot;Mask information will be lost with the resampling&quot;</span>
+                <span class="p">)</span>
+
             <span class="n">data</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">to_UniformGridData</span><span class="p">(</span>
                 <span class="n">shape</span><span class="o">=</span><span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;shape&quot;</span><span class="p">],</span> <span class="n">x0</span><span class="o">=</span><span class="n">x0</span><span class="p">,</span> <span class="n">x1</span><span class="o">=</span><span class="n">x1</span><span class="p">,</span> <span class="n">resample</span><span class="o">=</span><span class="n">resample</span>
             <span class="p">)</span>
@@ -301,6 +307,12 @@
             <span class="k">if</span> <span class="n">resampling</span><span class="p">:</span>
                 <span class="n">resample</span> <span class="o">=</span> <span class="n">default_or_kwargs</span><span class="p">(</span><span class="s2">&quot;resample&quot;</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
                 <span class="n">new_grid</span> <span class="o">=</span> <span class="n">gd</span><span class="o">.</span><span class="n">UniformGrid</span><span class="p">(</span><span class="n">shape</span><span class="o">=</span><span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;shape&quot;</span><span class="p">],</span> <span class="n">x0</span><span class="o">=</span><span class="n">x0</span><span class="p">,</span> <span class="n">x1</span><span class="o">=</span><span class="n">x1</span><span class="p">)</span>
+
+                <span class="k">if</span> <span class="n">data</span><span class="o">.</span><span class="n">is_masked</span><span class="p">():</span>
+                    <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
+                        <span class="s2">&quot;Mask information will be lost with the resampling&quot;</span>
+                    <span class="p">)</span>
+
                 <span class="n">data</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">resampled</span><span class="p">(</span>
                     <span class="n">new_grid</span><span class="p">,</span> <span class="n">piecewise_constant</span><span class="o">=</span><span class="p">(</span><span class="ow">not</span> <span class="n">resample</span><span class="p">)</span>
                 <span class="p">)</span>
@@ -1226,7 +1238,7 @@
         <li class="right" >
           <a href="../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../index.html">kuibit 1.3.0-dev1 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">kuibit 1.3.0-alpha0 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="../index.html" >Module code</a> &#187;</li>
         <li class="nav-item nav-item-this"><a href="">kuibit.visualize_matplotlib</a></li> 
       </ul>

@@ -177,7 +177,7 @@
     "We provide the aliaxs `data_xyz`, which is the the tranposed of `data`. This is ready to be plotted. \n",
     "\n",
     "\n",
-    "In this tutorial, we plot the various quantities directly. This is to understand to access the data and what is the fundamental structure of these objects. However, `kuibit` comes with plottings methods too. The `visualize_matplotlib` module contains multiple functions to make 2D plots. We touch upon this at the end of this tutorial."
+    "⚠️ In this tutorial, we plot the various quantities directly. This is to understand to access the data and what is the fundamental structure of these objects. However, `kuibit` comes with plottings methods too. The `visualize_matplotlib` module contains multiple functions to make 2D plots. We touch upon this at the end of this tutorial."
    ]
   },
   {
@@ -510,6 +510,80 @@
    ]
   },
   {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "along_y_series = along_y.to_GridSeries()\n",
+    "plt.plot(along_y_series)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "## Masks\n",
+    "\n",
+    "It is often useful to mask the data according to some criterion. For example, mask the atmosphere out in a GRMHD simulation. `kuibit` fully supports mask with an interface that is similar to the one implemented in `NumPy` (but some features will not work with masked data, for example interpolation). \n",
+    "\n",
+    "The module `kuibit.masks` provides methods to apply masked functions in case the domain is restricted. For example, for the logarithm, or arcsin:"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "import kuibit.masks as km\n",
+    "\n",
+    "arcsin_funk = km.arcsin(more_funk)\n",
+    "\n",
+    "print(arcsin_funk.is_masked())"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "Alternatively, it is possible to apply masks according to the value of the data. For instance, masking all the values smaller than a given one:"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "print(more_funk.abs_min())\n",
+    "\n",
+    "funk_masked = more_funk.masked_less(1)\n",
+    "\n",
+    "print(funk_masked.abs_min())  # The minimum now reflects the mask"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "You can extract the mask and apply to another grid variable with the same structure. (This is how you would apply the atmospheric mask to other grid functions). "
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "funk2 = more_funk ** 2\n",
+    "\n",
+    "funk2_masked = funk2.mask_applied(funk_masked.mask)\n",
+    "\n",
+    "print(funk2_masked.is_masked())"
+   ]
+  },
+  {
    "cell_type": "markdown",
    "metadata": {},
    "source": [
@@ -579,7 +653,7 @@
    "name": "python",
    "nbconvert_exporter": "python",
    "pygments_lexer": "ipython3",
-   "version": "3.8.10"
+   "version": "3.9.2"
   },
   "name": "grid_data.ipynb"
  },

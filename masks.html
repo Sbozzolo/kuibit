@@ -6,9 +6,10 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Masking invalid data &#8212; kuibit 1.3.0-dev1 documentation</title>
+    <title>Masking invalid data &#8212; kuibit 1.3.0-alpha0 documentation</title>
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <link rel="stylesheet" href="_static/bizstyle.css" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="_static/css/custom.css" />
     
     <script id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
     <script src="_static/jquery.js"></script>
@@ -40,7 +41,7 @@
         <li class="right" >
           <a href="cactus_waves.html" title="Gravitational waves"
              accesskey="P">previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">kuibit 1.3.0-dev1 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="index.html">kuibit 1.3.0-alpha0 documentation</a> &#187;</li>
         <li class="nav-item nav-item-this"><a href="">Masking invalid data</a></li> 
       </ul>
     </div>  
@@ -119,6 +120,18 @@ possible to compute splines or perform interpolations. For
 this limitation by removing the invalid points with the methods
 <a class="reference internal" href="frequencyseries_ref.html#kuibit.frequencyseries.FrequencySeries.mask_remove" title="kuibit.frequencyseries.FrequencySeries.mask_remove"><code class="xref py py-meth docutils literal notranslate"><span class="pre">mask_remove()</span></code></a> or <a class="reference internal" href="frequencyseries_ref.html#kuibit.frequencyseries.FrequencySeries.mask_removed" title="kuibit.frequencyseries.FrequencySeries.mask_removed"><code class="xref py py-meth docutils literal notranslate"><span class="pre">mask_removed()</span></code></a>. This is not possible with
 grid data because we assume that the data is defined on regular grids.</p>
+<p>Suppose you want to mask the atmosphere. You have your density variable <code class="docutils literal notranslate"><span class="pre">rho</span></code>
+and you want to remove everything that is below <code class="docutils literal notranslate"><span class="pre">1e-8</span></code>, and you want to plot
+the pressure <code class="docutils literal notranslate"><span class="pre">press</span></code>. For that you would first construct a masked grid data
+with <code class="docutils literal notranslate"><span class="pre">rho</span></code>, and then apply the mask to <code class="docutils literal notranslate"><span class="pre">press</span></code>:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">masked_rho</span> <span class="o">=</span> <span class="n">rho</span><span class="o">.</span><span class="n">masked_less</span><span class="p">(</span><span class="mf">1e-8</span><span class="p">)</span>
+<span class="n">masked_press</span> <span class="o">=</span> <span class="n">press</span><span class="o">.</span><span class="n">mask_applied</span><span class="p">(</span><span class="n">masked_rho</span><span class="o">.</span><span class="n">mask</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>If you want to plot this with <a class="reference internal" href="visualize_matplotlib_ref.html#module-kuibit.visualize_matplotlib" title="kuibit.visualize_matplotlib"><code class="xref py py-mod docutils literal notranslate"><span class="pre">visualize_matplotlib</span></code></a>, you need to pay
+attention that resampling erases mask information. Therefore, if you want to
+plot the mask, you have to pass directly the <a class="reference internal" href="grid_data_ref.html#kuibit.grid_data.UniformGridData" title="kuibit.grid_data.UniformGridData"><code class="xref py py-class docutils literal notranslate"><span class="pre">UniformGridData</span></code></a> you
+want to plot (and not <a class="reference internal" href="grid_data_ref.html#kuibit.grid_data.HierarchicalGridData" title="kuibit.grid_data.HierarchicalGridData"><code class="xref py py-class docutils literal notranslate"><span class="pre">HierarchicalGridData</span></code></a>).</p>
 <div class="admonition warning">
 <p class="admonition-title">Warning</p>
 <p>We only mask the data, not the independent variable (e.g., the time in
@@ -129,7 +142,10 @@ method and manually apply the mask.</p>
 <div class="admonition warning">
 <p class="admonition-title">Warning</p>
 <p>Some methods will not work with masked data (e.g. splines and interpolation).
-The <a class="reference internal" href="frequencyseries_ref.html#kuibit.frequencyseries.FrequencySeries.save" title="kuibit.frequencyseries.FrequencySeries.save"><code class="xref py py-meth docutils literal notranslate"><span class="pre">save()</span></code></a> method will discard the mask information.</p>
+Therefore, resampling operations will not carry over the masks. You have to
+apply the masks again. One instance in which this is important is plotting
+with <a class="reference internal" href="visualize_matplotlib_ref.html#module-kuibit.visualize_matplotlib" title="kuibit.visualize_matplotlib"><code class="xref py py-mod docutils literal notranslate"><span class="pre">visualize_matplotlib</span></code></a>. Also, the <a class="reference internal" href="frequencyseries_ref.html#kuibit.frequencyseries.FrequencySeries.save" title="kuibit.frequencyseries.FrequencySeries.save"><code class="xref py py-meth docutils literal notranslate"><span class="pre">save()</span></code></a> method
+will discard the mask information.</p>
 </div>
 </div>
 </div>
@@ -187,7 +203,7 @@ The <a class="reference internal" href="frequencyseries_ref.html#kuibit.frequenc
         <li class="right" >
           <a href="cactus_waves.html" title="Gravitational waves"
              >previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">kuibit 1.3.0-dev1 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="index.html">kuibit 1.3.0-alpha0 documentation</a> &#187;</li>
         <li class="nav-item nav-item-this"><a href="">Masking invalid data</a></li> 
       </ul>
     </div>

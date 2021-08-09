@@ -77,6 +77,21 @@ this limitation by removing the invalid points with the methods
 :py:meth:`~.mask_remove` or :py:meth:`~.mask_removed`. This is not possible with
 grid data because we assume that the data is defined on regular grids.
 
+Suppose you want to mask the atmosphere. You have your density variable ``rho``
+and you want to remove everything that is below ``1e-8``, and you want to plot
+the pressure ``press``. For that you would first construct a masked grid data
+with ``rho``, and then apply the mask to ``press``:
+
+.. code-block:: python
+
+     masked_rho = rho.masked_less(1e-8)
+     masked_press = press.mask_applied(masked_rho.mask)
+
+If you want to plot this with :py:mod:`~.visualize_matplotlib`, you need to pay
+attention that resampling erases mask information. Therefore, if you want to
+plot the mask, you have to pass directly the :py:class:`~.UniformGridData` you
+want to plot (and not :py:class:`~.HierarchicalGridData`).
+
 .. warning::
 
    We only mask the data, not the independent variable (e.g., the time in
@@ -87,4 +102,7 @@ grid data because we assume that the data is defined on regular grids.
 .. warning::
 
    Some methods will not work with masked data (e.g. splines and interpolation).
-   The :py:meth:`~.save` method will discard the mask information.
+   Therefore, resampling operations will not carry over the masks. You have to
+   apply the masks again. One instance in which this is important is plotting
+   with :py:mod:`~.visualize_matplotlib`. Also, the :py:meth:`~.save` method
+   will discard the mask information.

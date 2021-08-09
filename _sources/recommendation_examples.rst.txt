@@ -35,9 +35,13 @@ Unpack the archive:
 ---------------
 
 It is convenient to be able to access the codes from anywhere in the file
-system. For that, you need to set up some environment variables. For the
-scripts, this is the ``$PATH`` variable. For ``bash`` and ``zsh``, you
-will have to add a line like this to your ``.bashrc`` or ``.zshrc``:
+system. If you are not interested in this, you can simply call the scripts with
+the full path, or copy them in the directories where you want to use them.
+
+If you prefer being able to access to the codes from anywhere, you need to set
+up some environment variables. For the scripts, this is the ``$PATH`` variable.
+For ``bash`` and ``zsh``, you will have to add a line like this to your
+``.bashrc`` or ``.zshrc``:
 
 ..  code-block:: sh
 
@@ -58,16 +62,16 @@ following line:
 ------------------------------
 
 The examples use `argcomplete <https://kislyuk.github.io/argcomplete/>`_ to
-enable tab completions on the available flags. For ``bash``, you can run
-``activate-global-python-argcomplete --user`` and start a new shell to enjoy tab
-completion. For ``zsh``, you have enable support for ``bash`` completion
+enable tab completions on the available flags. If you are not interested in tab
+completion, you can ignore this section. Alternatively, for ``bash``, you can
+run ``activate-global-python-argcomplete --user`` and start a new shell to enjoy
+tab completion. For ``zsh``, you have enable support for ``bash`` completion
 scripts.
 
 ..  code-block:: sh
 
     autoload -U bashcompinit
     bashcompinit
-
 
 Then, you have register each single script:
 
