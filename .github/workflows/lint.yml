@@ -1,4 +1,4 @@
-name: Tests
+name: Lint
 
 on: [push]
 
@@ -8,7 +8,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: [ '3.6', '3.9' ]
+        python-version: [ '3.9' ]
 
     steps:
       - uses: actions/checkout@v2
@@ -35,20 +35,15 @@ jobs:
 
       - name: Install Dependencies
         run: |
-          poetry install -E full
+          poetry install
         if: steps.cached-poetry-dependencies.outputs.cache-hit != 'true'
 
-      - name: Tests and produce coverage
-        continue-on-error: true
-        run: |
-          poetry run coverage run -m unittest discover
-          poetry run coverage xml
+      - name: Black
+        run: poetry run black . --check
 
-      - name: Upload coverage to Codecov
-        uses: codecov/codecov-action@v1
-        if: runner.python_version == '3.9'
-        with:
-          file: coverage.xml
-          flags: unittests
-          env_vars: OS,PYTHON
-          fail_ci_if_error: true
+      - name: Isort
+        run: poetry run isort --profile black --check .
+
+      - name: Flake8
+        run: poetry run flake8 .
+

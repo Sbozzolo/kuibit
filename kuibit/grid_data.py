@@ -34,9 +34,9 @@ Similarly, a :py:class:`~.HierarchicalGridData` contains multiple
 :py:class:`~.UniformGridData`.
 
 """
+import warnings
 from bisect import bisect_right
 from os.path import splitext
-import warnings
 
 import numpy as np
 from scipy import interpolate, linalg

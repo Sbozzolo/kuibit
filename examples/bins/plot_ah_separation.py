@@ -19,6 +19,7 @@
 import logging
 
 import matplotlib.pyplot as plt
+
 from kuibit import argparse_helper as kah
 from kuibit.cactus_horizons import compute_horizons_separation
 from kuibit.simdir import SimDir

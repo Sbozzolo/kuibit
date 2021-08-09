@@ -19,6 +19,7 @@
 import logging
 
 import matplotlib.pyplot as plt
+
 from kuibit import argparse_helper as kah
 from kuibit.simdir import SimDir
 from kuibit.visualize_matplotlib import (

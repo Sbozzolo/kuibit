@@ -57,6 +57,7 @@ array of booleans that identifies the valid data.
    function `load_SimDir`. This is useful to work with a simulation that has
    finished.
 - Examples can now use pickles.
+- New CI workflow: linting.
 
 #### Features
 

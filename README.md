@@ -5,6 +5,7 @@
 [![DOI](https://joss.theoj.org/papers/10.21105/joss.03099/status.svg)](https://doi.org/10.21105/joss.03099)
 [![codecov](https://codecov.io/gh/Sbozzolo/kuibit/branch/master/graph/badge.svg)](https://codecov.io/gh/Sbozzolo/kuibit)
 ![Tests](https://github.com/Sbozzolo/kuibit/workflows/Tests/badge.svg)
+![Lint](https://github.com/Sbozzolo/kuibit/workflows/Lint/badge.svg)
 ![Documentation](https://github.com/Sbozzolo/kuibit/workflows/Document/badge.svg)
 [![GPLv3
 license](https://img.shields.io/badge/License-GPLv3-blue.svg)](http://perso.crans.org/besson/LICENSE.html)

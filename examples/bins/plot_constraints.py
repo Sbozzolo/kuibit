@@ -19,11 +19,12 @@
 import logging
 
 import matplotlib.pyplot as plt
+
 from kuibit import argparse_helper as kah
 from kuibit.simdir import SimDir
 from kuibit.visualize_matplotlib import (
-    set_axis_limits_from_args,
     save_from_dir_filename_ext,
+    set_axis_limits_from_args,
     setup_matplotlib,
 )
 
