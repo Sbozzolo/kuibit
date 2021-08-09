@@ -1,0 +1,1175 @@
+
+
+<!doctype html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>kuibit.gw_mismatch &#8212; kuibit 1.3.0-alpha0 documentation</title>
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/bizstyle.css" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/css/custom.css" />
+    
+    <script id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+    <script src="../../_static/jquery.js"></script>
+    <script src="../../_static/underscore.js"></script>
+    <script src="../../_static/doctools.js"></script>
+    <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="../../_static/bizstyle.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0" />
+    <!--[if lt IE 9]>
+    <script src="_static/css3-mediaqueries.js"></script>
+    <![endif]-->
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">kuibit 1.3.0-alpha0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../index.html" accesskey="U">Module code</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">kuibit.gw_mismatch</a></li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for kuibit.gw_mismatch</h1><div class="highlight"><pre>
+<span></span><span class="ch">#!/usr/bin/env python3</span>
+
+<span class="c1"># Copyright (C) 2020-2021 Gabriele Bozzola</span>
+<span class="c1">#</span>
+<span class="c1"># This program is free software; you can redistribute it and/or modify it under</span>
+<span class="c1"># the terms of the GNU General Public License as published by the Free Software</span>
+<span class="c1"># Foundation; either version 3 of the License, or (at your option) any later</span>
+<span class="c1"># version.</span>
+<span class="c1">#</span>
+<span class="c1"># This program is distributed in the hope that it will be useful, but WITHOUT</span>
+<span class="c1"># ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS</span>
+<span class="c1"># FOR A PARTICULAR PURPOSE. See the GNU General Public License for more</span>
+<span class="c1"># details.</span>
+<span class="c1">#</span>
+<span class="c1"># You should have received a copy of the GNU General Public License along with</span>
+<span class="c1"># this program; if not, see &lt;https://www.gnu.org/licenses/&gt;.</span>
+
+<span class="sd">&quot;&quot;&quot;The :py:mod:`~.gw_mismatch` module functions to compute the mismatch between</span>
+<span class="sd">two waves using a simple grid search for phase and time shifts. Since no</span>
+<span class="sd">polarization shifts are performed, this is only relevant to the gravitational</span>
+<span class="sd">wave 2,2 mode.</span>
+
+<span class="sd">The two main interfaces are :py:func:`~.network_mismatch_from_psi4` (when</span>
+<span class="sd">computing the network mismatch starting from psi4 and the sky localization) and</span>
+<span class="sd">:py:func:`~.mismatch_from_strains` (when computing the mismatch from the</span>
+<span class="sd">strains).</span>
+
+<span class="sd">    ..warning::</span>
+
+<span class="sd">        Make sure to understand what is going on if you are using this module.</span>
+<span class="sd">        You should read the code and comments in the code.</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">from</span> <span class="nn">contextlib</span> <span class="kn">import</span> <span class="n">contextmanager</span>
+<span class="kn">from</span> <span class="nn">warnings</span> <span class="kn">import</span> <span class="n">warn</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
+<span class="c1"># What is this? This is numba!</span>
+<span class="c1">#</span>
+<span class="c1"># numba is a JITter (JIT = Just In Time). The following code is</span>
+<span class="c1"># compiled at runtime. The compiled code is instead, and it is much</span>
+<span class="c1"># faster.</span>
+<span class="c1">#</span>
+<span class="c1"># At the moment, fft is not supported, so the full power of numba</span>
+<span class="c1"># cannot be achieved.</span>
+
+<span class="c1"># TODO (FUTURE): Update when numba supports FFTs</span>
+
+<span class="c1"># We have to put this here. See numba issue #4456</span>
+<span class="c1"># We always try to import numba because we need objtmode</span>
+<span class="k">try</span><span class="p">:</span>
+    <span class="kn">from</span> <span class="nn">numba</span> <span class="kn">import</span> <span class="n">njit</span>
+    <span class="kn">from</span> <span class="nn">numba</span> <span class="kn">import</span> <span class="n">objmode</span> <span class="k">as</span> <span class="n">numba_objmode</span>
+<span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>  <span class="c1"># pragma: no cover</span>
+    <span class="k">pass</span>
+
+<span class="kn">from</span> <span class="nn">kuibit</span> <span class="kn">import</span> <span class="n">frequencyseries</span> <span class="k">as</span> <span class="n">fs</span>
+<span class="kn">from</span> <span class="nn">kuibit</span> <span class="kn">import</span> <span class="n">gw_utils</span> <span class="k">as</span> <span class="n">gwu</span>
+<span class="kn">from</span> <span class="nn">kuibit</span> <span class="kn">import</span> <span class="n">unitconv</span>
+
+
+<span class="k">def</span> <span class="nf">_mismatch_core_numerical</span><span class="p">(</span>
+    <span class="n">h1_c_fft</span><span class="p">,</span>
+    <span class="n">h1_p_fft</span><span class="p">,</span>
+    <span class="n">h2_t</span><span class="p">,</span>
+    <span class="n">delta_t</span><span class="p">,</span>
+    <span class="n">frequencies</span><span class="p">,</span>
+    <span class="n">frequency_mask</span><span class="p">,</span>
+    <span class="n">noises</span><span class="p">,</span>
+    <span class="n">antenna_patterns</span><span class="p">,</span>
+    <span class="n">polarization_shifts</span><span class="p">,</span>
+    <span class="n">time_shifts</span><span class="p">,</span>
+<span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Compute the maximum overlap between ``h1_fft`` (frequency domain, cross and</span>
+<span class="sd">    plus) and ``h2_t`` (time domain). This function requires very specific</span>
+<span class="sd">    pre-processing and should never be used directly. All the details are in the</span>
+<span class="sd">    comments.</span>
+
+<span class="sd">    This can be optinally &quot;numba-ified&quot; to increase the speed (if numba is</span>
+<span class="sd">    available). The input and output values and standard NumPy objects.</span>
+
+<span class="sd">    :param h1_c_fft: Fourier transform of the cross polarization of the first</span>
+<span class="sd">                     strain (it will not be modified). It has to be defined</span>
+<span class="sd">                     only over the frequencies of interest.</span>
+<span class="sd">    :type h1_c_fft: 1D complex NumPy array</span>
+<span class="sd">    :param h1_p_fft: Fourier transform of the plus polarization of the first</span>
+<span class="sd">                     strain (it will not be modified). It has to be defined</span>
+<span class="sd">                     only over the frequencies of interest.</span>
+<span class="sd">    :type h1_p_fft: 1D complex NumPy array</span>
+<span class="sd">    :param h2_t: Timeseries of the second strain. It will be modified with time</span>
+<span class="sd">    and polarization shifts. It has to be pre-processed so that is defined over</span>
+<span class="sd">    the same times as h1_t :type h2_t: 1D complex NumPy array.</span>
+<span class="sd">    :type h2_t: 1D complex NumPy array</span>
+<span class="sd">    :param delta_t: Timestep.</span>
+<span class="sd">    :type delta_t: float</span>
+<span class="sd">    :param frequencies: Frequencies where we want to compute the integral (ie,</span>
+<span class="sd">    from fmin to fmax).</span>
+<span class="sd">    :type frequencies: 1d NumPy array</span>
+
+<span class="sd">    :param frequency_mask: What frequencies we should keep from the unfiltered</span>
+<span class="sd">    ones (we start from 0 to 1/dt, which ones are in frequencies). Technically</span>
+<span class="sd">    we can compute this in this function, but it is easier and faster to just</span>
+<span class="sd">    provide it.</span>
+<span class="sd">    :type frequency_mask: 1d NumPy array of bools</span>
+
+<span class="sd">    :param noises: Power spectral density of the noise, defined on the correct</span>
+<span class="sd">    frequencies.</span>
+<span class="sd">    :type noises: tuple of 1d NumPy arrays</span>
+
+<span class="sd">    :param antenna_patterns: Fc, Fp for all the detectors. It has to be ordered</span>
+<span class="sd">    in the same way as ``noises``.</span>
+<span class="sd">    :type antenna_patterns: tuple of tuples</span>
+
+<span class="sd">    :param polarization_shifts: Polarization shifts that will be applied in the</span>
+<span class="sd">    search for the maximum.</span>
+<span class="sd">    :type polarization_shifts: 1d NumPy array</span>
+
+<span class="sd">    :param time_shifts: Time shifts that will be applied in the search for</span>
+<span class="sd">    the maximum.</span>
+<span class="sd">    :type time_shifts: 1d NumPy array</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># Here we are going to compute the overlaps (more or less). Since all the</span>
+    <span class="c1"># series are evenly spaced in the same frequency range, we can forget about</span>
+    <span class="c1"># the measure of integration (it simplifies in the formula for the</span>
+    <span class="c1"># overlap). Similarly, we can also drop the 4 in the inner product because</span>
+    <span class="c1"># it simplifies. So, we just need to integrate h * h^*</span>
+
+    <span class="c1"># 7. Prepare the array of the overlaps which we have to maximise</span>
+
+    <span class="n">overlaps</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="n">polarization_shifts</span><span class="p">),</span> <span class="nb">len</span><span class="p">(</span><span class="n">time_shifts</span><span class="p">)))</span>
+
+    <span class="c1"># Convenience alias (will use later)</span>
+    <span class="n">omega</span> <span class="o">=</span> <span class="mi">2</span><span class="n">j</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="n">frequencies</span>
+
+    <span class="c1"># 8. Now we fill the array</span>
+
+    <span class="k">for</span> <span class="n">index_p</span><span class="p">,</span> <span class="n">p_shift</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">polarization_shifts</span><span class="p">):</span>
+
+        <span class="c1"># 9. Apply polarization shift</span>
+
+        <span class="n">h2_t_pshifted</span> <span class="o">=</span> <span class="n">h2_t</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="mi">1</span><span class="n">j</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="n">p_shift</span><span class="p">)</span>
+
+        <span class="c1"># 10. Split in plus and cross polarizations</span>
+        <span class="n">h2_p_t_pshifted</span> <span class="o">=</span> <span class="n">h2_t_pshifted</span><span class="o">.</span><span class="n">real</span>
+        <span class="n">h2_c_t_pshifted</span> <span class="o">=</span> <span class="o">-</span><span class="n">h2_t_pshifted</span><span class="o">.</span><span class="n">imag</span>
+
+        <span class="c1"># 11. Now we have to Fourier transform and make sure that it matches</span>
+        <span class="c1">#     the frequency range of the other arrays.</span>
+
+        <span class="c1"># Numba does not support fft yet, so we have to go to object mode</span>
+        <span class="c1"># This context manager does not affect anything when we run without</span>
+        <span class="c1"># numba</span>
+        <span class="k">with</span> <span class="n">objmode</span><span class="p">(</span>  <span class="c1"># skipcq PYL-E0602</span>
+            <span class="n">h2_p_fft_pshifted</span><span class="o">=</span><span class="s2">&quot;complex128[:]&quot;</span><span class="p">,</span>
+            <span class="n">h2_c_fft_pshifted</span><span class="o">=</span><span class="s2">&quot;complex128[:]&quot;</span><span class="p">,</span>
+        <span class="p">):</span>
+            <span class="n">h2_p_fft_pshifted</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">fft</span><span class="o">.</span><span class="n">fft</span><span class="p">(</span><span class="n">h2_p_t_pshifted</span><span class="p">)</span>
+            <span class="c1"># We work with shifted frequencies (and ffts)</span>
+            <span class="n">h2_p_fft_pshifted</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">fft</span><span class="o">.</span><span class="n">fftshift</span><span class="p">(</span><span class="n">h2_p_fft_pshifted</span><span class="p">)</span>
+
+            <span class="n">h2_c_fft_pshifted</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">fft</span><span class="o">.</span><span class="n">fft</span><span class="p">(</span><span class="n">h2_c_t_pshifted</span><span class="p">)</span>
+            <span class="c1"># We work with shifted frequencies (and ffts)</span>
+            <span class="n">h2_c_fft_pshifted</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">fft</span><span class="o">.</span><span class="n">fftshift</span><span class="p">(</span><span class="n">h2_c_fft_pshifted</span><span class="p">)</span>
+
+        <span class="c1"># Remove negative frequencies, and those outside the range (fmin, fmax)</span>
+        <span class="n">h2_p_fft_pshifted</span> <span class="o">=</span> <span class="n">h2_p_fft_pshifted</span><span class="p">[</span><span class="n">frequency_mask</span><span class="p">]</span>
+        <span class="n">h2_c_fft_pshifted</span> <span class="o">=</span> <span class="n">h2_c_fft_pshifted</span><span class="p">[</span><span class="n">frequency_mask</span><span class="p">]</span>
+
+        <span class="c1"># Normalize</span>
+        <span class="n">h2_p_fft_pshifted</span> <span class="o">*=</span> <span class="n">delta_t</span>
+        <span class="n">h2_c_fft_pshifted</span> <span class="o">*=</span> <span class="n">delta_t</span>
+
+        <span class="k">for</span> <span class="n">index_t</span><span class="p">,</span> <span class="n">t_shift</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">time_shifts</span><span class="p">):</span>
+
+            <span class="c1"># 12. We implement time shift is implemented as phase shift in</span>
+            <span class="c1">#     Fourier space. We do this while computing the integral of</span>
+            <span class="c1">#     the the inner product (we will normalize later).</span>
+            <span class="c1">#</span>
+            <span class="c1">#     (We also have to include the antenna factors and the noise).</span>
+
+            <span class="n">inner_product</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros_like</span><span class="p">(</span><span class="n">h1_p_fft</span><span class="p">)</span>
+
+            <span class="k">for</span> <span class="n">noise</span><span class="p">,</span> <span class="n">antenna_pattern</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">noises</span><span class="p">,</span> <span class="n">antenna_patterns</span><span class="p">):</span>
+
+                <span class="n">Fc</span><span class="p">,</span> <span class="n">Fp</span> <span class="o">=</span> <span class="n">antenna_pattern</span>
+
+                <span class="n">numerator</span> <span class="o">=</span> <span class="n">Fp</span> <span class="o">*</span> <span class="n">h1_p_fft</span> <span class="o">+</span> <span class="n">Fc</span> <span class="o">*</span> <span class="n">h1_c_fft</span>
+                <span class="n">numerator</span> <span class="o">*=</span> <span class="p">(</span>
+                    <span class="n">Fp</span> <span class="o">*</span> <span class="n">h2_p_fft_pshifted</span> <span class="o">+</span> <span class="n">Fc</span> <span class="o">*</span> <span class="n">h2_c_fft_pshifted</span>
+                <span class="p">)</span><span class="o">.</span><span class="n">conj</span><span class="p">()</span>
+
+                <span class="n">inner_product</span> <span class="o">+=</span> <span class="n">numerator</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">omega</span> <span class="o">*</span> <span class="n">t_shift</span><span class="p">)</span> <span class="o">/</span> <span class="n">noise</span>
+
+            <span class="n">overlaps</span><span class="p">[</span><span class="n">index_p</span><span class="p">][</span><span class="n">index_t</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">inner_product</span><span class="p">)</span><span class="o">.</span><span class="n">real</span>
+
+    <span class="n">overlaps</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">overlaps</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">amax</span><span class="p">(</span><span class="n">overlaps</span><span class="p">),</span> <span class="n">overlaps</span><span class="o">.</span><span class="n">argmax</span><span class="p">())</span>
+
+
+<div class="viewcode-block" id="mismatch_from_strains"><a class="viewcode-back" href="../../gw_mismatch_ref.html#kuibit.gw_mismatch.mismatch_from_strains">[docs]</a><span class="k">def</span> <span class="nf">mismatch_from_strains</span><span class="p">(</span>
+    <span class="n">h1</span><span class="p">,</span>
+    <span class="n">h2</span><span class="p">,</span>
+    <span class="n">fmin</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+    <span class="n">fmax</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">inf</span><span class="p">,</span>
+    <span class="n">noises</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">antenna_patterns</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">num_polarization_shifts</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span>
+    <span class="n">num_time_shifts</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span>
+    <span class="n">time_shift_start</span><span class="o">=-</span><span class="mi">5</span><span class="p">,</span>
+    <span class="n">time_shift_end</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>
+    <span class="n">force_numba</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+<span class="p">):</span>
+    <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Compute the network-mismatch between ``h1`` and ``h2`` by maximizing the</span>
+<span class="sd">    overlap over time and polarization shifts.</span>
+
+<span class="sd">    Network here means that the inner product is computed for N detectors, as</span>
+<span class="sd">    provided by the lists antenna_patterns and noises. Noises and antenna</span>
+<span class="sd">    patterns have to be properly ordered: ``noises[i]`` has to correspond to</span>
+<span class="sd">    ``antenna_pattern[i]``.</span>
+
+<span class="sd">    See :ref:`gw_mismatch:Overlap and mismatch` for formulas and details.</span>
+
+<span class="sd">    The mismatch is computed by maximizing over time and polarization shifts.</span>
+<span class="sd">    Polarization shifts and are around the 2pi, time shifts are specified by</span>
+<span class="sd">    time_shift_start and time_shift_end. If num_time_shifts is 1, then no time</span>
+<span class="sd">    shift is performed. For times, we make sure that we always have to zero</span>
+<span class="sd">    timeshift. All the transformations are done in h2.</span>
+
+<span class="sd">    This computation is a maximisation, which is very expensive. So, we have a</span>
+<span class="sd">    very fast core function called _mismatch_core_numerical to do all the hard</span>
+<span class="sd">    work. This function is compiled to native code by numba, resulting to</span>
+<span class="sd">    enormous speed-up.There is an overhead in calling numba. Hence, by default</span>
+<span class="sd">    we do not always use numba. We use it only when the number</span>
+<span class="sd">    num_polarization_shifts * num_time_shifts is greater than 500*500. You can</span>
+<span class="sd">    force using numba passing the keyword argument force_numba=True.</span>
+
+<span class="sd">    We do not perform phase shifts here, so this function makes sense only</span>
+<span class="sd">    for the (2,2) mode.</span>
+
+<span class="sd">    h1 and h2 have to be already pre-processed for Fourier transform, so you</span>
+<span class="sd">    should window them and zero pad as needed.</span>
+
+<span class="sd">    :param h1: First strain.</span>
+<span class="sd">    :type h1: :py:class:`~.TimeSeries`</span>
+<span class="sd">    :param h2: Second strain (the one that will be modified).</span>
+<span class="sd">    :type h2: :py:class:`~.TimeSeries`</span>
+<span class="sd">    :param fmin: Lower limit of the integration.</span>
+<span class="sd">    :type fmin: float</span>
+<span class="sd">    :param fmax: Higher limit of the integration.</span>
+<span class="sd">    :type fmax: float</span>
+<span class="sd">    :param noises: Power spectral density of the noise for all the detectors.</span>
+<span class="sd">                   If None, a uniform noise is applied.</span>
+<span class="sd">    :type noises: list of :py:class:`~.FrequencySeries`, or None</span>
+<span class="sd">    :param antenna_patterns: Fc, Fp for all the detectors. It has to be ordered</span>
+<span class="sd">                             in the same way as noises. If None, a uniform antenna</span>
+<span class="sd">                             pattern is applied.</span>
+<span class="sd">    :type antenna_patterns: list of tuples, or None</span>
+<span class="sd">    :param num_polarization_shifts: How many points to divide the range</span>
+<span class="sd">                                    (0, 2 pi) in the polarization shift.</span>
+<span class="sd">    :type num_polarization_shifts: int</span>
+<span class="sd">    :param num_time_shifts: How many points to divide the range</span>
+<span class="sd">                            (time_shift_start, time_shift_end) in the time shift.</span>
+<span class="sd">    :type num_time_shifts: int</span>
+<span class="sd">    :param time_shift_start: Minimum time shift applied. Search will be done</span>
+<span class="sd">                             linearly up to time_shift_end.</span>
+<span class="sd">    :type time_shift_start: float</span>
+<span class="sd">    :param time_shift_end: Largest value of time shift applied.</span>
+<span class="sd">    :type time_shift_end: float</span>
+<span class="sd">    :param force_numba: Use numba irrespectively of the size of the input.</span>
+<span class="sd">    :type force_numba: bool</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># In kuibit, we have beautiful collection of classes to represent</span>
+    <span class="c1"># different data types (TimeSeries, FrequencySeries, ...).</span>
+    <span class="c1"># However, from great abstraction comes great performance penalities.</span>
+    <span class="c1"># Using these classes is too slow for expensive operations.</span>
+    <span class="c1"># The reason for this are (at least):</span>
+    <span class="c1"># 1. large number of function calls (expensive in Python)</span>
+    <span class="c1"># 2. several redundant operations</span>
+    <span class="c1"># 3. several checks that we can guarantee will be passed</span>
+    <span class="c1"># ...</span>
+    <span class="c1"># Computing the mismatch is a numerical operation, we should be able</span>
+    <span class="c1"># to crunch numbers at the speed of light (ie, as fast as C). For this,</span>
+    <span class="c1"># we use numba and we break apart all our abstractions to expose only</span>
+    <span class="c1"># the data as NumPy arrays. In this function we pre-process the</span>
+    <span class="c1"># FrequencySeries so that we can feed _mismatch_core_numerical with</span>
+    <span class="c1"># what we need. _mismatch_core_numerical takes only standard NumPy</span>
+    <span class="c1"># objects (arrays, tuples, and floats) and return the mismatch and</span>
+    <span class="c1"># the phase/time shifts needed for it.</span>
+    <span class="c1">#</span>
+    <span class="c1"># An important step will be to guarantee that everything (the series and</span>
+    <span class="c1"># the noise) is defined over the same frequency range.</span>
+    <span class="c1">#</span>
+    <span class="c1"># What we are doing is:</span>
+    <span class="c1"># 1. Prepare the arrays for the shifts that have to be performed</span>
+
+    <span class="n">polarization_shifts</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">,</span> <span class="n">num_polarization_shifts</span><span class="p">)</span>
+
+    <span class="c1"># We make sure that we always have to zero timeshift.</span>
+    <span class="n">time_shifts</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+        <span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+        <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="n">time_shift_start</span><span class="p">,</span> <span class="n">time_shift_end</span><span class="p">,</span> <span class="n">num_time_shifts</span> <span class="o">-</span> <span class="mi">1</span><span class="p">),</span>
+    <span class="p">)</span>
+
+    <span class="c1"># 2. We resample h1 and h2 to a common timeseries (linearly spaced). This</span>
+    <span class="c1">#    guarantees that their Fourier transform will be defined over the same</span>
+    <span class="c1">#    frequencies. To avoid throwing away signal, we resample the two series</span>
+    <span class="c1">#    to the union of their times, setting them to zero where they were not</span>
+    <span class="c1">#    defined, and choosing as number of points the smallest number of</span>
+    <span class="c1">#    points between the two series.</span>
+
+    <span class="p">(</span><span class="n">smallest_len</span><span class="p">,</span> <span class="n">largest_tmax</span><span class="p">,</span> <span class="n">smallest_tmin</span><span class="p">)</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="nb">min</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">h1</span><span class="p">),</span> <span class="nb">len</span><span class="p">(</span><span class="n">h2</span><span class="p">)),</span>
+        <span class="nb">max</span><span class="p">(</span><span class="n">h1</span><span class="o">.</span><span class="n">tmax</span><span class="p">,</span> <span class="n">h2</span><span class="o">.</span><span class="n">tmax</span><span class="p">),</span>
+        <span class="nb">min</span><span class="p">(</span><span class="n">h1</span><span class="o">.</span><span class="n">tmin</span><span class="p">,</span> <span class="n">h2</span><span class="o">.</span><span class="n">tmin</span><span class="p">),</span>
+    <span class="p">)</span>
+
+    <span class="n">union_times</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="n">smallest_tmin</span><span class="p">,</span> <span class="n">largest_tmax</span><span class="p">,</span> <span class="n">smallest_len</span><span class="p">)</span>
+
+    <span class="c1"># ext=1 sets zero where the series is not defined</span>
+    <span class="n">h1_res</span><span class="p">,</span> <span class="n">h2_res</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="n">h1</span><span class="o">.</span><span class="n">resampled</span><span class="p">(</span><span class="n">union_times</span><span class="p">,</span> <span class="n">ext</span><span class="o">=</span><span class="mi">1</span><span class="p">),</span>
+        <span class="n">h2</span><span class="o">.</span><span class="n">resampled</span><span class="p">(</span><span class="n">union_times</span><span class="p">,</span> <span class="n">ext</span><span class="o">=</span><span class="mi">1</span><span class="p">),</span>
+    <span class="p">)</span>
+
+    <span class="c1"># 3. We take the Fourier transform of the two polarizations. In doing this,</span>
+    <span class="c1">#    we also make sure that the arrays are complex.This is because we will</span>
+    <span class="c1">#    be doing complex operations (e.g. phase-shift), so, we will always</span>
+    <span class="c1">#    deal with complex series. However, enforcing that they are complex</span>
+    <span class="c1">#    since the beginning makes bookeeping easier for the Fourier transform,</span>
+    <span class="c1">#    as the operation behaves differently for real and imaginary data.</span>
+    <span class="c1">#</span>
+    <span class="c1">#    We crop h1_res to the requested frequencies and we only take the</span>
+    <span class="c1">#    positive ones. We will resample the noise to match h1_res.</span>
+
+    <span class="n">h1_p_res</span> <span class="o">=</span> <span class="n">h1_res</span><span class="o">.</span><span class="n">real</span><span class="p">()</span>
+    <span class="n">h1_c_res</span> <span class="o">=</span> <span class="o">-</span><span class="n">h1_res</span><span class="o">.</span><span class="n">imag</span><span class="p">()</span>
+
+    <span class="n">h1_p_res</span><span class="o">.</span><span class="n">y</span> <span class="o">=</span> <span class="n">h1_p_res</span><span class="o">.</span><span class="n">y</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="s2">&quot;complex128&quot;</span><span class="p">)</span>
+    <span class="n">h1_c_res</span><span class="o">.</span><span class="n">y</span> <span class="o">=</span> <span class="n">h1_c_res</span><span class="o">.</span><span class="n">y</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="s2">&quot;complex128&quot;</span><span class="p">)</span>
+
+    <span class="n">h1f_p_res</span> <span class="o">=</span> <span class="n">h1_p_res</span><span class="o">.</span><span class="n">to_FrequencySeries</span><span class="p">()</span>
+    <span class="n">h1f_p_res</span><span class="o">.</span><span class="n">band_pass</span><span class="p">(</span><span class="n">fmin</span><span class="p">,</span> <span class="n">fmax</span><span class="p">)</span>
+    <span class="n">h1f_p_res</span><span class="o">.</span><span class="n">negative_frequencies_remove</span><span class="p">()</span>
+
+    <span class="n">h1f_c_res</span> <span class="o">=</span> <span class="n">h1_c_res</span><span class="o">.</span><span class="n">to_FrequencySeries</span><span class="p">()</span>
+    <span class="n">h1f_c_res</span><span class="o">.</span><span class="n">band_pass</span><span class="p">(</span><span class="n">fmin</span><span class="p">,</span> <span class="n">fmax</span><span class="p">)</span>
+    <span class="n">h1f_c_res</span><span class="o">.</span><span class="n">negative_frequencies_remove</span><span class="p">()</span>
+
+    <span class="c1"># 3. Then, we resample the noise to have be defined on the same frequencies</span>
+    <span class="c1">#    as h1f. We will only need to take care of the h2. If the noise is</span>
+    <span class="c1">#    None, we prepare a unweighted noise (ones everywhere).</span>
+    <span class="c1">#</span>
+    <span class="c1">#    The problem with resampling noises is that PSD curves have often</span>
+    <span class="c1">#    strong discontinuities, which are not correctly captured by the</span>
+    <span class="c1">#    splines. Therefore, instead of using cubic splines, here we prefer</span>
+    <span class="c1">#    using a piecewise constant approximation. Since the noise has</span>
+    <span class="c1">#    typically a lot of points, this should be a better approximation than</span>
+    <span class="c1">#    having large jumps. kuibit does not have this option, so we use</span>
+    <span class="c1">#    directly SciPy&#39;s interp1d.</span>
+
+    <span class="k">if</span> <span class="n">noises</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="c1"># With this, we can guarantee that everything has the same domain.</span>
+        <span class="c1"># If there&#39;s a None entry, we fill it with a constant noise.</span>
+        <span class="n">noises_res</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">noise</span> <span class="ow">in</span> <span class="n">noises</span><span class="p">:</span>
+            <span class="n">noises_res</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                <span class="n">fs</span><span class="o">.</span><span class="n">FrequencySeries</span><span class="p">(</span><span class="n">h1f_p_res</span><span class="o">.</span><span class="n">f</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ones_like</span><span class="p">(</span><span class="n">h1f_p_res</span><span class="o">.</span><span class="n">fft</span><span class="p">))</span>
+            <span class="p">)</span>
+            <span class="k">if</span> <span class="n">noise</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="c1"># TODO: Now the Series class has a function for this kind of</span>
+                <span class="c1">#       resampling. Use that.</span>
+                <span class="c1">#</span>
+                <span class="c1"># We start with a FrequencySeries of ones, and we overwrite the</span>
+                <span class="c1"># fft attribute</span>
+                <span class="n">noises_res</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">noises</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">resampled</span><span class="p">(</span>
+                    <span class="n">h1f_p_res</span><span class="o">.</span><span class="n">f</span><span class="p">,</span> <span class="n">piecewise_constant</span><span class="o">=</span><span class="kc">True</span>
+                <span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="c1"># Here we prepare a noise that is made by ones everywhere. This is what</span>
+        <span class="c1"># happens internally when noises is None. However, here we do it</span>
+        <span class="c1"># explicitly because we are going to pass it to the numba function.</span>
+        <span class="n">noises_res</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="n">fs</span><span class="o">.</span><span class="n">FrequencySeries</span><span class="p">(</span><span class="n">h1f_p_res</span><span class="o">.</span><span class="n">f</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ones_like</span><span class="p">(</span><span class="n">h1f_p_res</span><span class="o">.</span><span class="n">fft</span><span class="p">))</span>
+        <span class="p">]</span>
+
+    <span class="c1"># 4. We use the linearity of the Fourier transform to apply the antenna</span>
+    <span class="c1">#    pattern. (This is why we have to carry around the two polarization</span>
+    <span class="c1">#    seperatebly). We have to compute tilde(h_1) * tilde(h_2).conj().</span>
+    <span class="c1">#    But h_i = Fp h_p + Fc h_c. So, for linearity</span>
+    <span class="c1">#    tilde(h_1) = Fp tilde(h_p) + Fc tilde(h_c). Similarly with h_2.</span>
+    <span class="c1">#    Therefore, we have to prepare the antenna patterns for each detector.</span>
+
+    <span class="c1"># This case is &quot;we have 3 noise curves, but we don&#39;t care about the antenna</span>
+    <span class="c1"># response&quot;. So we have to have 3 antenna patterns.</span>
+    <span class="k">if</span> <span class="n">antenna_patterns</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">antenna_patterns</span> <span class="o">=</span> <span class="p">[(</span><span class="mi">1</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">1</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)]</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">noises_res</span><span class="p">)</span>
+
+    <span class="c1"># This case is &quot;we have N detectors, but we don&#39;t care about the actual</span>
+    <span class="c1"># noise curve&quot;. So we have to have N noises. Before, we set noises =</span>
+    <span class="c1"># [ones], so we duplicate that.</span>
+    <span class="c1">#</span>
+    <span class="c1"># If both noises and antenna_patterns are None, we will have a single</span>
+    <span class="c1"># element in the noises list, which is what we expect.</span>
+    <span class="k">if</span> <span class="n">noises</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">noises_res</span> <span class="o">*=</span> <span class="nb">len</span><span class="p">(</span><span class="n">antenna_patterns</span><span class="p">)</span>
+
+    <span class="c1"># Numba doesn&#39;t support lists, so we generate a tuple of arrays</span>
+    <span class="n">antenna_patterns</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">antenna_patterns</span><span class="p">)</span>
+    <span class="n">noises</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">n</span><span class="o">.</span><span class="n">fft</span> <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="n">noises_res</span><span class="p">)</span>
+
+    <span class="c1"># 5. Now, we have to prepare a frequency mask. This is an array of bools</span>
+    <span class="c1">#    that indicates which frequencies in h2 should be used. This is because</span>
+    <span class="c1">#    we are taking the Fourier transform in _mismatch_core_numerical, but</span>
+    <span class="c1">#    we need to make sure that we considering only positive frequencies</span>
+    <span class="c1">#    from fmin to fmax.</span>
+
+    <span class="n">all_frequencies</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">fft</span><span class="o">.</span><span class="n">fftfreq</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">h2_res</span><span class="o">.</span><span class="n">t</span><span class="p">),</span> <span class="n">d</span><span class="o">=</span><span class="n">h2_res</span><span class="o">.</span><span class="n">dt</span><span class="p">)</span>
+    <span class="n">shifted_frequencies</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">fft</span><span class="o">.</span><span class="n">fftshift</span><span class="p">(</span><span class="n">all_frequencies</span><span class="p">)</span>
+
+    <span class="n">frequency_mask</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">f</span> <span class="ow">in</span> <span class="n">h1f_p_res</span><span class="o">.</span><span class="n">f</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">shifted_frequencies</span><span class="p">])</span>
+
+    <span class="c1"># 6. Finally we can call the numerical routine which will return the</span>
+    <span class="c1">#    un-normalized mismatch and the shifts required. We will Fourier</span>
+    <span class="c1">#    transform h2 in there. We must do that because we have to perform</span>
+    <span class="c1">#    the polarization shifts in the time domain.</span>
+
+    <span class="n">frequencies</span> <span class="o">=</span> <span class="n">h1f_p_res</span><span class="o">.</span><span class="n">f</span>  <span class="c1"># from fmin to fmax</span>
+
+    <span class="n">use_numba</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="n">force_numba</span> <span class="ow">or</span> <span class="n">num_polarization_shifts</span> <span class="o">*</span> <span class="n">num_time_shifts</span> <span class="o">&gt;=</span> <span class="mi">500</span> <span class="o">*</span> <span class="mi">500</span>
+    <span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">use_numba</span> <span class="ow">and</span> <span class="s2">&quot;njit&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="nb">globals</span><span class="p">():</span>
+        <span class="k">if</span> <span class="n">force_numba</span><span class="p">:</span>
+            <span class="n">warn</span><span class="p">(</span><span class="s2">&quot;numba not available, ignoring force_numba&quot;</span><span class="p">)</span>
+        <span class="n">use_numba</span> <span class="o">=</span> <span class="kc">False</span>
+
+    <span class="k">if</span> <span class="n">use_numba</span><span class="p">:</span>
+        <span class="nb">globals</span><span class="p">()[</span><span class="s2">&quot;objmode&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">numba_objmode</span>
+        <span class="n">_core_function</span> <span class="o">=</span> <span class="n">njit</span><span class="p">(</span><span class="n">_mismatch_core_numerical</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="c1"># HACK: Now we have to do something dirty. _mismatch_core_numerical</span>
+        <span class="c1">#       calls numba.objmode to perform FFTs, but when numba is not</span>
+        <span class="c1">#       available, objmode is unkown. Hence, we have to provide a dummy</span>
+        <span class="c1">#       objmode that does nothing. As long as numba doesn&#39;t support</span>
+        <span class="c1">#       FFTs natively, that code has to be here. However, cannot put in</span>
+        <span class="c1">#       _mismatch_core_numerical because numba wouldn&#39;t be able to</span>
+        <span class="c1">#       compile the function.</span>
+        <span class="nd">@contextmanager</span>
+        <span class="k">def</span> <span class="nf">nullcontext</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+            <span class="k">yield</span> <span class="kc">None</span>
+
+        <span class="c1"># We override objmode in the gobal scope with nullcontext</span>
+        <span class="nb">globals</span><span class="p">()[</span><span class="s2">&quot;objmode&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">nullcontext</span>
+
+        <span class="n">_core_function</span> <span class="o">=</span> <span class="n">_mismatch_core_numerical</span>
+
+    <span class="p">(</span><span class="n">unnormalized_max_overlap</span><span class="p">,</span> <span class="n">index_max</span><span class="p">)</span> <span class="o">=</span> <span class="n">_core_function</span><span class="p">(</span>
+        <span class="n">h1f_c_res</span><span class="o">.</span><span class="n">fft</span><span class="p">,</span>
+        <span class="n">h1f_p_res</span><span class="o">.</span><span class="n">fft</span><span class="p">,</span>
+        <span class="n">h2_res</span><span class="o">.</span><span class="n">y</span><span class="p">,</span>
+        <span class="n">h2_res</span><span class="o">.</span><span class="n">dt</span><span class="p">,</span>
+        <span class="n">frequencies</span><span class="p">,</span>
+        <span class="n">frequency_mask</span><span class="p">,</span>
+        <span class="n">noises</span><span class="p">,</span>
+        <span class="n">antenna_patterns</span><span class="p">,</span>
+        <span class="n">polarization_shifts</span><span class="p">,</span>
+        <span class="n">time_shifts</span><span class="p">,</span>
+    <span class="p">)</span>
+
+    <span class="c1"># 12. The normalization is constant. Again, we do not include df or the</span>
+    <span class="c1">#     factor of 4.</span>
+
+    <span class="n">h2_p_res</span> <span class="o">=</span> <span class="n">h2_res</span><span class="o">.</span><span class="n">real</span><span class="p">()</span>
+    <span class="n">h2_c_res</span> <span class="o">=</span> <span class="o">-</span><span class="n">h2_res</span><span class="o">.</span><span class="n">imag</span><span class="p">()</span>
+
+    <span class="c1"># Transform to complex</span>
+    <span class="n">h2_p_res</span><span class="o">.</span><span class="n">y</span> <span class="o">=</span> <span class="n">h2_p_res</span><span class="o">.</span><span class="n">y</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="s2">&quot;complex128&quot;</span><span class="p">)</span>
+    <span class="n">h2_c_res</span><span class="o">.</span><span class="n">y</span> <span class="o">=</span> <span class="n">h2_c_res</span><span class="o">.</span><span class="n">y</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="s2">&quot;complex128&quot;</span><span class="p">)</span>
+
+    <span class="n">h2f_p_res</span> <span class="o">=</span> <span class="n">h2_p_res</span><span class="o">.</span><span class="n">to_FrequencySeries</span><span class="p">()</span>
+    <span class="n">h2f_p_res</span><span class="o">.</span><span class="n">band_pass</span><span class="p">(</span><span class="n">fmin</span><span class="p">,</span> <span class="n">fmax</span><span class="p">)</span>
+    <span class="n">h2f_p_res</span><span class="o">.</span><span class="n">negative_frequencies_remove</span><span class="p">()</span>
+
+    <span class="n">h2f_c_res</span> <span class="o">=</span> <span class="n">h2_c_res</span><span class="o">.</span><span class="n">to_FrequencySeries</span><span class="p">()</span>
+    <span class="n">h2f_c_res</span><span class="o">.</span><span class="n">band_pass</span><span class="p">(</span><span class="n">fmin</span><span class="p">,</span> <span class="n">fmax</span><span class="p">)</span>
+    <span class="n">h2f_c_res</span><span class="o">.</span><span class="n">negative_frequencies_remove</span><span class="p">()</span>
+
+    <span class="n">inner11</span> <span class="o">=</span> <span class="n">fs</span><span class="o">.</span><span class="n">FrequencySeries</span><span class="p">(</span><span class="n">h1f_p_res</span><span class="o">.</span><span class="n">f</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros_like</span><span class="p">(</span><span class="n">h1f_p_res</span><span class="o">.</span><span class="n">f</span><span class="p">))</span>
+    <span class="n">inner22</span> <span class="o">=</span> <span class="n">fs</span><span class="o">.</span><span class="n">FrequencySeries</span><span class="p">(</span><span class="n">h2f_p_res</span><span class="o">.</span><span class="n">f</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros_like</span><span class="p">(</span><span class="n">h2f_p_res</span><span class="o">.</span><span class="n">f</span><span class="p">))</span>
+
+    <span class="k">for</span> <span class="n">noise</span><span class="p">,</span> <span class="n">antenna_pattern</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">noises_res</span><span class="p">,</span> <span class="n">antenna_patterns</span><span class="p">):</span>
+
+        <span class="n">Fc</span><span class="p">,</span> <span class="n">Fp</span> <span class="o">=</span> <span class="n">antenna_pattern</span>
+
+        <span class="n">numerator11</span> <span class="o">=</span> <span class="n">Fp</span> <span class="o">*</span> <span class="n">h1f_p_res</span> <span class="o">+</span> <span class="n">Fc</span> <span class="o">*</span> <span class="n">h1f_c_res</span>
+        <span class="n">numerator11</span> <span class="o">*=</span> <span class="p">(</span><span class="n">Fp</span> <span class="o">*</span> <span class="n">h1f_p_res</span> <span class="o">+</span> <span class="n">Fc</span> <span class="o">*</span> <span class="n">h1f_c_res</span><span class="p">)</span><span class="o">.</span><span class="n">conjugate</span><span class="p">()</span>
+
+        <span class="n">inner11</span> <span class="o">+=</span> <span class="n">numerator11</span> <span class="o">/</span> <span class="n">noise</span>
+
+        <span class="n">numerator22</span> <span class="o">=</span> <span class="n">Fp</span> <span class="o">*</span> <span class="n">h2f_p_res</span> <span class="o">+</span> <span class="n">Fc</span> <span class="o">*</span> <span class="n">h2f_c_res</span>
+        <span class="n">numerator22</span> <span class="o">*=</span> <span class="p">(</span><span class="n">Fp</span> <span class="o">*</span> <span class="n">h2f_p_res</span> <span class="o">+</span> <span class="n">Fc</span> <span class="o">*</span> <span class="n">h2f_c_res</span><span class="p">)</span><span class="o">.</span><span class="n">conjugate</span><span class="p">()</span>
+
+        <span class="n">inner22</span> <span class="o">+=</span> <span class="n">numerator22</span> <span class="o">/</span> <span class="n">noise</span>
+
+    <span class="n">inner11</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">inner11</span><span class="o">.</span><span class="n">fft</span><span class="p">)</span><span class="o">.</span><span class="n">real</span>
+    <span class="n">inner22</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">inner22</span><span class="o">.</span><span class="n">fft</span><span class="p">)</span><span class="o">.</span><span class="n">real</span>
+
+    <span class="n">norm</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">inner11</span> <span class="o">*</span> <span class="n">inner22</span><span class="p">)</span>
+
+    <span class="c1"># Values that maximise the overlap</span>
+
+    <span class="c1"># pylint: disable=unbalanced-tuple-unpacking</span>
+    <span class="p">(</span><span class="n">p_index</span><span class="p">,</span> <span class="n">t_index</span><span class="p">)</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">unravel_index</span><span class="p">(</span>
+        <span class="n">index_max</span><span class="p">,</span> <span class="p">(</span><span class="n">num_polarization_shifts</span><span class="p">,</span> <span class="n">num_time_shifts</span><span class="p">)</span>
+    <span class="p">)</span>
+
+    <span class="c1"># Check t_index is close to the boundary and emit warning</span>
+    <span class="c1"># We have to check for t_index = 0 because we always put the tshift=0 there</span>
+    <span class="k">if</span> <span class="p">(</span><span class="ow">not</span> <span class="mf">0.05</span> <span class="o">&lt;</span> <span class="n">t_index</span> <span class="o">/</span> <span class="n">num_time_shifts</span> <span class="o">&lt;</span> <span class="mf">0.95</span><span class="p">)</span> <span class="ow">and</span> <span class="n">t_index</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">warn</span><span class="p">(</span><span class="s2">&quot;Maximum of overlap near the boundary of the time shift interval&quot;</span><span class="p">)</span>
+
+    <span class="n">p_shift_max</span> <span class="o">=</span> <span class="n">polarization_shifts</span><span class="p">[</span><span class="n">p_index</span><span class="p">]</span>
+    <span class="n">t_shift_max</span> <span class="o">=</span> <span class="n">time_shifts</span><span class="p">[</span><span class="n">t_index</span><span class="p">]</span>
+
+    <span class="k">return</span> <span class="mi">1</span> <span class="o">-</span> <span class="n">unnormalized_max_overlap</span> <span class="o">/</span> <span class="n">norm</span><span class="p">,</span> <span class="p">(</span>
+        <span class="n">p_shift_max</span><span class="p">,</span>
+        <span class="n">t_shift_max</span><span class="p">,</span>
+    <span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="network_mismatch"><a class="viewcode-back" href="../../gw_mismatch_ref.html#kuibit.gw_mismatch.network_mismatch">[docs]</a><span class="k">def</span> <span class="nf">network_mismatch</span><span class="p">(</span>
+    <span class="n">h1</span><span class="p">,</span>
+    <span class="n">h2</span><span class="p">,</span>
+    <span class="n">right_ascension</span><span class="p">,</span>
+    <span class="n">declination</span><span class="p">,</span>
+    <span class="n">time_utc</span><span class="p">,</span>
+    <span class="n">fmin</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+    <span class="n">fmax</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">inf</span><span class="p">,</span>
+    <span class="n">noises</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">num_polarization_shifts</span><span class="o">=</span><span class="mi">200</span><span class="p">,</span>
+    <span class="n">num_time_shifts</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span>
+    <span class="n">time_shift_start</span><span class="o">=-</span><span class="mi">20</span><span class="p">,</span>
+    <span class="n">time_shift_end</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span>
+    <span class="n">force_numba</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+<span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Compute network mismatch between strains h1 and h2.</span>
+
+<span class="sd">    This is a wrapper around :py:meth:`~.mismatch_from_strains` (read the</span>
+<span class="sd">    docstring for more information) that prepares the correct antenna patterns</span>
+<span class="sd">    from the sky localization of the event. Moreover, it makes sure that noises</span>
+<span class="sd">    (that has to be a gw_utils.Detectors object, or None) is correctly ordered.</span>
+
+<span class="sd">    :param h1: First strain.</span>
+<span class="sd">    :type h1: :py:class:`~.TimeSeries`</span>
+<span class="sd">    :param h2: Second strain (the one that will be modified).</span>
+<span class="sd">    :type h2: :py:class:`~.TimeSeries`</span>
+<span class="sd">    :param right_ascension: Right ascension of the source in the sky.</span>
+<span class="sd">    :type right_ascension: float</span>
+<span class="sd">    :param declination: Declination of the source in the sky.</span>
+<span class="sd">    :type declination: float</span>
+<span class="sd">    :param time_utc: Time UTC of the event.</span>
+<span class="sd">    :type time_utc: float</span>
+<span class="sd">    :param fmin: Lower limit of the integration.</span>
+<span class="sd">    :type fmin: float</span>
+<span class="sd">    :param fmax: Higher limit of the integration.</span>
+<span class="sd">    :type fmax: float</span>
+<span class="sd">    :param noises: Power spectral density of the noise for all the detectors.</span>
+<span class="sd">    :type noises: :py:class:`~.Detector`, or None</span>
+<span class="sd">    :param num_polarization_shifts: How many points to divide the range</span>
+<span class="sd">                                    (0, 2 pi) in the polarization shift.</span>
+<span class="sd">    :type num_polarization_shifts: int</span>
+<span class="sd">    :param num_time_shifts: How many points to divide the range</span>
+<span class="sd">                            (time_shift_start, time_shift_end) in the</span>
+<span class="sd">                            time shift.</span>
+<span class="sd">    :type num_time_shifts: int</span>
+<span class="sd">    :param time_shift_start: Minimum time shift applied. Search will be done</span>
+<span class="sd">                             linearly up to time_shift_end.</span>
+<span class="sd">    :type time_shift_start: float</span>
+<span class="sd">    :param time_shift_end: Largest value of time shift applied.</span>
+<span class="sd">    :type time_shift_end: float</span>
+<span class="sd">    :param force_numba: Use numba irrespectively of the size of the input.</span>
+<span class="sd">    :type force_numba: bool</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">antenna_patterns</span> <span class="o">=</span> <span class="n">gwu</span><span class="o">.</span><span class="n">antenna_responses_from_sky_localization</span><span class="p">(</span>
+        <span class="n">right_ascension</span><span class="p">,</span> <span class="n">declination</span><span class="p">,</span> <span class="n">time_utc</span>
+    <span class="p">)</span>
+
+    <span class="c1"># Transform Detectors to lists (they are already properly ordered)</span>
+    <span class="k">if</span> <span class="n">noises</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">noises</span><span class="p">,</span> <span class="n">gwu</span><span class="o">.</span><span class="n">Detectors</span><span class="p">):</span>
+            <span class="c1"># We select thos antennas for which the corresponding noise is not</span>
+            <span class="c1"># -1</span>
+            <span class="n">antenna_patterns</span> <span class="o">=</span> <span class="p">[</span>
+                <span class="n">ap</span>
+                <span class="k">for</span> <span class="n">ap</span><span class="p">,</span> <span class="n">noise</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">antenna_patterns</span><span class="p">,</span> <span class="n">noises</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">noise</span> <span class="o">!=</span> <span class="o">-</span><span class="mi">1</span>
+            <span class="p">]</span>
+            <span class="c1"># We remove all the noises that are -1. This modifies the list.</span>
+            <span class="n">noises</span> <span class="o">=</span> <span class="p">[</span><span class="n">noise</span> <span class="k">for</span> <span class="n">noise</span> <span class="ow">in</span> <span class="n">noises</span> <span class="k">if</span> <span class="n">noise</span> <span class="o">!=</span> <span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;noises has to be None or of type Detectors&quot;</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="c1"># All three detectors</span>
+        <span class="n">antenna_patterns</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">antenna_patterns</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">mismatch_from_strains</span><span class="p">(</span>
+        <span class="n">h1</span><span class="p">,</span>
+        <span class="n">h2</span><span class="p">,</span>
+        <span class="n">fmin</span><span class="p">,</span>
+        <span class="n">fmax</span><span class="p">,</span>
+        <span class="n">noises</span><span class="o">=</span><span class="n">noises</span><span class="p">,</span>
+        <span class="n">antenna_patterns</span><span class="o">=</span><span class="n">antenna_patterns</span><span class="p">,</span>
+        <span class="n">num_polarization_shifts</span><span class="o">=</span><span class="n">num_polarization_shifts</span><span class="p">,</span>
+        <span class="n">num_time_shifts</span><span class="o">=</span><span class="n">num_time_shifts</span><span class="p">,</span>
+        <span class="n">time_shift_start</span><span class="o">=</span><span class="n">time_shift_start</span><span class="p">,</span>
+        <span class="n">time_shift_end</span><span class="o">=</span><span class="n">time_shift_end</span><span class="p">,</span>
+        <span class="n">force_numba</span><span class="o">=</span><span class="n">force_numba</span><span class="p">,</span>
+    <span class="p">)</span></div>
+
+
+<span class="k">def</span> <span class="nf">_strains_from_psi4</span><span class="p">(</span>
+    <span class="n">psi1</span><span class="p">,</span>
+    <span class="n">psi2</span><span class="p">,</span>
+    <span class="n">pcut1</span><span class="p">,</span>
+    <span class="n">pcut2</span><span class="p">,</span>
+    <span class="o">*</span><span class="n">args</span><span class="p">,</span>
+    <span class="n">window_function</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">align_at_peak</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">trim_ends</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">mass_scale1_msun</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">mass_scale2_msun</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">distance1</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">distance2</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">num_zero_pad</span><span class="o">=</span><span class="mi">16384</span><span class="p">,</span>
+    <span class="n">time_to_keep_after_max</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">time_removed_beginning</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="o">**</span><span class="n">kwargs</span>
+<span class="p">):</span>
+    <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Extract the strains from (2, 2) mode of psi1 and psi2 (which have to be</span>
+<span class="sd">    :py:class:`~.GravitationalWavesOneDet`, as from :py:class:`~.SimDir` when</span>
+<span class="sd">    a radius is specified). In doing this, use the fixed-frequency integration</span>
+<span class="sd">    method with pcut1 and pcut2 and with the provided window function.</span>
+
+<span class="sd">    Then, possibly align the signal to peak, transform it to physical units,</span>
+<span class="sd">    and crop it as requested. Send this to the :py:meth:`~.network_mismatch`</span>
+<span class="sd">    function.</span>
+
+<span class="sd">    :param psi1: :math:`\Psi_4` for the first wave.</span>
+<span class="sd">    :type psi1: :py:class:`~.GravitationalWavesOneDet`</span>
+<span class="sd">    :param psi2: :math:`\Psi_4` for the second wave (the one that will be</span>
+<span class="sd">                 modified).</span>
+<span class="sd">    :type psi2: :py:class:`~.GravitationalWavesOneDet`</span>
+
+<span class="sd">    :param mass_scale1_msun: If not None, the signal h1 is converted from</span>
+<span class="sd">    computational units to physical units assuming that</span>
+<span class="sd">    M = mass_scale1_msun.</span>
+<span class="sd">    :type mass_scale1_msun: float or None</span>
+
+<span class="sd">    :param mass_scale2_msun: If not None, the signal h2 is converted from</span>
+<span class="sd">    computational units to physical units assuming that</span>
+<span class="sd">    M = mass_scale2_msun.</span>
+<span class="sd">    :type mass_scale2_msun: float or None</span>
+
+<span class="sd">    :param pcut1: Period associated with the threshold frequency</span>
+<span class="sd">                 ``omega_0 = 2 * pi / pcut`` for the fixed frequency</span>
+<span class="sd">                 integration of :math:`\Psi_4`</span>
+<span class="sd">    :type pcut1: float</span>
+
+<span class="sd">    :param pcut2: Period associated with the threshold frequency</span>
+<span class="sd">                 ``omega_0 = 2 * pi / pcut`` for the fixed frequency</span>
+<span class="sd">                 integration of :math:`\Psi_4`</span>
+<span class="sd">    :type pcut2: float</span>
+
+<span class="sd">    :param window_function: If not None, apply window_function to the</span>
+<span class="sd">    series before computing the strain.</span>
+<span class="sd">    :type window_function: callable, str, or None</span>
+
+<span class="sd">    :param trim_ends: If True, a portion of the resulting strain is removed</span>
+<span class="sd">    at both the initial and final times. The amount removed is equal to</span>
+<span class="sd">    pcut.</span>
+<span class="sd">    :type trim_ends: bool</span>
+
+<span class="sd">    :param align_at_peak: Time-shifts the strain so that they have both the</span>
+<span class="sd">    maximum amplitude at t=0.</span>
+<span class="sd">    :type align_at_peak: bool</span>
+
+<span class="sd">    :param num_zero_pad: How many points do the timeseries have to have</span>
+<span class="sd">    before Fourier transforms are taken? This is not the number of zeros</span>
+<span class="sd">    added (at the end) of the timeseries, this is the total number. If the</span>
+<span class="sd">    series already have that length, no zeros will be added.</span>
+<span class="sd">    :type num_zero_pad: int</span>
+
+<span class="sd">    :param time_removed_beginning: Remove this amount from the beginning</span>
+<span class="sd">    of the strain signals before computing the mismatch. If None, nothing</span>
+<span class="sd">    is removed. This is in computational units regardless of the value of</span>
+<span class="sd">    mass_scale.</span>
+<span class="sd">    :type time_removed_beginning: float or None</span>
+
+<span class="sd">    :param time_to_keep_after_max: If not None, remove all the signal that comes</span>
+<span class="sd">    after t_max + time_to_keep_after_max, where t_max is the time at which the</span>
+<span class="sd">    signal peaks. This is in computational units regardless of the value of</span>
+<span class="sd">    mass_scale. :type time_to_keep_after_max: float or None</span>
+
+<span class="sd">    :param *args: All the other arguments are passed to the window</span>
+<span class="sd">     function.</span>
+<span class="sd">    :type *args: anything</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># First, we compute the strains. If we just look at the (2,2) mode, we</span>
+    <span class="c1"># don&#39;t need to multiply the spin weighted spherical harmonics, since it is</span>
+    <span class="c1"># a normalization factor.</span>
+    <span class="n">h1</span> <span class="o">=</span> <span class="n">psi1</span><span class="o">.</span><span class="n">get_strain_lm</span><span class="p">(</span>
+        <span class="mi">2</span><span class="p">,</span>
+        <span class="mi">2</span><span class="p">,</span>
+        <span class="n">pcut1</span><span class="p">,</span>
+        <span class="o">*</span><span class="n">args</span><span class="p">,</span>
+        <span class="n">window_function</span><span class="o">=</span><span class="n">window_function</span><span class="p">,</span>
+        <span class="n">trim_ends</span><span class="o">=</span><span class="n">trim_ends</span><span class="p">,</span>
+        <span class="o">**</span><span class="n">kwargs</span>
+    <span class="p">)</span>
+
+    <span class="n">h2</span> <span class="o">=</span> <span class="n">psi2</span><span class="o">.</span><span class="n">get_strain_lm</span><span class="p">(</span>
+        <span class="mi">2</span><span class="p">,</span>
+        <span class="mi">2</span><span class="p">,</span>
+        <span class="n">pcut2</span><span class="p">,</span>
+        <span class="o">*</span><span class="n">args</span><span class="p">,</span>
+        <span class="n">window_function</span><span class="o">=</span><span class="n">window_function</span><span class="p">,</span>
+        <span class="n">trim_ends</span><span class="o">=</span><span class="n">trim_ends</span><span class="p">,</span>
+        <span class="o">**</span><span class="n">kwargs</span>
+    <span class="p">)</span>
+
+    <span class="c1"># Align the waves at the peak</span>
+    <span class="k">if</span> <span class="n">align_at_peak</span><span class="p">:</span>
+        <span class="n">h1</span><span class="o">.</span><span class="n">align_at_maximum</span><span class="p">()</span>
+        <span class="n">h2</span><span class="o">.</span><span class="n">align_at_maximum</span><span class="p">()</span>
+
+    <span class="c1"># Now, we convert to physical units</span>
+    <span class="k">if</span> <span class="n">mass_scale1_msun</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">CU1</span> <span class="o">=</span> <span class="n">unitconv</span><span class="o">.</span><span class="n">geom_umass_msun</span><span class="p">(</span><span class="n">mass_scale1_msun</span><span class="p">)</span>
+        <span class="n">h1</span><span class="o">.</span><span class="n">time_unit_change</span><span class="p">(</span><span class="n">CU1</span><span class="o">.</span><span class="n">time</span><span class="p">,</span> <span class="n">inverse</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">distance1</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">distance1_SI</span> <span class="o">=</span> <span class="n">distance1</span> <span class="o">*</span> <span class="n">unitconv</span><span class="o">.</span><span class="n">MEGAPARSEC_SI</span>
+            <span class="c1"># Remember, h is actually r * h!</span>
+            <span class="c1">#</span>
+            <span class="c1"># We will work with rh (in physical units). This does not change the</span>
+            <span class="c1"># result because r is just a constant.</span>
+            <span class="n">h1</span> <span class="o">*=</span> <span class="n">CU1</span><span class="o">.</span><span class="n">length</span> <span class="o">/</span> <span class="n">distance1_SI</span>
+            <span class="n">redshift1</span> <span class="o">=</span> <span class="n">gwu</span><span class="o">.</span><span class="n">luminosity_distance_to_redshift</span><span class="p">(</span><span class="n">distance1</span><span class="p">)</span>
+            <span class="n">h1</span><span class="o">.</span><span class="n">redshift</span><span class="p">(</span><span class="n">redshift1</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">mass_scale2_msun</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">CU2</span> <span class="o">=</span> <span class="n">unitconv</span><span class="o">.</span><span class="n">geom_umass_msun</span><span class="p">(</span><span class="n">mass_scale2_msun</span><span class="p">)</span>
+        <span class="n">h2</span><span class="o">.</span><span class="n">time_unit_change</span><span class="p">(</span><span class="n">CU2</span><span class="o">.</span><span class="n">time</span><span class="p">,</span> <span class="n">inverse</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">distance2</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">distance2_SI</span> <span class="o">=</span> <span class="n">distance2</span> <span class="o">*</span> <span class="n">unitconv</span><span class="o">.</span><span class="n">MEGAPARSEC_SI</span>
+            <span class="c1"># Remember, h is actually r * h!</span>
+            <span class="c1">#</span>
+            <span class="c1"># We will work with rh (in physical units). This does not change the</span>
+            <span class="c1"># result because r is just a constant.</span>
+            <span class="n">h2</span> <span class="o">*=</span> <span class="n">CU2</span><span class="o">.</span><span class="n">length</span> <span class="o">/</span> <span class="n">distance2_SI</span>
+            <span class="n">redshift2</span> <span class="o">=</span> <span class="n">gwu</span><span class="o">.</span><span class="n">luminosity_distance_to_redshift</span><span class="p">(</span><span class="n">distance2</span><span class="p">)</span>
+            <span class="n">h2</span><span class="o">.</span><span class="n">redshift</span><span class="p">(</span><span class="n">redshift2</span><span class="p">)</span>
+
+    <span class="c1"># This keeps into account if we are using geometrized units or physical</span>
+    <span class="n">time_factor1</span> <span class="o">=</span> <span class="n">CU1</span><span class="o">.</span><span class="n">time</span> <span class="k">if</span> <span class="n">mass_scale1_msun</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="mi">1</span>
+    <span class="n">time_factor2</span> <span class="o">=</span> <span class="n">CU2</span><span class="o">.</span><span class="n">time</span> <span class="k">if</span> <span class="n">mass_scale2_msun</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="mi">1</span>
+
+    <span class="k">if</span> <span class="n">time_removed_beginning</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">h1</span><span class="o">.</span><span class="n">initial_time_remove</span><span class="p">(</span><span class="n">time_removed_beginning</span> <span class="o">*</span> <span class="n">time_factor1</span><span class="p">)</span>
+        <span class="n">h2</span><span class="o">.</span><span class="n">initial_time_remove</span><span class="p">(</span><span class="n">time_removed_beginning</span> <span class="o">*</span> <span class="n">time_factor2</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">time_to_keep_after_max</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">h1</span><span class="o">.</span><span class="n">crop</span><span class="p">(</span><span class="n">end</span><span class="o">=</span><span class="n">time_to_keep_after_max</span> <span class="o">*</span> <span class="n">time_factor1</span><span class="p">)</span>
+        <span class="n">h2</span><span class="o">.</span><span class="n">crop</span><span class="p">(</span><span class="n">end</span><span class="o">=</span><span class="n">time_to_keep_after_max</span> <span class="o">*</span> <span class="n">time_factor2</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">window_function</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="c1"># Next, we window and zero-pad</span>
+        <span class="n">h1</span><span class="o">.</span><span class="n">window</span><span class="p">(</span><span class="n">window_function</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="n">h2</span><span class="o">.</span><span class="n">window</span><span class="p">(</span><span class="n">window_function</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+    <span class="n">h1</span><span class="o">.</span><span class="n">zero_pad</span><span class="p">(</span><span class="n">num_zero_pad</span><span class="p">)</span>
+    <span class="n">h2</span><span class="o">.</span><span class="n">zero_pad</span><span class="p">(</span><span class="n">num_zero_pad</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">h1</span><span class="p">,</span> <span class="n">h2</span>
+
+
+<div class="viewcode-block" id="one_detector_mismatch_from_psi4"><a class="viewcode-back" href="../../gw_mismatch_ref.html#kuibit.gw_mismatch.one_detector_mismatch_from_psi4">[docs]</a><span class="k">def</span> <span class="nf">one_detector_mismatch_from_psi4</span><span class="p">(</span>
+    <span class="n">psi1</span><span class="p">,</span>
+    <span class="n">psi2</span><span class="p">,</span>
+    <span class="n">pcut1</span><span class="p">,</span>
+    <span class="n">pcut2</span><span class="p">,</span>
+    <span class="o">*</span><span class="n">args</span><span class="p">,</span>
+    <span class="n">window_function</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">align_at_peak</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">trim_ends</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">mass_scale1_msun</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">mass_scale2_msun</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">distance1</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">distance2</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">fmin</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+    <span class="n">fmax</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">inf</span><span class="p">,</span>
+    <span class="n">noise</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">num_zero_pad</span><span class="o">=</span><span class="mi">16384</span><span class="p">,</span>
+    <span class="n">num_time_shifts</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span>
+    <span class="n">num_polarization_shifts</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span>
+    <span class="n">time_shift_start</span><span class="o">=-</span><span class="mi">50</span><span class="p">,</span>
+    <span class="n">time_shift_end</span><span class="o">=</span><span class="mi">50</span><span class="p">,</span>
+    <span class="n">force_numba</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="n">time_to_keep_after_max</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">time_removed_beginning</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="o">**</span><span class="n">kwargs</span>
+<span class="p">):</span>
+    <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Compute the mismatch between strains from psi1 and psi2.</span>
+
+<span class="sd">    This function is complex, read :ref:`gw_mismatch:Overlap and mismatch` for</span>
+<span class="sd">    formulas and details.</span>
+
+<span class="sd">    :param psi1: :math:`\Psi_4` for the first wave.</span>
+<span class="sd">    :type psi1: :py:class:`~.GravitationalWavesOneDet`</span>
+<span class="sd">    :param psi2: :math:`\Psi_4` for the second wave (the one that will be</span>
+<span class="sd">                 modified).</span>
+<span class="sd">    :type psi2: :py:class:`~.GravitationalWavesOneDet`</span>
+<span class="sd">    :param right_ascension: Right ascension of the source in the sky.</span>
+<span class="sd">    :type right_ascension: float</span>
+<span class="sd">    :param declination: Declination of the source in the sky.</span>
+<span class="sd">    :type declination: float</span>
+<span class="sd">    :param mass_scale1_msun: If not None, the signal h1 is converted from</span>
+<span class="sd">                             computational units to physical units assuming that</span>
+<span class="sd">                             M = mass_scale1_msun.</span>
+<span class="sd">    :type mass_scale1_msun: float or None</span>
+<span class="sd">    :param mass_scale2_msun: If not None, the signal h2 is converted from</span>
+<span class="sd">                             computational units to physical units assuming that</span>
+<span class="sd">                             M = mass_scale2_msun.</span>
+<span class="sd">    :type mass_scale2_msun: float or None</span>
+<span class="sd">    :param time_utc: Time UTC of the event.</span>
+<span class="sd">    :type time_utc: float</span>
+<span class="sd">    :param pcut1: Period associated with the threshold frequency</span>
+<span class="sd">                 ``omega_0 = 2 * pi / pcut`` for the fixed frequency</span>
+<span class="sd">                 integration of :math:`\Psi_4`</span>
+<span class="sd">    :type pcut1: float</span>
+<span class="sd">    :param pcut2: Period associated with the threshold frequency</span>
+<span class="sd">                 ``omega_0 = 2 * pi / pcut`` for the fixed frequency</span>
+<span class="sd">                 integration of :math:`\Psi_4`</span>
+<span class="sd">    :type pcut2: float</span>
+<span class="sd">    :param window_function: If not None, apply window_function to the</span>
+<span class="sd">                            series before computing the strain.</span>
+<span class="sd">    :type window_function: callable, str, or None</span>
+<span class="sd">    :param trim_ends: If True, a portion of the resulting strain is removed</span>
+<span class="sd">                      at both the initial and final times. The amount removed</span>
+<span class="sd">                      is equal to pcut.</span>
+<span class="sd">    :type trim_ends: bool</span>
+<span class="sd">    :param align_at_peak: Time-shifts the strain so that they have both the</span>
+<span class="sd">                          maximum amplitude at ``t=0``.</span>
+<span class="sd">    :type align_at_peak: bool</span>
+<span class="sd">    :param fmin: Lower limit of the integration.</span>
+<span class="sd">    :type fmin: float</span>
+<span class="sd">    :param fmax: Higher limit of the integration.</span>
+<span class="sd">    :type fmax: float</span>
+<span class="sd">    :param noises: Power spectral density of the noise for all the</span>
+<span class="sd">                   detectors. If None, a uniform noise is applied.</span>
+<span class="sd">    :type noises: :py:class:`~.Detectors`, or None</span>
+<span class="sd">    :param num_zero_pad: How many points do the timeseries have to have</span>
+<span class="sd">                         before Fourier transforms are taken? This is not the</span>
+<span class="sd">                         number of zeros added (at the end) of the timeseries,</span>
+<span class="sd">                         this is the total number. If the series already have</span>
+<span class="sd">                         that length, no zeros will be added.</span>
+<span class="sd">    :type num_zero_pad: int</span>
+<span class="sd">    :param num_polarization_shifts: How many points to divide the range</span>
+<span class="sd">                                    (0, 2 pi) in the polarization shift.</span>
+<span class="sd">    :type num_polarization_shifts: int</span>
+
+<span class="sd">    :param num_time_shifts: How many points to divide the range</span>
+<span class="sd">                            (time_shift_start, time_shift_end) in the time shift.</span>
+<span class="sd">    :type num_time_shifts: int</span>
+<span class="sd">    :param time_shift_start: Minimum time shift applied. Search will be</span>
+<span class="sd">                             done linearly up to time_shift_end.</span>
+<span class="sd">    :type time_shift_start: float</span>
+<span class="sd">    :param time_shift_end: Largest value of time shift applied.</span>
+<span class="sd">    :type time_shift_end: float</span>
+<span class="sd">    :param time_removed_beginning: Remove this amount from the beginning</span>
+<span class="sd">                                   of the strain signals before computing</span>
+<span class="sd">                                   the mismatch. If None, nothing is removed.</span>
+<span class="sd">    :type time_removed_beginning: float or None</span>
+<span class="sd">    :param time_to_keep_after_max: If not None, remove all the signal that</span>
+<span class="sd">                                   comes after t_max + time_to_keep_after_max,</span>
+<span class="sd">                                   where t_max is the time at which the signal</span>
+<span class="sd">                                   peaks.</span>
+<span class="sd">    :type time_to_keep_after_max: float or None</span>
+<span class="sd">    :param force_numba: Use numba irrespectively of the size of the input.</span>
+<span class="sd">    :type force_numba: bool</span>
+<span class="sd">    :param args: All the other arguments are passed to the window</span>
+<span class="sd">                  function.</span>
+<span class="sd">    :type args: anything</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">h1</span><span class="p">,</span> <span class="n">h2</span> <span class="o">=</span> <span class="n">_strains_from_psi4</span><span class="p">(</span>
+        <span class="n">psi1</span><span class="p">,</span>
+        <span class="n">psi2</span><span class="p">,</span>
+        <span class="n">pcut1</span><span class="p">,</span>
+        <span class="n">pcut2</span><span class="p">,</span>
+        <span class="o">*</span><span class="n">args</span><span class="p">,</span>
+        <span class="n">window_function</span><span class="o">=</span><span class="n">window_function</span><span class="p">,</span>
+        <span class="n">align_at_peak</span><span class="o">=</span><span class="n">align_at_peak</span><span class="p">,</span>
+        <span class="n">trim_ends</span><span class="o">=</span><span class="n">trim_ends</span><span class="p">,</span>
+        <span class="n">mass_scale1_msun</span><span class="o">=</span><span class="n">mass_scale1_msun</span><span class="p">,</span>
+        <span class="n">mass_scale2_msun</span><span class="o">=</span><span class="n">mass_scale2_msun</span><span class="p">,</span>
+        <span class="n">distance1</span><span class="o">=</span><span class="n">distance1</span><span class="p">,</span>
+        <span class="n">distance2</span><span class="o">=</span><span class="n">distance2</span><span class="p">,</span>
+        <span class="n">num_zero_pad</span><span class="o">=</span><span class="n">num_zero_pad</span><span class="p">,</span>
+        <span class="n">time_to_keep_after_max</span><span class="o">=</span><span class="n">time_to_keep_after_max</span><span class="p">,</span>
+        <span class="n">time_removed_beginning</span><span class="o">=</span><span class="n">time_removed_beginning</span><span class="p">,</span>
+        <span class="o">**</span><span class="n">kwargs</span>
+    <span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">mismatch_from_strains</span><span class="p">(</span>
+        <span class="n">h1</span><span class="p">,</span>
+        <span class="n">h2</span><span class="p">,</span>
+        <span class="n">fmin</span><span class="p">,</span>
+        <span class="n">fmax</span><span class="p">,</span>
+        <span class="n">noises</span><span class="o">=</span><span class="p">[</span><span class="n">noise</span><span class="p">],</span>
+        <span class="n">antenna_patterns</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">num_polarization_shifts</span><span class="o">=</span><span class="n">num_polarization_shifts</span><span class="p">,</span>
+        <span class="n">num_time_shifts</span><span class="o">=</span><span class="n">num_time_shifts</span><span class="p">,</span>
+        <span class="n">time_shift_start</span><span class="o">=</span><span class="n">time_shift_start</span><span class="p">,</span>
+        <span class="n">time_shift_end</span><span class="o">=</span><span class="n">time_shift_end</span><span class="p">,</span>
+        <span class="n">force_numba</span><span class="o">=</span><span class="n">force_numba</span><span class="p">,</span>
+    <span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="network_mismatch_from_psi4"><a class="viewcode-back" href="../../gw_mismatch_ref.html#kuibit.gw_mismatch.network_mismatch_from_psi4">[docs]</a><span class="k">def</span> <span class="nf">network_mismatch_from_psi4</span><span class="p">(</span>
+    <span class="n">psi1</span><span class="p">,</span>
+    <span class="n">psi2</span><span class="p">,</span>
+    <span class="n">right_ascension</span><span class="p">,</span>
+    <span class="n">declination</span><span class="p">,</span>
+    <span class="n">time_utc</span><span class="p">,</span>
+    <span class="n">pcut1</span><span class="p">,</span>
+    <span class="n">pcut2</span><span class="p">,</span>
+    <span class="o">*</span><span class="n">args</span><span class="p">,</span>
+    <span class="n">window_function</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">align_at_peak</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">trim_ends</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">mass_scale1_msun</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">mass_scale2_msun</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">distance1</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">distance2</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">fmin</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+    <span class="n">fmax</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">inf</span><span class="p">,</span>
+    <span class="n">noises</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">num_zero_pad</span><span class="o">=</span><span class="mi">16384</span><span class="p">,</span>
+    <span class="n">num_time_shifts</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span>
+    <span class="n">num_polarization_shifts</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span>
+    <span class="n">time_shift_start</span><span class="o">=-</span><span class="mi">50</span><span class="p">,</span>
+    <span class="n">time_shift_end</span><span class="o">=</span><span class="mi">50</span><span class="p">,</span>
+    <span class="n">force_numba</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="n">time_to_keep_after_max</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">time_removed_beginning</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="o">**</span><span class="n">kwargs</span>
+<span class="p">):</span>
+    <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Compute the mismatch between strains from psi1 and psi2.</span>
+
+<span class="sd">    This function is complex, read :ref:`gw_mismatch:Overlap and mismatch` for</span>
+<span class="sd">    formulas and details.</span>
+
+<span class="sd">    :param psi1: :math:`\Psi_4` for the first wave.</span>
+<span class="sd">    :type psi1: :py:class:`~.GravitationalWavesOneDet`</span>
+<span class="sd">    :param psi2: :math:`\Psi_4` for the second wave (the one that will be</span>
+<span class="sd">                 modified).</span>
+<span class="sd">    :type psi2: :py:class:`~.GravitationalWavesOneDet`</span>
+<span class="sd">    :param right_ascension: Right ascension of the source in the sky.</span>
+<span class="sd">    :type right_ascension: float</span>
+<span class="sd">    :param declination: Declination of the source in the sky.</span>
+<span class="sd">    :type declination: float</span>
+<span class="sd">    :param mass_scale1_msun: If not None, the signal h1 is converted from</span>
+<span class="sd">                             computational units to physical units assuming that</span>
+<span class="sd">                             ``M = mass_scale1_msun``.</span>
+<span class="sd">    :type mass_scale1_msun: float or None</span>
+<span class="sd">    :param mass_scale2_msun: If not None, the signal h2 is converted from</span>
+<span class="sd">                             computational units to physical units assuming that</span>
+<span class="sd">                             M = mass_scale2_msun.</span>
+<span class="sd">    :type mass_scale2_msun: float or None</span>
+<span class="sd">    :param time_utc: Time UTC of the event.</span>
+<span class="sd">    :type time_utc: float</span>
+<span class="sd">    :param pcut1: Period associated with the threshold frequency</span>
+<span class="sd">                  ``omega_0 = 2 * pi / pcut`` for the fixed frequency</span>
+<span class="sd">                  integration of :math:`\Psi_4`</span>
+<span class="sd">    :type pcut1: float</span>
+<span class="sd">    :param pcut2: Period associated with the threshold frequency</span>
+<span class="sd">                  ``omega_0 = 2 * pi / pcut`` for the fixed frequency</span>
+<span class="sd">                  integration of :math:`\Psi_4`</span>
+<span class="sd">    :type pcut2: float</span>
+<span class="sd">    :param window_function: If not None, apply window_function to the</span>
+<span class="sd">                            series before computing the strain.</span>
+<span class="sd">    :type window_function: callable, str, or None</span>
+<span class="sd">    :param trim_ends: If True, a portion of the resulting strain is removed</span>
+<span class="sd">                      at both the initial and final times. The amount</span>
+<span class="sd">                      removed is equal to pcut.</span>
+<span class="sd">    :type trim_ends: bool</span>
+<span class="sd">    :param align_at_peak: Time-shifts the strain so that they have both the</span>
+<span class="sd">                          maximum amplitude at ``t=0``.</span>
+<span class="sd">    :type align_at_peak: bool</span>
+<span class="sd">    :param fmin: Lower limit of the integration.</span>
+<span class="sd">    :type fmin: float</span>
+<span class="sd">    :param fmax: Higher limit of the integration.</span>
+<span class="sd">    :type fmax: float</span>
+<span class="sd">    :param noises: Power spectral density of the noise for all the</span>
+<span class="sd">                   detectors. If None, a uniform noise is applied.</span>
+<span class="sd">    :type noises: :py:class:`~.Detectors`, or None</span>
+<span class="sd">    :param num_zero_pad: How many points do the timeseries have to have</span>
+<span class="sd">                         before Fourier transforms are taken? This is not</span>
+<span class="sd">                         the number of zeros added (at the end) of the timeseries,</span>
+<span class="sd">                         this is the total number. If the series already have that</span>
+<span class="sd">                         length, no zeros will be added.</span>
+<span class="sd">    :type num_zero_pad: int</span>
+<span class="sd">    :param num_polarization_shifts: How many points to divide the range</span>
+<span class="sd">                                    (0, 2 pi) in the polarization shift.</span>
+<span class="sd">    :type num_polarization_shifts: int</span>
+<span class="sd">    :param num_time_shifts: How many points to divide the range</span>
+<span class="sd">                            (time_shift_start, time_shift_end) in the time shift.</span>
+<span class="sd">    :type num_time_shifts: int</span>
+<span class="sd">    :param time_shift_start: Minimum time shift applied. Search will be</span>
+<span class="sd">                             done linearly up to time_shift_end.</span>
+<span class="sd">    :type time_shift_start: float</span>
+<span class="sd">    :param time_shift_end: Largest value of time shift applied.</span>
+<span class="sd">    :type time_shift_end: float</span>
+<span class="sd">    :param time_removed_beginning: Remove this amount from the beginning</span>
+<span class="sd">                                   of the strain signals before computing the</span>
+<span class="sd">                                   mismatch. If None, nothing is removed.</span>
+<span class="sd">    :type time_removed_beginning: float or None</span>
+<span class="sd">    :param time_to_keep_after_max: If not None, remove all the signal that</span>
+<span class="sd">                                   comes after t_max + time_to_keep_after_max,</span>
+<span class="sd">                                   where t_max is the time at which the signal peaks.</span>
+<span class="sd">    :type time_to_keep_after_max: float or None</span>
+<span class="sd">    :param force_numba: Use numba irrespectively of the size of the input.</span>
+<span class="sd">    :type force_numba: bool</span>
+<span class="sd">    :param args: All the other arguments are passed to the window</span>
+<span class="sd">                  function.</span>
+<span class="sd">    :type args: anything</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">h1</span><span class="p">,</span> <span class="n">h2</span> <span class="o">=</span> <span class="n">_strains_from_psi4</span><span class="p">(</span>
+        <span class="n">psi1</span><span class="p">,</span>
+        <span class="n">psi2</span><span class="p">,</span>
+        <span class="n">pcut1</span><span class="p">,</span>
+        <span class="n">pcut2</span><span class="p">,</span>
+        <span class="o">*</span><span class="n">args</span><span class="p">,</span>
+        <span class="n">window_function</span><span class="o">=</span><span class="n">window_function</span><span class="p">,</span>
+        <span class="n">align_at_peak</span><span class="o">=</span><span class="n">align_at_peak</span><span class="p">,</span>
+        <span class="n">trim_ends</span><span class="o">=</span><span class="n">trim_ends</span><span class="p">,</span>
+        <span class="n">mass_scale1_msun</span><span class="o">=</span><span class="n">mass_scale1_msun</span><span class="p">,</span>
+        <span class="n">mass_scale2_msun</span><span class="o">=</span><span class="n">mass_scale2_msun</span><span class="p">,</span>
+        <span class="n">distance1</span><span class="o">=</span><span class="n">distance1</span><span class="p">,</span>
+        <span class="n">distance2</span><span class="o">=</span><span class="n">distance2</span><span class="p">,</span>
+        <span class="n">num_zero_pad</span><span class="o">=</span><span class="n">num_zero_pad</span><span class="p">,</span>
+        <span class="n">time_to_keep_after_max</span><span class="o">=</span><span class="n">time_to_keep_after_max</span><span class="p">,</span>
+        <span class="n">time_removed_beginning</span><span class="o">=</span><span class="n">time_removed_beginning</span><span class="p">,</span>
+        <span class="o">**</span><span class="n">kwargs</span>
+    <span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">network_mismatch</span><span class="p">(</span>
+        <span class="n">h1</span><span class="p">,</span>
+        <span class="n">h2</span><span class="p">,</span>
+        <span class="n">right_ascension</span><span class="p">,</span>
+        <span class="n">declination</span><span class="p">,</span>
+        <span class="n">time_utc</span><span class="p">,</span>
+        <span class="n">fmin</span><span class="o">=</span><span class="n">fmin</span><span class="p">,</span>
+        <span class="n">fmax</span><span class="o">=</span><span class="n">fmax</span><span class="p">,</span>
+        <span class="n">noises</span><span class="o">=</span><span class="n">noises</span><span class="p">,</span>
+        <span class="n">num_polarization_shifts</span><span class="o">=</span><span class="n">num_polarization_shifts</span><span class="p">,</span>
+        <span class="n">num_time_shifts</span><span class="o">=</span><span class="n">num_time_shifts</span><span class="p">,</span>
+        <span class="n">time_shift_start</span><span class="o">=</span><span class="n">time_shift_start</span><span class="p">,</span>
+        <span class="n">time_shift_end</span><span class="o">=</span><span class="n">time_shift_end</span><span class="p">,</span>
+        <span class="n">force_numba</span><span class="o">=</span><span class="n">force_numba</span><span class="p">,</span>
+    <span class="p">)</span></div>
+</pre></div>
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="../../index.html">
+              <img class="logo" src="../../_static/logo.png" alt="Logo"/>
+            </a></p>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">kuibit 1.3.0-alpha0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../index.html" >Module code</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">kuibit.gw_mismatch</a></li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2020-2021, Gabriele Bozzola.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 3.5.4.
+    </div>
+  </body>
+</html>

@@ -1,0 +1,308 @@
+
+
+<!doctype html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>List of features implemented in kuibit &#8212; kuibit 1.3.0-alpha0 documentation</title>
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="_static/bizstyle.css" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="_static/css/custom.css" />
+    
+    <script id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/doctools.js"></script>
+    <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="_static/bizstyle.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Frequently Asked Questions" href="faq.html" />
+    <link rel="prev" title="What users say about kuibit" href="testimonials.html" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0" />
+    <!--[if lt IE 9]>
+    <script src="_static/css3-mediaqueries.js"></script>
+    <![endif]-->
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="faq.html" title="Frequently Asked Questions"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="testimonials.html" title="What users say about kuibit"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">kuibit 1.3.0-alpha0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">List of features implemented in kuibit</a></li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="list-of-features-implemented-in-kuibit">
+<h1>List of features implemented in kuibit<a class="headerlink" href="#list-of-features-implemented-in-kuibit" title="Permalink to this headline">¶</a></h1>
+<p><code class="docutils literal notranslate"><span class="pre">kuibit</span></code> implements a large collection of features. In general, the spirit
+of the package is to provide high-level interfaces to simulation data, hiding
+all the computation complexity behind it. In doing this, <code class="docutils literal notranslate"><span class="pre">kuibit</span></code> tries to
+be Pythonic: many custom objects behave either like dictionaries, or like
+callable. These objects behave as you expect (or at least, they should). For
+example, if an objects smells like a dictionary, you should be able to ask for
+<code class="docutils literal notranslate"><span class="pre">keys()</span></code>, or iteratate over it, or see if an element is contained with the
+<code class="docutils literal notranslate"><span class="pre">in</span></code> keyword.</p>
+<p>Here we review all the available features as of version <code class="docutils literal notranslate"><span class="pre">1.2.0</span></code>.</p>
+<div class="section" id="general">
+<h2>General<a class="headerlink" href="#general" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">kuibit</span></code> is documented, thoroughly commented, provides examples, and has
+a large test suite.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">kuibit</span></code> is available as wheel and can be installed with <code class="docutils literal notranslate"><span class="pre">pip</span></code>.</p></li>
+</ul>
+</div>
+<div class="section" id="simdir">
+<h2>SimDir<a class="headerlink" href="#simdir" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li><p>Scan and organize all the files in a directory up to a specified depth.</p></li>
+<li><p>Print out an overview of what is available in the simulation.</p></li>
+<li><p>Individuate all the par, log, out, and err files.</p></li>
+<li><p>Easily access all the data that <code class="docutils literal notranslate"><span class="pre">kuibit</span></code> can represent.</p></li>
+<li><p>Transparently handle all the restarts with any directory structure.</p></li>
+</ul>
+</div>
+<div class="section" id="series">
+<h2>Series<a class="headerlink" href="#series" title="Permalink to this headline">¶</a></h2>
+<p>Time and frequency series are represented in an intuitive way. They</p>
+<ul class="simple">
+<li><p>can be real or complex;</p></li>
+<li><p>can be unevenly spaced;</p></li>
+<li><p>support all the mathematical operations (e.g., you can sum two timeseries);</p></li>
+<li><p>can be interpolated with arbitrary (up to quintic) splines;</p></li>
+<li><p>can be called returning interpolated values where no data is available</p></li>
+<li><p>support reductions (maximum/minimum, absolute maximum/minimum, location of the maximum/minimum, location of the absolute maximum/minimum);</p></li>
+<li><p>are compatible with NumPy’s operations (e.g., you can all <code class="docutils literal notranslate"><span class="pre">np.log(rho)</span></code>);</p></li>
+<li><p>are compatible with matplotlib <code class="docutils literal notranslate"><span class="pre">plot</span></code> (you can plot with <code class="docutils literal notranslate"><span class="pre">plt.plot(rho)</span></code>);</p></li>
+<li><p>can be resampled using nearest neighors or splines on new times/frequencies;</p></li>
+<li><p>can be written to disk in a human-readable way (with <code class="docutils literal notranslate"><span class="pre">save</span></code>);</p></li>
+<li><p>can be clean from <code class="docutils literal notranslate"><span class="pre">nans</span></code>;</p></li>
+<li><p>can be integrated with the trapezional method (cumulative integral);</p></li>
+<li><p>can be differentiated from splines, or with second-order finite differencing;</p></li>
+<li><p>can be smoothed with the Savitzky-Golay filter;</p></li>
+<li><p>can be cropped;</p></li>
+<li><p>support masks;</p></li>
+<li><p>can be resampled to the points common points with other series.</p></li>
+</ul>
+<p>Specifically timeseries, also support:</p>
+<ul class="simple">
+<li><p>computing the unfolded phase and phase velocity;</p></li>
+<li><p>computing duration, time intervals;</p></li>
+<li><p>shifting time/phase, aligning at (absolute) maximum/minimum;</p></li>
+<li><p>resampling evenly, even with a fixed frequency or delta time;</p></li>
+<li><p>zero-paddeding;</p></li>
+<li><p>removing mean;</p></li>
+<li><p>removing initial/final portion of the signal;</p></li>
+<li><p>changing time units;</p></li>
+<li><p>redshifting for a given redshift;</p></li>
+<li><p>window functions (Tukey, Hamming, Blackman, or arbitrary);</p></li>
+<li><p>Fourier Transform (real and complex).</p></li>
+</ul>
+<p>Frequencyseries support:</p>
+<ul class="simple">
+<li><p>loading from file (e.g., noise curves);</p></li>
+<li><p>normalization;</p></li>
+<li><p>low/high pass filters;</p></li>
+<li><p>removing negative frequencies;</p></li>
+<li><p>locating peaks (with also a quadratic approximation);</p></li>
+<li><p>Inverse Fourier Transform;</p></li>
+<li><p>computing the inner product between two frequencyseries, also with multiple noises;</p></li>
+<li><p>computing the overlap, also with multiple noises.</p></li>
+</ul>
+</div>
+<div class="section" id="scalar-data">
+<h2>Scalar data<a class="headerlink" href="#scalar-data" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li><p>Read data from <code class="docutils literal notranslate"><span class="pre">CarpetASCII</span></code> (max, min, norm, …) as timeseries (both <code class="docutils literal notranslate"><span class="pre">one_file_per_group</span></code> or <code class="docutils literal notranslate"><span class="pre">one_variable_per_group</span></code> options).</p></li>
+<li><p>Combine all the different files from multiple checkpoints in a single timeseries.</p></li>
+<li><p>Read data transparently compressed with gzip or bzip2.</p></li>
+</ul>
+</div>
+<div class="section" id="multipoles-and-waves">
+<h2>Multipoles and waves<a class="headerlink" href="#multipoles-and-waves" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li><p>Read ASCII and HDF5 data from <code class="docutils literal notranslate"><span class="pre">Multipoles</span></code>.</p></li>
+<li><p>Represent multipoles with objects that can be accessed with the multipole numbers.</p></li>
+<li><p>Use the fixed frequency integration method to compute from <code class="docutils literal notranslate"><span class="pre">Psi4</span></code>:</p>
+<ul>
+<li><p>strains at given multipole number,</p></li>
+<li><p>strains at a given point (accounting for the spin-weigthed spherical harmonics),</p></li>
+<li><p>strain as observed by LIGO/Virgo (considering the antenna patterns),</p></li>
+<li><p>force/linear momentum along the z axis lost via gravitational waves (one or multiple modes),</p></li>
+<li><p>power/energy lost via gravitational waves (one or multiple modes),</p></li>
+<li><p>torque/angular momentum along the z axis lost via gravitational waves (one or multiple modes),</p></li>
+<li><p>Compute the last two for electromagnetic waves from <code class="docutils literal notranslate"><span class="pre">Phi2</span></code>.</p></li>
+</ul>
+</li>
+<li><p>Extrapolate waves at infinity with polynomial expansion in real/imaginary parts or amplitude and phase.</p></li>
+<li><p>Compute spin-weigthed spherical harmonics.</p></li>
+<li><p>Convert from RA and Dec to spherical coordinates.</p></li>
+<li><p>Compute antenna responses.</p></li>
+<li><p>Compute signal to noise ratio from strain.</p></li>
+<li><p>Compute redshift from luminosity distance.</p></li>
+<li><p>Compute mismatch between the 2,2 modes of two waves for multiple detectors.</p></li>
+<li><p>Access sensitivity curves of known detectors (e.g., LISA, or Cosmic Explorer).</p></li>
+</ul>
+</div>
+<div class="section" id="units">
+<h2>Units<a class="headerlink" href="#units" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li><p>Convert from geometrized units (given mass, length, or mass in solar masses) to physical and vice versa.</p></li>
+<li><p>Implement some basic constants of Nature.</p></li>
+</ul>
+</div>
+<div class="section" id="grid-data">
+<h2>Grid Data<a class="headerlink" href="#grid-data" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li><p>Read 1D, 2D, and 3D ASCII and HDF5 files as <code class="docutils literal notranslate"><span class="pre">HierarchicalGridData</span></code>, which supports:</p>
+<ul>
+<li><p>working with multiple components and refinement levels;</p></li>
+<li><p>handling ghost-zones;</p></li>
+<li><p>merging multiple patches that logically represent a single grid (e.g., due to domain decomposition);</p></li>
+<li><p>real or complex data;</p></li>
+<li><p>all the mathematical operations (e.g., you can sum two timeseries);</p></li>
+<li><p>interpolation with multilinear interpolation;</p></li>
+<li><p>being called returning interpolated values where no data is available;</p></li>
+<li><p>reductions (maximum/minimum, absolute maximum/minimum, location of the maximum/minimum, location of the absolute maximum/minimum);</p></li>
+<li><p>NumPy’s operations (e.g., you can all <code class="docutils literal notranslate"><span class="pre">np.log(rho)</span></code>);</p></li>
+<li><p>resampling using nearest neighors or splines on new grids;</p></li>
+<li><p>Second-order finite-differencing along any dimension;</p></li>
+<li><p>being resampled to <code class="docutils literal notranslate"><span class="pre">UniformGridData</span></code> (unigrid);</p></li>
+<li><p>masks;</p></li>
+<li><p>abitrarily slicing with lower-dimensional cuts (e.g., equatorial plane from 3D data).</p></li>
+</ul>
+</li>
+<li><p>In addition to above <code class="docutils literal notranslate"><span class="pre">UniformGridData</span></code> support:</p>
+<ul>
+<li><p>being saved on disk;</p></li>
+<li><p>histogram and percentiles;</p></li>
+<li><p>additonal reductions (e.g., norm2, mean, norm-p, integral);</p></li>
+<li><p>changing grid spacing (up/down sampling);</p></li>
+<li><p>Fourier Transform;</p></li>
+<li><p>computing grid coordiantes (for plotting or operations involving the coordinates);</p></li>
+</ul>
+</li>
+<li><p>Read multiple iterations as spacetime <code class="docutils literal notranslate"><span class="pre">HierarchicalGridData</span></code> (to take advantage of multilinear interpolation in space and time).</p></li>
+<li><p>Transparently handle multiple restarts/output from different MPI processes.</p></li>
+<li><p>Computing the total size of the files associated to a variable/dimension.</p></li>
+</ul>
+</div>
+<div class="section" id="horizons">
+<h2>Horizons<a class="headerlink" href="#horizons" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li><p>Read and represent the ASCII output from <code class="docutils literal notranslate"><span class="pre">QuasiLocalMeasures</span></code> and <code class="docutils literal notranslate"><span class="pre">AHFinderDirect</span></code>.</p></li>
+<li><p>Work with the shape of the horizons and their properties (as timeseries).</p></li>
+<li><p>Cut the 3D shape into 2D projection along the axes centered in the origin of the horizon.</p></li>
+</ul>
+</div>
+<div class="section" id="visualize">
+<h2>Visualize<a class="headerlink" href="#visualize" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li><p>Automatically configure <code class="docutils literal notranslate"><span class="pre">matplotlib</span></code> with default options.</p></li>
+<li><p>Visualize grid data in 2D.</p></li>
+<li><p>Visualize apparent horizons in 2D (with <code class="docutils literal notranslate"><span class="pre">matplotlibt</span></code>) and 3D (with <code class="docutils literal notranslate"><span class="pre">mayavi</span></code>).</p></li>
+<li><p>Visualize time and frequency series.</p></li>
+<li><p>Visualize apparent horizon orbits in 3D with <code class="docutils literal notranslate"><span class="pre">mayavi</span></code>.</p></li>
+<li><p>Visualize quasi-local properties of apparent horizons as vectors in 3D with <code class="docutils literal notranslate"><span class="pre">mayavi</span></code>.</p></li>
+<li><p>Save 2D figures as LaTeX files.</p></li>
+<li><p>Make movies with <a class="reference external" href="https://github.com/Sbozzolo/motionpicture">motionpicture</a>.</p></li>
+</ul>
+</div>
+<div class="section" id="utilities">
+<h2>Utilities<a class="headerlink" href="#utilities" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li><p>Build command-line scripts with commonly used options.</p></li>
+</ul>
+</div>
+</div>
+
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="index.html">
+              <img class="logo" src="_static/logo.png" alt="Logo"/>
+            </a></p>
+  <h3><a href="index.html">Table of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">List of features implemented in kuibit</a><ul>
+<li><a class="reference internal" href="#general">General</a></li>
+<li><a class="reference internal" href="#simdir">SimDir</a></li>
+<li><a class="reference internal" href="#series">Series</a></li>
+<li><a class="reference internal" href="#scalar-data">Scalar data</a></li>
+<li><a class="reference internal" href="#multipoles-and-waves">Multipoles and waves</a></li>
+<li><a class="reference internal" href="#units">Units</a></li>
+<li><a class="reference internal" href="#grid-data">Grid Data</a></li>
+<li><a class="reference internal" href="#horizons">Horizons</a></li>
+<li><a class="reference internal" href="#visualize">Visualize</a></li>
+<li><a class="reference internal" href="#utilities">Utilities</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="testimonials.html"
+                        title="previous chapter">What users say about kuibit</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="faq.html"
+                        title="next chapter">Frequently Asked Questions</a></p>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="faq.html" title="Frequently Asked Questions"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="testimonials.html" title="What users say about kuibit"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">kuibit 1.3.0-alpha0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">List of features implemented in kuibit</a></li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2020-2021, Gabriele Bozzola.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 3.5.4.
+    </div>
+  </body>
+</html>

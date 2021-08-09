@@ -1,0 +1,184 @@
+
+
+<!doctype html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Gravitational-wave utilities &#8212; kuibit 1.3.0-alpha0 documentation</title>
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="_static/bizstyle.css" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="_static/css/custom.css" />
+    
+    <script id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/doctools.js"></script>
+    <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script type="text/x-mathjax-config">MathJax.Hub.Config({"tex2jax": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true, "ignoreClass": "document", "processClass": "math|output_area"}})</script>
+    <script src="_static/bizstyle.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Mismatch between gravitational waves" href="gw_mismatch.html" />
+    <link rel="prev" title="Masking invalid data" href="masks.html" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0" />
+    <!--[if lt IE 9]>
+    <script src="_static/css3-mediaqueries.js"></script>
+    <![endif]-->
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="gw_mismatch.html" title="Mismatch between gravitational waves"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="masks.html" title="Masking invalid data"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">kuibit 1.3.0-alpha0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">Gravitational-wave utilities</a></li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="gravitational-wave-utilities">
+<h1>Gravitational-wave utilities<a class="headerlink" href="#gravitational-wave-utilities" title="Permalink to this headline">¶</a></h1>
+<p>The <a class="reference internal" href="gw_utils_ref.html#module-kuibit.gw_utils" title="kuibit.gw_utils"><code class="xref py py-mod docutils literal notranslate"><span class="pre">gw_utils</span></code></a> module contains functions that are useful in connecting
+numerical relativity simulation with gravitational-waves observations.</p>
+<p><a class="reference internal" href="gw_utils_ref.html#module-kuibit.gw_utils"><span class="std std-ref">Reference on kuibit.gw_utils</span></a></p>
+<div class="section" id="detectors">
+<h2>Detectors<a class="headerlink" href="#detectors" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference internal" href="gw_utils_ref.html#module-kuibit.gw_utils" title="kuibit.gw_utils"><code class="xref py py-mod docutils literal notranslate"><span class="pre">gw_utils</span></code></a> defines a new data type, <code class="docutils literal notranslate"><span class="pre">Detectors</span></code> that can contain
+quantities that are specific to the each of operating gravitational-wave
+detector (Hanford, Livingston, Virgo). A <code class="docutils literal notranslate"><span class="pre">Detectors</span></code> object <code class="docutils literal notranslate"><span class="pre">det</span></code> has three
+attributes: <code class="docutils literal notranslate"><span class="pre">det.hanford</span></code>, <code class="docutils literal notranslate"><span class="pre">det.livingston</span></code>, and <code class="docutils literal notranslate"><span class="pre">det.virgo</span></code>. You can
+access the fields in <code class="docutils literal notranslate"><span class="pre">det</span></code> as shown, or you can use the index notation, e.g.,
+<code class="docutils literal notranslate"><span class="pre">det[0]</span></code> (which is det.hanford). The fields are (by convention) in
+alphabetical order. Using <code class="docutils literal notranslate"><span class="pre">Detectors</span></code> is very convinent because it allows us
+to forget about the order of the fields, while guaranteeing that an order exist.</p>
+<p>Technically, <code class="docutils literal notranslate"><span class="pre">Detectors</span></code> is a <a class="reference external" href="https://docs.python.org/3/library/collections.html">namedtuple</a>. You can think of it as
+an ordered and immutable dictionary.</p>
+</div>
+<div class="section" id="luminosity-distance-to-redshift">
+<h2>luminosity_distance_to_redshift<a class="headerlink" href="#luminosity-distance-to-redshift" title="Permalink to this headline">¶</a></h2>
+<p>Compute the redshift starting from a given luminosity distance in Megaparsec.
+The assumed cosmology is LCDM with no radiation (only matter and dark energy)
+and the default values are the ones provided by the Planck mission.</p>
+<p>The computation is based on a numerical inversion, which requires an initial
+guess. The default one (0.1) should work in most scenarios, but it should be
+changed in case of failure.</p>
+</div>
+<div class="section" id="sylm">
+<h2>sYlm<a class="headerlink" href="#sylm" title="Permalink to this headline">¶</a></h2>
+<p>Compute the spin-weighted spherical harmonics using recursion relationships. The
+angles are defined as <span class="math notranslate nohighlight">\(\theta\)</span> the meridional angle and <span class="math notranslate nohighlight">\(\phi\)</span> the
+azimulathal one.</p>
+</div>
+<div class="section" id="antenna-responses">
+<h2>antenna_responses<a class="headerlink" href="#antenna-responses" title="Permalink to this headline">¶</a></h2>
+<p>Compute the antenna pattern <span class="math notranslate nohighlight">\(F\)</span> for Hanford, Livingston, and the Virgo
+interferometers for a given source localization (as right ascension and
+declination in degrees, and the UTC time). The antenna pattern is used to
+compute the strain measured by a detector with the formula. The output of this
+<code class="xref py py-meth docutils literal notranslate"><span class="pre">antenna_responses_from_sky_localization()</span></code> is a <code class="docutils literal notranslate"><span class="pre">Detectors</span></code>, a
+<code class="docutils literal notranslate"><span class="pre">namedtuple</span></code> with attributes <code class="docutils literal notranslate"><span class="pre">hanford</span></code>, <code class="docutils literal notranslate"><span class="pre">livingston</span></code>, and <code class="docutils literal notranslate"><span class="pre">virgo</span></code>, each
+containing a standard tuple with the responses of that detector for the cross
+and plus polarizations.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># GW150914</span>
+<span class="n">antenna</span> <span class="o">=</span> <span class="n">antenna_responses_from_sky_localization</span><span class="p">(</span><span class="mi">8</span><span class="p">,</span> <span class="o">-</span><span class="mi">70</span><span class="p">,</span> <span class="s2">&quot;2015-09-14 09:50:45&quot;</span><span class="p">)</span>
+<span class="p">(</span><span class="n">Fc_H</span><span class="p">,</span> <span class="n">Fp_H</span><span class="p">)</span> <span class="o">=</span> <span class="n">antenna_LIGO</span><span class="o">.</span><span class="n">hanford</span>  <span class="c1"># or antenna_LIGO[&#39;hanford&#39;]</span>
+
+<span class="c1"># Alternatively, unpack everything</span>
+<span class="p">((</span><span class="n">Fc_H</span><span class="p">,</span> <span class="n">Fp_H</span><span class="p">),</span> <span class="p">(</span><span class="n">Fc_L</span><span class="p">,</span> <span class="n">Fp_L</span><span class="p">),</span> <span class="p">(</span><span class="n">Fc_V</span><span class="p">,</span> <span class="n">Fp_V</span><span class="p">))</span> <span class="o">=</span> <span class="n">antenna</span>
+</pre></div>
+</div>
+<p>If you are working with a single generic detector, you can use
+<code class="xref py py-meth docutils literal notranslate"><span class="pre">antenna_responses()</span></code> which takes the spherical angles with respect to
+a detector on the <span class="math notranslate nohighlight">\(z=0\)</span> plane and with arms on the two other directions.</p>
+</div>
+<div class="section" id="signal-to-noise-ratio-from-strain">
+<h2>signal_to_noise_ratio_from_strain<a class="headerlink" href="#signal-to-noise-ratio-from-strain" title="Permalink to this headline">¶</a></h2>
+<p><code class="xref py py-meth docutils literal notranslate"><span class="pre">signal_to_noise_ratio_from_strain()</span></code> takes a strain, a noise curve, and
+two boundary frequencies and return the signal-to-noise ratio as</p>
+</div>
+</div>
+
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="index.html">
+              <img class="logo" src="_static/logo.png" alt="Logo"/>
+            </a></p>
+  <h3><a href="index.html">Table of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Gravitational-wave utilities</a><ul>
+<li><a class="reference internal" href="#detectors">Detectors</a></li>
+<li><a class="reference internal" href="#luminosity-distance-to-redshift">luminosity_distance_to_redshift</a></li>
+<li><a class="reference internal" href="#sylm">sYlm</a></li>
+<li><a class="reference internal" href="#antenna-responses">antenna_responses</a></li>
+<li><a class="reference internal" href="#signal-to-noise-ratio-from-strain">signal_to_noise_ratio_from_strain</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="masks.html"
+                        title="previous chapter">Masking invalid data</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="gw_mismatch.html"
+                        title="next chapter">Mismatch between gravitational waves</a></p>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="gw_mismatch.html" title="Mismatch between gravitational waves"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="masks.html" title="Masking invalid data"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">kuibit 1.3.0-alpha0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">Gravitational-wave utilities</a></li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2020-2021, Gabriele Bozzola.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 3.5.4.
+    </div>
+  </body>
+</html>

@@ -1,0 +1,1710 @@
+
+
+<!doctype html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Reference on kuibit.timeseries &#8212; kuibit 1.3.0-alpha0 documentation</title>
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="_static/bizstyle.css" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="_static/css/custom.css" />
+    
+    <script id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/doctools.js"></script>
+    <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="_static/bizstyle.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Reference on kuibit.frequencyseries" href="frequencyseries_ref.html" />
+    <link rel="prev" title="Reference on kuibit.series" href="series_ref.html" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0" />
+    <!--[if lt IE 9]>
+    <script src="_static/css3-mediaqueries.js"></script>
+    <![endif]-->
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="frequencyseries_ref.html" title="Reference on kuibit.frequencyseries"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="series_ref.html" title="Reference on kuibit.series"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">kuibit 1.3.0-alpha0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">Reference on kuibit.timeseries</a></li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="module-kuibit.timeseries">
+<span id="reference-on-kuibit-timeseries"></span><h1>Reference on kuibit.timeseries<a class="headerlink" href="#module-kuibit.timeseries" title="Permalink to this headline">¶</a></h1>
+<p>The <a class="reference internal" href="#module-kuibit.timeseries" title="kuibit.timeseries"><code class="xref py py-mod docutils literal notranslate"><span class="pre">timeseries</span></code></a> module provides a representation of time series
+and convenience functions to create <a class="reference internal" href="#kuibit.timeseries.TimeSeries" title="kuibit.timeseries.TimeSeries"><code class="xref py py-class docutils literal notranslate"><span class="pre">TimeSeries</span></code></a>.</p>
+<p><a class="reference internal" href="#kuibit.timeseries.TimeSeries" title="kuibit.timeseries.TimeSeries"><code class="xref py py-class docutils literal notranslate"><span class="pre">TimeSeries</span></code></a> can be evenly or unevenly sampled are rich in features.
+They support all the mathematical operations and operators you may expect, and
+have additional methods, which include ones for taking derivatives, integrals,
+apply windows, smooth the signal, take Fourier transform, and more. Most of
+these methods are available in two flavors: those that return a new
+<a class="reference internal" href="#kuibit.timeseries.TimeSeries" title="kuibit.timeseries.TimeSeries"><code class="xref py py-class docutils literal notranslate"><span class="pre">TimeSeries</span></code></a>, and those which modify the object in place. The latter
+have names with imperative verbs.</p>
+<p><a class="reference internal" href="#kuibit.timeseries.TimeSeries" title="kuibit.timeseries.TimeSeries"><code class="xref py py-class docutils literal notranslate"><span class="pre">TimeSeries</span></code></a> are derived from the <a class="reference internal" href="series_ref.html#kuibit.series.BaseSeries" title="kuibit.series.BaseSeries"><code class="xref py py-class docutils literal notranslate"><span class="pre">BaseSeries</span></code></a>, which in
+turn is derived from the abstract class <code class="xref py py-class docutils literal notranslate"><span class="pre">BaseNumerical</span></code>. Some of the
+capabilities of <a class="reference internal" href="#kuibit.timeseries.TimeSeries" title="kuibit.timeseries.TimeSeries"><code class="xref py py-class docutils literal notranslate"><span class="pre">TimeSeries</span></code></a> (e.g., overloading the mathematical
+operators) are implemented in the parent classes.</p>
+<p>The additional functions provided in <a class="reference internal" href="#module-kuibit.timeseries" title="kuibit.timeseries"><code class="xref py py-mod docutils literal notranslate"><span class="pre">timeseries</span></code></a> are:</p>
+<ul class="simple">
+<li><p><a class="reference internal" href="#kuibit.timeseries.remove_duplicated_iters" title="kuibit.timeseries.remove_duplicated_iters"><code class="xref py py-func docutils literal notranslate"><span class="pre">remove_duplicated_iters()</span></code></a> cleans the input arrays by removing duplicated times.</p></li>
+<li><p><a class="reference internal" href="#kuibit.timeseries.unfold_phase" title="kuibit.timeseries.unfold_phase"><code class="xref py py-func docutils literal notranslate"><span class="pre">unfold_phase()</span></code></a> takes as argument a NumPy array representing a phase
+and unfolds it removing all the jumps of 2 pi. This is useful in gravitational
+wave analysis.</p></li>
+<li><p><a class="reference internal" href="#kuibit.timeseries.combine_ts" title="kuibit.timeseries.combine_ts"><code class="xref py py-func docutils literal notranslate"><span class="pre">combine_ts()</span></code></a> takes a list of timeseries and removes all the overlapping segments.</p></li>
+</ul>
+<dl class="py class">
+<dt id="kuibit.timeseries.TimeSeries">
+<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">kuibit.timeseries.</span></code><code class="sig-name descname"><span class="pre">TimeSeries</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">t</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">guarantee_t_is_monotonic</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/kuibit/timeseries.html#TimeSeries"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kuibit.timeseries.TimeSeries" title="Permalink to this definition">¶</a></dt>
+<dd><p>This class represents real or complex valued time series.</p>
+<p><a class="reference internal" href="#kuibit.timeseries.TimeSeries" title="kuibit.timeseries.TimeSeries"><code class="xref py py-class docutils literal notranslate"><span class="pre">TimeSeries</span></code></a> are defined providing a time list or array and the
+corresponding values. For example,</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">times</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">,</span> <span class="mi">100</span><span class="p">)</span>
+<span class="n">values</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">times</span><span class="p">)</span>
+
+<span class="n">ts</span> <span class="o">=</span> <span class="n">TimeSeries</span><span class="p">(</span><span class="n">times</span><span class="p">,</span> <span class="n">values</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Times cannot be empty or not monotonically increasing.
+Times and values must have the same length.</p>
+<p>TimeSeries are well-behaved classed, many operations and methods are
+implemented. For instance, you can sum/multiply two <a class="reference internal" href="#kuibit.timeseries.TimeSeries" title="kuibit.timeseries.TimeSeries"><code class="xref py py-class docutils literal notranslate"><span class="pre">TimeSeries</span></code></a>.</p>
+<p>NumPy acts on TimeSeries cleanly, eg. <code class="docutils literal notranslate"><span class="pre">np.log10(TimeSeries)</span></code> is a
+<a class="reference internal" href="#kuibit.timeseries.TimeSeries" title="kuibit.timeseries.TimeSeries"><code class="xref py py-class docutils literal notranslate"><span class="pre">TimeSeries</span></code></a> with <code class="docutils literal notranslate"><span class="pre">log10(data)</span></code>.</p>
+<p><a class="reference internal" href="#kuibit.timeseries.TimeSeries" title="kuibit.timeseries.TimeSeries"><code class="xref py py-class docutils literal notranslate"><span class="pre">TimeSeries</span></code></a> have methods for smoothing, windowing, extracting phase and
+more.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Variables</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><a class="reference internal" href="#kuibit.timeseries.TimeSeries.t" title="kuibit.timeseries.TimeSeries.t"><strong>t</strong></a> (<em>1D NumPy array</em><em> or </em><em>float</em>) – Times.</p></li>
+<li><p><strong>y</strong> (<em>1D NumPy array</em><em> or </em><em>float</em>) – Values.</p></li>
+<li><p><strong>spline_real</strong> (<em>tuple</em>) – Coefficients for a spline represent of the real part
+of y.</p></li>
+<li><p><strong>spline_imag</strong> (<em>tuple</em>) – Coefficients for a spline represent of the real part
+of y.</p></li>
+</ul>
+</dd>
+</dl>
+<p>Constructor.</p>
+<p>When guarantee_t_is_monotonic is True no checks will be perform to make
+sure that t is monotonically increasing (increasing performance). This
+should is used internally whenever a new series is returned from self
+(since we have already checked that t is good.) or in performance
+critical routines.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>t</strong> (<em>1D NumPy array</em><em> or </em><em>list</em>) – Sampling times, need to be strictly increasing.</p></li>
+<li><p><strong>y</strong> (<em>1D NumPy array</em><em> or </em><em>list</em>) – Data samples, can be real or complex valued.</p></li>
+<li><p><strong>guarantee_t_is_monotonic</strong> (<em>bool</em>) – The code will assume that t is
+monotonically increasing.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt id="kuibit.timeseries.TimeSeries.abs_max">
+<code class="sig-name descname"><span class="pre">abs_max</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#kuibit.timeseries.TimeSeries.abs_max" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the maximum of the absolute value</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="kuibit.timeseries.TimeSeries.abs_min">
+<code class="sig-name descname"><span class="pre">abs_min</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#kuibit.timeseries.TimeSeries.abs_min" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the minimum of the absolute value</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="kuibit.timeseries.TimeSeries.abs_nanmax">
+<code class="sig-name descname"><span class="pre">abs_nanmax</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#kuibit.timeseries.TimeSeries.abs_nanmax" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the maximum of the absolute value ignoring NaNs</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="kuibit.timeseries.TimeSeries.abs_nanmin">
+<code class="sig-name descname"><span class="pre">abs_nanmin</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#kuibit.timeseries.TimeSeries.abs_nanmin" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the minimum of the absolute value ignoring NaNs</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="kuibit.timeseries.TimeSeries.align_at_maximum">
+<code class="sig-name descname"><span class="pre">align_at_maximum</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/kuibit/timeseries.html#TimeSeries.align_at_maximum"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kuibit.timeseries.TimeSeries.align_at_maximum" title="Permalink to this definition">¶</a></dt>
+<dd><p>Time shift the series so that the absolute maximum is at t=0.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="kuibit.timeseries.TimeSeries.align_at_minimum">
+<code class="sig-name descname"><span class="pre">align_at_minimum</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/kuibit/timeseries.html#TimeSeries.align_at_minimum"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kuibit.timeseries.TimeSeries.align_at_minimum" title="Permalink to this definition">¶</a></dt>
+<dd><p>Time shift the series so that the absolute minimum is at t=0.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="kuibit.timeseries.TimeSeries.aligned_at_maximum">
+<code class="sig-name descname"><span class="pre">aligned_at_maximum</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/kuibit/timeseries.html#TimeSeries.aligned_at_maximum"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kuibit.timeseries.TimeSeries.aligned_at_maximum" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a new timeseries with absolute maximum at t=0.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Timeseries shifted so that the maximum is a t=0.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><a class="reference internal" href="#kuibit.timeseries.TimeSeries" title="kuibit.timeseries.TimeSeries"><code class="xref py py-class docutils literal notranslate"><span class="pre">TimeSeries</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="kuibit.timeseries.TimeSeries.aligned_at_minimum">
+<code class="sig-name descname"><span class="pre">aligned_at_minimum</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/kuibit/timeseries.html#TimeSeries.aligned_at_minimum"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kuibit.timeseries.TimeSeries.aligned_at_minimum" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a new timeseries with absolute minimum at t=0.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Timeseries shifted so that the minimum is a t=0.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><a class="reference internal" href="#kuibit.timeseries.TimeSeries" title="kuibit.timeseries.TimeSeries"><code class="xref py py-class docutils literal notranslate"><span class="pre">TimeSeries</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="kuibit.timeseries.TimeSeries.blackman_window">
+<code class="sig-name descname"><span class="pre">blackman_window</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/kuibit/timeseries.html#TimeSeries.blackman_window"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kuibit.timeseries.TimeSeries.blackman_window" title="Permalink to this definition">¶</a></dt>
+<dd><p>Apply Blackman window.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="kuibit.timeseries.TimeSeries.blackman_windowed">
+<code class="sig-name descname"><span class="pre">blackman_windowed</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/kuibit/timeseries.html#TimeSeries.blackman_windowed"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kuibit.timeseries.TimeSeries.blackman_windowed" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a timeseries with Blackman window applied.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="kuibit.timeseries.TimeSeries.clip">
+<code class="sig-name descname"><span class="pre">clip</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">init</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">end</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#kuibit.timeseries.TimeSeries.clip" title="Permalink to this definition">¶</a></dt>
+<dd><p>Remove data outside the the interval <code class="docutils literal notranslate"><span class="pre">[init,</span> <span class="pre">end]</span></code>. If
+<code class="docutils literal notranslate"><span class="pre">init</span></code> or <code class="docutils literal notranslate"><span class="pre">end</span></code> are not specified or None, it does not remove
+anything from this side.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>init</strong> (<em>float</em><em> or </em><em>None</em>) – Data with <code class="docutils literal notranslate"><span class="pre">x</span> <span class="pre">&lt;=</span> <span class="pre">init</span></code> will be removed.</p></li>
+<li><p><strong>end</strong> (<em>float</em><em> or </em><em>None</em>) – Data with <code class="docutils literal notranslate"><span class="pre">x</span> <span class="pre">&gt;=</span> <span class="pre">init</span></code> will be removed.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="kuibit.timeseries.TimeSeries.clipped">
+<code class="sig-name descname"><span class="pre">clipped</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">init</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">end</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#kuibit.timeseries.TimeSeries.clipped" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a series with data removed outside the interval <code class="docutils literal notranslate"><span class="pre">[init,</span> <span class="pre">end]</span></code>. If
+<code class="docutils literal notranslate"><span class="pre">init</span></code> or <code class="docutils literal notranslate"><span class="pre">end</span></code> are not specified or None, it does not remove
+anything from this side.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>init</strong> (<em>float</em><em> or </em><em>None</em>) – Data with <code class="docutils literal notranslate"><span class="pre">x</span> <span class="pre">&lt;=</span> <span class="pre">init</span></code> will be removed.</p></li>
+<li><p><strong>end</strong> (<em>float</em><em> or </em><em>None</em>) – Data with <code class="docutils literal notranslate"><span class="pre">x</span> <span class="pre">&gt;=</span> <span class="pre">init</span></code> will be removed.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Series with enforced minimum and maximum</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="series_ref.html#kuibit.series.BaseSeries" title="kuibit.series.BaseSeries"><code class="xref py py-class docutils literal notranslate"><span class="pre">BaseSeries</span></code></a> or derived class</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="kuibit.timeseries.TimeSeries.copy">
+<code class="sig-name descname"><span class="pre">copy</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#kuibit.timeseries.TimeSeries.copy" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a deep copy.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Deep copy of the series.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><a class="reference internal" href="series_ref.html#kuibit.series.BaseSeries" title="kuibit.series.BaseSeries"><code class="xref py py-class docutils literal notranslate"><span class="pre">BaseSeries</span></code></a> or derived class</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="kuibit.timeseries.TimeSeries.crop">
+<code class="sig-name descname"><span class="pre">crop</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">init</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">end</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#kuibit.timeseries.TimeSeries.crop" title="Permalink to this definition">¶</a></dt>
+<dd><p>Remove data outside the the interval <code class="docutils literal notranslate"><span class="pre">[init,</span> <span class="pre">end]</span></code>. If
+<code class="docutils literal notranslate"><span class="pre">init</span></code> or <code class="docutils literal notranslate"><span class="pre">end</span></code> are not specified or None, it does not remove
+anything from this side.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>init</strong> (<em>float</em><em> or </em><em>None</em>) – Data with <code class="docutils literal notranslate"><span class="pre">x</span> <span class="pre">&lt;=</span> <span class="pre">init</span></code> will be removed.</p></li>
+<li><p><strong>end</strong> (<em>float</em><em> or </em><em>None</em>) – Data with <code class="docutils literal notranslate"><span class="pre">x</span> <span class="pre">&gt;=</span> <span class="pre">init</span></code> will be removed.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="kuibit.timeseries.TimeSeries.cropped">
+<code class="sig-name descname"><span class="pre">cropped</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">init</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">end</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#kuibit.timeseries.TimeSeries.cropped" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a series with data removed outside the interval <code class="docutils literal notranslate"><span class="pre">[init,</span> <span class="pre">end]</span></code>. If
+<code class="docutils literal notranslate"><span class="pre">init</span></code> or <code class="docutils literal notranslate"><span class="pre">end</span></code> are not specified or None, it does not remove
+anything from this side.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>init</strong> (<em>float</em><em> or </em><em>None</em>) – Data with <code class="docutils literal notranslate"><span class="pre">x</span> <span class="pre">&lt;=</span> <span class="pre">init</span></code> will be removed.</p></li>
+<li><p><strong>end</strong> (<em>float</em><em> or </em><em>None</em>) – Data with <code class="docutils literal notranslate"><span class="pre">x</span> <span class="pre">&gt;=</span> <span class="pre">init</span></code> will be removed.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Series with enforced minimum and maximum</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="series_ref.html#kuibit.series.BaseSeries" title="kuibit.series.BaseSeries"><code class="xref py py-class docutils literal notranslate"><span class="pre">BaseSeries</span></code></a> or derived class</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="kuibit.timeseries.TimeSeries.differentiate">
+<code class="sig-name descname"><span class="pre">differentiate</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">order</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#kuibit.timeseries.TimeSeries.differentiate" title="Permalink to this definition">¶</a></dt>
+<dd><p>Differentiate with the numerical order-differentiation.</p>
+<p>The optional parameter <code class="docutils literal notranslate"><span class="pre">order</span></code> specifies the order of the derivative.</p>
+<p>The derivative is calulated as centered differencing in the interior
+and one-sided derivatives at the boundaries. Higher orders are computed
+applying the same rule recursively.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>order</strong> (<em>int</em>) – Order of derivative (e.g. 2 = second derivative).</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="kuibit.timeseries.TimeSeries.differentiated">
+<code class="sig-name descname"><span class="pre">differentiated</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">order</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#kuibit.timeseries.TimeSeries.differentiated" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a series that is the numerical order-differentiation of
+the present series.</p>
+<p>The optional parameter <code class="docutils literal notranslate"><span class="pre">order</span></code> specifies the order of the derivative.</p>
+<p>The derivative is calulated as centered differencing in the interior
+and one-sided derivatives at the boundaries. Higher orders are computed
+applying the same rule recursively.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>order</strong> (<em>int</em>) – Order of derivative (e.g. 2 = second derivative).</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>New series with derivative.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="series_ref.html#kuibit.series.BaseSeries" title="kuibit.series.BaseSeries"><code class="xref py py-class docutils literal notranslate"><span class="pre">BaseSeries</span></code></a> or derived class</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="kuibit.timeseries.TimeSeries.dt">
+<em class="property"><span class="pre">property</span> </em><code class="sig-name descname"><span class="pre">dt</span></code><a class="headerlink" href="#kuibit.timeseries.TimeSeries.dt" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the timestep if the series is regularly sampled,
+otherwise raise error.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Timestep of the series (if evenly sampled).</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="kuibit.timeseries.TimeSeries.duration">
+<em class="property"><span class="pre">property</span> </em><code class="sig-name descname"><span class="pre">duration</span></code><a class="headerlink" href="#kuibit.timeseries.TimeSeries.duration" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the length of the covered time interval.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Length of time covered by the timeseries (tmax - tmin).</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="kuibit.timeseries.TimeSeries.evaluate_with_spline">
+<code class="sig-name descname"><span class="pre">evaluate_with_spline</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ext</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#kuibit.timeseries.TimeSeries.evaluate_with_spline" title="Permalink to this definition">¶</a></dt>
+<dd><p>Evaluate the spline on the points <code class="docutils literal notranslate"><span class="pre">x</span></code>.</p>
+<p>Values outside the interval are extrapolated if <code class="docutils literal notranslate"><span class="pre">ext=0</span></code>, set to 0 if
+<code class="docutils literal notranslate"><span class="pre">ext=1</span></code>, raise a <code class="docutils literal notranslate"><span class="pre">ValueError</span></code> if <code class="docutils literal notranslate"><span class="pre">ext=2</span></code>, or if <code class="docutils literal notranslate"><span class="pre">ext=3</span></code>, return
+the boundary value.</p>
+<p>This method is meant to be used only if you want to use a different ext
+for a specific call, otherwise, just use __call__.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>x</strong> (<em>1D NumPy array of float</em>) – Array of x where to evaluate the series or single x.</p></li>
+<li><p><strong>ext</strong> (<em>int</em>) – How to deal values outside the bounaries. Values outside the
+interval are extrapolated if <code class="docutils literal notranslate"><span class="pre">ext=0</span></code>, set to 0 if
+<code class="docutils literal notranslate"><span class="pre">ext=1</span></code>, raise a ValueError if <code class="docutils literal notranslate"><span class="pre">ext=2</span></code>, or if <code class="docutils literal notranslate"><span class="pre">ext=3</span></code>,
+return the boundary value.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Values of the series evaluated on the input x.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>1D NumPy array or float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="kuibit.timeseries.TimeSeries.final_time_remove">
+<code class="sig-name descname"><span class="pre">final_time_remove</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">time_end</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/kuibit/timeseries.html#TimeSeries.final_time_remove"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kuibit.timeseries.TimeSeries.final_time_remove" title="Permalink to this definition">¶</a></dt>
+<dd><p>Remove the final <code class="docutils literal notranslate"><span class="pre">time_end</span></code> amount of time in the timeseries.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>time_end</strong> (<em>float</em>) – Amount of time to be removed from the end.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="kuibit.timeseries.TimeSeries.final_time_removed">
+<code class="sig-name descname"><span class="pre">final_time_removed</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">time_end</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/kuibit/timeseries.html#TimeSeries.final_time_removed"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kuibit.timeseries.TimeSeries.final_time_removed" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a <a class="reference internal" href="#kuibit.timeseries.TimeSeries" title="kuibit.timeseries.TimeSeries"><code class="xref py py-class docutils literal notranslate"><span class="pre">TimeSeries</span></code></a> without the final <code class="docutils literal notranslate"><span class="pre">time_end</span></code> amount of
+time.</p>
+<p>If a series goes from t=-1 to t=10 and you set time_end=2,
+the series will go from t=-1 to t=8.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>time_end</strong> (<em>float</em>) – Amount of time to be removed from the end.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>A new <a class="reference internal" href="#kuibit.timeseries.TimeSeries" title="kuibit.timeseries.TimeSeries"><code class="xref py py-class docutils literal notranslate"><span class="pre">TimeSeries</span></code></a> without the final <code class="docutils literal notranslate"><span class="pre">time_end</span></code>.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="#kuibit.timeseries.TimeSeries" title="kuibit.timeseries.TimeSeries"><code class="xref py py-class docutils literal notranslate"><span class="pre">TimeSeries</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="kuibit.timeseries.TimeSeries.fixed_frequency_resample">
+<code class="sig-name descname"><span class="pre">fixed_frequency_resample</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">frequency</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/kuibit/timeseries.html#TimeSeries.fixed_frequency_resample"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kuibit.timeseries.TimeSeries.fixed_frequency_resample" title="Permalink to this definition">¶</a></dt>
+<dd><p>Resample the timeseries to regularly spaced times with the given frequency.
+The final time will change if the frequency does not lead a integer
+number of timesteps.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>frequency</strong> (<em>float</em>) – Sampling rate.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="kuibit.timeseries.TimeSeries.fixed_frequency_resampled">
+<code class="sig-name descname"><span class="pre">fixed_frequency_resampled</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">frequency</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/kuibit/timeseries.html#TimeSeries.fixed_frequency_resampled"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kuibit.timeseries.TimeSeries.fixed_frequency_resampled" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a  <a class="reference internal" href="#kuibit.timeseries.TimeSeries" title="kuibit.timeseries.TimeSeries"><code class="xref py py-class docutils literal notranslate"><span class="pre">TimeSeries</span></code></a> with same tmin and tmax
+but resampled at a fixed frequency. The final time will change
+if the frequency does not lead a integer number of timesteps.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>frequency</strong> (<em>float</em>) – Sampling rate.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Time series resampled with given frequency.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="#kuibit.timeseries.TimeSeries" title="kuibit.timeseries.TimeSeries"><code class="xref py py-class docutils literal notranslate"><span class="pre">TimeSeries</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="kuibit.timeseries.TimeSeries.fixed_timestep_resample">
+<code class="sig-name descname"><span class="pre">fixed_timestep_resample</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">timestep</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/kuibit/timeseries.html#TimeSeries.fixed_timestep_resample"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kuibit.timeseries.TimeSeries.fixed_timestep_resample" title="Permalink to this definition">¶</a></dt>
+<dd><p>Resample the timeseries to regularly spaced times with given timestep.
+The final time will change if the timestep does not lead a integer
+number of timesteps.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>timestep</strong> (<em>float</em>) – New timestep.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="kuibit.timeseries.TimeSeries.fixed_timestep_resampled">
+<code class="sig-name descname"><span class="pre">fixed_timestep_resampled</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">timestep</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/kuibit/timeseries.html#TimeSeries.fixed_timestep_resampled"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kuibit.timeseries.TimeSeries.fixed_timestep_resampled" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a new <a class="reference internal" href="#kuibit.timeseries.TimeSeries" title="kuibit.timeseries.TimeSeries"><code class="xref py py-class docutils literal notranslate"><span class="pre">TimeSeries</span></code></a> with evenly spaced with the given
+timestep. The final time will change if the timestep does not lead a
+integer number of timesteps.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>timestep</strong> (<em>float</em>) – New timestep.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Time series resampled with given timestep.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="#kuibit.timeseries.TimeSeries" title="kuibit.timeseries.TimeSeries"><code class="xref py py-class docutils literal notranslate"><span class="pre">TimeSeries</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="kuibit.timeseries.TimeSeries.hamming_window">
+<code class="sig-name descname"><span class="pre">hamming_window</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/kuibit/timeseries.html#TimeSeries.hamming_window"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kuibit.timeseries.TimeSeries.hamming_window" title="Permalink to this definition">¶</a></dt>
+<dd><p>Apply Hamming window.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="kuibit.timeseries.TimeSeries.hamming_windowed">
+<code class="sig-name descname"><span class="pre">hamming_windowed</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/kuibit/timeseries.html#TimeSeries.hamming_windowed"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kuibit.timeseries.TimeSeries.hamming_windowed" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a timeseries with Hamming window applied.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>New windowed <a class="reference internal" href="#kuibit.timeseries.TimeSeries" title="kuibit.timeseries.TimeSeries"><code class="xref py py-class docutils literal notranslate"><span class="pre">TimeSeries</span></code></a>.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><a class="reference internal" href="#kuibit.timeseries.TimeSeries" title="kuibit.timeseries.TimeSeries"><code class="xref py py-class docutils literal notranslate"><span class="pre">TimeSeries</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="kuibit.timeseries.TimeSeries.index">
+<em class="property"><span class="pre">property</span> </em><code class="sig-name descname"><span class="pre">index</span></code><a class="headerlink" href="#kuibit.timeseries.TimeSeries.index" title="Permalink to this definition">¶</a></dt>
+<dd><p>Fake pandas properties, to make Series objects plottable by
+matplotlib.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="kuibit.timeseries.TimeSeries.initial_time_remove">
+<code class="sig-name descname"><span class="pre">initial_time_remove</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">time_init</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/kuibit/timeseries.html#TimeSeries.initial_time_remove"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kuibit.timeseries.TimeSeries.initial_time_remove" title="Permalink to this definition">¶</a></dt>
+<dd><p>Remove the first <code class="docutils literal notranslate"><span class="pre">time_init</span></code> amount of time in the timeseries.</p>
+<p>When <code class="docutils literal notranslate"><span class="pre">tmin</span> <span class="pre">=</span> <span class="pre">0</span></code>, this is the same as cropping, otherwise the
+difference is that in one case the time interval is specified, whereas
+in the other (cropping) the new <code class="docutils literal notranslate"><span class="pre">tmin</span></code> is specified.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>time_init</strong> (<em>float</em>) – Amount of time to be removed from the beginning.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="kuibit.timeseries.TimeSeries.initial_time_removed">
+<code class="sig-name descname"><span class="pre">initial_time_removed</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">time_init</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/kuibit/timeseries.html#TimeSeries.initial_time_removed"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kuibit.timeseries.TimeSeries.initial_time_removed" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a <a class="reference internal" href="#kuibit.timeseries.TimeSeries" title="kuibit.timeseries.TimeSeries"><code class="xref py py-class docutils literal notranslate"><span class="pre">TimeSeries</span></code></a> without the initial <code class="docutils literal notranslate"><span class="pre">time_init</span></code> amount of
+time.</p>
+<p>When <code class="docutils literal notranslate"><span class="pre">tmin</span> <span class="pre">=</span> <span class="pre">0</span></code>, this is the same as cropping, otherwise the
+difference is that in one case the time interval is specified, whereas
+in the other (cropping) the new <code class="docutils literal notranslate"><span class="pre">tmin</span></code> is specified.</p>
+<p>If a series goes from t=-1 to t=10 and you set time_init=2,
+the series will go from t=1 to t=10.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>time_init</strong> (<em>float</em>) – Amount of time to be removed from the beginning.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>A new <a class="reference internal" href="#kuibit.timeseries.TimeSeries" title="kuibit.timeseries.TimeSeries"><code class="xref py py-class docutils literal notranslate"><span class="pre">TimeSeries</span></code></a> without the initial <code class="docutils literal notranslate"><span class="pre">time_init</span></code>.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="#kuibit.timeseries.TimeSeries" title="kuibit.timeseries.TimeSeries"><code class="xref py py-class docutils literal notranslate"><span class="pre">TimeSeries</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="kuibit.timeseries.TimeSeries.integrate">
+<code class="sig-name descname"><span class="pre">integrate</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dx</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#kuibit.timeseries.TimeSeries.integrate" title="Permalink to this definition">¶</a></dt>
+<dd><p>Integrate series with method of the rectangles.</p>
+<p>The spacing <code class="docutils literal notranslate"><span class="pre">dx</span></code> can be optionally provided. If provided, it will be
+used (increasing performance), otherwise it will be computed internally.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="kuibit.timeseries.TimeSeries.integrated">
+<code class="sig-name descname"><span class="pre">integrated</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dx</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#kuibit.timeseries.TimeSeries.integrated" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a series that is the integral computed with method of
+the rectangles.</p>
+<p>The spacing <code class="docutils literal notranslate"><span class="pre">dx</span></code> can be optionally provided. If provided, it will be
+used (increasing performance), otherwise it will be computed internally.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>dx</strong> (<em>float</em><em> or </em><em>None</em>) – Delta x in the independent variable. If None it will be
+computed internally.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>New series with the cumulative integral.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="series_ref.html#kuibit.series.BaseSeries" title="kuibit.series.BaseSeries"><code class="xref py py-class docutils literal notranslate"><span class="pre">BaseSeries</span></code></a> or derived class</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="kuibit.timeseries.TimeSeries.is_complex">
+<code class="sig-name descname"><span class="pre">is_complex</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#kuibit.timeseries.TimeSeries.is_complex" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return whether the data is complex.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>True if the data is complex, false if it is not.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="kuibit.timeseries.TimeSeries.is_masked">
+<code class="sig-name descname"><span class="pre">is_masked</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#kuibit.timeseries.TimeSeries.is_masked" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return whether the x or y are masked.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>True if the x or y are masked, false if it is not.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="kuibit.timeseries.TimeSeries.is_regularly_sampled">
+<code class="sig-name descname"><span class="pre">is_regularly_sampled</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#kuibit.timeseries.TimeSeries.is_regularly_sampled" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return whether the series is regularly sampled.</p>
+<p>If the series is only one point, an error is raised.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Is the series regularly sampled?</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="kuibit.timeseries.TimeSeries.mask">
+<em class="property"><span class="pre">property</span> </em><code class="sig-name descname"><span class="pre">mask</span></code><a class="headerlink" href="#kuibit.timeseries.TimeSeries.mask" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return where the data is valid (according to the mask).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Array of True/False of the same length of the data.
+False where the data is valid, true where is not.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>1D array of bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="kuibit.timeseries.TimeSeries.mask_applied">
+<code class="sig-name descname"><span class="pre">mask_applied</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mask</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#kuibit.timeseries.TimeSeries.mask_applied" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a new series with given mask applied to the data.</p>
+<p>The previous mask (if present) will be ignored.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>mask</strong> (<em>1D NumPy array</em>) – Array of booleans that identify where the data is invalid.
+This can be obtained with the method <a class="reference internal" href="#kuibit.timeseries.TimeSeries.mask" title="kuibit.timeseries.TimeSeries.mask"><code class="xref py py-meth docutils literal notranslate"><span class="pre">mask()</span></code></a>.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>New series with mask applied.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="series_ref.html#kuibit.series.BaseSeries" title="kuibit.series.BaseSeries"><code class="xref py py-class docutils literal notranslate"><span class="pre">BaseSeries</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="kuibit.timeseries.TimeSeries.mask_apply">
+<code class="sig-name descname"><span class="pre">mask_apply</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mask</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#kuibit.timeseries.TimeSeries.mask_apply" title="Permalink to this definition">¶</a></dt>
+<dd><p>Apply given mask.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>mask</strong> (<em>1D NumPy array</em>) – Array of booleans that identify where the data is invalid.
+This can be obtained with the method <a class="reference internal" href="#kuibit.timeseries.TimeSeries.mask" title="kuibit.timeseries.TimeSeries.mask"><code class="xref py py-meth docutils literal notranslate"><span class="pre">mask()</span></code></a>.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="kuibit.timeseries.TimeSeries.mask_equal">
+<code class="sig-name descname"><span class="pre">mask_equal</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#kuibit.timeseries.TimeSeries.mask_equal" title="Permalink to this definition">¶</a></dt>
+<dd><p>Mask where data is equal to given value.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="kuibit.timeseries.TimeSeries.mask_greater">
+<code class="sig-name descname"><span class="pre">mask_greater</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#kuibit.timeseries.TimeSeries.mask_greater" title="Permalink to this definition">¶</a></dt>
+<dd><p>Mask where data is greater to given value.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="kuibit.timeseries.TimeSeries.mask_greater_equal">
+<code class="sig-name descname"><span class="pre">mask_greater_equal</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#kuibit.timeseries.TimeSeries.mask_greater_equal" title="Permalink to this definition">¶</a></dt>
+<dd><p>Mask where data is greater or equal to given value.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="kuibit.timeseries.TimeSeries.mask_inside">
+<code class="sig-name descname"><span class="pre">mask_inside</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value2</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#kuibit.timeseries.TimeSeries.mask_inside" title="Permalink to this definition">¶</a></dt>
+<dd><p>Mask where data is inside the given values.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="kuibit.timeseries.TimeSeries.mask_invalid">
+<code class="sig-name descname"><span class="pre">mask_invalid</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#kuibit.timeseries.TimeSeries.mask_invalid" title="Permalink to this definition">¶</a></dt>
+<dd><p>Mask where data is invalid (NaNs of infs).</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="kuibit.timeseries.TimeSeries.mask_less">
+<code class="sig-name descname"><span class="pre">mask_less</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#kuibit.timeseries.TimeSeries.mask_less" title="Permalink to this definition">¶</a></dt>
+<dd><p>Mask where data is less to given value.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="kuibit.timeseries.TimeSeries.mask_less_equal">
+<code class="sig-name descname"><span class="pre">mask_less_equal</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#kuibit.timeseries.TimeSeries.mask_less_equal" title="Permalink to this definition">¶</a></dt>
+<dd><p>Mask where data is less or equal to given value.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="kuibit.timeseries.TimeSeries.mask_not_equal">
+<code class="sig-name descname"><span class="pre">mask_not_equal</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#kuibit.timeseries.TimeSeries.mask_not_equal" title="Permalink to this definition">¶</a></dt>
+<dd><p>Mask where data is not equal to given value.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="kuibit.timeseries.TimeSeries.mask_outside">
+<code class="sig-name descname"><span class="pre">mask_outside</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value2</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#kuibit.timeseries.TimeSeries.mask_outside" title="Permalink to this definition">¶</a></dt>
+<dd><p>Mask where data is outside the given values.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="kuibit.timeseries.TimeSeries.mask_remove">
+<code class="sig-name descname"><span class="pre">mask_remove</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#kuibit.timeseries.TimeSeries.mask_remove" title="Permalink to this definition">¶</a></dt>
+<dd><p>Remove masked values.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="kuibit.timeseries.TimeSeries.mask_removed">
+<code class="sig-name descname"><span class="pre">mask_removed</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#kuibit.timeseries.TimeSeries.mask_removed" title="Permalink to this definition">¶</a></dt>
+<dd><p>Remove masked value.</p>
+<p>Return a new series with valid values only.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>A new series with only valid values.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><a class="reference internal" href="series_ref.html#kuibit.series.BaseSeries" title="kuibit.series.BaseSeries"><code class="xref py py-class docutils literal notranslate"><span class="pre">BaseSeries</span></code></a> or derived class</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="kuibit.timeseries.TimeSeries.masked_equal">
+<code class="sig-name descname"><span class="pre">masked_equal</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#kuibit.timeseries.TimeSeries.masked_equal" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a new objected masked where data is equal to given value.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="kuibit.timeseries.TimeSeries.masked_greater">
+<code class="sig-name descname"><span class="pre">masked_greater</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#kuibit.timeseries.TimeSeries.masked_greater" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a new objected masked where data is greater to given value.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="kuibit.timeseries.TimeSeries.masked_greater_equal">
+<code class="sig-name descname"><span class="pre">masked_greater_equal</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#kuibit.timeseries.TimeSeries.masked_greater_equal" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a new objected masked where data is greater or equal to given value.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="kuibit.timeseries.TimeSeries.masked_inside">
+<code class="sig-name descname"><span class="pre">masked_inside</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value2</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#kuibit.timeseries.TimeSeries.masked_inside" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a new objected masked where data is inside the given values.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="kuibit.timeseries.TimeSeries.masked_invalid">
+<code class="sig-name descname"><span class="pre">masked_invalid</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#kuibit.timeseries.TimeSeries.masked_invalid" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a new objected masked where data is invalid (NaNs or infs).</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="kuibit.timeseries.TimeSeries.masked_less">
+<code class="sig-name descname"><span class="pre">masked_less</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#kuibit.timeseries.TimeSeries.masked_less" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a new objected masked where data is less to given value.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="kuibit.timeseries.TimeSeries.masked_less_equal">
+<code class="sig-name descname"><span class="pre">masked_less_equal</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#kuibit.timeseries.TimeSeries.masked_less_equal" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a new objected masked where data is less or equal to given value.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="kuibit.timeseries.TimeSeries.masked_not_equal">
+<code class="sig-name descname"><span class="pre">masked_not_equal</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#kuibit.timeseries.TimeSeries.masked_not_equal" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a new objected masked where data is not equal to given value.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="kuibit.timeseries.TimeSeries.masked_outside">
+<code class="sig-name descname"><span class="pre">masked_outside</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value2</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#kuibit.timeseries.TimeSeries.masked_outside" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a new objected masked where data is outside the given values.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="kuibit.timeseries.TimeSeries.mean_remove">
+<code class="sig-name descname"><span class="pre">mean_remove</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/kuibit/timeseries.html#TimeSeries.mean_remove"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kuibit.timeseries.TimeSeries.mean_remove" title="Permalink to this definition">¶</a></dt>
+<dd><p>Remove the mean value from the data.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="kuibit.timeseries.TimeSeries.mean_removed">
+<code class="sig-name descname"><span class="pre">mean_removed</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/kuibit/timeseries.html#TimeSeries.mean_removed"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kuibit.timeseries.TimeSeries.mean_removed" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a <a class="reference internal" href="#kuibit.timeseries.TimeSeries" title="kuibit.timeseries.TimeSeries"><code class="xref py py-class docutils literal notranslate"><span class="pre">TimeSeries</span></code></a> with mean removed, so that its new
+total average is zero.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>A new <a class="reference internal" href="#kuibit.timeseries.TimeSeries" title="kuibit.timeseries.TimeSeries"><code class="xref py py-class docutils literal notranslate"><span class="pre">TimeSeries</span></code></a> with zero mean.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><a class="reference internal" href="#kuibit.timeseries.TimeSeries" title="kuibit.timeseries.TimeSeries"><code class="xref py py-class docutils literal notranslate"><span class="pre">TimeSeries</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="kuibit.timeseries.TimeSeries.nans_remove">
+<code class="sig-name descname"><span class="pre">nans_remove</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#kuibit.timeseries.TimeSeries.nans_remove" title="Permalink to this definition">¶</a></dt>
+<dd><p>Filter out nans/infinite values.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="kuibit.timeseries.TimeSeries.nans_removed">
+<code class="sig-name descname"><span class="pre">nans_removed</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#kuibit.timeseries.TimeSeries.nans_removed" title="Permalink to this definition">¶</a></dt>
+<dd><p>Filter out nans/infinite values.
+Return a new series with finite values only.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>A new series with only finite values.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><a class="reference internal" href="series_ref.html#kuibit.series.BaseSeries" title="kuibit.series.BaseSeries"><code class="xref py py-class docutils literal notranslate"><span class="pre">BaseSeries</span></code></a> or derived class</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="kuibit.timeseries.TimeSeries.phase_angular_velocity">
+<code class="sig-name descname"><span class="pre">phase_angular_velocity</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">use_splines</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tsmooth</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">order</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">3</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/kuibit/timeseries.html#TimeSeries.phase_angular_velocity"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kuibit.timeseries.TimeSeries.phase_angular_velocity" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compute the phase angular velocity, i.e. the time derivative of the
+complex phase.</p>
+<p>Optionally smooth the with a savgol filter with smoothing length
+tsmooth and order order. If you do so, the timeseries is resampled to
+regular timesteps.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>use_splines</strong> (<em>bool</em>) – Wheter to use splines of finite differencing for
+the derivative.</p></li>
+<li><p><strong>tsmooth</strong> (<em>float</em>) – Time over which smoothing is applied.</p></li>
+<li><p><strong>order</strong> (<em>int</em>) – Order of the for the savgol smoothing.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Time derivative of the complex phase.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="#kuibit.timeseries.TimeSeries" title="kuibit.timeseries.TimeSeries"><code class="xref py py-class docutils literal notranslate"><span class="pre">TimeSeries</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="kuibit.timeseries.TimeSeries.phase_frequency">
+<code class="sig-name descname"><span class="pre">phase_frequency</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">use_splines</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tsmooth</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">order</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">3</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/kuibit/timeseries.html#TimeSeries.phase_frequency"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kuibit.timeseries.TimeSeries.phase_frequency" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compute the phase frequency, i.e. the time derivative
+of the complex phase divided by 2 pi.</p>
+<p>Optionally smooth the with a savgol filter with smoothing length
+tsmooth and order order. If you do so, the timeseries is resampled
+to regular timesteps.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>use_splines</strong> (<em>bool</em>) – Wheter to use splines of finite differencing for
+the derivative.</p></li>
+<li><p><strong>tsmooth</strong> (<em>float</em>) – Time over which smoothing is applied.</p></li>
+<li><p><strong>order</strong> (<em>int</em>) – Order of the for the savgol smoothing.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Time derivative of the complex phase divided by 2 pi</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="#kuibit.timeseries.TimeSeries" title="kuibit.timeseries.TimeSeries"><code class="xref py py-class docutils literal notranslate"><span class="pre">TimeSeries</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="kuibit.timeseries.TimeSeries.phase_shift">
+<code class="sig-name descname"><span class="pre">phase_shift</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pshift</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/kuibit/timeseries.html#TimeSeries.phase_shift"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kuibit.timeseries.TimeSeries.phase_shift" title="Permalink to this definition">¶</a></dt>
+<dd><p>Shift the complex phase timeseries by <code class="docutils literal notranslate"><span class="pre">pshift</span></code>. If the signal is real,
+it is turned complex with phase of <code class="docutils literal notranslate"><span class="pre">pshift</span></code>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>pshift</strong> (<em>float</em>) – Amount of phase to shift.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="kuibit.timeseries.TimeSeries.phase_shifted">
+<code class="sig-name descname"><span class="pre">phase_shifted</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pshift</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/kuibit/timeseries.html#TimeSeries.phase_shifted"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kuibit.timeseries.TimeSeries.phase_shifted" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a new <a class="reference internal" href="#kuibit.timeseries.TimeSeries" title="kuibit.timeseries.TimeSeries"><code class="xref py py-class docutils literal notranslate"><span class="pre">TimeSeries</span></code></a> with complex phase shifted by <code class="docutils literal notranslate"><span class="pre">pshift</span></code>.
+If the signal is real, it is turned complex with phase of <code class="docutils literal notranslate"><span class="pre">pshift</span></code>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>pshift</strong> (<em>float</em>) – Amount of phase to shift.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>A new <a class="reference internal" href="#kuibit.timeseries.TimeSeries" title="kuibit.timeseries.TimeSeries"><code class="xref py py-class docutils literal notranslate"><span class="pre">TimeSeries</span></code></a> with phase shifted.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="#kuibit.timeseries.TimeSeries" title="kuibit.timeseries.TimeSeries"><code class="xref py py-class docutils literal notranslate"><span class="pre">TimeSeries</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="kuibit.timeseries.TimeSeries.redshift">
+<code class="sig-name descname"><span class="pre">redshift</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">z</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/kuibit/timeseries.html#TimeSeries.redshift"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kuibit.timeseries.TimeSeries.redshift" title="Permalink to this definition">¶</a></dt>
+<dd><p>Apply redshift to the data by rescaling the time so that the frequencies
+are redshifted by <code class="docutils literal notranslate"><span class="pre">1</span> <span class="pre">+</span> <span class="pre">z</span></code>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>z</strong> (<em>float</em>) – Redshift factor.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="kuibit.timeseries.TimeSeries.redshifted">
+<code class="sig-name descname"><span class="pre">redshifted</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">z</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/kuibit/timeseries.html#TimeSeries.redshifted"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kuibit.timeseries.TimeSeries.redshifted" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a new <a class="reference internal" href="#kuibit.timeseries.TimeSeries" title="kuibit.timeseries.TimeSeries"><code class="xref py py-class docutils literal notranslate"><span class="pre">TimeSeries</span></code></a> with time rescaled so that frequencies
+are redshifted by <code class="docutils literal notranslate"><span class="pre">1</span> <span class="pre">+</span> <span class="pre">z</span></code>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>z</strong> (<em>float</em>) – Redshift factor.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>A new redshifted <a class="reference internal" href="#kuibit.timeseries.TimeSeries" title="kuibit.timeseries.TimeSeries"><code class="xref py py-class docutils literal notranslate"><span class="pre">TimeSeries</span></code></a>.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="#kuibit.timeseries.TimeSeries" title="kuibit.timeseries.TimeSeries"><code class="xref py py-class docutils literal notranslate"><span class="pre">TimeSeries</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="kuibit.timeseries.TimeSeries.regular_resample">
+<code class="sig-name descname"><span class="pre">regular_resample</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/kuibit/timeseries.html#TimeSeries.regular_resample"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kuibit.timeseries.TimeSeries.regular_resample" title="Permalink to this definition">¶</a></dt>
+<dd><p>Resample the timeseries to regularly spaced times,
+with the same number of points.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="kuibit.timeseries.TimeSeries.regular_resampled">
+<code class="sig-name descname"><span class="pre">regular_resampled</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/kuibit/timeseries.html#TimeSeries.regular_resampled"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kuibit.timeseries.TimeSeries.regular_resampled" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a new timeseries resampled to regularly spaced times,
+with the same number of points.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Regularly resampled time series.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><a class="reference internal" href="#kuibit.timeseries.TimeSeries" title="kuibit.timeseries.TimeSeries"><code class="xref py py-class docutils literal notranslate"><span class="pre">TimeSeries</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="kuibit.timeseries.TimeSeries.resample">
+<code class="sig-name descname"><span class="pre">resample</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">new_x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ext</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">piecewise_constant</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#kuibit.timeseries.TimeSeries.resample" title="Permalink to this definition">¶</a></dt>
+<dd><p>Resample the series to new independent variable new_x.</p>
+<p>If you want to resample without using the spline, and you want a nearest
+neighbor resampling, pass the keyword <code class="docutils literal notranslate"><span class="pre">piecewise_constant=True</span></code>.
+This may be a good choice for data with large discontinuities, where the
+splines are ineffective.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>new_x</strong> (<em>1D NumPy array</em><em> or </em><em>list of float</em>) – New independent variable.</p></li>
+<li><p><strong>ext</strong> (<em>0 for extrapolation</em><em>, </em><em>1 for returning zero</em><em>, </em><em>2 for ValueError</em><em>,
+</em><em>3 for extending the boundary</em>) – How to handle points outside the interval.</p></li>
+<li><p><strong>piecewise_constant</strong> (<em>bool</em>) – Do not use splines, use the nearest neighbors.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="kuibit.timeseries.TimeSeries.resampled">
+<code class="sig-name descname"><span class="pre">resampled</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">new_x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ext</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">piecewise_constant</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#kuibit.timeseries.TimeSeries.resampled" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a new series resampled from this to new_x.</p>
+<p>You can specify the details of the spline with the method make_spline.</p>
+<p>If you want to resample without using the spline, and you want a nearest
+neighbor resampling, pass the keyword <code class="docutils literal notranslate"><span class="pre">piecewise_constant=True</span></code>.
+This may be a good choice for data with large discontinuities, where the
+splines are ineffective.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>new_x</strong> (<em>1D NumPy array</em><em> or </em><em>list of float</em>) – New independent variable.</p></li>
+<li><p><strong>ext</strong> (0 for extrapolation, 1 for returning zero, 2 for <code class="docutils literal notranslate"><span class="pre">ValueError</span></code>,
+3 for extending the boundary) – How to handle points outside the data interval.</p></li>
+<li><p><strong>piecewise_constant</strong> (<em>bool</em>) – Do not use splines, use the nearest neighbors.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Resampled series.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="series_ref.html#kuibit.series.BaseSeries" title="kuibit.series.BaseSeries"><code class="xref py py-class docutils literal notranslate"><span class="pre">BaseSeries</span></code></a> or derived class</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="kuibit.timeseries.TimeSeries.save">
+<code class="sig-name descname"><span class="pre">save</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file_name</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#kuibit.timeseries.TimeSeries.save" title="Permalink to this definition">¶</a></dt>
+<dd><p>Saves into simple ASCII format with 2 columns <code class="docutils literal notranslate"><span class="pre">(x,</span> <span class="pre">y)</span></code>
+for real valued data and 3 columns <code class="docutils literal notranslate"><span class="pre">(x,</span> <span class="pre">Re(y),</span> <span class="pre">Im(y))</span></code>
+for complex valued data.</p>
+<p>Unknown arguments are passed to <code class="docutils literal notranslate"><span class="pre">NumPy.savetxt</span></code>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>file_name</strong> (<em>str</em>) – Path (with extension) of the output file.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="kuibit.timeseries.TimeSeries.savgol_smooth">
+<code class="sig-name descname"><span class="pre">savgol_smooth</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">window_size</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">order</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">3</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#kuibit.timeseries.TimeSeries.savgol_smooth" title="Permalink to this definition">¶</a></dt>
+<dd><p>Smooth the series with a Savitzky-Golay filter with window of
+size <code class="docutils literal notranslate"><span class="pre">window_size</span></code> and order <code class="docutils literal notranslate"><span class="pre">order</span></code>.</p>
+<p>This is just like a regular “Moving average” filter, but instead of
+just calculating the average, a polynomial (usually 2nd or 4th order)
+fit is made for every point, and only the “middle” point is chosen.
+Since 2nd (or 4th) order information is concerned at every point, the
+bias introduced in “moving average” approach at local maxima or minima,
+is circumvented.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>window_size</strong> (<em>int</em>) – Number of points of the smoothing window (needs to
+be odd).</p></li>
+<li><p><strong>order</strong> (<em>int</em>) – Order of the filter.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="kuibit.timeseries.TimeSeries.savgol_smooth_time">
+<code class="sig-name descname"><span class="pre">savgol_smooth_time</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tsmooth</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">order</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">3</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/kuibit/timeseries.html#TimeSeries.savgol_smooth_time"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kuibit.timeseries.TimeSeries.savgol_smooth_time" title="Permalink to this definition">¶</a></dt>
+<dd><p>Resample the timeseries with uniform timesteps, smooth it with
+<code class="docutils literal notranslate"><span class="pre">savgol_smooth</span></code> with a window that is <code class="docutils literal notranslate"><span class="pre">tsmooth</span></code> in time (as opposed to a
+number of points).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>tsmooth</strong> (<em>float</em>) – Time interval over which to smooth.</p></li>
+<li><p><strong>order</strong> (<em>int</em>) – Order of the filter.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="kuibit.timeseries.TimeSeries.savgol_smoothed">
+<code class="sig-name descname"><span class="pre">savgol_smoothed</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">window_size</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">order</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">3</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#kuibit.timeseries.TimeSeries.savgol_smoothed" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a smoothed series with a Savitzky-Golay filter with
+window of size <code class="docutils literal notranslate"><span class="pre">window_size</span></code> and order <code class="docutils literal notranslate"><span class="pre">order</span></code>.</p>
+<p>This is just like a regular “Moving average” filter, but instead of
+just calculating the average, a polynomial (usually 2nd or 4th order)
+fit is made for every point, and only the “middle” point is chosen.
+Since 2nd (or 4th) order information is concerned at every point, the
+bias introduced in “moving average” approach at local maxima or minima,
+is circumvented.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>window_size</strong> (<em>int</em>) – Number of points of the smoothing window (needs to
+be odd).</p></li>
+<li><p><strong>order</strong> (<em>int</em>) – Order of the filter.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>New smoothed series.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="series_ref.html#kuibit.series.BaseSeries" title="kuibit.series.BaseSeries"><code class="xref py py-class docutils literal notranslate"><span class="pre">BaseSeries</span></code></a> or derived class</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="kuibit.timeseries.TimeSeries.savgol_smoothed_time">
+<code class="sig-name descname"><span class="pre">savgol_smoothed_time</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tsmooth</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">order</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">3</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/kuibit/timeseries.html#TimeSeries.savgol_smoothed_time"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kuibit.timeseries.TimeSeries.savgol_smoothed_time" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a resampled timeseries with uniform timesteps, smoothed with
+<code class="docutils literal notranslate"><span class="pre">savgol_smooth</span></code> with a window that is <code class="docutils literal notranslate"><span class="pre">tsmooth</span></code> in time (as opposed
+to a number of points).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>tsmooth</strong> (<em>float</em>) – Time interval over which to smooth.</p></li>
+<li><p><strong>order</strong> (<em>int</em>) – Order of the filter.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>New smoothed and resampled <a class="reference internal" href="#kuibit.timeseries.TimeSeries" title="kuibit.timeseries.TimeSeries"><code class="xref py py-class docutils literal notranslate"><span class="pre">TimeSeries</span></code></a>.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="#kuibit.timeseries.TimeSeries" title="kuibit.timeseries.TimeSeries"><code class="xref py py-class docutils literal notranslate"><span class="pre">TimeSeries</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="kuibit.timeseries.TimeSeries.spline_differentiate">
+<code class="sig-name descname"><span class="pre">spline_differentiate</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">order</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#kuibit.timeseries.TimeSeries.spline_differentiate" title="Permalink to this definition">¶</a></dt>
+<dd><p>Differentiate the series using the spline representation.</p>
+<p>The optional parameter <code class="docutils literal notranslate"><span class="pre">order</span></code> specifies the order of the derivative.</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>The values at the boundary are typically not accurate.</p>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>order</strong> (<em>int</em>) – Order of derivative (e.g. 2 = second derivative).</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="kuibit.timeseries.TimeSeries.spline_differentiated">
+<code class="sig-name descname"><span class="pre">spline_differentiated</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">order</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#kuibit.timeseries.TimeSeries.spline_differentiated" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a series that is the derivative of the current one using
+the spline representation.</p>
+<p>The optional parameter <code class="docutils literal notranslate"><span class="pre">order</span></code> specifies the order of the derivative.</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>The values at the boundary are typically not accurate.</p>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>order</strong> (<em>int</em>) – Order of derivative (e.g. 2 = second derivative).</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>New series with derivative</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="series_ref.html#kuibit.series.BaseSeries" title="kuibit.series.BaseSeries"><code class="xref py py-class docutils literal notranslate"><span class="pre">BaseSeries</span></code></a> or derived class</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="kuibit.timeseries.TimeSeries.t">
+<em class="property"><span class="pre">property</span> </em><code class="sig-name descname"><span class="pre">t</span></code><a class="headerlink" href="#kuibit.timeseries.TimeSeries.t" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the time.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Times.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>1d NumPy array.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="kuibit.timeseries.TimeSeries.time_at_maximum">
+<code class="sig-name descname"><span class="pre">time_at_maximum</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">absolute</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/kuibit/timeseries.html#TimeSeries.time_at_maximum"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kuibit.timeseries.TimeSeries.time_at_maximum" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the time at which the timeseries is maximum.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>absolute</strong> (<em>bool</em>) – Whether to take the absolute value of the
+data.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Time at maximum. If <code class="docutils literal notranslate"><span class="pre">absolute</span></code> is True, then
+time at absolute maximum.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="kuibit.timeseries.TimeSeries.time_at_minimum">
+<code class="sig-name descname"><span class="pre">time_at_minimum</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">absolute</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/kuibit/timeseries.html#TimeSeries.time_at_minimum"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kuibit.timeseries.TimeSeries.time_at_minimum" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the time at which the timeseries is minimum.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>absolute</strong> (<em>bool</em>) – Whether to take the absolute value of the
+data.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Time at minimum. If <code class="docutils literal notranslate"><span class="pre">absolute</span></code> is True, then
+time at absolute minimum.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="kuibit.timeseries.TimeSeries.time_length">
+<em class="property"><span class="pre">property</span> </em><code class="sig-name descname"><span class="pre">time_length</span></code><a class="headerlink" href="#kuibit.timeseries.TimeSeries.time_length" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the length of the covered time interval.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Length of time covered by the timeseries (tmax - tmin).</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="kuibit.timeseries.TimeSeries.time_shift">
+<code class="sig-name descname"><span class="pre">time_shift</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tshift</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/kuibit/timeseries.html#TimeSeries.time_shift"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kuibit.timeseries.TimeSeries.time_shift" title="Permalink to this definition">¶</a></dt>
+<dd><p>Shift the timeseries by <code class="docutils literal notranslate"><span class="pre">tshift</span></code> so that what was t = 0 will be <code class="docutils literal notranslate"><span class="pre">tshift</span></code>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>N</strong> (<em>float</em>) – Amount of time to shift.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="kuibit.timeseries.TimeSeries.time_shifted">
+<code class="sig-name descname"><span class="pre">time_shifted</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tshift</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/kuibit/timeseries.html#TimeSeries.time_shifted"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kuibit.timeseries.TimeSeries.time_shifted" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a new timeseries with time shifted by <code class="docutils literal notranslate"><span class="pre">tshift</span></code> so that
+what was t = 0 will be <code class="docutils literal notranslate"><span class="pre">tshift</span></code>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>tshift</strong> (<em>float</em>) – Amount of time to shift.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>A new <a class="reference internal" href="#kuibit.timeseries.TimeSeries" title="kuibit.timeseries.TimeSeries"><code class="xref py py-class docutils literal notranslate"><span class="pre">TimeSeries</span></code></a> with time shifted.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="#kuibit.timeseries.TimeSeries" title="kuibit.timeseries.TimeSeries"><code class="xref py py-class docutils literal notranslate"><span class="pre">TimeSeries</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="kuibit.timeseries.TimeSeries.time_unit_change">
+<code class="sig-name descname"><span class="pre">time_unit_change</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">unit</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">inverse</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/kuibit/timeseries.html#TimeSeries.time_unit_change"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kuibit.timeseries.TimeSeries.time_unit_change" title="Permalink to this definition">¶</a></dt>
+<dd><p>Rescale time units by unit.</p>
+<p>This amounts to sending t to <code class="docutils literal notranslate"><span class="pre">t</span> <span class="pre">/</span> <span class="pre">unit</span></code>. For example, if initially the
+units where seconds, with unit=1e-3 the new units will be milliseconds.</p>
+<p>When inverse is True, the opposite is done and t is sent to <code class="docutils literal notranslate"><span class="pre">t</span> <span class="pre">*</span>
+<span class="pre">unit</span></code>. This is useful to convert geometrized units to physical units
+with <a class="reference internal" href="unitconv_ref.html#module-kuibit.unitconv" title="kuibit.unitconv"><code class="xref py py-mod docutils literal notranslate"><span class="pre">unitconv</span></code></a>. For example,</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Gravitational waves in geometrized units</span>
+<span class="n">gw_cu</span> <span class="o">=</span> <span class="n">TimeSeries</span><span class="p">(</span><span class="o">...</span><span class="p">)</span>
+<span class="c1"># Gravitational waves in seconds, assuming a mass of 1 M_sun</span>
+<span class="n">CU</span> <span class="o">=</span> <span class="n">uc</span><span class="o">.</span><span class="n">geom_umass_msun</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+<span class="n">gw_s</span> <span class="o">=</span> <span class="n">gw_cu</span><span class="o">.</span><span class="n">time_unit_changed</span><span class="p">(</span><span class="n">CU</span><span class="o">.</span><span class="n">time</span><span class="p">,</span> <span class="n">inverse</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</pre></div>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>unit</strong> (<em>float</em>) – New time unit.</p></li>
+<li><p><strong>inverse</strong> (<em>bool</em>) – If True, time = 1 -&gt; time = unit, otherwise
+time = unit -&gt; 1.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="kuibit.timeseries.TimeSeries.time_unit_changed">
+<code class="sig-name descname"><span class="pre">time_unit_changed</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">unit</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">inverse</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/kuibit/timeseries.html#TimeSeries.time_unit_changed"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kuibit.timeseries.TimeSeries.time_unit_changed" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a new <a class="reference internal" href="#kuibit.timeseries.TimeSeries" title="kuibit.timeseries.TimeSeries"><code class="xref py py-class docutils literal notranslate"><span class="pre">TimeSeries</span></code></a> with time scaled by <code class="docutils literal notranslate"><span class="pre">unit</span></code>.</p>
+<p>This amounts to sending t to <code class="docutils literal notranslate"><span class="pre">t</span> <span class="pre">/</span> <span class="pre">unit</span></code>. For example, if initially the
+units where seconds, with unit=1e-3 the new units will be milliseconds.</p>
+<p>When inverse is True, the opposite is done and t is sent to <code class="docutils literal notranslate"><span class="pre">t</span> <span class="pre">*</span>
+<span class="pre">unit</span></code>. This is useful to convert geometrized units to physical units
+with <a class="reference internal" href="unitconv_ref.html#module-kuibit.unitconv" title="kuibit.unitconv"><code class="xref py py-mod docutils literal notranslate"><span class="pre">unitconv</span></code></a>. For example,</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Gravitational waves in geometrized units</span>
+<span class="n">gw_cu</span> <span class="o">=</span> <span class="n">TimeSeries</span><span class="p">(</span><span class="o">...</span><span class="p">)</span>
+<span class="c1"># Gravitational waves in seconds, assuming a mass of 1 M_sun</span>
+<span class="n">CU</span> <span class="o">=</span> <span class="n">uc</span><span class="o">.</span><span class="n">geom_umass_msun</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+<span class="n">gw_s</span> <span class="o">=</span> <span class="n">gw_cu</span><span class="o">.</span><span class="n">time_unit_changed</span><span class="p">(</span><span class="n">CU</span><span class="o">.</span><span class="n">time</span><span class="p">,</span> <span class="n">inverse</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</pre></div>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>unit</strong> (<em>float</em>) – New time unit.</p></li>
+<li><p><strong>inverse</strong> (<em>bool</em>) – If True, time = 1 -&gt; time = unit, otherwise
+time = unit -&gt; 1.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>A <a class="reference internal" href="#kuibit.timeseries.TimeSeries" title="kuibit.timeseries.TimeSeries"><code class="xref py py-class docutils literal notranslate"><span class="pre">TimeSeries</span></code></a> with new time unit.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="#kuibit.timeseries.TimeSeries" title="kuibit.timeseries.TimeSeries"><code class="xref py py-class docutils literal notranslate"><span class="pre">TimeSeries</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="kuibit.timeseries.TimeSeries.tmax">
+<em class="property"><span class="pre">property</span> </em><code class="sig-name descname"><span class="pre">tmax</span></code><a class="headerlink" href="#kuibit.timeseries.TimeSeries.tmax" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the final time.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Final time of the timeseries.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="kuibit.timeseries.TimeSeries.tmin">
+<em class="property"><span class="pre">property</span> </em><code class="sig-name descname"><span class="pre">tmin</span></code><a class="headerlink" href="#kuibit.timeseries.TimeSeries.tmin" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the starting time.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Initial time of the timeseries.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="kuibit.timeseries.TimeSeries.to_FrequencySeries">
+<code class="sig-name descname"><span class="pre">to_FrequencySeries</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/kuibit/timeseries.html#TimeSeries.to_FrequencySeries"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kuibit.timeseries.TimeSeries.to_FrequencySeries" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a <a class="reference internal" href="frequencyseries_ref.html#kuibit.frequencyseries.FrequencySeries" title="kuibit.frequencyseries.FrequencySeries"><code class="xref py py-class docutils literal notranslate"><span class="pre">FrequencySeries</span></code></a> that is the Fourier transform of the
+timeseries.</p>
+<p>If the signal is not complex, only positive frequencies are kept.</p>
+<p>If the timeseries is not regularly sampled, it will be resampled before
+transforming.</p>
+<p>:: warning:</p>
+<blockquote>
+<div><p>To have meaningful results, you should consider removing the
+mean and windowing the signal before calling this method!</p>
+</div></blockquote>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Fourier Transform.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><a class="reference internal" href="frequencyseries_ref.html#kuibit.frequencyseries.FrequencySeries" title="kuibit.frequencyseries.FrequencySeries"><code class="xref py py-class docutils literal notranslate"><span class="pre">FrequencySeries</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="kuibit.timeseries.TimeSeries.tukey_window">
+<code class="sig-name descname"><span class="pre">tukey_window</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">alpha</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/kuibit/timeseries.html#TimeSeries.tukey_window"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kuibit.timeseries.TimeSeries.tukey_window" title="Permalink to this definition">¶</a></dt>
+<dd><p>Apply Tukey window with parameter <code class="docutils literal notranslate"><span class="pre">alpha</span></code>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>alpha</strong> (<em>float</em>) – Tukey parameter.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="kuibit.timeseries.TimeSeries.tukey_windowed">
+<code class="sig-name descname"><span class="pre">tukey_windowed</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">alpha</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/kuibit/timeseries.html#TimeSeries.tukey_windowed"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kuibit.timeseries.TimeSeries.tukey_windowed" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a <a class="reference internal" href="#kuibit.timeseries.TimeSeries" title="kuibit.timeseries.TimeSeries"><code class="xref py py-class docutils literal notranslate"><span class="pre">TimeSeries</span></code></a> with Tukey window with parameter <code class="docutils literal notranslate"><span class="pre">alpha</span></code>
+applied.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>alpha</strong> (<em>float</em>) – Tukey parameter.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>New windowed <a class="reference internal" href="#kuibit.timeseries.TimeSeries" title="kuibit.timeseries.TimeSeries"><code class="xref py py-class docutils literal notranslate"><span class="pre">TimeSeries</span></code></a>.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="#kuibit.timeseries.TimeSeries" title="kuibit.timeseries.TimeSeries"><code class="xref py py-class docutils literal notranslate"><span class="pre">TimeSeries</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="kuibit.timeseries.TimeSeries.unfolded_phase">
+<code class="sig-name descname"><span class="pre">unfolded_phase</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">t_of_zero_phase</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/kuibit/timeseries.html#TimeSeries.unfolded_phase"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kuibit.timeseries.TimeSeries.unfolded_phase" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compute the complex phase of a complex-valued signal such that no phase
+wrap-around occur, i.e. if the input is continuous, so is the output.
+Optionally, add a phase shift such that phase is zero at the given time.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>t_of_zero_phase</strong> (<em>float</em><em> or </em><em>None</em>) – Time at which the phase is set to zero.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Continuous complex phase.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="#kuibit.timeseries.TimeSeries" title="kuibit.timeseries.TimeSeries"><code class="xref py py-class docutils literal notranslate"><span class="pre">TimeSeries</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="kuibit.timeseries.TimeSeries.values">
+<em class="property"><span class="pre">property</span> </em><code class="sig-name descname"><span class="pre">values</span></code><a class="headerlink" href="#kuibit.timeseries.TimeSeries.values" title="Permalink to this definition">¶</a></dt>
+<dd><p>Fake pandas properties, to make Series objects plottable by
+matplotlib.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="kuibit.timeseries.TimeSeries.window">
+<code class="sig-name descname"><span class="pre">window</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">window_function</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/kuibit/timeseries.html#TimeSeries.window"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kuibit.timeseries.TimeSeries.window" title="Permalink to this definition">¶</a></dt>
+<dd><p>Apply window_function to the data.</p>
+<p><code class="docutils literal notranslate"><span class="pre">window_function</span></code> has to be a function that takes as first argument
+the number of points of the signal. <code class="docutils literal notranslate"><span class="pre">window_function</span></code> can take
+additional arguments as passed by <code class="docutils literal notranslate"><span class="pre">windowed</span></code>. Alternatively,
+<code class="docutils literal notranslate"><span class="pre">window_function</span></code> can be a string with the name of the window
+function, if this is already implemented in <a class="reference internal" href="#kuibit.timeseries.TimeSeries" title="kuibit.timeseries.TimeSeries"><code class="xref py py-class docutils literal notranslate"><span class="pre">TimeSeries</span></code></a>
+(e.g., <code class="docutils literal notranslate"><span class="pre">tukey</span></code>).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>window_function</strong> (<em>callable</em><em> or </em><em>str</em>) – Window function to apply to the timeseries.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="kuibit.timeseries.TimeSeries.windowed">
+<code class="sig-name descname"><span class="pre">windowed</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">window_function</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/kuibit/timeseries.html#TimeSeries.windowed"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kuibit.timeseries.TimeSeries.windowed" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a <a class="reference internal" href="#kuibit.timeseries.TimeSeries" title="kuibit.timeseries.TimeSeries"><code class="xref py py-class docutils literal notranslate"><span class="pre">TimeSeries</span></code></a> windowed with <code class="docutils literal notranslate"><span class="pre">window_function</span></code>.</p>
+<p><code class="docutils literal notranslate"><span class="pre">window_function</span></code> has to be a function that takes as first argument
+the number of points of the signal. <code class="docutils literal notranslate"><span class="pre">window_function</span></code> can take
+additional arguments as passed by <code class="docutils literal notranslate"><span class="pre">windowed</span></code>. Alternatively,
+<code class="docutils literal notranslate"><span class="pre">window_function</span></code> can be a string with the name of the window
+function, if this is already implemented in <a class="reference internal" href="#kuibit.timeseries.TimeSeries" title="kuibit.timeseries.TimeSeries"><code class="xref py py-class docutils literal notranslate"><span class="pre">TimeSeries</span></code></a>
+(e.g., <code class="docutils literal notranslate"><span class="pre">tukey</span></code>).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>window_function</strong> (<em>callable</em><em> or </em><em>str</em>) – Window function to apply to the timeseries.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>New windowed <a class="reference internal" href="#kuibit.timeseries.TimeSeries" title="kuibit.timeseries.TimeSeries"><code class="xref py py-class docutils literal notranslate"><span class="pre">TimeSeries</span></code></a>.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="#kuibit.timeseries.TimeSeries" title="kuibit.timeseries.TimeSeries"><code class="xref py py-class docutils literal notranslate"><span class="pre">TimeSeries</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="kuibit.timeseries.TimeSeries.x_at_abs_maximum_y">
+<code class="sig-name descname"><span class="pre">x_at_abs_maximum_y</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#kuibit.timeseries.TimeSeries.x_at_abs_maximum_y" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the value of x when abs(y) is maximum.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Value of x when abs(y) is maximum.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="kuibit.timeseries.TimeSeries.x_at_abs_minimum_y">
+<code class="sig-name descname"><span class="pre">x_at_abs_minimum_y</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#kuibit.timeseries.TimeSeries.x_at_abs_minimum_y" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the value of x when abs(y) is minimum.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Value of x when abs(y) is minimum.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="kuibit.timeseries.TimeSeries.x_at_maximum_y">
+<code class="sig-name descname"><span class="pre">x_at_maximum_y</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#kuibit.timeseries.TimeSeries.x_at_maximum_y" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the value of x when y is maximum.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Value of x when y is maximum.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="kuibit.timeseries.TimeSeries.x_at_minimum_y">
+<code class="sig-name descname"><span class="pre">x_at_minimum_y</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#kuibit.timeseries.TimeSeries.x_at_minimum_y" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the value of x when y is minimum.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Value of x when y is minimum.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="kuibit.timeseries.TimeSeries.xmax">
+<em class="property"><span class="pre">property</span> </em><code class="sig-name descname"><span class="pre">xmax</span></code><a class="headerlink" href="#kuibit.timeseries.TimeSeries.xmax" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the maximum of the independent variable x.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Rvalue</dt>
+<dd class="field-odd"><p>Maximum of x</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="kuibit.timeseries.TimeSeries.xmin">
+<em class="property"><span class="pre">property</span> </em><code class="sig-name descname"><span class="pre">xmin</span></code><a class="headerlink" href="#kuibit.timeseries.TimeSeries.xmin" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the minimum of the independent variable x.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Rvalue</dt>
+<dd class="field-odd"><p>Minimum of x.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="kuibit.timeseries.TimeSeries.zero_pad">
+<code class="sig-name descname"><span class="pre">zero_pad</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">N</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/kuibit/timeseries.html#TimeSeries.zero_pad"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kuibit.timeseries.TimeSeries.zero_pad" title="Permalink to this definition">¶</a></dt>
+<dd><p>Pad the timeseries with zeros so that it has a total of N points.</p>
+<p>This operation will work only if the timeseries is equispaced and if N
+is larger than the number of points already present.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p><code class="docutils literal notranslate"><span class="pre">N</span></code> is the final number of points, not the number of points added.</p>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>N</strong> (<em>int</em>) – Total number new points with zeros at the end.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="kuibit.timeseries.TimeSeries.zero_padded">
+<code class="sig-name descname"><span class="pre">zero_padded</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">N</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/kuibit/timeseries.html#TimeSeries.zero_padded"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kuibit.timeseries.TimeSeries.zero_padded" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a <a class="reference internal" href="#kuibit.timeseries.TimeSeries" title="kuibit.timeseries.TimeSeries"><code class="xref py py-class docutils literal notranslate"><span class="pre">TimeSeries</span></code></a> that is zero-padded and that has
+in total <code class="docutils literal notranslate"><span class="pre">N</span></code> points.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p><code class="docutils literal notranslate"><span class="pre">N</span></code> is the final number of points, not the number of points added.</p>
+</div>
+<p>This operation will work only if the series is equispaced.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>N</strong> (<em>int</em>) – Total number of points of the output.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>A new timeseries with in total N points where all
+the trailing ones are zero.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="#kuibit.timeseries.TimeSeries" title="kuibit.timeseries.TimeSeries"><code class="xref py py-class docutils literal notranslate"><span class="pre">TimeSeries</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt id="kuibit.timeseries.combine_ts">
+<code class="sig-prename descclassname"><span class="pre">kuibit.timeseries.</span></code><code class="sig-name descname"><span class="pre">combine_ts</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">series</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prefer_late</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/kuibit/timeseries.html#combine_ts"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kuibit.timeseries.combine_ts" title="Permalink to this definition">¶</a></dt>
+<dd><p>Combine several overlapping time series into one.</p>
+<p>In intervals covered by two or more time series, which data is used depends
+on the parameter prefer_late. If two segments start at the same time, the
+longer one gets used.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>series</strong> (list of <a class="reference internal" href="#kuibit.timeseries.TimeSeries" title="kuibit.timeseries.TimeSeries"><code class="xref py py-class docutils literal notranslate"><span class="pre">TimeSeries</span></code></a>) – The timeseries to combine.</p></li>
+<li><p><strong>prefer_late</strong> – If true, prefer data that starts later for overlapping
+segments, otherwise, use data from the ones that come
+earlier.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>The combined time series</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="#kuibit.timeseries.TimeSeries" title="kuibit.timeseries.TimeSeries"><code class="xref py py-class docutils literal notranslate"><span class="pre">TimeSeries</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="kuibit.timeseries.remove_duplicated_iters">
+<code class="sig-prename descclassname"><span class="pre">kuibit.timeseries.</span></code><code class="sig-name descname"><span class="pre">remove_duplicated_iters</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">t</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/kuibit/timeseries.html#remove_duplicated_iters"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kuibit.timeseries.remove_duplicated_iters" title="Permalink to this definition">¶</a></dt>
+<dd><p>Remove overlapping segments from a time series in (t,y).</p>
+<p>Only the latest of overlapping segments is kept, the rest
+removed.</p>
+<p>This function is used for cleaning up simulations with multiple
+checkpoints.</p>
+<p>Note, if t = [1, 2, 3, 4, 2, 3] the output will be [1, 2, 3].
+The ‘4’ is discarded because it is not the last segment. The
+idea is that if this corresponds to a simulation restart, you
+may have changed the paramters, so that 4 is not anymore correct.
+We consider the second restart the “truth”.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>t</strong> (<em>1D NumPy array</em>) – Times.</p></li>
+<li><p><strong>y</strong> – Values.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Strictly monotonic time series.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="#kuibit.timeseries.TimeSeries" title="kuibit.timeseries.TimeSeries"><code class="xref py py-class docutils literal notranslate"><span class="pre">TimeSeries</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="kuibit.timeseries.unfold_phase">
+<code class="sig-prename descclassname"><span class="pre">kuibit.timeseries.</span></code><code class="sig-name descname"><span class="pre">unfold_phase</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">phase</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/kuibit/timeseries.html#unfold_phase"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kuibit.timeseries.unfold_phase" title="Permalink to this definition">¶</a></dt>
+<dd><p>Remove phase jumps to get a continuous (unfolded) phase.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>phase</strong> (<em>1D NumPy array</em>) – Phase wrapped around the provided jump.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Phase plus multiples of pi chosen to minimize jumps.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>1D NumPy array</p>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="index.html">
+              <img class="logo" src="_static/logo.png" alt="Logo"/>
+            </a></p>
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="series_ref.html"
+                        title="previous chapter">Reference on kuibit.series</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="frequencyseries_ref.html"
+                        title="next chapter">Reference on kuibit.frequencyseries</a></p>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="frequencyseries_ref.html" title="Reference on kuibit.frequencyseries"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="series_ref.html" title="Reference on kuibit.series"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">kuibit 1.3.0-alpha0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">Reference on kuibit.timeseries</a></li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2020-2021, Gabriele Bozzola.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 3.5.4.
+    </div>
+  </body>
+</html>

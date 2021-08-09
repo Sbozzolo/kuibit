@@ -1,0 +1,245 @@
+
+
+<!doctype html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>save_resampled_grid_data.py &#8212; kuibit 1.3.0-alpha0 documentation</title>
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/bizstyle.css" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/css/custom.css" />
+    
+    <script id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+    <script src="../../_static/jquery.js"></script>
+    <script src="../../_static/underscore.js"></script>
+    <script src="../../_static/doctools.js"></script>
+    <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="../../_static/bizstyle.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="grid_var" href="../mopi_movies/grid_var.html" />
+    <link rel="prev" title="print_qlm_properties_at_time.py" href="print_qlm_properties_at_time.html" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0" />
+    <!--[if lt IE 9]>
+    <script src="_static/css3-mediaqueries.js"></script>
+    <![endif]-->
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="../mopi_movies/grid_var.html" title="grid_var"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="print_qlm_properties_at_time.html" title="print_qlm_properties_at_time.py"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">kuibit 1.3.0-alpha0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">save_resampled_grid_data.py</a></li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="save-resampled-grid-data-py">
+<h1>save_resampled_grid_data.py<a class="headerlink" href="#save-resampled-grid-data-py" title="Permalink to this headline">¶</a></h1>
+<p><code class="docutils literal notranslate"><span class="pre">save_reasampled_grid_data</span></code> reads a grid function, resamples it to a given grid,
+and saves it to a file. This script is useful to move data from a cluster to
+your local machine (especially for 3D visualization).</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="ch">#!/usr/bin/env python3</span>
+<span class="c1"># PYTHON_ARGCOMPLETE_OK</span>
+
+<span class="c1"># Copyright (C) 2020-2021 Gabriele Bozzola</span>
+<span class="c1">#</span>
+<span class="c1"># This program is free software; you can redistribute it and/or modify it under</span>
+<span class="c1"># the terms of the GNU General Public License as published by the Free Software</span>
+<span class="c1"># Foundation; either version 3 of the License, or (at your option) any later</span>
+<span class="c1"># version.</span>
+<span class="c1">#</span>
+<span class="c1"># This program is distributed in the hope that it will be useful, but WITHOUT</span>
+<span class="c1"># ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS</span>
+<span class="c1"># FOR A PARTICULAR PURPOSE. See the GNU General Public License for more</span>
+<span class="c1"># details.</span>
+<span class="c1">#</span>
+<span class="c1"># You should have received a copy of the GNU General Public License along with</span>
+<span class="c1"># this program; if not, see &lt;https://www.gnu.org/licenses/&gt;.</span>
+
+<span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">import</span> <span class="nn">os</span>
+
+<span class="kn">from</span> <span class="nn">kuibit</span> <span class="kn">import</span> <span class="n">argparse_helper</span> <span class="k">as</span> <span class="n">kah</span>
+<span class="kn">from</span> <span class="nn">kuibit.simdir</span> <span class="kn">import</span> <span class="n">SimDir</span>
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+
+    <span class="n">desc</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;&quot;&quot;</span><span class="si">{</span><span class="n">kah</span><span class="o">.</span><span class="n">get_program_name</span><span class="p">()</span><span class="si">}</span><span class="s2"> dumps a specific grid variable</span>
+<span class="s2">    resampled to a given grid into a file. Saving as .npz files guarantees</span>
+<span class="s2">    the best performances. For 3D data, the default resolution will lead to</span>
+<span class="s2">    long processing times. &quot;&quot;&quot;</span>
+
+    <span class="n">parser</span> <span class="o">=</span> <span class="n">kah</span><span class="o">.</span><span class="n">init_argparse</span><span class="p">(</span><span class="n">description</span><span class="o">=</span><span class="n">desc</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span>
+        <span class="s2">&quot;--variable&quot;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="nb">str</span><span class="p">,</span> <span class="n">required</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Variable to save.&quot;</span>
+    <span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span>
+        <span class="s2">&quot;--iteration&quot;</span><span class="p">,</span>
+        <span class="nb">type</span><span class="o">=</span><span class="nb">int</span><span class="p">,</span>
+        <span class="n">default</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span>
+        <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Iteration to plot. If -1, the latest.&quot;</span><span class="p">,</span>
+    <span class="p">)</span>
+
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span>
+        <span class="s2">&quot;--resolution&quot;</span><span class="p">,</span>
+        <span class="nb">type</span><span class="o">=</span><span class="nb">int</span><span class="p">,</span>
+        <span class="n">default</span><span class="o">=</span><span class="mi">500</span><span class="p">,</span>
+        <span class="n">help</span><span class="o">=</span><span class="p">((</span><span class="s2">&quot;Resolution of the resampled data&quot;</span> <span class="s2">&quot;(default: </span><span class="si">%(default)s</span><span class="s2">)&quot;</span><span class="p">)),</span>
+    <span class="p">)</span>
+
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span>
+        <span class="s2">&quot;--type&quot;</span><span class="p">,</span>
+        <span class="nb">type</span><span class="o">=</span><span class="nb">str</span><span class="p">,</span>
+        <span class="n">choices</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;x&quot;</span><span class="p">,</span> <span class="s2">&quot;y&quot;</span><span class="p">,</span> <span class="s2">&quot;z&quot;</span><span class="p">,</span> <span class="s2">&quot;xy&quot;</span><span class="p">,</span> <span class="s2">&quot;xz&quot;</span><span class="p">,</span> <span class="s2">&quot;yz&quot;</span><span class="p">,</span> <span class="s2">&quot;xyz&quot;</span><span class="p">],</span>
+        <span class="n">default</span><span class="o">=</span><span class="s2">&quot;xyz&quot;</span><span class="p">,</span>
+        <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Type of data (default: </span><span class="si">%(default)s</span><span class="s2">)&quot;</span><span class="p">,</span>
+    <span class="p">)</span>
+
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span>
+        <span class="s2">&quot;--outname&quot;</span><span class="p">,</span>
+        <span class="nb">type</span><span class="o">=</span><span class="nb">str</span><span class="p">,</span>
+        <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Name of the output file.&quot;</span><span class="p">,</span>
+    <span class="p">)</span>
+
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span>
+        <span class="s2">&quot;-x0&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;--origin&quot;</span><span class="p">,</span>
+        <span class="nb">type</span><span class="o">=</span><span class="nb">float</span><span class="p">,</span>
+        <span class="n">nargs</span><span class="o">=</span><span class="s2">&quot;+&quot;</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span>
+        <span class="s2">&quot;-x1&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;--corner&quot;</span><span class="p">,</span>
+        <span class="nb">type</span><span class="o">=</span><span class="nb">float</span><span class="p">,</span>
+        <span class="n">nargs</span><span class="o">=</span><span class="s2">&quot;+&quot;</span><span class="p">,</span>
+    <span class="p">)</span>
+
+    <span class="n">args</span> <span class="o">=</span> <span class="n">kah</span><span class="o">.</span><span class="n">get_args</span><span class="p">(</span><span class="n">parser</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">type</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">origin</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;x0 (</span><span class="si">{</span><span class="n">args</span><span class="o">.</span><span class="n">origin</span><span class="si">}</span><span class="s2">) and type (</span><span class="si">{</span><span class="n">args</span><span class="o">.</span><span class="n">type</span><span class="si">}</span><span class="s2">) are incompatible&quot;</span>
+        <span class="p">)</span>
+
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">type</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">corner</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;x1 (</span><span class="si">{</span><span class="n">args</span><span class="o">.</span><span class="n">corner</span><span class="si">}</span><span class="s2">) and type (</span><span class="si">{</span><span class="n">args</span><span class="o">.</span><span class="n">type</span><span class="si">}</span><span class="s2">) are incompatible&quot;</span>
+        <span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">args</span><span class="o">.</span><span class="n">outname</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">outname</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">args</span><span class="o">.</span><span class="n">variable</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">args</span><span class="o">.</span><span class="n">type</span><span class="si">}</span><span class="s2">.npz&quot;</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">outname</span> <span class="o">=</span> <span class="n">args</span><span class="o">.</span><span class="n">outname</span>
+
+    <span class="n">output_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">outdir</span><span class="p">,</span> <span class="n">outname</span><span class="p">)</span>
+
+    <span class="n">iteration</span> <span class="o">=</span> <span class="n">args</span><span class="o">.</span><span class="n">iteration</span>
+    <span class="n">x0</span><span class="p">,</span> <span class="n">x1</span><span class="p">,</span> <span class="n">res</span> <span class="o">=</span> <span class="n">args</span><span class="o">.</span><span class="n">origin</span><span class="p">,</span> <span class="n">args</span><span class="o">.</span><span class="n">corner</span><span class="p">,</span> <span class="n">args</span><span class="o">.</span><span class="n">resolution</span>
+    <span class="n">shape</span> <span class="o">=</span> <span class="p">[</span><span class="n">res</span><span class="p">]</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">type</span><span class="p">)</span>
+
+    <span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">args</span><span class="o">.</span><span class="n">verbose</span><span class="p">:</span>
+        <span class="n">logging</span><span class="o">.</span><span class="n">basicConfig</span><span class="p">(</span><span class="nb">format</span><span class="o">=</span><span class="s2">&quot;</span><span class="si">%(asctime)s</span><span class="s2"> - </span><span class="si">%(message)s</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">setLevel</span><span class="p">(</span><span class="n">logging</span><span class="o">.</span><span class="n">DEBUG</span><span class="p">)</span>
+
+    <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Reading variable </span><span class="si">{</span><span class="n">args</span><span class="o">.</span><span class="n">variable</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="k">with</span> <span class="n">SimDir</span><span class="p">(</span>
+        <span class="n">args</span><span class="o">.</span><span class="n">datadir</span><span class="p">,</span>
+        <span class="n">ignore_symlinks</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">ignore_symlinks</span><span class="p">,</span>
+        <span class="n">pickle_file</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">pickle_file</span><span class="p">,</span>
+    <span class="p">)</span> <span class="k">as</span> <span class="n">sim</span><span class="p">:</span>
+
+        <span class="n">reader</span> <span class="o">=</span> <span class="n">sim</span><span class="o">.</span><span class="n">gridfunctions</span><span class="p">[</span><span class="n">args</span><span class="o">.</span><span class="n">type</span><span class="p">]</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Variables available </span><span class="si">{</span><span class="n">reader</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="n">var</span> <span class="o">=</span> <span class="n">reader</span><span class="p">[</span><span class="n">args</span><span class="o">.</span><span class="n">variable</span><span class="p">]</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Read variable </span><span class="si">{</span><span class="n">args</span><span class="o">.</span><span class="n">variable</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">iteration</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
+            <span class="n">iteration</span> <span class="o">=</span> <span class="n">var</span><span class="o">.</span><span class="n">available_iterations</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+
+        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Reading </span><span class="si">{</span><span class="n">iteration</span><span class="si">}</span><span class="s2"> and resampling&quot;</span><span class="p">)</span>
+
+        <span class="n">data</span> <span class="o">=</span> <span class="n">var</span><span class="p">[</span><span class="n">iteration</span><span class="p">]</span><span class="o">.</span><span class="n">to_UniformGridData</span><span class="p">(</span>
+            <span class="n">shape</span><span class="p">,</span> <span class="n">x0</span><span class="p">,</span> <span class="n">x1</span><span class="p">,</span> <span class="n">iteration</span><span class="o">=</span><span class="n">iteration</span>
+        <span class="p">)</span>
+
+        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Saving to </span><span class="si">{</span><span class="n">output_path</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="n">data</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">output_path</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="../../index.html">
+              <img class="logo" src="../../_static/logo.png" alt="Logo"/>
+            </a></p>
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="print_qlm_properties_at_time.html"
+                        title="previous chapter">print_qlm_properties_at_time.py</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="../mopi_movies/grid_var.html"
+                        title="next chapter">grid_var</a></p>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="../mopi_movies/grid_var.html" title="grid_var"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="print_qlm_properties_at_time.html" title="print_qlm_properties_at_time.py"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">kuibit 1.3.0-alpha0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">save_resampled_grid_data.py</a></li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2020-2021, Gabriele Bozzola.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 3.5.4.
+    </div>
+  </body>
+</html>

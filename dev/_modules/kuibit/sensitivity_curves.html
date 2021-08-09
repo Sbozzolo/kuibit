@@ -1,0 +1,424 @@
+
+
+<!doctype html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>kuibit.sensitivity_curves &#8212; kuibit 1.3.0-alpha0 documentation</title>
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/bizstyle.css" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/css/custom.css" />
+    
+    <script id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+    <script src="../../_static/jquery.js"></script>
+    <script src="../../_static/underscore.js"></script>
+    <script src="../../_static/doctools.js"></script>
+    <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="../../_static/bizstyle.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0" />
+    <!--[if lt IE 9]>
+    <script src="_static/css3-mediaqueries.js"></script>
+    <![endif]-->
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">kuibit 1.3.0-alpha0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../index.html" accesskey="U">Module code</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">kuibit.sensitivity_curves</a></li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for kuibit.sensitivity_curves</h1><div class="highlight"><pre>
+<span></span><span class="ch">#!/usr/bin/env python3</span>
+
+<span class="c1"># Copyright (C) 2020-2021 Gabriele Bozzola</span>
+<span class="c1">#</span>
+<span class="c1"># This program is free software; you can redistribute it and/or modify it under</span>
+<span class="c1"># the terms of the GNU General Public License as published by the Free Software</span>
+<span class="c1"># Foundation; either version 3 of the License, or (at your option) any later</span>
+<span class="c1"># version.</span>
+<span class="c1">#</span>
+<span class="c1"># This program is distributed in the hope that it will be useful, but WITHOUT</span>
+<span class="c1"># ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS</span>
+<span class="c1"># FOR A PARTICULAR PURPOSE. See the GNU General Public License for more</span>
+<span class="c1"># details.</span>
+<span class="c1">#</span>
+<span class="c1"># You should have received a copy of the GNU General Public License along with</span>
+<span class="c1"># this program; if not, see &lt;https://www.gnu.org/licenses/&gt;.</span>
+
+<span class="sd">&quot;&quot;&quot;The :py:mod:`~.sensitivity_curves` module contains the power spectral</span>
+<span class="sd">distribution of the noise of known detectors. The available ones are:</span>
+
+<span class="sd">- :py:func:`~.Sn_LISA`</span>
+<span class="sd">- :py:func:`~.Sn_ET_B`</span>
+<span class="sd">- :py:func:`~.Sn_CE1`</span>
+<span class="sd">- :py:func:`~.Sn_CE2`</span>
+<span class="sd">- :py:func:`~.Sn_aLIGO`</span>
+<span class="sd">- :py:func:`~.Sn_voyager`</span>
+<span class="sd">- :py:func:`~.Sn_KAGRA_D`</span>
+<span class="sd">- :py:func:`~.Sn_aLIGO_plus`</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">pkgutil</span>
+<span class="kn">from</span> <span class="nn">io</span> <span class="kn">import</span> <span class="n">StringIO</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
+<span class="kn">from</span> <span class="nn">kuibit.frequencyseries</span> <span class="kn">import</span> <span class="n">FrequencySeries</span><span class="p">,</span> <span class="n">load_FrequencySeries</span>
+<span class="kn">from</span> <span class="nn">kuibit.unitconv</span> <span class="kn">import</span> <span class="n">C_SI</span>
+
+
+<div class="viewcode-block" id="Sn_LISA"><a class="viewcode-back" href="../../sensitivity_curves_ref.html#kuibit.sensitivity_curves.Sn_LISA">[docs]</a><span class="k">def</span> <span class="nf">Sn_LISA</span><span class="p">(</span><span class="n">freqs</span><span class="p">,</span> <span class="n">arms_length</span><span class="o">=</span><span class="mf">2.5e9</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Return the average power spectral density noise for LISA in 1/Hz.</span>
+
+<span class="sd">    The expression implemented is Equation (13) in</span>
+<span class="sd">    https://arxiv.org/abs/1803.01944.</span>
+
+<span class="sd">    :param freqs: Frequencies in Hz over which to evaluate the sensitivity curve.</span>
+<span class="sd">    :type freqs: 1d NumPy array</span>
+<span class="sd">    :param arms_length: Length of the detector&#39;s arms in meters.</span>
+<span class="sd">    :type arms_length: float</span>
+
+<span class="sd">    :returns: LISA sensitivity curve in 1/Hz.</span>
+<span class="sd">    :rtype: :py:class:`~.FrequencySeries`</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">freqs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">freqs</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">P_acc</span><span class="p">(</span><span class="n">f</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Equation (11) of 1803.01944&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="p">(</span>
+            <span class="p">(</span><span class="mf">3.0e-15</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span>
+            <span class="o">*</span> <span class="p">(</span><span class="mf">1.0</span> <span class="o">+</span> <span class="p">(</span><span class="mf">0.4e-3</span> <span class="o">/</span> <span class="n">f</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span>
+            <span class="o">*</span> <span class="p">(</span><span class="mf">1.0</span> <span class="o">+</span> <span class="p">(</span><span class="n">f</span> <span class="o">/</span> <span class="mf">8e-3</span><span class="p">)</span> <span class="o">**</span> <span class="mi">4</span><span class="p">)</span>
+        <span class="p">)</span>  <span class="c1"># 1/Hz</span>
+
+    <span class="k">def</span> <span class="nf">P_OMS</span><span class="p">(</span><span class="n">f</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Equation (10) of 1803.01944&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="p">(</span><span class="mf">1.5e-11</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">*</span> <span class="p">(</span><span class="mf">1.0</span> <span class="o">+</span> <span class="p">(</span><span class="mf">2e-3</span> <span class="o">/</span> <span class="n">f</span><span class="p">)</span> <span class="o">**</span> <span class="mi">4</span><span class="p">)</span>  <span class="c1"># 1/Hz</span>
+
+    <span class="c1"># Transfer frequency</span>
+    <span class="n">f_star</span> <span class="o">=</span> <span class="n">C_SI</span> <span class="o">/</span> <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="n">arms_length</span><span class="p">)</span>
+
+    <span class="c1"># Equation (13)</span>
+    <span class="n">Sn</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="p">(</span><span class="mf">10.0</span> <span class="o">/</span> <span class="p">(</span><span class="mi">3</span> <span class="o">*</span> <span class="n">arms_length</span> <span class="o">**</span> <span class="mi">2</span><span class="p">))</span>
+        <span class="o">*</span> <span class="p">(</span>
+            <span class="n">P_OMS</span><span class="p">(</span><span class="n">freqs</span><span class="p">)</span>
+            <span class="o">+</span> <span class="mi">2</span>
+            <span class="o">*</span> <span class="p">(</span><span class="mf">1.0</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">freqs</span> <span class="o">/</span> <span class="n">f_star</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span>
+            <span class="o">*</span> <span class="n">P_acc</span><span class="p">(</span><span class="n">freqs</span><span class="p">)</span>
+            <span class="o">/</span> <span class="p">((</span><span class="mi">2</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="n">freqs</span><span class="p">)</span> <span class="o">**</span> <span class="mi">4</span><span class="p">)</span>
+        <span class="p">)</span>
+        <span class="o">*</span> <span class="p">(</span><span class="mf">1.0</span> <span class="o">+</span> <span class="p">(</span><span class="mf">6.0</span> <span class="o">/</span> <span class="mf">10.0</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="n">freqs</span> <span class="o">/</span> <span class="n">f_star</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span>
+    <span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">FrequencySeries</span><span class="p">(</span><span class="n">freqs</span><span class="p">,</span> <span class="n">Sn</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="Sn_ET_B"><a class="viewcode-back" href="../../sensitivity_curves_ref.html#kuibit.sensitivity_curves.Sn_ET_B">[docs]</a><span class="k">def</span> <span class="nf">Sn_ET_B</span><span class="p">(</span><span class="n">freqs</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Return the average power spectral density noise for Einstein Telescope</span>
+<span class="sd">    (variant B) in 1/Hz.</span>
+
+<span class="sd">    .. note::</span>
+
+<span class="sd">        The data was downloaded from</span>
+<span class="sd">        https://apps.et-gw.eu/tds/?content=3&amp;r=14323 and has range ``fmin=1``,</span>
+<span class="sd">        ``fmax=10000`` (Hz).</span>
+
+<span class="sd">    :param freqs: Frequencies in Hz over which to evaluate the sensitivity curve.</span>
+<span class="sd">    :type freqs: 1d NumPy array</span>
+
+<span class="sd">    :returns: ET-B sensitivity curve in 1/Hz.</span>
+<span class="sd">    :rtype: :py:class:`~.FrequencySeries`</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">freqs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">freqs</span><span class="p">)</span>
+
+    <span class="c1"># Why is it so difficult to read files in Python packages? :(</span>
+    <span class="n">data</span> <span class="o">=</span> <span class="n">pkgutil</span><span class="o">.</span><span class="n">get_data</span><span class="p">(</span><span class="s2">&quot;kuibit&quot;</span><span class="p">,</span> <span class="s2">&quot;data/ETB.dat&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s2">&quot;utf8&quot;</span><span class="p">)</span>
+    <span class="c1"># We convert this data in a StringIO that NumPy can read, we can pass this</span>
+    <span class="c1"># to load_FrequencySeries, since its backend is np.loadtxt</span>
+    <span class="c1">#</span>
+    <span class="c1"># ET distributes Amplitude Spectral Densities</span>
+    <span class="n">asd</span> <span class="o">=</span> <span class="n">load_FrequencySeries</span><span class="p">(</span><span class="n">StringIO</span><span class="p">(</span><span class="n">data</span><span class="p">))</span>
+    <span class="n">psd</span> <span class="o">=</span> <span class="n">asd</span> <span class="o">**</span> <span class="mi">2</span>
+
+    <span class="c1"># Resample on the requested frequencies. ETB is well-behaved, so it is fine</span>
+    <span class="c1"># to use splines.</span>
+    <span class="n">psd</span><span class="o">.</span><span class="n">resample</span><span class="p">(</span><span class="n">freqs</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">psd</span></div>
+
+
+<div class="viewcode-block" id="Sn_CE1"><a class="viewcode-back" href="../../sensitivity_curves_ref.html#kuibit.sensitivity_curves.Sn_CE1">[docs]</a><span class="k">def</span> <span class="nf">Sn_CE1</span><span class="p">(</span><span class="n">freqs</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Return the average power spectral density noise for Einstein Telescope in</span>
+<span class="sd">    1/Hz.</span>
+
+<span class="sd">    .. note::</span>
+
+<span class="sd">        The data was downloaded from</span>
+<span class="sd">        https://cosmicexplorer.org/data/CE1_strain.txt and has range ``fmin=3``,</span>
+<span class="sd">        ``fmax=10000`` (Hz).</span>
+
+<span class="sd">    The resampling to the requested frequencies is done considering the values</span>
+<span class="sd">    of the nearest neighbors.</span>
+
+<span class="sd">    :param freqs: Frequencies in Hz over which to evaluate the sensitivity curve.</span>
+<span class="sd">    :type freqs: 1d NumPy array</span>
+
+<span class="sd">    :returns: CE1 sensitivity curve in 1/Hz.</span>
+<span class="sd">    :rtype: :py:class:`~.FrequencySeries`</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">freqs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">freqs</span><span class="p">)</span>
+
+    <span class="n">data</span> <span class="o">=</span> <span class="n">pkgutil</span><span class="o">.</span><span class="n">get_data</span><span class="p">(</span><span class="s2">&quot;kuibit&quot;</span><span class="p">,</span> <span class="s2">&quot;data/CE1.dat&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s2">&quot;utf8&quot;</span><span class="p">)</span>
+
+    <span class="c1"># CE distributes Amplitude Spectral Densities</span>
+    <span class="n">asd</span> <span class="o">=</span> <span class="n">load_FrequencySeries</span><span class="p">(</span><span class="n">StringIO</span><span class="p">(</span><span class="n">data</span><span class="p">))</span>
+    <span class="n">psd</span> <span class="o">=</span> <span class="n">asd</span> <span class="o">**</span> <span class="mi">2</span>
+
+    <span class="c1"># Resample on the requested frequencies. CE1 has some spikes, so it is</span>
+    <span class="c1"># better to not use splines.</span>
+    <span class="n">psd</span><span class="o">.</span><span class="n">resample</span><span class="p">(</span><span class="n">freqs</span><span class="p">,</span> <span class="n">piecewise_constant</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">psd</span></div>
+
+
+<div class="viewcode-block" id="Sn_CE2"><a class="viewcode-back" href="../../sensitivity_curves_ref.html#kuibit.sensitivity_curves.Sn_CE2">[docs]</a><span class="k">def</span> <span class="nf">Sn_CE2</span><span class="p">(</span><span class="n">freqs</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Return the average power spectral density noise for Einstein Telescope in</span>
+<span class="sd">    1/Hz.</span>
+
+<span class="sd">    .. note::</span>
+
+<span class="sd">        The data was downloaded from</span>
+<span class="sd">        https://cosmicexplorer.org/data/CE2_strain.txt and has range ``fmin=3``,</span>
+<span class="sd">        ``fmax=10000`` (Hz).</span>
+
+<span class="sd">    The resampling to the requested frequencies is done considering the values</span>
+<span class="sd">    of the nearest neighbors.</span>
+
+<span class="sd">    :param freqs: Frequencies in Hz over which to evaluate the sensitivity curve.</span>
+<span class="sd">    :type freqs: 1d NumPy array</span>
+
+<span class="sd">    :returns: CE2 sensitivity curve in 1/Hz.</span>
+<span class="sd">    :rtype: :py:class:`~.FrequencySeries`</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">freqs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">freqs</span><span class="p">)</span>
+
+    <span class="n">data</span> <span class="o">=</span> <span class="n">pkgutil</span><span class="o">.</span><span class="n">get_data</span><span class="p">(</span><span class="s2">&quot;kuibit&quot;</span><span class="p">,</span> <span class="s2">&quot;data/CE1.dat&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s2">&quot;utf8&quot;</span><span class="p">)</span>
+
+    <span class="c1"># CE distributes Amplitude Spectral Densities</span>
+    <span class="n">asd</span> <span class="o">=</span> <span class="n">load_FrequencySeries</span><span class="p">(</span><span class="n">StringIO</span><span class="p">(</span><span class="n">data</span><span class="p">))</span>
+    <span class="n">psd</span> <span class="o">=</span> <span class="n">asd</span> <span class="o">**</span> <span class="mi">2</span>
+
+    <span class="c1"># Resample on the requested frequencies. CE1 has some spikes, so it is</span>
+    <span class="c1"># better to not use splines.</span>
+    <span class="n">psd</span><span class="o">.</span><span class="n">resample</span><span class="p">(</span><span class="n">freqs</span><span class="p">,</span> <span class="n">piecewise_constant</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">psd</span></div>
+
+
+<div class="viewcode-block" id="Sn_aLIGO"><a class="viewcode-back" href="../../sensitivity_curves_ref.html#kuibit.sensitivity_curves.Sn_aLIGO">[docs]</a><span class="k">def</span> <span class="nf">Sn_aLIGO</span><span class="p">(</span><span class="n">freqs</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Return the average power spectral density noise for advanced LIGO in</span>
+<span class="sd">    1/Hz. This is the Zero-Detuned-High-Power noise curve.</span>
+
+<span class="sd">    .. note::</span>
+
+<span class="sd">        The data was downloaded from</span>
+<span class="sd">        https://dcc.ligo.org/LIGO-T1500293-v11/public and has range ``fmin=9``,</span>
+<span class="sd">        ``fmax=8192`` (Hz).</span>
+
+<span class="sd">    The resampling to the requested frequencies is done considering the values</span>
+<span class="sd">    of the nearest neighbors.</span>
+
+<span class="sd">    :param freqs: Frequencies in Hz over to evaluate the sensitivity curve.</span>
+<span class="sd">    :type freqs: 1d NumPy array</span>
+
+<span class="sd">    :returns: Advanced LIGO Zero-Detuned High-Power sensitivity curve in 1/Hz.</span>
+<span class="sd">    :rtype: :py:class:`~.FrequencySeries`</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">freqs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">freqs</span><span class="p">)</span>
+
+    <span class="n">data</span> <span class="o">=</span> <span class="n">pkgutil</span><span class="o">.</span><span class="n">get_data</span><span class="p">(</span><span class="s2">&quot;kuibit&quot;</span><span class="p">,</span> <span class="s2">&quot;data/aLIGO_ZDHP.dat&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s2">&quot;utf8&quot;</span><span class="p">)</span>
+
+    <span class="c1"># aLIGO distributes Amplitude Spectral Densities</span>
+    <span class="n">asd</span> <span class="o">=</span> <span class="n">load_FrequencySeries</span><span class="p">(</span><span class="n">StringIO</span><span class="p">(</span><span class="n">data</span><span class="p">))</span>
+    <span class="n">psd</span> <span class="o">=</span> <span class="n">asd</span> <span class="o">**</span> <span class="mi">2</span>
+
+    <span class="c1"># Resample on the requested frequencies. CE1 has some spikes, so it is</span>
+    <span class="c1"># better to not use splines.</span>
+    <span class="n">psd</span><span class="o">.</span><span class="n">resample</span><span class="p">(</span><span class="n">freqs</span><span class="p">,</span> <span class="n">piecewise_constant</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">psd</span></div>
+
+
+<div class="viewcode-block" id="Sn_voyager"><a class="viewcode-back" href="../../sensitivity_curves_ref.html#kuibit.sensitivity_curves.Sn_voyager">[docs]</a><span class="k">def</span> <span class="nf">Sn_voyager</span><span class="p">(</span><span class="n">freqs</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Return the average power spectral density noise for voyager in</span>
+<span class="sd">    1/Hz.</span>
+
+<span class="sd">    .. note::</span>
+
+<span class="sd">        The data was downloaded from</span>
+<span class="sd">        https://dcc.ligo.org/LIGO-T1500293-v11/public and has range ``fmin=5``,</span>
+<span class="sd">        ``fmax=10000`` (Hz).</span>
+
+<span class="sd">    The resampling to the requested frequencies is done considering the values</span>
+<span class="sd">    of the nearest neighbors.</span>
+
+<span class="sd">    :param freqs: Frequencies in Hz over to evaluate the sensitivity curve.</span>
+<span class="sd">    :type freqs: 1d NumPy array</span>
+
+<span class="sd">    :returns: Voyager sensitivity curve in 1/Hz.</span>
+<span class="sd">    :rtype: :py:class:`~.FrequencySeries`</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">freqs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">freqs</span><span class="p">)</span>
+
+    <span class="n">data</span> <span class="o">=</span> <span class="n">pkgutil</span><span class="o">.</span><span class="n">get_data</span><span class="p">(</span><span class="s2">&quot;kuibit&quot;</span><span class="p">,</span> <span class="s2">&quot;data/voyager.dat&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s2">&quot;utf8&quot;</span><span class="p">)</span>
+
+    <span class="c1"># Voyager distributes Amplitude Spectral Densities</span>
+    <span class="n">asd</span> <span class="o">=</span> <span class="n">load_FrequencySeries</span><span class="p">(</span><span class="n">StringIO</span><span class="p">(</span><span class="n">data</span><span class="p">))</span>
+    <span class="n">psd</span> <span class="o">=</span> <span class="n">asd</span> <span class="o">**</span> <span class="mi">2</span>
+
+    <span class="c1"># Resample on the requested frequencies. CE1 has some spikes, so it is</span>
+    <span class="c1"># better to not use splines.</span>
+    <span class="n">psd</span><span class="o">.</span><span class="n">resample</span><span class="p">(</span><span class="n">freqs</span><span class="p">,</span> <span class="n">piecewise_constant</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">psd</span></div>
+
+
+<div class="viewcode-block" id="Sn_KAGRA_D"><a class="viewcode-back" href="../../sensitivity_curves_ref.html#kuibit.sensitivity_curves.Sn_KAGRA_D">[docs]</a><span class="k">def</span> <span class="nf">Sn_KAGRA_D</span><span class="p">(</span><span class="n">freqs</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Return the average power spectral density noise for KAGRA in</span>
+<span class="sd">    1/Hz.</span>
+
+
+<span class="sd">    .. note::</span>
+
+<span class="sd">        The data was downloaded from</span>
+<span class="sd">        https://granite.phys.s.u-tokyo.ac.jp/svn/LCGT/trunk/sensitivity/spectrum/BW2009_VRSED.dat</span>
+<span class="sd">        and has range ``fmin=1.00231``, ``fmax=10000`` (Hz).</span>
+
+<span class="sd">    The resampling to the requested frequencies is done considering the values</span>
+<span class="sd">    of the nearest neighbors.</span>
+
+<span class="sd">    :param freqs: Frequencies in Hz over to evaluate the sensitivity curve.</span>
+<span class="sd">    :type freqs: 1d NumPy array</span>
+
+<span class="sd">    :returns: KAGRA sensitivity curve in 1/Hz.</span>
+<span class="sd">    :rtype: :py:class:`~.FrequencySeries`</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">freqs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">freqs</span><span class="p">)</span>
+
+    <span class="n">data</span> <span class="o">=</span> <span class="n">pkgutil</span><span class="o">.</span><span class="n">get_data</span><span class="p">(</span><span class="s2">&quot;kuibit&quot;</span><span class="p">,</span> <span class="s2">&quot;data/KAGRA_VRSED.dat&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s2">&quot;utf8&quot;</span><span class="p">)</span>
+
+    <span class="c1"># KAGRA distributes Amplitude Spectral Densities</span>
+    <span class="n">asd</span> <span class="o">=</span> <span class="n">load_FrequencySeries</span><span class="p">(</span><span class="n">StringIO</span><span class="p">(</span><span class="n">data</span><span class="p">))</span>
+    <span class="n">psd</span> <span class="o">=</span> <span class="n">asd</span> <span class="o">**</span> <span class="mi">2</span>
+
+    <span class="c1"># Resample on the requested frequencies. CE1 has some spikes, so it is</span>
+    <span class="c1"># better to not use splines.</span>
+    <span class="n">psd</span><span class="o">.</span><span class="n">resample</span><span class="p">(</span><span class="n">freqs</span><span class="p">,</span> <span class="n">piecewise_constant</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">psd</span></div>
+
+
+<div class="viewcode-block" id="Sn_aLIGO_plus"><a class="viewcode-back" href="../../sensitivity_curves_ref.html#kuibit.sensitivity_curves.Sn_aLIGO_plus">[docs]</a><span class="k">def</span> <span class="nf">Sn_aLIGO_plus</span><span class="p">(</span><span class="n">freqs</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Return the average power spectral density noise for Advanced LIGO + in</span>
+<span class="sd">    1/Hz.</span>
+
+<span class="sd">    .. note::</span>
+
+<span class="sd">        The data was downloaded from</span>
+<span class="sd">        https://dcc.ligo.org/public/0149/T1800042/005/AplusDesign.txt and has</span>
+<span class="sd">        range ``fmin=5``, ``fmax=5000`` (Hz).</span>
+
+<span class="sd">    The resampling to the requested frequencies is done considering the values</span>
+<span class="sd">    of the nearest neighbors.</span>
+
+<span class="sd">    :param freqs: Frequencies in Hz over to evaluate the sensitivity curve.</span>
+<span class="sd">    :type freqs: 1d NumPy array</span>
+
+<span class="sd">    :returns: aLIGO+ sensitivity curve in 1/Hz.</span>
+<span class="sd">    :rtype: :py:class:`~.FrequencySeries`</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">freqs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">freqs</span><span class="p">)</span>
+
+    <span class="n">data</span> <span class="o">=</span> <span class="n">pkgutil</span><span class="o">.</span><span class="n">get_data</span><span class="p">(</span><span class="s2">&quot;kuibit&quot;</span><span class="p">,</span> <span class="s2">&quot;data/aLIGO_PLUS.dat&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s2">&quot;utf8&quot;</span><span class="p">)</span>
+
+    <span class="c1"># aLIGO distributes Amplitude Spectral Densities</span>
+    <span class="n">asd</span> <span class="o">=</span> <span class="n">load_FrequencySeries</span><span class="p">(</span><span class="n">StringIO</span><span class="p">(</span><span class="n">data</span><span class="p">))</span>
+    <span class="n">psd</span> <span class="o">=</span> <span class="n">asd</span> <span class="o">**</span> <span class="mi">2</span>
+
+    <span class="c1"># Resample on the requested frequencies. CE1 has some spikes, so it is</span>
+    <span class="c1"># better to not use splines.</span>
+    <span class="n">psd</span><span class="o">.</span><span class="n">resample</span><span class="p">(</span><span class="n">freqs</span><span class="p">,</span> <span class="n">piecewise_constant</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">psd</span></div>
+</pre></div>
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="../../index.html">
+              <img class="logo" src="../../_static/logo.png" alt="Logo"/>
+            </a></p>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">kuibit 1.3.0-alpha0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../index.html" >Module code</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">kuibit.sensitivity_curves</a></li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2020-2021, Gabriele Bozzola.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 3.5.4.
+    </div>
+  </body>
+</html>
