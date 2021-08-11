@@ -1435,7 +1435,7 @@ class AllGridFunctions:
                     # except block, and keep only the variables that do not
                     # throw errors.
                     try:
-                        # TODO (FEATURE): Avoid reading headers twice
+                        # TODO (PERFORMANCE): Avoid reading headers twice
                         #
                         # Here we scan the headers, we should not do this work again
                         # when we deal with the single variables.
