@@ -91,6 +91,7 @@ Scripts:
 * `picklify.py`
 * `plot_1d_slice.py`
 * `plot_grid_expr.py`
+* `plot_phi_time_averaged.py`
 * `plot_gw_angular_momentum.py`
 * `print_grid_point_minmax.py`
 

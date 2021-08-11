@@ -34,6 +34,7 @@ placing them in you `$PATH` so that they can be used for your simulations.
 | `plot_gw_linear_momentum`     | Plots the linear momentum lost by gravitational-wave as measured by a given detector as a function of time.                |
 | `plot_physical_time_per_hour` | Plots the computational speed of the simulation by plotting how much physical time is simulated in one hour and one day.   |
 | `plot_timeseries`             | Plots any timeseries among the ones output by IOASCII (e.g., scalars, reductions).                                         |
+| `plot_phi_time_averaged`      | Plots the azimuthal and time average of a 2D quantity. Optionally take logarithm and/or absolute value.                    |
 | `plot_phi_lm`                 | Plots the (l,m) mode of one of Phi0, Phi1, or Phi2 as measured from a given detector.                                      |
 | `plot_psi4_lm`                | Plots the (l,m) mode of Psi4 as measured from a given detector.                                                            |
 | `plot_strain_lm`              | Plots the (l,m) mode of the gravitational-wave strain as measured from a given detector from Psi4.                         |
