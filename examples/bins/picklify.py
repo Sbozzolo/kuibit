@@ -51,6 +51,12 @@ file will be overwritten."""
     sim = SimDir(args.datadir, ignore_symlinks=args.ignore_symlinks)
     logger.debug("Prepared SimDir")
 
+    # Now an interesting trick: we force the evaluation of all the subcomponents
+    # of SimDir, so that we can save them. To do this, we simply call the
+    # __str__ method.
+    _ = str(sim)
+    logger.debug("Filled SimDir")
+
     sim.save(args.pickle_file)
 
     logger.debug("DONE")
