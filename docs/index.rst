@@ -18,6 +18,8 @@ contains video tutorials on ``kuibit``.
 The :doc:`testimonials page <testimonials>` collects short user's reviews about
 ``kuibit``.
 
+New to ``kuibit``? Read :doc:`First steps with kuibit <first_steps>`.
+
 Summary of Features
 -------------------
 
@@ -88,6 +90,7 @@ Usage
 .. toctree::
    :maxdepth: 1
 
+   first_steps.rst
    simdir.rst
    series.rst
    cactus_scalars.rst
