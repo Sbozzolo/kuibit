@@ -1204,6 +1204,8 @@
 <span class="sd">        :returns: The positions of the data bins and the distribution.</span>
 <span class="sd">        :rtype:   tuple of two 1D NumPy arrays.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Function from Wolfgang Kastaun&#39;s PostCactus</span>
+
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_complex</span><span class="p">():</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Histogram only works with real data&quot;</span><span class="p">)</span>
 
@@ -1259,6 +1261,8 @@
 <span class="sd">        :returns: Data values corresponding to the given fractions.</span>
 <span class="sd">        :rtype:   1D NumPy array</span>
 <span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Function from Wolfgang Kastaun&#39;s PostCactus</span>
+
         <span class="n">hist_values</span><span class="p">,</span> <span class="n">bin_edges</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">histogram</span><span class="p">(</span>
             <span class="n">min_value</span><span class="o">=</span><span class="n">min_value</span><span class="p">,</span>
             <span class="n">max_value</span><span class="o">=</span><span class="n">max_value</span><span class="p">,</span>
@@ -1299,36 +1303,53 @@
             <span class="k">return</span> <span class="n">percentiles</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
         <span class="k">return</span> <span class="n">percentiles</span></div>
 
-<div class="viewcode-block" id="UniformGridData.mask_applied"><a class="viewcode-back" href="../../grid_data_ref.html#kuibit.grid_data.UniformGridData.mask_applied">[docs]</a>    <span class="k">def</span> <span class="nf">mask_applied</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mask</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Return a new series with given mask applied to the data.</span>
+<div class="viewcode-block" id="UniformGridData.mask_applied"><a class="viewcode-back" href="../../grid_data_ref.html#kuibit.grid_data.UniformGridData.mask_applied">[docs]</a>    <span class="k">def</span> <span class="nf">mask_applied</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mask</span><span class="p">,</span> <span class="n">ignore_existing</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Return a new :py:class:`~.UniformGridData` with given mask applied to the</span>
+<span class="sd">        data.</span>
 
-<span class="sd">        The previous mask (if present) will be ignored.</span>
+<span class="sd">        If a previous mask already exists, the new mask will be added on top,</span>
+<span class="sd">        unless ``ignore_existing`` is True.</span>
 
 <span class="sd">        :param mask: Array of booleans that identify where the data is invalid.</span>
 <span class="sd">                     This can be obtained with the method :py:meth:`~.mask`.</span>
 <span class="sd">        :type mask: NumPy array</span>
+
+<span class="sd">        :param ignore_existing: If True, overwrite any previously existing mask.</span>
+<span class="sd">        :type ignore_existing: bool</span>
 
 <span class="sd">        :returns: New grid data with mask applied.</span>
 <span class="sd">        :rtype: :py:class:`~.UniformGridData`</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_masked</span><span class="p">()</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">ignore_existing</span><span class="p">:</span>
+            <span class="n">mask</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ma</span><span class="o">.</span><span class="n">mask_or</span><span class="p">(</span><span class="n">mask</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">mask</span><span class="p">)</span>
+
         <span class="k">return</span> <span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)(</span><span class="bp">self</span><span class="o">.</span><span class="n">grid</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ma</span><span class="o">.</span><span class="n">MaskedArray</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="n">mask</span><span class="o">=</span><span class="n">mask</span><span class="p">))</span></div>
 
-<div class="viewcode-block" id="UniformGridData.mask_apply"><a class="viewcode-back" href="../../grid_data_ref.html#kuibit.grid_data.UniformGridData.mask_apply">[docs]</a>    <span class="k">def</span> <span class="nf">mask_apply</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mask</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Apply given mask.</span>
+<div class="viewcode-block" id="UniformGridData.mask_apply"><a class="viewcode-back" href="../../grid_data_ref.html#kuibit.grid_data.UniformGridData.mask_apply">[docs]</a>    <span class="k">def</span> <span class="nf">mask_apply</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mask</span><span class="p">,</span> <span class="n">ignore_existing</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Apply the given mask.</span>
+
+<span class="sd">        If a previous mask already exists, the new mask will be added on top,</span>
+<span class="sd">        unless ``ignore_existing`` is True.</span>
 
 <span class="sd">        :param mask: Array of booleans that identify where the data is invalid.</span>
 <span class="sd">                     This can be obtained with the method :py:meth:`~.mask`.</span>
 <span class="sd">        :type mask: NumPy array</span>
+
+<span class="sd">        :param ignore_existing: If True, overwrite any previously existing mask.</span>
+<span class="sd">        :type ignore_existing: bool</span>
+
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_apply_to_self</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mask_applied</span><span class="p">,</span> <span class="n">mask</span><span class="p">)</span></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_apply_to_self</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">mask_applied</span><span class="p">,</span> <span class="n">mask</span><span class="p">,</span> <span class="n">ignore_existing</span><span class="o">=</span><span class="n">ignore_existing</span>
+        <span class="p">)</span></div>
 
 <div class="viewcode-block" id="UniformGridData.partial_differentiated"><a class="viewcode-back" href="../../grid_data_ref.html#kuibit.grid_data.UniformGridData.partial_differentiated">[docs]</a>    <span class="k">def</span> <span class="nf">partial_differentiated</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">direction</span><span class="p">,</span> <span class="n">order</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Return a :py:class:`~.UniformGridData` that is the numerical</span>
 <span class="sd">        order-differentiation of the present grid_data along a given direction.</span>
 <span class="sd">        (``order`` = number of derivatives, ie ``order=2`` is second derivative)</span>
 
-<span class="sd">        The derivative is calulated as centered differencing in the interior</span>
+<span class="sd">        The derivative is calculated as centered differencing in the interior</span>
 <span class="sd">        and one-sided derivatives at the boundaries. Higher orders are computed</span>
 <span class="sd">        applying the same rule recursively.</span>
 
@@ -2284,15 +2305,19 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)(</span><span class="bp">self</span><span class="o">.</span><span class="n">all_components</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="HierarchicalGridData.mask_applied"><a class="viewcode-back" href="../../grid_data_ref.html#kuibit.grid_data.HierarchicalGridData.mask_applied">[docs]</a>    <span class="k">def</span> <span class="nf">mask_applied</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mask</span><span class="p">):</span>
+<div class="viewcode-block" id="HierarchicalGridData.mask_applied"><a class="viewcode-back" href="../../grid_data_ref.html#kuibit.grid_data.HierarchicalGridData.mask_applied">[docs]</a>    <span class="k">def</span> <span class="nf">mask_applied</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mask</span><span class="p">,</span> <span class="n">ignore_existing</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Return a new grid data with given mask applied to the data.</span>
 
-<span class="sd">        The previous mask (if present) will be ignored.</span>
+<span class="sd">        If a previous mask already exists, the new mask will be added on top,</span>
+<span class="sd">        unless ``ignore_existing`` is True.</span>
 
 <span class="sd">        :param mask: List of arrays of booleans (one per component) that identify</span>
 <span class="sd">                     where the data is invalid.</span>
 <span class="sd">                     This can be obtained with the method :py:meth:`~.mask`.</span>
 <span class="sd">        :type mask: list of NumPy array</span>
+
+<span class="sd">        :param ignore_existing: If True, overwrite any previously existing mask.</span>
+<span class="sd">        :type ignore_existing: bool</span>
 
 <span class="sd">        :returns: New grid data with mask applied.</span>
 <span class="sd">        :rtype: :py:class:`~.HierarchicalGridData`</span>
@@ -2300,20 +2325,29 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)(</span>
             <span class="p">[</span>
-                <span class="n">comp</span><span class="o">.</span><span class="n">mask_applied</span><span class="p">(</span><span class="n">mask_comp</span><span class="p">)</span>
+                <span class="n">comp</span><span class="o">.</span><span class="n">mask_applied</span><span class="p">(</span><span class="n">mask_comp</span><span class="p">,</span> <span class="n">ignore_existing</span><span class="o">=</span><span class="n">ignore_existing</span><span class="p">)</span>
                 <span class="k">for</span> <span class="n">comp</span><span class="p">,</span> <span class="n">mask_comp</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">all_components</span><span class="p">,</span> <span class="n">mask</span><span class="p">)</span>
             <span class="p">]</span>
         <span class="p">)</span></div>
 
-<div class="viewcode-block" id="HierarchicalGridData.mask_apply"><a class="viewcode-back" href="../../grid_data_ref.html#kuibit.grid_data.HierarchicalGridData.mask_apply">[docs]</a>    <span class="k">def</span> <span class="nf">mask_apply</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mask</span><span class="p">):</span>
+<div class="viewcode-block" id="HierarchicalGridData.mask_apply"><a class="viewcode-back" href="../../grid_data_ref.html#kuibit.grid_data.HierarchicalGridData.mask_apply">[docs]</a>    <span class="k">def</span> <span class="nf">mask_apply</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mask</span><span class="p">,</span> <span class="n">ignore_existing</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Apply given mask.</span>
+
+<span class="sd">        If a previous mask already exists, the new mask will be added on top,</span>
+<span class="sd">        unless ``ignore_existing`` is True.</span>
 
 <span class="sd">        :param mask: List of arrays of booleans (one per component) that identify</span>
 <span class="sd">                     where the data is invalid.</span>
 <span class="sd">                     This can be obtained with the method :py:meth:`~.mask`.</span>
 <span class="sd">        :type mask: list of NumPy array</span>
+
+<span class="sd">        :param ignore_existing: If True, overwrite any previously existing mask.</span>
+<span class="sd">        :type ignore_existing: bool</span>
+
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_apply_to_self</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mask_applied</span><span class="p">,</span> <span class="n">mask</span><span class="p">)</span></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_apply_to_self</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">mask_applied</span><span class="p">,</span> <span class="n">mask</span><span class="p">,</span> <span class="n">ignore_existing</span><span class="o">=</span><span class="n">ignore_existing</span>
+        <span class="p">)</span></div>
 
     <span class="k">def</span> <span class="fm">__eq__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Check for equality.&quot;&quot;&quot;</span>

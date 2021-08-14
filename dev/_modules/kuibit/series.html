@@ -726,29 +726,44 @@
         <span class="sd">&quot;&quot;&quot;Remove masked values.&quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_apply_to_self</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mask_removed</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="BaseSeries.mask_applied"><a class="viewcode-back" href="../../series_ref.html#kuibit.series.BaseSeries.mask_applied">[docs]</a>    <span class="k">def</span> <span class="nf">mask_applied</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mask</span><span class="p">):</span>
+<div class="viewcode-block" id="BaseSeries.mask_applied"><a class="viewcode-back" href="../../series_ref.html#kuibit.series.BaseSeries.mask_applied">[docs]</a>    <span class="k">def</span> <span class="nf">mask_applied</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mask</span><span class="p">,</span> <span class="n">ignore_existing</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Return a new series with given mask applied to the data.</span>
 
-<span class="sd">        The previous mask (if present) will be ignored.</span>
+<span class="sd">        If a previous mask already exists, the new mask will be added on top,</span>
+<span class="sd">        unless ``ignore_existing`` is True.</span>
 
 <span class="sd">        :param mask: Array of booleans that identify where the data is invalid.</span>
 <span class="sd">                     This can be obtained with the method :py:meth:`~.mask`.</span>
 <span class="sd">        :type mask: 1D NumPy array</span>
+
+<span class="sd">        :param ignore_existing: If True, overwrite any previously existing mask.</span>
+<span class="sd">        :type ignore_existing: bool</span>
 
 <span class="sd">        :returns: New series with mask applied.</span>
 <span class="sd">        :rtype: :py:class:`~.BaseSeries`</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_masked</span><span class="p">()</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">ignore_existing</span><span class="p">:</span>
+            <span class="n">mask</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ma</span><span class="o">.</span><span class="n">mask_or</span><span class="p">(</span><span class="n">mask</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">mask</span><span class="p">)</span>
+
         <span class="k">return</span> <span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)(</span><span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ma</span><span class="o">.</span><span class="n">MaskedArray</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">y</span><span class="p">,</span> <span class="n">mask</span><span class="o">=</span><span class="n">mask</span><span class="p">),</span> <span class="kc">True</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="BaseSeries.mask_apply"><a class="viewcode-back" href="../../series_ref.html#kuibit.series.BaseSeries.mask_apply">[docs]</a>    <span class="k">def</span> <span class="nf">mask_apply</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mask</span><span class="p">):</span>
+<div class="viewcode-block" id="BaseSeries.mask_apply"><a class="viewcode-back" href="../../series_ref.html#kuibit.series.BaseSeries.mask_apply">[docs]</a>    <span class="k">def</span> <span class="nf">mask_apply</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mask</span><span class="p">,</span> <span class="n">ignore_existing</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Apply given mask.</span>
+
+<span class="sd">        If a previous mask already exists, the new mask will be added on top,</span>
+<span class="sd">        unless ``ignore_existing`` is True.</span>
 
 <span class="sd">        :param mask: Array of booleans that identify where the data is invalid.</span>
 <span class="sd">                     This can be obtained with the method :py:meth:`~.mask`.</span>
 <span class="sd">        :type mask: 1D NumPy array</span>
+
+<span class="sd">        :param ignore_existing: If True, overwrite any previously existing mask.</span>
+<span class="sd">        :type ignore_existing: bool</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_apply_to_self</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mask_applied</span><span class="p">,</span> <span class="n">mask</span><span class="p">)</span></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_apply_to_self</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">mask_applied</span><span class="p">,</span> <span class="n">mask</span><span class="p">,</span> <span class="n">ignore_existing</span><span class="o">=</span><span class="n">ignore_existing</span>
+        <span class="p">)</span></div>
 
 <div class="viewcode-block" id="BaseSeries.integrated"><a class="viewcode-back" href="../../series_ref.html#kuibit.series.BaseSeries.integrated">[docs]</a>    <span class="k">def</span> <span class="nf">integrated</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dx</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Return a series that is the integral computed with method of</span>
