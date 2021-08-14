@@ -464,18 +464,26 @@ class TestUniformGridData(unittest.TestCase):
 
         data = np.array([i * np.linspace(1, 5, 51) for i in range(101)])
 
-        data_masked = np.ma.log10(data)
+        data_masked = np.ma.masked_less(data, 3)
 
         ug_data_mask = gd.UniformGridData(self.geom, data_masked)
 
         # The log10 will produce warnings because of the zeros in the data
-        with warnings.catch_warnings():
-            warnings.simplefilter("ignore", category=RuntimeWarning)
-            ug_data_nomask = gd.UniformGridData(self.geom, np.log10(data))
+        ug_data_nomask = gd.UniformGridData(self.geom, data)
 
         ug_data_nomask.mask_apply(ug_data_mask.mask)
 
         self.assertEqual(ug_data_mask, ug_data_nomask)
+
+        # Now let's add another mask on top
+
+        data_masked2 = np.ma.masked_less(data, 2)
+
+        ug_data_mask2 = gd.UniformGridData(self.geom, data_masked2)
+
+        ug_data_nomask.mask_apply(ug_data_mask2.mask)
+
+        self.assertEqual(ug_data_mask2, ug_data_nomask)
 
     def test_flat_dimensions_remove(self):
 

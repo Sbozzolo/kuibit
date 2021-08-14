@@ -1146,13 +1146,24 @@ class TestTimeseries(unittest.TestCase):
     def test_mask_apply(self):
 
         ts_mask = ts.TimeSeries(
-            self.times, np.ma.masked_less_equal(self.times, 0)
+            self.times, np.ma.masked_less_equal(self.times, 1)
         )
         ts_nomask = ts.TimeSeries(self.times, self.times)
 
         ts_nomask.mask_apply(ts_mask.mask)
 
         self.assertEqual(ts_mask, ts_nomask)
+
+        # Check with series already masked, by applying a second
+        # mask
+
+        ts_mask05 = ts.TimeSeries(
+            self.times, np.ma.masked_less_equal(self.times, 0.5)
+        )
+
+        ts_nomask.mask_apply(ts_mask05.mask)
+
+        self.assertEqual(ts_mask05, ts_nomask)
 
     def test_unfold_phase(self):
 

@@ -679,29 +679,44 @@ class BaseSeries(BaseNumerical):
         """Remove masked values."""
         self._apply_to_self(self.mask_removed)
 
-    def mask_applied(self, mask):
+    def mask_applied(self, mask, ignore_existing=False):
         """Return a new series with given mask applied to the data.
 
-        The previous mask (if present) will be ignored.
+        If a previous mask already exists, the new mask will be added on top,
+        unless ``ignore_existing`` is True.
 
         :param mask: Array of booleans that identify where the data is invalid.
                      This can be obtained with the method :py:meth:`~.mask`.
         :type mask: 1D NumPy array
+
+        :param ignore_existing: If True, overwrite any previously existing mask.
+        :type ignore_existing: bool
 
         :returns: New series with mask applied.
         :rtype: :py:class:`~.BaseSeries`
 
         """
+        if self.is_masked() and not ignore_existing:
+            mask = np.ma.mask_or(mask, self.mask)
+
         return type(self)(self.x, np.ma.MaskedArray(self.y, mask=mask), True)
 
-    def mask_apply(self, mask):
+    def mask_apply(self, mask, ignore_existing=False):
         """Apply given mask.
+
+        If a previous mask already exists, the new mask will be added on top,
+        unless ``ignore_existing`` is True.
 
         :param mask: Array of booleans that identify where the data is invalid.
                      This can be obtained with the method :py:meth:`~.mask`.
         :type mask: 1D NumPy array
+
+        :param ignore_existing: If True, overwrite any previously existing mask.
+        :type ignore_existing: bool
         """
-        self._apply_to_self(self.mask_applied, mask)
+        self._apply_to_self(
+            self.mask_applied, mask, ignore_existing=ignore_existing
+        )
 
     def integrated(self, dx=None):
         """Return a series that is the integral computed with method of

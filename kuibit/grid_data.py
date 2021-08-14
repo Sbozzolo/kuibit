@@ -1157,6 +1157,8 @@ class UniformGridData(BaseNumerical):
         :returns: The positions of the data bins and the distribution.
         :rtype:   tuple of two 1D NumPy arrays.
         """
+        # Function from Wolfgang Kastaun's PostCactus
+
         if self.is_complex():
             raise ValueError("Histogram only works with real data")
 
@@ -1212,6 +1214,8 @@ class UniformGridData(BaseNumerical):
         :returns: Data values corresponding to the given fractions.
         :rtype:   1D NumPy array
         """
+        # Function from Wolfgang Kastaun's PostCactus
+
         hist_values, bin_edges = self.histogram(
             min_value=min_value,
             max_value=max_value,
@@ -1252,36 +1256,53 @@ class UniformGridData(BaseNumerical):
             return percentiles[0]
         return percentiles
 
-    def mask_applied(self, mask):
-        """Return a new series with given mask applied to the data.
+    def mask_applied(self, mask, ignore_existing=False):
+        """Return a new :py:class:`~.UniformGridData` with given mask applied to the
+        data.
 
-        The previous mask (if present) will be ignored.
+        If a previous mask already exists, the new mask will be added on top,
+        unless ``ignore_existing`` is True.
 
         :param mask: Array of booleans that identify where the data is invalid.
                      This can be obtained with the method :py:meth:`~.mask`.
         :type mask: NumPy array
+
+        :param ignore_existing: If True, overwrite any previously existing mask.
+        :type ignore_existing: bool
 
         :returns: New grid data with mask applied.
         :rtype: :py:class:`~.UniformGridData`
 
         """
+        if self.is_masked() and not ignore_existing:
+            mask = np.ma.mask_or(mask, self.mask)
+
         return type(self)(self.grid, np.ma.MaskedArray(self.data, mask=mask))
 
-    def mask_apply(self, mask):
-        """Apply given mask.
+    def mask_apply(self, mask, ignore_existing=False):
+        """Apply the given mask.
+
+        If a previous mask already exists, the new mask will be added on top,
+        unless ``ignore_existing`` is True.
 
         :param mask: Array of booleans that identify where the data is invalid.
                      This can be obtained with the method :py:meth:`~.mask`.
         :type mask: NumPy array
+
+        :param ignore_existing: If True, overwrite any previously existing mask.
+        :type ignore_existing: bool
+
         """
-        self._apply_to_self(self.mask_applied, mask)
+        self._apply_to_self(
+            self.mask_applied, mask, ignore_existing=ignore_existing
+        )
 
     def partial_differentiated(self, direction, order=1):
         """Return a :py:class:`~.UniformGridData` that is the numerical
         order-differentiation of the present grid_data along a given direction.
         (``order`` = number of derivatives, ie ``order=2`` is second derivative)
 
-        The derivative is calulated as centered differencing in the interior
+        The derivative is calculated as centered differencing in the interior
         and one-sided derivatives at the boundaries. Higher orders are computed
         applying the same rule recursively.
 
@@ -2237,15 +2258,19 @@ class HierarchicalGridData(BaseNumerical):
         """
         return type(self)(self.all_components)
 
-    def mask_applied(self, mask):
+    def mask_applied(self, mask, ignore_existing=False):
         """Return a new grid data with given mask applied to the data.
 
-        The previous mask (if present) will be ignored.
+        If a previous mask already exists, the new mask will be added on top,
+        unless ``ignore_existing`` is True.
 
         :param mask: List of arrays of booleans (one per component) that identify
                      where the data is invalid.
                      This can be obtained with the method :py:meth:`~.mask`.
         :type mask: list of NumPy array
+
+        :param ignore_existing: If True, overwrite any previously existing mask.
+        :type ignore_existing: bool
 
         :returns: New grid data with mask applied.
         :rtype: :py:class:`~.HierarchicalGridData`
@@ -2253,20 +2278,29 @@ class HierarchicalGridData(BaseNumerical):
         """
         return type(self)(
             [
-                comp.mask_applied(mask_comp)
+                comp.mask_applied(mask_comp, ignore_existing=ignore_existing)
                 for comp, mask_comp in zip(self.all_components, mask)
             ]
         )
 
-    def mask_apply(self, mask):
+    def mask_apply(self, mask, ignore_existing=False):
         """Apply given mask.
+
+        If a previous mask already exists, the new mask will be added on top,
+        unless ``ignore_existing`` is True.
 
         :param mask: List of arrays of booleans (one per component) that identify
                      where the data is invalid.
                      This can be obtained with the method :py:meth:`~.mask`.
         :type mask: list of NumPy array
+
+        :param ignore_existing: If True, overwrite any previously existing mask.
+        :type ignore_existing: bool
+
         """
-        self._apply_to_self(self.mask_applied, mask)
+        self._apply_to_self(
+            self.mask_applied, mask, ignore_existing=ignore_existing
+        )
 
     def __eq__(self, other):
         """Check for equality."""
