@@ -17,7 +17,6 @@
 
 import os
 import unittest
-from unittest.mock import patch
 
 # We use the agg backend because it should work everywhere
 import matplotlib
@@ -148,7 +147,7 @@ class TestVisualizeMatplotlib(unittest.TestCase):
         self.assertEqual(ret3[1]["xlabel"], "x")
 
         # Test with resample=True
-        ret5 = dec_func_grid(
+        _ = dec_func_grid(
             data=cactus_ascii,
             iteration=0,
             shape=ugd.shape,

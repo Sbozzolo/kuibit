@@ -159,7 +159,7 @@ class TestCactusScalar(unittest.TestCase):
         # Test scanning header
         path = "tests/tov/output-0000/static_tov/vel[0].maximum.asc"
         asc = cs.OneScalar(path)
-        vel = asc.load("vel[0]")
+        _ = asc.load("vel[0]")
 
     def test_AllScalars(self):
 
