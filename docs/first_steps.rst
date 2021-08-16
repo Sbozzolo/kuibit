@@ -62,7 +62,8 @@ them in the directory you want to analyze.
 You can do a lot of things with the examples. The complete list with a short
 description is available `on GitHub
 <https://github.com/Sbozzolo/kuibit/tree/master/examples>`_. Examples have also
-their space in the documentation.
+their space in the documentation (see, :doc:`Scripts <index>` and :doc:`Movies
+<index>`).
 
 Here, we will assume you have a simulation in the folder ``my_sim`` (typically
 it will contain the subdirectories ``output-0000``, ``output-0001``, and so on).
@@ -72,19 +73,26 @@ We will refer to this as the *simulation directory*, or the *data directory*
 There are two categories of examples: scripts, and movies.
 
 Scripts
--------
+^^^^^^^
 
 Scripts are valid Python codes that use ``kuibit`` to achieve a goal: most of
 the scripts are targeted towards generating a plot. All the examples share some
 common features. In the following, we will consider ``plot_grid_var.py`` to
 illustrate how examples work.
 
-* The examples are command-line scripts. If your examples are in your PATHs, you
+* The examples are command-line scripts. If your examples are in your ``PATH``, you
   can call them in your shell with
 
 .. code-block:: sh
 
    plot_grid_var.py
+
+
+  If you saved them in the folder,
+
+.. code-block:: sh
+
+   ./plot_grid_var.py
 
 * The examples are designed to be as general and flexible as possible. For
   instance, they should work on any simulation data, and they provide a lot of
@@ -174,26 +182,27 @@ This is a lot to digest, so let's focus on the most important flags.
 1. The header describes briefly what the script is supposed to do and
    discusses some peculiarities.
 
-2. ``--datadir``: Where the data lives. In our case, it is the folder ``my_sim``.
-   You can specify the top-level folder, or the specific subfolder (e.g.,
-   ``my_sim/output-0000``), if you know exactly where the iteration you are
-   interested in lives. Specifying the subfolder speeds up the discovery
-   algorithm. Namely, organizing the data across the different subdirectories.
-   This can be very significant for large simulations (alternatively, you can use
+2. ``--datadir``: Where the data lives. In our case, it is the folder
+   ``my_sim``. You can specify the top-level folder, or the specific subfolder
+   (e.g., ``my_sim/output-0000``), if you know exactly where the iteration you
+   are interested in lives. Specifying the subfolder speeds up the discovery
+   algorithm (organizing the data across the different subdirectories). This can
+   be very significant for large simulations (alternatively, you can use
    pickles, see later).
 
-3. ``--outdir``: Where to save the output. By default, this is the location where
-   the script is run.
+3. ``--outdir``: Where to save the output. By default, this is the location
+   where the script is run. If ``--figname`` is not specified, the output will
+   have a default name
 
 4. ``--pickle-file``: Scanning a simulation directory and all its subdirectories
    is an expensive operation. If the same simulation is analyzed with different
-   scripts, it is convenient to save some things to disk. These are saved as
+   scripts, it is convenient to save some information to disk. This is saved as
    Python pickle file. Passing this flag means that the pickle file is used and
-   the directories are not scanned. If there's a mismatch between what the pickle
-   file contains and the actual directories, that would possibly lead to an
-   error. Hence, it is best to use pickle file only on simulations that have
-   completed, or the it is best to regenerate the pickle file every time the data
-   changes. This can be done with the picklify utility.
+   the directories are not scanned. If there's a mismatch between what the
+   pickle file contains and the actual directories, that would possibly lead to
+   an error. Hence, it is best to use pickle file only on simulations that have
+   completed, or the it is best to regenerate the pickle file every time the
+   data changes. This can be done with the picklify utility.
 
 5. ``--fig-extension``: By default, images are saves as pngs. If tikz is passed,
    the images are exported to LaTeX. This variable can be set with a
@@ -228,7 +237,7 @@ Combining all the different flags, a possible invocation of the example would be
                     --interpolation-method bicubic --verbose
 
 Movies
--------
+^^^^^^^^
 
 The examples in ``kuibit`` use `motionpicture`_ to produce videos.
 ``motionpicture`` is a Python package that helps developers render movies from
@@ -267,7 +276,13 @@ about the details of ``kuibit`` as a library.
    The examples aim to be general, so they contain some boilerplate and several
    if/else statements. These are not essential.
 
+Script
+^^^^^^
+
 Let's walk through one example: let's try to reproduce ``plot_grid_var.py``.
+Since we want to work with grid data, the relevant tutorials are the one on
+:doc:`SimDir <tutorials/simdir>` and the one one :doc:`grid data
+<tutorials/grid_data>`.
 
 First, we need import the relevant modules. In this case, we are only going to
 need :py:mod:`~.simdir` and :py:mod:`~.visualize_matplotlib`. We are also going
@@ -279,9 +294,8 @@ to import ``matplotlib``.
    from kuibit import visualize_matplotlib as viz
    import matplotlib.pyplot as plt
 
-Next, we are going to initialize a :py:class:`~.SimDir` object. This is how all
-the codes start, because :py:class:`~.SimDir` is how we interface with
-the simulation.
+Next, we initialize a :py:class:`~.SimDir` object. This is how all the codes
+start, since :py:class:`~.SimDir` is how we interface with the simulation.
 
 .. code-block::
 
@@ -300,7 +314,7 @@ do we want to read, or what plane, and so on.
    PLANE = "xy"
    X0 = -100, -100
    X1 = 100, 100
-   RESOLUTION = 500, 500
+   SHAPE = 500, 500
    LOGSCALE = True
    VMIN, VMAX = -10, 1
 
@@ -308,13 +322,13 @@ do we want to read, or what plane, and so on.
 region we want to plot, in computational units (the same units of the
 simulation). ``LOGSCALE`` will specify if we want to use base-10 logarithm or
 not, and ``VMIN``, ``VMAX`` define the range where we want to plot (in
-log). ``RESOLUTION`` will be discussed in the next paragraph.
+log). ``SHAPE`` will be discussed in the next paragraph.
 
 We can finally read the variable as :py:class:`~.HierarchicalGridData`. This is
 a complex object containing all the various components and refinement levels.
 This object cannot be plotted directly, but it needs to be resampled to a
 :py:class:`~.UniformGridData`, which is a simpler object that contains a regular
-grid and data defined on this grid. The variable ``RESOLUTION`` controls the
+grid and data defined on this grid. The variable ``SHAPE`` controls the
 resolution of this grid.
 
 .. code-block::
@@ -327,7 +341,7 @@ You can plot this quantity directly with :py:func:`~.plot_color`:
 .. code-block::
 
    plot_color(var,
-              shape=RESOLUTION,
+              shape=SHAPE,
               x0=X0,
               x1=X1,
               vmin=VMIN,
@@ -343,18 +357,23 @@ a title to the plot:
    plt.savefig("plot.pdf")
 
 This is (almost) the minimum code possible to plot any given iteration of any
-given grid function.
+given grid function. You should now try to run it and compare it with the output
+with the example. Next, you can have a look at the code of example to see what
+other options are available.
+
+Movie
+^^^^^^
 
 Let us use ``motionpicture`` to make a movie out of this. See :doc:`A quick
 introduction to motionpicture <motionpicture>` for more details.
 
 To use ``mopi``, we first to write a *movie file*, which is just a regular
 Python file that defines a class ``MOPIMovie`` with three methods. The first is
-``__init__(self, args)_``, which takes a ``Name space`` containing the
+``__init__(self, args)_``, which takes a ``Namespace`` containing the
 command-line arguments passed (we are not going to use any here). The
 ``__init___`` does all the preparatory work needed to generate frames. In this
 case, we want to initialize the :py:class:`~.SimDir` and the ``reader``, which
-are the common work needed to generate a frame.
+are the common work needed to make a frame.
 
 .. code-block::
 
@@ -370,14 +389,14 @@ are the common work needed to generate a frame.
 
            self.X0 = -100, -100
            self.X1 = 100, 100
-           self.RESOLUTION = 500, 500
+           self.SHAPE = 500, 500
            self.LOGSCALE = True
            self.VMIN, self.VMAX = -10, 1
 
            self.reader = sim("my_sim").gridfunctions[PLANE][VAR]
 
 
-We made ``X0``, ``X1``, ``RESOLUTION``, and ``reader`` attributes (with
+We made ``X0``, ``X1``, ``SHAPE``, and ``reader`` attributes (with
 ``self.``) because we want to access them in the other methods. The second
 method is ``get_frames(self)`` which defines the list of frames that compose
 the movie. In this case, we are going to use the iterations available
@@ -430,9 +449,9 @@ Here we collect vocabulary that you might find used in ``kuibit``.
 * :py:class:`~.HierarchicalGridData`: collection of components at possibly
   different refinements that form a grid with several levels.
 * `motionpicture`_ (mopi): external Python program to render movies.
-* Origin (corner): bottom left (top right) cell in a center-centered grid
-* :py:class:`~.SimDir`: fundamental interface to the data in the simulation
-* Outdir: where to save the output of an example
+* Origin (corner): bottom left (top right) cell in a center-centered grid.
+* :py:class:`~.SimDir`: fundamental interface to the data in the simulation.
+* Outdir: where to save the output of an example.
 * Pickle: binary file where a :py:class:`~.SimDir` can be saved.
 * TikZ: package to render graphics in LaTeX. ``kuibit`` can optionally output in
   this format.
@@ -440,7 +459,7 @@ Here we collect vocabulary that you might find used in ``kuibit``.
 
 .. _motionpicture: https://github.com/Sbozzolo/motionpicture
 
-Are you still confused?
+Still confused?
 -----------------------
 
 Feel free to ask questions in the Telegram group or send an email to
