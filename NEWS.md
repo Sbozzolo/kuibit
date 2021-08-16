@@ -58,6 +58,7 @@ array of booleans that identifies the valid data.
    finished.
 - Examples can now use pickles.
 - New CI workflow: linting.
+- New `First Steps` documentation page.
 
 #### Features
 

@@ -94,18 +94,19 @@ are (make sure to read below this list!):
 1. Fork `kubit` on GitHub.
 2. Create a branch. If your contribution is a bugfix, an improvement in
    documentation, or a small feature, you should branch off `master`. If it is a
-   significant improvement, you should branch off `experimental`.
+   significant improvement, you should branch off `next`.
 3. Work on your contribution, making sure that your commits are atomic.
 4. Add tests, all the test in `kuibit` must pass.
 5. Add documentation. This must include comments in the code, docstrings, user
    documentation, and possibly examples.
 6. Run `black -l 79`.
-7. Optionally, run other static analysis tools like `pylint`, and/or `flake8` to
+8. Run `isort --profile black`.
+9. Optionally, run other static analysis tools like `pylint`, and/or `flake8` to
    improve your code.
-8. Open a pull request.
-9. Your code will be reviewed by at least one maintainer, who may request some
-   additional changes. At the end of the review, the contribution will be
-   merged.
+10. Open a pull request.
+11. Your code will be reviewed by at least one maintainer, who may request some
+    additional changes. At the end of the review, the contribution will be
+    merged.
 
 This looks like an intimidating list, and if you have never done anything like
 this, it may feel overwhelming. These contribution rules are required to ensure
@@ -136,4 +137,8 @@ When releasing a new version, these are the steps:
   `minor`, `major`, `prepatch`, `preminor`, `premajor`, `prerelease`).
 - Edit `kuibit/__init__.py`.
 - Edit `tests/test_kuibit.py`.
-- Edit `docs/conf.py`
+- Edit `docs/conf.py`.
+- Update the dependencies with `poetry update`.
+- Run the tests.
+- Tag a release.
+- Clean up the release notes on `GitHub`.
