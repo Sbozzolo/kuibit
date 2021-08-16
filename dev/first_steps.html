@@ -100,24 +100,29 @@ the examples</span></a> page. Alternatively, you can simply save
 them in the directory you want to analyze.</p>
 <p>You can do a lot of things with the examples. The complete list with a short
 description is available <a class="reference external" href="https://github.com/Sbozzolo/kuibit/tree/master/examples">on GitHub</a>. Examples have also
-their space in the documentation.</p>
+their space in the documentation (see, <a class="reference internal" href="index.html"><span class="doc">Scripts</span></a> and <a class="reference internal" href="index.html"><span class="doc">Movies</span></a>).</p>
 <p>Here, we will assume you have a simulation in the folder <code class="docutils literal notranslate"><span class="pre">my_sim</span></code> (typically
 it will contain the subdirectories <code class="docutils literal notranslate"><span class="pre">output-0000</span></code>, <code class="docutils literal notranslate"><span class="pre">output-0001</span></code>, and so on).
 We will refer to this as the <em>simulation directory</em>, or the <em>data directory</em>
 (shortened as <em>datadir</em>).</p>
 <p>There are two categories of examples: scripts, and movies.</p>
-</div>
 <div class="section" id="scripts">
-<h2>Scripts<a class="headerlink" href="#scripts" title="Permalink to this headline">¶</a></h2>
+<h3>Scripts<a class="headerlink" href="#scripts" title="Permalink to this headline">¶</a></h3>
 <p>Scripts are valid Python codes that use <code class="docutils literal notranslate"><span class="pre">kuibit</span></code> to achieve a goal: most of
 the scripts are targeted towards generating a plot. All the examples share some
 common features. In the following, we will consider <code class="docutils literal notranslate"><span class="pre">plot_grid_var.py</span></code> to
 illustrate how examples work.</p>
 <ul class="simple">
-<li><p>The examples are command-line scripts. If your examples are in your PATHs, you
+<li><p>The examples are command-line scripts. If your examples are in your <code class="docutils literal notranslate"><span class="pre">PATH</span></code>, you
 can call them in your shell with</p></li>
 </ul>
-<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>plot_grid_var.py
+<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span> plot_grid_var.py
+
+
+If you saved them <span class="k">in</span> the folder,
+</pre></div>
+</div>
+<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>./plot_grid_var.py
 </pre></div>
 </div>
 <ul class="simple">
@@ -202,24 +207,25 @@ defaults.
 <ol class="arabic simple">
 <li><p>The header describes briefly what the script is supposed to do and
 discusses some peculiarities.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">--datadir</span></code>: Where the data lives. In our case, it is the folder <code class="docutils literal notranslate"><span class="pre">my_sim</span></code>.
-You can specify the top-level folder, or the specific subfolder (e.g.,
-<code class="docutils literal notranslate"><span class="pre">my_sim/output-0000</span></code>), if you know exactly where the iteration you are
-interested in lives. Specifying the subfolder speeds up the discovery
-algorithm. Namely, organizing the data across the different subdirectories.
-This can be very significant for large simulations (alternatively, you can use
+<li><p><code class="docutils literal notranslate"><span class="pre">--datadir</span></code>: Where the data lives. In our case, it is the folder
+<code class="docutils literal notranslate"><span class="pre">my_sim</span></code>. You can specify the top-level folder, or the specific subfolder
+(e.g., <code class="docutils literal notranslate"><span class="pre">my_sim/output-0000</span></code>), if you know exactly where the iteration you
+are interested in lives. Specifying the subfolder speeds up the discovery
+algorithm (organizing the data across the different subdirectories). This can
+be very significant for large simulations (alternatively, you can use
 pickles, see later).</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">--outdir</span></code>: Where to save the output. By default, this is the location where
-the script is run.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">--outdir</span></code>: Where to save the output. By default, this is the location
+where the script is run. If <code class="docutils literal notranslate"><span class="pre">--figname</span></code> is not specified, the output will
+have a default name</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">--pickle-file</span></code>: Scanning a simulation directory and all its subdirectories
 is an expensive operation. If the same simulation is analyzed with different
-scripts, it is convenient to save some things to disk. These are saved as
+scripts, it is convenient to save some information to disk. This is saved as
 Python pickle file. Passing this flag means that the pickle file is used and
-the directories are not scanned. If there’s a mismatch between what the pickle
-file contains and the actual directories, that would possibly lead to an
-error. Hence, it is best to use pickle file only on simulations that have
-completed, or the it is best to regenerate the pickle file every time the data
-changes. This can be done with the picklify utility.</p></li>
+the directories are not scanned. If there’s a mismatch between what the
+pickle file contains and the actual directories, that would possibly lead to
+an error. Hence, it is best to use pickle file only on simulations that have
+completed, or the it is best to regenerate the pickle file every time the
+data changes. This can be done with the picklify utility.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">--fig-extension</span></code>: By default, images are saves as pngs. If tikz is passed,
 the images are exported to LaTeX. This variable can be set with a
 environmental variable <code class="docutils literal notranslate"><span class="pre">KBIT_FIG_EXTENSION</span></code>.</p></li>
@@ -248,7 +254,7 @@ arguments can be mixed, but command-line arguments will have the precedence.</p>
 </div>
 </div>
 <div class="section" id="movies">
-<h2>Movies<a class="headerlink" href="#movies" title="Permalink to this headline">¶</a></h2>
+<h3>Movies<a class="headerlink" href="#movies" title="Permalink to this headline">¶</a></h3>
 <p>The examples in <code class="docutils literal notranslate"><span class="pre">kuibit</span></code> use <a class="reference external" href="https://github.com/Sbozzolo/motionpicture">motionpicture</a> to produce videos.
 <code class="docutils literal notranslate"><span class="pre">motionpicture</span></code> is a Python package that helps developers render movies from
 single frames. See <a class="reference internal" href="motionpicture.html"><span class="doc">A quick introduction to motionpicture</span></a>
@@ -268,6 +274,7 @@ in the previous section, with the difference that movies are produced with the
 <span class="pre">--help</span></code>). In particular, <code class="docutils literal notranslate"><span class="pre">--parallel</span></code> ensures that all the cores on the
 machine are used to render the various frames.</p>
 </div>
+</div>
 <div class="section" id="reproduce-the-examples">
 <h2>Reproduce the examples<a class="headerlink" href="#reproduce-the-examples" title="Permalink to this headline">¶</a></h2>
 <p>Now that you have run the examples, you can move to the next step, which is to
@@ -282,7 +289,11 @@ about the details of <code class="docutils literal notranslate"><span class="pre
 <p>The examples aim to be general, so they contain some boilerplate and several
 if/else statements. These are not essential.</p>
 </div>
-<p>Let’s walk through one example: let’s try to reproduce <code class="docutils literal notranslate"><span class="pre">plot_grid_var.py</span></code>.</p>
+<div class="section" id="script">
+<h3>Script<a class="headerlink" href="#script" title="Permalink to this headline">¶</a></h3>
+<p>Let’s walk through one example: let’s try to reproduce <code class="docutils literal notranslate"><span class="pre">plot_grid_var.py</span></code>.
+Since we want to work with grid data, the relevant tutorials are the one on
+<a class="reference internal" href="tutorials/simdir.html"><span class="doc">SimDir</span></a> and the one one <a class="reference internal" href="tutorials/grid_data.html"><span class="doc">grid data</span></a>.</p>
 <p>First, we need import the relevant modules. In this case, we are only going to
 need <a class="reference internal" href="simdir_ref.html#module-kuibit.simdir" title="kuibit.simdir"><code class="xref py py-mod docutils literal notranslate"><span class="pre">simdir</span></code></a> and <a class="reference internal" href="visualize_matplotlib_ref.html#module-kuibit.visualize_matplotlib" title="kuibit.visualize_matplotlib"><code class="xref py py-mod docutils literal notranslate"><span class="pre">visualize_matplotlib</span></code></a>. We are also going
 to import <code class="docutils literal notranslate"><span class="pre">matplotlib</span></code>.</p>
@@ -291,9 +302,8 @@ to import <code class="docutils literal notranslate"><span class="pre">matplotli
 <span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
 </pre></div>
 </div>
-<p>Next, we are going to initialize a <a class="reference internal" href="simdir_ref.html#kuibit.simdir.SimDir" title="kuibit.simdir.SimDir"><code class="xref py py-class docutils literal notranslate"><span class="pre">SimDir</span></code></a> object. This is how all
-the codes start, because <a class="reference internal" href="simdir_ref.html#kuibit.simdir.SimDir" title="kuibit.simdir.SimDir"><code class="xref py py-class docutils literal notranslate"><span class="pre">SimDir</span></code></a> is how we interface with
-the simulation.</p>
+<p>Next, we initialize a <a class="reference internal" href="simdir_ref.html#kuibit.simdir.SimDir" title="kuibit.simdir.SimDir"><code class="xref py py-class docutils literal notranslate"><span class="pre">SimDir</span></code></a> object. This is how all the codes
+start, since <a class="reference internal" href="simdir_ref.html#kuibit.simdir.SimDir" title="kuibit.simdir.SimDir"><code class="xref py py-class docutils literal notranslate"><span class="pre">SimDir</span></code></a> is how we interface with the simulation.</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">s</span> <span class="o">=</span> <span class="n">SimDir</span><span class="p">(</span><span class="s2">&quot;my_sim&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
@@ -306,7 +316,7 @@ do we want to read, or what plane, and so on.</p>
 <span class="n">PLANE</span> <span class="o">=</span> <span class="s2">&quot;xy&quot;</span>
 <span class="n">X0</span> <span class="o">=</span> <span class="o">-</span><span class="mi">100</span><span class="p">,</span> <span class="o">-</span><span class="mi">100</span>
 <span class="n">X1</span> <span class="o">=</span> <span class="mi">100</span><span class="p">,</span> <span class="mi">100</span>
-<span class="n">RESOLUTION</span> <span class="o">=</span> <span class="mi">500</span><span class="p">,</span> <span class="mi">500</span>
+<span class="n">SHAPE</span> <span class="o">=</span> <span class="mi">500</span><span class="p">,</span> <span class="mi">500</span>
 <span class="n">LOGSCALE</span> <span class="o">=</span> <span class="kc">True</span>
 <span class="n">VMIN</span><span class="p">,</span> <span class="n">VMAX</span> <span class="o">=</span> <span class="o">-</span><span class="mi">10</span><span class="p">,</span> <span class="mi">1</span>
 </pre></div>
@@ -315,12 +325,12 @@ do we want to read, or what plane, and so on.</p>
 region we want to plot, in computational units (the same units of the
 simulation). <code class="docutils literal notranslate"><span class="pre">LOGSCALE</span></code> will specify if we want to use base-10 logarithm or
 not, and <code class="docutils literal notranslate"><span class="pre">VMIN</span></code>, <code class="docutils literal notranslate"><span class="pre">VMAX</span></code> define the range where we want to plot (in
-log). <code class="docutils literal notranslate"><span class="pre">RESOLUTION</span></code> will be discussed in the next paragraph.</p>
+log). <code class="docutils literal notranslate"><span class="pre">SHAPE</span></code> will be discussed in the next paragraph.</p>
 <p>We can finally read the variable as <a class="reference internal" href="grid_data_ref.html#kuibit.grid_data.HierarchicalGridData" title="kuibit.grid_data.HierarchicalGridData"><code class="xref py py-class docutils literal notranslate"><span class="pre">HierarchicalGridData</span></code></a>. This is
 a complex object containing all the various components and refinement levels.
 This object cannot be plotted directly, but it needs to be resampled to a
 <a class="reference internal" href="grid_data_ref.html#kuibit.grid_data.UniformGridData" title="kuibit.grid_data.UniformGridData"><code class="xref py py-class docutils literal notranslate"><span class="pre">UniformGridData</span></code></a>, which is a simpler object that contains a regular
-grid and data defined on this grid. The variable <code class="docutils literal notranslate"><span class="pre">RESOLUTION</span></code> controls the
+grid and data defined on this grid. The variable <code class="docutils literal notranslate"><span class="pre">SHAPE</span></code> controls the
 resolution of this grid.</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">reader</span> <span class="o">=</span> <span class="n">s</span><span class="o">.</span><span class="n">gridfunctions</span><span class="p">[</span><span class="n">PLANE</span><span class="p">][</span><span class="n">VAR</span><span class="p">]</span>
 <span class="n">var</span> <span class="o">=</span> <span class="n">reader</span><span class="p">[</span><span class="n">ITERATION</span><span class="p">]</span>
@@ -328,7 +338,7 @@ resolution of this grid.</p>
 </div>
 <p>You can plot this quantity directly with <a class="reference internal" href="visualize_matplotlib_ref.html#kuibit.visualize_matplotlib.plot_color" title="kuibit.visualize_matplotlib.plot_color"><code class="xref py py-func docutils literal notranslate"><span class="pre">plot_color()</span></code></a>:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">plot_color</span><span class="p">(</span><span class="n">var</span><span class="p">,</span>
-           <span class="n">shape</span><span class="o">=</span><span class="n">RESOLUTION</span><span class="p">,</span>
+           <span class="n">shape</span><span class="o">=</span><span class="n">SHAPE</span><span class="p">,</span>
            <span class="n">x0</span><span class="o">=</span><span class="n">X0</span><span class="p">,</span>
            <span class="n">x1</span><span class="o">=</span><span class="n">X1</span><span class="p">,</span>
            <span class="n">vmin</span><span class="o">=</span><span class="n">VMIN</span><span class="p">,</span>
@@ -343,16 +353,21 @@ a title to the plot:</p>
 </pre></div>
 </div>
 <p>This is (almost) the minimum code possible to plot any given iteration of any
-given grid function.</p>
+given grid function. You should now try to run it and compare it with the output
+with the example. Next, you can have a look at the code of example to see what
+other options are available.</p>
+</div>
+<div class="section" id="movie">
+<h3>Movie<a class="headerlink" href="#movie" title="Permalink to this headline">¶</a></h3>
 <p>Let us use <code class="docutils literal notranslate"><span class="pre">motionpicture</span></code> to make a movie out of this. See <a class="reference internal" href="motionpicture.html"><span class="doc">A quick
 introduction to motionpicture</span></a> for more details.</p>
 <p>To use <code class="docutils literal notranslate"><span class="pre">mopi</span></code>, we first to write a <em>movie file</em>, which is just a regular
 Python file that defines a class <code class="docutils literal notranslate"><span class="pre">MOPIMovie</span></code> with three methods. The first is
-<code class="docutils literal notranslate"><span class="pre">__init__(self,</span> <span class="pre">args)_</span></code>, which takes a <code class="docutils literal notranslate"><span class="pre">Name</span> <span class="pre">space</span></code> containing the
+<code class="docutils literal notranslate"><span class="pre">__init__(self,</span> <span class="pre">args)_</span></code>, which takes a <code class="docutils literal notranslate"><span class="pre">Namespace</span></code> containing the
 command-line arguments passed (we are not going to use any here). The
 <code class="docutils literal notranslate"><span class="pre">__init___</span></code> does all the preparatory work needed to generate frames. In this
 case, we want to initialize the <a class="reference internal" href="simdir_ref.html#kuibit.simdir.SimDir" title="kuibit.simdir.SimDir"><code class="xref py py-class docutils literal notranslate"><span class="pre">SimDir</span></code></a> and the <code class="docutils literal notranslate"><span class="pre">reader</span></code>, which
-are the common work needed to generate a frame.</p>
+are the common work needed to make a frame.</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">kuibit</span> <span class="kn">import</span> <span class="n">simdir</span> <span class="n">sd</span>
 <span class="kn">from</span> <span class="nn">kuibit</span> <span class="kn">import</span> <span class="n">visualize_matplotlib</span> <span class="k">as</span> <span class="n">viz</span>
 <span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
@@ -365,14 +380,14 @@ are the common work needed to generate a frame.</p>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">X0</span> <span class="o">=</span> <span class="o">-</span><span class="mi">100</span><span class="p">,</span> <span class="o">-</span><span class="mi">100</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">X1</span> <span class="o">=</span> <span class="mi">100</span><span class="p">,</span> <span class="mi">100</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">RESOLUTION</span> <span class="o">=</span> <span class="mi">500</span><span class="p">,</span> <span class="mi">500</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">SHAPE</span> <span class="o">=</span> <span class="mi">500</span><span class="p">,</span> <span class="mi">500</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">LOGSCALE</span> <span class="o">=</span> <span class="kc">True</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">VMIN</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">VMAX</span> <span class="o">=</span> <span class="o">-</span><span class="mi">10</span><span class="p">,</span> <span class="mi">1</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">reader</span> <span class="o">=</span> <span class="n">sim</span><span class="p">(</span><span class="s2">&quot;my_sim&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">gridfunctions</span><span class="p">[</span><span class="n">PLANE</span><span class="p">][</span><span class="n">VAR</span><span class="p">]</span>
 </pre></div>
 </div>
-<p>We made <code class="docutils literal notranslate"><span class="pre">X0</span></code>, <code class="docutils literal notranslate"><span class="pre">X1</span></code>, <code class="docutils literal notranslate"><span class="pre">RESOLUTION</span></code>, and <code class="docutils literal notranslate"><span class="pre">reader</span></code> attributes (with
+<p>We made <code class="docutils literal notranslate"><span class="pre">X0</span></code>, <code class="docutils literal notranslate"><span class="pre">X1</span></code>, <code class="docutils literal notranslate"><span class="pre">SHAPE</span></code>, and <code class="docutils literal notranslate"><span class="pre">reader</span></code> attributes (with
 <code class="docutils literal notranslate"><span class="pre">self.</span></code>) because we want to access them in the other methods. The second
 method is <code class="docutils literal notranslate"><span class="pre">get_frames(self)</span></code> which defines the list of frames that compose
 the movie. In this case, we are going to use the iterations available</p>
@@ -410,6 +425,7 @@ frame. For that, we essentially copy what we have done with the previous script:
 <p>You can make this script more flexible by adding command-line arguments, so that
 you don’t have to modify the file when you want to change parameters.</p>
 </div>
+</div>
 <div class="section" id="glossary">
 <h2>Glossary<a class="headerlink" href="#glossary" title="Permalink to this headline">¶</a></h2>
 <p>Here we collect vocabulary that you might find used in <code class="docutils literal notranslate"><span class="pre">kuibit</span></code>.</p>
@@ -419,17 +435,17 @@ you don’t have to modify the file when you want to change parameters.</p>
 <li><p><a class="reference internal" href="grid_data_ref.html#kuibit.grid_data.HierarchicalGridData" title="kuibit.grid_data.HierarchicalGridData"><code class="xref py py-class docutils literal notranslate"><span class="pre">HierarchicalGridData</span></code></a>: collection of components at possibly
 different refinements that form a grid with several levels.</p></li>
 <li><p><a class="reference external" href="https://github.com/Sbozzolo/motionpicture">motionpicture</a> (mopi): external Python program to render movies.</p></li>
-<li><p>Origin (corner): bottom left (top right) cell in a center-centered grid</p></li>
-<li><p><a class="reference internal" href="simdir_ref.html#kuibit.simdir.SimDir" title="kuibit.simdir.SimDir"><code class="xref py py-class docutils literal notranslate"><span class="pre">SimDir</span></code></a>: fundamental interface to the data in the simulation</p></li>
-<li><p>Outdir: where to save the output of an example</p></li>
+<li><p>Origin (corner): bottom left (top right) cell in a center-centered grid.</p></li>
+<li><p><a class="reference internal" href="simdir_ref.html#kuibit.simdir.SimDir" title="kuibit.simdir.SimDir"><code class="xref py py-class docutils literal notranslate"><span class="pre">SimDir</span></code></a>: fundamental interface to the data in the simulation.</p></li>
+<li><p>Outdir: where to save the output of an example.</p></li>
 <li><p>Pickle: binary file where a <a class="reference internal" href="simdir_ref.html#kuibit.simdir.SimDir" title="kuibit.simdir.SimDir"><code class="xref py py-class docutils literal notranslate"><span class="pre">SimDir</span></code></a> can be saved.</p></li>
 <li><p>TikZ: package to render graphics in LaTeX. <code class="docutils literal notranslate"><span class="pre">kuibit</span></code> can optionally output in
 this format.</p></li>
 <li><p><a class="reference internal" href="grid_data_ref.html#kuibit.grid_data.UniformGridData" title="kuibit.grid_data.UniformGridData"><code class="xref py py-class docutils literal notranslate"><span class="pre">UniformGridData</span></code></a>: data defined on a uniform grid.</p></li>
 </ul>
 </div>
-<div class="section" id="are-you-still-confused">
-<h2>Are you still confused?<a class="headerlink" href="#are-you-still-confused" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="still-confused">
+<h2>Still confused?<a class="headerlink" href="#still-confused" title="Permalink to this headline">¶</a></h2>
 <p>Feel free to ask questions in the Telegram group or send an email to
 <a class="reference external" href="mailto:gabrielebozzola&#37;&#52;&#48;email&#46;arizona&#46;edu">gabrielebozzola<span>&#64;</span>email<span>&#46;</span>arizona<span>&#46;</span>edu</a>.</p>
 </div>
@@ -450,12 +466,18 @@ this format.</p></li>
 <li><a class="reference internal" href="#">First steps with <code class="docutils literal notranslate"><span class="pre">kuibit</span></code></a><ul>
 <li><a class="reference internal" href="#what-is-kuibit">What is <code class="docutils literal notranslate"><span class="pre">kuibit</span></code>?</a></li>
 <li><a class="reference internal" href="#how-to-install-kuibit">How to install <code class="docutils literal notranslate"><span class="pre">kuibit</span></code>?</a></li>
-<li><a class="reference internal" href="#test-out-kuibit-with-the-examples">Test out <code class="docutils literal notranslate"><span class="pre">kuibit</span></code> with the examples</a></li>
+<li><a class="reference internal" href="#test-out-kuibit-with-the-examples">Test out <code class="docutils literal notranslate"><span class="pre">kuibit</span></code> with the examples</a><ul>
 <li><a class="reference internal" href="#scripts">Scripts</a></li>
 <li><a class="reference internal" href="#movies">Movies</a></li>
-<li><a class="reference internal" href="#reproduce-the-examples">Reproduce the examples</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#reproduce-the-examples">Reproduce the examples</a><ul>
+<li><a class="reference internal" href="#script">Script</a></li>
+<li><a class="reference internal" href="#movie">Movie</a></li>
+</ul>
+</li>
 <li><a class="reference internal" href="#glossary">Glossary</a></li>
-<li><a class="reference internal" href="#are-you-still-confused">Are you still confused?</a></li>
+<li><a class="reference internal" href="#still-confused">Still confused?</a></li>
 </ul>
 </li>
 </ul>
