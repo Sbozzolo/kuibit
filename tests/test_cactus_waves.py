@@ -167,6 +167,15 @@ class TestCactusWaves(unittest.TestCase):
             )
         )
 
+        # Test trim ends
+        self.assertTrue(
+            np.allclose(
+                self.psi4.get_strain_lm(2, 2, 0.1, trim_ends=True).y,
+                self.psi4._fixed_frequency_integrated(psi4lm, 0.1, order=2).cropped(init=self.psi4[(2,2)].tmin + 0.1,
+                                                                                    end=self.psi4[(2,2)].tmax - 0.1).y,
+            )
+        )
+
     def test_get_strain(self):
 
         # test l_max too big
@@ -296,6 +305,33 @@ class TestCactusWaves(unittest.TestCase):
             self.psi4.get_angular_momentum_z_lm(2, 2, 0.1),
         )
 
+        # Test get_torque_lm
+        with self.assertRaises(ValueError):
+            self.psi4.get_torque_lm(2, 2, 0.1, direction=4)
+
+        self.assertEqual(
+            self.psi4.get_torque_lm(2, 2, 0.1, direction=2),
+            self.psi4.get_torque_z_lm(2, 2, 0.1),
+        )
+
+        with self.assertRaises(NotImplementedError):
+            self.psi4.get_torque_x_lm(2, 2, 0.1)
+
+        with self.assertRaises(NotImplementedError):
+            self.psi4.get_torque_y_lm(2, 2, 0.1)
+
+        # get_angular_momentum_lm
+        self.assertEqual(
+            self.psi4.get_angular_momentum_lm(2, 2, 0.1, direction=2),
+            self.psi4.get_angular_momentum_z_lm(2, 2, 0.1),
+        )
+
+        with self.assertRaises(NotImplementedError):
+            self.psi4.get_angular_momentum_x_lm(2, 2, 0.1)
+
+        with self.assertRaises(NotImplementedError):
+            self.psi4.get_angular_momentum_y_lm(2, 2, 0.1)
+
         # Total angular momentum
         total_torque_z = (
             self.psi4.get_torque_z_lm(2, 2, 0.1)
@@ -306,15 +342,36 @@ class TestCactusWaves(unittest.TestCase):
         )
 
         self.assertEqual(total_torque_z, self.psi4.get_total_torque_z(0.1))
+
+        with self.assertRaises(NotImplementedError):
+            self.psi4.get_total_torque_x(0.1)
+
+        with self.assertRaises(NotImplementedError):
+            self.psi4.get_total_torque_y(0.1)
+
         self.assertEqual(
             total_torque_z.integrated(),
             self.psi4.get_total_angular_momentum_z(0.1),
         )
 
+        self.assertEqual(
+            total_torque_z.integrated(),
+            self.psi4.get_total_angular_momentum(0.1, direction=2),
+        )
+
+        with self.assertRaises(NotImplementedError):
+            self.psi4.get_total_angular_momentum_x(0.1)
+
+        with self.assertRaises(NotImplementedError):
+            self.psi4.get_total_angular_momentum_y(0.1)
+
     def test_get_force_linear_momentum(self):
 
-        # In this case we only have the 2, 2 mode, so
-        # dP/dz should be r^2 / 16 pi * int psi4_22 * int conj(psi4_cc) * 2 / 3
+        # Test the z component with the 2,2 mode, so
+        # dPz/dt should be r^2 / 16 pi * int psi4_22 * int conj(psi4_cc) * 2 / 3
+
+        # Test of the other components is below (we need more components)
+
         psi4lm = self.psi4[(2, 2)]
 
         mult_l, mult_m = 2, 2
@@ -336,8 +393,22 @@ class TestCactusWaves(unittest.TestCase):
 
         self.assertEqual(force_lm, self.psi4.get_force_z_lm(2, 2, 0.1))
 
+        with self.assertRaises(ValueError):
+            self.psi4.get_force_lm(2, 2, 0.1, direction=4)
+
+        self.assertEqual(
+            self.psi4.get_force_lm(2, 2, 0.1, direction=2),
+            self.psi4.get_force_z_lm(2, 2, 0.1),
+        )
+
         self.assertEqual(
             force_lm.integrated(),
+            self.psi4.get_linear_momentum_z_lm(2, 2, 0.1),
+        )
+
+        # get_linear_momentum_lm
+        self.assertEqual(
+            self.psi4.get_linear_momentum_lm(2, 2, 0.1, direction=2),
             self.psi4.get_linear_momentum_z_lm(2, 2, 0.1),
         )
 
@@ -356,18 +427,102 @@ class TestCactusWaves(unittest.TestCase):
             self.psi4.get_total_linear_momentum_z(0.1),
         )
 
-        # Now we want to test a case with l, m = 3, and for which we have
+        # total
+        self.assertEqual(
+            total_force_z, self.psi4.get_total_force(0.1, direction=2)
+        )
+        self.assertEqual(
+            total_force_z.integrated(),
+            self.psi4.get_total_linear_momentum(0.1, direction=2),
+        )
+
+        # Now we want to test a case with l, m = 3, 2, and for which we have
         # l = 2 and l = 4.  We are going to fake these momenta in a copy
         # of self.psi4.
 
+        # We multiply times some numbers so that they are not exactly the same
+
         dist = self.psi4.dist
         multipoles = [
-            (2, 2, self.psi4[(2, 2)]),
-            (3, 2, self.psi4[(2, 2)]),
-            (4, 2, self.psi4[(2, 2)]),
+            (2, 2, 2 * self.psi4[(2, 2)]),
+            (3, 1, 3 * self.psi4[(2, 2)]),
+            (3, 2, 4 * self.psi4[(2, 2)]),
+            (4, 2, 5 * self.psi4[(2, 2)]),
         ]
 
         psi4_234 = cw.GravitationalWavesOneDet(dist, multipoles)
+
+        el, em = 3, 1
+
+        a_lm = np.sqrt((el - em) * (el + em + 1)) / (el * (el + 1))
+        b_lmm = (
+            1
+            / (2 * el)
+            * np.sqrt(
+                ((el - 2) * (el + 2) * (el - em) * (el - em - 1))
+                / ((2 * el - 1) * (2 * el + 1))
+            )
+        )
+        b_l1m1 = (
+            1
+            / (2 * el + 2)
+            * np.sqrt(
+                ((el - 1) * (el + 3) * (el + em + 2) * (el + em + 1))
+                / ((2 * el + 1) * (2 * el + 3))
+            )
+        )
+
+        psi4lm_xy_int1 = psi4_234._fixed_frequency_integrated(
+            psi4_234[3, 1], 0.1, order=1
+        )
+        psi4lm_xy_int2 = psi4_234._fixed_frequency_integrated(
+            a_lm * np.conj(psi4_234[3, 2])
+            + b_lmm * np.conj(psi4_234[2, 2])
+            - b_l1m1 * np.conj(psi4_234[4, 2]),
+            0.1,
+            order=1,
+        )
+
+        Pp_lm = (
+            psi4_234.dist ** 2
+            / (8 * np.pi)
+            * (psi4lm_xy_int1 * psi4lm_xy_int2)
+        )
+
+        self.assertEqual(Pp_lm.real(), psi4_234.get_force_x_lm(3, 1, 0.1))
+        self.assertEqual(Pp_lm.imag(), psi4_234.get_force_y_lm(3, 1, 0.1))
+
+        # There's only one component
+        self.assertEqual(
+            psi4_234.get_force_x_lm(3, 1, 0.1), psi4_234.get_total_force(0.1, direction=0)
+        )
+        self.assertEqual(
+            psi4_234.get_force_y_lm(3, 1, 0.1), psi4_234.get_total_force(0.1, direction=1)
+        )
+
+        self.assertEqual(
+            Pp_lm.real().integrated(),
+            psi4_234.get_linear_momentum_x_lm(3, 1, 0.1),
+        )
+        self.assertEqual(
+            Pp_lm.imag().integrated(),
+            psi4_234.get_linear_momentum_y_lm(3, 1, 0.1),
+        )
+
+        self.assertEqual(
+            Pp_lm.real().integrated(),
+            psi4_234.get_total_linear_momentum_x(0.1),
+        )
+        self.assertEqual(
+            Pp_lm.imag().integrated(),
+            psi4_234.get_total_linear_momentum_y(0.1),
+        )
+        self.assertEqual(
+            Pp_lm.imag().integrated(),
+            psi4_234.get_total_linear_momentum(0.1, direction=1),
+        )
+
+        # z direction
 
         el, em = 3, 2
 
@@ -389,10 +544,10 @@ class TestCactusWaves(unittest.TestCase):
             )
         )
 
-        psi4lm_int1 = psi4_234._fixed_frequency_integrated(
+        psi4lm_z_int1 = psi4_234._fixed_frequency_integrated(
             psi4_234[3, 2], 0.1, order=1
         )
-        psi4lm_int2 = psi4_234._fixed_frequency_integrated(
+        psi4lm_z_int2 = psi4_234._fixed_frequency_integrated(
             c_lm * np.conj(psi4_234[3, 2])
             + d_lm * np.conj(psi4_234[2, 2])
             + d_l1m * np.conj(psi4_234[4, 2]),
@@ -400,13 +555,13 @@ class TestCactusWaves(unittest.TestCase):
             order=1,
         )
 
-        force_lm = (
+        force_z_lm = (
             psi4_234.dist ** 2
             / (16 * np.pi)
-            * (psi4lm_int1 * psi4lm_int2).real()
+            * (psi4lm_z_int1 * psi4lm_z_int2).real()
         )
 
-        self.assertEqual(force_lm, psi4_234.get_force_z_lm(3, 2, 0.1))
+        self.assertEqual(force_z_lm, psi4_234.get_force_z_lm(3, 2, 0.1))
 
     def test_WavesDir(self):
 
