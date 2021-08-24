@@ -6,7 +6,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Frequently Asked Questions &#8212; kuibit 1.3.0-alpha0 documentation</title>
+    <title>Frequently Asked Questions &#8212; kuibit 1.3.0-alpha1 documentation</title>
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <link rel="stylesheet" href="_static/bizstyle.css" type="text/css" />
     <link rel="stylesheet" type="text/css" href="_static/css/custom.css" />
@@ -41,7 +41,7 @@
         <li class="right" >
           <a href="features.html" title="List of features implemented in kuibit"
              accesskey="P">previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">kuibit 1.3.0-alpha0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="index.html">kuibit 1.3.0-alpha1 documentation</a> &#187;</li>
         <li class="nav-item nav-item-this"><a href="">Frequently Asked Questions</a></li> 
       </ul>
     </div>  
@@ -101,6 +101,25 @@ With this function you can control the region where you want to focus and the
 resolution that you want to work with. In this way, you can reduce the number of
 computations needed and make the problem tractable.</p>
 </div>
+<div class="section" id="i-want-to-pre-process-psi4-before-computing-the-strain">
+<h2>I want to pre-process Psi4 before computing the strain<a class="headerlink" href="#i-want-to-pre-process-psi4-before-computing-the-strain" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference internal" href="cactus_waves_ref.html#kuibit.cactus_waves.GravitationalWavesOneDet" title="kuibit.cactus_waves.GravitationalWavesOneDet"><code class="xref py py-class docutils literal notranslate"><span class="pre">GravitationalWavesOneDet</span></code></a> contains methods to compute quantities
+from <code class="docutils literal notranslate"><span class="pre">Psi4</span></code>, but sometimes is desirable to perform some operations on <code class="docutils literal notranslate"><span class="pre">Psi4</span></code>
+first. The easiest way to do so is to create a new
+<a class="reference internal" href="cactus_waves_ref.html#kuibit.cactus_waves.GravitationalWavesOneDet" title="kuibit.cactus_waves.GravitationalWavesOneDet"><code class="xref py py-class docutils literal notranslate"><span class="pre">GravitationalWavesOneDet</span></code></a> with the new data. For instance, to crop
+the <code class="docutils literal notranslate"><span class="pre">Psi4</span></code>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">kuibit.cactus_waves</span> <span class="kn">import</span> <span class="n">GravitationalWavesOneDet</span>
+
+<span class="n">data</span> <span class="o">=</span> <span class="p">[]</span>
+
+ <span class="k">for</span> <span class="n">mult_l</span><span class="p">,</span> <span class="n">mult_m</span><span class="p">,</span> <span class="n">ts</span> <span class="ow">in</span> <span class="n">wav</span><span class="p">:</span>
+     <span class="n">data</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">mult_l</span><span class="p">,</span> <span class="n">mult_m</span><span class="p">,</span> <span class="n">ts</span><span class="o">.</span><span class="n">cropped</span><span class="p">(</span><span class="n">init</span><span class="o">=</span><span class="n">T_MIN</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="n">T_MAX</span><span class="p">)])</span>
+
+ <span class="n">new_wav</span> <span class="o">=</span> <span class="n">GravitationalWavesOneDet</span><span class="p">(</span><span class="n">wav</span><span class="o">.</span><span class="n">dist</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>where <code class="docutils literal notranslate"><span class="pre">wav</span></code> is the old <code class="docutils literal notranslate"><span class="pre">GravitationalWavesOneDet</span></code>, <code class="docutils literal notranslate"><span class="pre">new_wav</span></code> the new one.</p>
+</div>
 </div>
 
 
@@ -118,6 +137,7 @@ computations needed and make the problem tractable.</p>
 <li><a class="reference internal" href="#">Frequently Asked Questions</a><ul>
 <li><a class="reference internal" href="#some-of-the-attributes-in-simdir-are-slow">Some of the attributes in SimDir are slow</a></li>
 <li><a class="reference internal" href="#merge-refinement-levels-is-too-slow-and-or-requires-too-much-memory">merge_refinement_levels() is too slow and/or requires too much memory</a></li>
+<li><a class="reference internal" href="#i-want-to-pre-process-psi4-before-computing-the-strain">I want to pre-process Psi4 before computing the strain</a></li>
 </ul>
 </li>
 </ul>
@@ -157,7 +177,7 @@ computations needed and make the problem tractable.</p>
         <li class="right" >
           <a href="features.html" title="List of features implemented in kuibit"
              >previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">kuibit 1.3.0-alpha0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="index.html">kuibit 1.3.0-alpha1 documentation</a> &#187;</li>
         <li class="nav-item nav-item-this"><a href="">Frequently Asked Questions</a></li> 
       </ul>
     </div>

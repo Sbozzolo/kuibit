@@ -53,3 +53,25 @@ result. When are ready to plot, you should use the method
 With this function you can control the region where you want to focus and the
 resolution that you want to work with. In this way, you can reduce the number of
 computations needed and make the problem tractable.
+
+I want to pre-process Psi4 before computing the strain
+------------------------------------------------------
+
+:py:class:`~.GravitationalWavesOneDet` contains methods to compute quantities
+from ``Psi4``, but sometimes is desirable to perform some operations on ``Psi4``
+first. The easiest way to do so is to create a new
+:py:class:`~.GravitationalWavesOneDet` with the new data. For instance, to crop
+the ``Psi4``:
+
+.. code-block::
+
+   from kuibit.cactus_waves import GravitationalWavesOneDet
+
+   data = []
+
+    for mult_l, mult_m, ts in wav:
+        data.append([mult_l, mult_m, ts.cropped(init=T_MIN, end=T_MAX)])
+
+    new_wav = GravitationalWavesOneDet(wav.dist, data)
+
+where ``wav`` is the old ``GravitationalWavesOneDet``, ``new_wav`` the new one.
