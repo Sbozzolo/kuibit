@@ -22,15 +22,15 @@ import unittest
 import matplotlib
 
 matplotlib.use("Agg")
-import matplotlib.pyplot as plt
-import numpy as np
+import matplotlib.pyplot as plt  # noqa: E402
+import numpy as np  # noqa: E402
 
-from kuibit import cactus_grid_functions as cgf
-from kuibit import grid_data as gd
-from kuibit import grid_data_utils as gdu
-from kuibit import masks as km
-from kuibit import visualize_matplotlib as viz
-from kuibit.simdir import SimDir
+from kuibit import cactus_grid_functions as cgf  # noqa: E402
+from kuibit import grid_data as gd  # noqa: E402
+from kuibit import grid_data_utils as gdu  # noqa: E402
+from kuibit import masks as km  # noqa: E402
+from kuibit import visualize_matplotlib as viz  # noqa: E402
+from kuibit.simdir import SimDir  # noqa: E402
 
 
 class TestVisualizeMatplotlib(unittest.TestCase):
@@ -321,7 +321,7 @@ class TestVisualizeMatplotlib(unittest.TestCase):
         )
 
         # Test with a 3D plot
-        from mpl_toolkits.mplot3d import Axes3D
+        from mpl_toolkits.mplot3d import Axes3D  # noqa: F401, E402
 
         ax = plt.figure().gca(projection="3d")
         self.assertTrue(

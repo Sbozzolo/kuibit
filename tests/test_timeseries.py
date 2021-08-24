@@ -243,7 +243,7 @@ class TestTimeseries(unittest.TestCase):
         cos = ts.TimeSeries(times, values)
 
         with self.assertRaises(ValueError):
-            out = self.TS._apply_binary(cos, np.add)
+            _ = self.TS._apply_binary(cos, np.add)
 
         # 1b
         times = np.linspace(2, 3 * np.pi, 100)

@@ -153,7 +153,7 @@ def _mismatch_core_numerical(
         # Numba does not support fft yet, so we have to go to object mode
         # This context manager does not affect anything when we run without
         # numba
-        with objmode(  # skipcq PYL-E0602
+        with objmode(  # skipcq PYL-E0602  # noqa F821
             h2_p_fft_pshifted="complex128[:]",
             h2_c_fft_pshifted="complex128[:]",
         ):
