@@ -177,7 +177,7 @@ class GravitationalWavesOneDet(mp.MultipoleOneDet):
         pcut,
         *args,
         window_function=None,
-        trim_ends=True,
+        trim_ends=False,
         **kwargs,
     ):
         r"""Return the strain associated to the multipolar component (l, m).
@@ -278,7 +278,7 @@ class GravitationalWavesOneDet(mp.MultipoleOneDet):
         *args,
         window_function=None,
         l_max=None,
-        trim_ends=True,
+        trim_ends=False,
         **kwargs,
     ):
         r"""Return the strain accounting for all the multipoles and the spin
@@ -348,7 +348,7 @@ class GravitationalWavesOneDet(mp.MultipoleOneDet):
         window_function=None,
         polarization=0,
         l_max=None,
-        trim_ends=True,
+        trim_ends=False,
         **kwargs,
     ):
         r"""Return the strain accounting for all the multipoles and the spin
@@ -976,7 +976,7 @@ class GravitationalWavesDir(WavesDir):
         retarded_times,
         *args,
         window_function=None,
-        trim_ends=True,
+        trim_ends=False,
         mass=1,
         order=2,
         extrapolate_amplitude_phase=False,

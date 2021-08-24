@@ -74,6 +74,7 @@ array of booleans that identifies the valid data.
 
 #### Breaking changes
 - The `ignore` parameter in `SimDir` has been renamed to `ignored_dirs`.
+- The `trim_ends` parameter in `cactus_waves` is now set to `False` by default.
 
 #### Bug fixes
 
