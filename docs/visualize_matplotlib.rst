@@ -33,8 +33,8 @@ Grid functions
 
 The main way to visualize grid data is with the functions :py:mod:`~.plot_color`
 and :py:mod:`~.plot_contourf`. The first plots directly the values of the given
-data, the second plots contours. The functions support a large variety of
-inputs:
+data, the second plots contours (filled). The functions support a large variety
+of inputs:
 
 - NumPy arrays, with coordintes specified by the ``coordinates`` keyword.
 - :py:class:`~.UniformGridData`: it will be plotted over the entire domain,
@@ -61,6 +61,9 @@ Details can be found in the reference material
 
 Plots can be enanched by adding a colorbar with :py:mod:`~.plot_colorbar` (or
 passing the ``colorbar`` option).
+
+The function :py:func:`~.plot_contour` plots the contours without filling. It
+requires the number of levels, or an array that specify where the levels are.
 
 Horizons
 --------

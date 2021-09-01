@@ -242,6 +242,19 @@ class TestVisualizeMatplotlib(unittest.TestCase):
             )
         )
 
+        # Plot contour, no levels
+        with self.assertRaises(ValueError):
+            viz._plot_grid(ugd, plot_type="contour")
+
+        self.assertTrue(
+            isinstance(
+                viz.plot_contour(
+                    ugd, xlabel="x", ylabel="y", colorbar=True, label="test"
+                ),
+                matplotlib.contour.QuadContourSet,
+            )
+        )
+
     def test_plot_colorbar(self):
 
         ugd = gdu.sample_function(

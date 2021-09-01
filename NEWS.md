@@ -71,6 +71,7 @@ array of booleans that identifies the valid data.
   `argparse_helper.add_figure`, and to examples. This can be used to reduce
   the size of output `tikz` files.
 - Added `clear_cache` in `OneGridFunction`.
+- Added `plot_contour`.
 
 #### Breaking changes
 - The `ignore` parameter in `SimDir` has been renamed to `ignored_dirs`.

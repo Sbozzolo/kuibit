@@ -615,12 +615,13 @@ def _plot_grid(
     Unknown arguments are passed to
     ``imshow`` if plot is color
     ``contourf`` if plot is contourf.
+    ``contour`` if plot is contour.
 
-    :param plot_type: Type of plot. It can be: 'color', 'contourf'.
+    :param plot_type: Type of plot. It can be: 'color', 'contourf', 'contour'.
     :type plot_type: str
     """
 
-    _known_plot_types = ("color", "contourf")
+    _known_plot_types = ("color", "contourf", "contour")
 
     if plot_type not in _known_plot_types:
         raise ValueError(
@@ -678,6 +679,19 @@ def _plot_grid(
                 f"You must provide the coordiantes with plot_type = {plot_type}"
             )
         image = axis.contourf(
+            *coordinates, data, extend=colorbar_extend, **kwargs
+        )
+    elif plot_type == "contour":
+        if coordinates is None:
+            raise ValueError(
+                f"You must provide the coordiantes with plot_type = {plot_type}"
+            )
+        # We need to pass the levels for the contours
+        if "levels" not in kwargs:
+            raise ValueError(
+                f"You must provide the levels with plot_type = {plot_type}"
+            )
+        image = axis.contour(
             *coordinates, data, extend=colorbar_extend, **kwargs
         )
 
@@ -881,6 +895,111 @@ def plot_color(data, **kwargs):
     """
     # This function is a convinence function around _plot_grid.
     return _plot_grid(data, plot_type="color", **kwargs)
+
+
+def plot_contour(data, levels=5, **kwargs):
+    """Plot the given data drawing the contours.
+
+    You can pass (everything is processed by :py:func:`~.preprocess_plot_grid` so
+    that at the end we have a 2D NumPy array):
+    - A 2D NumPy array,
+    - A :py:class:`~.UniformGridData`,
+    - A :py:class:`~.HierarchicalGridData`,
+    - A :py:class:`~.BaseOneGridFunction`.
+
+    Depending on what you pass, you might need additional arguments.
+
+    If you pass a :py:class:`~.BaseOneGridFunction`, you need also to pass
+    ``iteration``, and ``shape``. If you pass
+    :py:class:`~.HierarchicalGridData`, you also need to pass ``shape``. In all
+    cases you can also pass ``x0`` and ``x1`` to define origin and corner of the
+    grid. You can pass the option ``resample=True`` if you want to do bilinear
+    resampling at the grid data level, otherwise, nearest neighbor resampling is
+    done. When you pass the NumPy array, you also have to pass the
+    ``coordinates``.
+
+    ``levels`` can be an integer (the number of levels), or an array with the
+    specific values where to put the levels.
+
+    All the unknown arguments are passed to ``contour``.
+
+    .. note
+
+       Read the documentation for a concise table on what arguments are
+       supported.
+
+    :param data: Data that has to be plotted. The function expects a 2D NumPy
+                 array, but the decorator :py:func:`~.preprocess_plot_grid`
+                 allows it to take different kind of data.
+    :type data: 2D NumPy array, or object that can be cast to 2D NumPy array.
+
+    :param x0: Lowermost leftmost coordinate to plot. If passed, resampling will
+               be performed.
+    :type x0: 2D array or list
+
+    :param x1: Uppermost rightmost coordinate to plot. If passed, resampling will
+               be performed.
+    :type x1: 2D array or list
+
+    :param coordiantes: Coordinates to use for the plot. Used only if data is a
+                        NumPy array.
+    :type coordinates: 2D array or list
+
+    :param shape: Resolution of the image. This parameter is used if resampling
+                  is needed or requested.
+    :type shape: tuple or list
+
+    :param iteration: Iteration to plot. Relevant only if data is a
+                      :py:class:`~.BaseOneGridData`.
+    :type iteration: int
+
+    :param resample: If resampling has to be done, do bilinear resampling at the
+                     level of the grid data. If not passed, use nearest neighbors.
+    :type resample: bool
+
+    :param logscale: If True, take the log10 of the data before plotting.
+    :type logscale: bool
+
+    :param colorbar: If True, add a colorbar.
+    :type colorbar: bool
+
+    :param vmin: Remove all the data below this value. If logscale, this has to
+                 be the log10.
+    :type vmin: float
+    :param vmax: Remove all the data above this value. If logscale, this has to
+                 be the log10.
+    :type vmax: float
+
+    :param xlabel: Label of the x axis. If None (or not passed), no label is
+                   placed.
+    :type xlabel: str
+
+    :param ylabel: Label of the y axis. If None (or not passed), no label is
+                   placed.
+    :type ylabel: str
+
+    :param levels: If int, the number of levels, if array, the specific levels
+                   where to place the contour lines.
+    :type levels: int or list
+
+    :param aspect_ratio: Aspect ratio of the plot, as passed to the function
+                         ``set_aspect_ratio`` in matplotlib.
+    :type aspect_ratio: str
+
+    :param figure: If passed, plot on this figure. If not passed (or if None),
+                   use the current figure.
+    :type figure: ``matplotlib.pyplot.figure``
+
+    :param axis: If passed, plot on this axis. If not passed (or if None), use
+                 the current axis.
+    :type axis: ``matplotlib.pyplot.axis``
+
+    :param kwargs: All the unknown arguments are passed to ``imshow``.
+    :type kwargs: dict
+
+    """
+    # This function is a convinence function around _plot_grid.
+    return _plot_grid(data, plot_type="contour", levels=levels, **kwargs)
 
 
 @preprocess_plot
