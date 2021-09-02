@@ -27,7 +27,7 @@ following piece of code:
 .. code-block:: python
 
    import kuibit
-   print(kuibit.__version___)
+   print(kuibit.__version__)
 
 You can save this snippet into a file and run it as ``python3
 name_of_the_file.py``, or execute it as a cell in a Jupyter notebook, or
@@ -377,7 +377,7 @@ are the common work needed to make a frame.
 
 .. code-block::
 
-   from kuibit import simdir sd
+   from kuibit.simdir import SimDir as sd
    from kuibit import visualize_matplotlib as viz
    import matplotlib.pyplot as plt
 
