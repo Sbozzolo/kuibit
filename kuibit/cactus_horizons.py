@@ -167,6 +167,9 @@ class OneHorizon:
         else:
             self.formation_time = None
 
+        # Alias
+        self.time_found = self.formation_time
+
         # Now we deal with the shape. Shape files is a dictionary that maps
         # iteration to the associated file
         self._shape_files = shape_files

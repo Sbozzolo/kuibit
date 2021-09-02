@@ -72,6 +72,7 @@ array of booleans that identifies the valid data.
   the size of output `tikz` files.
 - Added `clear_cache` in `OneGridFunction`.
 - Added `plot_contour`.
+- Added alias `time_found` to `formation_time` in horizons.
 
 #### Breaking changes
 - The `ignore` parameter in `SimDir` has been renamed to `ignored_dirs`.
