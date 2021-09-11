@@ -87,6 +87,7 @@ array of booleans that identifies the valid data.
 - `HierarchicalGridData` now owns the components.
 - Clear `OneGridFunction` cache in `grid_var` to avoid death by OOM.
 - Uniform constructor of `GridSeries` with constructors of other `Series`.
+- Horizon properties now lead to valid python variable names.
 
 #### New examples
 

@@ -799,8 +799,10 @@ class HorizonsDir:
                     # We remove parentheses
                     name = name.replace("(", "")
                     name = name.replace(")", "")
-                    # We change / to -
-                    name = name.replace("/", "-")
+                    # We change / to _
+                    name = name.replace("/", "_")
+                    # We change - to _
+                    name = name.replace("-", "_")
                     self._ah_vars_columns[name] = column_number
 
             # Now we are ready to populate, we read all the data first. Then, we
