@@ -74,6 +74,7 @@ array of booleans that identifies the valid data.
 - Added `plot_contour`.
 - Added alias `time_found` to `formation_time` in horizons.
 - Added `plot_components_boundaries`.
+- Added `ghost_zones_remove` in `HierarchicalGridData`
 
 #### Breaking changes
 - The `ignore` parameter in `SimDir` has been renamed to `ignored_dirs`.

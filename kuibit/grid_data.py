@@ -2780,6 +2780,18 @@ class HierarchicalGridData(BaseNumerical):
             self.partial_differentiated, direction, order=order
         )
 
+    def ghost_zones_removed(self):
+        """Return a new :py:class:`~.HierarchicalGridData` with all the ghost zones removed.
+
+        :returns: New :py:class:`~.HierarchicalGridData` without ghostzones.
+        :rtype: :py:class:`HierarchicalGridData`
+        """
+        return self._call_component_method("ghost_zones_removed")
+
+    def ghost_zones_remove(self):
+        """Remove all the ghost zones."""
+        self._apply_to_self(self.ghost_zones_removed)
+
     def sliced(self, cut, resample=False):
         """Return a new :py:class:`~.HierarchicalGridData` obtained slicing the current one.
 

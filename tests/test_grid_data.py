@@ -1783,6 +1783,25 @@ class TestHierarchicalGridData(unittest.TestCase):
         with self.assertRaises(RuntimeError):
             hg_masked([(2, 3)])
 
+    def test_ghost_zones_remove(self):
+
+        hg = gd.HierarchicalGridData(self.grid_data_two_comp)
+
+        def product(x, y):
+            return x * (y + 2)
+
+        grid_data_two_comp_no_ghost = [
+            gdu.sample_function_from_uniformgrid(
+                lambda x, y: x * (y + 2), g
+            ).ghost_zones_removed()
+            for g in self.grids1
+        ]
+
+        expected_hg = gd.HierarchicalGridData(grid_data_two_comp_no_ghost)
+
+        hg.ghost_zones_remove()
+        self.assertEqual(expected_hg, hg)
+
     def test_merge_refinement_levels(self):
         # This also tests to_UniformGridData
 
