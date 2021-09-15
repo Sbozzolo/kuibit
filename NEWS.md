@@ -73,6 +73,7 @@ array of booleans that identifies the valid data.
 - Added `clear_cache` in `OneGridFunction`.
 - Added `plot_contour`.
 - Added alias `time_found` to `formation_time` in horizons.
+- Added `plot_components_boundaries`.
 
 #### Breaking changes
 - The `ignore` parameter in `SimDir` has been renamed to `ignored_dirs`.

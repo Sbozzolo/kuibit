@@ -75,6 +75,7 @@ import matplotlib
 import matplotlib.pyplot as plt
 import numpy as np
 import tikzplotlib
+from matplotlib.patches import Rectangle
 from mpl_toolkits.axes_grid1 import make_axes_locatable
 from mpl_toolkits.mplot3d import Axes3D
 
@@ -1047,6 +1048,67 @@ def plot_colorbar(
     plt.sca(axis)
 
     return cb
+
+
+@preprocess_plot
+def plot_components_boundaries(
+    hierarchical_data, figure=None, axis=None, remove_ghosts=True, **kwargs
+):
+    """Plot the boundaries of all the components available in the data.
+
+    If the components in a given refinement levels can be merged into a single
+    one, they be.
+
+    By default, the grids are plotted with black boundaries. This can be
+    customized passing the ``edgecolor`` argument.
+
+    :param hierarchical_data: 2D :py:class:`~.HierarchicalGridData` from which
+                              to extract the grid structure.
+    :type hierarchical_data: :py:class:`~.HierarchicalGridData`,
+
+    :param remove_ghosts: If True, ghosts zones are not included in the plotted
+                          grids.
+    :type remove_ghosts: bool
+
+    :param kwargs: All the unknown arguments are passed to ``Rectangle``.
+    :type kwargs: dict
+
+    :param figure: If passed, plot on this figure. If not passed (or if None),
+                   use the current figure.
+    :type figure: ``matplotlib.pyplot.figure``
+
+    :param axis: If passed, plot on this axis. If not passed (or if None), use
+                 the current axis.
+    :type axis: ``matplotlib.pyplot.axis``
+
+    """
+    if not isinstance(hierarchical_data, gd.HierarchicalGridData):
+        raise TypeError("The input has to be a HierarchicalGridData")
+
+    if hierarchical_data.num_dimensions != 2:
+        raise ValueError("Only 2D HierarchicalGridData can be plotted")
+
+    # Add default color
+    if "edgecolor" not in kwargs:
+        kwargs["edgecolor"] = "black"
+
+    for _1, _2, comp in hierarchical_data:
+
+        # grid is the UniformGrid of the component under consideration with or
+        # without ghost zones depending on the value of remove_ghosts
+        grid = comp.grid.ghost_zones_removed() if remove_ghosts else comp.grid
+
+        # comp.highest_vertex and comp.lowest_vertex are 2D NumPy arrays, so
+        # comp.highest_vertex - comp.lowest_vertex is the length of the
+        # component along the two directions. We unpack it to width and height.
+        # We need vertices as opposed to x0 and x1 because we want to take into
+        # account the size of the boundary cells
+        width, height = grid.highest_vertex - grid.lowest_vertex
+        axis.add_patch(
+            Rectangle(
+                grid.lowest_vertex, width, height, facecolor="none", **kwargs
+            )
+        )
 
 
 # HORIZONS

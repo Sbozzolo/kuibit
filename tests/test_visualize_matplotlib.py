@@ -303,6 +303,26 @@ class TestVisualizeMatplotlib(unittest.TestCase):
             )
         )
 
+    def test_plot_components_boundaries(self):
+
+        # Test invalid data
+        with self.assertRaises(TypeError):
+            viz.plot_components_boundaries("bob")
+
+        # Not 2D data
+        ugd1D = gdu.sample_function(lambda x: x, [10], [0], [2])
+        hg1D = gd.HierarchicalGridData([ugd1D])
+
+        # Test invalid data
+        with self.assertRaises(ValueError):
+            viz.plot_components_boundaries(hg1D)
+
+        # Now with valid data
+        ugd = gdu.sample_function(lambda x, y: x + y, [10, 20], [0, 2], [2, 5])
+        hg = gd.HierarchicalGridData([ugd])
+
+        viz.plot_components_boundaries(hg)
+
     def test_add_text_to_corner(self):
 
         with self.assertRaises(ValueError):

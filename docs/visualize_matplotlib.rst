@@ -65,6 +65,15 @@ passing the ``colorbar`` option).
 The function :py:func:`~.plot_contour` plots the contours without filling. It
 requires the number of levels, or an array that specify where the levels are.
 
+With :py:func:`~.plot_components_boundaries`, you can plot the grid structure.
+The function takes a :py:class:`~.HierarchicalGridData` as argument as plots its
+grid structure. By defaults, ghost zones are not included, but they can be
+passing ``remove_ghosts=False``. The function plots the boundaries of the single
+components, but when multiple components can be merged into a single refinement
+level, then only the outer boundary is plotted (a notable case in which this is
+currently not possible is when there are multiple refinement centers).
+
+
 Horizons
 --------
 
