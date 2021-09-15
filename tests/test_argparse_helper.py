@@ -109,6 +109,19 @@ class TestArgparseHelper(unittest.TestCase):
         self.assertEqual(args.ah_alpha, 0.5)
         self.assertEqual(args.ah_time_tolerance, 1)
 
+    def test_add_grid_structure_to_parser(self):
+
+        kah.add_grid_structure_to_parser(
+            self.parser, edge_color="r", alpha=0.5
+        )
+
+        # The [] essentially means "use defaults"
+        args = kah.get_args(self.parser, [])
+
+        self.assertFalse(args.rl_show)
+        self.assertEqual(args.rl_edge_color, "r")
+        self.assertEqual(args.rl_alpha, 0.5)
+
     def test_program_name(self):
         sys.argv = ["/tmp/program_name.py", "--datadir", "test"]
 

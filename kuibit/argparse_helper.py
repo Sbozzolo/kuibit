@@ -291,6 +291,45 @@ def add_horizon_to_parser(
     return parser
 
 
+def add_grid_structure_to_parser(parser, edge_color="black", alpha=0.5):
+    """Add parameters that have to do with drawing the grid structure.
+
+    This function edits ``parser`` in place.
+
+    The options added are:
+
+    - ``rl-show``
+    - ``rl-edge-color``
+    - ``rl-alpha``
+
+    :param edge_color: Color of the edge of the components.
+    :type edge_color: anything accepted by the drawing package
+    :param alpha: Number between 0 and 1 that identifies the opacity of the
+                  horizon.
+    :type alpha: float
+
+    :param parser: Argparse parser (generated with init_argparse())
+    :type parser: configargparse.ArgumentParser
+
+    """
+    ah_group = parser.add_argument_group("Grid structure options")
+    ah_group.add_argument(
+        "--rl-show", action="store_true", help="Plot grid structure."
+    )
+    ah_group.add_argument(
+        "--rl-edge-color",
+        default=edge_color,
+        help="Color name for refinement boundaries (default is '%(default)s').",
+    )
+    ah_group.add_argument(
+        "--rl-alpha",
+        type=float,
+        default=alpha,
+        help="Alpha (transparency) for refinement boundaries (default: %(default)s)",
+    )
+    return parser
+
+
 def get_program_name():
     """Return the name of the current script.
 
