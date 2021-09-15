@@ -122,6 +122,7 @@
 <span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">tikzplotlib</span>
+<span class="kn">from</span> <span class="nn">matplotlib.patches</span> <span class="kn">import</span> <span class="n">Rectangle</span>
 <span class="kn">from</span> <span class="nn">mpl_toolkits.axes_grid1</span> <span class="kn">import</span> <span class="n">make_axes_locatable</span>
 <span class="kn">from</span> <span class="nn">mpl_toolkits.mplot3d</span> <span class="kn">import</span> <span class="n">Axes3D</span>
 
@@ -1094,6 +1095,67 @@
     <span class="n">plt</span><span class="o">.</span><span class="n">sca</span><span class="p">(</span><span class="n">axis</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="n">cb</span>
+
+
+<span class="nd">@preprocess_plot</span>
+<span class="k">def</span> <span class="nf">plot_components_boundaries</span><span class="p">(</span>
+    <span class="n">hierarchical_data</span><span class="p">,</span> <span class="n">figure</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">remove_ghosts</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span>
+<span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Plot the boundaries of all the components available in the data.</span>
+
+<span class="sd">    If the components in a given refinement levels can be merged into a single</span>
+<span class="sd">    one, they be.</span>
+
+<span class="sd">    By default, the grids are plotted with black boundaries. This can be</span>
+<span class="sd">    customized passing the ``edgecolor`` argument.</span>
+
+<span class="sd">    :param hierarchical_data: 2D :py:class:`~.HierarchicalGridData` from which</span>
+<span class="sd">                              to extract the grid structure.</span>
+<span class="sd">    :type hierarchical_data: :py:class:`~.HierarchicalGridData`,</span>
+
+<span class="sd">    :param remove_ghosts: If True, ghosts zones are not included in the plotted</span>
+<span class="sd">                          grids.</span>
+<span class="sd">    :type remove_ghosts: bool</span>
+
+<span class="sd">    :param kwargs: All the unknown arguments are passed to ``Rectangle``.</span>
+<span class="sd">    :type kwargs: dict</span>
+
+<span class="sd">    :param figure: If passed, plot on this figure. If not passed (or if None),</span>
+<span class="sd">                   use the current figure.</span>
+<span class="sd">    :type figure: ``matplotlib.pyplot.figure``</span>
+
+<span class="sd">    :param axis: If passed, plot on this axis. If not passed (or if None), use</span>
+<span class="sd">                 the current axis.</span>
+<span class="sd">    :type axis: ``matplotlib.pyplot.axis``</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">hierarchical_data</span><span class="p">,</span> <span class="n">gd</span><span class="o">.</span><span class="n">HierarchicalGridData</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;The input has to be a HierarchicalGridData&quot;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">hierarchical_data</span><span class="o">.</span><span class="n">num_dimensions</span> <span class="o">!=</span> <span class="mi">2</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Only 2D HierarchicalGridData can be plotted&quot;</span><span class="p">)</span>
+
+    <span class="c1"># Add default color</span>
+    <span class="k">if</span> <span class="s2">&quot;edgecolor&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="p">:</span>
+        <span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;edgecolor&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;black&quot;</span>
+
+    <span class="k">for</span> <span class="n">_1</span><span class="p">,</span> <span class="n">_2</span><span class="p">,</span> <span class="n">comp</span> <span class="ow">in</span> <span class="n">hierarchical_data</span><span class="p">:</span>
+
+        <span class="c1"># grid is the UniformGrid of the component under consideration with or</span>
+        <span class="c1"># without ghost zones depending on the value of remove_ghosts</span>
+        <span class="n">grid</span> <span class="o">=</span> <span class="n">comp</span><span class="o">.</span><span class="n">grid</span><span class="o">.</span><span class="n">ghost_zones_removed</span><span class="p">()</span> <span class="k">if</span> <span class="n">remove_ghosts</span> <span class="k">else</span> <span class="n">comp</span><span class="o">.</span><span class="n">grid</span>
+
+        <span class="c1"># comp.highest_vertex and comp.lowest_vertex are 2D NumPy arrays, so</span>
+        <span class="c1"># comp.highest_vertex - comp.lowest_vertex is the length of the</span>
+        <span class="c1"># component along the two directions. We unpack it to width and height.</span>
+        <span class="c1"># We need vertices as opposed to x0 and x1 because we want to take into</span>
+        <span class="c1"># account the size of the boundary cells</span>
+        <span class="n">width</span><span class="p">,</span> <span class="n">height</span> <span class="o">=</span> <span class="n">grid</span><span class="o">.</span><span class="n">highest_vertex</span> <span class="o">-</span> <span class="n">grid</span><span class="o">.</span><span class="n">lowest_vertex</span>
+        <span class="n">axis</span><span class="o">.</span><span class="n">add_patch</span><span class="p">(</span>
+            <span class="n">Rectangle</span><span class="p">(</span>
+                <span class="n">grid</span><span class="o">.</span><span class="n">lowest_vertex</span><span class="p">,</span> <span class="n">width</span><span class="p">,</span> <span class="n">height</span><span class="p">,</span> <span class="n">facecolor</span><span class="o">=</span><span class="s2">&quot;none&quot;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span>
+            <span class="p">)</span>
+        <span class="p">)</span>
 
 
 <span class="c1"># HORIZONS</span>
