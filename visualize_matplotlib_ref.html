@@ -184,6 +184,70 @@ the current axis.</p></li>
 </dd></dl>
 
 <dl class="py function">
+<dt id="kuibit.visualize_matplotlib.plot_contour">
+<code class="sig-prename descclassname"><span class="pre">kuibit.visualize_matplotlib.</span></code><code class="sig-name descname"><span class="pre">plot_contour</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">levels</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">5</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/kuibit/visualize_matplotlib.html#plot_contour"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kuibit.visualize_matplotlib.plot_contour" title="Permalink to this definition">¶</a></dt>
+<dd><p>Plot the given data drawing the contours.</p>
+<p>You can pass (everything is processed by <a class="reference internal" href="#kuibit.visualize_matplotlib.preprocess_plot_grid" title="kuibit.visualize_matplotlib.preprocess_plot_grid"><code class="xref py py-func docutils literal notranslate"><span class="pre">preprocess_plot_grid()</span></code></a> so
+that at the end we have a 2D NumPy array):
+- A 2D NumPy array,
+- A <a class="reference internal" href="grid_data_ref.html#kuibit.grid_data.UniformGridData" title="kuibit.grid_data.UniformGridData"><code class="xref py py-class docutils literal notranslate"><span class="pre">UniformGridData</span></code></a>,
+- A <a class="reference internal" href="grid_data_ref.html#kuibit.grid_data.HierarchicalGridData" title="kuibit.grid_data.HierarchicalGridData"><code class="xref py py-class docutils literal notranslate"><span class="pre">HierarchicalGridData</span></code></a>,
+- A <a class="reference internal" href="cactus_grid_functions_ref.html#kuibit.cactus_grid_functions.BaseOneGridFunction" title="kuibit.cactus_grid_functions.BaseOneGridFunction"><code class="xref py py-class docutils literal notranslate"><span class="pre">BaseOneGridFunction</span></code></a>.</p>
+<p>Depending on what you pass, you might need additional arguments.</p>
+<p>If you pass a <a class="reference internal" href="cactus_grid_functions_ref.html#kuibit.cactus_grid_functions.BaseOneGridFunction" title="kuibit.cactus_grid_functions.BaseOneGridFunction"><code class="xref py py-class docutils literal notranslate"><span class="pre">BaseOneGridFunction</span></code></a>, you need also to pass
+<code class="docutils literal notranslate"><span class="pre">iteration</span></code>, and <code class="docutils literal notranslate"><span class="pre">shape</span></code>. If you pass
+<a class="reference internal" href="grid_data_ref.html#kuibit.grid_data.HierarchicalGridData" title="kuibit.grid_data.HierarchicalGridData"><code class="xref py py-class docutils literal notranslate"><span class="pre">HierarchicalGridData</span></code></a>, you also need to pass <code class="docutils literal notranslate"><span class="pre">shape</span></code>. In all
+cases you can also pass <code class="docutils literal notranslate"><span class="pre">x0</span></code> and <code class="docutils literal notranslate"><span class="pre">x1</span></code> to define origin and corner of the
+grid. You can pass the option <code class="docutils literal notranslate"><span class="pre">resample=True</span></code> if you want to do bilinear
+resampling at the grid data level, otherwise, nearest neighbor resampling is
+done. When you pass the NumPy array, you also have to pass the
+<code class="docutils literal notranslate"><span class="pre">coordinates</span></code>.</p>
+<p><code class="docutils literal notranslate"><span class="pre">levels</span></code> can be an integer (the number of levels), or an array with the
+specific values where to put the levels.</p>
+<p>All the unknown arguments are passed to <code class="docutils literal notranslate"><span class="pre">contour</span></code>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>data</strong> (<em>2D NumPy array</em><em>, or </em><em>object that can be cast to 2D NumPy array.</em>) – Data that has to be plotted. The function expects a 2D NumPy
+array, but the decorator <a class="reference internal" href="#kuibit.visualize_matplotlib.preprocess_plot_grid" title="kuibit.visualize_matplotlib.preprocess_plot_grid"><code class="xref py py-func docutils literal notranslate"><span class="pre">preprocess_plot_grid()</span></code></a>
+allows it to take different kind of data.</p></li>
+<li><p><strong>x0</strong> (<em>2D array</em><em> or </em><em>list</em>) – Lowermost leftmost coordinate to plot. If passed, resampling will
+be performed.</p></li>
+<li><p><strong>x1</strong> (<em>2D array</em><em> or </em><em>list</em>) – Uppermost rightmost coordinate to plot. If passed, resampling will
+be performed.</p></li>
+<li><p><strong>coordiantes</strong> – Coordinates to use for the plot. Used only if data is a
+NumPy array.</p></li>
+<li><p><strong>shape</strong> (<em>tuple</em><em> or </em><em>list</em>) – Resolution of the image. This parameter is used if resampling
+is needed or requested.</p></li>
+<li><p><strong>iteration</strong> (<em>int</em>) – Iteration to plot. Relevant only if data is a
+<code class="xref py py-class docutils literal notranslate"><span class="pre">BaseOneGridData</span></code>.</p></li>
+<li><p><strong>resample</strong> (<em>bool</em>) – If resampling has to be done, do bilinear resampling at the
+level of the grid data. If not passed, use nearest neighbors.</p></li>
+<li><p><strong>logscale</strong> (<em>bool</em>) – If True, take the log10 of the data before plotting.</p></li>
+<li><p><strong>colorbar</strong> (<em>bool</em>) – If True, add a colorbar.</p></li>
+<li><p><strong>vmin</strong> (<em>float</em>) – Remove all the data below this value. If logscale, this has to
+be the log10.</p></li>
+<li><p><strong>vmax</strong> (<em>float</em>) – Remove all the data above this value. If logscale, this has to
+be the log10.</p></li>
+<li><p><strong>xlabel</strong> (<em>str</em>) – Label of the x axis. If None (or not passed), no label is
+placed.</p></li>
+<li><p><strong>ylabel</strong> (<em>str</em>) – Label of the y axis. If None (or not passed), no label is
+placed.</p></li>
+<li><p><strong>levels</strong> (<em>int</em><em> or </em><em>list</em>) – If int, the number of levels, if array, the specific levels
+where to place the contour lines.</p></li>
+<li><p><strong>aspect_ratio</strong> (<em>str</em>) – Aspect ratio of the plot, as passed to the function
+<code class="docutils literal notranslate"><span class="pre">set_aspect_ratio</span></code> in matplotlib.</p></li>
+<li><p><strong>figure</strong> (<code class="docutils literal notranslate"><span class="pre">matplotlib.pyplot.figure</span></code>) – If passed, plot on this figure. If not passed (or if None),
+use the current figure.</p></li>
+<li><p><strong>axis</strong> (<code class="docutils literal notranslate"><span class="pre">matplotlib.pyplot.axis</span></code>) – If passed, plot on this axis. If not passed (or if None), use
+the current axis.</p></li>
+<li><p><strong>kwargs</strong> (<em>dict</em>) – All the unknown arguments are passed to <code class="docutils literal notranslate"><span class="pre">imshow</span></code>.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
 <dt id="kuibit.visualize_matplotlib.plot_contourf">
 <code class="sig-prename descclassname"><span class="pre">kuibit.visualize_matplotlib.</span></code><code class="sig-name descname"><span class="pre">plot_contourf</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/kuibit/visualize_matplotlib.html#plot_contourf"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kuibit.visualize_matplotlib.plot_contourf" title="Permalink to this definition">¶</a></dt>
 <dd><p>Plot the given data drawing filled contours.</p>

@@ -338,6 +338,45 @@
     <span class="k">return</span> <span class="n">parser</span></div>
 
 
+<div class="viewcode-block" id="add_grid_structure_to_parser"><a class="viewcode-back" href="../../argparse_helper_ref.html#kuibit.argparse_helper.add_grid_structure_to_parser">[docs]</a><span class="k">def</span> <span class="nf">add_grid_structure_to_parser</span><span class="p">(</span><span class="n">parser</span><span class="p">,</span> <span class="n">edge_color</span><span class="o">=</span><span class="s2">&quot;black&quot;</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.5</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Add parameters that have to do with drawing the grid structure.</span>
+
+<span class="sd">    This function edits ``parser`` in place.</span>
+
+<span class="sd">    The options added are:</span>
+
+<span class="sd">    - ``rl-show``</span>
+<span class="sd">    - ``rl-edge-color``</span>
+<span class="sd">    - ``rl-alpha``</span>
+
+<span class="sd">    :param edge_color: Color of the edge of the components.</span>
+<span class="sd">    :type edge_color: anything accepted by the drawing package</span>
+<span class="sd">    :param alpha: Number between 0 and 1 that identifies the opacity of the</span>
+<span class="sd">                  horizon.</span>
+<span class="sd">    :type alpha: float</span>
+
+<span class="sd">    :param parser: Argparse parser (generated with init_argparse())</span>
+<span class="sd">    :type parser: configargparse.ArgumentParser</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">ah_group</span> <span class="o">=</span> <span class="n">parser</span><span class="o">.</span><span class="n">add_argument_group</span><span class="p">(</span><span class="s2">&quot;Grid structure options&quot;</span><span class="p">)</span>
+    <span class="n">ah_group</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span>
+        <span class="s2">&quot;--rl-show&quot;</span><span class="p">,</span> <span class="n">action</span><span class="o">=</span><span class="s2">&quot;store_true&quot;</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Plot grid structure.&quot;</span>
+    <span class="p">)</span>
+    <span class="n">ah_group</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span>
+        <span class="s2">&quot;--rl-edge-color&quot;</span><span class="p">,</span>
+        <span class="n">default</span><span class="o">=</span><span class="n">edge_color</span><span class="p">,</span>
+        <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Color name for refinement boundaries (default is &#39;</span><span class="si">%(default)s</span><span class="s2">&#39;).&quot;</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="n">ah_group</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span>
+        <span class="s2">&quot;--rl-alpha&quot;</span><span class="p">,</span>
+        <span class="nb">type</span><span class="o">=</span><span class="nb">float</span><span class="p">,</span>
+        <span class="n">default</span><span class="o">=</span><span class="n">alpha</span><span class="p">,</span>
+        <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Alpha (transparency) for refinement boundaries (default: </span><span class="si">%(default)s</span><span class="s2">)&quot;</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="k">return</span> <span class="n">parser</span></div>
+
+
 <div class="viewcode-block" id="get_program_name"><a class="viewcode-back" href="../../argparse_helper_ref.html#kuibit.argparse_helper.get_program_name">[docs]</a><span class="k">def</span> <span class="nf">get_program_name</span><span class="p">():</span>
     <span class="sd">&quot;&quot;&quot;Return the name of the current script.</span>
 

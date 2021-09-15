@@ -81,8 +81,8 @@ native functions. For example,</p>
 <h2>Grid functions<a class="headerlink" href="#grid-functions" title="Permalink to this headline">¶</a></h2>
 <p>The main way to visualize grid data is with the functions <code class="xref py py-mod docutils literal notranslate"><span class="pre">plot_color</span></code>
 and <code class="xref py py-mod docutils literal notranslate"><span class="pre">plot_contourf</span></code>. The first plots directly the values of the given
-data, the second plots contours. The functions support a large variety of
-inputs:</p>
+data, the second plots contours (filled). The functions support a large variety
+of inputs:</p>
 <ul class="simple">
 <li><p>NumPy arrays, with coordintes specified by the <code class="docutils literal notranslate"><span class="pre">coordinates</span></code> keyword.</p></li>
 <li><p><a class="reference internal" href="grid_data_ref.html#kuibit.grid_data.UniformGridData" title="kuibit.grid_data.UniformGridData"><code class="xref py py-class docutils literal notranslate"><span class="pre">UniformGridData</span></code></a>: it will be plotted over the entire domain,
@@ -107,6 +107,15 @@ provide the <a class="reference internal" href="grid_data_ref.html#kuibit.grid_d
 </div>
 <p>Plots can be enanched by adding a colorbar with <code class="xref py py-mod docutils literal notranslate"><span class="pre">plot_colorbar</span></code> (or
 passing the <code class="docutils literal notranslate"><span class="pre">colorbar</span></code> option).</p>
+<p>The function <a class="reference internal" href="visualize_matplotlib_ref.html#kuibit.visualize_matplotlib.plot_contour" title="kuibit.visualize_matplotlib.plot_contour"><code class="xref py py-func docutils literal notranslate"><span class="pre">plot_contour()</span></code></a> plots the contours without filling. It
+requires the number of levels, or an array that specify where the levels are.</p>
+<p>With <code class="xref py py-func docutils literal notranslate"><span class="pre">plot_components_boundaries()</span></code>, you can plot the grid structure.
+The function takes a <a class="reference internal" href="grid_data_ref.html#kuibit.grid_data.HierarchicalGridData" title="kuibit.grid_data.HierarchicalGridData"><code class="xref py py-class docutils literal notranslate"><span class="pre">HierarchicalGridData</span></code></a> as argument as plots its
+grid structure. By defaults, ghost zones are not included, but they can be
+passing <code class="docutils literal notranslate"><span class="pre">remove_ghosts=False</span></code>. The function plots the boundaries of the single
+components, but when multiple components can be merged into a single refinement
+level, then only the outer boundary is plotted (a notable case in which this is
+currently not possible is when there are multiple refinement centers).</p>
 </div>
 <div class="section" id="horizons">
 <h2>Horizons<a class="headerlink" href="#horizons" title="Permalink to this headline">¶</a></h2>
