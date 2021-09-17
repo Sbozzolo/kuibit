@@ -6,7 +6,7 @@
 
 The `visualize_mayavi` module provides functions to render 3D plots with
 `mayavi`. At the moment, only the basic infrastructure and simple plots with
-apparent horizons are available, but the more will be added in the future.
+apparent horizons are available, but more will be added in the future.
 
 ## Version 1.3.1 (4 November 2021)
 
