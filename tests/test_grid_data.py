@@ -576,6 +576,102 @@ class TestUniformGridData(unittest.TestCase):
         ug_data.ghost_zones_remove()
         self.assertEqual(ug_data, ug_data.copy())
 
+    def test_reflection_symmetry_undo(self):
+
+        g_zero = gdu.sample_function(
+            lambda x, y: 2 * x + y,
+            shape=[6, 2],
+            x0=[-2, 1],
+            x1=[3, 2],
+            time=10,
+        )
+
+        # The grid looks like: (This grid contains 0)
+        #
+        # (-2, 2) -- (-1, 2) -- (0, 2) -- (1, 2) -- (2, 2)  --  (3, 2)
+        #    |          |         |          |        |           |
+        # (-2, 1) -- (-1, 1) -- (0, 1) -- (1, 1) -- (2, 1)  --  (3, 1)
+        #
+        # We cannot reflect across the y axis, but we can reflect
+        # across the x one
+        #
+        # The data is
+        #
+        #  -2  --  0  --  2  --  4  --  6 --  8
+        #  -3  -- -1  --  1  --  3  --  5 --  7
+        #
+        # When we reflect across the x axis, we expect a new (7, 2) array:
+        #
+        #  8  --  6  --  0  --  2  --  4  --  6 --  8
+        #  7  --  5  --  1  --  1  --  3  --  5 --  7
+
+        # Test with grid that does not intersect zero
+        with self.assertRaises(ValueError):
+            g_zero.reflection_symmetry_undone(1)
+
+        # Test with wrong parity
+        with self.assertRaises(ValueError):
+            g_zero.reflection_symmetry_undone(0, parity=2)
+
+        # Test with grid that cannot be symmetrized
+        with self.assertRaises(ValueError):
+            gdu.sample_function(
+                lambda x: 2 * x,
+                shape=[5],
+                x0=[-2],
+                x1=[3],
+                time=10,
+            ).reflection_symmetry_undo(0)
+
+        expected_grid = gd.UniformGrid(
+            [7, 2], x0=[-3, 1], x1=g_zero.grid.x1, time=10
+        )
+        expected_data = np.array(
+            [[7, 8], [5, 6], [3, 4], [1, 2], [3, 4], [5, 6], [7, 8]]
+        )
+        expected_g_zero = gd.UniformGridData(expected_grid, expected_data)
+
+        g_zero.reflection_symmetry_undo(0)
+
+        self.assertEqual(expected_g_zero, g_zero)
+
+        # Now a grid that does not contain zero
+
+        g_no_zero = gdu.sample_function(
+            lambda x, y: 2 * x + y,
+            shape=[4, 2],
+            x0=[-3, 1],
+            x1=[3, 2],
+            time=10,
+        )
+
+        # The grid looks like: (This grid contains 0)
+        #
+        # (-3, 2) -- (-1, 2) -- (1, 2) -- (3, 2)
+        #    |          |         |          |        |           |
+        # (-3, 1) -- (-1, 1) -- (1, 1) -- (3, 1)
+        #
+        #
+        # The data is
+        #
+        #  -4  --  0  --  4  --  8
+        #  -5  -- -1  --  3  --  7
+        #
+        # When we reflect across the x axis, we expect a new (4, 2) array:
+        #
+        #  8  --  4  --  4  --  8
+        #  7  --  3  --  3  --  7
+
+        expected_grid = gd.UniformGrid(
+            [4, 2], x0=[-3, 1], x1=g_zero.grid.x1, time=10
+        )
+        expected_data = np.array([[7, 8], [3, 4], [3, 4], [7, 8]])
+        expected_g_no_zero = gd.UniformGridData(expected_grid, expected_data)
+
+        g_no_zero.reflection_symmetry_undo(0)
+
+        self.assertEqual(expected_g_no_zero, g_no_zero)
+
     def test__apply_reduction(self):
 
         data = np.array([i * np.linspace(1, 5, 51) for i in range(101)])

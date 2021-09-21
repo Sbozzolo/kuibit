@@ -254,6 +254,14 @@ type of object that shares the same properties and infrastructure as
 example, you can plot them directly with ``plt.plot(rho)``).
 
 
+With :py:class:`~.UniformGridData`, it is possible to undo reflection symmetry
+across a given dimension. The relevant method is
+:py:meth:`~.reflection_symmetry_undone` (which takes the parity of the data as
+optional argument). This will only work if the grid crosses 0 along the given
+dimension and if the resulting grid is a valid equispaced grid (so 0 has to be
+part of the coordinates, or the data has to be such that it yields a uniform
+grid).
+
 HierarchicalGridData
 --------------------
 

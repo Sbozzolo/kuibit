@@ -967,6 +967,165 @@ class UniformGridData(BaseNumerical):
         """Remove all the ghost zones."""
         self._apply_to_self(self.ghost_zones_removed)
 
+    def reflection_symmetry_undone(self, dimension, parity=1):
+        """Return a new UniformGridData with reflection symmetry undo for the given dimension.
+
+        The parameter ``parity`` determines how to fill the data.
+
+        This method works only if the data crosses the value 0 along the given
+        dimension.
+
+        We assume that the reflection will always be from the positive side to
+        the negative. Pre-existing data in the negative side will be overwritten.
+
+        This will change the shape of the object.
+
+        :param dimension: Dimension that has to be reflected.
+        :type dimension: int
+
+        :param parity: Fill the data assuming that the function is even (parity = 1),
+                       or odd (parity = -1).
+        :type parity: 1 or -1
+
+        :returns: New :py:class:`UniformGridData` with values explicitly set for
+                  reflected data.
+        :rtype: :py:class:`~.UniformGridData`
+
+        """
+
+        # NOTE: this cannot be applied to HierarchicalGridData. In that case we would
+        # need to add new components all together.
+
+        # We assume that we are going to reflect from the positive side to the
+        # negative
+
+        # 0 is not in the data
+        if self.x0[dimension] > 0:
+            raise ValueError("Cannot reflect data that does not cross 0")
+
+        if parity not in (-1, 1):
+            raise ValueError(
+                f"Parity has to be either 1 or -1, cannot be {parity}"
+            )
+
+        # See self.grid.coordinates_to_indices():
+        # We convert the coordinate 0.0 to the index, this will always overestimate, so
+        # it will always be the first positive
+        index_first_positive = int(
+            (0.0 - self.x0[dimension]) / self.dx[dimension] + 0.5
+        )
+
+        # Next we check that the grid is indeed symmetric about 0. So, the first
+        # positive point has to be such that, when reflected, it has the correct
+        # dx.
+        #
+        # For example: -2, -0.75, 0.5, 1.75, 3 is not a good grid. The dx here
+        # is 1.25, but, when reflected, 0.5 -> -0.5, and the dx would be 1.
+        #
+        # But -2, 1, 3 is because 1 -> -1, and dx = 2
+
+        # Compare UniformGrid.indices_to_coordinates
+        coordinates_first_positive_dim = (
+            index_first_positive * self.dx[dimension] + self.x0[dimension]
+        )
+        # This could actually be 0. If it is zero, we have to take this into
+        # account. The zero value should not be copied.
+        first_element_is_zero = (
+            1
+            if np.isclose(coordinates_first_positive_dim, 0, atol=1e-14)
+            else 0
+        )
+
+        # 2 * coordinates_first_positive_dim = first_positive - (-first_positive)
+        if not (
+            first_element_is_zero
+            or np.isclose(
+                2 * coordinates_first_positive_dim,
+                self.dx[dimension],
+                atol=1e-14,
+            )
+        ):
+            raise ValueError(
+                f"Grid is not symmetric along dimension {dimension}"
+            )
+
+        num_elements_to_copy = (
+            self.shape[dimension]
+            - index_first_positive
+            - first_element_is_zero
+        )
+
+        new_shape = self.shape.copy()
+        # The new shape is the old shape + num_elements_to_copy - the negative
+        # values (that are going to be overwritten) and the possible zero.
+        new_shape[dimension] += num_elements_to_copy - index_first_positive
+
+        # Prepare the output array
+        # We overwrite it with the data
+        new_data = np.zeros(new_shape, dtype=self.dtype)
+
+        # These are slicers that copy everything. This is what we want, except
+        # for the given dimension.
+        destination = [slice(None, None) for _ in self.shape]
+        source = [slice(None, None) for _ in self.shape]
+        # Copy in indices 0, 1, ..., num_elements_to_copy - 1
+        destination[dimension] = slice(0, num_elements_to_copy)
+        # We have to read the data backwards from the source, so we read from the end
+        # to index_first_positive - 1 (not included)
+        source[dimension] = slice(
+            self.shape[dimension],
+            index_first_positive + first_element_is_zero - 1,
+            -1,
+        )
+
+        new_data[tuple(destination)] = parity * self.data[tuple(source)]
+
+        # Now we copy the data we already had
+        #
+        # num_elements_to_copy - 1 because we start counting from 0
+        destination[dimension] = slice(
+            num_elements_to_copy, new_shape[dimension]
+        )
+        source[dimension] = slice(index_first_positive, self.shape[dimension])
+
+        new_data[tuple(destination)] = self.data[tuple(source)]
+
+        # And we need to extend the grid too
+
+        # Compute the new x0
+        new_x0 = self.x0
+        new_x0[dimension] = -self.x1[dimension]
+
+        new_grid = UniformGrid(
+            shape=new_shape,
+            x0=new_x0,
+            x1=self.grid.x1,
+            dx=self.grid.dx,
+            ref_level=self.grid.ref_level,
+            component=self.grid.component,
+            num_ghost=self.grid.num_ghost,
+            time=self.grid.time,
+            iteration=self.grid.iteration,
+        )
+
+        return type(self)(new_grid, new_data)
+
+    def reflection_symmetry_undo(self, dimension, parity=1):
+        """Undo reflection symmetry for the given dimension.
+
+        This method works only if the data crosses the value 0 along the given dimension.
+
+        This will change the shape of the object.
+
+        :param dimension: Dimension that has to be reflected.
+        :type dimension: int
+
+        :param parity: Fill the data assuming that the function is even (parity = 1),
+                       or odd (parity = -1).
+        :type parity: 1 or -1
+        """
+        self._apply_to_self(self.reflection_symmetry_undone, dimension)
+
     def dx_changed(self, new_dx, piecewise_constant=False):
         """Return a new :py:class:`UniformGridData` with the same grid extent, but with
         a new spacing. This effectively up-samples or down-samples the grid.
