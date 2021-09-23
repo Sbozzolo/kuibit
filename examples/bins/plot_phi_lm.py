@@ -114,11 +114,11 @@ at a given l and m."""
 
         plt.plot(
             phi.real(),
-            label=fr"$\Re \Phi_{phi_num}^{{{args.mult_l}{args.mult_l}}}$",
+            label=fr"$\Re \Phi_{phi_num}^{{{args.mult_l}{args.mult_m}}}$",
         )
         plt.plot(
             phi.imag(),
-            label=fr"$\Im \Phi_{phi_num}^{{{args.mult_l}{args.mult_l}}}$",
+            label=fr"$\Im \Phi_{phi_num}^{{{args.mult_l}{args.mult_m}}}$",
         )
 
         plt.legend()
