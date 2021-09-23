@@ -43,6 +43,7 @@ detector. """
 
     parser.add_argument(
         "--detector-num",
+        "--num-detector",
         type=int,
         required=True,
         help="Number of the spherical surface over which to read Psi4.",

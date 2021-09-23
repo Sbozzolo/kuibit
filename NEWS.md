@@ -95,6 +95,8 @@ array of booleans that identifies the valid data.
 
 #### New examples
 
+Examples with `--detector-num` now also accept `--num-detector` as alias.
+
 Scripts:
 
 * `picklify.py`
