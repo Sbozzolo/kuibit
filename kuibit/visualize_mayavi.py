@@ -108,7 +108,7 @@ def plot_apparent_horizon(horizon, iteration, color=None, **kwargs):
     # over the three coordinates. The elements of this list comprehension are
     # np.concatenate of the various points in the patch.
     shape_xyz = [
-        np.concatenate(patch for patch in patches[dim]) for dim in range(3)
+        np.concatenate([patch for patch in patches[dim]]) for dim in range(3)
     ]
 
     # Here we plot!
