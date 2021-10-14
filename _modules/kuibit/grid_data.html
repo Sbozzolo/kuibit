@@ -1014,6 +1014,165 @@
         <span class="sd">&quot;&quot;&quot;Remove all the ghost zones.&quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_apply_to_self</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ghost_zones_removed</span><span class="p">)</span></div>
 
+<div class="viewcode-block" id="UniformGridData.reflection_symmetry_undone"><a class="viewcode-back" href="../../grid_data_ref.html#kuibit.grid_data.UniformGridData.reflection_symmetry_undone">[docs]</a>    <span class="k">def</span> <span class="nf">reflection_symmetry_undone</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dimension</span><span class="p">,</span> <span class="n">parity</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Return a new UniformGridData with reflection symmetry undo for the given dimension.</span>
+
+<span class="sd">        The parameter ``parity`` determines how to fill the data.</span>
+
+<span class="sd">        This method works only if the data crosses the value 0 along the given</span>
+<span class="sd">        dimension.</span>
+
+<span class="sd">        We assume that the reflection will always be from the positive side to</span>
+<span class="sd">        the negative. Pre-existing data in the negative side will be overwritten.</span>
+
+<span class="sd">        This will change the shape of the object.</span>
+
+<span class="sd">        :param dimension: Dimension that has to be reflected.</span>
+<span class="sd">        :type dimension: int</span>
+
+<span class="sd">        :param parity: Fill the data assuming that the function is even (parity = 1),</span>
+<span class="sd">                       or odd (parity = -1).</span>
+<span class="sd">        :type parity: 1 or -1</span>
+
+<span class="sd">        :returns: New :py:class:`UniformGridData` with values explicitly set for</span>
+<span class="sd">                  reflected data.</span>
+<span class="sd">        :rtype: :py:class:`~.UniformGridData`</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># NOTE: this cannot be applied to HierarchicalGridData. In that case we would</span>
+        <span class="c1"># need to add new components all together.</span>
+
+        <span class="c1"># We assume that we are going to reflect from the positive side to the</span>
+        <span class="c1"># negative</span>
+
+        <span class="c1"># 0 is not in the data</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">x0</span><span class="p">[</span><span class="n">dimension</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Cannot reflect data that does not cross 0&quot;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">parity</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;Parity has to be either 1 or -1, cannot be </span><span class="si">{</span><span class="n">parity</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="p">)</span>
+
+        <span class="c1"># See self.grid.coordinates_to_indices():</span>
+        <span class="c1"># We convert the coordinate 0.0 to the index, this will always overestimate, so</span>
+        <span class="c1"># it will always be the first positive</span>
+        <span class="n">index_first_positive</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span>
+            <span class="p">(</span><span class="mf">0.0</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">x0</span><span class="p">[</span><span class="n">dimension</span><span class="p">])</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">dx</span><span class="p">[</span><span class="n">dimension</span><span class="p">]</span> <span class="o">+</span> <span class="mf">0.5</span>
+        <span class="p">)</span>
+
+        <span class="c1"># Next we check that the grid is indeed symmetric about 0. So, the first</span>
+        <span class="c1"># positive point has to be such that, when reflected, it has the correct</span>
+        <span class="c1"># dx.</span>
+        <span class="c1">#</span>
+        <span class="c1"># For example: -2, -0.75, 0.5, 1.75, 3 is not a good grid. The dx here</span>
+        <span class="c1"># is 1.25, but, when reflected, 0.5 -&gt; -0.5, and the dx would be 1.</span>
+        <span class="c1">#</span>
+        <span class="c1"># But -2, 1, 3 is because 1 -&gt; -1, and dx = 2</span>
+
+        <span class="c1"># Compare UniformGrid.indices_to_coordinates</span>
+        <span class="n">coordinates_first_positive_dim</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">index_first_positive</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">dx</span><span class="p">[</span><span class="n">dimension</span><span class="p">]</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">x0</span><span class="p">[</span><span class="n">dimension</span><span class="p">]</span>
+        <span class="p">)</span>
+        <span class="c1"># This could actually be 0. If it is zero, we have to take this into</span>
+        <span class="c1"># account. The zero value should not be copied.</span>
+        <span class="n">first_element_is_zero</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="mi">1</span>
+            <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">isclose</span><span class="p">(</span><span class="n">coordinates_first_positive_dim</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">atol</span><span class="o">=</span><span class="mf">1e-14</span><span class="p">)</span>
+            <span class="k">else</span> <span class="mi">0</span>
+        <span class="p">)</span>
+
+        <span class="c1"># 2 * coordinates_first_positive_dim = first_positive - (-first_positive)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span>
+            <span class="n">first_element_is_zero</span>
+            <span class="ow">or</span> <span class="n">np</span><span class="o">.</span><span class="n">isclose</span><span class="p">(</span>
+                <span class="mi">2</span> <span class="o">*</span> <span class="n">coordinates_first_positive_dim</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">dx</span><span class="p">[</span><span class="n">dimension</span><span class="p">],</span>
+                <span class="n">atol</span><span class="o">=</span><span class="mf">1e-14</span><span class="p">,</span>
+            <span class="p">)</span>
+        <span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;Grid is not symmetric along dimension </span><span class="si">{</span><span class="n">dimension</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="p">)</span>
+
+        <span class="n">num_elements_to_copy</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="n">dimension</span><span class="p">]</span>
+            <span class="o">-</span> <span class="n">index_first_positive</span>
+            <span class="o">-</span> <span class="n">first_element_is_zero</span>
+        <span class="p">)</span>
+
+        <span class="n">new_shape</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">shape</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="c1"># The new shape is the old shape + num_elements_to_copy - the negative</span>
+        <span class="c1"># values (that are going to be overwritten) and the possible zero.</span>
+        <span class="n">new_shape</span><span class="p">[</span><span class="n">dimension</span><span class="p">]</span> <span class="o">+=</span> <span class="n">num_elements_to_copy</span> <span class="o">-</span> <span class="n">index_first_positive</span>
+
+        <span class="c1"># Prepare the output array</span>
+        <span class="c1"># We overwrite it with the data</span>
+        <span class="n">new_data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">new_shape</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">dtype</span><span class="p">)</span>
+
+        <span class="c1"># These are slicers that copy everything. This is what we want, except</span>
+        <span class="c1"># for the given dimension.</span>
+        <span class="n">destination</span> <span class="o">=</span> <span class="p">[</span><span class="nb">slice</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">shape</span><span class="p">]</span>
+        <span class="n">source</span> <span class="o">=</span> <span class="p">[</span><span class="nb">slice</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">shape</span><span class="p">]</span>
+        <span class="c1"># Copy in indices 0, 1, ..., num_elements_to_copy - 1</span>
+        <span class="n">destination</span><span class="p">[</span><span class="n">dimension</span><span class="p">]</span> <span class="o">=</span> <span class="nb">slice</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">num_elements_to_copy</span><span class="p">)</span>
+        <span class="c1"># We have to read the data backwards from the source, so we read from the end</span>
+        <span class="c1"># to index_first_positive - 1 (not included)</span>
+        <span class="n">source</span><span class="p">[</span><span class="n">dimension</span><span class="p">]</span> <span class="o">=</span> <span class="nb">slice</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="n">dimension</span><span class="p">],</span>
+            <span class="n">index_first_positive</span> <span class="o">+</span> <span class="n">first_element_is_zero</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span>
+            <span class="o">-</span><span class="mi">1</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="n">new_data</span><span class="p">[</span><span class="nb">tuple</span><span class="p">(</span><span class="n">destination</span><span class="p">)]</span> <span class="o">=</span> <span class="n">parity</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="nb">tuple</span><span class="p">(</span><span class="n">source</span><span class="p">)]</span>
+
+        <span class="c1"># Now we copy the data we already had</span>
+        <span class="c1">#</span>
+        <span class="c1"># num_elements_to_copy - 1 because we start counting from 0</span>
+        <span class="n">destination</span><span class="p">[</span><span class="n">dimension</span><span class="p">]</span> <span class="o">=</span> <span class="nb">slice</span><span class="p">(</span>
+            <span class="n">num_elements_to_copy</span><span class="p">,</span> <span class="n">new_shape</span><span class="p">[</span><span class="n">dimension</span><span class="p">]</span>
+        <span class="p">)</span>
+        <span class="n">source</span><span class="p">[</span><span class="n">dimension</span><span class="p">]</span> <span class="o">=</span> <span class="nb">slice</span><span class="p">(</span><span class="n">index_first_positive</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="n">dimension</span><span class="p">])</span>
+
+        <span class="n">new_data</span><span class="p">[</span><span class="nb">tuple</span><span class="p">(</span><span class="n">destination</span><span class="p">)]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="nb">tuple</span><span class="p">(</span><span class="n">source</span><span class="p">)]</span>
+
+        <span class="c1"># And we need to extend the grid too</span>
+
+        <span class="c1"># Compute the new x0</span>
+        <span class="n">new_x0</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">x0</span>
+        <span class="n">new_x0</span><span class="p">[</span><span class="n">dimension</span><span class="p">]</span> <span class="o">=</span> <span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">x1</span><span class="p">[</span><span class="n">dimension</span><span class="p">]</span>
+
+        <span class="n">new_grid</span> <span class="o">=</span> <span class="n">UniformGrid</span><span class="p">(</span>
+            <span class="n">shape</span><span class="o">=</span><span class="n">new_shape</span><span class="p">,</span>
+            <span class="n">x0</span><span class="o">=</span><span class="n">new_x0</span><span class="p">,</span>
+            <span class="n">x1</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">grid</span><span class="o">.</span><span class="n">x1</span><span class="p">,</span>
+            <span class="n">dx</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">grid</span><span class="o">.</span><span class="n">dx</span><span class="p">,</span>
+            <span class="n">ref_level</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">grid</span><span class="o">.</span><span class="n">ref_level</span><span class="p">,</span>
+            <span class="n">component</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">grid</span><span class="o">.</span><span class="n">component</span><span class="p">,</span>
+            <span class="n">num_ghost</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">grid</span><span class="o">.</span><span class="n">num_ghost</span><span class="p">,</span>
+            <span class="n">time</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">grid</span><span class="o">.</span><span class="n">time</span><span class="p">,</span>
+            <span class="n">iteration</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">grid</span><span class="o">.</span><span class="n">iteration</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="k">return</span> <span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)(</span><span class="n">new_grid</span><span class="p">,</span> <span class="n">new_data</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="UniformGridData.reflection_symmetry_undo"><a class="viewcode-back" href="../../grid_data_ref.html#kuibit.grid_data.UniformGridData.reflection_symmetry_undo">[docs]</a>    <span class="k">def</span> <span class="nf">reflection_symmetry_undo</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dimension</span><span class="p">,</span> <span class="n">parity</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Undo reflection symmetry for the given dimension.</span>
+
+<span class="sd">        This method works only if the data crosses the value 0 along the given dimension.</span>
+
+<span class="sd">        This will change the shape of the object.</span>
+
+<span class="sd">        :param dimension: Dimension that has to be reflected.</span>
+<span class="sd">        :type dimension: int</span>
+
+<span class="sd">        :param parity: Fill the data assuming that the function is even (parity = 1),</span>
+<span class="sd">                       or odd (parity = -1).</span>
+<span class="sd">        :type parity: 1 or -1</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_apply_to_self</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">reflection_symmetry_undone</span><span class="p">,</span> <span class="n">dimension</span><span class="p">)</span></div>
+
 <div class="viewcode-block" id="UniformGridData.dx_changed"><a class="viewcode-back" href="../../grid_data_ref.html#kuibit.grid_data.UniformGridData.dx_changed">[docs]</a>    <span class="k">def</span> <span class="nf">dx_changed</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_dx</span><span class="p">,</span> <span class="n">piecewise_constant</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Return a new :py:class:`UniformGridData` with the same grid extent, but with</span>
 <span class="sd">        a new spacing. This effectively up-samples or down-samples the grid.</span>
