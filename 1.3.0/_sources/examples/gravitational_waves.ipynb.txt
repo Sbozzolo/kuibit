@@ -1,0 +1,367 @@
+{
+ "cells": [
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "# Working with gravitational waves\n",
+    "\n",
+    "Gravitational waves are one of the most important quantity in numerical-relativity simulations. Here, we will see how to extract the strain and how to do some of the most common operations with gravitational waves. For this, we will some some sample data that we will read with the  [SimDir](../simdir.rst) module.\n",
+    "\n",
+    "(This notebook is meant to be converted in Sphinx documentation and not used directly.)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "import numpy as np\n",
+    "\n",
+    "from kuibit.simdir import SimDir"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "First, we load the data."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "sim = SimDir(\"../../tests/gwsample\")"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "Here, we are only interested in gravitational waves, to access those, we use the `.gws` or `.gravitational_waves` attributes."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "gws = sim.gws"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "`gws` is a `GravitationalWavesDir` object: it contains all the available information about gravitational waves. To see it, you can print `gws`."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "print(gws)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "We see the extraction radii available and the available multipoles. There's also information about the missing multipoles. This information is also avilable through the `available_lm` and `missing_lm` attributes in `gws`.\n",
+    "In this dataset we only have the (2, 2). In case you had a l=1 or l=0 mode, that would have been ignored.\n",
+    "\n",
+    "Data from ASCII files or from hdf5 files is supported.\n",
+    "\n",
+    "`gws` is like a dictionary, where the keys are the radii and the values are `GravitationalWaveOneDet`."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "gws.keys()"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "Let's focus on one extraction radius. You can access the corresponding `GravitationalWavesOneDet` with the bracket operator."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "psi4 = gws[91.46]"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "`GravitationalWavesOneDet` contains $\\Psi_4$ for the extraction radius selected. This object is very rich. You can see which multipoles are available with `available_l`, `available_m`, or `available_lm`. You can see the extraction radius with the `dist` method."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "psi4.dist"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "You can loop over all the available (l, m) with a for loop. When you do this, you get the multipole l and m, and the corresponding timeseries. "
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "for l, m, ts in psi4:\n",
+    "    print(l, m, type(ts))"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "`GravitationalWavesOneDet` are dictionary-like objects as well, with keys being the available (l, m). "
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "psi4_22 = psi4[(2, 2)]\n",
+    "# In case you forget the [], that would work too\n",
+    "psi4_22 = psi4(2, 2)\n",
+    "# Alternatively, you can use the get_psi4_lm method\n",
+    "psi4_22 = psi4.get_psi4_lm(2, 2)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "This is a TimeSeries, we can plot it. $\\Psi_4$ is a complex number, so we only plot the real part>"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "import matplotlib.pyplot as plt\n",
+    "%matplotlib inline\n",
+    "\n",
+    "plt.xlabel(\"t [M]\")\n",
+    "plt.ylabel(\"$\\Psi_4$\")\n",
+    "plt.plot(psi4_22.real())"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "In general, we are interested in the strain. `GravitationalWavesOneDet` objects have numerous methods to extract the strain. The most simple is the one to obtain the strain associated to a specific mode. This (as all the other methods that involve strains) needs to take a Fourier transform. To avoid aliasing effects, your signal should go smoothly to zero. In case it doesn't, you have to window it. To do this, you have to pass the `window_function` paramter, and all the additional paramters that the window may need. You can pass the window in multiple ways, but the simplest is to use one the window functions already coded up. In this example, we will use the Tukey window. If you don't need a window, you can pass `None` (or nothing).\n",
+    "In addition to the window, you have to provide `pcut`. This is the period that will go in the fixed-frequency integration (`omega_threshold = 2 * pi / pcut`). Choose pcut as the longest physical period you expect in your signal.\n",
+    "\n",
+    "Also notice, when extracting the strain `h`, we always obtain `r * h`, where `r` is the extraction radius. "
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "strain_22 = psi4.get_strain_lm(2, # l\n",
+    "                               2, # m\n",
+    "                               120, # pcut\n",
+    "                               0.1, # paramter of the window\n",
+    "                               window_function='tukey'\n",
+    "                               )\n",
+    "rhp = strain_22.real()\n",
+    "rhc = -strain_22.imag()\n",
+    "\n",
+    "plt.xlabel(\"t [M]\")\n",
+    "plt.ylabel(\"$rh [M]$\")\n",
+    "plt.plot(rhp, label=\"h_+\")\n",
+    "plt.plot(rhc, label=\"h_x\")\n",
+    "plt.legend()"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "This is a beautiful gravitational-wave signal! If may not have noticed that the signal is a little bit shorter than $\\Psi_4$. This is because, by default, we remove part of the signal at the beginning and at the end, which typically is not very accurate. If do not want this to happen, send `trim_ends` to `False`.\n",
+    "\n",
+    "Now, let's consider the signal that would be observed by LIGO-Virgo interferometers with function `get_observed_strain`. This method takes into account all the available modes and the localization in the sky. It knows about LIGO Hanford, LIGO Livingston and Virgo and returns a `Detectors` object. We will see in a second how `Detectors` work. No noise is added or taken into account."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "strains = psi4.get_observed_strain(8, # Right ascension\n",
+    "                                   -70, # Declination\n",
+    "                                    \"2015-09-14 09:50:45\", # Time UTC\n",
+    "                                   np.pi/3, # theta_gw\n",
+    "                                   0, # phi_gw\n",
+    "                                   120, # pcut\n",
+    "                                   0.1, # paramter of the window\n",
+    "                                   window_function='tukey'\n",
+    "                                   )"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "Now that we have `strains`, we can access its field as if they were attributes. The name of the fields are the different detectors."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "plt.xlabel(\"t [M]\")\n",
+    "plt.ylabel(\"$rh [M]$\")\n",
+    "plt.plot(strains.hanford, label=\"hanford\")\n",
+    "plt.plot(strains.livingston, label=\"livingston\")\n",
+    "plt.legend()"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "There are additional useful function in `gw_utils`, for example, if we want to compute the signal-to-noise ratio of GW150914 assuming design-sensitivity LIGO:\n",
+    "\n",
+    "(Here we also see how to use bundled sensitivity curves)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "# Let's convert this the strain to physical units\n",
+    "from kuibit import unitconv as uc\n",
+    "import kuibit.gw_utils as gwu\n",
+    "\n",
+    "CU = uc.geom_umass_msun(65)\n",
+    "distance = 410  # Mpc\n",
+    "distance_SI = distance * uc.MEGAPARSEC_SI\n",
+    "\n",
+    "strain_hanford = strains.hanford * CU.length / distance_SI\n",
+    "strain_hanford.time_unit_change(CU.time, inverse=True)\n",
+    "redshift = gwu.luminosity_distance_to_redshift(distance)\n",
+    "strain_hanford.redshift(redshift)\n",
+    "\n",
+    "from kuibit.sensitivity_curves import Sn_aLIGO\n",
+    "\n",
+    "freqs = np.linspace(20, 512, 1000)\n",
+    "aligo = Sn_aLIGO(freqs)\n",
+    "\n",
+    "snr = gwu.signal_to_noise_ratio_from_strain(\n",
+    "    strain_hanford,\n",
+    "    0.1,\n",
+    "    noise=aligo,\n",
+    "    fmin=25,\n",
+    "    fmax=256,\n",
+    "    window_function=\"tukey\",\n",
+    ")\n",
+    "\n",
+    "print(f\"SNR = {snr:.2f}\")"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "We can also compute energy and angular momentum carried away by these waves. There are methods to compute the instantaneous value, or the cumulative one. You can select a specific mode, or sum up all the modes.\n",
+    "\n",
+    "Let's see a couple."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "power_22 = psi4.get_power_lm(2, # l\n",
+    "                             2, # m\n",
+    "                             120 # pcut\n",
+    "                             )\n",
+    "plt.xlabel(\"t [M]\")\n",
+    "plt.ylabel(\"$dE/dt [M]$\")\n",
+    "plt.plot(power_22)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "angmom = psi4.get_total_angular_momentum_z(120)\n",
+    "\n",
+    "plt.xlabel(\"t [M]\")\n",
+    "plt.ylabel(\"$L(<t) [M]$\")\n",
+    "plt.plot(angmom)"
+   ]
+  }
+ ],
+ "metadata": {
+  "kernelspec": {
+   "display_name": "Python 3",
+   "language": "python",
+   "name": "python3"
+  },
+  "language_info": {
+   "codemirror_mode": {
+    "name": "ipython",
+    "version": 3
+   },
+   "file_extension": ".py",
+   "mimetype": "text/x-python",
+   "name": "python",
+   "nbconvert_exporter": "python",
+   "pygments_lexer": "ipython3",
+   "version": "3.7.9"
+  },
+  "name": "gravitational_waves.ipynb"
+ },
+ "nbformat": 4,
+ "nbformat_minor": 4
+}

@@ -1,0 +1,739 @@
+
+
+<!doctype html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>kuibit.cactus_multipoles &#8212; kuibit 1.3.0 documentation</title>
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/bizstyle.css" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/css/custom.css" />
+    
+    <script id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+    <script src="../../_static/jquery.js"></script>
+    <script src="../../_static/underscore.js"></script>
+    <script src="../../_static/doctools.js"></script>
+    <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="../../_static/bizstyle.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0" />
+    <!--[if lt IE 9]>
+    <script src="_static/css3-mediaqueries.js"></script>
+    <![endif]-->
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">kuibit 1.3.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../index.html" accesskey="U">Module code</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">kuibit.cactus_multipoles</a></li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for kuibit.cactus_multipoles</h1><div class="highlight"><pre>
+<span></span><span class="ch">#!/usr/bin/env python3</span>
+
+<span class="c1"># Copyright (C) 2020-2021 Gabriele Bozzola</span>
+<span class="c1">#</span>
+<span class="c1"># Based on code originally developed by Wolfgang Kastaun. This file may contain</span>
+<span class="c1"># algorithms and/or structures first implemented in</span>
+<span class="c1"># GitHub:wokast/PyCactus/PostCactus/cactus_multipoles.py</span>
+<span class="c1">#</span>
+<span class="c1"># This program is free software; you can redistribute it and/or modify it under</span>
+<span class="c1"># the terms of the GNU General Public License as published by the Free Software</span>
+<span class="c1"># Foundation; either version 3 of the License, or (at your option) any later</span>
+<span class="c1"># version.</span>
+<span class="c1">#</span>
+<span class="c1"># This program is distributed in the hope that it will be useful, but WITHOUT</span>
+<span class="c1"># ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS</span>
+<span class="c1"># FOR A PARTICULAR PURPOSE. See the GNU General Public License for more</span>
+<span class="c1"># details.</span>
+<span class="c1">#</span>
+<span class="c1"># You should have received a copy of the GNU General Public License along with</span>
+<span class="c1"># this program; if not, see &lt;https://www.gnu.org/licenses/&gt;.</span>
+
+<span class="sd">&quot;&quot;&quot;This module provides access to data saved by the Multipole thorn.</span>
+
+<span class="sd">There are multiple classes defined in this module:</span>
+
+<span class="sd">- :py:class`~.MultipolesDir` interfaces with :py:class:`~.SimDir` and organizes the</span>
+<span class="sd">  data according to the variable available. This is a dictionary-like object with keys</span>
+<span class="sd">  the variable names.</span>
+<span class="sd">- :py:class`~.MultipoleAllDets` takes all the files that correspond to a given variable</span>
+<span class="sd">  and organize them according to the extraction radius.</span>
+<span class="sd">- :py:class`~.MultipoleOneDet` represents one single extraction radius, for a single</span>
+<span class="sd">  variable. It is a dictionary-like object with keys the multipolar numbers and values</span>
+<span class="sd">  the multipolar decomposition represented as represented as :py:class:`~.TimeSeries`</span>
+<span class="sd">  objects.</span>
+
+<span class="sd">These are hierarchical classes, one containing the others, so one typically ends</span>
+<span class="sd">up with a series of brackets or dots to access the actual data. For example, if</span>
+<span class="sd">``sim`` is a :py:class:`~.SimDir`, ``sim.multipoles[&#39;rho_b&#39;][100][2,2]`` is</span>
+<span class="sd">(2,2) decomposition of ``rho_b`` at radius 100 represented as</span>
+<span class="sd">:py:class:`~.TimeSeries`.</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">re</span>
+
+<span class="kn">import</span> <span class="nn">h5py</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
+<span class="kn">from</span> <span class="nn">kuibit</span> <span class="kn">import</span> <span class="n">timeseries</span>
+<span class="kn">from</span> <span class="nn">kuibit.attr_dict</span> <span class="kn">import</span> <span class="n">pythonize_name_dict</span>
+
+
+<div class="viewcode-block" id="MultipoleOneDet"><a class="viewcode-back" href="../../cactus_multipoles_ref.html#kuibit.cactus_multipoles.MultipoleOneDet">[docs]</a><span class="k">class</span> <span class="nc">MultipoleOneDet</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;This class collects multipole components of a specific variable</span>
+<span class="sd">    a given spherical surface.</span>
+
+<span class="sd">    Multipoles are tightly connected with gravitational waves, so morally a</span>
+<span class="sd">    sphere where multipoles are computed is a &quot;detector&quot;. Hence, the name</span>
+<span class="sd">    of the class.</span>
+
+<span class="sd">    :py:class:`~.MultipoleOneDet` is a dictionary-like object with components as</span>
+<span class="sd">    the tuples (l,m) and values the corresponding multipolar decomposition as a</span>
+<span class="sd">    :py:class:`~.TimeSeries` object. Alternatively, this can also be called</span>
+<span class="sd">    directly ``multipoleonedet(l,m)``. Iteration is supported and yields tuples</span>
+<span class="sd">    ``(l, m, data)``, which can be used to loop through all the multipoles</span>
+<span class="sd">    available.</span>
+
+<span class="sd">    The reason we allow for ``l_min`` is to remove those files that are not</span>
+<span class="sd">    necessary when considering gravitational waves (l&lt;2).</span>
+
+<span class="sd">    :ivar dist: Radius of the sphere.</span>
+<span class="sd">    :vartype dist: float</span>
+<span class="sd">    :ivar radius: Radius of the sphere.</span>
+<span class="sd">    :type radius: float</span>
+<span class="sd">    :ivar l_min: l smaller than ``l_min`` are dropped.</span>
+<span class="sd">    :type l_min: int</span>
+<span class="sd">    :ivar available_l: Available l values.</span>
+<span class="sd">    :type available_l: set</span>
+<span class="sd">    :ivar available_m: Available m values.</span>
+<span class="sd">    :ivar available_m: set</span>
+<span class="sd">    :ivar available_lm: Available ``(l, m)`` values.</span>
+<span class="sd">    :ivar available_lm: set of tuples</span>
+<span class="sd">    :ivar missing_lm: Missing (l, m) values to have all from ``l_min`` to ``l_max``.</span>
+<span class="sd">    :ivar missing_lm: set of tuples</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dist</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">l_min</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Constructor.</span>
+
+<span class="sd">        :param dist: Radius of the spherical surface.</span>
+<span class="sd">        :type dist: float</span>
+<span class="sd">        :param data: List of tuples with the two multipolar numbers and</span>
+<span class="sd">                     the data as :py:class:`~.TimeSeries`.</span>
+<span class="sd">        :type data: list of tuple ``(l, m, timeseries)``</span>
+<span class="sd">        :ivar l_min: l smaller than ``l_min`` are dropped.</span>
+<span class="sd">        :type l_min: int</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">dist</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">dist</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">radius</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dist</span>  <span class="c1"># This is just an alias</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">l_min</span> <span class="o">=</span> <span class="n">l_min</span>
+
+        <span class="c1"># Associate multipoles to list of timeseries</span>
+        <span class="n">multipoles_list_ts</span> <span class="o">=</span> <span class="p">{}</span>
+
+        <span class="c1"># Now we populate the multipoles_ts_list dictionary. This is a</span>
+        <span class="c1"># dictionary with keys (l, m) and with values lists of timeseries. If</span>
+        <span class="c1"># the key is not already present, we create it with value an empty</span>
+        <span class="c1"># list, then we append the timeseries to this list</span>
+        <span class="k">for</span> <span class="n">mult_l</span><span class="p">,</span> <span class="n">mult_m</span><span class="p">,</span> <span class="n">ts</span> <span class="ow">in</span> <span class="n">data</span><span class="p">:</span>  <span class="c1"># mult = &quot;multipole&quot;</span>
+            <span class="k">if</span> <span class="n">mult_l</span> <span class="o">&gt;=</span> <span class="n">l_min</span><span class="p">:</span>
+                <span class="n">lm_list</span> <span class="o">=</span> <span class="n">multipoles_list_ts</span><span class="o">.</span><span class="n">setdefault</span><span class="p">((</span><span class="n">mult_l</span><span class="p">,</span> <span class="n">mult_m</span><span class="p">),</span> <span class="p">[])</span>
+                <span class="c1"># This means: multipoles[(mult_t, mult_m)] = []</span>
+                <span class="n">lm_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ts</span><span class="p">)</span>
+                <span class="c1"># At the end we have:</span>
+                <span class="c1"># multipoles[(mult_t, mult_m)] = [ts1, ts2, ...]</span>
+
+        <span class="c1"># Now self._multipoles is a dictionary in which all the timeseries are</span>
+        <span class="c1"># collapse in a single one. So it is a straightforward map (l, m) -&gt; ts</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_multipoles</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="n">lm</span><span class="p">:</span> <span class="n">timeseries</span><span class="o">.</span><span class="n">combine_ts</span><span class="p">(</span><span class="n">ts</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">lm</span><span class="p">,</span> <span class="n">ts</span> <span class="ow">in</span> <span class="n">multipoles_list_ts</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+        <span class="p">}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">available_l</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span>
+            <span class="p">{</span><span class="n">mult_l</span> <span class="k">for</span> <span class="n">mult_l</span><span class="p">,</span> <span class="n">_</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_multipoles</span><span class="o">.</span><span class="n">keys</span><span class="p">()}</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">l_max</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">available_l</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">available_m</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span>
+            <span class="p">{</span><span class="n">mult_m</span> <span class="k">for</span> <span class="n">_</span><span class="p">,</span> <span class="n">mult_m</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_multipoles</span><span class="o">.</span><span class="n">keys</span><span class="p">()}</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">available_lm</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_multipoles</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+
+        <span class="c1"># Check if all the (l, m) from l_min to l_max are available</span>
+        <span class="n">all_lm</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">mult_l</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">l_min</span><span class="p">,</span> <span class="nb">max</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">available_l</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">mult_m</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="o">-</span><span class="n">mult_l</span><span class="p">,</span> <span class="n">mult_l</span> <span class="o">+</span> <span class="mi">1</span><span class="p">):</span>
+                <span class="n">all_lm</span><span class="o">.</span><span class="n">add</span><span class="p">((</span><span class="n">mult_l</span><span class="p">,</span> <span class="n">mult_m</span><span class="p">))</span>
+
+        <span class="c1"># set subtraction</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">missing_lm</span> <span class="o">=</span> <span class="n">all_lm</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">available_lm</span>
+
+        <span class="c1"># Data is in the format expected by __init__</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="p">[(</span><span class="n">lm</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">lm</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">ts</span><span class="p">)</span> <span class="k">for</span> <span class="n">lm</span><span class="p">,</span> <span class="n">ts</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_multipoles</span><span class="o">.</span><span class="n">items</span><span class="p">()]</span>
+
+<div class="viewcode-block" id="MultipoleOneDet.copy"><a class="viewcode-back" href="../../cactus_multipoles_ref.html#kuibit.cactus_multipoles.MultipoleOneDet.copy">[docs]</a>    <span class="k">def</span> <span class="nf">copy</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Return a deep copy.</span>
+
+<span class="sd">        :returns: Deep copy of ``self``.</span>
+<span class="sd">        :rtype: :py:class:`~.MultipoleOneDet`</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)(</span><span class="bp">self</span><span class="o">.</span><span class="n">dist</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">l_min</span><span class="p">)</span></div>
+
+    <span class="k">def</span> <span class="fm">__contains__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_multipoles</span>
+
+    <span class="k">def</span> <span class="fm">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_multipoles</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
+
+    <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mult_l</span><span class="p">,</span> <span class="n">mult_m</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="p">[(</span><span class="n">mult_l</span><span class="p">,</span> <span class="n">mult_m</span><span class="p">)]</span>
+
+    <span class="k">def</span> <span class="fm">__eq__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)):</span>
+            <span class="k">return</span> <span class="kc">False</span>
+        <span class="k">return</span> <span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">dist</span> <span class="o">==</span> <span class="n">other</span><span class="o">.</span><span class="n">dist</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">_multipoles</span> <span class="o">==</span> <span class="n">other</span><span class="o">.</span><span class="n">_multipoles</span>
+        <span class="p">)</span>
+
+    <span class="k">def</span> <span class="fm">__iter__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">for</span> <span class="p">(</span><span class="n">mult_l</span><span class="p">,</span> <span class="n">mult_m</span><span class="p">),</span> <span class="n">ts</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_multipoles</span><span class="o">.</span><span class="n">items</span><span class="p">()):</span>
+            <span class="k">yield</span> <span class="n">mult_l</span><span class="p">,</span> <span class="n">mult_m</span><span class="p">,</span> <span class="n">ts</span>
+
+    <span class="k">def</span> <span class="fm">__len__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_multipoles</span><span class="p">)</span>
+
+<div class="viewcode-block" id="MultipoleOneDet.keys"><a class="viewcode-back" href="../../cactus_multipoles_ref.html#kuibit.cactus_multipoles.MultipoleOneDet.keys">[docs]</a>    <span class="k">def</span> <span class="nf">keys</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Return available multipolar numbers.</span>
+
+<span class="sd">        :returns: Available multipolar numbers.</span>
+<span class="sd">        :rtype: dict_keys</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_multipoles</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span></div>
+
+    <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">ret</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;(l, m) available: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">missing_lm</span><span class="p">:</span>
+            <span class="n">ret</span> <span class="o">+=</span> <span class="sa">f</span><span class="s2">&quot; (missing: </span><span class="si">{</span><span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">missing_lm</span><span class="p">)</span><span class="si">}</span><span class="s2">)&quot;</span>
+        <span class="k">return</span> <span class="n">ret</span>
+
+<div class="viewcode-block" id="MultipoleOneDet.total_function_on_available_lm"><a class="viewcode-back" href="../../cactus_multipoles_ref.html#kuibit.cactus_multipoles.MultipoleOneDet.total_function_on_available_lm">[docs]</a>    <span class="k">def</span> <span class="nf">total_function_on_available_lm</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">function</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="n">l_max</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span>
+    <span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Evaluate ``function`` on each multipole and accumulate the result.</span>
+
+<span class="sd">        ``total_function_on_available_lm`` will call ``function`` with the</span>
+<span class="sd">        following arguments:</span>
+
+<span class="sd">        ``function(timeseries, mult_l, mult_m, dist, *args, **kwargs)``</span>
+
+<span class="sd">        If ``function`` does not need some paramters, it should use take</span>
+<span class="sd">        the ``*args`` argument to ignore the additional paramters that</span>
+<span class="sd">        are always passed ``(l, m, r)``.</span>
+
+<span class="sd">        Values of l larger than ``l_max`` are ignored.</span>
+
+<span class="sd">        This method is used to compute quantities like the total power in</span>
+<span class="sd">        gravitational waves.</span>
+
+<span class="sd">        ``function`` can take additional paramters passed directly from</span>
+<span class="sd">        ``total_function_on_available_lm`` (e.g. ``pcut`` for FFI).</span>
+
+<span class="sd">        :params function: Function that has to be applied on each multipole.</span>
+<span class="sd">        :type function: callable</span>
+
+<span class="sd">        :returns: Sum of function applied to each monopole</span>
+<span class="sd">        :rtype: return type of function</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># This function is used to compute many quantities with waves (e.g.,</span>
+        <span class="c1"># total strain, total power emitted, ...)</span>
+        <span class="c1"># It is a little bit ugly, but it works</span>
+        <span class="k">if</span> <span class="n">l_max</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">l_max</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">l_max</span>
+
+        <span class="k">if</span> <span class="n">l_max</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">l_max</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;l max larger than l available&quot;</span><span class="p">)</span>
+
+        <span class="c1"># The iterator is increasing in (l, m), so we can start from the first</span>
+        <span class="c1"># element</span>
+
+        <span class="n">iter_self</span> <span class="o">=</span> <span class="nb">iter</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">first_l</span><span class="p">,</span> <span class="n">first_m</span><span class="p">,</span> <span class="n">first_det</span> <span class="o">=</span> <span class="nb">next</span><span class="p">(</span><span class="n">iter_self</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">StopIteration</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s2">&quot;No multipole moments available&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">first_l</span> <span class="o">&gt;</span> <span class="n">l_max</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;l max smaller than all l available&quot;</span><span class="p">)</span>
+
+        <span class="n">result</span> <span class="o">=</span> <span class="n">function</span><span class="p">(</span>
+            <span class="n">first_det</span><span class="p">,</span> <span class="n">first_l</span><span class="p">,</span> <span class="n">first_m</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">dist</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span>
+        <span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">mult_l</span><span class="p">,</span> <span class="n">mult_m</span><span class="p">,</span> <span class="n">det</span> <span class="ow">in</span> <span class="n">iter_self</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">mult_l</span> <span class="o">&lt;=</span> <span class="n">l_max</span><span class="p">:</span>
+                <span class="n">result</span> <span class="o">+=</span> <span class="n">function</span><span class="p">(</span>
+                    <span class="n">det</span><span class="p">,</span> <span class="n">mult_l</span><span class="p">,</span> <span class="n">mult_m</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">dist</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span>
+                <span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">result</span></div></div>
+
+
+<div class="viewcode-block" id="MultipoleAllDets"><a class="viewcode-back" href="../../cactus_multipoles_ref.html#kuibit.cactus_multipoles.MultipoleAllDets">[docs]</a><span class="k">class</span> <span class="nc">MultipoleAllDets</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;This class collects available surfaces with multipole data.</span>
+
+<span class="sd">    It is a dictionary-like object with keys the spherical surface radius, and</span>
+<span class="sd">    values :py:class:`MultipoleOneDet` object. Iteration is supported, sorted by</span>
+<span class="sd">    ascending radius. You can iterate over all the radii and all the available l</span>
+<span class="sd">    and m with a nested loop.</span>
+
+<span class="sd">    :ivar radii:        Available surface radii.</span>
+<span class="sd">    :type radii: float</span>
+<span class="sd">    :ivar r_outer:      Radius of the outermost detector.</span>
+<span class="sd">    :type r_outer: float</span>
+<span class="sd">    :ivar l_min: l smaller than l_min are dropped.</span>
+<span class="sd">    :type l_min: int</span>
+<span class="sd">    :ivar outermost:    Outermost detector.</span>
+<span class="sd">    :type outermost: :py:class:`~MultipoleOneDet`</span>
+<span class="sd">    :ivar available_lm: Available components as tuple (l,m).</span>
+<span class="sd">    :type available_lm: list of tuples</span>
+<span class="sd">    :ivar available_l:  List of available l.</span>
+<span class="sd">    :type available_l: list</span>
+<span class="sd">    :ivar available_m:  List of available m.</span>
+<span class="sd">    :type available_m: list</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">l_min</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Constructor.</span>
+
+<span class="sd">        :param data: List of tuples with ``(multipole_l, multipole_m,</span>
+<span class="sd">                     extraction_radius, [timeseries])``, where</span>
+<span class="sd">                     ``[timeseries]`` is a list of the :py:class:`~.TimeSeries`</span>
+<span class="sd">                     associated.</span>
+<span class="sd">        :type data: list of tuples</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">l_min</span> <span class="o">=</span> <span class="n">l_min</span>
+
+        <span class="n">detectors</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">available_lm</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+
+        <span class="c1"># Populate detectors</span>
+        <span class="c1"># detectors is a dictionary with keys the radii and</span>
+        <span class="c1"># items that look like ([l, m, timeseries, ...]).</span>
+        <span class="c1"># We accumulate in the list all the ones for the same</span>
+        <span class="c1"># radius</span>
+        <span class="k">for</span> <span class="n">mult_l</span><span class="p">,</span> <span class="n">mult_m</span><span class="p">,</span> <span class="n">radius</span><span class="p">,</span> <span class="n">ts</span> <span class="ow">in</span> <span class="n">data</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">mult_l</span> <span class="o">&gt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">l_min</span><span class="p">:</span>
+                <span class="c1"># If we don&#39;t have the radius yet, let&#39;s create an empty list</span>
+                <span class="n">d</span> <span class="o">=</span> <span class="n">detectors</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="n">radius</span><span class="p">,</span> <span class="p">[])</span>
+                <span class="c1"># Add the new values</span>
+                <span class="n">d</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">mult_l</span><span class="p">,</span> <span class="n">mult_m</span><span class="p">,</span> <span class="n">ts</span><span class="p">))</span>
+                <span class="c1"># Tally the available l and m</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">available_lm</span><span class="o">.</span><span class="n">add</span><span class="p">((</span><span class="n">mult_l</span><span class="p">,</span> <span class="n">mult_m</span><span class="p">))</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_detectors</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="n">radius</span><span class="p">:</span> <span class="n">MultipoleOneDet</span><span class="p">(</span><span class="n">radius</span><span class="p">,</span> <span class="n">multipoles</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">l_min</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">radius</span><span class="p">,</span> <span class="n">multipoles</span> <span class="ow">in</span> <span class="n">detectors</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+        <span class="p">}</span>
+
+        <span class="c1"># In Python3 .keys() is not a list</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">radii</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_detectors</span><span class="o">.</span><span class="n">keys</span><span class="p">()))</span>
+
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">radii</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">r_outer</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">radii</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">outermost</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_detectors</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">r_outer</span><span class="p">]</span>
+        <span class="c1">#</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">available_l</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">({</span><span class="n">mult_l</span> <span class="k">for</span> <span class="n">mult_l</span><span class="p">,</span> <span class="n">_</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">available_lm</span><span class="p">})</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">available_l</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">l_max</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">available_l</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">l_max</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">available_m</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">({</span><span class="n">mult_m</span> <span class="k">for</span> <span class="n">_</span><span class="p">,</span> <span class="n">mult_m</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">available_lm</span><span class="p">})</span>
+
+        <span class="c1"># Alias</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_dets</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_detectors</span>
+
+        <span class="c1"># Data is in the format expected by __init__</span>
+        <span class="c1"># (multipole_l, multipole_m, extraction_radius, [timeseries])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">radius</span><span class="p">,</span> <span class="n">det</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dets</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="k">for</span> <span class="n">mult_l</span><span class="p">,</span> <span class="n">mult_m</span><span class="p">,</span> <span class="n">ts</span> <span class="ow">in</span> <span class="n">det</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">mult_l</span><span class="p">,</span> <span class="n">mult_m</span><span class="p">,</span> <span class="n">radius</span><span class="p">,</span> <span class="n">ts</span><span class="p">))</span>
+
+<div class="viewcode-block" id="MultipoleAllDets.copy"><a class="viewcode-back" href="../../cactus_multipoles_ref.html#kuibit.cactus_multipoles.MultipoleAllDets.copy">[docs]</a>    <span class="k">def</span> <span class="nf">copy</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Return a deep copy.</span>
+
+<span class="sd">        :returns: Deep copy of ``self``.</span>
+<span class="sd">        :rtype: :py:class:`~.MultipoleAllDets`</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">l_min</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="MultipoleAllDets.has_detector"><a class="viewcode-back" href="../../cactus_multipoles_ref.html#kuibit.cactus_multipoles.MultipoleAllDets.has_detector">[docs]</a>    <span class="k">def</span> <span class="nf">has_detector</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mult_l</span><span class="p">,</span> <span class="n">mult_m</span><span class="p">,</span> <span class="n">dist</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Check if a given multipole component extracted at a given</span>
+<span class="sd">        distance is available.</span>
+
+<span class="sd">        :param mult_l:     Multipole component l.</span>
+<span class="sd">        :type mult_l:      int</span>
+<span class="sd">        :param mult_m:     Multipole component m.</span>
+<span class="sd">        :type mult_m:      int</span>
+<span class="sd">        :param dist:  Distance of the detector.</span>
+<span class="sd">        :type dist:   float</span>
+
+<span class="sd">        :returns:     If available or not.</span>
+<span class="sd">        :rtype:       bool</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">dist</span> <span class="ow">in</span> <span class="bp">self</span><span class="p">:</span>
+            <span class="k">return</span> <span class="p">(</span><span class="n">mult_l</span><span class="p">,</span> <span class="n">mult_m</span><span class="p">)</span> <span class="ow">in</span> <span class="bp">self</span><span class="p">[</span><span class="n">dist</span><span class="p">]</span>
+        <span class="k">return</span> <span class="kc">False</span></div>
+
+    <span class="k">def</span> <span class="fm">__contains__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dets</span>
+
+    <span class="k">def</span> <span class="fm">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dets</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
+
+    <span class="k">def</span> <span class="fm">__iter__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">radii</span><span class="p">:</span>
+            <span class="k">yield</span> <span class="bp">self</span><span class="p">[</span><span class="n">r</span><span class="p">]</span>
+
+    <span class="k">def</span> <span class="fm">__eq__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)):</span>
+            <span class="k">return</span> <span class="kc">False</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">radii</span> <span class="o">==</span> <span class="n">other</span><span class="o">.</span><span class="n">radii</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dets</span> <span class="o">==</span> <span class="n">other</span><span class="o">.</span><span class="n">_dets</span>
+
+    <span class="k">def</span> <span class="fm">__len__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_dets</span><span class="p">)</span>
+
+<div class="viewcode-block" id="MultipoleAllDets.keys"><a class="viewcode-back" href="../../cactus_multipoles_ref.html#kuibit.cactus_multipoles.MultipoleAllDets.keys">[docs]</a>    <span class="k">def</span> <span class="nf">keys</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Return available extraction radii.</span>
+
+<span class="sd">        :returns: Available extraction radii.</span>
+<span class="sd">        :rtype: dict_keys</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dets</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span></div>
+
+    <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">ret</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;Avilable radii: </span><span class="si">{</span><span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span><span class="si">}</span><span class="se">\n\n</span><span class="s2">&quot;</span>
+        <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">keys</span><span class="p">()):</span>
+            <span class="n">ret</span> <span class="o">+=</span> <span class="sa">f</span><span class="s2">&quot;At radius </span><span class="si">{</span><span class="n">d</span><span class="si">}</span><span class="s2">, </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_dets</span><span class="p">[</span><span class="n">d</span><span class="p">]</span><span class="si">}</span><span class="se">\n</span><span class="s2">&quot;</span>
+        <span class="k">return</span> <span class="n">ret</span></div>
+
+
+<div class="viewcode-block" id="MultipolesDir"><a class="viewcode-back" href="../../cactus_multipoles_ref.html#kuibit.cactus_multipoles.MultipolesDir">[docs]</a><span class="k">class</span> <span class="nc">MultipolesDir</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;This class provides acces to various types of multipole data in a given</span>
+<span class="sd">    simulation directory.</span>
+
+<span class="sd">    This class is like a dictionary, you can access its values using the</span>
+<span class="sd">    brackets operator, with values that are :py:mod:`~.MultipoleAllDets`. These</span>
+<span class="sd">    contain the full multipolar description for all the available radii. Files</span>
+<span class="sd">    are lazily loaded. If both HDF5 and ASCII are present, HDF5 are preferred.</span>
+<span class="sd">    There&#39;s no attempt to combine the two. Alternatively, you can access</span>
+<span class="sd">    variables with ``get`` or with ``fields.var_name``.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sd</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Constructor.</span>
+
+<span class="sd">        :param sd: Simulation directory.</span>
+<span class="sd">        :type sd: :py:class:`~.SimDir`</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># self._vars_*_files are dictionary. For _vars_ascii_files, the keys are</span>
+        <span class="c1"># the variables and the items are sets of tuples of the form</span>
+        <span class="c1"># (multipole_l, multipole_m, radius, filename) for text files.</span>
+        <span class="c1">#</span>
+        <span class="c1"># For example:</span>
+        <span class="c1"># self._vars_ascii_files =</span>
+        <span class="c1"># {&#39;psi4&#39;: {(2, 2, 110.69, &#39;output-0000/mp_Psi4_l_m2_r110.69.asc&#39;),</span>
+        <span class="c1">#           (2, 2, 110.69, &#39;output-0001/mp_Psi4_l_m2_r110.69.asc&#39;)}}</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_vars_ascii_files</span> <span class="o">=</span> <span class="p">{}</span>
+
+        <span class="c1"># For _vars_h5_files, the keys are still the variables, but values are</span>
+        <span class="c1"># sets with only the files (and not tuples), since we have to read the</span>
+        <span class="c1"># content to find the l and m</span>
+        <span class="c1">#</span>
+        <span class="c1"># For example</span>
+        <span class="c1"># self._vars_h5_files =</span>
+        <span class="c1"># {&#39;psi4&#39;: {&#39;output-0000/mp_Psi4.h5&#39;, &#39;output-0001/mp_Psi4.h5&#39;}}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_vars_h5_files</span> <span class="o">=</span> <span class="p">{}</span>
+
+        <span class="c1"># self._vars is the dictionary where we cache the results. The keys are</span>
+        <span class="c1"># the variables, the values are the corresponding MultipoleAllDets</span>
+        <span class="c1"># objects. We fill this with __getitem__</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_vars</span> <span class="o">=</span> <span class="p">{}</span>
+
+        <span class="c1"># First, we need to find the multipole files.</span>
+        <span class="c1"># There are text files and h5 files</span>
+        <span class="c1">#</span>
+        <span class="c1"># We use a regular expressions on the name</span>
+        <span class="c1"># The structure is like mp_Psi4_l_m2_r110.69.asc</span>
+        <span class="c1">#</span>
+        <span class="c1"># Let&#39;s understand the regexp:</span>
+        <span class="c1"># 0. ^ and $ means that we match the entire name</span>
+        <span class="c1"># 1. We match mp_ followed my the variable name, which is</span>
+        <span class="c1">#    any combination of characters</span>
+        <span class="c1"># 2. We match _l with a number</span>
+        <span class="c1"># 3. We match _m with possibly a minus sign and a number</span>
+        <span class="c1"># 4. We match _r with any combination of numbers with possibly</span>
+        <span class="c1">#    dots</span>
+        <span class="c1"># 5. We possibly match a compression</span>
+        <span class="n">rx_ascii</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span>
+            <span class="sa">r</span><span class="sd">&quot;&quot;&quot;^</span>
+<span class="sd">        mp_([a-zA-Z0-9\[\]_]+)</span>
+<span class="sd">        _l(\d+)</span>
+<span class="sd">        _m([-]?\d+)</span>
+<span class="sd">        _r([0-9.]+)</span>
+<span class="sd">        .asc</span>
+<span class="sd">        (?:.bz2|.gz)?</span>
+<span class="sd">        $&quot;&quot;&quot;</span><span class="p">,</span>
+            <span class="n">re</span><span class="o">.</span><span class="n">VERBOSE</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="c1"># For h5 files is easy: it is just the var name</span>
+        <span class="n">rx_h5</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;^mp_([a-zA-Z0-9\[\]_]+).h5$&quot;</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">sd</span><span class="o">.</span><span class="n">allfiles</span><span class="p">:</span>
+            <span class="n">filename</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">f</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span>
+            <span class="n">matched_h5</span> <span class="o">=</span> <span class="n">rx_h5</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+            <span class="n">matched_ascii</span> <span class="o">=</span> <span class="n">rx_ascii</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">matched_h5</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">variable_name</span> <span class="o">=</span> <span class="n">matched_h5</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+                <span class="n">var_list</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_vars_h5_files</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="n">variable_name</span><span class="p">,</span> <span class="nb">set</span><span class="p">())</span>
+                <span class="c1"># We are flagging that this h5</span>
+                <span class="n">var_list</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="n">matched_ascii</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">variable_name</span> <span class="o">=</span> <span class="n">matched_ascii</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+                <span class="n">mult_l</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">matched_ascii</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">2</span><span class="p">))</span>
+                <span class="n">mult_m</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">matched_ascii</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">3</span><span class="p">))</span>
+                <span class="n">radius</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">matched_ascii</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">4</span><span class="p">))</span>
+                <span class="n">var_list</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_vars_ascii_files</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span>
+                    <span class="n">variable_name</span><span class="p">,</span> <span class="nb">set</span><span class="p">()</span>
+                <span class="p">)</span>
+                <span class="n">var_list</span><span class="o">.</span><span class="n">add</span><span class="p">((</span><span class="n">mult_l</span><span class="p">,</span> <span class="n">mult_m</span><span class="p">,</span> <span class="n">radius</span><span class="p">,</span> <span class="n">f</span><span class="p">))</span>
+
+        <span class="c1"># What pythonize_name_dict does is to make the various variables</span>
+        <span class="c1"># accessible as attributes, e.g. self.fields.rho</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fields</span> <span class="o">=</span> <span class="n">pythonize_name_dict</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">keys</span><span class="p">()),</span> <span class="bp">self</span><span class="o">.</span><span class="fm">__getitem__</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="fm">__contains__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="n">key</span><span class="p">)</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span>
+
+    <span class="c1"># The following are staticmethods because they do not depend on the bound</span>
+    <span class="c1"># object. Using this decorator we save memory because Python will</span>
+    <span class="c1"># initialize them only once.</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_multipole_from_textfile</span><span class="p">(</span><span class="n">path</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Read multipole data from a text file.</span>
+
+<span class="sd">        :param path: File to read.</span>
+<span class="sd">        :type path: str</span>
+
+<span class="sd">        :returns: Multipole data.</span>
+<span class="sd">        :rtype: :py:class:`~.TimeSeries`</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">a</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">loadtxt</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">unpack</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">ndmin</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">a</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">3</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Wrong format in </span><span class="si">{</span><span class="n">path</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="n">complex_mp</span> <span class="o">=</span> <span class="n">a</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="mi">1</span><span class="n">j</span> <span class="o">*</span> <span class="n">a</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">timeseries</span><span class="o">.</span><span class="n">remove_duplicated_iters</span><span class="p">(</span><span class="n">a</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">complex_mp</span><span class="p">)</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_multipoles_from_h5file</span><span class="p">(</span><span class="n">path</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Read multipole data from a HDF5 file.</span>
+
+<span class="sd">        :param path: File to read.</span>
+<span class="sd">        :type path: str</span>
+<span class="sd">        :returns: Multipole data.</span>
+<span class="sd">        :rtype: :py:class:`~.TimeSeries`</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">alldets</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="c1"># This regex matches : l(number)_m(-number)_r(number)</span>
+        <span class="n">fieldname_pattern</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;l(\d+)_m([-]?\d+)_r([0-9.]+)&quot;</span><span class="p">)</span>
+
+        <span class="k">with</span> <span class="n">h5py</span><span class="o">.</span><span class="n">File</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">data</span><span class="p">:</span>
+
+            <span class="c1"># Loop over the groups in the hdf5</span>
+            <span class="k">for</span> <span class="n">entry</span> <span class="ow">in</span> <span class="n">data</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+                <span class="n">matched</span> <span class="o">=</span> <span class="n">fieldname_pattern</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">entry</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">matched</span><span class="p">:</span>
+                    <span class="n">mult_l</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">matched</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">1</span><span class="p">))</span>
+                    <span class="n">mult_m</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">matched</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">2</span><span class="p">))</span>
+                    <span class="n">radius</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">matched</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">3</span><span class="p">))</span>
+                    <span class="c1"># Read the actual data</span>
+                    <span class="n">a</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">entry</span><span class="p">][()]</span><span class="o">.</span><span class="n">T</span>
+                    <span class="n">complex_mp</span> <span class="o">=</span> <span class="n">a</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="mi">1</span><span class="n">j</span> <span class="o">*</span> <span class="n">a</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+                    <span class="n">ts</span> <span class="o">=</span> <span class="n">timeseries</span><span class="o">.</span><span class="n">remove_duplicated_iters</span><span class="p">(</span><span class="n">a</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">complex_mp</span><span class="p">)</span>
+                    <span class="n">alldets</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">mult_l</span><span class="p">,</span> <span class="n">mult_m</span><span class="p">,</span> <span class="n">radius</span><span class="p">,</span> <span class="n">ts</span><span class="p">))</span>
+
+        <span class="k">return</span> <span class="n">alldets</span>
+
+    <span class="k">def</span> <span class="nf">_multipoles_from_textfiles</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mpfiles</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Read all the multipole data in several text files.</span>
+
+<span class="sd">        :param mpfiles: Files to read.</span>
+<span class="sd">        :type mpfiles: list of str</span>
+
+<span class="sd">        :returns: :py:class:`~.MultipoleAllDets` with all the data read.</span>
+<span class="sd">        :rtype: :py:class:`~.MultipoleAllDets`</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># We prepare the data for MultipoleAllDets checking for errors</span>
+        <span class="n">alldets</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="p">(</span>
+                <span class="n">mult_l</span><span class="p">,</span>
+                <span class="n">mult_m</span><span class="p">,</span>
+                <span class="n">radius</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_multipole_from_textfile</span><span class="p">(</span><span class="n">filename</span><span class="p">),</span>
+            <span class="p">)</span>
+            <span class="k">for</span> <span class="n">mult_l</span><span class="p">,</span> <span class="n">mult_m</span><span class="p">,</span> <span class="n">radius</span><span class="p">,</span> <span class="n">filename</span> <span class="ow">in</span> <span class="n">mpfiles</span>
+        <span class="p">]</span>
+        <span class="k">return</span> <span class="n">MultipoleAllDets</span><span class="p">(</span><span class="n">alldets</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_multipoles_from_h5files</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mpfiles</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Read all the multipole data in several HDF5 files.</span>
+
+<span class="sd">        :param mpfiles: Files to read.</span>
+<span class="sd">        :type mpfiles: list of str</span>
+
+<span class="sd">        :returns: :py:class:`~.MultipoleAllDets` with all the data read.</span>
+<span class="sd">        :rtype: :py:class:`~.MultipoleAllDets`</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">mult_l</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="k">for</span> <span class="n">filename</span> <span class="ow">in</span> <span class="n">mpfiles</span><span class="p">:</span>
+            <span class="n">mult_l</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_multipoles_from_h5file</span><span class="p">(</span><span class="n">filename</span><span class="p">))</span>
+
+        <span class="k">return</span> <span class="n">MultipoleAllDets</span><span class="p">(</span><span class="n">mult_l</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="fm">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Read data associated to variable ``key``.</span>
+
+<span class="sd">        HDF5 files are preferred over ASCII ones.</span>
+
+<span class="sd">        :returns: Multipolar data.</span>
+<span class="sd">        :rtype: :py:class:`~.MultipoleAllDets`</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">k</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">key</span><span class="p">)</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+
+        <span class="c1"># If we don&#39;t have already cached the result, we first read it.</span>
+
+        <span class="k">if</span> <span class="n">k</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_vars</span><span class="p">:</span>
+            <span class="c1"># We prefer h5</span>
+            <span class="k">if</span> <span class="n">k</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_vars_h5_files</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_vars</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_multipoles_from_h5files</span><span class="p">(</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_vars_h5_files</span><span class="p">[</span><span class="n">k</span><span class="p">]</span>
+                <span class="p">)</span>
+            <span class="k">elif</span> <span class="n">k</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_vars_ascii_files</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_vars</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_multipoles_from_textfiles</span><span class="p">(</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_vars_ascii_files</span><span class="p">[</span><span class="n">k</span><span class="p">]</span>
+                <span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">KeyError</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_vars</span><span class="p">[</span><span class="n">k</span><span class="p">]</span>
+
+<div class="viewcode-block" id="MultipolesDir.get"><a class="viewcode-back" href="../../cactus_multipoles_ref.html#kuibit.cactus_multipoles.MultipolesDir.get">[docs]</a>    <span class="k">def</span> <span class="nf">get</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Return a the multipolar data for the given variable if available, else return</span>
+<span class="sd">        the default value.</span>
+
+<span class="sd">        :param key: Requested variable.</span>
+<span class="sd">        :type key: str</span>
+<span class="sd">        :param default: Returned value if ``key`` is not available.</span>
+<span class="sd">        :type default: any</span>
+
+<span class="sd">        :returns: Collection of all the multipolar data for the given variable.</span>
+<span class="sd">        :rtype: :py:class:`~.MultipoleAllDets`</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="n">key</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">default</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="p">[</span><span class="n">key</span><span class="p">]</span></div>
+
+<div class="viewcode-block" id="MultipolesDir.keys"><a class="viewcode-back" href="../../cactus_multipoles_ref.html#kuibit.cactus_multipoles.MultipolesDir.keys">[docs]</a>    <span class="k">def</span> <span class="nf">keys</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Return available variables with multipolar data.</span>
+
+<span class="sd">        :returns: Available variables that have multipolar data.</span>
+<span class="sd">        :rtype: dict_keys</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># We merge the dictionaries and return the keys.</span>
+        <span class="c1"># This automatically takes care of making sure that they keys are unique.</span>
+        <span class="k">return</span> <span class="p">{</span><span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">_vars_h5_files</span><span class="p">,</span> <span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">_vars_ascii_files</span><span class="p">}</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span></div>
+
+    <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;NOTE: __str__ requires opening all the h5 files! This can be slow!&quot;&quot;&quot;</span>
+        <span class="n">ret</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;Variables available: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span><span class="si">}</span><span class="se">\n</span><span class="s2">&quot;</span>
+        <span class="k">for</span> <span class="n">variable</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+            <span class="n">ret</span> <span class="o">+=</span> <span class="sa">f</span><span class="s2">&quot;For variable </span><span class="si">{</span><span class="n">variable</span><span class="si">}</span><span class="s2">:</span><span class="se">\n\n</span><span class="s2">&quot;</span>
+            <span class="n">ret</span> <span class="o">+=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="p">[</span><span class="n">variable</span><span class="p">]</span><span class="si">}</span><span class="se">\n</span><span class="s2">&quot;</span>
+        <span class="k">return</span> <span class="n">ret</span></div>
+</pre></div>
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="../../index.html">
+              <img class="logo" src="../../_static/logo.png" alt="Logo"/>
+            </a></p>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">kuibit 1.3.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../index.html" >Module code</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">kuibit.cactus_multipoles</a></li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2020-2021, Gabriele Bozzola.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 3.5.4.
+    </div>
+  </body>
+</html>

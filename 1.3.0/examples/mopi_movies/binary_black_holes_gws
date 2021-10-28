@@ -1,0 +1,262 @@
+#!/usr/bin/env python3
+
+# Copyright (C) 2021 Gabriele Bozzola
+#
+# This program is free software; you can redistribute it and/or modify it under
+# the terms of the GNU General Public License as published by the Free Software
+# Foundation; either version 3 of the License, or (at your option) any later
+# version.
+#
+# This program is distributed in the hope that it will be useful, but WITHOUT
+# ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+# FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
+# details.
+#
+# You should have received a copy of the GNU General Public License along with
+# this program; if not, see <https://www.gnu.org/licenses/>.
+
+"""Make the footer (with the gravitational-wave signal) for the
+binary_black_holes movie. This movie will fail if run by itself. You have to run
+`binary_black_holes` before, and use the same arguments for this.
+
+"""
+
+import matplotlib.pyplot as plt
+from PIL import Image
+
+from kuibit.simdir import SimDir
+from kuibit.visualize_matplotlib import save as pltsave
+
+
+def mopi_add_custom_options(parser):
+    parser.add_argument(
+        "--ignore-symlinks",
+        action="store_true",
+        help="Ignore symlinks in the data directory",
+    )
+    parser.add_argument("--datadir", default=".", help="Data directory")
+    parser.add_argument(
+        "--ah-color", default=(1, 1, 1), help="Color of the horizons."
+    )
+    parser.add_argument(
+        "--bg-color", default=(0, 0, 0), help="Color of the background."
+    )
+    parser.add_argument(
+        "--fg-color", default=(1, 1, 1), help="Color of the foreground."
+    )
+    parser.add_argument(
+        "--arrow-color", default=(1, 0, 0), help="Color of the arrows."
+    )
+
+    parser.add_argument(
+        "--resolution",
+        default=(1920, 1080),
+        nargs="+",
+        type=int,
+        help="Resolution of the movie.",
+    )
+
+    parser.add_argument(
+        "--ah1",
+        type=int,
+        default=1,
+        help="Apparent horizon 1",
+    )
+
+    parser.add_argument(
+        "--ah2",
+        type=int,
+        default=2,
+        help="Apparent horizon 2",
+    )
+
+    parser.add_argument(
+        "--cah",
+        type=int,
+        default=3,
+        help="Common apparent horizon",
+    )
+
+    parser.add_argument(
+        "--qlm1",
+        type=int,
+        default=-1,
+        help="QLM index associated to apparent horizon 1",
+    )
+
+    parser.add_argument(
+        "--qlm2",
+        type=int,
+        default=-1,
+        help="QLM index associated to apparent horizon 2",
+    )
+
+    parser.add_argument(
+        "--cqlm",
+        type=int,
+        default=-1,
+        help="QLM index associated to the apparent horizon",
+    )
+
+    parser.add_argument(
+        "--orientation-axes-show",
+        action="store_true",
+        help="Show orientation axes",
+    )
+
+    parser.add_argument(
+        "--trajectory-show",
+        action="store_true",
+        help="Show black holes trajectory",
+    )
+
+    parser.add_argument(
+        "--spin-show",
+        action="store_true",
+        help="Show black holes spins",
+    )
+
+    parser.add_argument(
+        "--grid-fudge-factor",
+        type=float,
+        default=0,
+        help="Fudge factor used to ensure that the frame does not move in the video."
+        " If your video is shaky, increase this.",
+    )
+
+    parser.add_argument(
+        "--camera-distance",
+        type=float,
+        help="Force the camera at this distance.",
+    )
+
+    parser.add_argument(
+        "--gw-show",
+        action="store_true",
+        help="Show gravitational-wave strain given a (l,m) mode.",
+    )
+
+    parser.add_argument(
+        "--detector-num",
+        type=int,
+        help="Number of the spherical surface over which to read Psi4",
+    )
+
+    parser.add_argument(
+        "--pcut",
+        type=float,
+        help="Period for the fixed frequency integration",
+    )
+
+    parser.add_argument(
+        "--mult-l", type=int, default=2, help="Multipole number l"
+    )
+    parser.add_argument(
+        "--mult-m", type=int, default=2, help="Multipole number m"
+    )
+
+
+class MOPIMovie:
+    def __init__(self, args):
+
+        self.sim = SimDir(
+            args.datadir,
+            ignore_symlinks=args.ignore_symlinks,
+            pickle_file=args.pickle_file,
+        )
+
+        self.background_color = args.bg_color
+        self.foreground_color = args.fg_color
+
+        self.size = args.resolution
+
+        if not args.detector_num:
+            raise RuntimeError("--detector-num is required with --gw-show")
+        if not args.pcut:
+            raise RuntimeError("--pcut is required with --gw-show")
+
+        reader = self.sim.gravitationalwaves
+
+        self.radius = reader.radii[args.detector_num]
+        detector = reader[self.radius]
+
+        if (args.mult_l, args.mult_m) not in detector.available_lm:
+            raise ValueError(
+                f"Multipole {args.mult_l}, {args.mult_m} not available"
+            )
+
+        self.strain = detector.get_strain_lm(
+            args.mult_l, args.mult_m, args.pcut
+        ).time_shifted(-self.radius)
+
+        self.mult_l, self.mult_m = args.mult_l, args.mult_m
+
+        # Reserve the bottom 10 % of the picture for the gravitational
+        # waves
+        self.size[1] * 0.9
+
+        # Make sure that colors are consistent
+        plt.rcParams["axes.facecolor"] = self.background_color
+        plt.rcParams["figure.facecolor"] = self.background_color
+
+        self.ah1 = self.sim.horizons[args.qlm1, args.ah1]
+        self.ah2 = self.sim.horizons[args.qlm2, args.ah2]
+
+        iterations1 = self.ah1.shape_iterations
+        iterations2 = self.ah2.shape_iterations
+
+        if args.cah in self.sim.horizons.available_apparent_horizons:
+            self.cah = self.sim.horizons[args.cqlm, args.cah]
+            citerations = self.cah.shape_iterations
+        else:
+            print("No common apparent horizon found")
+            self.cah = None
+            citerations = []
+
+        # We either have 1 and 2, or we have the common horizon
+        self.iterations = [
+            it for it in iterations1 if it in iterations2
+        ] + citerations
+
+        self.args = args
+
+    def get_frames(self):
+        return self.iterations
+
+    def make_frame(self, path, iteration):
+
+        output_path = "".join(path.split(".")[:-1])
+        extension = path.split(".")[-1]
+
+        time = self.ah2.shape_time_at_iteration(iteration)
+
+        dpi = plt.rcParams["figure.dpi"]
+
+        res_x, res_y = self.size
+        # We reduced the vertical size by 10%, and this is the 10% that we
+        # are going to add
+        res_y /= 9
+
+        plt.figure(figsize=(res_x / dpi, res_y / dpi), dpi=dpi)
+
+        plt.plot(self.strain.real(), c=self.foreground_color, linewidth=0.5)
+
+        plt.plot(
+            self.strain.real().cropped(end=time),
+            c=self.foreground_color,
+            linewidth=4,
+        )
+        plt.axis("off")
+        plt.tight_layout()
+        pltsave(output_path + "plt", extension, dpi=dpi)
+        plt.close()
+
+        with Image.open(output_path + "vi." + extension) as im1:
+            with Image.open(output_path + "plt." + extension) as im2:
+                dst = Image.new(
+                    "RGB", (min(im1.width, im2.width), im1.height + im2.height)
+                )
+                dst.paste(im1, (0, 0))
+                dst.paste(im2, (0, im1.height))
+                dst.save(output_path + "." + extension)
+                dst.close()

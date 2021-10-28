@@ -1,0 +1,132 @@
+#!/usr/bin/env python3
+
+# Copyright (C) 2020-2021 Gabriele Bozzola
+#
+# This program is free software; you can redistribute it and/or modify it under
+# the terms of the GNU General Public License as published by the Free Software
+# Foundation; either version 3 of the License, or (at your option) any later
+# version.
+#
+# This program is distributed in the hope that it will be useful, but WITHOUT
+# ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+# FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
+# details.
+#
+# You should have received a copy of the GNU General Public License along with
+# this program; if not, see <https://www.gnu.org/licenses/>.
+
+
+"""This script plots one or more grid functions along a 1D axis with options
+specified via command-line. """
+
+import matplotlib.pyplot as plt
+
+from kuibit import argparse_helper as pah
+from kuibit.simdir import SimDir
+from kuibit.visualize_matplotlib import (
+    add_text_to_figure_corner,
+    save,
+    setup_matplotlib,
+)
+
+
+def mopi_add_custom_options(parser):
+    pah.add_figure_to_parser(parser)
+
+    parser.add_argument(
+        "--variables",
+        type=str,
+        required=True,
+        help="Variables to plot",
+        nargs="+",
+    )
+    parser.add(
+        "--logscale", help="Use a logarithmic y scale.", action="store_true"
+    )
+    parser.add(
+        "--vmin",
+        help=(
+            "Minimum value of the variable. "
+            "If logscale is True, this has to be the log."
+        ),
+        type=float,
+    )
+    parser.add(
+        "--vmax",
+        help=(
+            "Maximum value of the variable. "
+            "If logscale is True, this has to be the log."
+        ),
+        type=float,
+    )
+    parser.add(
+        "--xmin",
+        help=("Minimum coordinate."),
+        type=float,
+    )
+    parser.add(
+        "--xmax",
+        help=("Maximum coordinate."),
+        type=float,
+    )
+    parser.add_argument(
+        "--absolute",
+        action="store_true",
+        help="Whether to take the absolute value.",
+    )
+    parser.add_argument(
+        "--axis",
+        type=str,
+        choices=["x", "y", "z"],
+        default="x",
+        help="Axis to plot (default: %(default)s)",
+    )
+
+
+class MOPIMovie:
+    def __init__(self, args):
+
+        self.sim = SimDir(
+            args.datadir,
+            ignore_symlinks=args.ignore_symlinks,
+            pickle_file=args.pickle_file,
+        )
+        self.reader = self.sim.gridfunctions[args.axis]
+        self.var = self.reader[args.variable]
+
+        self.iterations = self.var.available_iterations
+
+        self.args = args
+
+    def get_frames(self):
+        return self.iterations
+
+    def make_frame(self, path, iteration):
+        setup_matplotlib()
+
+        if self.args.absolute:
+            data = abs(self.var[iteration])
+            variable = f"abs({self.args.variable})"
+        else:
+            data = self.var[iteration]
+            variable = self.args.variable
+        if self.args.logscale:
+            label = f"log10({variable})"
+            data = data.log10()
+        else:
+            label = variable
+
+        add_text_to_figure_corner(fr"$it = {iteration}$")
+
+        plt.plot(data.coordinates_from_grid()[0], data.data_xyz, label=label)
+
+        plt.legend()
+        plt.xlabel(args.axis)
+        plt.ylim(ymin=args.vmin, ymax=args.vmax)
+        plt.xlim(xmin=args.xmin, xmax=args.xmax)
+        plt.tight_layout()
+
+        output_path = "".join(path.split(".")[:-1])
+        extension = path.split(".")[-1]
+
+        save(output_path, extension, as_tikz=False)

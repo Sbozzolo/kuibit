@@ -1,0 +1,284 @@
+
+
+<!doctype html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Getting started with SimDir &#8212; kuibit 1.3.0 documentation</title>
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="_static/bizstyle.css" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="_static/css/custom.css" />
+    
+    <script id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/doctools.js"></script>
+    <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script type="text/x-mathjax-config">MathJax.Hub.Config({"tex2jax": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true, "ignoreClass": "tex2jax_ignore|mathjax_ignore|document", "processClass": "tex2jax_process|mathjax_process|math|output_area"}})</script>
+    <script src="_static/bizstyle.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Time and frequency series" href="series.html" />
+    <link rel="prev" title="First steps with kuibit" href="first_steps.html" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0" />
+    <!--[if lt IE 9]>
+    <script src="_static/css3-mediaqueries.js"></script>
+    <![endif]-->
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="series.html" title="Time and frequency series"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="first_steps.html" title="First steps with kuibit"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">kuibit 1.3.0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">Getting started with SimDir</a></li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="getting-started-with-simdir">
+<h1>Getting started with SimDir<a class="headerlink" href="#getting-started-with-simdir" title="Permalink to this headline">¶</a></h1>
+<p>The <a class="reference internal" href="simdir_ref.html#kuibit.simdir.SimDir" title="kuibit.simdir.SimDir"><code class="xref py py-class docutils literal notranslate"><span class="pre">SimDir</span></code></a> class provide easy access to simulation data. Most data
+analysis start by using this object. <code class="docutils literal notranslate"><span class="pre">SimDir</span></code> takes as input the top level
+directory containing simulation data, and read and organizes the content.
+<code class="docutils literal notranslate"><span class="pre">SimDir</span></code> contains the index of all the information that is possible to extract
+from the ASCII and HDF5 files. If there are restarts, <code class="docutils literal notranslate"><span class="pre">SimDir</span></code> will handle
+them transparently.</p>
+<div class="section" id="defining-a-simdir-object">
+<h2>Defining a SimDir object<a class="headerlink" href="#defining-a-simdir-object" title="Permalink to this headline">¶</a></h2>
+<p>Assuming <code class="docutils literal notranslate"><span class="pre">gw150914</span></code> is the folder where a simulation was run. <code class="docutils literal notranslate"><span class="pre">gw150914</span></code> can
+possibly contain multiple checkpoints and restarts.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">kuibit.simdir</span> <span class="k">as</span> <span class="nn">sd</span>
+
+<span class="n">sim</span> <span class="o">=</span> <span class="n">sd</span><span class="o">.</span><span class="n">SimDir</span><span class="p">(</span><span class="s2">&quot;gw150914&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>In case the directory structure is very deep (more than 8 levels), you can
+specify the option <code class="docutils literal notranslate"><span class="pre">max_depth</span></code> to increase the default.</p>
+<p>If you want to ignore specific folders (by default <code class="docutils literal notranslate"><span class="pre">SIMFACTORY</span></code>, <code class="docutils literal notranslate"><span class="pre">report</span></code>,
+<code class="docutils literal notranslate"><span class="pre">movies</span></code>, <code class="docutils literal notranslate"><span class="pre">tmp</span></code>, <code class="docutils literal notranslate"><span class="pre">temp</span></code>), you can provide the <code class="docutils literal notranslate"><span class="pre">ignored_dirs</span></code> argument.</p>
+<p>By default, symlinks are ignored. You can change this behavior by passing the
+keyword argument <code class="docutils literal notranslate"><span class="pre">ignore_symlinks=False</span></code>.</p>
+</div>
+<div class="section" id="simdir-and-pickles">
+<h2>SimDir and pickles<a class="headerlink" href="#simdir-and-pickles" title="Permalink to this headline">¶</a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">kuibit</span></code> tries to do as much lazy-loading as possible. For examples, files are
+opened only when needed. When analyzing simulations it is useful to save the
+work done by <code class="docutils literal notranslate"><span class="pre">kuibit</span></code> to avoid re-doing the same operations over and over.
+This can be done with pickles. <code class="docutils literal notranslate"><span class="pre">SimDir</span></code> can be used as a context manager and
+the progresses can be loaded and saved from files. For example:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">with</span> <span class="n">SimDir</span><span class="p">(</span><span class="s2">&quot;path_of_simulation&quot;</span><span class="p">,</span> <span class="n">pickle_file</span><span class="o">=</span><span class="s2">&quot;simdir.pickle&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">sim</span><span class="p">:</span>
+   <span class="c1"># do operations</span>
+</pre></div>
+</div>
+<p>In this case, if <code class="docutils literal notranslate"><span class="pre">pickle_file</span></code> exists, it will be loaded (ignoring all the other
+arguments passed to <code class="docutils literal notranslate"><span class="pre">SimDir</span></code>), and it will be kept updated with the additional
+work done by <code class="docutils literal notranslate"><span class="pre">kuibit</span></code>. If <code class="docutils literal notranslate"><span class="pre">pickle_file</span></code> does not exist, the <code class="docutils literal notranslate"><span class="pre">SimDir</span></code> will be
+created as usual as a <code class="docutils literal notranslate"><span class="pre">pickle_file</span></code> will be generated.</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>When using pickles, no consistency check with the current state of the
+simulation is performed. If the simulation changes (e.g., new checkpoints are
+added), this will result in errors. In that case, a new pickle file must be
+produced or the data has to be refreshed (with the method
+<a class="reference internal" href="simdir_ref.html#kuibit.simdir.SimDir.rescan" title="kuibit.simdir.SimDir.rescan"><code class="xref py py-meth docutils literal notranslate"><span class="pre">rescan()</span></code></a>). When the version of <code class="docutils literal notranslate"><span class="pre">kuibit</span></code> changes, a new pickle
+file has to be regenerated.</p>
+</div>
+<p><a class="reference internal" href="simdir_ref.html#kuibit.simdir.SimDir" title="kuibit.simdir.SimDir"><code class="xref py py-class docutils literal notranslate"><span class="pre">SimDir</span></code></a> objects can be saved to disk as pickles with the
+<a class="reference internal" href="frequencyseries_ref.html#kuibit.frequencyseries.FrequencySeries.save" title="kuibit.frequencyseries.FrequencySeries.save"><code class="xref py py-meth docutils literal notranslate"><span class="pre">save()</span></code></a> method, which takes as argument the path of the file that
+has to be generated. The function <a class="reference internal" href="simdir_ref.html#kuibit.simdir.load_SimDir" title="kuibit.simdir.load_SimDir"><code class="xref py py-func docutils literal notranslate"><span class="pre">load_SimDir()</span></code></a> loads back this
+data.</p>
+</div>
+<div class="section" id="using-simdir-objects">
+<h2>Using SimDir objects<a class="headerlink" href="#using-simdir-objects" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference internal" href="simdir_ref.html#kuibit.simdir.SimDir" title="kuibit.simdir.SimDir"><code class="xref py py-class docutils literal notranslate"><span class="pre">SimDir</span></code></a> classes are used to read and organize data. You can easily
+access simulation data from the attributes of <a class="reference internal" href="simdir_ref.html#kuibit.simdir.SimDir" title="kuibit.simdir.SimDir"><code class="xref py py-class docutils literal notranslate"><span class="pre">SimDir</span></code></a>.</p>
+<p>For all the <a class="reference internal" href="timeseries_ref.html#kuibit.timeseries.TimeSeries" title="kuibit.timeseries.TimeSeries"><code class="xref py py-class docutils literal notranslate"><span class="pre">TimeSeries</span></code></a> (scalars and reductions, like maximum), you
+can use</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">timeseries</span> <span class="o">=</span> <span class="n">sd</span><span class="o">.</span><span class="n">ts</span>
+<span class="c1"># or timeseries = sd.timeseries</span>
+</pre></div>
+</div>
+<p>The resulting object is a <a class="reference internal" href="cactus_scalars_ref.html#kuibit.cactus_scalars.ScalarsDir" title="kuibit.cactus_scalars.ScalarsDir"><code class="xref py py-class docutils literal notranslate"><span class="pre">ScalarsDir</span></code></a>. The page
+<a class="reference internal" href="cactus_scalars.html#scalar-data"><span class="std std-ref">Scalar data</span></a> contains a lot of information on how to use
+these.</p>
+<p>For the multipoles (documentation: <a class="reference internal" href="cactus_multipoles.html#working-with-multipolar-decompositions"><span class="std std-ref">Working with multipolar decompositions</span></a>):</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">multipoles</span> <span class="o">=</span> <span class="n">sd</span><span class="o">.</span><span class="n">multipoles</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="some-useful-conventions">
+<h2>Some useful conventions<a class="headerlink" href="#some-useful-conventions" title="Permalink to this headline">¶</a></h2>
+<p>It is useful to be aware of some conventions employed by <code class="docutils literal notranslate"><span class="pre">kuibit</span></code>. If you
+are reading this for the first time, you may skip this section, but we reccomend
+you come back here once you gain familiarity with the code. This section will be
+useful to you also in the case that you are extending <code class="docutils literal notranslate"><span class="pre">kuibit</span></code>.</p>
+<div class="section" id="class-hierarchy">
+<h3>Class hierarchy<a class="headerlink" href="#class-hierarchy" title="Permalink to this headline">¶</a></h3>
+<p><code class="docutils literal notranslate"><span class="pre">kuibit</span></code> defines a large number of custum object types to represent in a
+convinent way the simulation data. Some of these classes are not designed to be
+initialized directly, but are created by other more general objects. In general,
+we advise users to only directly define <code class="docutils literal notranslate"><span class="pre">SimDir</span></code> objects, and access
+everything else from there. However, it is useful to know what is the hierarchy
+because in case you are not sure of what an object is supposed to do you
+can evaluate <code class="docutils literal notranslate"><span class="pre">type(object)</span></code>.</p>
+<p>The most abstract object is the <a class="reference internal" href="simdir_ref.html#kuibit.simdir.SimDir" title="kuibit.simdir.SimDir"><code class="xref py py-class docutils literal notranslate"><span class="pre">SimDir</span></code></a> which takes a path and has
+as attributes a collection <code class="docutils literal notranslate"><span class="pre">*Dir</span></code> objects.</p>
+<p><code class="docutils literal notranslate"><span class="pre">*Dir</span></code> classes do the first high-level organization of the content of the
+<code class="docutils literal notranslate"><span class="pre">SimDir</span></code> with respect to a specific area. For example, we have
+<code class="xref py py-class docutils literal notranslate"><span class="pre">ScalarsDir</span></code>, or <code class="xref py py-class docutils literal notranslate"><span class="pre">MultipolesDir</span></code>, or
+<code class="xref py py-class docutils literal notranslate"><span class="pre">GravitationalWavesDir</span></code>. To organize means to create a dictionary for
+easier access to the quantities. For example, in the case of
+<code class="xref py py-class docutils literal notranslate"><span class="pre">MultipolesDir</span></code>, we create a dictionary where the keys are the
+available variables.</p>
+<p>At the step below, we have <code class="docutils literal notranslate"><span class="pre">*All*</span></code> classes, for example
+<code class="xref py py-class docutils literal notranslate"><span class="pre">AllScalars</span></code>, here, there’s a second round of organizing the
+available data in dictionaries. The keys of these new dictionaries are a second
+quantity that is logically varying. Continuing the example of the
+<code class="xref py py-class docutils literal notranslate"><span class="pre">MultipolesDir</span></code>, the second level is <code class="xref py py-class docutils literal notranslate"><span class="pre">MultipolesAllDets</span></code>
+that organizes the available multipolar decompositions for different radii for a
+given variable (where the variable was the higher level key in
+<code class="xref py py-class docutils literal notranslate"><span class="pre">MultipolesDir</span></code>).</p>
+<p>Finally, we have the <code class="docutils literal notranslate"><span class="pre">*One*</span></code> objects, which are responsible of returning the
+actual data requested. In the case of <code class="xref py py-class docutils literal notranslate"><span class="pre">MultipolesDir</span></code>, that would be
+<code class="xref py py-class docutils literal notranslate"><span class="pre">MultipolesOneDet</span></code>, which returns the timeseries of a specific choice
+of <span class="math notranslate nohighlight">\(l, m\)</span> for a given variable at a given radius.</p>
+<p>To see more clearly this hierarchy, consider the following code</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># This contains all the available information on the simulation</span>
+<span class="n">sim</span> <span class="o">=</span> <span class="n">sd</span><span class="o">.</span><span class="n">SimDir</span><span class="p">(</span><span class="s2">&quot;gw150914&quot;</span><span class="p">)</span>
+
+<span class="c1"># This contains all the available information on multipoles</span>
+<span class="n">sim</span><span class="o">.</span><span class="n">multipoles</span>  <span class="c1"># type -&gt; MultipolesDir</span>
+
+<span class="c1"># This contains all the available information on the multipolar</span>
+<span class="c1"># decomposition for &#39;Psi4&#39;</span>
+<span class="n">sim</span><span class="o">.</span><span class="n">multipoles</span><span class="p">[</span><span class="s1">&#39;Psi4&#39;</span><span class="p">]</span>  <span class="c1"># type -&gt; MultipolesAllDets</span>
+
+<span class="c1"># This contains all the available information on the multipolar</span>
+<span class="c1"># decomposition for &#39;Psi4&#39; at the radius r</span>
+<span class="n">sim</span><span class="o">.</span><span class="n">multipoles</span><span class="p">[</span><span class="s1">&#39;Psi4&#39;</span><span class="p">][</span><span class="n">r</span><span class="p">]</span> <span class="c1"># type -&gt; MultipolesOneDet</span>
+
+<span class="c1"># This is the timeseries of the (2, 2) mode of Psi4 at radius r</span>
+<span class="c1"># at all the available times</span>
+<span class="n">sim</span><span class="o">.</span><span class="n">multipoles</span><span class="p">[</span><span class="s1">&#39;Psi4&#39;</span><span class="p">][</span><span class="n">r</span><span class="p">][(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">)]</span>  <span class="c1"># type -&gt; TimeSeries</span>
+
+<span class="c1"># This is the timeseries of the (2, 2) mode of Psi4 at radius r</span>
+<span class="c1"># at time t</span>
+<span class="n">sim</span><span class="o">.</span><span class="n">multipoles</span><span class="p">[</span><span class="s1">&#39;Psi4&#39;</span><span class="p">][</span><span class="n">r</span><span class="p">][(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">)](</span><span class="n">t</span><span class="p">)</span>  <span class="c1"># type -&gt; float</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="accessing-data">
+<h3>Accessing data<a class="headerlink" href="#accessing-data" title="Permalink to this headline">¶</a></h3>
+<p>There are up to four ways to access data stored in an object. Let us assume that
+<code class="docutils literal notranslate"><span class="pre">data</span></code> is one of these classes, and the relevant physical quantity for which you
+want to find the value is <code class="docutils literal notranslate"><span class="pre">x</span></code> (e.g., <code class="docutils literal notranslate"><span class="pre">data</span></code> is a time series and you are asking
+what is the value at time <code class="docutils literal notranslate"><span class="pre">x</span></code>, or <code class="docutils literal notranslate"><span class="pre">data</span></code> is a gravitational wave signal and
+you are asking what is the associated timeseries as extracted by radius <code class="docutils literal notranslate"><span class="pre">x</span></code>).</p>
+<ol class="arabic simple">
+<li><p>Using the brackets notation: <code class="docutils literal notranslate"><span class="pre">y</span> <span class="pre">=</span> <span class="pre">data[x]</span></code></p></li>
+<li><p>Using the parentheses notation: <code class="docutils literal notranslate"><span class="pre">y</span> <span class="pre">=</span> <span class="pre">data(x)</span></code></p></li>
+<li><p>Using the <code class="docutils literal notranslate"><span class="pre">get</span></code> method: <code class="docutils literal notranslate"><span class="pre">y</span> <span class="pre">=</span> <span class="pre">data.get(x)</span></code></p></li>
+<li><p>Accessing the <code class="docutils literal notranslate"><span class="pre">fields</span></code> attribute: <code class="docutils literal notranslate"><span class="pre">y</span> <span class="pre">=</span> <span class="pre">data.fields.x</span></code> (<code class="docutils literal notranslate"><span class="pre">x</span></code> is
+labelling different grid functions or variables)</p></li>
+</ol>
+<p>Not all the objects implement all the different methods, and others implement
+additional ones, so you should refer to the documentation to find what is
+available.</p>
+</div>
+<div class="section" id="printing-objects">
+<h3>Printing objects<a class="headerlink" href="#printing-objects" title="Permalink to this headline">¶</a></h3>
+<p>When in doubt, you can always try to <code class="docutils literal notranslate"><span class="pre">print</span></code> an object. Most classes will tell
+you what they are storing.</p>
+</div>
+</div>
+</div>
+
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="index.html">
+              <img class="logo" src="_static/logo.png" alt="Logo"/>
+            </a></p>
+  <h3><a href="index.html">Table of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Getting started with SimDir</a><ul>
+<li><a class="reference internal" href="#defining-a-simdir-object">Defining a SimDir object</a></li>
+<li><a class="reference internal" href="#simdir-and-pickles">SimDir and pickles</a></li>
+<li><a class="reference internal" href="#using-simdir-objects">Using SimDir objects</a></li>
+<li><a class="reference internal" href="#some-useful-conventions">Some useful conventions</a><ul>
+<li><a class="reference internal" href="#class-hierarchy">Class hierarchy</a></li>
+<li><a class="reference internal" href="#accessing-data">Accessing data</a></li>
+<li><a class="reference internal" href="#printing-objects">Printing objects</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="first_steps.html"
+                        title="previous chapter">First steps with <code class="docutils literal notranslate"><span class="pre">kuibit</span></code></a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="series.html"
+                        title="next chapter">Time and frequency series</a></p>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="series.html" title="Time and frequency series"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="first_steps.html" title="First steps with kuibit"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">kuibit 1.3.0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">Getting started with SimDir</a></li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2020-2021, Gabriele Bozzola.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 3.5.4.
+    </div>
+  </body>
+</html>

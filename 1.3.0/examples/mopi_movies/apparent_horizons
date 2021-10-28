@@ -1,0 +1,152 @@
+#!/usr/bin/env python3
+
+# Copyright (C) 2021 Gabriele Bozzola
+#
+# This program is free software; you can redistribute it and/or modify it under
+# the terms of the GNU General Public License as published by the Free Software
+# Foundation; either version 3 of the License, or (at your option) any later
+# version.
+#
+# This program is distributed in the hope that it will be useful, but WITHOUT
+# ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+# FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
+# details.
+#
+# You should have received a copy of the GNU General Public License along with
+# this program; if not, see <https://www.gnu.org/licenses/>.
+
+"""Make a video of up to two given apparent horizons.
+"""
+
+import numpy as np
+from mayavi import mlab
+from tvtk.tools import visual
+
+from kuibit import argparse_helper as pah
+from kuibit.simdir import SimDir
+from kuibit.visualize_mayavi import (
+    add_text_to_figure_corner,
+    disable_interactive_window,
+    plot_ah_trajectory,
+    plot_apparent_horizon,
+    save,
+)
+
+
+def mopi_add_custom_options(parser):
+    parser.add_argument(
+        "--ignore-symlinks",
+        action="store_true",
+        help="Ignore symlinks in the data directory",
+    )
+    parser.add_argument("--datadir", default=".", help="Data directory")
+    parser.add_argument(
+        "--ah-color", default=(1, 1, 1), help="Color of the horizon"
+    )
+
+
+class MOPIMovie:
+    def __init__(self, args):
+
+        self.sim = SimDir(
+            args.datadir,
+            ignore_symlinks=args.ignore_symlinks,
+            pickle_file=args.pickle_file,
+        )
+        self.ah1, self.ah2 = self.sim.horizons[0, 1], self.sim.horizons[0, 2]
+        # self.ah3 = self.sim.horizons[0,3]
+
+        iterations1 = self.ah1.shape_iterations
+        iterations2 = self.ah2.shape_iterations
+
+        self.centroid1x = self.ah1.ah["centroid_x"]
+        self.centroid1y = self.ah1.ah["centroid_y"]
+        self.centroid1z = self.ah1.ah["centroid_z"]
+
+        self.centroid2x = self.ah2.ah["centroid_x"]
+        self.centroid2y = self.ah2.ah["centroid_y"]
+        self.centroid2z = self.ah2.ah["centroid_z"]
+
+        self.spin1x = self.ah1["coordspinx"]
+        self.spin1y = self.ah1["coordspiny"]
+        self.spin1z = self.ah1["coordspinz"]
+
+        self.spin2x = self.ah2["coordspinx"]
+        self.spin2y = self.ah2["coordspiny"]
+        self.spin2z = self.ah2["coordspinz"]
+
+        # self.iterations3 = self.ah3.shape_iterations
+
+        # self.iterations = [it for it in iterations1 if it in iterations2]
+        #
+        self.iterations = iterations2
+
+        self.args = args
+
+    def get_frames(self):
+        return self.iterations
+
+    def make_frame(self, path, iteration):
+        disable_interactive_window()
+        mlab.clf()
+        # mlab.figure(bgcolor=(1,1,1))
+
+        self.args.ah_color = (1, 1, 1)
+
+        # if iteration in self.iterations3:
+        #     plot_apparent_horizon(self.ah3, iteration, color=self.args.ah_color)
+        #     time = self.ah3.shape_time_at_iteration(iteration)
+        # else:
+        if iteration in self.ah1.shape_iterations:
+            plot_apparent_horizon(
+                self.ah1, iteration, color=self.args.ah_color
+            )
+            time = self.ah1.shape_time_at_iteration(iteration)
+
+            v = mlab.pipeline.vectors(
+                mlab.pipeline.vector_scatter(
+                    self.centroid1x(time),
+                    self.centroid1y(time),
+                    self.centroid1z(time),
+                    3 * self.spin1x(time),
+                    3 * self.spin1y(time),
+                    3 * self.spin1z(time),
+                )
+            )  # xyzuvw
+            v.glyph.glyph.clamping = False
+        if iteration in self.ah2.shape_iterations:
+            plot_apparent_horizon(
+                self.ah2, iteration, color=self.args.ah_color
+            )
+            time = self.ah2.shape_time_at_iteration(iteration)
+
+            v = mlab.pipeline.vectors(
+                mlab.pipeline.vector_scatter(
+                    self.centroid2x(time),
+                    self.centroid2y(time),
+                    self.centroid2z(time),
+                    3 * self.spin2x(time),
+                    3 * self.spin2y(time),
+                    3 * self.spin2z(time),
+                )
+            )  # xyzuvw
+            v.glyph.glyph.clamping = False
+
+            plot_ah_trajectory(self.ah1, time=time)
+            plot_ah_trajectory(self.ah2, time=time)
+
+        mlab.orientation_axes()
+
+        plot_ah_trajectory(self.ah1, opacity=0.01)
+        plot_ah_trajectory(self.ah2, opacity=0.01)
+        mlab.view(distance=30)
+
+        # time -= self.ah3.shape_times[0]
+
+        # add_text_to_figure_corner(f"t - t_CAH={time:.3f} M", color=(0,0,0))
+
+        output_path = "".join(path.split(".")[:-1])
+        extension = path.split(".")[-1]
+
+        save(output_path, extension)
+        mlab.close()

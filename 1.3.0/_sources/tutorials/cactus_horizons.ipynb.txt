@@ -1,0 +1,235 @@
+{
+ "cells": [
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "# Working with Cactus horizons\n",
+    "\n",
+    "In this notebook, we learn how to work with horizon data. \n",
+    "\n",
+    "(This notebook is meant to be converted in Sphinx documentation and not used directly.)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "import matplotlib.pyplot as plt\n",
+    "import numpy as np\n",
+    "from kuibit.simdir import SimDir\n",
+    "\n",
+    "%matplotlib inline"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "The best way to access horizon data is from `SimDir`:"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "hor = SimDir(\"../../tests/horizons\").horizons\n",
+    "\n",
+    "print(hor)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "As we see, `kuibit` found some horizons. `kuibit` looks for data from `QuasiLocalMeasures` and `AHFinderDirect`. These two thorns use different indexing systems, and, at the moment, you must provide both to uniquely indentify an horizon. If you need information from only one of the two (e.g., you want to plot the apparent horizon), you can also use the functions `get_apparent_horizon` and `get_qlm_horizon`."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "h1 = hor[(0, 1)]\n",
+    "print(h1)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "You can find the available indices using suitable attributes:"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "print(hor.available_qlm_horizons)\n",
+    "print(hor.available_apparent_horizons)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "Once an horizon is fixed, you can access all the properties from `QuasiLocalMeasures` and from `AHFinderDirect` as attributes. These are all `TimeSeries`. For example, the mass as computed by `QuasiLocalMeasures`:"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "plt.plot(h1.mass)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "For quantities from `AHFinderDirect` you have to use the `ah` namespace:"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "plt.plot(h1.ah.area)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "`kuibit` can also work with shape data. `AHFinderDirect` uses multiple patches, we can plot an example in 3D:"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "from mayavi import mlab\n",
+    "mlab.init_notebook('png')\n",
+    "\n",
+    "(px, py, pz) = h1.shape_at_iteration(0)\n",
+    "\n",
+    "mlab.mesh(px[0], py[0], pz[0], representation='wireframe')"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "If you plot all the patches, you will have the horizon in 3D."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "mlab.clf()\n",
+    "\n",
+    "for pnum in range(len(px)):\n",
+    "    mlab.mesh(px[pnum], py[pnum], pz[pnum], color=(0, 0, 0))\n",
+    "\n",
+    "# For some reasons mlab.show() doesn't produce the picture here, \n",
+    "# so, there' is an additional mlab.mesh statement. This is here\n",
+    "# just to display the picture\n",
+    "mlab.orientation_axes()\n",
+    "mlab.mesh(px[0], py[0], pz[0], color=(0,0,0))"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "In case you want to work with a 2D slice, of the shape, you can use the method `shape_outline_at_iteration` and specify how to cut the shape. \n",
+    "\n",
+    "Note that the the distributions of points is not uniform across the horizon and `kuibit` does not do any interpolation across points. Therefore, there are values of `cut` that will lead to a malformed horizon. It is recommended to use cuts that are along the principal directions."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "cut = [None, None, 0]  # Equatorial plane (z=0)\n",
+    "\n",
+    "shape = h1.shape_outline_at_iteration(0, cut)\n",
+    "\n",
+    "plt.fill(*shape)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "You can also use the module `visualize_matplotlib` to plot the horizon in 2D. If you already have the shape, you can use `plot_horizon`."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "from kuibit import visualize_matplotlib as viz\n",
+    "\n",
+    "viz.plot_horizon(shape, color='r', edgecolor='b')"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "Alternatively, you can use the higher level functions `plot_horizon_on_plane_at_iteration` or `plot_horizon_on_plane_at_time`. These take directly a `OneHorizon` object and the desired iteration/time."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "viz.plot_horizon_on_plane_at_time(h1, time=0, plane=\"xy\", color='g')"
+   ]
+  }
+ ],
+ "metadata": {
+  "kernelspec": {
+   "display_name": "Python 3",
+   "language": "python",
+   "name": "python3"
+  },
+  "language_info": {
+   "codemirror_mode": {
+    "name": "ipython",
+    "version": 3
+   },
+   "file_extension": ".py",
+   "mimetype": "text/x-python",
+   "name": "python",
+   "nbconvert_exporter": "python",
+   "pygments_lexer": "ipython3",
+   "version": "3.8.8"
+  }
+ },
+ "nbformat": 4,
+ "nbformat_minor": 4
+}

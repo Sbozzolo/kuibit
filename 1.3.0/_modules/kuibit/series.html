@@ -1,0 +1,1141 @@
+
+
+<!doctype html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>kuibit.series &#8212; kuibit 1.3.0 documentation</title>
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/bizstyle.css" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/css/custom.css" />
+    
+    <script id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+    <script src="../../_static/jquery.js"></script>
+    <script src="../../_static/underscore.js"></script>
+    <script src="../../_static/doctools.js"></script>
+    <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="../../_static/bizstyle.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0" />
+    <!--[if lt IE 9]>
+    <script src="_static/css3-mediaqueries.js"></script>
+    <![endif]-->
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">kuibit 1.3.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../index.html" accesskey="U">Module code</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">kuibit.series</a></li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for kuibit.series</h1><div class="highlight"><pre>
+<span></span><span class="ch">#!/usr/bin/env python3</span>
+
+<span class="c1"># Copyright (C) 2020-2021 Gabriele Bozzola</span>
+<span class="c1">#</span>
+<span class="c1"># This program is free software; you can redistribute it and/or modify it under</span>
+<span class="c1"># the terms of the GNU General Public License as published by the Free Software</span>
+<span class="c1"># Foundation; either version 3 of the License, or (at your option) any later</span>
+<span class="c1"># version.</span>
+<span class="c1">#</span>
+<span class="c1"># This program is distributed in the hope that it will be useful, but WITHOUT</span>
+<span class="c1"># ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS</span>
+<span class="c1"># FOR A PARTICULAR PURPOSE. See the GNU General Public License for more</span>
+<span class="c1"># details.</span>
+<span class="c1">#</span>
+<span class="c1"># You should have received a copy of the GNU General Public License along with</span>
+<span class="c1"># this program; if not, see &lt;https://www.gnu.org/licenses/&gt;.</span>
+
+<span class="sd">&quot;&quot;&quot;The :py:mod:`~.series` module provides a base class :py:class:`~.BaseSeries`</span>
+<span class="sd">for representing and handling series (from which :py:class:`~.TimeSeries` and</span>
+<span class="sd">:py:class:`~.FrequencySeries` are derived).</span>
+
+<span class="sd">:py:class:`~.BaseSeries` handles series that have a independent variable ``x``</span>
+<span class="sd">and a dependent variable ``y``. The derived classes have to implement setters</span>
+<span class="sd">and getters if they need to rename these variables (e.g. ``x -&gt; t``). The</span>
+<span class="sd">independent variable has to be monotonically increasing.</span>
+
+<span class="sd">:py:class:`~.BaseSeries` implements several methods for operations on series.</span>
+<span class="sd">Most of these methods are available in two flavors: those that return a new</span>
+<span class="sd">:py:class:`~.BaseSeries`, and those which modify the object in place. The latter</span>
+<span class="sd">have names with imperative verbs.</span>
+
+<span class="sd">This module also provides the useful function :py:func:`~.sample_common`, which</span>
+<span class="sd">takes a list of series and resamples them to their common points.</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">warnings</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">scipy</span> <span class="kn">import</span> <span class="n">integrate</span><span class="p">,</span> <span class="n">interpolate</span><span class="p">,</span> <span class="n">signal</span>
+
+<span class="kn">from</span> <span class="nn">kuibit.attr_dict</span> <span class="kn">import</span> <span class="n">AttributeDictionary</span>
+<span class="kn">from</span> <span class="nn">kuibit.numerical</span> <span class="kn">import</span> <span class="n">BaseNumerical</span>
+
+
+<span class="c1"># Note, we test this class testing its derived class TimeSeries</span>
+<div class="viewcode-block" id="BaseSeries"><a class="viewcode-back" href="../../series_ref.html#kuibit.series.BaseSeries">[docs]</a><span class="k">class</span> <span class="nc">BaseSeries</span><span class="p">(</span><span class="n">BaseNumerical</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Base class (not intended for direct use) for generic series data in</span>
+<span class="sd">    which the independendent variable x is sorted.</span>
+
+<span class="sd">    This class is already rich of features.</span>
+
+<span class="sd">    .. note:</span>
+
+<span class="sd">        Derived class should define setters and getters to handle ``x``</span>
+<span class="sd">        and ``y``. This is where the data is stored.</span>
+
+<span class="sd">        The idea is the following. The actual data is stored in the</span>
+<span class="sd">        ``BaseSeries` properties ``data_x`` and ``data_y``. These are</span>
+<span class="sd">        accessible from the derived classes. However, we don&#39;t want the</span>
+<span class="sd">        derived classes to use directly ``data_x`` and ``data_y``: they</span>
+<span class="sd">        should use something that clearly inform the user of their meaning,</span>
+<span class="sd">        like ``t`` or ``f`` (time or frequency). To do this, we have to</span>
+<span class="sd">        define getters and setters that access and modify ``data_x``</span>
+<span class="sd">        and ``y`` but use more meaningful names. To define a getters,</span>
+<span class="sd">        simply use the ``@property`` decorator:</span>
+
+<span class="sd">        .. code-block:: python</span>
+
+<span class="sd">            @property</span>
+<span class="sd">            def t(self):</span>
+<span class="sd">                 return self.data_x</span>
+
+<span class="sd">        With these, ``.t`` will return ``self.data_x``. For a setter,</span>
+
+<span class="sd">        .. code-block:: python</span>
+
+<span class="sd">            @t.setter</span>
+<span class="sd">            def t(self, t):</span>
+<span class="sd">                # This is defined BaseClass</span>
+<span class="sd">                self.data_x = t</span>
+
+<span class="sd">        This is called when with ``.t = something``. Once these are defined,</span>
+<span class="sd">        the derived classes should use their getters and setters.</span>
+
+<span class="sd">    :ivar data_x: Independent variable.</span>
+<span class="sd">    :vartype data_x: 1D NumPy array or float</span>
+<span class="sd">    :ivar y: Dependent variable.</span>
+<span class="sd">    :vartype y: 1D NumPy array or float</span>
+
+<span class="sd">    :ivar spline_real: Coefficients for a spline represent of the real part</span>
+<span class="sd">                       of y.</span>
+<span class="sd">    :vartype spline_real: Tuple</span>
+<span class="sd">    :ivar spline_imag: Coefficients for a spline represent of the real part</span>
+<span class="sd">                       of y.</span>
+<span class="sd">    :vartype spline_imag: Tuple</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_make_array</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Return a NumPy array version of x (if x is not already an array).&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">atleast_1d</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="k">else</span> <span class="n">x</span>
+
+    <span class="k">def</span> <span class="nf">_return_array_if_monotonic</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x_array</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Return the import array if it has length 1 or if it is</span>
+<span class="sd">        monotonically increasing. Otherwise return error.</span>
+
+<span class="sd">        We assume x_array is an array. We will not check for this, it is up to</span>
+<span class="sd">        the developer to guarantee this. If this is not true, some errors will</span>
+<span class="sd">        be thrown.</span>
+
+<span class="sd">        :param x_array: Array to check if it is monotonically increasing.</span>
+<span class="sd">        :type x_array: 1d NumPy array</span>
+
+<span class="sd">        :returns: Input array, if increasing monotonically.</span>
+<span class="sd">        :rtype: 1d NumPy array</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">x_array</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="c1"># Here we compute directly the diff because it seems faster</span>
+            <span class="c1"># than using np.diff</span>
+
+            <span class="c1"># Example:</span>
+            <span class="c1"># self.x = [1,2,3]</span>
+            <span class="c1"># self.x[1:] = [2, 3]</span>
+            <span class="c1"># self.x[:-1] = [1, 2]</span>
+            <span class="c1"># dx = [1,1]</span>
+            <span class="n">dx</span> <span class="o">=</span> <span class="n">x_array</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span> <span class="o">-</span> <span class="n">x_array</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">dx</span><span class="o">.</span><span class="n">min</span><span class="p">()</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="c1"># HACK: To provide more useful information we assume</span>
+                <span class="c1">#       that the derived classes are named like TimeSeries.</span>
+                <span class="c1">#       Then, we remove the &quot;series&quot;</span>
+                <span class="n">name</span> <span class="o">=</span> <span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span>
+                <span class="n">x_name</span> <span class="o">=</span> <span class="n">name</span><span class="p">[:</span><span class="o">-</span><span class="mi">6</span><span class="p">]</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">x_name</span><span class="si">}</span><span class="s2"> not monotonically increasing&quot;</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">x_array</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">guarantee_x_is_monotonic</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;When guarantee_x_is_monotonic is True no checks will be perform to</span>
+<span class="sd">        make sure that x is monotonically increasing (increasing performance).</span>
+<span class="sd">        This should is used internally whenever a new series is returned from</span>
+<span class="sd">        self, since we have already checked that data_x is good.</span>
+
+<span class="sd">        :param x: Independent variable.</span>
+<span class="sd">        :type x: 1d NumPy array or list</span>
+<span class="sd">        :param y: Dependent variable.</span>
+<span class="sd">        :type y: 1d NumPy array or list</span>
+<span class="sd">        :param guarantee_x_is_monotonic: Whether we can skip the check on monotonicity.</span>
+<span class="sd">        :param guarantee_x_is_monotonic: bool</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">x_array</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_array</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+        <span class="n">y_array</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_array</span><span class="p">(</span><span class="n">y</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">x_array</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="n">y_array</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Data length mismatch&quot;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">x_array</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Trying to construct empty Series.&quot;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">guarantee_x_is_monotonic</span><span class="p">:</span>
+            <span class="n">x_array</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_return_array_if_monotonic</span><span class="p">(</span><span class="n">x_array</span><span class="p">)</span>
+
+        <span class="c1"># The copy is because we don&#39;t want to change the input values</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__data_x</span> <span class="o">=</span> <span class="n">x_array</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__data_y</span> <span class="o">=</span> <span class="n">y_array</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+
+        <span class="c1"># The data is stored in the members self.data_x and self.data_y. We</span>
+        <span class="c1"># will never access these directly. We have setters and getters to that</span>
+        <span class="c1"># we can do stuff when variables change. For example, we want to</span>
+        <span class="c1"># compute or update splines. The setter and getters are for x and y</span>
+
+        <span class="c1"># We keep this flag around to know when we have to recompute the</span>
+        <span class="c1"># splines. Operations that invalidate the splines MUST reset this flag</span>
+        <span class="c1"># to True.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">invalid_spline</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="c1"># Here we also define the splines as empty objects so that we know</span>
+        <span class="c1"># that they are attributes of the class and they are not uninitialized</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">spline_real</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">spline_imag</span> <span class="o">=</span> <span class="kc">None</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">x</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__data_x</span>
+
+    <span class="nd">@x</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">x</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
+        <span class="n">x_array</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_array</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">x_array</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;You cannot change the length of the series&quot;</span><span class="p">)</span>
+        <span class="n">x_array</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_return_array_if_monotonic</span><span class="p">(</span><span class="n">x_array</span><span class="p">)</span>
+
+        <span class="c1"># This series should own the data, so we copy (to avoid accidentally</span>
+        <span class="c1"># changing some other variable).</span>
+        <span class="c1"># If you do self.x = z</span>
+        <span class="c1"># and then self.x = *2</span>
+        <span class="c1"># z will change (if we don&#39;t copy)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__data_x</span> <span class="o">=</span> <span class="n">x_array</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+
+        <span class="c1"># Invalidate the spline</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">invalid_spline</span> <span class="o">=</span> <span class="kc">True</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">y</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__data_y</span>
+
+    <span class="nd">@y</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">y</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">y</span><span class="p">):</span>
+        <span class="n">y_array</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_array</span><span class="p">(</span><span class="n">y</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">y_array</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__data_y</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;You cannot change the length of the series&quot;</span><span class="p">)</span>
+
+        <span class="c1"># This series should own the data, so we copy (to avoid accidentally</span>
+        <span class="c1"># changing some other variable)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__data_y</span> <span class="o">=</span> <span class="n">y_array</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+
+        <span class="c1"># Invalidate the spline</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">invalid_spline</span> <span class="o">=</span> <span class="kc">True</span>
+
+    <span class="c1"># Here is where we pretend to be pandas. We want to be able to plot our</span>
+    <span class="c1"># series with matplotlib. Unfortunately, there is no easy way to provide a</span>
+    <span class="c1"># custom object to the plot functions. However, matplotlib has a special</span>
+    <span class="c1"># hook for pandas in the function matplotlib.cbook.index_of. In this</span>
+    <span class="c1"># function is checked if the index property is available, in which case,</span>
+    <span class="c1"># index.values and values are returned. We use this to make our objects</span>
+    <span class="c1"># plottable.</span>
+    <span class="c1"># The function in matplotlib is:</span>
+    <span class="c1"># try:</span>
+    <span class="c1">#    return y.index.values, y.values</span>
+    <span class="c1"># except AttributeError:</span>
+    <span class="c1">#    y = _check_1d(y)</span>
+    <span class="c1">#    return np.arange(y.shape[0], dtype=float), y</span>
+    <span class="c1">#</span>
+    <span class="c1"># If we provide index.values and values, we can return x and y</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">values</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Fake pandas properties, to make Series objects plottable by</span>
+<span class="sd">        matplotlib.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">y</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">index</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Fake pandas properties, to make Series objects plottable by</span>
+<span class="sd">        matplotlib.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">AttributeDictionary</span><span class="p">({</span><span class="s2">&quot;values&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="p">})</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">mask</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Return where the data is valid (according to the mask).</span>
+
+<span class="sd">        :returns: Array of True/False of the same length of the data.</span>
+<span class="sd">                  False where the data is valid, true where is not.</span>
+<span class="sd">        :rtype: 1D array of bool</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_masked</span><span class="p">():</span>
+            <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">ma</span><span class="o">.</span><span class="n">getmask</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">y</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">bool</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">xmin</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Return the minimum of the independent variable x.</span>
+
+<span class="sd">        :rvalue: Minimum of x.</span>
+<span class="sd">        :rtype: float</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">xmax</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Return the maximum of the independent variable x.</span>
+
+<span class="sd">        :rvalue: Maximum of x</span>
+<span class="sd">        :rtype: float</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+
+<div class="viewcode-block" id="BaseSeries.is_regularly_sampled"><a class="viewcode-back" href="../../series_ref.html#kuibit.series.BaseSeries.is_regularly_sampled">[docs]</a>    <span class="k">def</span> <span class="nf">is_regularly_sampled</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Return whether the series is regularly sampled.</span>
+
+<span class="sd">        If the series is only one point, an error is raised.</span>
+
+<span class="sd">        :returns:  Is the series regularly sampled?</span>
+<span class="sd">        :rtype:    bool</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span>
+                <span class="s2">&quot;Series is only one point, &quot;</span>
+                <span class="s2">&quot;it does not make sense to compute dx&quot;</span>
+            <span class="p">)</span>
+
+        <span class="n">dx</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">allclose</span><span class="p">(</span><span class="n">dx</span><span class="p">,</span> <span class="n">dx</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">atol</span><span class="o">=</span><span class="mf">1e-14</span><span class="p">)</span></div>
+
+    <span class="k">def</span> <span class="fm">__len__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;The number of data points.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="fm">__iter__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">y</span><span class="p">):</span>
+            <span class="k">yield</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span>
+
+<div class="viewcode-block" id="BaseSeries.is_complex"><a class="viewcode-back" href="../../series_ref.html#kuibit.series.BaseSeries.is_complex">[docs]</a>    <span class="k">def</span> <span class="nf">is_complex</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Return whether the data is complex.</span>
+
+<span class="sd">        :returns:  True if the data is complex, false if it is not.</span>
+<span class="sd">        :rtype:   bool</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="nb">issubclass</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">y</span><span class="o">.</span><span class="n">dtype</span><span class="o">.</span><span class="n">type</span><span class="p">,</span> <span class="nb">complex</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="BaseSeries.is_masked"><a class="viewcode-back" href="../../series_ref.html#kuibit.series.BaseSeries.is_masked">[docs]</a>    <span class="k">def</span> <span class="nf">is_masked</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Return whether the x or y are masked.</span>
+
+<span class="sd">        :returns:  True if the x or y are masked, false if it is not.</span>
+<span class="sd">        :rtype:   bool</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">y</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ma</span><span class="o">.</span><span class="n">MaskedArray</span><span class="p">)</span> <span class="ow">or</span> <span class="nb">isinstance</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ma</span><span class="o">.</span><span class="n">MaskedArray</span>
+        <span class="p">)</span></div>
+
+<div class="viewcode-block" id="BaseSeries.x_at_maximum_y"><a class="viewcode-back" href="../../series_ref.html#kuibit.series.BaseSeries.x_at_maximum_y">[docs]</a>    <span class="k">def</span> <span class="nf">x_at_maximum_y</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Return the value of x when y is maximum.</span>
+
+<span class="sd">        :returns: Value of x when y is maximum.</span>
+<span class="sd">        :rtype: float</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">argmax</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">y</span><span class="p">)]</span></div>
+
+<div class="viewcode-block" id="BaseSeries.x_at_minimum_y"><a class="viewcode-back" href="../../series_ref.html#kuibit.series.BaseSeries.x_at_minimum_y">[docs]</a>    <span class="k">def</span> <span class="nf">x_at_minimum_y</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Return the value of x when y is minimum.</span>
+
+<span class="sd">        :returns: Value of x when y is minimum.</span>
+<span class="sd">        :rtype: float</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">argmin</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">y</span><span class="p">)]</span></div>
+
+<div class="viewcode-block" id="BaseSeries.x_at_abs_maximum_y"><a class="viewcode-back" href="../../series_ref.html#kuibit.series.BaseSeries.x_at_abs_maximum_y">[docs]</a>    <span class="k">def</span> <span class="nf">x_at_abs_maximum_y</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Return the value of x when abs(y) is maximum.</span>
+
+<span class="sd">        :returns: Value of x when abs(y) is maximum.</span>
+<span class="sd">        :rtype: float</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">argmax</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">y</span><span class="p">))]</span></div>
+
+<div class="viewcode-block" id="BaseSeries.x_at_abs_minimum_y"><a class="viewcode-back" href="../../series_ref.html#kuibit.series.BaseSeries.x_at_abs_minimum_y">[docs]</a>    <span class="k">def</span> <span class="nf">x_at_abs_minimum_y</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Return the value of x when abs(y) is minimum.</span>
+
+<span class="sd">        :returns: Value of x when abs(y) is minimum.</span>
+<span class="sd">        :rtype: float</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">argmin</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">y</span><span class="p">))]</span></div>
+
+    <span class="k">def</span> <span class="nf">_make_spline</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="n">k</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">s</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Private function to make spline representation of the data.</span>
+
+<span class="sd">        This function is not meant to be called directly.</span>
+
+<span class="sd">        ``k`` is the degree of the spline fit. It is recommended to use cubic</span>
+<span class="sd">        splines. Even values of ``k`` should be avoided especially with small ``s``</span>
+<span class="sd">        values. 1 &lt;= k &lt;= 5</span>
+
+<span class="sd">        Unknown arguments are pass to ``scipy.interpolate.splrep``.</span>
+
+<span class="sd">        :param k: Order of the spline representation.</span>
+<span class="sd">        :type k:  int</span>
+<span class="sd">        :param s: Smoothing of the spline.</span>
+<span class="sd">        :type s:  float</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">k</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;Too few points to compute a spline of order </span><span class="si">{</span><span class="n">k</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_masked</span><span class="p">():</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s2">&quot;Splines with masked data are not supported.&quot;</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">spline_real</span> <span class="o">=</span> <span class="n">interpolate</span><span class="o">.</span><span class="n">splrep</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">y</span><span class="o">.</span><span class="n">real</span><span class="p">,</span> <span class="n">k</span><span class="o">=</span><span class="n">k</span><span class="p">,</span> <span class="n">s</span><span class="o">=</span><span class="n">s</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span>
+        <span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_complex</span><span class="p">():</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">spline_imag</span> <span class="o">=</span> <span class="n">interpolate</span><span class="o">.</span><span class="n">splrep</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">y</span><span class="o">.</span><span class="n">imag</span><span class="p">,</span> <span class="n">k</span><span class="o">=</span><span class="n">k</span><span class="p">,</span> <span class="n">s</span><span class="o">=</span><span class="n">s</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span>
+            <span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">invalid_spline</span> <span class="o">=</span> <span class="kc">False</span>
+
+<div class="viewcode-block" id="BaseSeries.evaluate_with_spline"><a class="viewcode-back" href="../../series_ref.html#kuibit.series.BaseSeries.evaluate_with_spline">[docs]</a>    <span class="k">def</span> <span class="nf">evaluate_with_spline</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">ext</span><span class="o">=</span><span class="mi">2</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Evaluate the spline on the points ``x``.</span>
+
+<span class="sd">        Values outside the interval are extrapolated if ``ext=0``, set to 0 if</span>
+<span class="sd">        ``ext=1``, raise a ``ValueError`` if ``ext=2``, or if ``ext=3``, return</span>
+<span class="sd">        the boundary value.</span>
+
+<span class="sd">        This method is meant to be used only if you want to use a different ext</span>
+<span class="sd">        for a specific call, otherwise, just use __call__.</span>
+
+<span class="sd">        :param x: Array of x where to evaluate the series or single x.</span>
+<span class="sd">        :type x: 1D NumPy array of float</span>
+
+<span class="sd">        :param ext: How to deal values outside the bounaries. Values outside the</span>
+<span class="sd">                    interval are extrapolated if ``ext=0``, set to 0 if</span>
+<span class="sd">                    ``ext=1``, raise a ValueError if ``ext=2``, or if ``ext=3``,</span>
+<span class="sd">                    return the boundary value.</span>
+<span class="sd">        :type ext: int</span>
+
+<span class="sd">        :returns: Values of the series evaluated on the input x.</span>
+<span class="sd">        :rtype:   1D NumPy array or float</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">invalid_spline</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_make_spline</span><span class="p">()</span>
+
+        <span class="n">y_real</span> <span class="o">=</span> <span class="n">interpolate</span><span class="o">.</span><span class="n">splev</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">spline_real</span><span class="p">,</span> <span class="n">ext</span><span class="o">=</span><span class="n">ext</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_complex</span><span class="p">():</span>
+            <span class="n">y_imag</span> <span class="o">=</span> <span class="n">interpolate</span><span class="o">.</span><span class="n">splev</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">spline_imag</span><span class="p">,</span> <span class="n">ext</span><span class="o">=</span><span class="n">ext</span><span class="p">)</span>
+            <span class="n">ret</span> <span class="o">=</span> <span class="n">y_real</span> <span class="o">+</span> <span class="mi">1</span><span class="n">j</span> <span class="o">*</span> <span class="n">y_imag</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">ret</span> <span class="o">=</span> <span class="n">y_real</span>
+
+        <span class="c1"># When this method is called with a scalar input, at this point, ret</span>
+        <span class="c1"># would be a 0d NumPy scalar array. What&#39;s that? - you may ask. I have</span>
+        <span class="c1"># no idea, but the user is expecting a scalar as output. Hence, we cast</span>
+        <span class="c1"># the 0d array into at &quot;at_least_1d&quot; array, then we can see its length</span>
+        <span class="c1"># and act consequently.</span>
+        <span class="n">ret</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">atleast_1d</span><span class="p">(</span><span class="n">ret</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">ret</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">ret</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span> <span class="k">else</span> <span class="n">ret</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span></div>
+
+    <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Evaluate the spline on the points x. If the value is outside the</span>
+<span class="sd">        range, a ValueError will be raised.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># We call the spline only if we need to.</span>
+
+        <span class="c1"># TODO (REFACTORING): This is not a Pythonic way to write this function.</span>
+        <span class="c1">#</span>
+        <span class="c1"># The main problem is that it is is not vectorized. It is also not</span>
+        <span class="c1"># efficient, we are going over the array a lot of times, re-checking the</span>
+        <span class="c1"># same elements over and over. Also, we are not considering the floating</span>
+        <span class="c1"># point arithmetic, we should allow for some tolerance.</span>
+
+        <span class="c1"># First we consider the scalar case</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="s2">&quot;__len__&quot;</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">x</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="p">:</span>
+                <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">y</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">searchsorted</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="n">x</span><span class="p">)]</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">evaluate_with_spline</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">ext</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+
+        <span class="n">ret</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">y</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
+        <span class="c1"># Hash-maps are more efficient than searching every time through the</span>
+        <span class="c1"># array, but there is some overhead cost in defining the dictionary.</span>
+        <span class="c1"># Experiments show that it is sill more performant.</span>
+        <span class="n">dic_data</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">y</span><span class="p">))</span>
+        <span class="k">for</span> <span class="n">index</span><span class="p">,</span> <span class="n">elem</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">elem</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="p">:</span>
+                <span class="n">ret</span><span class="p">[</span><span class="n">index</span><span class="p">]</span> <span class="o">=</span> <span class="n">dic_data</span><span class="p">[</span><span class="n">elem</span><span class="p">]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">ret</span><span class="p">[</span><span class="n">index</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">evaluate_with_spline</span><span class="p">(</span><span class="n">elem</span><span class="p">,</span> <span class="n">ext</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">ret</span>
+
+<div class="viewcode-block" id="BaseSeries.copy"><a class="viewcode-back" href="../../series_ref.html#kuibit.series.BaseSeries.copy">[docs]</a>    <span class="k">def</span> <span class="nf">copy</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Return a deep copy.</span>
+
+<span class="sd">        :returns:  Deep copy of the series.</span>
+<span class="sd">        :rtype:    :py:class:`~.BaseSeries` or derived class</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># The following is more complicated copy constructor that is designed</span>
+        <span class="c1"># to copy also the spline information without re-computing it.</span>
+        <span class="c1"># This can speed up some computations.</span>
+        <span class="n">copied</span> <span class="o">=</span> <span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__new__</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="p">)</span>
+        <span class="c1"># We don&#39;t use the setters</span>
+        <span class="n">copied</span><span class="o">.</span><span class="n">__data_x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__data_x</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="n">copied</span><span class="o">.</span><span class="n">__data_y</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__data_y</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">invalid_spline</span><span class="p">:</span>
+            <span class="c1"># splines are tuples, with a direct call to the function</span>
+            <span class="c1"># tuple() we make a deep copy</span>
+            <span class="n">copied</span><span class="o">.</span><span class="n">spline_real</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">spline_real</span><span class="p">)</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_complex</span><span class="p">():</span>
+                <span class="n">copied</span><span class="o">.</span><span class="n">spline_imag</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">spline_imag</span><span class="p">)</span>
+            <span class="n">copied</span><span class="o">.</span><span class="n">invalid_spline</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="n">copied</span><span class="o">.</span><span class="n">invalid_spline</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="k">return</span> <span class="n">copied</span></div>
+
+<div class="viewcode-block" id="BaseSeries.resampled"><a class="viewcode-back" href="../../series_ref.html#kuibit.series.BaseSeries.resampled">[docs]</a>    <span class="k">def</span> <span class="nf">resampled</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_x</span><span class="p">,</span> <span class="n">ext</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">piecewise_constant</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Return a new series resampled from this to new_x.</span>
+
+<span class="sd">        You can specify the details of the spline with the method make_spline.</span>
+
+<span class="sd">        If you want to resample without using the spline, and you want a nearest</span>
+<span class="sd">        neighbor resampling, pass the keyword ``piecewise_constant=True``.</span>
+<span class="sd">        This may be a good choice for data with large discontinuities, where the</span>
+<span class="sd">        splines are ineffective.</span>
+
+<span class="sd">        :param new_x: New independent variable.</span>
+<span class="sd">        :type new_x:  1D NumPy array or list of float</span>
+<span class="sd">        :param ext: How to handle points outside the data interval.</span>
+<span class="sd">        :type ext: 0 for extrapolation, 1 for returning zero, 2 for ``ValueError``,</span>
+<span class="sd">                   3 for extending the boundary</span>
+<span class="sd">        :param piecewise_constant: Do not use splines, use the nearest neighbors.</span>
+<span class="sd">        :type piecewise_constant: bool</span>
+<span class="sd">        :returns: Resampled series.</span>
+<span class="sd">        :rtype:   :py:class:`~.BaseSeries` or derived class</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># If x is the same, there&#39;s no need to resample</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="p">)</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">new_x</span><span class="p">)</span> <span class="ow">and</span> <span class="n">np</span><span class="o">.</span><span class="n">allclose</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="n">new_x</span><span class="p">,</span> <span class="n">atol</span><span class="o">=</span><span class="mf">1e-14</span>
+        <span class="p">):</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+
+        <span class="c1"># Unfortunately there is no nearest neighor resampling in SciPy&#39;s splines.</span>
+        <span class="c1"># Hence, we use directly the method interp1d.</span>
+        <span class="k">if</span> <span class="n">piecewise_constant</span><span class="p">:</span>
+            <span class="n">interp_function</span> <span class="o">=</span> <span class="n">interpolate</span><span class="o">.</span><span class="n">interp1d</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">y</span><span class="p">,</span> <span class="n">kind</span><span class="o">=</span><span class="s2">&quot;nearest&quot;</span><span class="p">,</span> <span class="n">assume_sorted</span><span class="o">=</span><span class="kc">True</span>
+            <span class="p">)</span>
+            <span class="n">new_y</span> <span class="o">=</span> <span class="n">interp_function</span><span class="p">(</span><span class="n">new_x</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">new_y</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">evaluate_with_spline</span><span class="p">(</span><span class="n">new_x</span><span class="p">,</span> <span class="n">ext</span><span class="o">=</span><span class="n">ext</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)(</span><span class="n">new_x</span><span class="p">,</span> <span class="n">new_y</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="BaseSeries.resample"><a class="viewcode-back" href="../../series_ref.html#kuibit.series.BaseSeries.resample">[docs]</a>    <span class="k">def</span> <span class="nf">resample</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_x</span><span class="p">,</span> <span class="n">ext</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">piecewise_constant</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Resample the series to new independent variable new_x.</span>
+
+<span class="sd">        If you want to resample without using the spline, and you want a nearest</span>
+<span class="sd">        neighbor resampling, pass the keyword ``piecewise_constant=True``.</span>
+<span class="sd">        This may be a good choice for data with large discontinuities, where the</span>
+<span class="sd">        splines are ineffective.</span>
+
+<span class="sd">        :param new_x: New independent variable.</span>
+<span class="sd">        :type new_x:  1D NumPy array or list of float</span>
+<span class="sd">        :param ext: How to handle points outside the interval.</span>
+<span class="sd">        :type ext: 0 for extrapolation, 1 for returning zero, 2 for ValueError,</span>
+<span class="sd">                   3 for extending the boundary</span>
+<span class="sd">        :param piecewise_constant: Do not use splines, use the nearest neighbors.</span>
+<span class="sd">        :type piecewise_constant: bool</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_apply_to_self</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">resampled</span><span class="p">,</span>
+            <span class="n">new_x</span><span class="p">,</span>
+            <span class="n">ext</span><span class="o">=</span><span class="n">ext</span><span class="p">,</span>
+            <span class="n">piecewise_constant</span><span class="o">=</span><span class="n">piecewise_constant</span><span class="p">,</span>
+        <span class="p">)</span></div>
+
+    <span class="k">def</span> <span class="nf">_apply_binary</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">,</span> <span class="n">function</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;This is an abstract function that is used to implement mathematical</span>
+<span class="sd">        operations with other series (if they have the same x) or</span>
+<span class="sd">        scalars.</span>
+
+<span class="sd">        :py:meth:`~._apply_binary` takes another object that can be of the same</span>
+<span class="sd">        type or a scalar, and applies ``function(self.y, other.y)``, performing type</span>
+<span class="sd">        checking.</span>
+
+<span class="sd">        :param other: Other object.</span>
+<span class="sd">        :type other: :py:class:`~.BaseSeries` or derived class or float</span>
+<span class="sd">        :param function: Dyadic function (function that takes two arguments).</span>
+<span class="sd">        :type function: callable</span>
+
+<span class="sd">        :returns:  Return value of ``function`` when called with self and other.</span>
+<span class="sd">        :rtype:   :py:class:`~.BaseSeries` or derived class (typically)</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># If the other object is of the same type</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)):</span>
+            <span class="k">if</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="n">other</span><span class="o">.</span><span class="n">x</span><span class="p">))</span> <span class="ow">or</span> <span class="p">(</span>
+                <span class="ow">not</span> <span class="n">np</span><span class="o">.</span><span class="n">allclose</span><span class="p">(</span><span class="n">other</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="n">atol</span><span class="o">=</span><span class="mf">1e-14</span><span class="p">)</span>
+            <span class="p">):</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;The objects do not have the same x!&quot;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="p">,</span>
+                <span class="n">function</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">y</span><span class="p">,</span> <span class="n">other</span><span class="o">.</span><span class="n">y</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">),</span>
+                <span class="kc">True</span><span class="p">,</span>
+            <span class="p">)</span>
+        <span class="c1"># If it is a number</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">complex</span><span class="p">)):</span>
+            <span class="k">return</span> <span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="n">function</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">y</span><span class="p">,</span> <span class="n">other</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">),</span> <span class="kc">True</span>
+            <span class="p">)</span>
+
+        <span class="c1"># If we are here, it is because we cannot add the two objects</span>
+        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;I don&#39;t know how to combine these objects&quot;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="fm">__eq__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Check for equality up to numerical precision.&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)):</span>
+            <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">allclose</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="n">other</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="n">atol</span><span class="o">=</span><span class="mf">1e-14</span><span class="p">)</span> <span class="ow">and</span> <span class="n">np</span><span class="o">.</span><span class="n">ma</span><span class="o">.</span><span class="n">allclose</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">y</span><span class="p">,</span> <span class="n">other</span><span class="o">.</span><span class="n">y</span><span class="p">,</span> <span class="n">atol</span><span class="o">=</span><span class="mf">1e-14</span>
+            <span class="p">)</span>
+        <span class="k">return</span> <span class="kc">False</span>
+
+    <span class="k">def</span> <span class="nf">_apply_to_self</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Apply the method ``f`` to ``self``, modifying ``self``.</span>
+
+<span class="sd">        This is used to transform the commands from returning an object to</span>
+<span class="sd">        modifying ``self``. The function ``f`` has to return a new copy of the</span>
+<span class="sd">        object (not a reference).</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">ret</span> <span class="o">=</span> <span class="n">f</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="c1"># We avoid the setters to avoid checking for consistency because this</span>
+        <span class="c1"># was already done</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__data_x</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__data_y</span> <span class="o">=</span> <span class="n">ret</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="n">ret</span><span class="o">.</span><span class="n">y</span>
+        <span class="c1"># We have to recompute the splines</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">invalid_spline</span> <span class="o">=</span> <span class="kc">True</span>
+
+<div class="viewcode-block" id="BaseSeries.save"><a class="viewcode-back" href="../../series_ref.html#kuibit.series.BaseSeries.save">[docs]</a>    <span class="k">def</span> <span class="nf">save</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">file_name</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Saves into simple ASCII format with 2 columns ``(x, y)``</span>
+<span class="sd">        for real valued data and 3 columns ``(x, Re(y), Im(y))``</span>
+<span class="sd">        for complex valued data.</span>
+
+<span class="sd">        Unknown arguments are passed to ``NumPy.savetxt``.</span>
+
+<span class="sd">        :param file_name: Path (with extension) of the output file.</span>
+<span class="sd">        :type file_name: str</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_masked</span><span class="p">():</span>
+            <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
+                <span class="s2">&quot;Discarding mask information.&quot;</span><span class="p">,</span>
+                <span class="ne">RuntimeWarning</span><span class="p">,</span>
+            <span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_complex</span><span class="p">():</span>
+            <span class="n">np</span><span class="o">.</span><span class="n">savetxt</span><span class="p">(</span>
+                <span class="n">file_name</span><span class="p">,</span>
+                <span class="n">np</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span>
+                    <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">y</span><span class="o">.</span><span class="n">real</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">y</span><span class="o">.</span><span class="n">imag</span><span class="p">),</span>
+                    <span class="o">*</span><span class="n">args</span><span class="p">,</span>
+                    <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+                <span class="p">),</span>
+            <span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">np</span><span class="o">.</span><span class="n">savetxt</span><span class="p">(</span>
+                <span class="n">file_name</span><span class="p">,</span>
+                <span class="n">np</span><span class="o">.</span><span class="n">transpose</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">y</span><span class="p">),</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">),</span>
+            <span class="p">)</span></div>
+
+<div class="viewcode-block" id="BaseSeries.nans_removed"><a class="viewcode-back" href="../../series_ref.html#kuibit.series.BaseSeries.nans_removed">[docs]</a>    <span class="k">def</span> <span class="nf">nans_removed</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Filter out nans/infinite values.</span>
+<span class="sd">        Return a new series with finite values only.</span>
+
+<span class="sd">        :returns: A new series with only finite values.</span>
+<span class="sd">        :rtype: :py:class:`~.BaseSeries` or derived class</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">mask</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">isfinite</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">y</span><span class="p">)</span>
+        <span class="k">return</span> <span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)(</span><span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="p">[</span><span class="n">mask</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">y</span><span class="p">[</span><span class="n">mask</span><span class="p">],</span> <span class="kc">True</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="BaseSeries.nans_remove"><a class="viewcode-back" href="../../series_ref.html#kuibit.series.BaseSeries.nans_remove">[docs]</a>    <span class="k">def</span> <span class="nf">nans_remove</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Filter out nans/infinite values.&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_apply_to_self</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">nans_removed</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="BaseSeries.mask_removed"><a class="viewcode-back" href="../../series_ref.html#kuibit.series.BaseSeries.mask_removed">[docs]</a>    <span class="k">def</span> <span class="nf">mask_removed</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Remove masked value.</span>
+
+<span class="sd">        Return a new series with valid values only.</span>
+
+<span class="sd">        :returns: A new series with only valid values.</span>
+<span class="sd">        :rtype: :py:class:`~.BaseSeries` or derived class</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_masked</span><span class="p">():</span>
+            <span class="n">mask</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">invert</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mask</span><span class="p">)</span>
+            <span class="k">return</span> <span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)(</span><span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="p">[</span><span class="n">mask</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">y</span><span class="p">[</span><span class="n">mask</span><span class="p">],</span> <span class="kc">True</span><span class="p">)</span>
+
+        <span class="c1"># We can copy the spline</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="BaseSeries.mask_remove"><a class="viewcode-back" href="../../series_ref.html#kuibit.series.BaseSeries.mask_remove">[docs]</a>    <span class="k">def</span> <span class="nf">mask_remove</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Remove masked values.&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_apply_to_self</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mask_removed</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="BaseSeries.mask_applied"><a class="viewcode-back" href="../../series_ref.html#kuibit.series.BaseSeries.mask_applied">[docs]</a>    <span class="k">def</span> <span class="nf">mask_applied</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mask</span><span class="p">,</span> <span class="n">ignore_existing</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Return a new series with given mask applied to the data.</span>
+
+<span class="sd">        If a previous mask already exists, the new mask will be added on top,</span>
+<span class="sd">        unless ``ignore_existing`` is True.</span>
+
+<span class="sd">        :param mask: Array of booleans that identify where the data is invalid.</span>
+<span class="sd">                     This can be obtained with the method :py:meth:`~.mask`.</span>
+<span class="sd">        :type mask: 1D NumPy array</span>
+
+<span class="sd">        :param ignore_existing: If True, overwrite any previously existing mask.</span>
+<span class="sd">        :type ignore_existing: bool</span>
+
+<span class="sd">        :returns: New series with mask applied.</span>
+<span class="sd">        :rtype: :py:class:`~.BaseSeries`</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_masked</span><span class="p">()</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">ignore_existing</span><span class="p">:</span>
+            <span class="n">mask</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ma</span><span class="o">.</span><span class="n">mask_or</span><span class="p">(</span><span class="n">mask</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">mask</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)(</span><span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ma</span><span class="o">.</span><span class="n">MaskedArray</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">y</span><span class="p">,</span> <span class="n">mask</span><span class="o">=</span><span class="n">mask</span><span class="p">),</span> <span class="kc">True</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="BaseSeries.mask_apply"><a class="viewcode-back" href="../../series_ref.html#kuibit.series.BaseSeries.mask_apply">[docs]</a>    <span class="k">def</span> <span class="nf">mask_apply</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mask</span><span class="p">,</span> <span class="n">ignore_existing</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Apply given mask.</span>
+
+<span class="sd">        If a previous mask already exists, the new mask will be added on top,</span>
+<span class="sd">        unless ``ignore_existing`` is True.</span>
+
+<span class="sd">        :param mask: Array of booleans that identify where the data is invalid.</span>
+<span class="sd">                     This can be obtained with the method :py:meth:`~.mask`.</span>
+<span class="sd">        :type mask: 1D NumPy array</span>
+
+<span class="sd">        :param ignore_existing: If True, overwrite any previously existing mask.</span>
+<span class="sd">        :type ignore_existing: bool</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_apply_to_self</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">mask_applied</span><span class="p">,</span> <span class="n">mask</span><span class="p">,</span> <span class="n">ignore_existing</span><span class="o">=</span><span class="n">ignore_existing</span>
+        <span class="p">)</span></div>
+
+<div class="viewcode-block" id="BaseSeries.integrated"><a class="viewcode-back" href="../../series_ref.html#kuibit.series.BaseSeries.integrated">[docs]</a>    <span class="k">def</span> <span class="nf">integrated</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dx</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Return a series that is the integral computed with method of</span>
+<span class="sd">        the rectangles.</span>
+
+<span class="sd">        The spacing ``dx`` can be optionally provided. If provided, it will be</span>
+<span class="sd">        used (increasing performance), otherwise it will be computed internally.</span>
+
+<span class="sd">        :param dx: Delta x in the independent variable. If None it will be</span>
+<span class="sd">                   computed internally.</span>
+<span class="sd">        :type dx: float or None</span>
+<span class="sd">        :returns:  New series with the cumulative integral.</span>
+<span class="sd">        :rtype:    :py:class:`~.BaseSeries` or derived class</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_masked</span><span class="p">():</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span>
+                <span class="s2">&quot;Integration with masked data is not supported.&quot;</span>
+            <span class="p">)</span>
+
+        <span class="c1"># We pass self.x only if dx was not provided</span>
+        <span class="n">passing_x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">x</span> <span class="k">if</span> <span class="n">dx</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="kc">None</span>
+        <span class="k">return</span> <span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="p">,</span>
+            <span class="n">integrate</span><span class="o">.</span><span class="n">cumtrapz</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">y</span><span class="p">,</span> <span class="n">x</span><span class="o">=</span><span class="n">passing_x</span><span class="p">,</span> <span class="n">dx</span><span class="o">=</span><span class="n">dx</span><span class="p">,</span> <span class="n">initial</span><span class="o">=</span><span class="mi">0</span><span class="p">),</span>
+            <span class="kc">True</span><span class="p">,</span>
+        <span class="p">)</span></div>
+
+<div class="viewcode-block" id="BaseSeries.integrate"><a class="viewcode-back" href="../../series_ref.html#kuibit.series.BaseSeries.integrate">[docs]</a>    <span class="k">def</span> <span class="nf">integrate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dx</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Integrate series with method of the rectangles.</span>
+
+<span class="sd">        The spacing ``dx`` can be optionally provided. If provided, it will be</span>
+<span class="sd">        used (increasing performance), otherwise it will be computed internally.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_apply_to_self</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">integrated</span><span class="p">,</span> <span class="n">dx</span><span class="o">=</span><span class="n">dx</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="BaseSeries.spline_differentiated"><a class="viewcode-back" href="../../series_ref.html#kuibit.series.BaseSeries.spline_differentiated">[docs]</a>    <span class="k">def</span> <span class="nf">spline_differentiated</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">order</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Return a series that is the derivative of the current one using</span>
+<span class="sd">        the spline representation.</span>
+
+<span class="sd">        The optional parameter ``order`` specifies the order of the derivative.</span>
+
+<span class="sd">        .. warning::</span>
+
+<span class="sd">            The values at the boundary are typically not accurate.</span>
+
+<span class="sd">        :param order: Order of derivative (e.g. 2 = second derivative).</span>
+<span class="sd">        :type order: int</span>
+
+<span class="sd">        :returns:  New series with derivative</span>
+<span class="sd">        :rtype:    :py:class:`~.BaseSeries` or derived class</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">order</span> <span class="o">&gt;</span> <span class="mi">3</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span><span class="n">order</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Cannot compute differential of order </span><span class="si">{</span><span class="n">order</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">invalid_spline</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_make_spline</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_complex</span><span class="p">():</span>
+            <span class="n">ret_value</span> <span class="o">=</span> <span class="n">interpolate</span><span class="o">.</span><span class="n">splev</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">spline_real</span><span class="p">,</span> <span class="n">der</span><span class="o">=</span><span class="n">order</span>
+            <span class="p">)</span> <span class="o">+</span> <span class="mi">1</span><span class="n">j</span> <span class="o">*</span> <span class="n">interpolate</span><span class="o">.</span><span class="n">splev</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">spline_imag</span><span class="p">,</span> <span class="n">der</span><span class="o">=</span><span class="n">order</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">ret_value</span> <span class="o">=</span> <span class="n">interpolate</span><span class="o">.</span><span class="n">splev</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">spline_real</span><span class="p">,</span> <span class="n">der</span><span class="o">=</span><span class="n">order</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)(</span><span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="n">ret_value</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="BaseSeries.spline_differentiate"><a class="viewcode-back" href="../../series_ref.html#kuibit.series.BaseSeries.spline_differentiate">[docs]</a>    <span class="k">def</span> <span class="nf">spline_differentiate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">order</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Differentiate the series using the spline representation.</span>
+
+<span class="sd">        The optional parameter ``order`` specifies the order of the derivative.</span>
+
+<span class="sd">        .. warning::</span>
+
+<span class="sd">            The values at the boundary are typically not accurate.</span>
+
+<span class="sd">        :param order: Order of derivative (e.g. 2 = second derivative).</span>
+<span class="sd">        :type order: int</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_apply_to_self</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">spline_differentiated</span><span class="p">,</span> <span class="n">order</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="BaseSeries.differentiated"><a class="viewcode-back" href="../../series_ref.html#kuibit.series.BaseSeries.differentiated">[docs]</a>    <span class="k">def</span> <span class="nf">differentiated</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">order</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Return a series that is the numerical order-differentiation of</span>
+<span class="sd">        the present series.</span>
+
+<span class="sd">        The optional parameter ``order`` specifies the order of the derivative.</span>
+
+<span class="sd">        The derivative is calulated as centered differencing in the interior</span>
+<span class="sd">        and one-sided derivatives at the boundaries. Higher orders are computed</span>
+<span class="sd">        applying the same rule recursively.</span>
+
+<span class="sd">        :param order: Order of derivative (e.g. 2 = second derivative).</span>
+<span class="sd">        :type order: int</span>
+
+<span class="sd">        :returns:  New series with derivative.</span>
+<span class="sd">        :rtype:    :py:class:`~.BaseSeries` or derived class</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_masked</span><span class="p">():</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span>
+                <span class="s2">&quot;Differentiation with masked data is not supported.&quot;</span>
+            <span class="p">)</span>
+
+        <span class="n">ret_value</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">y</span>
+        <span class="k">for</span> <span class="n">_num_deriv</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">order</span><span class="p">):</span>
+            <span class="n">ret_value</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">gradient</span><span class="p">(</span><span class="n">ret_value</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="n">edge_order</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+        <span class="k">return</span> <span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)(</span><span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="n">ret_value</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="BaseSeries.differentiate"><a class="viewcode-back" href="../../series_ref.html#kuibit.series.BaseSeries.differentiate">[docs]</a>    <span class="k">def</span> <span class="nf">differentiate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">order</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Differentiate with the numerical order-differentiation.</span>
+
+<span class="sd">        The optional parameter ``order`` specifies the order of the derivative.</span>
+
+<span class="sd">        The derivative is calulated as centered differencing in the interior</span>
+<span class="sd">        and one-sided derivatives at the boundaries. Higher orders are computed</span>
+<span class="sd">        applying the same rule recursively.</span>
+
+<span class="sd">        :param order: Order of derivative (e.g. 2 = second derivative).</span>
+<span class="sd">        :type order: int</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_apply_to_self</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">differentiated</span><span class="p">,</span> <span class="n">order</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="BaseSeries.savgol_smoothed"><a class="viewcode-back" href="../../series_ref.html#kuibit.series.BaseSeries.savgol_smoothed">[docs]</a>    <span class="k">def</span> <span class="nf">savgol_smoothed</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">window_size</span><span class="p">,</span> <span class="n">order</span><span class="o">=</span><span class="mi">3</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Return a smoothed series with a Savitzky-Golay filter with</span>
+<span class="sd">        window of size ``window_size`` and order ``order``.</span>
+
+<span class="sd">        This is just like a regular &quot;Moving average&quot; filter, but instead of</span>
+<span class="sd">        just calculating the average, a polynomial (usually 2nd or 4th order)</span>
+<span class="sd">        fit is made for every point, and only the &quot;middle&quot; point is chosen.</span>
+<span class="sd">        Since 2nd (or 4th) order information is concerned at every point, the</span>
+<span class="sd">        bias introduced in &quot;moving average&quot; approach at local maxima or minima,</span>
+<span class="sd">        is circumvented.</span>
+
+<span class="sd">        :param window_size: Number of points of the smoothing window (needs to</span>
+<span class="sd">                            be odd).</span>
+<span class="sd">        :type window_size: int</span>
+<span class="sd">        :param order: Order of the filter.</span>
+<span class="sd">        :type order: int</span>
+
+<span class="sd">        :returns:  New smoothed series.</span>
+<span class="sd">        :rtype:    :py:class:`~.BaseSeries` or derived class</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_masked</span><span class="p">():</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s2">&quot;Smoothing with masked data is not supported.&quot;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_complex</span><span class="p">():</span>
+            <span class="k">return</span> <span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="p">,</span>
+                <span class="n">signal</span><span class="o">.</span><span class="n">savgol_filter</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">y</span><span class="o">.</span><span class="n">imag</span><span class="p">,</span> <span class="n">window_size</span><span class="p">,</span> <span class="n">order</span><span class="p">)</span>
+                <span class="o">+</span> <span class="mi">1</span><span class="n">j</span> <span class="o">*</span> <span class="n">signal</span><span class="o">.</span><span class="n">savgol_filter</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">y</span><span class="o">.</span><span class="n">real</span><span class="p">,</span> <span class="n">window_size</span><span class="p">,</span> <span class="n">order</span><span class="p">),</span>
+                <span class="kc">True</span><span class="p">,</span>
+            <span class="p">)</span>
+
+        <span class="k">return</span> <span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="p">,</span>
+            <span class="n">signal</span><span class="o">.</span><span class="n">savgol_filter</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">y</span><span class="p">,</span> <span class="n">window_size</span><span class="p">,</span> <span class="n">order</span><span class="p">),</span>
+            <span class="kc">True</span><span class="p">,</span>
+        <span class="p">)</span></div>
+
+<div class="viewcode-block" id="BaseSeries.savgol_smooth"><a class="viewcode-back" href="../../series_ref.html#kuibit.series.BaseSeries.savgol_smooth">[docs]</a>    <span class="k">def</span> <span class="nf">savgol_smooth</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">window_size</span><span class="p">,</span> <span class="n">order</span><span class="o">=</span><span class="mi">3</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Smooth the series with a Savitzky-Golay filter with window of</span>
+<span class="sd">        size ``window_size`` and order ``order``.</span>
+
+<span class="sd">        This is just like a regular &quot;Moving average&quot; filter, but instead of</span>
+<span class="sd">        just calculating the average, a polynomial (usually 2nd or 4th order)</span>
+<span class="sd">        fit is made for every point, and only the &quot;middle&quot; point is chosen.</span>
+<span class="sd">        Since 2nd (or 4th) order information is concerned at every point, the</span>
+<span class="sd">        bias introduced in &quot;moving average&quot; approach at local maxima or minima,</span>
+<span class="sd">        is circumvented.</span>
+
+<span class="sd">        :param window_size: Number of points of the smoothing window (needs to</span>
+<span class="sd">                            be odd).</span>
+<span class="sd">        :type window_size: int</span>
+<span class="sd">        :param order: Order of the filter.</span>
+<span class="sd">        :type order: int</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_apply_to_self</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">savgol_smoothed</span><span class="p">,</span> <span class="n">window_size</span><span class="p">,</span> <span class="n">order</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="BaseSeries.cropped"><a class="viewcode-back" href="../../series_ref.html#kuibit.series.BaseSeries.cropped">[docs]</a>    <span class="k">def</span> <span class="nf">cropped</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">init</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Return a series with data removed outside the interval ``[init, end]``. If</span>
+<span class="sd">        ``init`` or ``end`` are not specified or None, it does not remove</span>
+<span class="sd">        anything from this side.</span>
+
+<span class="sd">        :param init: Data with ``x &lt;= init`` will be removed.</span>
+<span class="sd">        :type init: float or None</span>
+<span class="sd">        :param end: Data with ``x &gt;= init`` will be removed.</span>
+<span class="sd">        :type end: float or None</span>
+
+<span class="sd">        :returns:  Series with enforced minimum and maximum</span>
+<span class="sd">        :rtype:    :py:class:`~.BaseSeries` or derived class</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">x</span>
+        <span class="n">y</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">y</span>
+        <span class="k">if</span> <span class="n">init</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">m</span> <span class="o">=</span> <span class="n">x</span> <span class="o">&gt;=</span> <span class="n">init</span>
+            <span class="n">x</span> <span class="o">=</span> <span class="n">x</span><span class="p">[</span><span class="n">m</span><span class="p">]</span>
+            <span class="n">y</span> <span class="o">=</span> <span class="n">y</span><span class="p">[</span><span class="n">m</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">end</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">m</span> <span class="o">=</span> <span class="n">x</span> <span class="o">&lt;=</span> <span class="n">end</span>
+            <span class="n">x</span> <span class="o">=</span> <span class="n">x</span><span class="p">[</span><span class="n">m</span><span class="p">]</span>
+            <span class="n">y</span> <span class="o">=</span> <span class="n">y</span><span class="p">[</span><span class="n">m</span><span class="p">]</span>
+        <span class="k">return</span> <span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="BaseSeries.crop"><a class="viewcode-back" href="../../series_ref.html#kuibit.series.BaseSeries.crop">[docs]</a>    <span class="k">def</span> <span class="nf">crop</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">init</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Remove data outside the the interval ``[init, end]``. If</span>
+<span class="sd">        ``init`` or ``end`` are not specified or None, it does not remove</span>
+<span class="sd">        anything from this side.</span>
+
+<span class="sd">        :param init: Data with ``x &lt;= init`` will be removed.</span>
+<span class="sd">        :type init: float or None</span>
+<span class="sd">        :param end: Data with ``x &gt;= init`` will be removed.</span>
+<span class="sd">        :type end: float or None</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_apply_to_self</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cropped</span><span class="p">,</span> <span class="n">init</span><span class="p">,</span> <span class="n">end</span><span class="p">)</span></div>
+
+    <span class="c1"># Define aliases</span>
+    <span class="n">clip</span> <span class="o">=</span> <span class="n">crop</span>
+    <span class="n">clipped</span> <span class="o">=</span> <span class="n">cropped</span>
+
+    <span class="k">def</span> <span class="nf">_apply_unary</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">function</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Apply a unary function to the data.</span>
+
+<span class="sd">        :param function: Function to apply to the series.</span>
+<span class="sd">        :type function: callable</span>
+
+<span class="sd">        :return: New series with function applied to the data.</span>
+<span class="sd">        :rtype: :py:class:`~.BaseSeries` or derived class</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)(</span><span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="n">function</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">y</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">),</span> <span class="kc">True</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_apply_reduction</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">reduction</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Apply a reduction to the data.</span>
+
+<span class="sd">        :param function: Function to apply to the series.</span>
+<span class="sd">        :type function: callable</span>
+
+<span class="sd">        :return: Reduction applied to the data</span>
+<span class="sd">        :rtype: float</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">reduction</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">y</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="sample_common"><a class="viewcode-back" href="../../series_ref.html#kuibit.series.sample_common">[docs]</a><span class="k">def</span> <span class="nf">sample_common</span><span class="p">(</span><span class="n">series</span><span class="p">,</span> <span class="n">resample</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">piecewise_constant</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Take a list of series and return new ones so that they are all defined on the</span>
+<span class="sd">    same points.</span>
+
+<span class="sd">    If ``resample`` is False (default), take as input a list of series and</span>
+<span class="sd">    return a new list with the same series but only defined on those points that</span>
+<span class="sd">    are common to all the lists. If ``resample`` is True, instead of removing</span>
+<span class="sd">    points, find the common interval of definition, and resample all the series</span>
+<span class="sd">    on that internal. The number of sample points is the minimum over all</span>
+<span class="sd">    series. Additionally, if ``piecewise_constant=True``, the approximant used</span>
+<span class="sd">    for resampling is a piecewise constant function, splines are not used,</span>
+<span class="sd">    instead, the nearest neighbors are used. Use this when you have series with</span>
+<span class="sd">    discontinuities.</span>
+
+<span class="sd">    :param series: The series to resample or redefine on the common points</span>
+<span class="sd">    :type series:  list of :py:class:`~.Series`</span>
+<span class="sd">    :param resample: Whether to resample the series, or just find the common</span>
+<span class="sd">                     points.</span>
+<span class="sd">    :type resample: bool</span>
+<span class="sd">    :param piecewise_constant: Whether to use the nearest neighbor resampling</span>
+<span class="sd">                               method instead of splines.</span>
+<span class="sd">                               If ``piecewise_constant=True``, the approximant used</span>
+<span class="sd">                               for resampling is a piecewise constant function.</span>
+<span class="sd">    :type piecewise_constant: bool</span>
+<span class="sd">    :returns:  Resampled series so that they are all defined in</span>
+<span class="sd">               the same interval.</span>
+<span class="sd">    :rtype:    list of :py:class:`~.Series`</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># In many cases there is no real need for resampling because the array</span>
+    <span class="c1"># already have the desired shape. It is worth checking if we need to</span>
+    <span class="c1"># resample. If the series are regularly sampled, it is easy to check</span>
+    <span class="c1"># if the are the same. We also need to check that they are regularly</span>
+    <span class="c1"># sampled, to do this, we check that the first is regularly sampled,</span>
+    <span class="c1"># and that all the other ones have the same x.</span>
+    <span class="n">s1</span><span class="p">,</span> <span class="o">*</span><span class="n">s_others</span> <span class="o">=</span> <span class="n">series</span>
+    <span class="k">if</span> <span class="n">s1</span><span class="o">.</span><span class="n">is_regularly_sampled</span><span class="p">():</span>
+        <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">s_others</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">s</span><span class="p">)</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">s1</span><span class="p">)):</span>
+                <span class="k">break</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">np</span><span class="o">.</span><span class="n">allclose</span><span class="p">(</span><span class="n">s1</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="n">s</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="n">atol</span><span class="o">=</span><span class="mf">1e-14</span><span class="p">):</span>
+                <span class="k">break</span>
+            <span class="c1"># This is an else to the for loop</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># We have to copy, otherwise one can accidentally modify input data</span>
+            <span class="k">return</span> <span class="p">[</span><span class="n">ss</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span> <span class="k">for</span> <span class="n">ss</span> <span class="ow">in</span> <span class="n">series</span><span class="p">]</span>
+
+    <span class="k">if</span> <span class="n">resample</span><span class="p">:</span>
+        <span class="c1"># Find the series with max xmin</span>
+        <span class="n">s_xmin</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">series</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="o">.</span><span class="n">xmin</span><span class="p">)</span>
+        <span class="c1"># Find the series with min xmax</span>
+        <span class="n">s_xmax</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">series</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="o">.</span><span class="n">xmax</span><span class="p">)</span>
+        <span class="c1"># Find the series with min number of points</span>
+        <span class="n">s_ns</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">series</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="nb">len</span><span class="p">)</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="n">s_xmin</span><span class="o">.</span><span class="n">xmin</span><span class="p">,</span> <span class="n">s_xmax</span><span class="o">.</span><span class="n">xmax</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">s_ns</span><span class="p">))</span>
+        <span class="k">return</span> <span class="p">[</span>
+            <span class="n">s</span><span class="o">.</span><span class="n">resampled</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">piecewise_constant</span><span class="o">=</span><span class="n">piecewise_constant</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">series</span>
+        <span class="p">]</span>
+
+    <span class="k">def</span> <span class="nf">float_intersection</span><span class="p">(</span><span class="n">array_1</span><span class="p">,</span> <span class="n">array_2</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Here we find the intersection between the two arrays also</span>
+<span class="sd">        considering the floating points.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># https://stackoverflow.com/a/32516182</span>
+        <span class="k">return</span> <span class="n">array_2</span><span class="p">[</span>
+            <span class="n">np</span><span class="o">.</span><span class="n">isclose</span><span class="p">(</span><span class="n">array_1</span><span class="p">[:,</span> <span class="kc">None</span><span class="p">],</span> <span class="n">array_2</span><span class="p">,</span> <span class="n">atol</span><span class="o">=</span><span class="mf">1e-14</span><span class="p">)</span><span class="o">.</span><span class="n">any</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+        <span class="p">]</span>
+
+    <span class="c1"># Here we find the common intersection between all the x, starting with</span>
+    <span class="c1"># the first one</span>
+    <span class="n">x</span> <span class="o">=</span> <span class="n">s1</span><span class="o">.</span><span class="n">x</span>
+    <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">s_others</span><span class="p">:</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="n">float_intersection</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">s</span><span class="o">.</span><span class="n">x</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Series do not have any point in common&quot;</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="p">[</span><span class="n">s</span><span class="o">.</span><span class="n">resampled</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">series</span><span class="p">]</span></div>
+</pre></div>
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="../../index.html">
+              <img class="logo" src="../../_static/logo.png" alt="Logo"/>
+            </a></p>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">kuibit 1.3.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../index.html" >Module code</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">kuibit.series</a></li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2020-2021, Gabriele Bozzola.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 3.5.4.
+    </div>
+  </body>
+</html>
