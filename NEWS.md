@@ -1,6 +1,6 @@
 # Changelog
 
-## Version 1.3.0 (Under development)
+## Version 1.3.0 (28 October 2021)
 
 #### `SimDir` can now be cached in pickle files
 
