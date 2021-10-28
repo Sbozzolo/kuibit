@@ -59,6 +59,8 @@ array of booleans that identifies the valid data.
 - Examples can now use pickles.
 - New CI workflow: linting.
 - New `First Steps` documentation page.
+- When a release is published, its documentation is saved to
+  `sbozzolo.github.io/kuibit/VERSION`
 
 #### Features
 
