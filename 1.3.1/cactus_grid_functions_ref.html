@@ -1,0 +1,619 @@
+
+
+<!doctype html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Reference on kuibit.cactus_grid_functions &#8212; kuibit 1.3.1 documentation</title>
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="_static/bizstyle.css" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="_static/css/custom.css" />
+    
+    <script id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/doctools.js"></script>
+    <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="_static/bizstyle.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Reference on kuibit.cactus_scalars" href="cactus_scalars_ref.html" />
+    <link rel="prev" title="Reference on kuibit.frequencyseries" href="frequencyseries_ref.html" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0" />
+    <!--[if lt IE 9]>
+    <script src="_static/css3-mediaqueries.js"></script>
+    <![endif]-->
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="cactus_scalars_ref.html" title="Reference on kuibit.cactus_scalars"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="frequencyseries_ref.html" title="Reference on kuibit.frequencyseries"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">kuibit 1.3.1 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">Reference on kuibit.cactus_grid_functions</a></li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="module-kuibit.cactus_grid_functions">
+<span id="reference-on-kuibit-cactus-grid-functions"></span><h1>Reference on kuibit.cactus_grid_functions<a class="headerlink" href="#module-kuibit.cactus_grid_functions" title="Permalink to this headline">¶</a></h1>
+<p>The <code class="xref py py-mod docutils literal notranslate"><span class="pre">cactus_grid</span></code> module provides functions to load grid function
+in Cactus formats.</p>
+<p>There are multiple classes defined in this module:</p>
+<ul class="simple">
+<li><p>:py:class`~.GridFunctionsDir` interfaces with <a class="reference internal" href="simdir_ref.html#kuibit.simdir.SimDir" title="kuibit.simdir.SimDir"><code class="xref py py-class docutils literal notranslate"><span class="pre">SimDir</span></code></a> and
+organizes the grid functions by dimensionality. This is a dictionary-like
+object with keys the possible dimensions (e.g., <code class="docutils literal notranslate"><span class="pre">x</span></code>, <code class="docutils literal notranslate"><span class="pre">yz</span></code>, <code class="docutils literal notranslate"><span class="pre">xyz</span></code>).</p></li>
+<li><p>:py:class`~.AllGridFunctions` takes all the files in SimDir and sort them
+according the different grid functions they contain.</p></li>
+<li><p>There are two :py:class`~.OneGridFunction` classes, one for HDF5 files and one
+for ASCII files. They describe one single grid function and they contains the
+files associated to that grid function. Both the classes are derived from the
+same abstract base class :py:class`~.OneGridFunctionBase`, which implements
+the shared methods.</p></li>
+</ul>
+<p>These are hierarchical classes, one containing the others, so one typically ends
+up with a series of brackets to access the actual data. For example, if <code class="docutils literal notranslate"><span class="pre">sim</span></code>
+is a <a class="reference internal" href="simdir_ref.html#kuibit.simdir.SimDir" title="kuibit.simdir.SimDir"><code class="xref py py-class docutils literal notranslate"><span class="pre">SimDir</span></code></a>, <code class="docutils literal notranslate"><span class="pre">sim.gf.xy['rho_b'][0]</span></code> is <code class="docutils literal notranslate"><span class="pre">rho_b</span></code> at iteration 0
+on the equatorial plane represented as <a class="reference internal" href="grid_data_ref.html#kuibit.grid_data.HierarchicalGridData" title="kuibit.grid_data.HierarchicalGridData"><code class="xref py py-class docutils literal notranslate"><span class="pre">HierarchicalGridData</span></code></a>.</p>
+<dl class="py class">
+<dt id="kuibit.cactus_grid_functions.AllGridFunctions">
+<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">kuibit.cactus_grid_functions.</span></code><code class="sig-name descname"><span class="pre">AllGridFunctions</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">allfiles</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dimension</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_ghost</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/kuibit/cactus_grid_functions.html#AllGridFunctions"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kuibit.cactus_grid_functions.AllGridFunctions" title="Permalink to this definition">¶</a></dt>
+<dd><p>Helper class to read various types of grid data in a list of files and
+properly order them. The core of this object is the <code class="docutils literal notranslate"><span class="pre">_vars</span></code> dictionary
+which contains the location of all the files for a specific variable and
+reduction.</p>
+<p><code class="xref py py-class docutils literal notranslate"><span class="pre">AllGridFunction</span></code> is a dictionary-like object with keys the
+various variables and values <a class="reference internal" href="#kuibit.cactus_grid_functions.BaseOneGridFunction" title="kuibit.cactus_grid_functions.BaseOneGridFunction"><code class="xref py py-class docutils literal notranslate"><span class="pre">BaseOneGridFunction</span></code></a> (or derived).</p>
+<p>You can access data with the bracket operator or as attributes of the
+<code class="docutils literal notranslate"><span class="pre">fields</span></code> attribute.</p>
+<p>Not intended for direct initialization.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Variables</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>dimension</strong> – Dimension associated to this object (e.g. (0, 1) would be the
+xy plane).</p></li>
+<li><p><a class="reference internal" href="#kuibit.cactus_grid_functions.AllGridFunctions.num_ghost" title="kuibit.cactus_grid_functions.AllGridFunctions.num_ghost"><strong>num_ghost</strong></a> – Number of ghost zones in each dimension.</p></li>
+</ul>
+</dd>
+</dl>
+<p>Constructor.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>allfiles</strong> (<em>list</em>) – List of all the files.</p></li>
+<li><p><strong>dimension</strong> (<em>tuple</em>) – Dimension associated to this object.</p></li>
+<li><p><strong>num_ghost</strong> (<em>list</em><em> or </em><em>tuple of the same length as the number of dimension</em>) – Number of ghost zones in the data for each dimension.
+This is used only for ASCII data.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt id="kuibit.cactus_grid_functions.AllGridFunctions.allfiles">
+<em class="property"><span class="pre">property</span> </em><code class="sig-name descname"><span class="pre">allfiles</span></code><a class="headerlink" href="#kuibit.cactus_grid_functions.AllGridFunctions.allfiles" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a set of all the files that have variables of the
+given dimension</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Collection of all the unique files with variables of
+this dimension.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>set</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="kuibit.cactus_grid_functions.AllGridFunctions.get">
+<code class="sig-name descname"><span class="pre">get</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">key</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">default</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/kuibit/cactus_grid_functions.html#AllGridFunctions.get"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kuibit.cactus_grid_functions.AllGridFunctions.get" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return variable <code class="docutils literal notranslate"><span class="pre">key</span></code>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>key</strong> (<em>str</em>) – Variable to read.</p></li>
+<li><p><strong>default</strong> (<em>anything</em>) – Value to return is variable is not available.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="kuibit.cactus_grid_functions.AllGridFunctions.keys">
+<code class="sig-name descname"><span class="pre">keys</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/kuibit/cactus_grid_functions.html#AllGridFunctions.keys"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kuibit.cactus_grid_functions.AllGridFunctions.keys" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the list of all the available variables.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="kuibit.cactus_grid_functions.AllGridFunctions.num_ghost">
+<em class="property"><span class="pre">property</span> </em><code class="sig-name descname"><span class="pre">num_ghost</span></code><a class="headerlink" href="#kuibit.cactus_grid_functions.AllGridFunctions.num_ghost" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the number of ghost zones along each direction.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Number of ghost zones along each direction.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>1d NumPy array</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="kuibit.cactus_grid_functions.AllGridFunctions.total_filesize">
+<code class="sig-name descname"><span class="pre">total_filesize</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">unit</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'MB'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/kuibit/cactus_grid_functions.html#AllGridFunctions.total_filesize"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kuibit.cactus_grid_functions.AllGridFunctions.total_filesize" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the total size of the files with this dimension.
+Available units B, KB, MB and GB (in power of 1024 bytes).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>unit</strong> (str among: <code class="docutils literal notranslate"><span class="pre">B</span></code>, <code class="docutils literal notranslate"><span class="pre">KB</span></code>, <code class="docutils literal notranslate"><span class="pre">MB</span></code>, <code class="docutils literal notranslate"><span class="pre">GB</span></code>.) – Unit to use (in powers of 1024 bytes).</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Total size of all the files associated with this dimension.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt id="kuibit.cactus_grid_functions.BaseOneGridFunction">
+<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">kuibit.cactus_grid_functions.</span></code><code class="sig-name descname"><span class="pre">BaseOneGridFunction</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">allfiles</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">var_name</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/kuibit/cactus_grid_functions.html#BaseOneGridFunction"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kuibit.cactus_grid_functions.BaseOneGridFunction" title="Permalink to this definition">¶</a></dt>
+<dd><p>Abstract class that implements capabilities to handle grid functions.</p>
+<p>This class is the parent class of <a class="reference internal" href="#kuibit.cactus_grid_functions.OneGridFunctionASCII" title="kuibit.cactus_grid_functions.OneGridFunctionASCII"><code class="xref py py-class docutils literal notranslate"><span class="pre">OneGridFunctionASCII</span></code></a> and
+<a class="reference internal" href="#kuibit.cactus_grid_functions.OneGridFunctionH5" title="kuibit.cactus_grid_functions.OneGridFunctionH5"><code class="xref py py-class docutils literal notranslate"><span class="pre">OneGridFunctionH5</span></code></a>. <a class="reference internal" href="#kuibit.cactus_grid_functions.BaseOneGridFunction" title="kuibit.cactus_grid_functions.BaseOneGridFunction"><code class="xref py py-class docutils literal notranslate"><span class="pre">BaseOneGridFunction</span></code></a>
+implements most methods, except the readers.</p>
+<p>The derived classes have to specify:</p>
+<ul class="simple">
+<li><p>How to read a file, populating the <code class="docutils literal notranslate"><span class="pre">self.alldata</span></code> dictionary
+(method <code class="docutils literal notranslate"><span class="pre">_parse_file</span></code>).</p></li>
+<li><p>How to populate the last level of <code class="docutils literal notranslate"><span class="pre">self.alldata</span></code> by returning
+a <a class="reference internal" href="grid_data_ref.html#kuibit.grid_data.UniformGridData" title="kuibit.grid_data.UniformGridData"><code class="xref py py-class docutils literal notranslate"><span class="pre">UniformGridData</span></code></a> for a given iteration and component
+(method <code class="docutils literal notranslate"><span class="pre">_read_componenent_as_uniform_grid</span></code>)</p></li>
+<li><p>How to associate an iteration with a time (method
+<code class="docutils literal notranslate"><span class="pre">time_at_iteration</span></code>).</p></li>
+</ul>
+<p>The simplest way to access data at a given iteration as
+<a class="reference internal" href="grid_data_ref.html#kuibit.grid_data.HierarchicalGridData" title="kuibit.grid_data.HierarchicalGridData"><code class="xref py py-class docutils literal notranslate"><span class="pre">HierarchicalGridData</span></code></a> is using the <code class="docutils literal notranslate"><span class="pre">[]</span></code> notation.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Variables</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><a class="reference internal" href="#kuibit.cactus_grid_functions.AllGridFunctions.allfiles" title="kuibit.cactus_grid_functions.AllGridFunctions.allfiles"><strong>allfiles</strong></a> – Paths of files associated to the variable.</p></li>
+<li><p><strong>alldata</strong> – Dictionary that organizes files and iterations available.</p></li>
+<li><p><strong>restarts_data</strong> – How iterations are distributed across files.</p></li>
+<li><p><strong>var_name</strong> – Variable name.</p></li>
+</ul>
+</dd>
+</dl>
+<p>Constructor.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>allfiles</strong> (<em>list of str</em>) – Paths of files associated to the variable.</p></li>
+<li><p><strong>var_name</strong> (<em>str</em>) – Variable name.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt id="kuibit.cactus_grid_functions.BaseOneGridFunction.available_iterations">
+<em class="property"><span class="pre">property</span> </em><code class="sig-name descname"><span class="pre">available_iterations</span></code><a class="headerlink" href="#kuibit.cactus_grid_functions.BaseOneGridFunction.available_iterations" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the available iterations.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>List with all the available iterations.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>list</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="kuibit.cactus_grid_functions.BaseOneGridFunction.available_times">
+<em class="property"><span class="pre">property</span> </em><code class="sig-name descname"><span class="pre">available_times</span></code><a class="headerlink" href="#kuibit.cactus_grid_functions.BaseOneGridFunction.available_times" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the available times.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>List with all the available times.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>list</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="kuibit.cactus_grid_functions.BaseOneGridFunction.get_iteration">
+<code class="sig-name descname"><span class="pre">get_iteration</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">iteration</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">default</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/kuibit/cactus_grid_functions.html#BaseOneGridFunction.get_iteration"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kuibit.cactus_grid_functions.BaseOneGridFunction.get_iteration" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the data at the given iteration as a <a class="reference internal" href="grid_data_ref.html#kuibit.grid_data.HierarchicalGridData" title="kuibit.grid_data.HierarchicalGridData"><code class="xref py py-class docutils literal notranslate"><span class="pre">HierarchicalGridData</span></code></a>.
+If the iteration is not available, return <code class="docutils literal notranslate"><span class="pre">default</span></code>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>iteration</strong> (<em>int</em>) – Iteration.</p></li>
+<li><p><strong>default</strong> (<em>anything</em>) – What to return if iteration is not available.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Variable at the given iteration as a
+<a class="reference internal" href="grid_data_ref.html#kuibit.grid_data.HierarchicalGridData" title="kuibit.grid_data.HierarchicalGridData"><code class="xref py py-class docutils literal notranslate"><span class="pre">HierarchicalGridData</span></code></a>.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="grid_data_ref.html#kuibit.grid_data.HierarchicalGridData" title="kuibit.grid_data.HierarchicalGridData"><code class="xref py py-class docutils literal notranslate"><span class="pre">HierarchicalGridData</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="kuibit.cactus_grid_functions.BaseOneGridFunction.get_time">
+<code class="sig-name descname"><span class="pre">get_time</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">time</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">default</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/kuibit/cactus_grid_functions.html#BaseOneGridFunction.get_time"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kuibit.cactus_grid_functions.BaseOneGridFunction.get_time" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the data at the given time as a <a class="reference internal" href="grid_data_ref.html#kuibit.grid_data.HierarchicalGridData" title="kuibit.grid_data.HierarchicalGridData"><code class="xref py py-class docutils literal notranslate"><span class="pre">HierarchicalGridData</span></code></a>.
+If the time is not available, return <code class="docutils literal notranslate"><span class="pre">default</span></code>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>iteration</strong> (<em>int</em>) – Iteration.</p></li>
+<li><p><strong>default</strong> (<em>anything</em>) – What to return if time is not available.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Variable at the given time as a
+<a class="reference internal" href="grid_data_ref.html#kuibit.grid_data.HierarchicalGridData" title="kuibit.grid_data.HierarchicalGridData"><code class="xref py py-class docutils literal notranslate"><span class="pre">HierarchicalGridData</span></code></a>.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="grid_data_ref.html#kuibit.grid_data.HierarchicalGridData" title="kuibit.grid_data.HierarchicalGridData"><code class="xref py py-class docutils literal notranslate"><span class="pre">HierarchicalGridData</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="kuibit.cactus_grid_functions.BaseOneGridFunction.iteration_at_time">
+<code class="sig-name descname"><span class="pre">iteration_at_time</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">time</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/kuibit/cactus_grid_functions.html#BaseOneGridFunction.iteration_at_time"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kuibit.cactus_grid_functions.BaseOneGridFunction.iteration_at_time" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the iteration that corresponds to the given time.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>time</strong> (<em>float</em>) – Time.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Iteration corresponding to the given time.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="kuibit.cactus_grid_functions.BaseOneGridFunction.iterations">
+<em class="property"><span class="pre">property</span> </em><code class="sig-name descname"><span class="pre">iterations</span></code><a class="headerlink" href="#kuibit.cactus_grid_functions.BaseOneGridFunction.iterations" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the available iterations.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>List with all the available iterations.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>list</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="kuibit.cactus_grid_functions.BaseOneGridFunction.max_iteration">
+<em class="property"><span class="pre">property</span> </em><code class="sig-name descname"><span class="pre">max_iteration</span></code><a class="headerlink" href="#kuibit.cactus_grid_functions.BaseOneGridFunction.max_iteration" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the maximum available iteration in the all the files.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Latest iteration available.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="kuibit.cactus_grid_functions.BaseOneGridFunction.min_iteration">
+<em class="property"><span class="pre">property</span> </em><code class="sig-name descname"><span class="pre">min_iteration</span></code><a class="headerlink" href="#kuibit.cactus_grid_functions.BaseOneGridFunction.min_iteration" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the minimum available iteration in the all the files.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>First iteration available.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="kuibit.cactus_grid_functions.BaseOneGridFunction.read_on_grid">
+<code class="sig-name descname"><span class="pre">read_on_grid</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">iteration</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">grid</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">resample</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/kuibit/cactus_grid_functions.html#BaseOneGridFunction.read_on_grid"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kuibit.cactus_grid_functions.BaseOneGridFunction.read_on_grid" title="Permalink to this definition">¶</a></dt>
+<dd><p>Read an iteration and resample the output on the specified grid.</p>
+<p>Warning: this can be computationally expensive!</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>iteration</strong> (<em>time</em>) – requested iteration</p></li>
+<li><p><strong>grid</strong> (<em>UniformGrid</em>) – </p></li>
+<li><p><strong>resample</strong> (<em>bool</em>) – Whether to use multilinear interpolation</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="kuibit.cactus_grid_functions.BaseOneGridFunction.restarts">
+<em class="property"><span class="pre">property</span> </em><code class="sig-name descname"><span class="pre">restarts</span></code><a class="headerlink" href="#kuibit.cactus_grid_functions.BaseOneGridFunction.restarts" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a list of tuples of the form <code class="docutils literal notranslate"><span class="pre">(iteration_min,</span> <span class="pre">iteration_max,</span> <span class="pre">paths)</span></code>
+with the minimum iterations and maximum iterations in each file
+associated to this variable. <code class="docutils literal notranslate"><span class="pre">paths</span></code> is a list of all the files with
+same <code class="docutils literal notranslate"><span class="pre">min_iteration</span></code> and <code class="docutils literal notranslate"><span class="pre">max_iteration</span></code> (as when we have 3d
+xyz_file files).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>List of tuples with first iteration, last iteration, and
+path for every file in <code class="docutils literal notranslate"><span class="pre">self.allfiles</span></code>.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>list of tuple (int, int, list of str)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="kuibit.cactus_grid_functions.BaseOneGridFunction.time_at_iteration">
+<em class="property"><span class="pre">abstract</span> </em><code class="sig-name descname"><span class="pre">time_at_iteration</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">iteration</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/kuibit/cactus_grid_functions.html#BaseOneGridFunction.time_at_iteration"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kuibit.cactus_grid_functions.BaseOneGridFunction.time_at_iteration" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the time at a given iteration.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>iteration</strong> (<em>int</em>) – Iteration.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Time.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="kuibit.cactus_grid_functions.BaseOneGridFunction.times">
+<em class="property"><span class="pre">property</span> </em><code class="sig-name descname"><span class="pre">times</span></code><a class="headerlink" href="#kuibit.cactus_grid_functions.BaseOneGridFunction.times" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the available times.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>List with all the available times.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>list</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="kuibit.cactus_grid_functions.BaseOneGridFunction.total_filesize">
+<code class="sig-name descname"><span class="pre">total_filesize</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">unit</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'MB'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/kuibit/cactus_grid_functions.html#BaseOneGridFunction.total_filesize"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kuibit.cactus_grid_functions.BaseOneGridFunction.total_filesize" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the total size of the files with this variable.
+Available units B, KB, MB and GB (in power of 1024 bytes).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>unit</strong> (str among: <code class="docutils literal notranslate"><span class="pre">B</span></code>, <code class="docutils literal notranslate"><span class="pre">KB</span></code>, <code class="docutils literal notranslate"><span class="pre">MB</span></code>, <code class="docutils literal notranslate"><span class="pre">GB</span></code>.) – Unit to use (in powers of 1024 bytes).</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Total size of the files associated to this variable.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt id="kuibit.cactus_grid_functions.GridFunctionsDir">
+<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">kuibit.cactus_grid_functions.</span></code><code class="sig-name descname"><span class="pre">GridFunctionsDir</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sd</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/kuibit/cactus_grid_functions.html#GridFunctionsDir"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kuibit.cactus_grid_functions.GridFunctionsDir" title="Permalink to this definition">¶</a></dt>
+<dd><p>This class provides access to all grid data.</p>
+<p>This includes 1D-3D data in HDF5 and ASCII formats. Data of the required
+dimensionality is read from any format available (HDF5 preferred over
+ASCII). If you need lower dimensional data, read the higher dimensional one
+and slice the data.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Variables</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>x</strong> – Access to 1D data along x-axis.</p></li>
+<li><p><strong>y</strong> – Access to 1D data along y-axis.</p></li>
+<li><p><strong>z</strong> – Access to 1D data along z-axis.</p></li>
+<li><p><strong>xy</strong> – Access to 2D data along xy-plane.</p></li>
+<li><p><strong>xz</strong> – Access to 2D data along xz-plane.</p></li>
+<li><p><strong>yz</strong> – Access to 2D data along yz-plane.</p></li>
+<li><p><strong>xyz</strong> – Access to 3D data.</p></li>
+</ul>
+</dd>
+</dl>
+<p>Constructor.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>sd</strong> (<a class="reference internal" href="simdir_ref.html#kuibit.simdir.SimDir" title="kuibit.simdir.SimDir"><code class="xref py py-class docutils literal notranslate"><span class="pre">SimDir</span></code></a>) – Simulation directory.</p>
+</dd>
+</dl>
+<dl class="py method">
+<dt id="kuibit.cactus_grid_functions.GridFunctionsDir.total_filesize">
+<code class="sig-name descname"><span class="pre">total_filesize</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">unit</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'MB'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/kuibit/cactus_grid_functions.html#GridFunctionsDir.total_filesize"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kuibit.cactus_grid_functions.GridFunctionsDir.total_filesize" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the total size of the grid data files.
+Available units B, KB, MB and GB (in power of 1024 bytes).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>unit</strong> (str among: <code class="docutils literal notranslate"><span class="pre">B</span></code>, <code class="docutils literal notranslate"><span class="pre">KB</span></code>, <code class="docutils literal notranslate"><span class="pre">MB</span></code>, <code class="docutils literal notranslate"><span class="pre">GB</span></code>.) – Unit to use (in powers of 1024 bytes).</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Total size of the grid data files.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt id="kuibit.cactus_grid_functions.OneGridFunctionASCII">
+<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">kuibit.cactus_grid_functions.</span></code><code class="sig-name descname"><span class="pre">OneGridFunctionASCII</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">allfiles</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">var_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_ghost</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/kuibit/cactus_grid_functions.html#OneGridFunctionASCII"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kuibit.cactus_grid_functions.OneGridFunctionASCII" title="Permalink to this definition">¶</a></dt>
+<dd><p>Read grid data produced by CarpetASCII.</p>
+<p>This class is derived from <a class="reference internal" href="#kuibit.cactus_grid_functions.BaseOneGridFunction" title="kuibit.cactus_grid_functions.BaseOneGridFunction"><code class="xref py py-class docutils literal notranslate"><span class="pre">BaseOneGridFunction</span></code></a> and implements
+the reading facilities.</p>
+<p><a class="reference internal" href="#kuibit.cactus_grid_functions.OneGridFunctionASCII" title="kuibit.cactus_grid_functions.OneGridFunctionASCII"><code class="xref py py-class docutils literal notranslate"><span class="pre">OneGridFunctionASCII</span></code></a> can read 1D, 2D, and 3D ASCII files, even
+when they are compressed with bzip2 or gzip.</p>
+<p>ASCII files do not contain information about the ghost zones, but this can be
+set “by hand”.</p>
+<p>Constructor.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>allfiles</strong> (<em>list of str</em>) – Paths of files associated to the variable.</p></li>
+<li><p><strong>var_name</strong> (<em>str</em>) – Variable name.</p></li>
+<li><p><strong>num_ghost</strong> (<em>1d NumPy array</em>) – Number of ghost zones in each direction.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt id="kuibit.cactus_grid_functions.OneGridFunctionASCII.time_at_iteration">
+<code class="sig-name descname"><span class="pre">time_at_iteration</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">iteration</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/kuibit/cactus_grid_functions.html#OneGridFunctionASCII.time_at_iteration"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kuibit.cactus_grid_functions.OneGridFunctionASCII.time_at_iteration" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the time at a given iteration.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>iteration</strong> (<em>int</em>) – Iteration.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Time at given iteration.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt id="kuibit.cactus_grid_functions.OneGridFunctionH5">
+<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">kuibit.cactus_grid_functions.</span></code><code class="sig-name descname"><span class="pre">OneGridFunctionH5</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">allfiles</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">var_name</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/kuibit/cactus_grid_functions.html#OneGridFunctionH5"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kuibit.cactus_grid_functions.OneGridFunctionH5" title="Permalink to this definition">¶</a></dt>
+<dd><p>Read grid data produced by CarpetHDF5 files.</p>
+<p>This class is derived from <a class="reference internal" href="#kuibit.cactus_grid_functions.BaseOneGridFunction" title="kuibit.cactus_grid_functions.BaseOneGridFunction"><code class="xref py py-class docutils literal notranslate"><span class="pre">BaseOneGridFunction</span></code></a> and implements
+the reading facilities.</p>
+<p>Constructor.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>allfiles</strong> (<em>list of str</em>) – Paths of files associated to the variable.</p></li>
+<li><p><strong>var_name</strong> (<em>str</em>) – Variable name.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt id="kuibit.cactus_grid_functions.OneGridFunctionH5.clear_cache">
+<code class="sig-name descname"><span class="pre">clear_cache</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/kuibit/cactus_grid_functions.html#OneGridFunctionH5.clear_cache"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kuibit.cactus_grid_functions.OneGridFunctionH5.clear_cache" title="Permalink to this definition">¶</a></dt>
+<dd><p>Remove all the cached entries.</p>
+<p>Every time a component is read, <code class="xref py py-class docutils literal notranslate"><span class="pre">OneGridFunctionsH5</span></code> caches
+its value (reading can be expensive). In certain cases, this can lead to
+an explosion in the size of this object. For example, when reading
+several iterations to make a movie. This method removes all the cached
+entries, keeping the size of the object under control.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="kuibit.cactus_grid_functions.OneGridFunctionH5.time_at_iteration">
+<code class="sig-name descname"><span class="pre">time_at_iteration</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">iteration</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/kuibit/cactus_grid_functions.html#OneGridFunctionH5.time_at_iteration"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kuibit.cactus_grid_functions.OneGridFunctionH5.time_at_iteration" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the time corresponding to the provided iteration.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>iteration</strong> (<em>int</em>) – Iteration.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Time corresponding to <code class="docutils literal notranslate"><span class="pre">iteration</span></code>.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="index.html">
+              <img class="logo" src="_static/logo.png" alt="Logo"/>
+            </a></p>
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="frequencyseries_ref.html"
+                        title="previous chapter">Reference on kuibit.frequencyseries</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="cactus_scalars_ref.html"
+                        title="next chapter">Reference on kuibit.cactus_scalars</a></p>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="cactus_scalars_ref.html" title="Reference on kuibit.cactus_scalars"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="frequencyseries_ref.html" title="Reference on kuibit.frequencyseries"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">kuibit 1.3.1 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">Reference on kuibit.cactus_grid_functions</a></li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2020-2021, Gabriele Bozzola.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 3.5.4.
+    </div>
+  </body>
+</html>
