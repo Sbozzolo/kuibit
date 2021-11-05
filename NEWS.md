@@ -1,5 +1,11 @@
 # Changelog
 
+## Version 1.3.1 (4 November 2021)
+
+#### Bug fixes
+
+- `h5py >= 3` is now supported
+
 ## Version 1.3.0 (28 October 2021)
 
 #### `SimDir` can now be cached in pickle files
