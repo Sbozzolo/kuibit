@@ -466,9 +466,10 @@ class GravitationalWavesOneDet(mp.MultipoleOneDet):
                      Typically, the longest physical period in the signal.
         :type pcut: float
 
-        :returns: Energy lost up to the time t in the mode ``(l, m)`` as a function of
-                  time.
+        :returns: Energy lost up to the time t in the mode ``(l, m)`` as a
+                  function of time.
         :rtype: :py:class:`~TimeSeries`
+
         """
         return self.get_power_lm(mult_l, mult_m, pcut).integrated()
 
@@ -523,7 +524,7 @@ class GravitationalWavesOneDet(mp.MultipoleOneDet):
 
         """
         # This is what we are going to implement
-        # The foruma is dJ/dt = r**2/16pi m (dot(A)B - dot(B)*A)
+        # The formula is dJ/dt = r**2/16pi m (dot(A)B - dot(B)*A)
         # where ddot(A) = psi4.real and ddot(B) = -psi4.imag
         # So, A - i B = \int\int psi4, and
         # dot(A) - i dot(B) = \int psi4
