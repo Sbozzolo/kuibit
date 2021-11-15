@@ -8,8 +8,8 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        # python-version: [ '3.6', '3.9' ]
-        python-version: [ '3.6' ]
+        python-version: [ '3.6', '3.9' ]
+        # python-version: [ '3.6' ]
 
     steps:
       - uses: actions/checkout@v2
@@ -36,11 +36,7 @@ jobs:
 
       - name: Install Dependencies
         run: |
-          poetry run pip3 install "vtk==8.1.2"
-          poetry run pip3 install numpy
-          poetry run pip3 install mayavi
           poetry install -E full
-          poetry run pip3 install "vtk==8.1.2"
         if: steps.cached-poetry-dependencies.outputs.cache-hit != 'true'
 
       - name: Tests and produce coverage

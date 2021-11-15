@@ -5,6 +5,7 @@
 #### Bug fixes
 
 - Examples with `plot_components_boundaries` now respect axes limits
+- Improved support to installing `mayavi`
 
 ## Version 1.3.1 (4 November 2021)
 
