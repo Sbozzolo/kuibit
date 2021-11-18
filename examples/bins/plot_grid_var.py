@@ -27,6 +27,7 @@ from kuibit.visualize_matplotlib import (
     plot_components_boundaries,
     plot_horizon_on_plane_at_iteration,
     save_from_dir_filename_ext,
+    set_axis_limits,
     setup_matplotlib,
 )
 
@@ -198,6 +199,8 @@ This is much faster but it is not as accurate."""
             plot_components_boundaries(
                 data, edgecolor=args.rl_edge_color, alpha=args.rl_alpha
             )
+
+        set_axis_limits(xmin=x0[0], xmax=x1[0], ymin=x0[1], ymax=x1[1])
 
         logger.debug("Plotted")
 

@@ -1,5 +1,11 @@
 # Changelog
 
+## Version 1.3.2 (16 November 2021)
+
+#### Bug fixes
+
+- Examples with `plot_components_boundaries` now respect axes limits
+
 ## Version 1.3.1 (4 November 2021)
 
 #### Bug fixes
