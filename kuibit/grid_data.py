@@ -1124,7 +1124,9 @@ class UniformGridData(BaseNumerical):
                        or odd (parity = -1).
         :type parity: 1 or -1
         """
-        self._apply_to_self(self.reflection_symmetry_undone, dimension)
+        self._apply_to_self(
+            self.reflection_symmetry_undone, dimension, parity=parity
+        )
 
     def dx_changed(self, new_dx, piecewise_constant=False):
         """Return a new :py:class:`UniformGridData` with the same grid extent, but with
