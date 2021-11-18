@@ -6,6 +6,7 @@
 
 - Examples with `plot_components_boundaries` now respect axes limits
 - Improved support to installing `mayavi`
+- `Python 3.10` is now supported (with exception of `numba`)
 
 ## Version 1.3.1 (4 November 2021)
 
