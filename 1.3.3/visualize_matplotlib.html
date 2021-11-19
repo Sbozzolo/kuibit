@@ -1,0 +1,338 @@
+
+
+<!doctype html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Visualizing data with matplotlib &#8212; kuibit 1.3.3 documentation</title>
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="_static/bizstyle.css" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="_static/css/custom.css" />
+    
+    <script id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/doctools.js"></script>
+    <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="_static/bizstyle.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Building command-line scripts" href="argparse_helper.html" />
+    <link rel="prev" title="Unit conversion and constants" href="unitconv.html" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0" />
+    <!--[if lt IE 9]>
+    <script src="_static/css3-mediaqueries.js"></script>
+    <![endif]-->
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="argparse_helper.html" title="Building command-line scripts"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="unitconv.html" title="Unit conversion and constants"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">kuibit 1.3.3 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">Visualizing data with matplotlib</a></li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="visualizing-data-with-matplotlib">
+<h1>Visualizing data with matplotlib<a class="headerlink" href="#visualizing-data-with-matplotlib" title="Permalink to this headline">¶</a></h1>
+<p>The module <a class="reference internal" href="visualize_matplotlib_ref.html#module-kuibit.visualize_matplotlib" title="kuibit.visualize_matplotlib"><code class="xref py py-mod docutils literal notranslate"><span class="pre">visualize_matplotlib</span></code></a> contains functions to easily
+visualize Einstein Toolkit data with <code class="docutils literal notranslate"><span class="pre">matplotlib</span></code>
+(<a class="reference internal" href="visualize_matplotlib_ref.html#module-kuibit.visualize_matplotlib"><span class="std std-ref">Reference on kuibit.visualize_matplotlib</span></a>).</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Visualizations are a subjective matter: different people have different
+tastes, and it is impossible to have one-size-fits-all solutions.
+<a class="reference internal" href="visualize_matplotlib_ref.html#module-kuibit.visualize_matplotlib" title="kuibit.visualize_matplotlib"><code class="xref py py-mod docutils literal notranslate"><span class="pre">visualize_matplotlib</span></code></a> comes with convenient functions to quickly
+visualize data, but the module has default values that are opinionated. Where
+possible, customization has been exposed for your convenience. However, some
+settings and choices cannot be changed.</p>
+</div>
+<div class="section" id="series">
+<h2>Series<a class="headerlink" href="#series" title="Permalink to this headline">¶</a></h2>
+<p>Time and frequency series in <code class="docutils literal notranslate"><span class="pre">kuibit</span></code> can be plotted with <code class="docutils literal notranslate"><span class="pre">matplotlib</span></code>
+native functions. For example,</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Assuming rho_b is a TimeSeries</span>
+
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">rho_b</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="grid-functions">
+<h2>Grid functions<a class="headerlink" href="#grid-functions" title="Permalink to this headline">¶</a></h2>
+<p>The main way to visualize grid data is with the functions <code class="xref py py-mod docutils literal notranslate"><span class="pre">plot_color</span></code>
+and <code class="xref py py-mod docutils literal notranslate"><span class="pre">plot_contourf</span></code>. The first plots directly the values of the given
+data, the second plots contours (filled). The functions support a large variety
+of inputs:</p>
+<ul class="simple">
+<li><p>NumPy arrays, with coordintes specified by the <code class="docutils literal notranslate"><span class="pre">coordinates</span></code> keyword.</p></li>
+<li><p><a class="reference internal" href="grid_data_ref.html#kuibit.grid_data.UniformGridData" title="kuibit.grid_data.UniformGridData"><code class="xref py py-class docutils literal notranslate"><span class="pre">UniformGridData</span></code></a>: it will be plotted over the entire domain,
+unless the keywords <code class="docutils literal notranslate"><span class="pre">x0</span></code>, <code class="docutils literal notranslate"><span class="pre">x1</span></code> and <code class="docutils literal notranslate"><span class="pre">shape</span></code> are provided. These
+specify the extent of the grid to be plotted. <code class="docutils literal notranslate"><span class="pre">shape</span></code> is essentially the
+resolution of the plot. See documentation on grid data for details.</p></li>
+<li><p><a class="reference internal" href="grid_data_ref.html#kuibit.grid_data.HierarchicalGridData" title="kuibit.grid_data.HierarchicalGridData"><code class="xref py py-class docutils literal notranslate"><span class="pre">HierarchicalGridData</span></code></a>: it will be plotted over the entire domain,
+with resolution provided by <code class="docutils literal notranslate"><span class="pre">shape</span></code>. The keywords <code class="docutils literal notranslate"><span class="pre">x0</span></code>, <code class="docutils literal notranslate"><span class="pre">x1</span></code> can change
+the grid extent.</p></li>
+<li><p><a class="reference internal" href="cactus_grid_functions_ref.html#kuibit.cactus_grid_functions.BaseOneGridFunction" title="kuibit.cactus_grid_functions.BaseOneGridFunction"><code class="xref py py-class docutils literal notranslate"><span class="pre">BaseOneGridFunction</span></code></a>: same as <a class="reference internal" href="grid_data_ref.html#kuibit.grid_data.HierarchicalGridData" title="kuibit.grid_data.HierarchicalGridData"><code class="xref py py-class docutils literal notranslate"><span class="pre">HierarchicalGridData</span></code></a>,
+but you also have to provide the iteration with the <code class="docutils literal notranslate"><span class="pre">iteration</span></code> keyword.</p></li>
+</ul>
+<p>A table at the end of this document sums up these options. <code class="docutils literal notranslate"><span class="pre">shape</span></code>, <code class="docutils literal notranslate"><span class="pre">x0</span></code>,
+<code class="docutils literal notranslate"><span class="pre">x1</span></code> are all 2D lists or tuples.</p>
+<p>The functions take additional arguments (for example, the labels for the axes).
+Details can be found in the reference material
+(<a class="reference internal" href="visualize_matplotlib_ref.html#module-kuibit.visualize_matplotlib"><span class="std std-ref">Reference on kuibit.visualize_matplotlib</span></a>).</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>Mask information will be lost upon resampling. If you want masks, you need to
+provide the <a class="reference internal" href="grid_data_ref.html#kuibit.grid_data.UniformGridData" title="kuibit.grid_data.UniformGridData"><code class="xref py py-class docutils literal notranslate"><span class="pre">UniformGridData</span></code></a> you want to plot.</p>
+</div>
+<p>Plots can be enanched by adding a colorbar with <code class="xref py py-mod docutils literal notranslate"><span class="pre">plot_colorbar</span></code> (or
+passing the <code class="docutils literal notranslate"><span class="pre">colorbar</span></code> option).</p>
+<p>The function <a class="reference internal" href="visualize_matplotlib_ref.html#kuibit.visualize_matplotlib.plot_contour" title="kuibit.visualize_matplotlib.plot_contour"><code class="xref py py-func docutils literal notranslate"><span class="pre">plot_contour()</span></code></a> plots the contours without filling. It
+requires the number of levels, or an array that specify where the levels are.</p>
+<p>With <code class="xref py py-func docutils literal notranslate"><span class="pre">plot_components_boundaries()</span></code>, you can plot the grid structure.
+The function takes a <a class="reference internal" href="grid_data_ref.html#kuibit.grid_data.HierarchicalGridData" title="kuibit.grid_data.HierarchicalGridData"><code class="xref py py-class docutils literal notranslate"><span class="pre">HierarchicalGridData</span></code></a> as argument as plots its
+grid structure. By defaults, ghost zones are not included, but they can be
+passing <code class="docutils literal notranslate"><span class="pre">remove_ghosts=False</span></code>. The function plots the boundaries of the single
+components, but when multiple components can be merged into a single refinement
+level, then only the outer boundary is plotted (a notable case in which this is
+currently not possible is when there are multiple refinement centers).</p>
+</div>
+<div class="section" id="horizons">
+<h2>Horizons<a class="headerlink" href="#horizons" title="Permalink to this headline">¶</a></h2>
+<p>Apparent horizons can be plotted with <code class="xref py py-func docutils literal notranslate"><span class="pre">plot_horizon()</span></code>. This
+function takes the 2D shape of an horizon as returned by
+<a class="reference internal" href="cactus_horizons_ref.html#kuibit.cactus_horizons.OneHorizon.shape_outline_at_iteration" title="kuibit.cactus_horizons.OneHorizon.shape_outline_at_iteration"><code class="xref py py-meth docutils literal notranslate"><span class="pre">shape_outline_at_iteration()</span></code></a> or <a class="reference internal" href="cactus_horizons_ref.html#kuibit.cactus_horizons.OneHorizon.shape_outline_at_time" title="kuibit.cactus_horizons.OneHorizon.shape_outline_at_time"><code class="xref py py-meth docutils literal notranslate"><span class="pre">shape_outline_at_time()</span></code></a>.
+There are two wrappers around this function to simplify plotting horizons on the
+usual planes <code class="docutils literal notranslate"><span class="pre">xy</span></code>, <code class="docutils literal notranslate"><span class="pre">xz</span></code>, and <code class="docutils literal notranslate"><span class="pre">yz</span></code>:
+<code class="xref py py-func docutils literal notranslate"><span class="pre">plot_horizon_on_plane_at_iteration()</span></code> and
+<code class="xref py py-func docutils literal notranslate"><span class="pre">plot_horizon_on_plane_at_time()</span></code>. These take an
+<a class="reference internal" href="cactus_horizons_ref.html#kuibit.cactus_horizons.OneHorizon" title="kuibit.cactus_horizons.OneHorizon"><code class="xref py py-class docutils literal notranslate"><span class="pre">OneHorizon</span></code></a> object, the iteration/time that has to be plotted, and
+the plane over which you are plotting. All these functions take also the color
+of the horizon, the color of its boundary, and the opacity (<code class="docutils literal notranslate"><span class="pre">alpha</span></code>).</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>When you take a cross section (an outline) of an horizon, <code class="docutils literal notranslate"><span class="pre">kuibit</span></code> finds
+points that are within a threshold to the plane that cuts the surface.
+However, the way points are distributed on apparent horizons is highly
+non-uniform. So, if you are cutting the horizon along an axis that is not one
+of the coordinate ones (for the horizon), it is likely that too few points
+will be close enough to the intersecting plane, resulting in a malformed or
+absent outline. In some distant future, <code class="docutils literal notranslate"><span class="pre">kuibit</span></code> will perform
+interpolations to solve this problem.</p>
+</div>
+</div>
+<div class="section" id="other-utilities">
+<h2>Other utilities<a class="headerlink" href="#other-utilities" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="setup-matplotlib">
+<h3>setup_matplotlib<a class="headerlink" href="#setup-matplotlib" title="Permalink to this headline">¶</a></h3>
+<p>The default settings in <code class="docutils literal notranslate"><span class="pre">matplotlib</span></code> are not great (e.g., the text is
+typically too small). The function <a class="reference internal" href="visualize_matplotlib_ref.html#kuibit.visualize_matplotlib.setup_matplotlib" title="kuibit.visualize_matplotlib.setup_matplotlib"><code class="xref py py-func docutils literal notranslate"><span class="pre">setup_matplotlib()</span></code></a> sets some
+better defaults. Since “better” is relative, the function takes an optional
+argument <code class="docutils literal notranslate"><span class="pre">params</span></code>. This has to be dictionary with keys the parameters in
+<code class="docutils literal notranslate"><span class="pre">matplotlib</span></code> and values their new values. This can be used to override some of
+the defaults in <a class="reference internal" href="visualize_matplotlib_ref.html#kuibit.visualize_matplotlib.setup_matplotlib" title="kuibit.visualize_matplotlib.setup_matplotlib"><code class="xref py py-func docutils literal notranslate"><span class="pre">setup_matplotlib()</span></code></a>.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The function <a class="reference internal" href="visualize_matplotlib_ref.html#kuibit.visualize_matplotlib.setup_matplotlib" title="kuibit.visualize_matplotlib.setup_matplotlib"><code class="xref py py-func docutils literal notranslate"><span class="pre">setup_matplotlib()</span></code></a> simply updates the settings in
+<code class="docutils literal notranslate"><span class="pre">matplotlib</span></code>. It does not have any other effect.</p>
+</div>
+</div>
+<div class="section" id="add-text-to-corner">
+<h3>add_text_to_corner<a class="headerlink" href="#add-text-to-corner" title="Permalink to this headline">¶</a></h3>
+<p>The function <code class="xref py py-func docutils literal notranslate"><span class="pre">add_text_to_corner()</span></code> annotates a figure adding a label.
+The location of the label can be specified with the <code class="docutils literal notranslate"><span class="pre">node</span></code> argument. This is
+identified with cardinal point (N,S,W, or E) or a combination of two of them.
+For example, the default behavior is to place the text in the bottom right
+corner (corresponding to South-East–SE). The distance from the border can also
+be customized by passing the <code class="docutils literal notranslate"><span class="pre">offset</span></code> argument.</p>
+</div>
+<div class="section" id="save">
+<h3>save<a class="headerlink" href="#save" title="Permalink to this headline">¶</a></h3>
+<p>The <code class="xref py py-func docutils literal notranslate"><span class="pre">save()</span></code> function saves the figure to file. The function takes the
+path of the output and saves the current figure. If the file has extension
+<code class="docutils literal notranslate"><span class="pre">.tikz</span></code>, then <code class="docutils literal notranslate"><span class="pre">tikzplotlib</span></code> instead of <code class="docutils literal notranslate"><span class="pre">matplotlib</span></code> is used to save the
+figure. This results in a PGFPlots/TikZ ASCII file ready to be compiled with
+LaTeX.</p>
+</div>
+<div class="section" id="preprocess-plot-and-preprocess-plot-grid">
+<h3>preprocess_plot and preprocess_plot_grid<a class="headerlink" href="#preprocess-plot-and-preprocess-plot-grid" title="Permalink to this headline">¶</a></h3>
+<p><a class="reference internal" href="visualize_matplotlib_ref.html#kuibit.visualize_matplotlib.preprocess_plot" title="kuibit.visualize_matplotlib.preprocess_plot"><code class="xref py py-func docutils literal notranslate"><span class="pre">preprocess_plot()</span></code></a> and <a class="reference internal" href="visualize_matplotlib_ref.html#kuibit.visualize_matplotlib.preprocess_plot_grid" title="kuibit.visualize_matplotlib.preprocess_plot_grid"><code class="xref py py-func docutils literal notranslate"><span class="pre">preprocess_plot_grid()</span></code></a> are two
+decorators. The first one adds support for passing <code class="docutils literal notranslate"><span class="pre">figure</span></code> and <code class="docutils literal notranslate"><span class="pre">axis</span></code> to a
+function. Let us see how it works:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">kuibit.visualize_matplotlib</span> <span class="kn">import</span> <span class="n">preprocess_plot</span>
+
+<span class="nd">@preprocess_plot</span>
+<span class="k">def</span> <span class="nf">my_plot</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">figure</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="c1"># My plotting, for example</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>What <a class="reference internal" href="visualize_matplotlib_ref.html#kuibit.visualize_matplotlib.preprocess_plot" title="kuibit.visualize_matplotlib.preprocess_plot"><code class="xref py py-func docutils literal notranslate"><span class="pre">preprocess_plot()</span></code></a> is the following: if the user provides
+<code class="docutils literal notranslate"><span class="pre">figure</span></code> and/or <code class="docutils literal notranslate"><span class="pre">axis</span></code>, then those are used. If the user does not provide
+those arguments, then the current one are used. This is roughly equivalent to
+checking if <code class="docutils literal notranslate"><span class="pre">figure</span> <span class="pre">is</span> <span class="pre">None</span></code> and if it is, then set <code class="docutils literal notranslate"><span class="pre">figure</span> <span class="pre">=</span> <span class="pre">plt.gcf()</span></code>.</p>
+<p>The second decorator is <a class="reference internal" href="visualize_matplotlib_ref.html#kuibit.visualize_matplotlib.preprocess_plot_grid" title="kuibit.visualize_matplotlib.preprocess_plot_grid"><code class="xref py py-func docutils literal notranslate"><span class="pre">preprocess_plot_grid()</span></code></a>. With this, you can
+forget about all the classes defined in <code class="docutils literal notranslate"><span class="pre">kuibit</span></code> and simply plot NumPy arrays.
+In more details: when you work with <code class="docutils literal notranslate"><span class="pre">kuibit</span></code>, you will typically work with
+<a class="reference internal" href="grid_data_ref.html#kuibit.grid_data.HierarchicalGridData" title="kuibit.grid_data.HierarchicalGridData"><code class="xref py py-class docutils literal notranslate"><span class="pre">HierarchicalGridData</span></code></a> and <a class="reference internal" href="grid_data_ref.html#kuibit.grid_data.UniformGridData" title="kuibit.grid_data.UniformGridData"><code class="xref py py-class docutils literal notranslate"><span class="pre">UniformGridData</span></code></a>. These are
+complex structures that cannot be plotted immediately. The decorator
+<a class="reference internal" href="visualize_matplotlib_ref.html#kuibit.visualize_matplotlib.preprocess_plot_grid" title="kuibit.visualize_matplotlib.preprocess_plot_grid"><code class="xref py py-func docutils literal notranslate"><span class="pre">preprocess_plot_grid()</span></code></a> takes care of all the boilerplate needed to
+work with those two classes so that the user can provide a
+<code class="xref py py-class docutils literal notranslate"><span class="pre">OneGridFunction</span></code>, <a class="reference internal" href="grid_data_ref.html#kuibit.grid_data.UniformGridData" title="kuibit.grid_data.UniformGridData"><code class="xref py py-class docutils literal notranslate"><span class="pre">UniformGridData</span></code></a>, a
+<a class="reference internal" href="grid_data_ref.html#kuibit.grid_data.HierarchicalGridData" title="kuibit.grid_data.HierarchicalGridData"><code class="xref py py-class docutils literal notranslate"><span class="pre">HierarchicalGridData</span></code></a>, or a NumPy array. Let us see how it works:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">kuibit.visualize_matplotlib</span> <span class="kn">import</span> <span class="n">preprocess_plot_grid</span>
+
+<span class="nd">@preprocess_plot_grid</span>
+<span class="k">def</span> <span class="nf">my_plot</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">coordinates</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">figure</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="c1"># My plotting, for example</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+
+<span class="c1"># bob here is a H5OneGridFunction</span>
+
+<span class="c1"># Some of the arguments are optional</span>
+<span class="n">my_plot</span><span class="p">(</span><span class="n">bob</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="p">[</span><span class="mi">500</span><span class="p">,</span> <span class="mi">500</span><span class="p">],</span> <span class="n">iteration</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">x0</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">x1</span><span class="o">=</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">])</span>
+
+<span class="c1"># rho_b here is a HierarchicalGridData</span>
+
+<span class="c1"># Some of the arguments are optional</span>
+<span class="n">my_plot</span><span class="p">(</span><span class="n">rho_b</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="p">[</span><span class="mi">500</span><span class="p">,</span> <span class="mi">500</span><span class="p">],</span> <span class="n">x0</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">x1</span><span class="o">=</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">])</span>
+
+<span class="c1"># press here is a UniformGridData</span>
+
+<span class="c1"># Some of the arguments are optional</span>
+<span class="n">my_plot</span><span class="p">(</span><span class="n">press</span><span class="p">,</span> <span class="n">x0</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">])</span>
+
+<span class="c1"># eps here is a NumPy array</span>
+<span class="n">my_plot</span><span class="p">(</span><span class="n">eps</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Depending on the type of object passed, additional arguments might be needed.
+See table below for details.</p>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 30%" />
+<col style="width: 23%" />
+<col style="width: 22%" />
+<col style="width: 25%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Type</p></th>
+<th class="head" colspan="2"><p>Arguments needed</p></th>
+<th class="head"><p>Arguments supported</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><a class="reference internal" href="cactus_grid_functions_ref.html#kuibit.cactus_grid_functions.BaseOneGridFunction" title="kuibit.cactus_grid_functions.BaseOneGridFunction"><code class="xref py py-class docutils literal notranslate"><span class="pre">BaseOneGridFunction</span></code></a></p></td>
+<td colspan="2"><p><code class="docutils literal notranslate"><span class="pre">iteration</span></code>, <code class="docutils literal notranslate"><span class="pre">shape</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">x0</span></code>, <code class="docutils literal notranslate"><span class="pre">x1</span></code>, <code class="docutils literal notranslate"><span class="pre">resample</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="grid_data_ref.html#kuibit.grid_data.HierarchicalGridData" title="kuibit.grid_data.HierarchicalGridData"><code class="xref py py-class docutils literal notranslate"><span class="pre">HierarchicalGridData</span></code></a></p></td>
+<td colspan="2"><p><code class="docutils literal notranslate"><span class="pre">shape</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">x0</span></code>, <code class="docutils literal notranslate"><span class="pre">x1</span></code>, <code class="docutils literal notranslate"><span class="pre">resample</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="grid_data_ref.html#kuibit.grid_data.UniformGridData" title="kuibit.grid_data.UniformGridData"><code class="xref py py-class docutils literal notranslate"><span class="pre">UniformGridData</span></code></a></p></td>
+<td colspan="2"><p><code class="docutils literal notranslate"><span class="pre">shape</span></code> (if <code class="docutils literal notranslate"><span class="pre">x0</span></code> or <code class="docutils literal notranslate"><span class="pre">x1</span></code> are passed)</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">x0</span></code>, <code class="docutils literal notranslate"><span class="pre">x1</span></code>, <code class="docutils literal notranslate"><span class="pre">resample</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p>2D NumPy array</p></td>
+<td colspan="2"><p><code class="docutils literal notranslate"><span class="pre">coordinates</span></code> (depending on the specific function)</p></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="index.html">
+              <img class="logo" src="_static/logo.png" alt="Logo"/>
+            </a></p>
+  <h3><a href="index.html">Table of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Visualizing data with matplotlib</a><ul>
+<li><a class="reference internal" href="#series">Series</a></li>
+<li><a class="reference internal" href="#grid-functions">Grid functions</a></li>
+<li><a class="reference internal" href="#horizons">Horizons</a></li>
+<li><a class="reference internal" href="#other-utilities">Other utilities</a><ul>
+<li><a class="reference internal" href="#setup-matplotlib">setup_matplotlib</a></li>
+<li><a class="reference internal" href="#add-text-to-corner">add_text_to_corner</a></li>
+<li><a class="reference internal" href="#save">save</a></li>
+<li><a class="reference internal" href="#preprocess-plot-and-preprocess-plot-grid">preprocess_plot and preprocess_plot_grid</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="unitconv.html"
+                        title="previous chapter">Unit conversion and constants</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="argparse_helper.html"
+                        title="next chapter">Building command-line scripts</a></p>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="argparse_helper.html" title="Building command-line scripts"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="unitconv.html" title="Unit conversion and constants"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">kuibit 1.3.3 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">Visualizing data with matplotlib</a></li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2020-2021, Gabriele Bozzola.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 3.5.4.
+    </div>
+  </body>
+</html>

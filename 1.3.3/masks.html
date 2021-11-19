@@ -1,0 +1,215 @@
+
+
+<!doctype html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Masking invalid data &#8212; kuibit 1.3.3 documentation</title>
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="_static/bizstyle.css" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="_static/css/custom.css" />
+    
+    <script id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/doctools.js"></script>
+    <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="_static/bizstyle.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Gravitational-wave utilities" href="gw_utils.html" />
+    <link rel="prev" title="Gravitational waves" href="cactus_waves.html" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0" />
+    <!--[if lt IE 9]>
+    <script src="_static/css3-mediaqueries.js"></script>
+    <![endif]-->
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="gw_utils.html" title="Gravitational-wave utilities"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="cactus_waves.html" title="Gravitational waves"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">kuibit 1.3.3 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">Masking invalid data</a></li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="masking-invalid-data">
+<h1>Masking invalid data<a class="headerlink" href="#masking-invalid-data" title="Permalink to this headline">¶</a></h1>
+<p>It is often useful to ignore specific pieces of data. For example, it is wise to
+exclude the atmosphere when we compute the maximum temperature GRMHD
+simulations. For this, <code class="docutils literal notranslate"><span class="pre">kuibit</span></code> inherits from NumPy the concept of masks:
+masked data carries along the information of where the data is valid and where
+it is not. In <code class="docutils literal notranslate"><span class="pre">kuibit</span></code>, classes derived from <code class="xref py py-class docutils literal notranslate"><span class="pre">BaseNumerical</span></code>
+(mainly, <a class="reference internal" href="timeseries_ref.html#kuibit.timeseries.TimeSeries" title="kuibit.timeseries.TimeSeries"><code class="xref py py-class docutils literal notranslate"><span class="pre">TimeSeries</span></code></a>, <a class="reference internal" href="frequencyseries_ref.html#kuibit.frequencyseries.FrequencySeries" title="kuibit.frequencyseries.FrequencySeries"><code class="xref py py-class docutils literal notranslate"><span class="pre">FrequencySeries</span></code></a>,
+<a class="reference internal" href="grid_data_ref.html#kuibit.grid_data.UniformGridData" title="kuibit.grid_data.UniformGridData"><code class="xref py py-class docutils literal notranslate"><span class="pre">UniformGridData</span></code></a>, <a class="reference internal" href="grid_data_ref.html#kuibit.grid_data.HierarchicalGridData" title="kuibit.grid_data.HierarchicalGridData"><code class="xref py py-class docutils literal notranslate"><span class="pre">HierarchicalGridData</span></code></a>) support
+masks, meaning that operations like <code class="xref py py-meth docutils literal notranslate"><span class="pre">max()</span></code> will not include the data
+marked as invalid. In this page we describe how to work with masks
+(<span class="xref std std-ref">series_ref:Reference on kuibit.masks</span>).</p>
+<div class="section" id="creating-masked-objects">
+<h2>Creating masked objects<a class="headerlink" href="#creating-masked-objects" title="Permalink to this headline">¶</a></h2>
+<p>Since the interface for is the same for all the classes defined in kuibit, we
+will consider a <a class="reference internal" href="timeseries_ref.html#kuibit.timeseries.TimeSeries" title="kuibit.timeseries.TimeSeries"><code class="xref py py-class docutils literal notranslate"><span class="pre">TimeSeries</span></code></a> as an example.</p>
+<p>To create a masked object, you first need to start from the clean version.
+Suppose <code class="docutils literal notranslate"><span class="pre">ts</span></code> is a <a class="reference internal" href="timeseries_ref.html#kuibit.timeseries.TimeSeries" title="kuibit.timeseries.TimeSeries"><code class="xref py py-class docutils literal notranslate"><span class="pre">TimeSeries</span></code></a>, there are multiple ways to return
+a new object <code class="docutils literal notranslate"><span class="pre">ts_masked</span></code>:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Data is invalid when it is equal to 1</span>
+<span class="n">ts1</span> <span class="o">=</span> <span class="n">ts</span><span class="o">.</span><span class="n">masked_equal</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+
+<span class="c1"># Data is invalid when it is larger than 2</span>
+<span class="n">ts2</span> <span class="o">=</span> <span class="n">ts</span><span class="o">.</span><span class="n">masked_greater</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+
+<span class="c1"># Data is invalid when it is larger or equal than 3</span>
+<span class="n">ts3</span> <span class="o">=</span> <span class="n">ts</span><span class="o">.</span><span class="n">masked_greater_equal</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
+
+<span class="c1"># Data is invalid when it is between 4 and 5</span>
+<span class="n">ts4</span> <span class="o">=</span> <span class="n">ts</span><span class="o">.</span><span class="n">masked_inside</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">)</span>
+
+<span class="c1"># Data is invalid when it is NaN or inf</span>
+<span class="n">ts5</span> <span class="o">=</span> <span class="n">ts</span><span class="o">.</span><span class="n">masked_invalid</span><span class="p">()</span>
+
+<span class="c1"># Data is invalid when it is larger than 6</span>
+<span class="n">ts6</span> <span class="o">=</span> <span class="n">ts</span><span class="o">.</span><span class="n">masked_less</span><span class="p">(</span><span class="mi">6</span><span class="p">)</span>
+
+<span class="c1"># Data is invalid when it is larger or equal than 7</span>
+<span class="n">ts7</span> <span class="o">=</span> <span class="n">ts</span><span class="o">.</span><span class="n">masked_less_equal</span><span class="p">(</span><span class="mi">7</span><span class="p">)</span>
+
+<span class="c1"># Data is invalid when it is not 8</span>
+<span class="n">ts8</span> <span class="o">=</span> <span class="n">ts</span><span class="o">.</span><span class="n">masked_not_equal</span><span class="p">(</span><span class="mi">8</span><span class="p">)</span>
+
+<span class="c1"># Data is invalid when it is outside the range (8,9)</span>
+<span class="n">ts9</span> <span class="o">=</span> <span class="n">ts</span><span class="o">.</span><span class="n">masked_outside</span><span class="p">(</span><span class="mi">8</span><span class="p">,</span> <span class="mi">9</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>All these methods return new objects. Alternatively, it is possible to edit the
+object in place using methods with the imperative form (e.g., <code class="docutils literal notranslate"><span class="pre">mask_equal</span></code> instead
+of <code class="docutils literal notranslate"><span class="pre">masked_equal</span></code>).</p>
+<p>The second way to create masked objects is by using the functions in
+<a class="reference internal" href="masks_ref.html#module-kuibit.masks" title="kuibit.masks"><code class="xref py py-mod docutils literal notranslate"><span class="pre">masks</span></code></a>, which contains methods for mathematical functions that are
+defined on a domain. For instance, if you want to compute the natural logarithm
+of some data, you can use the function <code class="xref py py-func docutils literal notranslate"><span class="pre">masks.log()</span></code>, which automatically
+applies a mask where the operation is not defined.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">kuibit.masks</span> <span class="k">as</span> <span class="nn">ma</span>
+
+<span class="n">log_ts</span> <span class="o">=</span> <span class="n">ma</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">ts</span><span class="p">)</span>
+
+<span class="n">log_ts</span><span class="o">.</span><span class="n">is_masked</span><span class="p">()</span>  <span class="c1"># =&gt; True</span>
+</pre></div>
+</div>
+<p>The method <a class="reference internal" href="frequencyseries_ref.html#kuibit.frequencyseries.FrequencySeries.is_masked" title="kuibit.frequencyseries.FrequencySeries.is_masked"><code class="xref py py-meth docutils literal notranslate"><span class="pre">is_masked()</span></code></a> checks whether the object is masked or not.
+When objects are masked, some methods become unavailable. For example, it is not
+possible to compute splines or perform interpolations. For
+<a class="reference internal" href="timeseries_ref.html#kuibit.timeseries.TimeSeries" title="kuibit.timeseries.TimeSeries"><code class="xref py py-class docutils literal notranslate"><span class="pre">TimeSeries</span></code></a> and <a class="reference internal" href="frequencyseries_ref.html#kuibit.frequencyseries.FrequencySeries" title="kuibit.frequencyseries.FrequencySeries"><code class="xref py py-class docutils literal notranslate"><span class="pre">FrequencySeries</span></code></a>, you can go around
+this limitation by removing the invalid points with the methods
+<a class="reference internal" href="frequencyseries_ref.html#kuibit.frequencyseries.FrequencySeries.mask_remove" title="kuibit.frequencyseries.FrequencySeries.mask_remove"><code class="xref py py-meth docutils literal notranslate"><span class="pre">mask_remove()</span></code></a> or <a class="reference internal" href="frequencyseries_ref.html#kuibit.frequencyseries.FrequencySeries.mask_removed" title="kuibit.frequencyseries.FrequencySeries.mask_removed"><code class="xref py py-meth docutils literal notranslate"><span class="pre">mask_removed()</span></code></a>. This is not possible with
+grid data because we assume that the data is defined on regular grids.</p>
+<p>Suppose you want to mask the atmosphere. You have your density variable <code class="docutils literal notranslate"><span class="pre">rho</span></code>
+and you want to remove everything that is below <code class="docutils literal notranslate"><span class="pre">1e-8</span></code>, and you want to plot
+the pressure <code class="docutils literal notranslate"><span class="pre">press</span></code>. For that you would first construct a masked grid data
+with <code class="docutils literal notranslate"><span class="pre">rho</span></code>, and then apply the mask to <code class="docutils literal notranslate"><span class="pre">press</span></code>:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">masked_rho</span> <span class="o">=</span> <span class="n">rho</span><span class="o">.</span><span class="n">masked_less</span><span class="p">(</span><span class="mf">1e-8</span><span class="p">)</span>
+<span class="n">masked_press</span> <span class="o">=</span> <span class="n">press</span><span class="o">.</span><span class="n">mask_applied</span><span class="p">(</span><span class="n">masked_rho</span><span class="o">.</span><span class="n">mask</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>If you want to plot this with <a class="reference internal" href="visualize_matplotlib_ref.html#module-kuibit.visualize_matplotlib" title="kuibit.visualize_matplotlib"><code class="xref py py-mod docutils literal notranslate"><span class="pre">visualize_matplotlib</span></code></a>, you need to pay
+attention that resampling erases mask information. Therefore, if you want to
+plot the mask, you have to pass directly the <a class="reference internal" href="grid_data_ref.html#kuibit.grid_data.UniformGridData" title="kuibit.grid_data.UniformGridData"><code class="xref py py-class docutils literal notranslate"><span class="pre">UniformGridData</span></code></a> you
+want to plot (and not <a class="reference internal" href="grid_data_ref.html#kuibit.grid_data.HierarchicalGridData" title="kuibit.grid_data.HierarchicalGridData"><code class="xref py py-class docutils literal notranslate"><span class="pre">HierarchicalGridData</span></code></a>).</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>We only mask the data, not the independent variable (e.g., the time in
+<a class="reference internal" href="timeseries_ref.html#kuibit.timeseries.TimeSeries" title="kuibit.timeseries.TimeSeries"><code class="xref py py-class docutils literal notranslate"><span class="pre">TimeSeries</span></code></a>). If your computations required this variable to be
+masked too, you should extract the mask array with the <a class="reference internal" href="frequencyseries_ref.html#kuibit.frequencyseries.FrequencySeries.mask" title="kuibit.frequencyseries.FrequencySeries.mask"><code class="xref py py-meth docutils literal notranslate"><span class="pre">mask()</span></code></a>
+method and manually apply the mask.</p>
+</div>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>Some methods will not work with masked data (e.g. splines and interpolation).
+Therefore, resampling operations will not carry over the masks. You have to
+apply the masks again. One instance in which this is important is plotting
+with <a class="reference internal" href="visualize_matplotlib_ref.html#module-kuibit.visualize_matplotlib" title="kuibit.visualize_matplotlib"><code class="xref py py-mod docutils literal notranslate"><span class="pre">visualize_matplotlib</span></code></a>. Also, the <a class="reference internal" href="frequencyseries_ref.html#kuibit.frequencyseries.FrequencySeries.save" title="kuibit.frequencyseries.FrequencySeries.save"><code class="xref py py-meth docutils literal notranslate"><span class="pre">save()</span></code></a> method
+will discard the mask information.</p>
+</div>
+</div>
+</div>
+
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="index.html">
+              <img class="logo" src="_static/logo.png" alt="Logo"/>
+            </a></p>
+  <h3><a href="index.html">Table of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Masking invalid data</a><ul>
+<li><a class="reference internal" href="#creating-masked-objects">Creating masked objects</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="cactus_waves.html"
+                        title="previous chapter">Gravitational waves</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="gw_utils.html"
+                        title="next chapter">Gravitational-wave utilities</a></p>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="gw_utils.html" title="Gravitational-wave utilities"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="cactus_waves.html" title="Gravitational waves"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">kuibit 1.3.3 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">Masking invalid data</a></li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2020-2021, Gabriele Bozzola.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 3.5.4.
+    </div>
+  </body>
+</html>

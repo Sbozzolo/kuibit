@@ -1,0 +1,605 @@
+
+
+<!doctype html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Working with Cactus grid functions &#8212; kuibit 1.3.3 documentation</title>
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/bizstyle.css" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="../_static/css/custom.css" />
+    
+    <script id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script type="text/x-mathjax-config">MathJax.Hub.Config({"tex2jax": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true, "ignoreClass": "tex2jax_ignore|mathjax_ignore|document", "processClass": "tex2jax_process|mathjax_process|math|output_area"}})</script>
+    <script src="../_static/bizstyle.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Working with Cactus horizons" href="cactus_horizons.html" />
+    <link rel="prev" title="Working with grid data" href="grid_data.html" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0" />
+    <!--[if lt IE 9]>
+    <script src="_static/css3-mediaqueries.js"></script>
+    <![endif]-->
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="cactus_horizons.html" title="Working with Cactus horizons"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="grid_data.html" title="Working with grid data"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">kuibit 1.3.3 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">Working with Cactus grid functions</a></li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  
+<style>
+/* CSS for nbsphinx extension */
+
+/* remove conflicting styling from Sphinx themes */
+div.nbinput.container div.prompt *,
+div.nboutput.container div.prompt *,
+div.nbinput.container div.input_area pre,
+div.nboutput.container div.output_area pre,
+div.nbinput.container div.input_area .highlight,
+div.nboutput.container div.output_area .highlight {
+    border: none;
+    padding: 0;
+    margin: 0;
+    box-shadow: none;
+}
+
+div.nbinput.container > div[class*=highlight],
+div.nboutput.container > div[class*=highlight] {
+    margin: 0;
+}
+
+div.nbinput.container div.prompt *,
+div.nboutput.container div.prompt * {
+    background: none;
+}
+
+div.nboutput.container div.output_area .highlight,
+div.nboutput.container div.output_area pre {
+    background: unset;
+}
+
+div.nboutput.container div.output_area div.highlight {
+    color: unset;  /* override Pygments text color */
+}
+
+/* avoid gaps between output lines */
+div.nboutput.container div[class*=highlight] pre {
+    line-height: normal;
+}
+
+/* input/output containers */
+div.nbinput.container,
+div.nboutput.container {
+    display: -webkit-flex;
+    display: flex;
+    align-items: flex-start;
+    margin: 0;
+    width: 100%;
+}
+@media (max-width: 540px) {
+    div.nbinput.container,
+    div.nboutput.container {
+        flex-direction: column;
+    }
+}
+
+/* input container */
+div.nbinput.container {
+    padding-top: 5px;
+}
+
+/* last container */
+div.nblast.container {
+    padding-bottom: 5px;
+}
+
+/* input prompt */
+div.nbinput.container div.prompt pre {
+    color: #307FC1;
+}
+
+/* output prompt */
+div.nboutput.container div.prompt pre {
+    color: #BF5B3D;
+}
+
+/* all prompts */
+div.nbinput.container div.prompt,
+div.nboutput.container div.prompt {
+    width: 4.5ex;
+    padding-top: 5px;
+    position: relative;
+    user-select: none;
+}
+
+div.nbinput.container div.prompt > div,
+div.nboutput.container div.prompt > div {
+    position: absolute;
+    right: 0;
+    margin-right: 0.3ex;
+}
+
+@media (max-width: 540px) {
+    div.nbinput.container div.prompt,
+    div.nboutput.container div.prompt {
+        width: unset;
+        text-align: left;
+        padding: 0.4em;
+    }
+    div.nboutput.container div.prompt.empty {
+        padding: 0;
+    }
+
+    div.nbinput.container div.prompt > div,
+    div.nboutput.container div.prompt > div {
+        position: unset;
+    }
+}
+
+/* disable scrollbars on prompts */
+div.nbinput.container div.prompt pre,
+div.nboutput.container div.prompt pre {
+    overflow: hidden;
+}
+
+/* input/output area */
+div.nbinput.container div.input_area,
+div.nboutput.container div.output_area {
+    -webkit-flex: 1;
+    flex: 1;
+    overflow: auto;
+}
+@media (max-width: 540px) {
+    div.nbinput.container div.input_area,
+    div.nboutput.container div.output_area {
+        width: 100%;
+    }
+}
+
+/* input area */
+div.nbinput.container div.input_area {
+    border: 1px solid #e0e0e0;
+    border-radius: 2px;
+    /*background: #f5f5f5;*/
+}
+
+/* override MathJax center alignment in output cells */
+div.nboutput.container div[class*=MathJax] {
+    text-align: left !important;
+}
+
+/* override sphinx.ext.imgmath center alignment in output cells */
+div.nboutput.container div.math p {
+    text-align: left;
+}
+
+/* standard error */
+div.nboutput.container div.output_area.stderr {
+    background: #fdd;
+}
+
+/* ANSI colors */
+.ansi-black-fg { color: #3E424D; }
+.ansi-black-bg { background-color: #3E424D; }
+.ansi-black-intense-fg { color: #282C36; }
+.ansi-black-intense-bg { background-color: #282C36; }
+.ansi-red-fg { color: #E75C58; }
+.ansi-red-bg { background-color: #E75C58; }
+.ansi-red-intense-fg { color: #B22B31; }
+.ansi-red-intense-bg { background-color: #B22B31; }
+.ansi-green-fg { color: #00A250; }
+.ansi-green-bg { background-color: #00A250; }
+.ansi-green-intense-fg { color: #007427; }
+.ansi-green-intense-bg { background-color: #007427; }
+.ansi-yellow-fg { color: #DDB62B; }
+.ansi-yellow-bg { background-color: #DDB62B; }
+.ansi-yellow-intense-fg { color: #B27D12; }
+.ansi-yellow-intense-bg { background-color: #B27D12; }
+.ansi-blue-fg { color: #208FFB; }
+.ansi-blue-bg { background-color: #208FFB; }
+.ansi-blue-intense-fg { color: #0065CA; }
+.ansi-blue-intense-bg { background-color: #0065CA; }
+.ansi-magenta-fg { color: #D160C4; }
+.ansi-magenta-bg { background-color: #D160C4; }
+.ansi-magenta-intense-fg { color: #A03196; }
+.ansi-magenta-intense-bg { background-color: #A03196; }
+.ansi-cyan-fg { color: #60C6C8; }
+.ansi-cyan-bg { background-color: #60C6C8; }
+.ansi-cyan-intense-fg { color: #258F8F; }
+.ansi-cyan-intense-bg { background-color: #258F8F; }
+.ansi-white-fg { color: #C5C1B4; }
+.ansi-white-bg { background-color: #C5C1B4; }
+.ansi-white-intense-fg { color: #A1A6B2; }
+.ansi-white-intense-bg { background-color: #A1A6B2; }
+
+.ansi-default-inverse-fg { color: #FFFFFF; }
+.ansi-default-inverse-bg { background-color: #000000; }
+
+.ansi-bold { font-weight: bold; }
+.ansi-underline { text-decoration: underline; }
+
+
+div.nbinput.container div.input_area div[class*=highlight] > pre,
+div.nboutput.container div.output_area div[class*=highlight] > pre,
+div.nboutput.container div.output_area div[class*=highlight].math,
+div.nboutput.container div.output_area.rendered_html,
+div.nboutput.container div.output_area > div.output_javascript,
+div.nboutput.container div.output_area:not(.rendered_html) > img{
+    padding: 5px;
+    margin: 0;
+}
+
+/* fix copybtn overflow problem in chromium (needed for 'sphinx_copybutton') */
+div.nbinput.container div.input_area > div[class^='highlight'],
+div.nboutput.container div.output_area > div[class^='highlight']{
+    overflow-y: hidden;
+}
+
+/* hide copybtn icon on prompts (needed for 'sphinx_copybutton') */
+.prompt a.copybtn {
+    display: none;
+}
+
+/* Some additional styling taken form the Jupyter notebook CSS */
+div.rendered_html table {
+  border: none;
+  border-collapse: collapse;
+  border-spacing: 0;
+  color: black;
+  font-size: 12px;
+  table-layout: fixed;
+}
+div.rendered_html thead {
+  border-bottom: 1px solid black;
+  vertical-align: bottom;
+}
+div.rendered_html tr,
+div.rendered_html th,
+div.rendered_html td {
+  text-align: right;
+  vertical-align: middle;
+  padding: 0.5em 0.5em;
+  line-height: normal;
+  white-space: normal;
+  max-width: none;
+  border: none;
+}
+div.rendered_html th {
+  font-weight: bold;
+}
+div.rendered_html tbody tr:nth-child(odd) {
+  background: #f5f5f5;
+}
+div.rendered_html tbody tr:hover {
+  background: rgba(66, 165, 245, 0.2);
+}
+</style>
+<div class="section" id="Working-with-Cactus-grid-functions">
+<h1>Working with Cactus grid functions<a class="headerlink" href="#Working-with-Cactus-grid-functions" title="Permalink to this headline">¶</a></h1>
+<p>In this notebook, we learn how to read data and represent it with the classes in the <a class="reference internal" href="../grid_data.html"><span class="doc">grid_data</span></a> module. Make sure to see the example on how to work in grid data to better make use of this module (<a class="reference internal" href="grid_data.html"><span class="doc">grid_data</span></a>).</p>
+<p>As for all the objects in <code class="docutils literal notranslate"><span class="pre">kuibit</span></code>, the module for reading grid data is also structured hierarchically. Each level of this hierarchy focuses on a different subset of all the grid functions. The first level deals with dimensionality, the second on the available grid functions, and the third will be a specific variable. (Don’t worry if this is not clear, if will become clear in a second).</p>
+<p>(This notebook is meant to be converted in Sphinx documentation and not used directly.)</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">kuibit.simdir</span> <span class="kn">import</span> <span class="n">SimDir</span>
+<span class="kn">from</span> <span class="nn">kuibit.grid_data</span> <span class="kn">import</span> <span class="n">UniformGrid</span>
+
+<span class="o">%</span><span class="k">matplotlib</span> inline
+</pre></div>
+</div>
+</div>
+<p>The simplest way to access grid functions is from a SimDir with the attributes <code class="docutils literal notranslate"><span class="pre">gf</span></code> or <code class="docutils literal notranslate"><span class="pre">grid_functions</span></code>. You can print the attribute to see all the variables that are available to read.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">gf</span> <span class="o">=</span> <span class="n">SimDir</span><span class="p">(</span><span class="s2">&quot;../../tests/grid_functions&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">gf</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="n">gf</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+
+Available grid data of dimension 1D (x):
+[&#39;P&#39;, &#39;rho_b&#39;, &#39;vx&#39;, &#39;vy&#39;, &#39;vz&#39;, &#39;rho_star&#39;]
+
+
+Available grid data of dimension 1D (y):
+[&#39;P&#39;, &#39;rho_b&#39;, &#39;vx&#39;, &#39;vy&#39;, &#39;vz&#39;, &#39;rho_star&#39;]
+
+
+Available grid data of dimension 1D (z):
+[&#39;P&#39;, &#39;rho_b&#39;, &#39;vx&#39;, &#39;vy&#39;, &#39;vz&#39;, &#39;rho_star&#39;]
+
+
+Available grid data of dimension 2D (xy):
+[&#39;P&#39;, &#39;rho_b&#39;, &#39;vx&#39;, &#39;vy&#39;, &#39;vz&#39;, &#39;rho&#39;, &#39;int_em_T_rph&#39;, &#39;int_hydro_T_rph&#39;, &#39;int_surface_density&#39;, &#39;int_torque_dens&#39;, &#39;rho_star&#39;]
+
+
+Available grid data of dimension 2D (xz):
+[&#39;P&#39;, &#39;rho_b&#39;, &#39;vx&#39;, &#39;vy&#39;, &#39;vz&#39;, &#39;rho_star&#39;]
+
+
+Available grid data of dimension 2D (yz):
+[&#39;P&#39;, &#39;rho_b&#39;, &#39;vx&#39;, &#39;vy&#39;, &#39;vz&#39;, &#39;rho_star&#39;]
+
+
+Available grid data of dimension 3D (xyz):
+[&#39;P&#39;, &#39;rho_b&#39;, &#39;vx&#39;, &#39;vy&#39;, &#39;vz&#39;, &#39;rho_star&#39;]
+
+</pre></div></div>
+</div>
+<p>To work with a variable, we first have to select what dimension we are interested in. In this example we will focus on 2D and 3D data. In case you want lower-dimensional cuts from higher-dimensional data (e.g, the plane with z=2 from 3D data), you can ask for 3D data and use the functions in <code class="docutils literal notranslate"><span class="pre">UniformGridData</span></code> to slice the data as you need.</p>
+<p>Some of the variables listed here are stored in HDF5 files, other in ASCII files. When you can, always use HDF5 data, as the performances are orders of magnitude better. <code class="docutils literal notranslate"><span class="pre">kuibit</span></code> can handle both, but when HDF5 files are available, those are preferred.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">vars2D</span> <span class="o">=</span> <span class="n">gf</span><span class="o">.</span><span class="n">xy</span>  <span class="c1"># gf[(0, 1)] would work fine</span>
+<span class="n">vars3D</span> <span class="o">=</span> <span class="n">gf</span><span class="o">.</span><span class="n">xyz</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="n">vars3D</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+
+Available grid data of dimension 3D (xyz):
+[&#39;P&#39;, &#39;rho_b&#39;, &#39;vx&#39;, &#39;vy&#39;, &#39;vz&#39;, &#39;rho_star&#39;]
+
+</pre></div></div>
+</div>
+<p>Now, let’s assume that we are interested in working with the density <code class="docutils literal notranslate"><span class="pre">rho_b</span></code>. You can select this variable using the bracket operator or as attribute of the <code class="docutils literal notranslate"><span class="pre">fields</span></code> variable</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">rho_b</span> <span class="o">=</span> <span class="n">vars2D</span><span class="o">.</span><span class="n">fields</span><span class="o">.</span><span class="n">rho_b</span>  <span class="c1"># vars2D[&#39;rho_b&#39;] would be fine</span>
+</pre></div>
+</div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">rho_b</span></code> is a rich object. Roughly speaking, it is a dictionary that labels all the iterations in the data. The simplest way to access data is by using the bracket operator, or the <code class="docutils literal notranslate"><span class="pre">get</span></code> methods.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">rho0</span> <span class="o">=</span> <span class="n">rho_b</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>  <span class="c1"># this is rho at iteration 0</span>
+<span class="c1"># rho0 = rho_b.get_iteration(0) is equivalent</span>
+
+<span class="c1"># To know what iterations are available:</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">rho_b</span><span class="o">.</span><span class="n">iterations</span><span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;rho0 is a&quot;</span><span class="p">,</span> <span class="nb">type</span><span class="p">(</span><span class="n">rho0</span><span class="p">))</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;The value of rho0 at the point (1, 2) is </span><span class="si">{</span><span class="n">rho0</span><span class="p">((</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">))</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+[0, 1, 2]
+rho0 is a &lt;class &#39;kuibit.grid_data.HierarchicalGridData&#39;&gt;
+The value of rho0 at the point (1, 2) is 1.29285273509444e-10
+</pre></div></div>
+</div>
+<p>As we see <code class="docutils literal notranslate"><span class="pre">rho0</span></code> is a <code class="docutils literal notranslate"><span class="pre">HierarchicalGridData</span></code>. Read documentation about this class to see how to use this object.</p>
+<p>You can also use the time instead of the iteration with the <code class="docutils literal notranslate"><span class="pre">get_time</span></code> method:</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="nb">print</span><span class="p">(</span><span class="n">rho_b</span><span class="o">.</span><span class="n">available_times</span><span class="p">)</span>
+
+<span class="n">rho_final</span> <span class="o">=</span> <span class="n">rho_b</span><span class="o">.</span><span class="n">get_time</span><span class="p">(</span><span class="mf">0.5</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+[0.0, 0.25, 0.5]
+</pre></div></div>
+</div>
+<p>Sometimes we don’t need the entire grid, but we want to focus on a small region, and we want to have that sampled with uniform spacing (e.g, for plotting, or because we want to merge the refinement levels). To get a variable on a specified grid, use the <code class="docutils literal notranslate"><span class="pre">read_on_grid</span></code> method.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">small_grid</span> <span class="o">=</span> <span class="n">UniformGrid</span><span class="p">([</span><span class="mi">10</span><span class="p">,</span> <span class="mi">10</span><span class="p">],</span> <span class="n">x0</span><span class="o">=</span><span class="p">[</span><span class="o">-</span><span class="mi">3</span><span class="p">,</span> <span class="o">-</span><span class="mi">3</span><span class="p">],</span> <span class="n">x1</span><span class="o">=</span><span class="p">[</span><span class="mi">3</span><span class="p">,</span><span class="mi">3</span><span class="p">])</span>
+
+<span class="n">rho0_small</span> <span class="o">=</span> <span class="n">rho_b</span><span class="o">.</span><span class="n">read_on_grid</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">small_grid</span><span class="p">)</span>
+
+<span class="n">cf</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">contourf</span><span class="p">(</span><span class="o">*</span><span class="n">rho0_small</span><span class="o">.</span><span class="n">coordinates_meshgrid</span><span class="p">(),</span> <span class="n">np</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="n">rho0_small</span><span class="o">.</span><span class="n">data_xyz</span><span class="p">))</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">colorbar</span><span class="p">(</span><span class="n">cf</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+&lt;matplotlib.colorbar.Colorbar at 0x7f2ba1289908&gt;
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/tutorials_cactus_grid_functions_13_1.png" src="../_images/tutorials_cactus_grid_functions_13_1.png" />
+</div>
+</div>
+<p>The resolution is poor because we are only using 10 points (since this documentation is generated on the fly, so we want to keep the computation cost small).</p>
+<p>Here we are plotting the quantities directly so we can how how to access the data. However, <code class="docutils literal notranslate"><span class="pre">kuibit</span></code> has also a module for plotting, which simplifies most of these operations. For example:</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">kuibit</span> <span class="kn">import</span> <span class="n">visualize_matplotlib</span> <span class="k">as</span> <span class="n">viz</span>
+
+<span class="n">viz</span><span class="o">.</span><span class="n">plot_contourf</span><span class="p">(</span><span class="n">rho_b</span><span class="p">,</span> <span class="n">iteration</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">x0</span><span class="o">=</span><span class="p">[</span><span class="o">-</span><span class="mi">3</span><span class="p">,</span> <span class="o">-</span><span class="mi">3</span><span class="p">],</span> <span class="n">x1</span><span class="o">=</span><span class="p">[</span><span class="mi">3</span><span class="p">,</span><span class="mi">3</span><span class="p">],</span>
+                  <span class="n">shape</span><span class="o">=</span><span class="p">[</span><span class="mi">10</span><span class="p">,</span><span class="mi">10</span><span class="p">],</span> <span class="n">xlabel</span><span class="o">=</span><span class="s2">&quot;x&quot;</span><span class="p">,</span> <span class="n">ylabel</span><span class="o">=</span><span class="s2">&quot;y&quot;</span><span class="p">,</span>
+                  <span class="n">colorbar</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+&lt;matplotlib.contour.QuadContourSet at 0x7f2ba0de9c18&gt;
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/tutorials_cactus_grid_functions_15_1.png" src="../_images/tutorials_cactus_grid_functions_15_1.png" />
+</div>
+</div>
+<p>We can also make 3D plots. A simple package to made 3D plots is <code class="docutils literal notranslate"><span class="pre">mayavi</span></code>.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">mayavi</span> <span class="kn">import</span> <span class="n">mlab</span>
+<span class="n">mlab</span><span class="o">.</span><span class="n">init_notebook</span><span class="p">(</span><span class="s1">&#39;png&#39;</span><span class="p">)</span>
+
+<span class="c1"># Read 3D data on a small grid</span>
+<span class="n">small_3d_grid</span> <span class="o">=</span> <span class="n">UniformGrid</span><span class="p">([</span><span class="mi">20</span><span class="p">,</span> <span class="mi">20</span><span class="p">,</span> <span class="mi">20</span><span class="p">],</span> <span class="n">x0</span><span class="o">=</span><span class="p">[</span><span class="o">-</span><span class="mi">3</span><span class="p">,</span> <span class="o">-</span><span class="mi">3</span><span class="p">,</span> <span class="o">-</span><span class="mi">3</span><span class="p">],</span> <span class="n">x1</span><span class="o">=</span><span class="p">[</span><span class="mi">3</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">])</span>
+<span class="n">rho3d_small</span> <span class="o">=</span> <span class="n">vars3D</span><span class="p">[</span><span class="s1">&#39;rho_b&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">read_on_grid</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">small_3d_grid</span><span class="p">)</span>
+<span class="n">mlab</span><span class="o">.</span><span class="n">contour3d</span><span class="p">(</span><span class="n">rho3d_small</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="n">contours</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">transparent</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">mlab</span><span class="o">.</span><span class="n">colorbar</span><span class="p">(</span><span class="n">title</span><span class="o">=</span><span class="s1">&#39;rho_b&#39;</span><span class="p">)</span>
+<span class="n">mlab</span><span class="o">.</span><span class="n">orientation_axes</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Notebook initialized with png backend.
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area rendered_html docutils container">
+<img src="data:image/png;base64,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d7/73bfeeiuAz3/+891ut8p8GFahCuYcgD0sppqtW7cCOHbs2OmTkm3btgF48803T18VzDkACxZTSKPRaLfb0Gry2muvVeUYHlnFkSNHqgyZ85oz2SX82Mc+ds0118jwo48++q1vfavcnlkF1q9f/8d//McAfvCDH7zrXe964YUX/vVf/3Xjxo0A5ubmPvKRj1xyySWTk5NHjx79/ve//9JLL7l59+7de/3112/dujXLsqNHjz722GNPPfVUuhqfVqu1YcMGAG+88cY73vGO6667btOmTQsLCwcPHnzggQeOHz9eVQBzvtB473vfW2Vzuuh0Os8///yRI0d27dr11FNPHTx4sCoHc9rZuXPntddeC+CSSy5pNBrPPPNMt9u94YYbAFx44YXbtm2bmJhoNBrr16+/9tprf/7zn586dQrAmjVrPvrRj7773e++4IILxsbGms1mu92++uqr161b9/Of/7yiSmDHjh3XX389gG3btl111VVr165tNBrj4+ObN2++/vrr9+/fPzs7W1UGc15wJruEhw8f3r9//5YtW2ZnZx977LEqc2Y12LJliwzMz88/8MADTz75pOysAVhaWnrooYfuu+8+2XHLsmzPnj0AxsbGPvWpT11++eVE9NRTT33zm9/8wQ9+sLi4COD666+//PLLC6qymComJiZefvnl+++//1vf+tarr74KYGxs7EMf+lBpbuY84kx2CQFs3Ljxuuuuu//++5eWlqpsmdVAjq/nef6P//iPR48ehaMmX/rSl1555RUAr7zyyh/8wR8AmJycBHDbbbdt3Lix3+9/6UtfMp3EAwcO/N7v/R6Aq6666vnnn09VZTFVfO973/vRj34kw4899thnP/vZHTt2XHTRRWNjY3yGMDizHhaAW265ZXZ29tFHH60yZFYJKVivvPKKVCtoNTl8+LBUKwCyGwhgZmZm48aNsjf3ox/9yB3SOnjw4Jtvvglg8+bNqGL79u0AXnnlFaNWAIjo2WefBSCEWLNmTWFm5nziTArWpk2b9u7d+9BDD/V6vSpbZjVoNBpyfP0Xv/iFiZSdRKNWANavXy8Dx44d2717twzv27cPPuPj4wDm5+dRSpZlsornnnsuSJIl9Pv9TqeTyMmcf5xJwbrlllvyPJ+Zmbn88ssvvvjiKnPmtLNp06YsywC8/vrrMmbDhg2tVgv+hAMzzvXaa68Z3ycQposuumh6ehrAgQMHUMqmTZsajQaAYGRdCCHHvw4fPkz8LmgGwJkSrE7nygMHdm3ZsqXRaHzsYx/7xCc+8Wu/9mtVmZjTjuwPAgj6g26MMev1eseOHTt27JiMlNcWJevWrfuN3/gNAMeOHXviiSdQiqni6quvduPf//73y4oefPDBRDbmvOTMDLo//fSVDzxwcNeu/7fKkFlVpED0+305/AStJv1+/5e//GVg9sYbbxDRiy++uLS0NDY29oEPfOCCCy44ePDg5s2bb7jhhsnJyX6//5WvfKVysFwOYAG4+uqr77zzzmeffXZiYuLqq6+WTvf+/fsrfTTm/OEMCFanM/nAA2PA1QcOfG/XrnaVObN6GCXK1dvklWD98pe/NDEmUk58P3ny5H333ffhD39YCHHjjTfeeOON0ubYsWNf+9rX6kyOl6UdPXp069atV1xxxRVXXGGSDhw48NWvfrU4K3PecQYE6+mnM2AjAOAy4M0Ka2YVkYNTZgALjpqYmDVr1kxNTbmRTz755BtvvHHLLbds37691Wq9+eab+/bte+SRR2peS+l2u6+++uqPf/xjADfffLMUzaNHjz7++OM/+9nPqnIz5xfi7rvvrrJZSTqdhb/6q73A7QCAn91119fZyWIYpiar7WE9/XQGXOlEsJN1LnP55Zd/4hOfKEr9+7//e74fixmIVRWsTmfhgQcuBNYA4wCA7ffc8+PV9fCYVaXRaLzwwgtFqW+88UZREsMkOe2Cdccdd+zateuLX/ziwsLCFVdcvLT0f/2P//Hm//7fJn1vp/OTdnuipARmdHnuuefi6aAMMzSn/WkNr7766jve8Y41a9a88MILd9555+zszE9/+s01a7Zcdtnz73rXm7/5m/85MXHaRZNhmHOD0y5YS0tLs7Oz73vf+9avX7979+5/+qd/6vePLC3tW7v2lV27Xi7J+Lu/+7t79+6VD1S6+eabP/nJTz766KM1LzwxDHNOshoz3Z988slXXnnl7W9/+0MPPeReMi/nhz/84e7duzdv3iyEuOmmm/7zP/9zYWGhKhPDMOcyq9Qdk9MO3cmHlbz00kuHDh165zvf+eKLL05NTT3yyCNVORiGOcdZDcG67rrrLrvssqeffvo973nPvn373GtD69at+8AHPrBr1y4ieuKJJx544AE346OPPvrhD3/4bW97W57nN998s0yVd4FcccUVY2NjP/3pT3/4wx8CaDabH/zgB/fu3buwsHDvvffKhw0kI+vUm0xNlrZp06Y//MM/lLnm5+f/4i/+QoY/8pGPvPWtbwXwl3/5l+ae3iEqlQghfvu3f/vSSy/9/Oc/b24Dvu666+64446HH35YWrZardtuu2337t1CiEcffdS9/26IepP7JYR4z3vec8MNN2RZdt9998lnv7jPuQZgtmeISpNFlZQTHIGSkstTk/uVPM0k8c8xRKUlv1dQfsmWlJTvEp+Ngx7Vs4fTPoY1NTV15513PvXUU1/72teuvPLKK6644sknn3zzTQFg69bGZz7zma1btz799NMTExPXXHPNkSNHzM20Y2Njd9xxx+TkpBDizTffvOqqq44cOXL8+PFPf/rTl1122f79+ycnJ/fs2fPSSy+dOHHi9ttvv+GGG5544olLLrlk8+bNTz75JIBkpCy5vN5karK0d77znVu2bHn44Ydffvnl5557zjzSYHJycsuWLXmemxNxuEpl6m233fbWt771yJEjjz/+uIzZuXPnxz/+8eeee+6b3/wmgEaj8dnPfnb79u1PPfXUunXr9uzZ89prr8nsw9Wb3K93v/vd733ve/ft27dhw4bdu3f/5Cc/kXt6+PDhl19+mYguuOCChx9++NixY8NVGhd18uTJonKCI1DnMBalxvuVZVnyNEv+HENU2ul0in6voPzyLamsXRKcjSVZkkf1rOK0j2HJxzB85zvfIaKvf/3rO3bsMLeb7dmzZ9OmTffee+9999337W9/G4B8R4ubun///tdff10evna7ffnll1944YX333//N77xje9973sALrjgAgBPPvnk3/7t337ve99bXFyUD+ctiqxZb5yaLO3aa6/dt2/fgw8++OCDDxo1AfDEE08IIdw76YarFMCNN94on5Bn1HDDhg2/9Vu/dfjw4XvvvVfGyFc/fPnLX77//vu//vWvw3ls3nD1JvfrbW9724EDB77xjW8cOnTIHIHHHnvswQcffOSRRzZt2vTyyy/LJ7gPV2lcVJFlfATKSy5Pjfer6DRD6ucYotKS3ysov2RL6tQuCc7GQY/qWcVpF6x77733C1/4ghwvP3r06J//+Z//x3/8h0zavXv3wsKCfH6uvD3N/c8gU48fP05EJvXw4cN/93d/J59YIh1aOVX60KFDmzZt+pM/+ZOxsTH5uxZF1qw3To1Lu+iii6SG/umf/umnP/1p81g7AOPj4+12270Fb7hKd+/e/cEPfvAHP/gB9M3GrVbrk5/85OTk5LZt2/7oj/5I3iq8c+dOIjp8+DD0yWeqHqLeov1aWlq66KKLPvrRj1555ZXBQ2NuvfXW6enp++67b+hKk0UlLZNHoE7JRanxfhWdZvHPMVylRb9XXH7RlpSXD5/gbBz0qJ5VnHbBSnLkSAetk9u2bTO/evzmu2TqzMzMoUOH8jx/17ve9Su/8is//elPXd97aWmp1Wq95S1vMYUkI4eoN1naxRdfnOf5Cy+8cODAgYsvvli+uFgi7+CtWWxR6tatWz/2sY99+9vfls/Gkwa33nrrhg0bHn/88UcffXRqako6sPPz80KIO+6447/9t//2oQ996OjRo+aRLEPUm9yvDRs2NJvNiYkJ+eIJt5Dt27ffeOONP/7xj83o5BCVJotKWiaPQGXJRanJ/UqeZsmfY7hKk79XsvySE75O7ZLgbBz0qJ5VrMagu8uBAwd+88iR//7AAzf9FNccuOCqw1fJ+O3bt8/MzJjxafmiuueff/473/kOgDvvvNOkNhqND33oQ29/+9sffvjh7373u6bkJ554Yt++fZ/73OeuuOIK85D4ONKUXF5vMjUo7eGHH/7JT37S7/cBfO5zn3N99W3+Qw6GqFQI8YlPfOLRRx99/PHHb7/99jzPX3/99bGxsRtvvPHxxx//xje+AWDr1q07duwA8PDDD1944YW7du26+uqre73e1772NXlBdoh6Z2dn4/0SQnz84x+fnJz8h3/4h263+9nPfvYd73iHfIK7EOLXf/3XT548aQaDh6s0Lipp2e12k0dguHrn5ubuuuuu5H4Fp9maNWvin2O4SuURDn6vqampZPnxlsChvHaDezYOelTPNlbVw1p/4MD/fc89P9m+/b677/7if37xBrrhjkvveGjNQ7OzsxdddNHLL79sLNetWyeEkB3JsbExk7pmzZpPfepTe/bs+cpXvvLAAw8Q0a5du37/939ferBTU1PNZvONN95IRpaXXJKaLG337t133XWXdLXWr18/PT0tPXzJ1q1b3YfeDVHpLbfcsm7duptvvvnP/uzPbrrppizL7rrrri1btshLEAAajcaGDRvko9Y7nc7f/M3fSEX+t3/7NzO8MkS9yf1qt9tbt2595plnXn311ZmZGQBzc3OykJtuumn79u3//u//bh7UN0SlyaKSlkVHYLh6i/YrPs2SP8dwlSL1exWVH28JHMprN7hn46BH9WzjdHlY2YED244cEXv3Hmq3AcwcOPDJe+55+K67/u3uuycBACdPnnzfDe/b9/y+L174xS/c+oVbH7/15adfBjD1oan/ue9/fua/PtPr9W688caJiYndu3e3Wq0f//jH7Xb7M5/5zNq1a5966qkNGza85z3vOXDgwIkTJ7Zv33777bdfdNFF11xzzfz8/COPPDIxMRFHQtcblwzgPe95z8mTJ5999tk4tdfrxaVNT09feuml7XZ7375911xzzalTp9zrzdu2bXMfgzdEpevXr5f/Y4UQt9122+HDhx988MFOp9Pr9X71V391cnJy586dU1NT3//+92UVN95448033/zd7373mWeeMZsxRL1EFO9Xt9tdWlrau3dvv9+/4oor+v3+Qw89BGDt2rXvf//7n3/+efeGwSEqTRaVLGdmZqboCAxR76lTp+L9Sp5mL7zwQvxzDFep3Nrg90qWn9wS9/9iee3maWLu2TjoUT3bOC3TGhY6nS1/8zc3vvjiDT/5yXSzedX/+T+X/9d//fVdd03s2mVspORfd911H37rh29/9fa/Pv7XX7j0C5fll/3F2/4CE3ji1BP5D/Ob3nrTzp07jx8//tWvfvXIkSN79uyRDw7funXrpZdeeumllz777LOHDh06derUJZdc8pa3vOXw4cNf/vKXT548OTc3F0e69e7cudMtudVq/c7v/E6n0/n5z38epyZLm52dnZmZ2bVr14UXXnjw4MF/+Zd/MS+/kufciy++uH///qErlVcYDh8+fPLkyZtvvvmxxx578sknl5aWjh49eskll0jLr3zlK/Isv/zyy++4446f/exnsgcdHOSB6k3uV57npt6jR49++ctfliMpH/nIRzZt2vTP//zPC85NCENUmiwqWU7RERiu3uR+JU+z559/Pv45hqs0+Xslf+7klhw/frzmoZbjmMHZOOhRPdtY+Qf4LXQ6F/7VX70TuBBYBwD407vu2uhIVREHDh+453/dgylgEXgR+P9wd+/uqkwMw5xHrPwY1sann34vcJlWq5PAh8szaDbeuBENAMA4cBnwGziwgd8+wDCMZYUFKztw4CMPPHApMA6cBH4BHALCq6wFHJs4hheBXwByfPxS3PO+e1izGIYxrOSg+2Sn85v33DMNHAF+ARwGXgYAjG3cWJ5R8RLwCrAeuADYAWwGduCe2++565/v2pVX9ygZhjnnWckxrAs7na3Hjskb9uY2bgQwEd0lUIfOQgcALsCxxWPYgyNTR97903eb1P9195/1LgGmgGlgEsiAJjAOtIBpYAxoAmMAAHk9chwYAxpAExBABrR0fEN/BDAGCKABjAEZ0NDepyyqBWQ6Hro0EyN0fNOxMUmm8Myxga4iAwQBeerjxvedGAJ6OpL8QM+37wMAlnS47yf1nHBf5+35gb4O9IAlHejq8CLQBbrAAjAHzAMdAFfi6CQwBUwALaClD/OU8/uM6f+W7u8jf8yGPuRNfZDMr+T+PiYJ/o8WHPhMZ8z8X8C1F3585sRnKPhxin6fvh8Zx+ROTF9/yP99kh/zs5jV+PdZ0oGu/n3kTzQPzAJzwMv4f1auya8+K+lhHWq3D2mFmig3LaU90QaAebTRxlPYBXavGIYB9L8chmGYEYAFi2GYkYEFi2GYkYEFi2GYkYEFi2GYkYEFi2GYkYEFi2GYkYEFi2GYkYEFi2GYkYEFi2GYkYEFi2GYkYEFi2GYkYEFi2GYkYEFi2GYkYEFi2GYkYEFi2GYkYEFi2GYkYEFi2GYkYEFi2GYkYEFi2GYkWEl35rDMAxzWmEPi2GYkYEFi2GYkYEFi2GYkYEFi2GYkeH/BzZY9b65JoUfAAAAAElFTkSuQmCC" alt="PNG image"></img></div>
+</div>
+<p>If you see a Minecraft Neutron Star, that’s perfect! The resolution is very low.</p>
+<p>In this notebook we explored the basics of reading simulation data. The next important step for you is to understand how to make use of <code class="docutils literal notranslate"><span class="pre">HierachicalGridData</span></code> and <code class="docutils literal notranslate"><span class="pre">UniformGridData</span></code> (because this what the reader outputs!).</p>
+</div>
+
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="../index.html">
+              <img class="logo" src="../_static/logo.png" alt="Logo"/>
+            </a></p>
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="grid_data.html"
+                        title="previous chapter">Working with grid data</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="cactus_horizons.html"
+                        title="next chapter">Working with Cactus horizons</a></p>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="cactus_horizons.html" title="Working with Cactus horizons"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="grid_data.html" title="Working with grid data"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">kuibit 1.3.3 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">Working with Cactus grid functions</a></li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2020-2021, Gabriele Bozzola.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 3.5.4.
+    </div>
+  </body>
+</html>

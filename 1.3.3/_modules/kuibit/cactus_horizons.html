@@ -1,0 +1,1029 @@
+
+
+<!doctype html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>kuibit.cactus_horizons &#8212; kuibit 1.3.3 documentation</title>
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/bizstyle.css" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/css/custom.css" />
+    
+    <script id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+    <script src="../../_static/jquery.js"></script>
+    <script src="../../_static/underscore.js"></script>
+    <script src="../../_static/doctools.js"></script>
+    <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="../../_static/bizstyle.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0" />
+    <!--[if lt IE 9]>
+    <script src="_static/css3-mediaqueries.js"></script>
+    <![endif]-->
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">kuibit 1.3.3 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../index.html" accesskey="U">Module code</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">kuibit.cactus_horizons</a></li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for kuibit.cactus_horizons</h1><div class="highlight"><pre>
+<span></span><span class="ch">#!/usr/bin/env python3</span>
+
+<span class="c1"># Copyright (C) 2020-2021 Gabriele Bozzola</span>
+<span class="c1">#</span>
+<span class="c1"># Inspired by code originally developed by Wolfgang Kastaun. This file may</span>
+<span class="c1"># contain algorithms and/or structures first implemented in</span>
+<span class="c1"># GitHub:wokast/PyCactus/PostCactus/cactus_ah.py</span>
+<span class="c1">#</span>
+<span class="c1"># This program is free software; you can redistribute it and/or modify it under</span>
+<span class="c1"># the terms of the GNU General Public License as published by the Free Software</span>
+<span class="c1"># Foundation; either version 3 of the License, or (at your option) any later</span>
+<span class="c1"># version.</span>
+<span class="c1">#</span>
+<span class="c1"># This program is distributed in the hope that it will be useful, but WITHOUT</span>
+<span class="c1"># ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS</span>
+<span class="c1"># FOR A PARTICULAR PURPOSE. See the GNU General Public License for more</span>
+<span class="c1"># details.</span>
+<span class="c1">#</span>
+<span class="c1"># You should have received a copy of the GNU General Public License along with</span>
+<span class="c1"># this program; if not, see &lt;https://www.gnu.org/licenses/&gt;.</span>
+
+<span class="sd">&quot;&quot;&quot;The :py:mod:`~.cactus_horizons` module provides classes to access the</span>
+<span class="sd">information about apparent horizons from QuasiLocalMeasures and AHFinderDirect</span>
+<span class="sd">(including shape files).</span>
+
+<span class="sd">The main class is :py:class:`~.HorizonsDir` which collects all available data</span>
+<span class="sd">from a :py:class:`~.SimDir`. This is a dictionary-like object whose values can</span>
+<span class="sd">be accessed providing two integers. The first is the QuasiLocalMeasures index,</span>
+<span class="sd">the second is the AHFinderDirect (we need two indices because at the moment we</span>
+<span class="sd">have no way to connect the two indexing systems). If only one of the two is</span>
+<span class="sd">available, the other index can be a dummy.</span>
+
+<span class="sd">Once an horizon is selected with a combination of QLM and AHFinderDirect</span>
+<span class="sd">indices, the resulting object is a :py:class:`~.OneHorizon`.</span>
+<span class="sd">:py:class:`~.OneHorizon` contains as attributes all the QLM variables.</span>
+<span class="sd">Similarly, the attribute ``ah`` contains all the variables read from</span>
+<span class="sd">AHFinderDirect. All of these are represented as :py:class:`~.TimeSeries`.</span>
+<span class="sd">:py:class:`~.OneHorizon` also contains the shapes of the horizons (if the files</span>
+<span class="sd">are found), which can be accessed with the methods</span>
+<span class="sd">:py:meth:`~.shape_at_iteration` and :py:meth:`~.shape_outline_at_iteration`.</span>
+
+<span class="sd">The module contains also functions to work with horizons:</span>
+<span class="sd">- :py:func:`~.compute_horizons_separation`, which takes</span>
+<span class="sd">  two :py:class:`~.OneHorizon` and returns the timeseries of their separation</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">re</span>
+<span class="kn">import</span> <span class="nn">warnings</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
+<span class="kn">from</span> <span class="nn">kuibit.attr_dict</span> <span class="kn">import</span> <span class="n">pythonize_name_dict</span>
+<span class="kn">from</span> <span class="nn">kuibit.series</span> <span class="kn">import</span> <span class="n">sample_common</span>
+<span class="kn">from</span> <span class="nn">kuibit.timeseries</span> <span class="kn">import</span> <span class="n">combine_ts</span><span class="p">,</span> <span class="n">remove_duplicated_iters</span>
+
+
+<div class="viewcode-block" id="compute_horizons_separation"><a class="viewcode-back" href="../../cactus_horizons_ref.html#kuibit.cactus_horizons.compute_horizons_separation">[docs]</a><span class="k">def</span> <span class="nf">compute_horizons_separation</span><span class="p">(</span><span class="n">horizon1</span><span class="p">,</span> <span class="n">horizon2</span><span class="p">,</span> <span class="n">resample</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Compute the coordinate separation between the centroids of two horizons.</span>
+
+<span class="sd">    The information from the apparent horizons is used (contained in the</span>
+<span class="sd">    BHDiagnostics files).</span>
+
+<span class="sd">    :param horizon1: First horizon.</span>
+<span class="sd">    :type horizon1: :py:class:`~.OneHorizon`</span>
+<span class="sd">    :param horizon2: Second horizon.</span>
+<span class="sd">    :type horizon2: :py:class:`~.OneHorizon`</span>
+
+<span class="sd">    :returns: Coordinate distance between the two centroids, sampled over both</span>
+<span class="sd">              the horizons are available.</span>
+<span class="sd">    :rtype: :py:class:`~.TimeSeries`</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># We add sample_common to make sure that everything is defined on the same</span>
+    <span class="c1"># interval.</span>
+    <span class="p">(</span><span class="n">cen1_x</span><span class="p">,</span> <span class="n">cen1_y</span><span class="p">,</span> <span class="n">cen1_z</span><span class="p">,</span> <span class="n">cen2_x</span><span class="p">,</span> <span class="n">cen2_y</span><span class="p">,</span> <span class="n">cen2_z</span><span class="p">,)</span> <span class="o">=</span> <span class="n">sample_common</span><span class="p">(</span>
+        <span class="p">(</span>
+            <span class="n">horizon1</span><span class="o">.</span><span class="n">ah</span><span class="o">.</span><span class="n">centroid_x</span><span class="p">,</span>
+            <span class="n">horizon1</span><span class="o">.</span><span class="n">ah</span><span class="o">.</span><span class="n">centroid_y</span><span class="p">,</span>
+            <span class="n">horizon1</span><span class="o">.</span><span class="n">ah</span><span class="o">.</span><span class="n">centroid_z</span><span class="p">,</span>
+            <span class="n">horizon2</span><span class="o">.</span><span class="n">ah</span><span class="o">.</span><span class="n">centroid_x</span><span class="p">,</span>
+            <span class="n">horizon2</span><span class="o">.</span><span class="n">ah</span><span class="o">.</span><span class="n">centroid_y</span><span class="p">,</span>
+            <span class="n">horizon2</span><span class="o">.</span><span class="n">ah</span><span class="o">.</span><span class="n">centroid_z</span><span class="p">,</span>
+        <span class="p">),</span>
+        <span class="n">resample</span><span class="o">=</span><span class="n">resample</span><span class="p">,</span>
+    <span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span>
+        <span class="p">(</span><span class="n">cen1_x</span> <span class="o">-</span> <span class="n">cen2_x</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span>
+        <span class="o">+</span> <span class="p">(</span><span class="n">cen1_y</span> <span class="o">-</span> <span class="n">cen2_y</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span>
+        <span class="o">+</span> <span class="p">(</span><span class="n">cen1_z</span> <span class="o">-</span> <span class="n">cen2_z</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span>
+    <span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="OneHorizon"><a class="viewcode-back" href="../../cactus_horizons_ref.html#kuibit.cactus_horizons.OneHorizon">[docs]</a><span class="k">class</span> <span class="nc">OneHorizon</span><span class="p">:</span>
+    <span class="sa">r</span><span class="sd">&quot;&quot;&quot;This class represents properties of an apparent horizon</span>
+<span class="sd">    computed from the quasi-isolated horizon formalism.</span>
+
+<span class="sd">    All the variables from QuasiLocalMeasures are available as</span>
+<span class="sd">    :py:class:`~.TimeSeries` as attributes. All the ones from AHFinderDirect are</span>
+<span class="sd">    attributes of the attribute ``ah``.</span>
+
+<span class="sd">    :ivar formation_time: First time at which the horizon has been found</span>
+<span class="sd">                          (as from AHFinderDirect).</span>
+<span class="sd">    :ivar mass_final: QLM mass at the last iteration available.</span>
+<span class="sd">    :ivar spin_final: QLM spin (angular momentum) at the last iteration available.</span>
+<span class="sd">    :ivar dimensionless_spin_final: Dimensionless spin computed from QLM variables</span>
+<span class="sd">                                    at the last iteration available.</span>
+<span class="sd">    :ivar shape_available: Whether the shape files are available.</span>
+<span class="sd">    :ivar shape_iterations: Iterations at which the shape is available.</span>
+<span class="sd">    :ivar shape_iterations_min: First iteration at which the shape is available.</span>
+<span class="sd">    :ivar shape_iterations_max: Last iteration at which the shape is available.</span>
+<span class="sd">    :ivar shape_times: Times at which the shape is available.</span>
+<span class="sd">    :ivar shape_times_min: First time at which the shape is available.</span>
+<span class="sd">    :ivar shape_times_max: Last time at which the shape is available.</span>
+<span class="sd">    :ivar ah: All the variables from AHFinderDirect as :py:class:`~.TimeSeries`.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">qlm_vars</span><span class="p">,</span> <span class="n">ah_vars</span><span class="p">,</span> <span class="n">shape_files</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Constructor.</span>
+
+<span class="sd">        :param qlm_vars: Dictionary that maps the name of the QLM variable with</span>
+<span class="sd">                         the associated :py:class:`~.TimeSeries`.</span>
+<span class="sd">        :type qlm_vars: dict</span>
+<span class="sd">        :param ah_vars: Dictionary that maps the name of the AH variable with</span>
+<span class="sd">                        the associated :py:class:`~.TimeSeries`.</span>
+<span class="sd">        :type ah_vars: dict</span>
+<span class="sd">        :param shape_files: Dictionary that maps the iteration to the files where</span>
+<span class="sd">                            to find the shape at that iteration.</span>
+<span class="sd">        :type shape_files: dict</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_qlm_vars</span> <span class="o">=</span> <span class="n">qlm_vars</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_ah_vars</span> <span class="o">=</span> <span class="n">ah_vars</span>
+
+        <span class="c1"># We turn the var_dictionary into attributes</span>
+        <span class="k">for</span> <span class="n">var</span><span class="p">,</span> <span class="n">timeseries</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_qlm_vars</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="c1"># With this we can access properties in the following way</span>
+            <span class="c1"># horizon.mass</span>
+            <span class="nb">setattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">var</span><span class="p">,</span> <span class="n">timeseries</span><span class="p">)</span>
+
+        <span class="c1"># Here we compute some interesting and useful quantities, if we have</span>
+        <span class="c1"># qlm data</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_qlm_vars</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">mass_final</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mass</span><span class="o">.</span><span class="n">y</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">spin_final</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">spin</span><span class="o">.</span><span class="n">y</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">dimensionless_spin_final</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">spin_final</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">mass_final</span> <span class="o">**</span> <span class="mi">2</span>
+            <span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">mass_final</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">spin_final</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">dimensionless_spin_final</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="c1"># We put the AH vars under the ah attribute, they are accessed in the</span>
+        <span class="c1"># same way as qlm_vars (as attribute). This is achieved using</span>
+        <span class="c1"># pythonize_name_dict. The second argument is how we access the data.</span>
+        <span class="c1"># Here we use the method get_ah_property that peeks into self._ah_vars.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ah</span> <span class="o">=</span> <span class="n">pythonize_name_dict</span><span class="p">(</span><span class="n">ah_vars</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_ah_property</span><span class="p">)</span>
+
+        <span class="c1"># We read the formation time from a variable in AH</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ah_vars</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">formation_time</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ah</span><span class="o">.</span><span class="n">area</span><span class="o">.</span><span class="n">tmin</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">formation_time</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="c1"># Alias</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">time_found</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">formation_time</span>
+
+        <span class="c1"># Now we deal with the shape. Shape files is a dictionary that maps</span>
+        <span class="c1"># iteration to the associated file</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_shape_files</span> <span class="o">=</span> <span class="n">shape_files</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">shape_available</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_shape_files</span> <span class="o">!=</span> <span class="p">{}</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">shape_available</span><span class="p">:</span>
+            <span class="c1"># We sort the iterations</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">shape_iterations</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span>
+                <span class="nb">sorted</span><span class="p">(</span><span class="n">s</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_shape_files</span><span class="p">)</span>
+            <span class="p">)</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">shape_iteration_min</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">shape_iterations</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">shape_iteration_max</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">shape_iterations</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+
+            <span class="c1"># To convert between time and iteration, we need the AH data If we</span>
+            <span class="c1"># don&#39;t have that, we will assume time = iteration.</span>
+            <span class="c1">#</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ah_vars</span><span class="p">:</span>
+                <span class="c1"># Now we find the associated times using ah.cctk_iteration</span>
+                <span class="c1"># self.ah.cctk_iteration is a function time vs iteration, we</span>
+                <span class="c1"># want the opposite. We define a new timeseries in which we swap</span>
+                <span class="c1"># t and y</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_iterations_to_times</span> <span class="o">=</span> <span class="n">remove_duplicated_iters</span><span class="p">(</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">ah</span><span class="o">.</span><span class="n">cctk_iteration</span><span class="o">.</span><span class="n">y</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">ah</span><span class="o">.</span><span class="n">cctk_iteration</span><span class="o">.</span><span class="n">t</span>
+                <span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">shape_times</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_iterations_to_times</span><span class="p">(</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">shape_iterations</span>
+                <span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">shape_time_min</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">shape_times</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">shape_time_max</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">shape_times</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
+                    <span class="s2">&quot;AH data not found, so it is impossible to convert&quot;</span>
+                    <span class="s2">&quot; between iteration number to time.</span><span class="se">\n</span><span class="s2">Manually set&quot;</span>
+                    <span class="s2">&quot; shape_times or methods involving shape and time&quot;</span>
+                    <span class="s2">&quot; will not work&quot;</span>
+                <span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">shape_times</span> <span class="o">=</span> <span class="kc">None</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">shape_time_min</span> <span class="o">=</span> <span class="kc">None</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">shape_time_max</span> <span class="o">=</span> <span class="kc">None</span>
+
+            <span class="c1"># We will save all the shape patches and their origin that we read in</span>
+            <span class="c1"># this dictionary</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_patches</span> <span class="o">=</span> <span class="p">{}</span>
+
+    <span class="k">def</span> <span class="fm">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">key</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_qlm_vars</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+            <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Quantity </span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s2"> does not exist&quot;</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_qlm_vars</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
+
+<div class="viewcode-block" id="OneHorizon.get_ah_property"><a class="viewcode-back" href="../../cactus_horizons_ref.html#kuibit.cactus_horizons.OneHorizon.get_ah_property">[docs]</a>    <span class="k">def</span> <span class="nf">get_ah_property</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Return a property from AHFinderDirect as timeseries.</span>
+
+<span class="sd">        :param key: AH property.</span>
+<span class="sd">        :type key: str</span>
+<span class="sd">        :returns: AH property as a function of time.</span>
+<span class="sd">        :rtype: :py:class:`~.TimeSeries`</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ah_vars</span><span class="p">[</span><span class="n">key</span><span class="p">]</span></div>
+
+    <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Conversion to string.</span>
+<span class="sd">        :returns: Human readable summary</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">ret</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ah_vars</span><span class="p">:</span>
+            <span class="n">ret</span> <span class="o">+=</span> <span class="sa">f</span><span class="s2">&quot;Formation time: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">formation_time</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="se">\n</span><span class="s2">&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">shape_available</span><span class="p">:</span>
+            <span class="n">ret</span> <span class="o">+=</span> <span class="s2">&quot;Shape available</span><span class="se">\n</span><span class="s2">&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_qlm_vars</span><span class="p">:</span>
+            <span class="n">ret</span> <span class="o">+=</span> <span class="sa">f</span><span class="s2">&quot;Final Mass = </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">mass_final</span><span class="si">:</span><span class="s2">.3e</span><span class="si">}</span><span class="se">\n</span><span class="s2">&quot;</span>
+            <span class="n">ret</span> <span class="o">+=</span> <span class="sa">f</span><span class="s2">&quot;Final Angular Momentum = </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">spin_final</span><span class="si">:</span><span class="s2">.3e</span><span class="si">}</span><span class="se">\n</span><span class="s2">&quot;</span>
+            <span class="n">ret</span> <span class="o">+=</span> <span class="sa">f</span><span class="s2">&quot;Final Dimensionless Spin = </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">dimensionless_spin_final</span><span class="si">:</span><span class="s2">.3e</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="k">return</span> <span class="n">ret</span>
+
+<div class="viewcode-block" id="OneHorizon.ah_origin_at_iteration"><a class="viewcode-back" href="../../cactus_horizons_ref.html#kuibit.cactus_horizons.OneHorizon.ah_origin_at_iteration">[docs]</a>    <span class="k">def</span> <span class="nf">ah_origin_at_iteration</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">iteration</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Return the AH origin at the given iteration.</span>
+
+<span class="sd">        :param iteration: Iteration number.</span>
+<span class="sd">        :type iteration: int</span>
+<span class="sd">        :returns: Origin of the horizon as from AHFinderDirect.</span>
+<span class="sd">        :rtype: 3D NumPy array</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_patches_at_iteration</span><span class="p">(</span><span class="n">iteration</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span></div>
+
+    <span class="k">def</span> <span class="nf">_patches_at_iteration</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">iteration</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Return the shape of the horizon as a dictionary of patches with</span>
+<span class="sd">        3D coordinates.&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">shape_available</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Shape information not available&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">iteration</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">shape_iterations</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;Shape information for iteration </span><span class="si">{</span><span class="n">iteration</span><span class="si">}</span><span class="s2"> not available&quot;</span>
+            <span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">iteration</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_patches</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_patches</span><span class="p">[</span><span class="n">iteration</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_load_patches</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_shape_files</span><span class="p">[</span><span class="n">iteration</span><span class="p">]</span>
+            <span class="p">)</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_patches</span><span class="p">[</span><span class="n">iteration</span><span class="p">]</span>
+
+<div class="viewcode-block" id="OneHorizon.shape_at_iteration"><a class="viewcode-back" href="../../cactus_horizons_ref.html#kuibit.cactus_horizons.OneHorizon.shape_at_iteration">[docs]</a>    <span class="k">def</span> <span class="nf">shape_at_iteration</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">iteration</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Return the shape of the horizon as 3 arrays with the</span>
+<span class="sd">        coordinates of the points.</span>
+
+<span class="sd">        :param iteration: Iteration number.</span>
+<span class="sd">        :type iteration: int</span>
+<span class="sd">        :returns: Shape of the horizon.</span>
+<span class="sd">        :rtype: three lists of 2D NumPy arrays, one for each</span>
+<span class="sd">                coordinate. The list is over the different patches.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># TODO (FEATURE): Add an option to merge all the patches while keeping</span>
+        <span class="c1">#                 an order.</span>
+
+        <span class="n">patches</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_patches_at_iteration</span><span class="p">(</span><span class="n">iteration</span><span class="p">)</span>
+
+        <span class="c1"># Patches is dictionary, each patch is a list of three coordiantes for</span>
+        <span class="c1"># all the points along the two angular directions.</span>
+        <span class="n">coord_x</span> <span class="o">=</span> <span class="p">[</span><span class="n">p</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">patches</span><span class="o">.</span><span class="n">values</span><span class="p">()]</span>
+        <span class="n">coord_y</span> <span class="o">=</span> <span class="p">[</span><span class="n">p</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">patches</span><span class="o">.</span><span class="n">values</span><span class="p">()]</span>
+        <span class="n">coord_z</span> <span class="o">=</span> <span class="p">[</span><span class="n">p</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">patches</span><span class="o">.</span><span class="n">values</span><span class="p">()]</span>
+
+        <span class="k">return</span> <span class="n">coord_x</span><span class="p">,</span> <span class="n">coord_y</span><span class="p">,</span> <span class="n">coord_z</span></div>
+
+<div class="viewcode-block" id="OneHorizon.shape_at_time"><a class="viewcode-back" href="../../cactus_horizons_ref.html#kuibit.cactus_horizons.OneHorizon.shape_at_time">[docs]</a>    <span class="k">def</span> <span class="nf">shape_at_time</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">time</span><span class="p">,</span> <span class="n">tolerance</span><span class="o">=</span><span class="mf">1e-10</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Return the shape of the horizon as 3 arrays with the</span>
+<span class="sd">        coordinates of the points.</span>
+
+<span class="sd">        :param time: Time.</span>
+<span class="sd">        :type time: float</span>
+<span class="sd">        :param tolerance: Tolerance in determining the time.</span>
+<span class="sd">        :type tolerance: float</span>
+<span class="sd">        :returns: Shape of the horizon.</span>
+<span class="sd">        :rtype: three lists of 2D NumPy arrays, one for each</span>
+<span class="sd">                coordinate. The list is over the different patches.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># https://stackoverflow.com/a/41022847</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">index_closest</span> <span class="o">=</span> <span class="nb">next</span><span class="p">(</span>
+                <span class="n">i</span>
+                <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">shape_times</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">isclose</span><span class="p">(</span><span class="n">_</span><span class="p">,</span> <span class="n">time</span><span class="p">,</span> <span class="n">tolerance</span><span class="p">)</span>
+            <span class="p">)</span>
+        <span class="k">except</span> <span class="ne">StopIteration</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Time </span><span class="si">{</span><span class="n">time</span><span class="si">}</span><span class="s2"> not available&quot;</span><span class="p">)</span>
+
+        <span class="n">iteration</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">shape_iterations</span><span class="p">[</span><span class="n">index_closest</span><span class="p">]</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">shape_at_iteration</span><span class="p">(</span><span class="n">iteration</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="OneHorizon.shape_time_at_iteration"><a class="viewcode-back" href="../../cactus_horizons_ref.html#kuibit.cactus_horizons.OneHorizon.shape_time_at_iteration">[docs]</a>    <span class="k">def</span> <span class="nf">shape_time_at_iteration</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">iteration</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Return the time corresponding to the given iteration using the information</span>
+<span class="sd">        from the shape files.</span>
+
+<span class="sd">        :param iteration: Iteration number.</span>
+<span class="sd">        :type iteration: int</span>
+<span class="sd">        :returns: Time at the given iteration.</span>
+<span class="sd">        :rtype: float</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">iteration</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">shape_iterations</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Shape not available for iteration </span><span class="si">{</span><span class="n">iteration</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_iterations_to_times</span><span class="p">(</span><span class="n">iteration</span><span class="p">)</span></div>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_load_patches</span><span class="p">(</span><span class="n">path</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;AHFinderDirect uses a system of multipatches to avoid coordinates</span>
+<span class="sd">        singularities. Each patch covers a portion around an axis (e.g., +z</span>
+<span class="sd">        axis). We will load this data.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># TODO (FEATURE): Add support for HDF5 files</span>
+
+        <span class="c1"># ASCII files are structured in this way:</span>
+        <span class="c1"># * There is a header with the number of patches and the origin</span>
+        <span class="c1"># * For each patch, there is a section taht starts with</span>
+        <span class="c1">#   ### +z patch and a local header</span>
+        <span class="c1"># * Each section has multiple groups with one angular coordinate</span>
+        <span class="c1">#   fixed, the various groups are separated by a blank line</span>
+
+        <span class="c1"># Here we match the patch name. This matches</span>
+        <span class="c1"># 1. the entire string ^ #</span>
+        <span class="c1"># 2. the literals ### ..... patch</span>
+        <span class="c1"># 3. and then we find what is inside +/- and one between xyz</span>
+        <span class="n">rx_patch</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;^### ([+-][xyz]) patch$&quot;</span><span class="p">)</span>
+
+        <span class="c1"># Here we find the origin of the system.</span>
+        <span class="c1"># 1. We match the entire string (^ $)</span>
+        <span class="c1"># 2. The match the literal # origin =</span>
+        <span class="c1"># 3. We match numbers with possibly +/- and dots, and spaces in between</span>
+        <span class="c1">#    ([\s])</span>
+        <span class="n">rx_origin</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span>
+            <span class="sa">r</span><span class="s2">&quot;^# origin = ([+-eE\d.]+)[\s]+([+-eE\d.]+)[\s]+([+-eE\d.]+)[\s]*$&quot;</span>
+        <span class="p">)</span>
+        <span class="n">origin</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">fil</span><span class="p">:</span>
+            <span class="c1"># patches is a dictionary that maps the name of the patch to the</span>
+            <span class="c1"># coordiantes of that patch</span>
+            <span class="n">patches</span> <span class="o">=</span> <span class="p">{}</span>
+            <span class="c1"># We use these variables as local variables</span>
+            <span class="n">current_patch</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="n">current_patch_data</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="n">current_coordinates</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="c1"># We scan the entire file line by line</span>
+            <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">fil</span><span class="p">:</span>
+                <span class="c1"># We read the header, which starts with #</span>
+                <span class="k">if</span> <span class="n">line</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;#&quot;</span><span class="p">):</span>
+                    <span class="c1"># If we haven&#39;t found the origin yet, let&#39;s look for it</span>
+                    <span class="k">if</span> <span class="n">origin</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                        <span class="n">matched_origin</span> <span class="o">=</span> <span class="n">rx_origin</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">line</span><span class="p">)</span>
+                        <span class="k">if</span> <span class="n">matched_origin</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                            <span class="n">origin</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span>
+                                <span class="p">[</span>
+                                    <span class="nb">float</span><span class="p">(</span><span class="n">matched_origin</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="n">coord</span><span class="p">))</span>
+                                    <span class="k">for</span> <span class="n">coord</span> <span class="ow">in</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>
+                                <span class="p">]</span>
+                            <span class="p">)</span>
+                            <span class="c1"># If we know that this the origin line, we can</span>
+                            <span class="c1"># skip the rest of the analysis</span>
+                            <span class="k">continue</span>
+
+                    <span class="n">matched_patch</span> <span class="o">=</span> <span class="n">rx_patch</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">line</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="n">matched_patch</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                        <span class="c1"># If current_patch is not None it means that we have</span>
+                        <span class="c1"># already read an header, so here we are moving to the</span>
+                        <span class="c1"># next patch. We save all the data to the dictionary</span>
+                        <span class="c1"># patches, and move reset current_patch_data to an empty</span>
+                        <span class="c1"># list.</span>
+                        <span class="k">if</span> <span class="n">current_patch</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                            <span class="n">patches</span><span class="p">[</span><span class="n">current_patch</span><span class="p">]</span> <span class="o">=</span> <span class="n">current_patch_data</span>
+                            <span class="n">current_patch_data</span> <span class="o">=</span> <span class="p">[]</span>
+                        <span class="n">current_patch</span> <span class="o">=</span> <span class="n">matched_patch</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+                <span class="k">elif</span> <span class="p">(</span><span class="n">line</span> <span class="o">==</span> <span class="s2">&quot;&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span><span class="n">line</span><span class="o">.</span><span class="n">isspace</span><span class="p">()):</span>
+                    <span class="c1"># Here we found the blank line, which means that we have</span>
+                    <span class="c1"># to flush the data and move on to a new group in the same</span>
+                    <span class="c1"># patch.</span>
+                    <span class="c1"># If current_coordinates is empty, the following will test</span>
+                    <span class="c1"># negative. If it is not empty, it means that we have read</span>
+                    <span class="c1"># the current group, so we can reset the current_coordiantes</span>
+                    <span class="c1"># variable</span>
+                    <span class="k">if</span> <span class="n">current_coordinates</span><span class="p">:</span>
+                        <span class="n">current_patch_data</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">current_coordinates</span><span class="p">)</span>
+                        <span class="n">current_coordinates</span> <span class="o">=</span> <span class="p">[]</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="c1"># Data line should have 6 columns, the last three are x, y,</span>
+                    <span class="c1"># and z.</span>
+                    <span class="n">data</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">split</span><span class="p">()</span>
+                    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">6</span><span class="p">:</span>
+                        <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Corrupt AH shape file </span><span class="si">{</span><span class="n">path</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                    <span class="n">coordinates</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="nb">float</span><span class="p">,</span> <span class="n">data</span><span class="p">[</span><span class="mi">3</span><span class="p">:]))</span>
+                    <span class="c1"># coordinates is a list like:</span>
+                    <span class="c1"># [5.198917752 -0.1549284014 0.1549284014],</span>
+                    <span class="c1"># so we append the list</span>
+                    <span class="n">current_coordinates</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">coordinates</span><span class="p">)</span>
+
+            <span class="c1"># Here we take care of the last group</span>
+            <span class="k">if</span> <span class="n">current_coordinates</span><span class="p">:</span>
+                <span class="n">current_patch_data</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">current_coordinates</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">current_patch</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">patches</span><span class="p">[</span><span class="n">current_patch</span><span class="p">]</span> <span class="o">=</span> <span class="n">current_patch_data</span>
+
+        <span class="k">if</span> <span class="n">origin</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s2">&quot;Corrupt AH files, missing origin.&quot;</span><span class="p">)</span>
+        <span class="c1"># Reorganize the data from the AHHorizonDirect format to a NumPy matrix</span>
+        <span class="c1"># Each patch is an array with three lists, one for each direction</span>
+        <span class="n">patches</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="n">p</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">d</span><span class="p">),</span> <span class="n">axes</span><span class="o">=</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+            <span class="k">for</span> <span class="n">p</span><span class="p">,</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">patches</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+        <span class="p">}</span>
+        <span class="k">return</span> <span class="n">patches</span><span class="p">,</span> <span class="n">origin</span>
+
+<div class="viewcode-block" id="OneHorizon.shape_outline_at_iteration"><a class="viewcode-back" href="../../cactus_horizons_ref.html#kuibit.cactus_horizons.OneHorizon.shape_outline_at_iteration">[docs]</a>    <span class="k">def</span> <span class="nf">shape_outline_at_iteration</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">iteration</span><span class="p">,</span> <span class="n">cut</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Return the cut of the 3D shape on a specified plane.</span>
+
+<span class="sd">        ``cut`` has to be a 3D tuple or list with None on the dimensions you</span>
+<span class="sd">        want to keep, and the value of the other coordinates. For example, if</span>
+<span class="sd">        you want the outline at z = 3 on the xy plane, ``cut`` has to be</span>
+<span class="sd">        ``(None, None, 3)``.</span>
+
+<span class="sd">        No interpolation is performed, so results are not accurate when the cut</span>
+<span class="sd">        is not along one of the major directions centered in the origin of the</span>
+<span class="sd">        horizon.</span>
+
+<span class="sd">        :param iteration: Iteration number.</span>
+<span class="sd">        :type iteration: int</span>
+<span class="sd">        :param cut: How should the horizon be sliced?</span>
+<span class="sd">        :type cut: 3D tuple</span>
+<span class="sd">        :returns:    Coordinates of AH outline.</span>
+<span class="sd">        :rtype:      tuple of two 1D NumPy arrays.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># TODO (FEATURE): Add interpolation for off-axis cuts</span>
+        <span class="c1">#</span>
+        <span class="c1"># At the moment, cuts that are not along the main axes will return</span>
+        <span class="c1"># outlines with very few points, so we have to implement and</span>
+        <span class="c1"># interpolation scheme to ensure that the accuracy is high.</span>
+
+        <span class="k">if</span> <span class="n">iteration</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">shape_iterations</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Shape not available for iteration </span><span class="si">{</span><span class="n">iteration</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">cut</span><span class="p">,</span> <span class="p">(</span><span class="nb">tuple</span><span class="p">,</span> <span class="nb">list</span><span class="p">)):</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;Cut has to be a list or a tuple, not a </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">cut</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="p">)</span>
+
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">cut</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">3</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Cut has to be three-dimensional&quot;</span><span class="p">)</span>
+
+        <span class="n">patches</span><span class="p">,</span> <span class="n">origin</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_patches_at_iteration</span><span class="p">(</span><span class="n">iteration</span><span class="p">)</span>
+
+        <span class="c1"># If cut is three None, we return the entire shape.</span>
+        <span class="c1"># TODO (FEATURE): Merge patches here</span>
+        <span class="c1">#</span>
+        <span class="c1"># We should not return the multiple patches, but a single one,</span>
+        <span class="c1"># so we should merge them.</span>
+        <span class="k">if</span> <span class="n">cut</span><span class="o">.</span><span class="n">count</span><span class="p">(</span><span class="kc">None</span><span class="p">)</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>  <span class="c1"># all None</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">shape_at_iteration</span><span class="p">(</span><span class="n">iteration</span><span class="p">)</span>
+
+        <span class="c1"># There is at least one that is not None</span>
+
+        <span class="c1"># If they are all not None, that&#39;s a point, so we cannot return anything</span>
+        <span class="c1"># meaningful</span>
+        <span class="k">if</span> <span class="n">cut</span><span class="o">.</span><span class="n">count</span><span class="p">(</span><span class="kc">None</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Cut must has some entries set to None&quot;</span><span class="p">)</span>
+
+        <span class="c1"># There is at least one that is None, but not all</span>
+        <span class="c1">#</span>
+        <span class="c1"># This can be 1D or 2D.</span>
+
+        <span class="c1"># On what dimension(s) do we have to look at?</span>
+        <span class="n">dims</span> <span class="o">=</span> <span class="p">[</span><span class="n">index</span> <span class="k">for</span> <span class="n">index</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">cut</span><span class="p">)</span> <span class="k">if</span> <span class="n">value</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">]</span>
+
+        <span class="c1"># Let&#39;s first consider the 1D case</span>
+        <span class="k">if</span> <span class="n">cut</span><span class="o">.</span><span class="n">count</span><span class="p">(</span><span class="kc">None</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="c1"># Here we just have to find those points with the specified</span>
+            <span class="c1"># coordinates</span>
+
+            <span class="c1"># Here dim is the axis we are looking at, dim0 and dim1 the other</span>
+            <span class="c1"># two</span>
+            <span class="n">dim</span> <span class="o">=</span> <span class="n">dims</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="p">(</span><span class="n">dim0</span><span class="p">,</span> <span class="n">dim1</span><span class="p">)</span> <span class="o">=</span> <span class="p">[</span><span class="n">index</span> <span class="k">for</span> <span class="n">index</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span> <span class="k">if</span> <span class="n">index</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">dims</span><span class="p">]</span>
+
+            <span class="c1"># Here we collect the result</span>
+            <span class="n">points</span> <span class="o">=</span> <span class="p">[]</span>
+
+            <span class="c1"># We closest points up to tolerance of 0.1%, unless the cut is</span>
+            <span class="c1"># outside the horizon</span>
+            <span class="k">for</span> <span class="n">patch</span> <span class="ow">in</span> <span class="n">patches</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+                <span class="n">coords</span><span class="p">,</span> <span class="n">coords0</span><span class="p">,</span> <span class="n">coords1</span> <span class="o">=</span> <span class="n">patch</span><span class="p">[</span><span class="n">dim</span><span class="p">],</span> <span class="n">patch</span><span class="p">[</span><span class="n">dim0</span><span class="p">],</span> <span class="n">patch</span><span class="p">[</span><span class="n">dim1</span><span class="p">]</span>
+                <span class="c1"># We check we are inside the horizon</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span>
+                    <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">coords0</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="n">cut</span><span class="p">[</span><span class="n">dim0</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">coords0</span><span class="p">)</span>
+                    <span class="ow">and</span> <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">coords1</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="n">cut</span><span class="p">[</span><span class="n">dim1</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">coords1</span><span class="p">)</span>
+                <span class="p">):</span>
+                    <span class="k">continue</span>
+
+                <span class="n">size0</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">coords0</span><span class="p">)</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">coords0</span><span class="p">)</span>
+                <span class="n">size1</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">coords1</span><span class="p">)</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">coords1</span><span class="p">)</span>
+                <span class="n">points_around_cut0</span> <span class="o">=</span> <span class="nb">abs</span><span class="p">(</span><span class="n">coords0</span> <span class="o">-</span> <span class="n">cut</span><span class="p">[</span><span class="n">dim0</span><span class="p">])</span> <span class="o">&lt;</span> <span class="mf">1e-3</span> <span class="o">*</span> <span class="n">size0</span>
+                <span class="n">points_around_cut1</span> <span class="o">=</span> <span class="nb">abs</span><span class="p">(</span><span class="n">coords1</span> <span class="o">-</span> <span class="n">cut</span><span class="p">[</span><span class="n">dim1</span><span class="p">])</span> <span class="o">&lt;</span> <span class="mf">1e-3</span> <span class="o">*</span> <span class="n">size1</span>
+
+                <span class="n">selected_points</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">logical_and</span><span class="p">(</span>
+                    <span class="n">points_around_cut0</span><span class="p">,</span> <span class="n">points_around_cut1</span>
+                <span class="p">)</span>
+                <span class="n">points</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">coords</span><span class="p">[</span><span class="n">selected_points</span><span class="p">])</span>
+
+            <span class="k">return</span> <span class="n">points</span>
+
+        <span class="c1"># Finally the 2D case</span>
+        <span class="c1">#</span>
+        <span class="c1"># The catch here is that we want to merge the patches and make sure</span>
+        <span class="c1"># that they are in order.</span>
+        <span class="k">if</span> <span class="n">cut</span><span class="o">.</span><span class="n">count</span><span class="p">(</span><span class="kc">None</span><span class="p">)</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="p">(</span><span class="n">dim0</span><span class="p">,</span> <span class="n">dim1</span><span class="p">)</span> <span class="o">=</span> <span class="n">dims</span>
+            <span class="c1"># dim is the normal direction to the plane where we want the outline</span>
+            <span class="n">dim</span> <span class="o">=</span> <span class="p">[</span><span class="n">index</span> <span class="k">for</span> <span class="n">index</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span> <span class="k">if</span> <span class="n">index</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">dims</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+            <span class="c1"># In points0 and points1 we collect the points on the dimensions 0</span>
+            <span class="c1"># an 1, below we also use 0 and 1 to refer to these two dimensions.</span>
+            <span class="n">points0</span><span class="p">,</span> <span class="n">points1</span> <span class="o">=</span> <span class="p">[],</span> <span class="p">[]</span>
+
+            <span class="c1"># We closest points up to tolerance of 0.1%, unless the cut is</span>
+            <span class="c1"># outside the horizon</span>
+            <span class="k">for</span> <span class="n">patch</span> <span class="ow">in</span> <span class="n">patches</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+                <span class="n">coords</span><span class="p">,</span> <span class="n">coords0</span><span class="p">,</span> <span class="n">coords1</span> <span class="o">=</span> <span class="n">patch</span><span class="p">[</span><span class="n">dim</span><span class="p">],</span> <span class="n">patch</span><span class="p">[</span><span class="n">dim0</span><span class="p">],</span> <span class="n">patch</span><span class="p">[</span><span class="n">dim1</span><span class="p">]</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">coords</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="n">cut</span><span class="p">[</span><span class="n">dim</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">coords</span><span class="p">)):</span>
+                    <span class="k">continue</span>
+                <span class="n">size</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">coords</span><span class="p">)</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">coords</span><span class="p">)</span>
+                <span class="n">points_around_cut</span> <span class="o">=</span> <span class="nb">abs</span><span class="p">(</span><span class="n">coords</span> <span class="o">-</span> <span class="n">cut</span><span class="p">[</span><span class="n">dim</span><span class="p">])</span> <span class="o">&lt;</span> <span class="mf">1e-3</span> <span class="o">*</span> <span class="n">size</span>
+                <span class="n">points0</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">coords0</span><span class="p">[</span><span class="n">points_around_cut</span><span class="p">])</span>
+                <span class="n">points1</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">coords1</span><span class="p">[</span><span class="n">points_around_cut</span><span class="p">])</span>
+
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">points0</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="k">return</span> <span class="kc">None</span>
+
+            <span class="n">points0</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">hstack</span><span class="p">(</span><span class="n">points0</span><span class="p">)</span>
+            <span class="n">points1</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">hstack</span><span class="p">(</span><span class="n">points1</span><span class="p">)</span>
+            <span class="c1"># We compute angle to properly order the points</span>
+            <span class="n">phi</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">angle</span><span class="p">(</span>
+                <span class="n">points0</span> <span class="o">-</span> <span class="n">origin</span><span class="p">[</span><span class="n">dim0</span><span class="p">]</span> <span class="o">+</span> <span class="mi">1</span><span class="n">j</span> <span class="o">*</span> <span class="p">(</span><span class="n">points1</span> <span class="o">-</span> <span class="n">origin</span><span class="p">[</span><span class="n">dim1</span><span class="p">])</span>
+            <span class="p">)</span>
+            <span class="n">ordering</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argsort</span><span class="p">(</span><span class="n">phi</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">points0</span><span class="p">[</span><span class="n">ordering</span><span class="p">],</span> <span class="n">points1</span><span class="p">[</span><span class="n">ordering</span><span class="p">]</span></div>
+
+<div class="viewcode-block" id="OneHorizon.shape_outline_at_time"><a class="viewcode-back" href="../../cactus_horizons_ref.html#kuibit.cactus_horizons.OneHorizon.shape_outline_at_time">[docs]</a>    <span class="k">def</span> <span class="nf">shape_outline_at_time</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">time</span><span class="p">,</span> <span class="n">cut</span><span class="p">,</span> <span class="n">tolerance</span><span class="o">=</span><span class="mf">1e-10</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Return the cut of the 3D shape on a specified plane.</span>
+
+<span class="sd">        ``cut`` has to be a 3D tuple or list with None on the dimensions you</span>
+<span class="sd">        want to keep, and the value of the other coordinates. For example, if</span>
+<span class="sd">        you want the outline at z = 3 on the xy plane, ``cut`` has to be</span>
+<span class="sd">        ``(None, None, 3)``.</span>
+
+<span class="sd">        No interpolation is performed, so results are not accurate when the cut</span>
+<span class="sd">        is not along one of the major directions centered in the origin of the</span>
+<span class="sd">        horizon.</span>
+
+<span class="sd">        :param time: Time.</span>
+<span class="sd">        :type time: float</span>
+<span class="sd">        :param tolerance: Tolerance in determining the time.</span>
+<span class="sd">        :type tolerance: float</span>
+<span class="sd">        :param cut: How should the horizon be sliced?</span>
+<span class="sd">        :type cut: 3D tuple</span>
+<span class="sd">        :returns:    Coordinates of AH outline.</span>
+<span class="sd">        :rtype:      tuple of two 1D NumPy arrays.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># TODO: (REFACTOR) Code logic shared with shape_at_time</span>
+        <span class="c1">#</span>
+        <span class="c1"># This code is essentially the same as shape_at_time. We should refactor</span>
+        <span class="c1"># all the _at_time methods, maybe defining a function that transforms</span>
+        <span class="c1"># _at_iteration methods to _at_time_methods.</span>
+
+        <span class="c1"># https://stackoverflow.com/a/41022847</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">index_closest</span> <span class="o">=</span> <span class="nb">next</span><span class="p">(</span>
+                <span class="n">i</span>
+                <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">shape_times</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">isclose</span><span class="p">(</span><span class="n">_</span><span class="p">,</span> <span class="n">time</span><span class="p">,</span> <span class="n">tolerance</span><span class="p">)</span>
+            <span class="p">)</span>
+        <span class="k">except</span> <span class="ne">StopIteration</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Time </span><span class="si">{</span><span class="n">time</span><span class="si">}</span><span class="s2"> not available&quot;</span><span class="p">)</span>
+
+        <span class="n">iteration</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">shape_iterations</span><span class="p">[</span><span class="n">index_closest</span><span class="p">]</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">shape_outline_at_iteration</span><span class="p">(</span><span class="n">iteration</span><span class="p">,</span> <span class="n">cut</span><span class="o">=</span><span class="n">cut</span><span class="p">)</span></div></div>
+
+
+<div class="viewcode-block" id="HorizonsDir"><a class="viewcode-back" href="../../cactus_horizons_ref.html#kuibit.cactus_horizons.HorizonsDir">[docs]</a><span class="k">class</span> <span class="nc">HorizonsDir</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Class to collect information on apparent horizons</span>
+<span class="sd">    available from thorns AHFinderDirect and QuasiLocalMeasures.</span>
+
+<span class="sd">    :ivar found_any:   True if at least one horizon was found.</span>
+
+<span class="sd">    AHFinderDirect and QuasiLocalMeasures have different indexing. You must</span>
+<span class="sd">    provide both when accessing a file. In the future, the map between the</span>
+<span class="sd">    two indexing systems will be inferred from the paramter file.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># What variables should not be passed to OneHorizon?</span>
+    <span class="n">_exclude_ah_vars</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;cctk_time&quot;</span><span class="p">]</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sd</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Constructor.</span>
+
+<span class="sd">        :param sd:  SimDir object providing access to data directory.</span>
+<span class="sd">        :type sd:   SimDir</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># We organize the variables from QuasiLocalMeasures in the dictionary</span>
+        <span class="c1"># _qlm_vars. This dictionary has as keys the number of qlm horizon and</span>
+        <span class="c1"># as value another dictionary with as keys the name of the variables</span>
+        <span class="c1"># stripped of the qlm_ prefix and of the number, and as values the</span>
+        <span class="c1"># timeseries. We extract the number with a regular expression which</span>
+        <span class="c1"># matches qlm_VARNAME[NUM]</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_qlm_vars</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_populate_qlm_vars</span><span class="p">(</span><span class="n">sd</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_num_qlm_horizons</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_qlm_vars</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+
+        <span class="c1"># ah_vars is a dictionary like qlm_vars with the difference that we</span>
+        <span class="c1"># extract information from the files BH_diagnostics.ah(\d+).gp and</span>
+        <span class="c1"># that the index here is the Apparent Horizon index.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_ah_vars</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="c1"># self._num_ah_horizons is set inside the function</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_populate_ah_vars</span><span class="p">(</span><span class="n">sd</span><span class="p">)</span>
+
+        <span class="c1"># The next step is to find the files for the shape of the horizons, if</span>
+        <span class="c1"># available. We scan all the files and find those with h.t*****.ah*.gp</span>
+        <span class="c1">#</span>
+        <span class="c1"># Once again we put all the files in a dictionary with index the AH</span>
+        <span class="c1"># index and as values another dictionary with keys the iteration and</span>
+        <span class="c1"># value the file</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_shape_files</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_populate_shape_files</span><span class="p">(</span><span class="n">sd</span><span class="p">)</span>
+
+        <span class="c1"># Here we align the ah_vars and shape_files so that they have the same</span>
+        <span class="c1"># keys. We add an empty {} to the missing values.</span>
+        <span class="k">for</span> <span class="n">ah_index</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ah_vars</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">ah_index</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_shape_files</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_shape_files</span><span class="p">[</span><span class="n">ah_index</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+
+        <span class="k">for</span> <span class="n">ah_index</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_shape_files</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">ah_index</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ah_vars</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_ah_vars</span><span class="p">[</span><span class="n">ah_index</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+
+        <span class="c1"># Okay, here we can be confident that shape_files and ah_vars have the</span>
+        <span class="c1"># same keys.</span>
+
+        <span class="c1"># Now there are multiple options:</span>
+        <span class="c1"># 1. We don&#39;t have any qlm_vars, ah_vars, and _shape_files</span>
+        <span class="c1"># 2. We qlm_vars, ah_vars, and shape_files</span>
+        <span class="c1"># 3. We have a combination of the above</span>
+        <span class="c1">#</span>
+        <span class="c1"># The OneHorizon class is robust in taking partially empty data,</span>
+        <span class="c1"># but we must clear the indexing system.</span>
+        <span class="c1">#</span>
+        <span class="c1"># Here we check that all the dictionaries are not empty</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">found_any</span> <span class="o">=</span> <span class="nb">any</span><span class="p">(</span>
+            <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_qlm_vars</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ah_vars</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_shape_files</span><span class="p">]</span>
+        <span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_populate_qlm_vars</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sd</span><span class="p">):</span>
+        <span class="c1"># Here we a regular expression with two capturing groups</span>
+        <span class="c1"># 1. ^ $ means that we match the entire string</span>
+        <span class="c1"># 2. qlm_ is matched to itself</span>
+        <span class="c1"># 3. the first capturing group, (\w+), matches any word</span>
+        <span class="c1"># 4. Then we match the brackets, and inside a number</span>
+        <span class="n">rx_qlm_number</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;^qlm_(\w+)\[(\d+)\]$&quot;</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">var_name</span> <span class="ow">in</span> <span class="n">sd</span><span class="o">.</span><span class="n">ts</span><span class="o">.</span><span class="n">scalar</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+            <span class="n">matched</span> <span class="o">=</span> <span class="n">rx_qlm_number</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">var_name</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">matched</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="c1"># Here we strip of qlm_ and of the number</span>
+                <span class="n">var_name_stripped</span> <span class="o">=</span> <span class="n">matched</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+                <span class="n">horizon_number</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">matched</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">2</span><span class="p">))</span>
+                <span class="c1"># For each horizon, we have a dictionary that maps variable</span>
+                <span class="c1"># names to the timeseries</span>
+                <span class="n">horizon_vars</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_qlm_vars</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="n">horizon_number</span><span class="p">,</span> <span class="p">{})</span>
+                <span class="n">horizon_vars</span><span class="p">[</span><span class="n">var_name_stripped</span><span class="p">]</span> <span class="o">=</span> <span class="n">sd</span><span class="o">.</span><span class="n">ts</span><span class="o">.</span><span class="n">scalar</span><span class="p">[</span><span class="n">var_name</span><span class="p">]</span>
+
+    <span class="k">def</span> <span class="nf">_populate_ah_vars</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sd</span><span class="p">):</span>
+        <span class="c1"># First, we find all the files related to apparent horizons. These</span>
+        <span class="c1"># have names like BH_diagnostics.ah1.gp</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_ah_files</span> <span class="o">=</span> <span class="p">{}</span>
+
+        <span class="n">rx_ah_filename</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;^BH_diagnostics.ah(\d+).gp$&quot;</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">path</span> <span class="ow">in</span> <span class="n">sd</span><span class="o">.</span><span class="n">allfiles</span><span class="p">:</span>
+            <span class="n">filename</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">path</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+            <span class="n">matched</span> <span class="o">=</span> <span class="n">rx_ah_filename</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">matched</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">ah_index</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">matched</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">1</span><span class="p">))</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_ah_files</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="n">ah_index</span><span class="p">,</span> <span class="p">[])</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+
+        <span class="c1"># Next, we find what variables they contain. This should be pretty</span>
+        <span class="c1"># standard, but we can make our code more robust by not assuming too</span>
+        <span class="c1"># much. We read one header and find the variables, then read all the</span>
+        <span class="c1"># other files assuming the have the same variables. A complication is</span>
+        <span class="c1"># that variables names have blank spaces. We turn them into underscores.</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_num_ah_horizons</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_ah_files</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+
+        <span class="c1"># We continue only if we find some files</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_num_ah_horizons</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+
+            <span class="c1"># [0][0] is because the values are lists</span>
+            <span class="n">first_ah_file</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_ah_files</span><span class="o">.</span><span class="n">values</span><span class="p">())[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+            <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">first_ah_file</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">fil</span><span class="p">:</span>
+                <span class="c1"># Here we read the first lines_to_read into header</span>
+                <span class="c1"># We strip the new line</span>
+                <span class="n">header</span> <span class="o">=</span> <span class="p">[]</span>
+                <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">fil</span><span class="p">:</span>
+                    <span class="c1"># We read the header, which starts with #</span>
+                    <span class="k">if</span> <span class="n">line</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;#&quot;</span><span class="p">):</span>
+                        <span class="n">header</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">line</span><span class="o">.</span><span class="n">strip</span><span class="p">())</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="k">break</span>
+
+            <span class="c1"># Now, we parse the header and associate variable name with column</span>
+            <span class="c1"># where the data is. The header looks like:</span>
+            <span class="c1">#</span>
+            <span class="c1"># # apparent horizon 1/3</span>
+            <span class="c1"># #</span>
+            <span class="c1"># # column  1 = cctk_iteration</span>
+            <span class="c1"># # column  2 = cctk_time</span>
+            <span class="c1"># # column  3 = centroid_x</span>
+            <span class="c1"># # column  4 = centroid_y</span>
+            <span class="c1"># # column  5 = centroid_z</span>
+            <span class="c1">#</span>
+            <span class="c1"># We scan the columns with a regex.</span>
+            <span class="c1"># 1. ^ $ means that we match the entire string</span>
+            <span class="c1"># 2. \#[\s]column[\s]+ matches the literal &#39;# column &#39; with any</span>
+            <span class="c1">#    number of spaces.</span>
+            <span class="c1"># 3. Then we match the number</span>
+            <span class="c1"># 4. We match another literal &#39; = &#39; with the sapces</span>
+            <span class="c1"># 5. Finally we match the name of the variable matching letters</span>
+            <span class="c1">#    and symbols</span>
+            <span class="n">rx_column</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span>
+                <span class="sa">r</span><span class="s2">&quot;\#[\s]column[\s]+(\d+)[\s]=[\s]([a-zA-Z_0-9\s()-/]+)$&quot;</span>
+            <span class="p">)</span>
+
+            <span class="c1"># Here is where we store the map</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_ah_vars_columns</span> <span class="o">=</span> <span class="p">{}</span>
+
+            <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">header</span><span class="p">:</span>
+                <span class="n">matched</span> <span class="o">=</span> <span class="n">rx_column</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">line</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">matched</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="c1"># Columns counting start from 1, so we must subtract one to</span>
+                    <span class="c1"># be with 0-based indexing</span>
+                    <span class="n">column_number</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">matched</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">1</span><span class="p">))</span> <span class="o">-</span> <span class="mi">1</span>
+                    <span class="n">name</span> <span class="o">=</span> <span class="n">matched</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+
+                    <span class="c1"># We need to know where the time is</span>
+                    <span class="k">if</span> <span class="n">name</span> <span class="o">==</span> <span class="s2">&quot;cctk_time&quot;</span><span class="p">:</span>
+                        <span class="n">time_column</span> <span class="o">=</span> <span class="n">column_number</span>
+
+                    <span class="c1"># We exclude some variables we don&#39;t want in OneHorizon</span>
+                    <span class="c1"># (e.g., we don&#39;t want cctk_time)</span>
+                    <span class="k">if</span> <span class="n">name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_exclude_ah_vars</span><span class="p">:</span>
+                        <span class="k">continue</span>
+
+                    <span class="c1"># Spaces to underscores</span>
+                    <span class="n">name</span> <span class="o">=</span> <span class="n">name</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot; &quot;</span><span class="p">,</span> <span class="s2">&quot;_&quot;</span><span class="p">)</span>
+                    <span class="c1"># We remove parentheses</span>
+                    <span class="n">name</span> <span class="o">=</span> <span class="n">name</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;(&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
+                    <span class="n">name</span> <span class="o">=</span> <span class="n">name</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;)&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
+                    <span class="c1"># We change / to _</span>
+                    <span class="n">name</span> <span class="o">=</span> <span class="n">name</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;/&quot;</span><span class="p">,</span> <span class="s2">&quot;_&quot;</span><span class="p">)</span>
+                    <span class="c1"># We change - to _</span>
+                    <span class="n">name</span> <span class="o">=</span> <span class="n">name</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;-&quot;</span><span class="p">,</span> <span class="s2">&quot;_&quot;</span><span class="p">)</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_ah_vars_columns</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">column_number</span>
+
+            <span class="c1"># Now we are ready to populate, we read all the data first. Then, we</span>
+            <span class="c1"># select all the columns</span>
+            <span class="k">for</span> <span class="n">ah_index</span><span class="p">,</span> <span class="n">files</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ah_files</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                <span class="c1"># We create an empty dictionary in self._ah_vars[ah_index]</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_ah_vars</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="n">ah_index</span><span class="p">,</span> <span class="p">{})</span>
+
+                <span class="c1"># We read all the data</span>
+                <span class="n">alldata</span> <span class="o">=</span> <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">loadtxt</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">unpack</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">ndmin</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">files</span><span class="p">]</span>
+                <span class="k">for</span> <span class="n">var_name</span><span class="p">,</span> <span class="n">column_number</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ah_vars_columns</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                    <span class="c1"># Here we select the time column and the data column for all</span>
+                    <span class="c1"># the data in each file and we convert them into TimeSeries</span>
+                    <span class="n">data_ts</span> <span class="o">=</span> <span class="n">combine_ts</span><span class="p">(</span>
+                        <span class="p">[</span>
+                            <span class="n">remove_duplicated_iters</span><span class="p">(</span>
+                                <span class="n">data</span><span class="p">[</span><span class="n">time_column</span><span class="p">],</span> <span class="n">data</span><span class="p">[</span><span class="n">column_number</span><span class="p">]</span>
+                            <span class="p">)</span>
+                            <span class="k">for</span> <span class="n">data</span> <span class="ow">in</span> <span class="n">alldata</span>
+                        <span class="p">]</span>
+                    <span class="p">)</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_ah_vars</span><span class="p">[</span><span class="n">ah_index</span><span class="p">][</span><span class="n">var_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">data_ts</span>
+
+    <span class="k">def</span> <span class="nf">_populate_shape_files</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sd</span><span class="p">):</span>
+        <span class="c1"># Here we match the files with a regular expression:</span>
+        <span class="c1"># 1. ^ $ means that we match the entire string</span>
+        <span class="c1"># 2. Then we match the literal h.t</span>
+        <span class="c1"># 3. with a number (\d+)</span>
+        <span class="c1"># 4. the literal .ah</span>
+        <span class="c1"># 5. another number (\d+)</span>
+        <span class="c1"># 6. and the file extension .gp</span>
+        <span class="n">rx_shape_filename</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;^h.t(\d+).ah(\d+).gp$&quot;</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">path</span> <span class="ow">in</span> <span class="n">sd</span><span class="o">.</span><span class="n">allfiles</span><span class="p">:</span>
+            <span class="n">filename</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">path</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span>
+            <span class="n">matched</span> <span class="o">=</span> <span class="n">rx_shape_filename</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">matched</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">ah_index</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">matched</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">2</span><span class="p">))</span>
+                <span class="n">iteration</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">matched</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">1</span><span class="p">))</span>
+                <span class="n">ah_shape_dict</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_shape_files</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="n">ah_index</span><span class="p">,</span> <span class="p">{})</span>
+                <span class="n">ah_shape_dict</span><span class="p">[</span><span class="n">iteration</span><span class="p">]</span> <span class="o">=</span> <span class="n">path</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">available_qlm_horizons</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Horizons in QLM indexing with associated data.</span>
+
+<span class="sd">        :returns: Indices of the QLM horizons found in the data.</span>
+<span class="sd">        :rtype: list</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="nb">sorted</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_qlm_vars</span><span class="o">.</span><span class="n">keys</span><span class="p">()))</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">available_apparent_horizons</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Horizons in AH indexing with associated data.</span>
+
+<span class="sd">        :returns: Indices of the AH horizons found in the data.</span>
+<span class="sd">        :rtype: list&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="nb">sorted</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_ah_vars</span><span class="o">.</span><span class="n">keys</span><span class="p">()))</span>
+
+<div class="viewcode-block" id="HorizonsDir.get_apparent_horizon"><a class="viewcode-back" href="../../cactus_horizons_ref.html#kuibit.cactus_horizons.HorizonsDir.get_apparent_horizon">[docs]</a>    <span class="k">def</span> <span class="nf">get_apparent_horizon</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ah</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Return a :py:func:`~.OneHorizon` corresponding to an horizon as</span>
+<span class="sd">        found by AHFinderDirect.</span>
+
+<span class="sd">        :param ah: AHFinderDirect index.</span>
+<span class="sd">        :type ah: int</span>
+
+<span class="sd">        :returns: Apparent horizon.</span>
+<span class="sd">        :rtype: :py:func:`~.OneHorizon`</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">ah</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">available_apparent_horizons</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;AH horizon </span><span class="si">{</span><span class="n">ah</span><span class="si">}</span><span class="s2"> not available&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="p">[(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">ah</span><span class="p">)]</span></div>
+
+<div class="viewcode-block" id="HorizonsDir.get_qlm_horizon"><a class="viewcode-back" href="../../cactus_horizons_ref.html#kuibit.cactus_horizons.HorizonsDir.get_qlm_horizon">[docs]</a>    <span class="k">def</span> <span class="nf">get_qlm_horizon</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">qlm</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Return a :py:func:`~.OneHorizon` corresponding to an horizon as</span>
+<span class="sd">        analyzed by QuasiLocalMeasures.</span>
+
+<span class="sd">        :param qlm: QuasiLocalMeasures index.</span>
+<span class="sd">        :type qlm: int</span>
+
+<span class="sd">        :returns: QuasiLocalMeasures horizon.</span>
+<span class="sd">        :rtype: :py:func:`~.OneHorizon`</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">qlm</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">available_qlm_horizons</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;QLM horizon </span><span class="si">{</span><span class="n">qlm</span><span class="si">}</span><span class="s2"> not available&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="p">[(</span><span class="n">qlm</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">)]</span></div>
+
+    <span class="k">def</span> <span class="fm">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="p">(</span><span class="nb">tuple</span><span class="p">,</span> <span class="nb">list</span><span class="p">)):</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;You have to provide both the QLM and AH indices&quot;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">key</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s2"> does not identify an horizon&quot;</span><span class="p">)</span>
+
+        <span class="c1"># We ensure that we have ints because we store the keys as int.</span>
+        <span class="n">qlm_index</span><span class="p">,</span> <span class="n">ah_index</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">key</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span> <span class="nb">int</span><span class="p">(</span><span class="n">key</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+
+        <span class="c1"># We need at least of the two indices to be valid</span>
+        <span class="k">if</span> <span class="p">(</span>
+            <span class="n">qlm_index</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">available_qlm_horizons</span>
+            <span class="ow">and</span> <span class="n">ah_index</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">available_apparent_horizons</span>
+        <span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Horizon </span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s2"> is not found (QLM and AH absent)&quot;</span><span class="p">)</span>
+
+        <span class="c1"># With get we return an empty dictionary if we don&#39;t have the index</span>
+        <span class="k">return</span> <span class="n">OneHorizon</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_qlm_vars</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">qlm_index</span><span class="p">,</span> <span class="p">{}),</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_ah_vars</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">ah_index</span><span class="p">,</span> <span class="p">{}),</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_shape_files</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">ah_index</span><span class="p">,</span> <span class="p">{}),</span>
+        <span class="p">)</span>
+
+    <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">found_any</span><span class="p">:</span>
+            <span class="k">return</span> <span class="s2">&quot;No horizon found&quot;</span>
+
+        <span class="n">num_qlm</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">available_qlm_horizons</span><span class="p">)</span>
+        <span class="n">num_ah</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">available_apparent_horizons</span><span class="p">)</span>
+
+        <span class="n">ret</span> <span class="o">=</span> <span class="s2">&quot;Horizons found:</span><span class="se">\n</span><span class="s2">&quot;</span>
+        <span class="n">ret</span> <span class="o">+=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">num_qlm</span><span class="si">}</span><span class="s2"> horizons from QuasiLocalMeasures</span><span class="se">\n</span><span class="s2">&quot;</span>
+        <span class="n">ret</span> <span class="o">+=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">num_ah</span><span class="si">}</span><span class="s2"> horizons from AHFinderDirect&quot;</span>
+        <span class="k">return</span> <span class="n">ret</span></div>
+
+    <span class="c1"># TODO (FUTURE): Infer the mapping from the parameter file</span>
+    <span class="c1">#</span>
+    <span class="c1"># Once that is done, implement the following features.</span>
+
+    <span class="c1"># def __iter__(self):</span>
+    <span class="c1">#     for horizon_number in self.available_horizons:</span>
+    <span class="c1">#         yield self[horizon_number]</span>
+
+    <span class="c1"># def __len__(self):</span>
+    <span class="c1">#     return len(self.available_horizons)</span>
+</pre></div>
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="../../index.html">
+              <img class="logo" src="../../_static/logo.png" alt="Logo"/>
+            </a></p>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">kuibit 1.3.3 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../index.html" >Module code</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">kuibit.cactus_horizons</a></li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2020-2021, Gabriele Bozzola.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 3.5.4.
+    </div>
+  </body>
+</html>
