@@ -1,5 +1,11 @@
 # Changelog
 
+## Version 1.3.3 (19 November 2021)
+
+#### Bug fixes
+
+- Fixed `tikzplotlib` dependency for `Python 3.6`
+
 ## Version 1.3.2 (16 November 2021)
 
 #### Bug fixes
