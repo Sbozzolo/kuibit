@@ -303,6 +303,24 @@ class TestVisualizeMatplotlib(unittest.TestCase):
             )
         )
 
+        with self.assertRaises(RuntimeError):
+            # To trigger this error, we "move" the horizon up so that it does
+            # not intersect the equatorial plane. This is going to be surgical
+            # operation.
+
+            # This is some seriously ugly code!
+
+            # Moving all the coordinates by 10
+            # ah._patches[0] is at iteration 0
+            # ah._patches[0][0] is a dictionary with the various components
+            new_ah_patches00 = {
+                k: 10 + v for k, v in ah._patches[0][0].items()
+            }
+            new_ah_patches0 = (new_ah_patches00, ah._patches[0][1])
+            ah._patches[0] = new_ah_patches0
+
+            viz.plot_horizon_on_plane_at_time(ah, 0, "xy")
+
     def test_plot_components_boundaries(self):
 
         # Test invalid data

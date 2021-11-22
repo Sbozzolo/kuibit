@@ -1204,6 +1204,12 @@ def _plot_horizon_on_plane(
             time, cut[plane], tolerance=time_tolerance
         )
 
+    if shape is None:
+        raise RuntimeError(
+            "No outline found on given plane. "
+            "This might be due to lack of shape interpolation"
+        )
+
     return plot_horizon(
         shape,
         color=color,
