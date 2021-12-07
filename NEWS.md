@@ -2,6 +2,9 @@
 
 ## Version 1.4.0 (Under Development)
 
+#### General
+- Improvements to documentation and docstrings
+
 #### Features
 - Added linear momentum lost by gravitational waves along the x and y directions
   (starting from a contribution by @konrad-topolski)
