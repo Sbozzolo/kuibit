@@ -1,8 +1,9 @@
 Overview
 ========
 
-``kuibit`` is a set of tools to post-process simulations performed with the
-`Einstein Toolkit <https://einsteintoolkit.org/>`_.
+``kuibit`` is a set of `openly developed <https://github.com/Sbozzolo/kuibit>`_.
+ tools to post-process simulations performed with the `Einstein Toolkit
+ <https://einsteintoolkit.org/>`_.
 
 The goal of this package is to enable you to pursue your scientific goals
 without having to worry about computational details (e.g., handling simulation
@@ -19,6 +20,7 @@ The :doc:`testimonials page <testimonials>` collects short user's reviews about
 ``kuibit``.
 
 New to ``kuibit``? Read :doc:`First steps with kuibit <first_steps>`.
+
 
 Summary of Features
 -------------------
