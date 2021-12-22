@@ -22,7 +22,6 @@ Python required to complete the task.
   reading ASCII files containing multiple variables. [==]
 * Port `cactus_parfile` from `PostCactus`. [==]
 * Port `cactus_timertree` from `PostCactus`. [==]
-* Port support for grid data with reflection from `PostCactus`. [==]
 * Port support for locating bounding boxes from `PostCactus`. [==]
 
 * Transparently handle low dimensional grid data with higher dimensional one is
