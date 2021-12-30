@@ -450,7 +450,7 @@ The value of rho0 at the point (1, 2) is 1.29285273509444e-10
 [0.0, 0.25, 0.5]
 </pre></div></div>
 </div>
-<p>Sometimes we don’t need the entire grid, but we want to focus on a small region, and we want to have that sampled with uniform spacing (e.g, for plotting, or because we want to merge the refinement levels). To get a variable on a specified grid, use the <code class="docutils literal notranslate"><span class="pre">read_on_grid</span></code> method.</p>
+<p>Sometimes we don’t need the entire grid, but we want to focus on a small region, and we want to have that sampled with uniform spacing (e.g, for plotting, or because we want to merge the refinement levels). To get a variable on a specified grid, you can use the <code class="docutils literal notranslate"><span class="pre">read_on_grid</span></code> method. At the moment, this method does nothing fancy: it reads the data as <code class="docutils literal notranslate"><span class="pre">HierarchicalGridData</span></code> and interpolates onto the desired grid.</p>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
 </pre></div>
@@ -459,6 +459,12 @@ The value of rho0 at the point (1, 2) is 1.29285273509444e-10
 <span></span><span class="n">small_grid</span> <span class="o">=</span> <span class="n">UniformGrid</span><span class="p">([</span><span class="mi">10</span><span class="p">,</span> <span class="mi">10</span><span class="p">],</span> <span class="n">x0</span><span class="o">=</span><span class="p">[</span><span class="o">-</span><span class="mi">3</span><span class="p">,</span> <span class="o">-</span><span class="mi">3</span><span class="p">],</span> <span class="n">x1</span><span class="o">=</span><span class="p">[</span><span class="mi">3</span><span class="p">,</span><span class="mi">3</span><span class="p">])</span>
 
 <span class="n">rho0_small</span> <span class="o">=</span> <span class="n">rho_b</span><span class="o">.</span><span class="n">read_on_grid</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">small_grid</span><span class="p">)</span>
+<span class="c1"># This is equivalent to</span>
+<span class="c1"># rho0_small = rho_b[0].to_UniformGridData_from_grid(grid)</span>
+
+<span class="c1"># In most cases, it is more convenient to read rho_b as</span>
+<span class="c1"># HierarchicalGridData and interpolate onto uniform grid</span>
+<span class="c1"># for plotting</span>
 
 <span class="n">cf</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">contourf</span><span class="p">(</span><span class="o">*</span><span class="n">rho0_small</span><span class="o">.</span><span class="n">coordinates_meshgrid</span><span class="p">(),</span> <span class="n">np</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="n">rho0_small</span><span class="o">.</span><span class="n">data_xyz</span><span class="p">))</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">colorbar</span><span class="p">(</span><span class="n">cf</span><span class="p">)</span>
@@ -471,7 +477,7 @@ The value of rho0 at the point (1, 2) is 1.29285273509444e-10
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-&lt;matplotlib.colorbar.Colorbar at 0x7fcc29390898&gt;
+&lt;matplotlib.colorbar.Colorbar at 0x7ff99fde5898&gt;
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
@@ -502,7 +508,7 @@ The value of rho0 at the point (1, 2) is 1.29285273509444e-10
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-&lt;matplotlib.contour.QuadContourSet at 0x7fcc28ef0ba8&gt;
+&lt;matplotlib.contour.QuadContourSet at 0x7ff99f945ba8&gt;
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">

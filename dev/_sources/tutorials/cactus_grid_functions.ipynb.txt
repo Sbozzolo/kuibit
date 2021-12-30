@@ -131,7 +131,7 @@
    "cell_type": "markdown",
    "metadata": {},
    "source": [
-    "Sometimes we don't need the entire grid, but we want to focus on a small region, and we want to have that sampled with uniform spacing (e.g, for plotting, or because we want to merge the refinement levels). To get a variable on a specified grid, use the `read_on_grid` method."
+    "Sometimes we don't need the entire grid, but we want to focus on a small region, and we want to have that sampled with uniform spacing (e.g, for plotting, or because we want to merge the refinement levels). To get a variable on a specified grid, you can use the `read_on_grid` method. At the moment, this method does nothing fancy: it reads the data as `HierarchicalGridData` and interpolates onto the desired grid. "
    ]
   },
   {
@@ -143,6 +143,12 @@
     "small_grid = UniformGrid([10, 10], x0=[-3, -3], x1=[3,3])\n",
     "\n",
     "rho0_small = rho_b.read_on_grid(0, small_grid)\n",
+    "# This is equivalent to\n",
+    "# rho0_small = rho_b[0].to_UniformGridData_from_grid(grid)\n",
+    "\n",
+    "# In most cases, it is more convenient to read rho_b as \n",
+    "# HierarchicalGridData and interpolate onto uniform grid\n",
+    "# for plotting\n",
     "\n",
     "cf = plt.contourf(*rho0_small.coordinates_meshgrid(), np.log10(rho0_small.data_xyz))\n",
     "plt.colorbar(cf)"
@@ -220,7 +226,7 @@
    "name": "python",
    "nbconvert_exporter": "python",
    "pygments_lexer": "ipython3",
-   "version": "3.8.8"
+   "version": "3.9.9"
   }
  },
  "nbformat": 4,
