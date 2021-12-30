@@ -13,6 +13,12 @@
 
 - Added error in `_plot_horizon_on_plane` when the horizon cannot be plotted
 
+#### New examples
+
+Scripts:
+
+* `plot_ah_trajectories.py`
+
 ## Version 1.3.3 (19 November 2021)
 
 #### Bug fixes
