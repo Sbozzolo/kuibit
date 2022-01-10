@@ -2299,7 +2299,7 @@ class HierarchicalGridData(BaseNumerical):
         # We have multiple patches
         if len(self[self.num_coarsest_level]) != 1:
             raise ValueError(
-                "Data does not have a well defined x0 "
+                "Data does not have a well defined x0"
                 " (there are multiple patches)"
             )
         return self.first_component.x0
