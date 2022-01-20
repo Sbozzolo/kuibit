@@ -8,6 +8,7 @@
 #### Bug fixes
 
 - Added error in `_plot_horizon_on_plane` when the horizon cannot be plotted
+- Updated NumPy types (np.int -> int, np.float -> float)
 
 #### New examples
 

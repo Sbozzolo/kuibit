@@ -1548,7 +1548,7 @@ class TestHierarchicalGridData(unittest.TestCase):
         self.assertEqual(hg.num_coarsest_level, 0)
 
         # dtype
-        self.assertEqual(hg.dtype, np.float)
+        self.assertEqual(hg.dtype, float)
 
         # x0, x1
         self.assertCountEqual(hg.x0, self.expected_data.x0)
