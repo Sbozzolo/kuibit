@@ -609,9 +609,7 @@
 
         <span class="c1"># Here we substitute those elements that are outside with the point</span>
         <span class="c1"># (0, 0, 0, ...) (N zeros with 0 is num dimension)</span>
-        <span class="n">indices_arr</span><span class="p">[</span><span class="n">outside_indices</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">num_dimensions</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">int</span>
-        <span class="p">)</span>
+        <span class="n">indices_arr</span><span class="p">[</span><span class="n">outside_indices</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">num_dimensions</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">int</span><span class="p">)</span>
 
         <span class="c1"># See comment ~10 lines above for what this means</span>
         <span class="n">take_indices</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="o">*</span><span class="n">indices_arr</span><span class="p">))</span>
@@ -1221,7 +1219,7 @@
         <span class="c1"># There can zero entries, we substitute them with -1, so that we</span>
         <span class="c1"># can identify them as negative numbers</span>
         <span class="n">new_dx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">dx</span> <span class="k">if</span> <span class="n">dx</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="k">else</span> <span class="o">-</span><span class="mi">1</span> <span class="k">for</span> <span class="n">dx</span> <span class="ow">in</span> <span class="n">new_dx</span><span class="p">])</span>
-        <span class="n">new_shape</span> <span class="o">=</span> <span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">x1</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">x0</span><span class="p">)</span> <span class="o">/</span> <span class="n">new_dx</span> <span class="o">+</span> <span class="mf">1.5</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">int64</span><span class="p">)</span>
+        <span class="n">new_shape</span> <span class="o">=</span> <span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">x1</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">x0</span><span class="p">)</span> <span class="o">/</span> <span class="n">new_dx</span> <span class="o">+</span> <span class="mf">1.5</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
         <span class="n">new_shape</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">s</span> <span class="k">if</span> <span class="n">s</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="k">else</span> <span class="mi">1</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">new_shape</span><span class="p">])</span>
 
         <span class="n">new_grid</span> <span class="o">=</span> <span class="n">UniformGrid</span><span class="p">(</span>
@@ -2012,7 +2010,7 @@
         <span class="c1"># available on each block</span>
 
         <span class="n">finest_map</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span>
-            <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">boundaries_tilde</span><span class="p">]),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">int32</span>
+            <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">boundaries_tilde</span><span class="p">]),</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">int</span>
         <span class="p">)</span>
 
         <span class="k">for</span> <span class="n">component_index</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">boundary_origins_tilde</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">):</span>
@@ -2081,7 +2079,7 @@
 
         <span class="k">for</span> <span class="n">comp</span> <span class="ow">in</span> <span class="n">components</span><span class="p">:</span>
             <span class="c1"># We find the index corresponding to x0 and x1 of the component</span>
-            <span class="n">index_x0</span> <span class="o">=</span> <span class="p">((</span><span class="n">comp</span><span class="o">.</span><span class="n">x0</span> <span class="o">-</span> <span class="n">grid</span><span class="o">.</span><span class="n">x0</span><span class="p">)</span> <span class="o">/</span> <span class="n">grid</span><span class="o">.</span><span class="n">dx</span> <span class="o">+</span> <span class="mf">0.5</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">int32</span><span class="p">)</span>
+            <span class="n">index_x0</span> <span class="o">=</span> <span class="p">((</span><span class="n">comp</span><span class="o">.</span><span class="n">x0</span> <span class="o">-</span> <span class="n">grid</span><span class="o">.</span><span class="n">x0</span><span class="p">)</span> <span class="o">/</span> <span class="n">grid</span><span class="o">.</span><span class="n">dx</span> <span class="o">+</span> <span class="mf">0.5</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
             <span class="n">index_x1</span> <span class="o">=</span> <span class="n">index_x0</span> <span class="o">+</span> <span class="n">comp</span><span class="o">.</span><span class="n">shape</span>
             <span class="n">slicer</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span>
                 <span class="nb">slice</span><span class="p">(</span><span class="n">index_j0</span><span class="p">,</span> <span class="n">index_j1</span><span class="p">)</span>
@@ -2346,7 +2344,7 @@
         <span class="c1"># We have multiple patches</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">num_coarsest_level</span><span class="p">])</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-                <span class="s2">&quot;Data does not have a well defined x0 &quot;</span>
+                <span class="s2">&quot;Data does not have a well defined x0&quot;</span>
                 <span class="s2">&quot; (there are multiple patches)&quot;</span>
             <span class="p">)</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">first_component</span><span class="o">.</span><span class="n">x0</span>
@@ -2725,8 +2723,9 @@
 
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">to_UniformGridData_from_grid</span><span class="p">(</span><span class="n">grid</span><span class="p">,</span> <span class="n">resample</span><span class="o">=</span><span class="n">resample</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="HierarchicalGridData.merge_refinement_levels"><a class="viewcode-back" href="../../grid_data_ref.html#kuibit.grid_data.HierarchicalGridData.merge_refinement_levels">[docs]</a>    <span class="k">def</span> <span class="nf">merge_refinement_levels</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">resample</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Combine all the available data and resample it grid that encompasses all the</span>
+<div class="viewcode-block" id="HierarchicalGridData.refinement_levels_merged"><a class="viewcode-back" href="../../grid_data_ref.html#kuibit.grid_data.HierarchicalGridData.refinement_levels_merged">[docs]</a>    <span class="k">def</span> <span class="nf">refinement_levels_merged</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">resample</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Return a new :py:class:`~.UniformGridData` with all the available</span>
+<span class="sd">        data combined and resampled to a grid that encompasses all the</span>
 <span class="sd">        components and has resolution of the finest refinement level.</span>
 
 <span class="sd">        When ``resample`` is True, data from coarser refinement levels is</span>
@@ -2759,7 +2758,7 @@
         <span class="c1"># correspond. There can zero entries, we substitute them with -1, so</span>
         <span class="c1"># that we can identify them as negative numbers</span>
         <span class="n">new_dx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">dx</span> <span class="k">if</span> <span class="n">dx</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="k">else</span> <span class="o">-</span><span class="mi">1</span> <span class="k">for</span> <span class="n">dx</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">finest_dx</span><span class="p">])</span>
-        <span class="n">new_shape</span> <span class="o">=</span> <span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">x1</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">x0</span><span class="p">)</span> <span class="o">/</span> <span class="n">new_dx</span> <span class="o">+</span> <span class="mf">1.5</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">int64</span><span class="p">)</span>
+        <span class="n">new_shape</span> <span class="o">=</span> <span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">x1</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">x0</span><span class="p">)</span> <span class="o">/</span> <span class="n">new_dx</span> <span class="o">+</span> <span class="mf">1.5</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
         <span class="n">new_shape</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">s</span> <span class="k">if</span> <span class="n">s</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="k">else</span> <span class="mi">1</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">new_shape</span><span class="p">])</span>
 
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">to_UniformGridData</span><span class="p">(</span>

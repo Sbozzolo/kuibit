@@ -1361,37 +1361,6 @@ This can be obtained with the method <a class="reference internal" href="#kuibit
 </dd></dl>
 
 <dl class="py method">
-<dt id="kuibit.grid_data.HierarchicalGridData.merge_refinement_levels">
-<code class="sig-name descname"><span class="pre">merge_refinement_levels</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">resample</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/kuibit/grid_data.html#HierarchicalGridData.merge_refinement_levels"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kuibit.grid_data.HierarchicalGridData.merge_refinement_levels" title="Permalink to this definition">¶</a></dt>
-<dd><p>Combine all the available data and resample it grid that encompasses all the
-components and has resolution of the finest refinement level.</p>
-<p>When <code class="docutils literal notranslate"><span class="pre">resample</span></code> is True, data from coarser refinement levels is
-resampled with multilinear interpolation, otherwise the nearest
-neighbors are used.</p>
-<div class="admonition warning">
-<p class="admonition-title">Warning</p>
-<p>For most practical purposes, using this function is an overkill.
-This can be a very expensive operation and require a lot of memory.
-Prefer <a class="reference internal" href="#kuibit.grid_data.HierarchicalGridData.to_UniformGridData" title="kuibit.grid_data.HierarchicalGridData.to_UniformGridData"><code class="xref py py-meth docutils literal notranslate"><span class="pre">to_UniformGridData()</span></code></a> when possible. The only real
-reasonable application of this function is with small simluations or
-1D data.</p>
-</div>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>resample</strong> (<em>bool</em>) – If True, resample the data with multilinear interpolation,
-otherwise, use nearest neighbors.</p>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p>New <a class="reference internal" href="#kuibit.grid_data.UniformGridData" title="kuibit.grid_data.UniformGridData"><code class="xref py py-class docutils literal notranslate"><span class="pre">UniformGridData</span></code></a> with the resolution of the
-finest refinement level.</p>
-</dd>
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p><a class="reference internal" href="#kuibit.grid_data.UniformGridData" title="kuibit.grid_data.UniformGridData"><code class="xref py py-class docutils literal notranslate"><span class="pre">UniformGridData</span></code></a></p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
 <dt id="kuibit.grid_data.HierarchicalGridData.num_coarsest_level">
 <em class="property"><span class="pre">property</span> </em><code class="sig-name descname"><span class="pre">num_coarsest_level</span></code><a class="headerlink" href="#kuibit.grid_data.HierarchicalGridData.num_coarsest_level" title="Permalink to this definition">¶</a></dt>
 <dd><p>Return the number of the coarsest refinement level.</p>
@@ -1507,6 +1476,38 @@ applying the same rule recursively.</p>
 </dd>
 <dt class="field-even">Return type</dt>
 <dd class="field-even"><p>list of ints</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="kuibit.grid_data.HierarchicalGridData.refinement_levels_merged">
+<code class="sig-name descname"><span class="pre">refinement_levels_merged</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">resample</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/kuibit/grid_data.html#HierarchicalGridData.refinement_levels_merged"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kuibit.grid_data.HierarchicalGridData.refinement_levels_merged" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a new <a class="reference internal" href="#kuibit.grid_data.UniformGridData" title="kuibit.grid_data.UniformGridData"><code class="xref py py-class docutils literal notranslate"><span class="pre">UniformGridData</span></code></a> with all the available
+data combined and resampled to a grid that encompasses all the
+components and has resolution of the finest refinement level.</p>
+<p>When <code class="docutils literal notranslate"><span class="pre">resample</span></code> is True, data from coarser refinement levels is
+resampled with multilinear interpolation, otherwise the nearest
+neighbors are used.</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>For most practical purposes, using this function is an overkill.
+This can be a very expensive operation and require a lot of memory.
+Prefer <a class="reference internal" href="#kuibit.grid_data.HierarchicalGridData.to_UniformGridData" title="kuibit.grid_data.HierarchicalGridData.to_UniformGridData"><code class="xref py py-meth docutils literal notranslate"><span class="pre">to_UniformGridData()</span></code></a> when possible. The only real
+reasonable application of this function is with small simluations or
+1D data.</p>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>resample</strong> (<em>bool</em>) – If True, resample the data with multilinear interpolation,
+otherwise, use nearest neighbors.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>New <a class="reference internal" href="#kuibit.grid_data.UniformGridData" title="kuibit.grid_data.UniformGridData"><code class="xref py py-class docutils literal notranslate"><span class="pre">UniformGridData</span></code></a> with the resolution of the
+finest refinement level.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="#kuibit.grid_data.UniformGridData" title="kuibit.grid_data.UniformGridData"><code class="xref py py-class docutils literal notranslate"><span class="pre">UniformGridData</span></code></a></p>
 </dd>
 </dl>
 </dd></dl>
