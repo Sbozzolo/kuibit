@@ -1934,9 +1934,10 @@ class TestHierarchicalGridData(unittest.TestCase):
         expected_data = gdu.sample_function_from_uniformgrid(
             product, expected_grid
         )
+
         # Test with resample
         self.assertEqual(
-            hg.merge_refinement_levels(resample=True), expected_data
+            hg.refinement_levels_merged(resample=True), expected_data
         )
 
         # If we don't resample there will be points that are "wrong" because we
@@ -1944,12 +1945,12 @@ class TestHierarchicalGridData(unittest.TestCase):
         # For example, the point with coordinate (5, 1) falls inside the lowest
         # resolution grid, so its value will be the value of the closest point
         # in big_grid (6, 1) -> 18.
-        self.assertEqual(hg.merge_refinement_levels()((5, 1)), 18)
-        self.assertEqual(hg.merge_refinement_levels().grid, expected_grid)
+        self.assertEqual(hg.refinement_levels_merged()((5, 1)), 18)
+        self.assertEqual(hg.refinement_levels_merged().grid, expected_grid)
 
         # Test a case with only one refinement level, so just returning a copy
         hg_one = gd.HierarchicalGridData([big_grid_data])
-        self.assertEqual(hg_one.merge_refinement_levels(), big_grid_data)
+        self.assertEqual(hg_one.refinement_levels_merged(), big_grid_data)
 
     def test_coordinates(self):
 

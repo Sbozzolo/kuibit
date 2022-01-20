@@ -1,4 +1,4 @@
-# Changelog
+n# Changelog
 
 ## Version 1.4.0 (Under Development)
 
@@ -25,7 +25,6 @@
 - Improvements to documentation and docstrings
 
 #### Bug fixes
-
 - Added error in `_plot_horizon_on_plane` when the horizon cannot be plotted
 - Updated NumPy types (np.int -> int, np.float -> float)
 - Windowing uneven signals is no longer allowed
@@ -35,6 +34,11 @@
   [#28](https://github.com/Sbozzolo/kuibit/issues/28))
 - Fix some information not being propagated by
   `grid_data_utils.merge_uniform_grids`.
+
+#### Breaking changes
+- The `merge_refinement_levels` function in `HierarchicalGridData` has been
+  renamed to `refinement_levels_merged` for consistency. (Imperative methods
+  edit the object in-place)
 
 #### New examples
 

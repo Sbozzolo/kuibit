@@ -2676,8 +2676,9 @@ class HierarchicalGridData(BaseNumerical):
 
         return self.to_UniformGridData_from_grid(grid, resample=resample)
 
-    def merge_refinement_levels(self, resample=False):
-        """Combine all the available data and resample it grid that encompasses all the
+    def refinement_levels_merged(self, resample=False):
+        """Return a new :py:class:`~.UniformGridData` with all the available
+        data combined and resampled to a grid that encompasses all the
         components and has resolution of the finest refinement level.
 
         When ``resample`` is True, data from coarser refinement levels is
