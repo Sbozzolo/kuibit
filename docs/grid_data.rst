@@ -316,8 +316,8 @@ interpolation on that level (and component, if there are multiple components).
 
 Using splines, we can also combine the various refinement levels to obtain a
 :py:class:`~.UniformGridData`. This is often handy when plotting. The method
-:py:meth:`~.merge_refinement_levels` does exactly that. By default,
-:py:meth:`~.merge_refinement_levels` does not resample the data, but simply uses
+:py:meth:`~.refinement_levels_merged` does exactly that. By default,
+:py:meth:`~.refinement_levels_merged` does not resample the data, but simply uses
 the values on the grid. If the argument ``resample`` is set to ``True``, the
 data is resampled with a multilinear interpolation. One can also specify what
 grid (as :py:class:`~.UniformGridData`) to merge the data on by calling the

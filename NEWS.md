@@ -1,4 +1,4 @@
-# Changelog
+n# Changelog
 
 ## Version 1.4.0 (Under Development)
 
@@ -10,9 +10,13 @@
   (starting from a contribution by @konrad-topolski)
 
 #### Bug fixes
-
 - Added error in `_plot_horizon_on_plane` when the horizon cannot be plotted
 - Updated NumPy types (np.int -> int, np.float -> float)
+
+#### Breaking changes
+- The `merge_refinement_levels` function in `HierarchicalGridData` has been
+  renamed to `refinement_levels_merged` for consistency. (Imperative methods
+  edit the object in-place)
 
 #### New examples
 
