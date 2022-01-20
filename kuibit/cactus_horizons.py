@@ -40,7 +40,8 @@ are found), which can be accessed with the methods
 :py:meth:`~.shape_at_iteration` and :py:meth:`~.shape_outline_at_iteration`.
 
 The module contains also functions to work with horizons:
-- :py:func:`~.compute_horizons_separation`, which takes
+
+* :py:func:`~.compute_horizons_separation`, which takes
   two :py:class:`~.OneHorizon` and returns the timeseries of their separation
 
 """

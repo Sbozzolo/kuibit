@@ -8,8 +8,7 @@ where to plot it. The symbols that can be used are ``+``, ``-``, ``*``, ``/``,
 ``acos(x)``, ``atan(x)``, ``log(x)``, ``log10(x)``, ``abs(x)``, and ``exp(x)``.
 For example
 
-.. code-block::
-   :language: bash
+.. code-block:: bash
 
    plot_grid_expr.py "2 * P / rho_b^(3/2) "
 

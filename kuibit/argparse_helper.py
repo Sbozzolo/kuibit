@@ -106,7 +106,7 @@ def add_grid_to_parser(parser, dimensions=2):
 
     - ``resolution``
     - ``x0 (origin)``
-    - ``x1 (corner)
+    - ``x1 (corner)``
     - ``axis`` (for ``dimension = 1``)
     - ``plane`` (for ``dimension = 2``)
 
@@ -308,8 +308,8 @@ def add_grid_structure_to_parser(parser, edge_color="black", alpha=0.5):
                   horizon.
     :type alpha: float
 
-    :param parser: Argparse parser (generated with init_argparse())
-    :type parser: configargparse.ArgumentParser
+    :param parser: Argparse parser (generated with ``init_argparse()``)
+    :type parser: ``configargparse.ArgumentParser``
 
     """
     ah_group = parser.add_argument_group("Grid structure options")
