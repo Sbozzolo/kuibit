@@ -2749,7 +2749,7 @@ class HierarchicalGridData(BaseNumerical):
         :rtype: :py:class:`~.HierarchicalGridData`
 
         """
-        # We only know what how to combine HierarhicalGridData
+        # We only know what how to combine HierarchicalGridData
         if isinstance(other, type(self)):
             if self.shape != other.shape:
                 raise ValueError("Grid structure incompatible")
