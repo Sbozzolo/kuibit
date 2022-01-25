@@ -206,7 +206,7 @@ class OneHorizon:
                 warnings.warn(
                     "AH data not found, so it is impossible to convert"
                     " between iteration number to time.\nManually set"
-                    " shape_times or methods involving shape and time"
+                    " shape_times or the methods involving shape and time"
                     " will not work"
                 )
                 self.shape_times = None
