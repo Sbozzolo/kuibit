@@ -2724,6 +2724,15 @@ class HierarchicalGridData(BaseNumerical):
             resample=resample,
         )
 
+    def merge_refinement_levels(self, resample=False):
+        """DEPRECATED."""
+        warnings.warn(
+            "merge_refinement_levels was renamed to refinement_levels_merged "
+            "and it will be removed in kuibit 1.5.0",
+            category=FutureWarning,
+        )
+        return self.refinement_levels_merged(resample=resample)
+
     def _apply_to_self(self, f, *args, **kwargs):
         """Apply the method ``f`` to ``self``, modifying ``self``.
         This is used to transform the commands from returning an object

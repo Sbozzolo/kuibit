@@ -1898,7 +1898,7 @@ class TestHierarchicalGridData(unittest.TestCase):
         hg.ghost_zones_remove()
         self.assertEqual(expected_hg, hg)
 
-    def test_merge_refinement_levels(self):
+    def test_refinement_levels_merged(self):
         # This also tests to_UniformGridData
 
         # We redefine this to be ref_level=1
@@ -1951,6 +1951,10 @@ class TestHierarchicalGridData(unittest.TestCase):
         # Test a case with only one refinement level, so just returning a copy
         hg_one = gd.HierarchicalGridData([big_grid_data])
         self.assertEqual(hg_one.refinement_levels_merged(), big_grid_data)
+
+        # Deprecated name
+        with self.assertWarns(FutureWarning):
+            hg.merge_refinement_levels()
 
     def test_coordinates(self):
 
