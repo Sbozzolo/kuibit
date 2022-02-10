@@ -117,8 +117,8 @@ a plane. Optionally, it also plots the outline of the horizons."""
 
             hor = sim_hor.get_apparent_horizon(ah)
 
-            for coord in ah_coords:
-                ah_coords[coord].append(hor.ah[f"centroid_{coord}"])
+            for ah_coord in ah_coords.values():
+                ah_coord.append(hor.ah[f"centroid_{coord}"])
 
             if args.force_com_at_origin:
                 logger.debug("Reading mass")
@@ -149,7 +149,7 @@ a plane. Optionally, it also plots the outline of the horizons."""
             total_mass = sum(mass for mass in masses)
 
             # Loop over the three coordinates
-            for coord in ah_coords:
+            for ah_coord in ah_coords.values():
                 # For each coordinate, compute the center of mass along that
                 # coordinate
                 com = sum(
@@ -158,7 +158,7 @@ a plane. Optionally, it also plots the outline of the horizons."""
                 )
                 # Now, we update ah_coords over that coordinate by subtracting
                 # the center of mass from each apparent horizon
-                ah_coords[coord] = [ah - com for ah in ah_coords[coord]]
+                ah_coord = [ah - com for ah in ah_coords[coord]]
 
         to_plot_x, to_plot_y = args.plane
         logger.debug(f"Plotting on the x axis {to_plot_x}")

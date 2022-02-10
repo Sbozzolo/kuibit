@@ -1643,7 +1643,7 @@ class GridFunctionsDir:
             return dimension
 
         # If the input is a recognized string, return the corresponding tuple
-        if dimension in self._dim_indices.keys():
+        if dimension in self._dim_indices:
             return self._dim_indices[dimension]
 
         raise ValueError(f"{dimension} is not a recognized dimension")
@@ -1660,7 +1660,7 @@ class GridFunctionsDir:
 
     def __getattr__(self, attr):
         # This allows to call self.x, self.xy and so on
-        if attr in self._dim_indices.keys():
+        if attr in self._dim_indices:
             # We retrieve the data with __getitem__
             return self[attr]
 

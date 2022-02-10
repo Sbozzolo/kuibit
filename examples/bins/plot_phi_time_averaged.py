@@ -144,6 +144,7 @@ window of time defined by tmin and tmax."""
         selected_times = selected_times[:: args.time_every]
         logger.debug(f"Selected times {selected_times}")
 
+        # The equations are
         # X = X0 + R * cos(phi)
         # Y = Y0 + R * sin(phi)
 

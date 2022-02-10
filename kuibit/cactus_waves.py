@@ -529,7 +529,7 @@ class GravitationalWavesOneDet(mp.MultipoleOneDet):
         if not 0 <= direction <= 2:
             raise ValueError("Direction has to be 0 (x), 1 (y), or 2 (z)")
 
-        if not direction == 2:
+        if direction != 2:
             raise NotImplementedError(
                 "Only the z direction is currently implemented"
             )
@@ -885,7 +885,7 @@ class GravitationalWavesOneDet(mp.MultipoleOneDet):
             den = el * np.sqrt((2 * el - 1) * (2 * el + 1))
             return num / den
 
-        if direction == 0 or direction == 1:
+        if direction in (0, 1):
 
             # Pp_int1 = \int psi4_lm
             # Pp_int2 = \int [(a_lm * conj(psi4_l(m+1))
@@ -928,7 +928,7 @@ class GravitationalWavesOneDet(mp.MultipoleOneDet):
                     self.dist ** 2 / (8 * np.pi) * (Pp_int1 * Pp_int2).imag()
                 )
 
-        # direction == 2
+        # This is direction == 2
 
         # Pz_int1 = \int psi4_lm
         # Pz_int2 = \int [(c_lm * conj(psi4_lm)
