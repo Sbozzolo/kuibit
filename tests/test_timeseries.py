@@ -1071,6 +1071,20 @@ class TestTimeseries(unittest.TestCase):
         new_ones.window("blackman")
         self.assertTrue(np.allclose(new_ones.y, black_array))
 
+        # Test window on not regularly sampled series
+        log_times = np.logspace(-2, -1, 10)
+        new_ones_log = ts.TimeSeries(log_times, np.ones_like(log_times))
+        with self.assertWarns(RuntimeWarning):
+            new_ones_log.window("blackman")
+
+        new_ones_log_resampled = ts.TimeSeries(
+            log_times, np.ones_like(log_times)
+        ).regular_resampled()
+        new_ones_log_resampled.window("blackman")
+
+        self.assertTrue(np.allclose(new_ones_log.t, new_ones_log_resampled.t))
+        self.assertTrue(np.allclose(new_ones_log.y, new_ones_log_resampled.y))
+
     def test_savgol_smooth(self):
 
         # Here I just test that I am correctly calling the filter

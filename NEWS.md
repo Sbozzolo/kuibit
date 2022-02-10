@@ -9,6 +9,7 @@
 
 - Added error in `_plot_horizon_on_plane` when the horizon cannot be plotted
 - Updated NumPy types (np.int -> int, np.float -> float)
+- Windowing uneven signals is no longer allowed
 
 #### New examples
 
