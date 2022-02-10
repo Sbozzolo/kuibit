@@ -764,10 +764,18 @@ class TimeSeries(BaseSeries):
         :rtype:    :py:class:`~.TimeSeries`
 
         """
+        if not self.is_regularly_sampled():
+            warnings.warn(
+                "TimeSeries is not regularly samples. Resampling.",
+                RuntimeWarning,
+            )
+            regular_ts = self.regular_resampled()
+        else:
+            regular_ts = self
 
         if callable(window_function):
-            window_array = window_function(len(self), *args, **kwargs)
-            return TimeSeries(self.t, self.y * window_array)
+            window_array = window_function(len(regular_ts), *args, **kwargs)
+            return TimeSeries(regular_ts.t, regular_ts.y * window_array)
 
         if isinstance(window_function, str):
             window_function_method = f"{window_function}_windowed"
