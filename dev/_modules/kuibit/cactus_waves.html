@@ -576,7 +576,7 @@
         <span class="k">if</span> <span class="ow">not</span> <span class="mi">0</span> <span class="o">&lt;=</span> <span class="n">direction</span> <span class="o">&lt;=</span> <span class="mi">2</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Direction has to be 0 (x), 1 (y), or 2 (z)&quot;</span><span class="p">)</span>
 
-        <span class="k">if</span> <span class="ow">not</span> <span class="n">direction</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">direction</span> <span class="o">!=</span> <span class="mi">2</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span>
                 <span class="s2">&quot;Only the z direction is currently implemented&quot;</span>
             <span class="p">)</span>
@@ -932,7 +932,7 @@
             <span class="n">den</span> <span class="o">=</span> <span class="n">el</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">((</span><span class="mi">2</span> <span class="o">*</span> <span class="n">el</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">el</span> <span class="o">+</span> <span class="mi">1</span><span class="p">))</span>
             <span class="k">return</span> <span class="n">num</span> <span class="o">/</span> <span class="n">den</span>
 
-        <span class="k">if</span> <span class="n">direction</span> <span class="o">==</span> <span class="mi">0</span> <span class="ow">or</span> <span class="n">direction</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">direction</span> <span class="ow">in</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">):</span>
 
             <span class="c1"># Pp_int1 = \int psi4_lm</span>
             <span class="c1"># Pp_int2 = \int [(a_lm * conj(psi4_l(m+1))</span>
@@ -975,7 +975,7 @@
                     <span class="bp">self</span><span class="o">.</span><span class="n">dist</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">/</span> <span class="p">(</span><span class="mi">8</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="n">Pp_int1</span> <span class="o">*</span> <span class="n">Pp_int2</span><span class="p">)</span><span class="o">.</span><span class="n">imag</span><span class="p">()</span>
                 <span class="p">)</span>
 
-        <span class="c1"># direction == 2</span>
+        <span class="c1"># This is direction == 2</span>
 
         <span class="c1"># Pz_int1 = \int psi4_lm</span>
         <span class="c1"># Pz_int2 = \int [(c_lm * conj(psi4_lm)</span>
