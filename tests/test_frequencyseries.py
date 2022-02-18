@@ -183,20 +183,20 @@ class TestFrequencySeries(unittest.TestCase):
         # The result should be -2 * 10**3 + j 10**3
 
         self.assertAlmostEqual(
-            fs1.inner_product(fs2), 8 * (1.2 ** 3 - 1), places=3
+            fs1.inner_product(fs2), 8 * (1.2**3 - 1), places=3
         )
 
         # Now restrict to (fmin = 1.1, fmax = 1.15)
         self.assertAlmostEqual(
             fs1.inner_product(fs2, fmin=1.1, fmax=1.15),
-            8 * (1.15 ** 3 - 1.1 ** 3),
+            8 * (1.15**3 - 1.1**3),
             places=3,
         )
 
         # Now add a noise of f**2
         # The inner product is y * y2^* / noise= (6 - 3j)
         # Integrated it is (6 - 3j) * (fmax - fmin)
-        noise = fs.FrequencySeries(f, f ** 2)
+        noise = fs.FrequencySeries(f, f**2)
 
         self.assertAlmostEqual(
             fs1.inner_product(fs2, noises=noise), 4 * 6 * (1.2 - 1), places=3

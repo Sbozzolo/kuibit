@@ -43,7 +43,7 @@ class TestSensitivityCurves(unittest.TestCase):
         self.assertEqual(
             etb,
             fs.FrequencySeries(
-                freqs, [4.8012536e-21 ** 2, 6.5667816e-25 ** 2]
+                freqs, [4.8012536e-21**2, 6.5667816e-25**2]
             ),
         )
 
@@ -55,7 +55,7 @@ class TestSensitivityCurves(unittest.TestCase):
 
         self.assertEqual(
             ce1,
-            fs.FrequencySeries(freqs, [1.6664e-19 ** 2, 2.6856e-24 ** 2]),
+            fs.FrequencySeries(freqs, [1.6664e-19**2, 2.6856e-24**2]),
         )
 
     def test_CE2(self):
@@ -66,7 +66,7 @@ class TestSensitivityCurves(unittest.TestCase):
 
         self.assertEqual(
             ce2,
-            fs.FrequencySeries(freqs, [3.7939e-20 ** 2, 1.4944e-24 ** 2]),
+            fs.FrequencySeries(freqs, [3.7939e-20**2, 1.4944e-24**2]),
         )
 
     def test_aLIGO(self):
@@ -79,7 +79,7 @@ class TestSensitivityCurves(unittest.TestCase):
             aLIGO,
             fs.FrequencySeries(
                 freqs,
-                [1.7370722680197635e-21 ** 2, 3.8885269176411187e-24 ** 2],
+                [1.7370722680197635e-21**2, 3.8885269176411187e-24**2],
             ),
         )
 
@@ -91,7 +91,7 @@ class TestSensitivityCurves(unittest.TestCase):
 
         self.assertEqual(
             voya,
-            fs.FrequencySeries(freqs, [1.7021e-20 ** 2, 9.846e-25 ** 2]),
+            fs.FrequencySeries(freqs, [1.7021e-20**2, 9.846e-25**2]),
         )
 
     def test_KAGRA_D(self):
@@ -102,7 +102,7 @@ class TestSensitivityCurves(unittest.TestCase):
 
         self.assertEqual(
             kagra,
-            fs.FrequencySeries(freqs, [1.01841e-18 ** 2, 6.78164e-24 ** 2]),
+            fs.FrequencySeries(freqs, [1.01841e-18**2, 6.78164e-24**2]),
         )
 
     def test_aLIGO_plus(self):
@@ -113,5 +113,5 @@ class TestSensitivityCurves(unittest.TestCase):
 
         self.assertEqual(
             aligo,
-            fs.FrequencySeries(freqs, [1.9995e-20 ** 2, 1.8182e-24 ** 2]),
+            fs.FrequencySeries(freqs, [1.9995e-20**2, 1.8182e-24**2]),
         )

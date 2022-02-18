@@ -241,7 +241,7 @@ class TestCactusWaves(unittest.TestCase):
             psi4lm, 0.1, order=1
         )
 
-        power_lm = self.psi4.dist ** 2 / (16 * np.pi) * np.abs(psi4lm_int) ** 2
+        power_lm = self.psi4.dist**2 / (16 * np.pi) * np.abs(psi4lm_int) ** 2
 
         self.assertEqual(power_lm, self.psi4.get_power_lm(2, 2, 0.1))
         self.assertEqual(
@@ -268,7 +268,7 @@ class TestCactusWaves(unittest.TestCase):
         phi2 = emdir[110.69]
         phi2lm = phi2[(2, 2)]
 
-        power_lm = phi2.dist ** 2 / (4 * np.pi) * np.abs(phi2lm) ** 2
+        power_lm = phi2.dist**2 / (4 * np.pi) * np.abs(phi2lm) ** 2
 
         self.assertEqual(power_lm, phi2.get_power_lm(2, 2))
         self.assertEqual(power_lm.integrated(), phi2.get_energy_lm(2, 2))
@@ -297,7 +297,7 @@ class TestCactusWaves(unittest.TestCase):
         )
 
         torque_lm = (
-            self.psi4.dist ** 2
+            self.psi4.dist**2
             / (16 * np.pi)
             * 2
             * (np.conj(psi4lm_int2) * psi4lm_int1).imag()
@@ -390,7 +390,7 @@ class TestCactusWaves(unittest.TestCase):
         )
 
         force_lm = (
-            self.psi4.dist ** 2
+            self.psi4.dist**2
             / (16 * np.pi)
             * (psi4lm_int1 * psi4lm_int2).real()
         )
@@ -488,7 +488,7 @@ class TestCactusWaves(unittest.TestCase):
         )
 
         Pp_lm = (
-            psi4_234.dist ** 2
+            psi4_234.dist**2
             / (8 * np.pi)
             * (psi4lm_xy_int1 * psi4lm_xy_int2)
         )
@@ -562,7 +562,7 @@ class TestCactusWaves(unittest.TestCase):
         )
 
         force_z_lm = (
-            psi4_234.dist ** 2
+            psi4_234.dist**2
             / (16 * np.pi)
             * (psi4lm_z_int1 * psi4lm_z_int2).real()
         )

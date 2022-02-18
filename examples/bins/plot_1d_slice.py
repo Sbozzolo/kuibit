@@ -235,7 +235,7 @@ data is used if available, otherwise higher dimensional data is used."""
 
         plt.plot(data, label=label)
 
-        add_text_to_corner(fr"$t = {time:.3f}$")
+        add_text_to_corner(rf"$t = {time:.3f}$")
 
         plt.xlabel(axis)
         plt.ylabel(label)

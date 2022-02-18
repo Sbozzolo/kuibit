@@ -149,7 +149,7 @@ class OneHorizon:
             self.mass_final = self.mass.y[-1]
             self.spin_final = self.spin.y[-1]
             self.dimensionless_spin_final = (
-                self.spin_final / self.mass_final ** 2
+                self.spin_final / self.mass_final**2
             )
         else:
             self.mass_final = None

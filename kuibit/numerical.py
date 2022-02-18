@@ -103,7 +103,7 @@ class BaseNumerical(ABC):
         return self / other
 
     def __ipow__(self, other):
-        return self ** other
+        return self**other
 
     def __neg__(self):
         return self._apply_unary(np.negative)

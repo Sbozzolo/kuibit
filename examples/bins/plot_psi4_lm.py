@@ -96,11 +96,11 @@ by a given detector and a given l and m."""
 
         plt.plot(
             radius * psi4.real(),
-            label=fr"$r\Re\Psi_4^{{{args.mult_l}{args.mult_l}}}$",
+            label=rf"$r\Re\Psi_4^{{{args.mult_l}{args.mult_l}}}$",
         )
         plt.plot(
             radius * psi4.imag(),
-            label=fr"$r\Im\Psi_4^{{{args.mult_l}{args.mult_l}}}$",
+            label=rf"$r\Im\Psi_4^{{{args.mult_l}{args.mult_l}}}$",
         )
 
         plt.legend()
@@ -110,7 +110,7 @@ by a given detector and a given l and m."""
         add_text_to_corner(
             f"Det {args.detector_num}", anchor="SW", offset=0.005
         )
-        add_text_to_corner(fr"$r = {radius:.3f}$", anchor="NE", offset=0.005)
+        add_text_to_corner(rf"$r = {radius:.3f}$", anchor="NE", offset=0.005)
 
         set_axis_limits_from_args(args)
         logger.debug("Plotted")

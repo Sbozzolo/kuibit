@@ -72,7 +72,7 @@ def Sn_LISA(freqs, arms_length=2.5e9):
 
     # Equation (13)
     Sn = (
-        (10.0 / (3 * arms_length ** 2))
+        (10.0 / (3 * arms_length**2))
         * (
             P_OMS(freqs)
             + 2
@@ -112,7 +112,7 @@ def Sn_ET_B(freqs):
     #
     # ET distributes Amplitude Spectral Densities
     asd = load_FrequencySeries(StringIO(data))
-    psd = asd ** 2
+    psd = asd**2
 
     # Resample on the requested frequencies. ETB is well-behaved, so it is fine
     # to use splines.
@@ -147,7 +147,7 @@ def Sn_CE1(freqs):
 
     # CE distributes Amplitude Spectral Densities
     asd = load_FrequencySeries(StringIO(data))
-    psd = asd ** 2
+    psd = asd**2
 
     # Resample on the requested frequencies. CE1 has some spikes, so it is
     # better to not use splines.
@@ -182,7 +182,7 @@ def Sn_CE2(freqs):
 
     # CE distributes Amplitude Spectral Densities
     asd = load_FrequencySeries(StringIO(data))
-    psd = asd ** 2
+    psd = asd**2
 
     # Resample on the requested frequencies. CE1 has some spikes, so it is
     # better to not use splines.
@@ -217,7 +217,7 @@ def Sn_aLIGO(freqs):
 
     # aLIGO distributes Amplitude Spectral Densities
     asd = load_FrequencySeries(StringIO(data))
-    psd = asd ** 2
+    psd = asd**2
 
     # Resample on the requested frequencies. CE1 has some spikes, so it is
     # better to not use splines.
@@ -252,7 +252,7 @@ def Sn_voyager(freqs):
 
     # Voyager distributes Amplitude Spectral Densities
     asd = load_FrequencySeries(StringIO(data))
-    psd = asd ** 2
+    psd = asd**2
 
     # Resample on the requested frequencies. CE1 has some spikes, so it is
     # better to not use splines.
@@ -288,7 +288,7 @@ def Sn_KAGRA_D(freqs):
 
     # KAGRA distributes Amplitude Spectral Densities
     asd = load_FrequencySeries(StringIO(data))
-    psd = asd ** 2
+    psd = asd**2
 
     # Resample on the requested frequencies. CE1 has some spikes, so it is
     # better to not use splines.
@@ -323,7 +323,7 @@ def Sn_aLIGO_plus(freqs):
 
     # aLIGO distributes Amplitude Spectral Densities
     asd = load_FrequencySeries(StringIO(data))
-    psd = asd ** 2
+    psd = asd**2
 
     # Resample on the requested frequencies. CE1 has some spikes, so it is
     # better to not use splines.

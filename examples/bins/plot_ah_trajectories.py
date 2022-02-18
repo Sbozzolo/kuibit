@@ -194,7 +194,7 @@ a plane. Optionally, it also plots the outline of the horizons."""
         plt.gca().set_aspect("equal")
 
         plt.legend()
-        add_text_to_corner(fr"$t = {time:.3f}$")
+        add_text_to_corner(rf"$t = {time:.3f}$")
 
         logger.debug("Saving")
         save_from_dir_filename_ext(

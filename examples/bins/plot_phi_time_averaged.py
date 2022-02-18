@@ -201,9 +201,9 @@ window of time defined by tmin and tmax."""
         plt.plot(radii, ret_values)
 
         add_text_to_corner(
-            fr"$t \in ({selected_times[0]:.3f}, {selected_times[-1]:.3f})$"
+            rf"$t \in ({selected_times[0]:.3f}, {selected_times[-1]:.3f})$"
         )
-        add_text_to_corner(fr"Center = {X0:.3f}, {Y0:.3f}", anchor="NW")
+        add_text_to_corner(rf"Center = {X0:.3f}, {Y0:.3f}", anchor="NW")
 
         plt.xlabel("Radius")
         plt.ylabel(label)

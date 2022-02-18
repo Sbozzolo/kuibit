@@ -684,7 +684,7 @@ class TestUniformGridData(unittest.TestCase):
     def test__apply_binary(self):
 
         data1 = np.array([i * np.linspace(1, 5, 51) for i in range(101)])
-        data2 = np.array([i ** 2 * np.linspace(1, 5, 51) for i in range(101)])
+        data2 = np.array([i**2 * np.linspace(1, 5, 51) for i in range(101)])
         ug_data1 = gd.UniformGridData(self.geom, data1)
         ug_data2 = gd.UniformGridData(self.geom, data2)
 
@@ -1101,7 +1101,7 @@ class TestUniformGridData(unittest.TestCase):
 
     def test_mean_integral_norm1_norm2(self):
 
-        data = np.array([i ** 2 * np.linspace(1, 5, 51) for i in range(101)])
+        data = np.array([i**2 * np.linspace(1, 5, 51) for i in range(101)])
         ug_data = gd.UniformGridData(self.geom, data)
 
         self.assertAlmostEqual(ug_data.integral(), np.sum(data) * self.geom.dv)

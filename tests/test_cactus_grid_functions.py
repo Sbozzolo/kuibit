@@ -86,7 +86,7 @@ class TestGridFunctionsDir(unittest.TestCase):
         filesize_B = sum(os.path.getsize(fil) for fil in self.sim.allfiles)
         self.assertEqual(filesize_B, self.gd.total_filesize("B"))
 
-        filesize_MB = filesize_B / (1024 ** 2)
+        filesize_MB = filesize_B / (1024**2)
         self.assertEqual(filesize_MB, self.gd.total_filesize())
 
         # Test invalid unit

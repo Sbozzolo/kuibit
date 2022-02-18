@@ -194,7 +194,7 @@ This is much faster but it is not as accurate."""
             interpolation=args.interpolation_method,
         )
 
-        add_text_to_corner(fr"$t = {time:.3f}$")
+        add_text_to_corner(rf"$t = {time:.3f}$")
 
         if args.ah_show:
             for ah in sim.horizons.available_apparent_horizons:
