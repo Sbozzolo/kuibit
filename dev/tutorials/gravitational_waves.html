@@ -5,19 +5,20 @@
 <html>
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
     <title>Working with gravitational waves &#8212; kuibit 1.3.3 documentation</title>
-    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
-    <link rel="stylesheet" href="../_static/bizstyle.css" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/bizstyle.css" />
     <link rel="stylesheet" type="text/css" href="../_static/css/custom.css" />
     
-    <script id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
     <script src="../_static/jquery.js"></script>
     <script src="../_static/underscore.js"></script>
     <script src="../_static/doctools.js"></script>
     <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
-    <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
-    <script type="text/x-mathjax-config">MathJax.Hub.Config({"tex2jax": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true, "ignoreClass": "tex2jax_ignore|mathjax_ignore|document", "processClass": "tex2jax_process|mathjax_process|math|output_area"}})</script>
+    <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+    <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     <script src="../_static/bizstyle.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
@@ -263,7 +264,7 @@ div.nboutput.container div.output_area > div[class^='highlight']{
 }
 
 /* hide copybtn icon on prompts (needed for 'sphinx_copybutton') */
-.prompt a.copybtn {
+.prompt .copybtn {
     display: none;
 }
 
@@ -301,7 +302,7 @@ div.rendered_html tbody tr:hover {
   background: rgba(66, 165, 245, 0.2);
 }
 </style>
-<div class="section" id="Working-with-gravitational-waves">
+<section id="Working-with-gravitational-waves">
 <h1>Working with gravitational waves<a class="headerlink" href="#Working-with-gravitational-waves" title="Permalink to this headline">¶</a></h1>
 <p>Gravitational waves are one of the most important quantity in numerical-relativity simulations. Here, we will see how to extract the strain and how to do some of the most common operations with gravitational waves. For this, we will some some sample data that we will read with the <a class="reference internal" href="../simdir.html"><span class="doc">SimDir</span></a> module.</p>
 <p>(This notebook is meant to be converted in Sphinx documentation and not used directly.)</p>
@@ -309,8 +310,7 @@ div.rendered_html tbody tr:hover {
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 
 <span class="kn">from</span> <span class="nn">kuibit.simdir</span> <span class="kn">import</span> <span class="n">SimDir</span>
 </pre></div>
@@ -321,8 +321,7 @@ div.rendered_html tbody tr:hover {
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">sim</span> <span class="o">=</span> <span class="n">SimDir</span><span class="p">(</span><span class="s2">&quot;../../tests/gwsample&quot;</span><span class="p">)</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">sim</span> <span class="o">=</span> <span class="n">SimDir</span><span class="p">(</span><span class="s2">&quot;../../tests/gwsample&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -331,8 +330,7 @@ div.rendered_html tbody tr:hover {
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">gws</span> <span class="o">=</span> <span class="n">sim</span><span class="o">.</span><span class="n">gws</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">gws</span> <span class="o">=</span> <span class="n">sim</span><span class="o">.</span><span class="n">gws</span>
 </pre></div>
 </div>
 </div>
@@ -341,8 +339,7 @@ div.rendered_html tbody tr:hover {
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="nb">print</span><span class="p">(</span><span class="n">gws</span><span class="p">)</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="n">gws</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -351,18 +348,18 @@ div.rendered_html tbody tr:hover {
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-Avilable radii: [53.96, 67.88, 191.0, 44.78, 140.16, 77.93, 48.95, 110.69, 60.13, 91.46]
+Avilable radii: [110.69, 191.0, 91.46, 140.16, 44.78, 60.13, 48.95, 77.93, 53.96, 67.88]
 
-At radius 44.78, (l, m) available: dict_keys([(2, 2)]) (missing: [(2, 0), (2, -2), (2, 1), (2, -1)])
-At radius 48.95, (l, m) available: dict_keys([(2, 2)]) (missing: [(2, 0), (2, -2), (2, 1), (2, -1)])
-At radius 53.96, (l, m) available: dict_keys([(2, 2)]) (missing: [(2, 0), (2, -2), (2, 1), (2, -1)])
-At radius 60.13, (l, m) available: dict_keys([(2, 2)]) (missing: [(2, 0), (2, -2), (2, 1), (2, -1)])
-At radius 67.88, (l, m) available: dict_keys([(2, 2)]) (missing: [(2, 0), (2, -2), (2, 1), (2, -1)])
-At radius 77.93, (l, m) available: dict_keys([(2, 2)]) (missing: [(2, 0), (2, -2), (2, 1), (2, -1)])
-At radius 91.46, (l, m) available: dict_keys([(2, 2)]) (missing: [(2, 0), (2, -2), (2, 1), (2, -1)])
-At radius 110.69, (l, m) available: dict_keys([(2, 2)]) (missing: [(2, 0), (2, -2), (2, 1), (2, -1)])
-At radius 140.16, (l, m) available: dict_keys([(2, 2)]) (missing: [(2, 0), (2, -2), (2, 1), (2, -1)])
-At radius 191.0, (l, m) available: dict_keys([(2, 2)]) (missing: [(2, 0), (2, -2), (2, 1), (2, -1)])
+At radius 44.78, (l, m) available: dict_keys([(2, 2)]) (missing: [(2, 0), (2, -2), (2, -1), (2, 1)])
+At radius 48.95, (l, m) available: dict_keys([(2, 2)]) (missing: [(2, 0), (2, -2), (2, -1), (2, 1)])
+At radius 53.96, (l, m) available: dict_keys([(2, 2)]) (missing: [(2, 0), (2, -2), (2, -1), (2, 1)])
+At radius 60.13, (l, m) available: dict_keys([(2, 2)]) (missing: [(2, 0), (2, -2), (2, -1), (2, 1)])
+At radius 67.88, (l, m) available: dict_keys([(2, 2)]) (missing: [(2, 0), (2, -2), (2, -1), (2, 1)])
+At radius 77.93, (l, m) available: dict_keys([(2, 2)]) (missing: [(2, 0), (2, -2), (2, -1), (2, 1)])
+At radius 91.46, (l, m) available: dict_keys([(2, 2)]) (missing: [(2, 0), (2, -2), (2, -1), (2, 1)])
+At radius 110.69, (l, m) available: dict_keys([(2, 2)]) (missing: [(2, 0), (2, -2), (2, -1), (2, 1)])
+At radius 140.16, (l, m) available: dict_keys([(2, 2)]) (missing: [(2, 0), (2, -2), (2, -1), (2, 1)])
+At radius 191.0, (l, m) available: dict_keys([(2, 2)]) (missing: [(2, 0), (2, -2), (2, -1), (2, 1)])
 
 </pre></div></div>
 </div>
@@ -373,8 +370,7 @@ At radius 191.0, (l, m) available: dict_keys([(2, 2)]) (missing: [(2, 0), (2, -2
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">gws</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">gws</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span>
 </pre></div>
 </div>
 </div>
@@ -384,7 +380,7 @@ At radius 191.0, (l, m) available: dict_keys([(2, 2)]) (missing: [(2, 0), (2, -2
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-dict_keys([53.96, 67.88, 191.0, 44.78, 140.16, 77.93, 48.95, 110.69, 60.13, 91.46])
+dict_keys([110.69, 191.0, 91.46, 140.16, 44.78, 60.13, 48.95, 77.93, 53.96, 67.88])
 </pre></div></div>
 </div>
 <p>Let’s focus on one extraction radius. You can access the corresponding <code class="docutils literal notranslate"><span class="pre">GravitationalWavesOneDet</span></code> with the bracket operator.</p>
@@ -392,8 +388,7 @@ dict_keys([53.96, 67.88, 191.0, 44.78, 140.16, 77.93, 48.95, 110.69, 60.13, 91.4
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">psi4</span> <span class="o">=</span> <span class="n">gws</span><span class="p">[</span><span class="mf">91.46</span><span class="p">]</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">psi4</span> <span class="o">=</span> <span class="n">gws</span><span class="p">[</span><span class="mf">91.46</span><span class="p">]</span>
 </pre></div>
 </div>
 </div>
@@ -402,8 +397,7 @@ dict_keys([53.96, 67.88, 191.0, 44.78, 140.16, 77.93, 48.95, 110.69, 60.13, 91.4
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">psi4</span><span class="o">.</span><span class="n">dist</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">psi4</span><span class="o">.</span><span class="n">dist</span>
 </pre></div>
 </div>
 </div>
@@ -421,8 +415,7 @@ dict_keys([53.96, 67.88, 191.0, 44.78, 140.16, 77.93, 48.95, 110.69, 60.13, 91.4
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="k">for</span> <span class="n">l</span><span class="p">,</span> <span class="n">m</span><span class="p">,</span> <span class="n">ts</span> <span class="ow">in</span> <span class="n">psi4</span><span class="p">:</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">for</span> <span class="n">l</span><span class="p">,</span> <span class="n">m</span><span class="p">,</span> <span class="n">ts</span> <span class="ow">in</span> <span class="n">psi4</span><span class="p">:</span>
     <span class="nb">print</span><span class="p">(</span><span class="n">l</span><span class="p">,</span> <span class="n">m</span><span class="p">,</span> <span class="nb">type</span><span class="p">(</span><span class="n">ts</span><span class="p">))</span>
 </pre></div>
 </div>
@@ -440,8 +433,7 @@ dict_keys([53.96, 67.88, 191.0, 44.78, 140.16, 77.93, 48.95, 110.69, 60.13, 91.4
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">psi4_22</span> <span class="o">=</span> <span class="n">psi4</span><span class="p">[(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">)]</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">psi4_22</span> <span class="o">=</span> <span class="n">psi4</span><span class="p">[(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">)]</span>
 <span class="c1"># In case you forget the [], that would work too</span>
 <span class="n">psi4_22</span> <span class="o">=</span> <span class="n">psi4</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
 <span class="c1"># Alternatively, you can use the get_psi4_lm method</span>
@@ -454,8 +446,7 @@ dict_keys([53.96, 67.88, 191.0, 44.78, 140.16, 77.93, 48.95, 110.69, 60.13, 91.4
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
 <span class="o">%</span><span class="k">matplotlib</span> inline
 
 <span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s2">&quot;t [M]&quot;</span><span class="p">)</span>
@@ -470,7 +461,7 @@ dict_keys([53.96, 67.88, 191.0, 44.78, 140.16, 77.93, 48.95, 110.69, 60.13, 91.4
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-[&lt;matplotlib.lines.Line2D at 0x7f5abfc48048&gt;]
+[&lt;matplotlib.lines.Line2D at 0x7f9db7a92370&gt;]
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
@@ -487,8 +478,7 @@ parameters that the window may need. You can pass the window in multiple ways, b
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[11]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">strain_22</span> <span class="o">=</span> <span class="n">psi4</span><span class="o">.</span><span class="n">get_strain_lm</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="c1"># l</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">strain_22</span> <span class="o">=</span> <span class="n">psi4</span><span class="o">.</span><span class="n">get_strain_lm</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="c1"># l</span>
                                <span class="mi">2</span><span class="p">,</span> <span class="c1"># m</span>
                                <span class="mi">120</span><span class="p">,</span> <span class="c1"># pcut</span>
                                <span class="mf">0.1</span><span class="p">,</span> <span class="c1"># parameter of the window</span>
@@ -511,7 +501,7 @@ parameters that the window may need. You can pass the window in multiple ways, b
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-&lt;matplotlib.legend.Legend at 0x7f5abfa82470&gt;
+&lt;matplotlib.legend.Legend at 0x7f9db58d8970&gt;
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
@@ -527,8 +517,7 @@ parameters that the window may need. You can pass the window in multiple ways, b
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[12]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">strains</span> <span class="o">=</span> <span class="n">psi4</span><span class="o">.</span><span class="n">get_observed_strain</span><span class="p">(</span><span class="mi">8</span><span class="p">,</span> <span class="c1"># Right ascension</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">strains</span> <span class="o">=</span> <span class="n">psi4</span><span class="o">.</span><span class="n">get_observed_strain</span><span class="p">(</span><span class="mi">8</span><span class="p">,</span> <span class="c1"># Right ascension</span>
                                    <span class="o">-</span><span class="mi">70</span><span class="p">,</span> <span class="c1"># Declination</span>
                                     <span class="s2">&quot;2015-09-14 09:50:45&quot;</span><span class="p">,</span> <span class="c1"># Time UTC</span>
                                    <span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">/</span><span class="mi">3</span><span class="p">,</span> <span class="c1"># theta_gw</span>
@@ -545,8 +534,7 @@ parameters that the window may need. You can pass the window in multiple ways, b
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[13]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s2">&quot;t [M]&quot;</span><span class="p">)</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s2">&quot;t [M]&quot;</span><span class="p">)</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s2">&quot;$rh [M]$&quot;</span><span class="p">)</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">strains</span><span class="o">.</span><span class="n">hanford</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;hanford&quot;</span><span class="p">)</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">strains</span><span class="o">.</span><span class="n">livingston</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;livingston&quot;</span><span class="p">)</span>
@@ -560,7 +548,7 @@ parameters that the window may need. You can pass the window in multiple ways, b
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-&lt;matplotlib.legend.Legend at 0x7f5abfa011d0&gt;
+&lt;matplotlib.legend.Legend at 0x7f9db58f5f70&gt;
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
@@ -576,8 +564,7 @@ parameters that the window may need. You can pass the window in multiple ways, b
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[14]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="c1"># Let&#39;s convert this the strain to physical units</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Let&#39;s convert this the strain to physical units</span>
 <span class="kn">from</span> <span class="nn">kuibit</span> <span class="kn">import</span> <span class="n">unitconv</span> <span class="k">as</span> <span class="n">uc</span>
 <span class="kn">import</span> <span class="nn">kuibit.gw_utils</span> <span class="k">as</span> <span class="nn">gwu</span>
 
@@ -622,8 +609,7 @@ SNR = 38.56
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[15]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">power_22</span> <span class="o">=</span> <span class="n">psi4</span><span class="o">.</span><span class="n">get_power_lm</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="c1"># l</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">power_22</span> <span class="o">=</span> <span class="n">psi4</span><span class="o">.</span><span class="n">get_power_lm</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="c1"># l</span>
                              <span class="mi">2</span><span class="p">,</span> <span class="c1"># m</span>
                              <span class="mi">120</span> <span class="c1"># pcut</span>
                              <span class="p">)</span>
@@ -639,7 +625,7 @@ SNR = 38.56
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-[&lt;matplotlib.lines.Line2D at 0x7f5abfad8e48&gt;]
+[&lt;matplotlib.lines.Line2D at 0x7f9db5815880&gt;]
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
@@ -653,8 +639,7 @@ SNR = 38.56
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[16]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">angmom</span> <span class="o">=</span> <span class="n">psi4</span><span class="o">.</span><span class="n">get_total_angular_momentum_z</span><span class="p">(</span><span class="mi">120</span><span class="p">)</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">angmom</span> <span class="o">=</span> <span class="n">psi4</span><span class="o">.</span><span class="n">get_total_angular_momentum_z</span><span class="p">(</span><span class="mi">120</span><span class="p">)</span>
 
 <span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s2">&quot;t [M]&quot;</span><span class="p">)</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s2">&quot;$L(&lt;t) [M]$&quot;</span><span class="p">)</span>
@@ -668,7 +653,7 @@ SNR = 38.56
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-[&lt;matplotlib.lines.Line2D at 0x7f5abf914eb8&gt;]
+[&lt;matplotlib.lines.Line2D at 0x7f9db5749bb0&gt;]
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
@@ -678,7 +663,7 @@ SNR = 38.56
 <img alt="../_images/tutorials_gravitational_waves_30_1.png" src="../_images/tutorials_gravitational_waves_30_1.png" />
 </div>
 </div>
-</div>
+</section>
 
 
             <div class="clearer"></div>
@@ -690,17 +675,21 @@ SNR = 38.56
             <p class="logo"><a href="../index.html">
               <img class="logo" src="../_static/logo.png" alt="Logo"/>
             </a></p>
-  <h4>Previous topic</h4>
-  <p class="topless"><a href="cactus_horizons.html"
-                        title="previous chapter">Working with Cactus horizons</a></p>
-  <h4>Next topic</h4>
-  <p class="topless"><a href="../examples/bins/picklify.html"
-                        title="next chapter">picklify.py</a></p>
+  <div>
+    <h4>Previous topic</h4>
+    <p class="topless"><a href="cactus_horizons.html"
+                          title="previous chapter">Working with Cactus horizons</a></p>
+  </div>
+  <div>
+    <h4>Next topic</h4>
+    <p class="topless"><a href="../examples/bins/picklify.html"
+                          title="next chapter">picklify.py</a></p>
+  </div>
 <div id="searchbox" style="display: none" role="search">
   <h3 id="searchlabel">Quick search</h3>
     <div class="searchformwrapper">
     <form class="search" action="../search.html" method="get">
-      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
       <input type="submit" value="Go" />
     </form>
     </div>
@@ -731,7 +720,7 @@ SNR = 38.56
     </div>
     <div class="footer" role="contentinfo">
         &#169; Copyright 2020-2021, Gabriele Bozzola.
-      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 3.5.4.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 4.4.0.
     </div>
   </body>
 </html>
