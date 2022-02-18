@@ -936,7 +936,7 @@ class OneGridFunctionH5(BaseOneGridFunction):
     ([ ]c=(\d+))?       # Component
     """
 
-    def __init__(self, allfiles, var_name):
+    def __init__(self, allfiles, var_name: str, dimension):
         """Constructor.
 
         :param allfiles: Paths of files associated to the variable.
@@ -950,6 +950,8 @@ class OneGridFunctionH5(BaseOneGridFunction):
         # the HDF5 file.
         self.thorn_name = None
         self.map = None
+
+        self.dimension = dimension
 
         self.rx_group_name = re.compile(self._pattern_group_name, re.VERBOSE)
 
@@ -968,13 +970,15 @@ class OneGridFunctionH5(BaseOneGridFunction):
             f"{self.thorn_name}::{self.var_name} it=%d tl=0{self.map}%s%s"
         )
 
+        file_is_3D = len(self.dimension) == 3
+
         # HDF5 files can contain ghostzones or not. Here, we can that all the
         # files have the same behavior (they all contain, or they all don't)
         #
         # self._are_ghostzones_in_file(path) returns True or False, so this
         # is a set with True, False or a mix
         ghost_in_files = {
-            self._are_ghostzones_in_file(path) for path in self.allfiles
+            self._are_ghostzones_in_file(path, file_is_3D) for path in self.allfiles
         }
 
         # Here we check that we only have True or False
@@ -1154,11 +1158,13 @@ class OneGridFunctionH5(BaseOneGridFunction):
         return self.alldata[path][iteration][ref_level][component]
 
     @staticmethod
-    def _are_ghostzones_in_file(path):
+    def _are_ghostzones_in_file(path: str, is_3D_file: bool) -> bool:
         """Return whether the ghostzones were output or not.
 
         :param path: File to inspect.
         :type path: str
+        :param is_3D_file: The file contains 3D data
+        :type is_3D_file: bool
 
         :returns: Whether ``path`` contains ghost zones.
         :rtype: bool
@@ -1167,13 +1173,14 @@ class OneGridFunctionH5(BaseOneGridFunction):
         # This is a tricky and important function to stitch together all the
         # different components. Carpet has an option (technically two) to output
         # the ghostzones in the files. These are: output_ghost_points and
-        # out3D_ghosts (which is deprecated). When they are both set to yes,
-        # the ghostzones are output in the h5 files. When one of the two is set
-        # to no, the ghostzones are not output.
+        # out3D_ghosts (which is deprecated). For 3D files, when they are both
+        # set to yes, the ghostzones are output in the h5 files. When one of the
+        # two is set to no, the ghostzones are not output. For 2D files, when
+        # it depends only on the value of the first.
 
         # The default value of these parameters is yes
-        with h5py.File(path, "r") as f:
-            parameters = f["Parameters and Global Attributes"]
+        with h5py.File(path, "r") as file_:
+            parameters = file_["Parameters and Global Attributes"]
             all_pars = parameters["All Parameters"][()].decode().split("\n")
             # We make sure that everything is lowercase, we are case insensitive
             iohdf5_pars = [
@@ -1183,10 +1190,10 @@ class OneGridFunctionH5(BaseOneGridFunction):
                 or param.lower().startswith("iohdf5")
             ]
 
-            def is_param_true(name):
+            def is_param_true(name: str) -> bool:
                 param = [p for p in iohdf5_pars if name.lower() in p]
-                # When the parameters are not set, they are set to yes by
-                # default
+                # When the parameters we are interested in are not set, they are
+                # set to yes by default
                 if len(param) == 0:
                     return True
 
@@ -1197,9 +1204,14 @@ class OneGridFunctionH5(BaseOneGridFunction):
                     or ("1" in param[0])
                 )
 
-            return is_param_true("out3D_ghosts") and is_param_true(
-                "output_ghost_points"
-            )
+            params_to_check = {"output_ghost_points"}
+
+            if is_3D_file:
+                params_to_check.add("out3D_ghosts")
+
+            # Ghostzones are in the file if all the relevant parameters are set
+            # to true
+            return all(is_param_true(param) for param in params_to_check)
 
     def clear_cache(self):
         """Remove all the cached entries.
@@ -1479,7 +1491,7 @@ class AllGridFunctions:
             # We prefer h5
             if var_name in self._vars_h5_files:
                 self._vars[var_name] = OneGridFunctionH5(
-                    self._vars_h5_files[var_name], var_name
+                    self._vars_h5_files[var_name], var_name, self.dimension
                 )
             elif var_name in self._vars_ascii_files:
                 if self.num_ghost is None:
