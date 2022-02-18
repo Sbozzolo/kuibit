@@ -2140,10 +2140,7 @@ class HierarchicalGridData(BaseNumerical):
         :returns: Refinement level number, component index, and data.
         :rtype: generator of tuples (int, int, :py:class:`~.UniformGridData`)
         """
-        # TODO (FUTURE): Reverse dictionary in Python 3.8
-        #
-        # In Python 3.8 we can reverse without transforming into a list first
-        for ref_level, data in reversed(list(self.grid_data_dict.items())):
+        for ref_level, data in reversed(self.grid_data_dict.items()):
             for comp_index, comp in enumerate(data):
                 yield ref_level, comp_index, comp
 
