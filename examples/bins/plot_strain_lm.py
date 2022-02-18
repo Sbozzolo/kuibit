@@ -130,21 +130,21 @@ the order as they appear in the TimeSeries method."""
 
         plt.plot(
             strain.real(),
-            label=fr"$r_{{\mathrm{{ex}}}} h^{{{args.mult_l}{args.mult_m}}}_+$",
+            label=rf"$r_{{\mathrm{{ex}}}} h^{{{args.mult_l}{args.mult_m}}}_+$",
         )
         plt.plot(
             -strain.imag(),
-            label=fr"$r_{{\mathrm{{ex}}}} h^{{{args.mult_l}{args.mult_m}}}_\times$",
+            label=rf"$r_{{\mathrm{{ex}}}} h^{{{args.mult_l}{args.mult_m}}}_\times$",
         )
 
         plt.legend()
         plt.xlabel("Time")
-        plt.ylabel(fr"$r_{{\mathrm{{ex}}}} h^{{{args.mult_l}{args.mult_l}}}$")
+        plt.ylabel(rf"$r_{{\mathrm{{ex}}}} h^{{{args.mult_l}{args.mult_l}}}$")
 
         add_text_to_corner(
             f"Det {args.detector_num}", anchor="SW", offset=0.005
         )
-        add_text_to_corner(fr"$r = {radius:.3f}$", anchor="NE", offset=0.005)
+        add_text_to_corner(rf"$r = {radius:.3f}$", anchor="NE", offset=0.005)
 
         set_axis_limits_from_args(args)
         logger.debug("Plotted")

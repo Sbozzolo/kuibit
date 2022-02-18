@@ -241,7 +241,7 @@ def total_filesize(allfiles, unit="MB"):
 
     # This function is here, but it could be anywhere, it doesn't really
     # apply only to ASCII files, nor only to Cactus files...
-    units = {"B": 1, "KB": 1024, "MB": 1024 ** 2, "GB": 1024 ** 3}
+    units = {"B": 1, "KB": 1024, "MB": 1024**2, "GB": 1024**3}
     if unit not in units:
         raise ValueError(f"Invalid unit: expected one of {list(units.keys())}")
     return sum(os.path.getsize(path) for path in set(allfiles)) / units[unit]

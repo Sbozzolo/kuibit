@@ -409,7 +409,7 @@ class TestTimeseries(unittest.TestCase):
         self.assertTrue(np.allclose(out.y, np.sin(times) ** 2))
 
         # Scalar
-        out = self.TS ** 2
+        out = self.TS**2
         self.assertTrue(np.allclose(out.y, np.sin(times) ** 2))
 
         # Test ipow
@@ -717,7 +717,7 @@ class TestTimeseries(unittest.TestCase):
 
     def test_resample(self):
 
-        new_times = np.array([float(1e-5 * i ** 2) for i in range(0, 100)])
+        new_times = np.array([float(1e-5 * i**2) for i in range(0, 100)])
 
         # Test no resampling
         sins = self.TS.copy()

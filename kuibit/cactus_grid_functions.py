@@ -981,7 +981,8 @@ class OneGridFunctionH5(BaseOneGridFunction):
         # self._are_ghostzones_in_file(path) returns True or False, so this
         # is a set with True, False or a mix
         ghost_in_files = {
-            self._are_ghostzones_in_file(path, file_is_3D) for path in self.allfiles
+            self._are_ghostzones_in_file(path, file_is_3D)
+            for path in self.allfiles
         }
 
         # Here we check that we only have True or False

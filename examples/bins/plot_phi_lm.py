@@ -114,22 +114,22 @@ at a given l and m."""
 
         plt.plot(
             phi.real(),
-            label=fr"$\Re \Phi_{phi_num}^{{{args.mult_l}{args.mult_m}}}$",
+            label=rf"$\Re \Phi_{phi_num}^{{{args.mult_l}{args.mult_m}}}$",
         )
         plt.plot(
             phi.imag(),
-            label=fr"$\Im \Phi_{phi_num}^{{{args.mult_l}{args.mult_m}}}$",
+            label=rf"$\Im \Phi_{phi_num}^{{{args.mult_l}{args.mult_m}}}$",
         )
 
         plt.legend()
         plt.xlabel("Time")
-        plt.ylabel(fr"$r \Phi_{phi_num}$")
+        plt.ylabel(rf"$r \Phi_{phi_num}$")
         set_axis_limits_from_args(args)
 
         add_text_to_corner(
             f"Det {args.detector_num}", anchor="SW", offset=0.005
         )
-        add_text_to_corner(fr"$r = {radius:.3f}$", anchor="NE", offset=0.005)
+        add_text_to_corner(rf"$r = {radius:.3f}$", anchor="NE", offset=0.005)
 
         logger.debug("Plotted")
 

@@ -92,7 +92,7 @@ luminosity and cumulative energy as a function of time as computed from Phi2.
         add_text_to_corner(
             f"Det {args.detector_num}", anchor="SW", offset=0.005
         )
-        add_text_to_corner(fr"$r = {radius:.3f}$", anchor="NE", offset=0.005)
+        add_text_to_corner(rf"$r = {radius:.3f}$", anchor="NE", offset=0.005)
 
         set_axis_limits_from_args(args)
         logger.debug("Plotted")

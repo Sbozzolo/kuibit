@@ -128,7 +128,7 @@ def geom_ulength(ulength):
     :rtype: :py:class :`~.Units`
 
     """
-    return Units(ulength, ulength / C_SI, ulength * (C_SI ** 2) / G_SI)
+    return Units(ulength, ulength / C_SI, ulength * (C_SI**2) / G_SI)
 
 
 def geom_umass(umass):
@@ -142,7 +142,7 @@ def geom_umass(umass):
     :rtype: :py:class:`~.Units`
 
     """
-    return geom_ulength(umass * G_SI / (C_SI ** 2))
+    return geom_ulength(umass * G_SI / (C_SI**2))
 
 
 def geom_umass_msun(umass):

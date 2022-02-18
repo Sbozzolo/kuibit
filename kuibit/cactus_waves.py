@@ -453,7 +453,7 @@ class GravitationalWavesOneDet(mp.MultipoleOneDet):
         psi4_int = self._fixed_frequency_integrated(
             self[(mult_l, mult_m)], pcut, order=1
         )
-        return self.dist ** 2 / (16 * np.pi) * np.abs(psi4_int) ** 2
+        return self.dist**2 / (16 * np.pi) * np.abs(psi4_int) ** 2
 
     def get_energy_lm(self, mult_l, mult_m, pcut):
         """Return the cumulative energy lost in the mode (l, m).
@@ -558,7 +558,7 @@ class GravitationalWavesOneDet(mp.MultipoleOneDet):
                 self[(mult_l, mult_m)], pcut, order=2
             )
             return (
-                self.dist ** 2
+                self.dist**2
                 / (16 * np.pi)
                 * mult_m
                 * (psi4_int1 * np.conj(psi4_int2)).imag()
@@ -920,12 +920,12 @@ class GravitationalWavesOneDet(mp.MultipoleOneDet):
 
             if direction == 0:
                 return (
-                    self.dist ** 2 / (8 * np.pi) * (Pp_int1 * Pp_int2).real()
+                    self.dist**2 / (8 * np.pi) * (Pp_int1 * Pp_int2).real()
                 )
 
             if direction == 1:
                 return (
-                    self.dist ** 2 / (8 * np.pi) * (Pp_int1 * Pp_int2).imag()
+                    self.dist**2 / (8 * np.pi) * (Pp_int1 * Pp_int2).imag()
                 )
 
         # This is direction == 2
@@ -958,7 +958,7 @@ class GravitationalWavesOneDet(mp.MultipoleOneDet):
         )
 
         # The imaginary part is zero, so we make the signal real
-        return self.dist ** 2 / (16 * np.pi) * (Pz_int1 * Pz_int2).real()
+        return self.dist**2 / (16 * np.pi) * (Pz_int1 * Pz_int2).real()
 
     def get_force_x_lm(self, mult_l, mult_m, pcut):
         r"""Return the instantaneous linear momentum along the x direction
@@ -1271,7 +1271,7 @@ class ElectromagneticWavesOneDet(mp.MultipoleOneDet):
         :rtype: :py:class:`~TimeSeries`
         """
         return (
-            self.dist ** 2 / (4 * np.pi) * np.abs(self[(mult_l, mult_m)]) ** 2
+            self.dist**2 / (4 * np.pi) * np.abs(self[(mult_l, mult_m)]) ** 2
         )
 
     def get_energy_lm(self, mult_l, mult_m):

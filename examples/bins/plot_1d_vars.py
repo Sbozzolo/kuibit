@@ -130,7 +130,7 @@ if __name__ == "__main__":
             set_axis_limits_from_args(args)
             logger.debug("Plotted")
 
-        add_text_to_corner(fr"$t = {time:.3f}$")
+        add_text_to_corner(rf"$t = {time:.3f}$")
 
         plt.legend()
         plt.xlabel(args.axis)
