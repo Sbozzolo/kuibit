@@ -468,7 +468,7 @@ class UniformGridData(BaseNumerical):
 
         # Our grid is cell-centered, so it is perfecly valid to evaluate a point
         # that it is outside coords, as long as it is within 0.5 * dx. For
-        # example, if the grid is linear from 0 to 10 with dx = 1, the pint
+        # example, if the grid is linear from 0 to 10 with dx = 1, the point
         # -0.25 is in the grid. To account for this in splines (to avoid that
         # they throw an error), we add another point at the two boundaries. This
         # point as the same value as the last point (which is equivalent to a

@@ -1,4 +1,4 @@
-n# Changelog
+# Changelog
 
 ## Version 1.4.0 (Under Development)
 
