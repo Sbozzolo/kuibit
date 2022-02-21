@@ -374,7 +374,7 @@ class TestVisualizeMatplotlib(unittest.TestCase):
         # Test with a 3D plot
         from mpl_toolkits.mplot3d import Axes3D  # noqa: F401, E402
 
-        ax = plt.figure().gca(projection="3d")
+        ax = plt.subplot(projection="3d")
         self.assertTrue(
             isinstance(
                 viz.add_text_to_corner("test", axis=ax),

@@ -11,6 +11,7 @@
 - Updated NumPy types (np.int -> int, np.float -> float)
 - Windowing uneven signals is no longer allowed
 - Correctly remove ghost zones for 1-2D HDF5 files
+- Fix deprecation warning for Matplotlib 3.4
 
 #### New examples
 
