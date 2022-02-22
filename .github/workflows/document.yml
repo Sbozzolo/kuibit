@@ -1,6 +1,6 @@
 name: Document
 
-on: [push]
+on: [push, pull_request]
 
 jobs:
 
@@ -46,6 +46,7 @@ jobs:
           cd ..
 
       - name: Commit documentation changes
+        if: github.event_name != 'pull_request'
         run: |
           git clone https://github.com/sbozzolo/kuibit.git --branch gh-pages --single-branch gh-pages
           mkdir -p gh-pages/dev
