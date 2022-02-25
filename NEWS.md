@@ -6,6 +6,7 @@
 - Improvements to documentation and docstrings
 - Minimum version of Python required is now 3.8
 - Started gradual typing
+- Now `SimDir` can be imported directly from `kuibit` (`from kuibit import SimDir`)
 
 #### Features
 - Added linear momentum lost by gravitational waves along the x and y directions
