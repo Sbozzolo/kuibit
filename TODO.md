@@ -21,8 +21,6 @@ Python required to complete the task.
 * Add layer in class hierarchy in `cactus_grid_functions` to save the work done in
   reading ASCII files containing multiple variables. [==]
 * Port `cactus_parfile` from `PostCactus`. [==]
-* Port `cactus_timertree` from `PostCactus`. [==]
-* Port support for locating bounding boxes from `PostCactus`. [==]
 
 * Transparently handle low dimensional grid data with higher dimensional one is
   available (e.g. add to the `xy` if `xyz` is available). [==]

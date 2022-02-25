@@ -2,8 +2,8 @@ Overview
 ========
 
 ``kuibit`` is a set of `openly developed <https://github.com/Sbozzolo/kuibit>`_.
- tools to post-process simulations performed with the `Einstein Toolkit
- <https://einsteintoolkit.org/>`_.
+tools to post-process simulations performed with the `Einstein Toolkit
+<https://einsteintoolkit.org/>`_.
 
 The goal of this package is to enable you to pursue your scientific goals
 without having to worry about computational details (e.g., handling simulation
@@ -104,6 +104,7 @@ Usage
    gw_mismatch.rst
    grid_data.rst
    sensitivity_curves.rst
+   timers.rst
    unitconv.rst
    visualize_matplotlib.rst
    argparse_helper.rst
@@ -220,6 +221,7 @@ Reference material (classes, functions, ...)
    unitconv_ref.rst
    visualize_matplotlib_ref.rst
    argparse_helper_ref.rst
+   cactus_timers_ref.rst
    tree_ref.rst
 
 What is a kuibit?
