@@ -20,6 +20,8 @@ Einstein Toolkit (or any Cactus-based code).
 
 """
 
+from kuibit.simdir import SimDir  # noqa: 401
+
 __version__ = "1.4.0-dev0"
 
 __bibtex__ = """\
