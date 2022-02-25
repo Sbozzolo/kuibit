@@ -9,6 +9,7 @@
 #### Features
 - Added linear momentum lost by gravitational waves along the x and y directions
   (starting from a contribution by @konrad-topolski)
+- Added `Tree` data structure
 
 #### Bug fixes
 - Added error in `_plot_horizon_on_plane` when the horizon cannot be plotted

@@ -220,6 +220,7 @@ Reference material (classes, functions, ...)
    unitconv_ref.rst
    visualize_matplotlib_ref.rst
    argparse_helper_ref.rst
+   tree_ref.rst
 
 What is a kuibit?
 -----------------
