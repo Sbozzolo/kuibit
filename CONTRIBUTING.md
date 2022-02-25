@@ -83,6 +83,8 @@ dependency implementing some feature.
 
 NumPy is spelled like that: NumPy (not numpy, or Numpy). Similarly SciPy.
 
+We use type hints.
+
 ## Contributing process
 
 We follow the [https://guides.github.com/introduction/flow/](GitHub flow) for
@@ -104,8 +106,9 @@ are (make sure to read below this list!):
 8. Run `isort --profile black`.
 9. Optionally, run other static analysis tools like `pylint`, and/or `flake8` to
    improve your code.
-10. Open a pull request.
-11. Your code will be reviewed by at least one maintainer, who may request some
+10. Check your code for type hints with `mypy`.
+11. Open a pull request.
+12. Your code will be reviewed by at least one maintainer, who may request some
     additional changes. At the end of the review, the contribution will be
     merged.
 
