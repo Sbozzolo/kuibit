@@ -19,6 +19,7 @@ placing them in you `$PATH` so that they can be used for your simulations.
 
 | Name                          | Description                                                                                                                |
 |-------------------------------|----------------------------------------------------------------------------------------------------------------------------|
+| `interactive_timertree`       | Reads timers and starts a web server with an interactive view on the profiling information.                                |
 | `plot_1d_slice`               | Plots a 1D slice of any grid functions output by Carpet. Optionally take logarithm and/or absolute value.                  |
 | `plot_1d_vars`                | Plots one or more 1D grid functions output by Carpet. Optionally take logarithm and/or absolute value.                     |
 | `plot_ah_coordinate_velocity` | Plots the coordinate velocities of a given horizon.                                                                        |

@@ -152,6 +152,7 @@ Scripts
 .. toctree::
    :maxdepth: 1
 
+   examples/bins/interactive_timertree.rst
    examples/bins/picklify.rst
    examples/bins/plot_1d_slice.rst
    examples/bins/plot_1d_vars.rst

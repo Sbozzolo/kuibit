@@ -29,6 +29,7 @@
 
 Scripts:
 
+* `interactive_timertree.py`
 * `plot_ah_trajectories.py`
 
 ## Version 1.3.3 (19 November 2021)
