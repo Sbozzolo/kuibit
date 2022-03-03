@@ -9,5 +9,11 @@ The webpage has to be rendered in a webserver, which is automatically (but
 optionally) started by ``interactive_timertree.py``. On a remote cluster, you
 may need to copy the file locally.
 
+This is what it looks like:
+
+.. raw:: html
+
+    <iframe src="../../_static/timertree.html" width="100%" frameBorder="0"></iframe>
+
 .. literalinclude:: ../../../examples/bins/interactive_timertree.py
   :language: python
