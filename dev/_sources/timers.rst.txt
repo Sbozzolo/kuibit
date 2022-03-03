@@ -6,7 +6,7 @@ kuibit.cactus_timers`) can be used to read timing information from the output of
 ``Carpet``. Timers are useful to profile the code and individuate bottlenecks.
 
 At the moment, only XML timers are supported. These files are output when the
- option ``Carpet::output_xml_timer_tree`` is set to ``yes``.
+option ``Carpet::output_xml_timer_tree`` is set to ``yes``.
 
 Trees
 -----------------------
