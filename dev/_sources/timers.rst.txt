@@ -70,3 +70,4 @@ across all the processes.
 .. note::
 
    Check out the examples to see a neat and useful application of this module.
+   In particular, :doc:`/examples/bins/interactive_timertree`
