@@ -63,8 +63,8 @@ import re
 from collections.abc import KeysView
 from statistics import mean, median
 from typing import TYPE_CHECKING, Dict, List, Optional
-from xml.etree.ElementTree import Element
-from xml.etree.ElementTree import parse as parse_xml
+from xml.etree.ElementTree import Element  # skipcq: BAN-B405
+from xml.etree.ElementTree import parse as parse_xml  # skipcq: BAN-B405
 
 from kuibit.tree import Tree, merge_trees
 
@@ -127,7 +127,7 @@ class TimersDir:
 
             return Tree(name, value, children)
 
-        root_node = parse_xml(path).getroot()
+        root_node = parse_xml(path).getroot()  # skipcq: BAN-B314
         return _traverse_recursive(root_node)
 
     def __init__(self, sd: "SimDir"):
@@ -149,7 +149,7 @@ class TimersDir:
         timertree_xml_rx = re.compile(timertree_xml_pattern)
 
         for path in sd.allfiles:
-            folder, filename = os.path.split(path)
+            _folder, filename = os.path.split(path)
             filename_match = timertree_xml_rx.match(filename)
             if filename_match is not None:
                 process_number = int(filename_match.group(1))

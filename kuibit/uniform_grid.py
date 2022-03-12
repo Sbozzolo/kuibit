@@ -491,7 +491,7 @@ class UniformGrid:
         # is the main method to find which grid contains a given point. (method
         # finest_component_at_point). So, it is better to have a less pythonic
         # method that fails as soon as possible.
-        for dim in range(self.num_dimensions):
+        for dim in range(self.num_dimensions):  # skipcq: PY-W0075
             if not (
                 self.lowest_vertex[dim]
                 <= point[dim]
