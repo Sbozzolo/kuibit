@@ -51,6 +51,8 @@ For a full list of available features, see the :doc:`features page <features>`.
   ``CarpetIOASCII``.
 - Work with horizon data from (:py:mod:`~.cactus_horizons`) as output by
   ``QuasiLocalMeasures`` and ``AHFinderDirect``.
+- Work with timers produced by ``Carpet``
+  (:py:mod:`~.cactus_timers`).
 - Handle unit conversion, in particular from geometrized to physical
   (:py:mod:`~.unitconv`).
 - Write command-line scripts (:py:mod:`~.argparse_helper`).
