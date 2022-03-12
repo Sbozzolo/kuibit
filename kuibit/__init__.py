@@ -20,6 +20,7 @@ Einstein Toolkit (or any Cactus-based code).
 
 """
 
+# skipcq: PY-W2000
 from kuibit.simdir import SimDir  # noqa: 401
 
 __version__ = "1.4.0-dev0"

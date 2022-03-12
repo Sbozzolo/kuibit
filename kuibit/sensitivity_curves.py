@@ -70,7 +70,7 @@ def Sn_LISA(freqs, arms_length=2.5e9):
     # Transfer frequency
     f_star = C_SI / (2 * np.pi * arms_length)
 
-    # Equation (13)
+    # This is Equation (13)
     Sn = (
         (10.0 / (3 * arms_length**2))
         * (
