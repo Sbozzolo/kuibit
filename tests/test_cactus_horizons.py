@@ -359,8 +359,8 @@ class TestOneHorizon(unittest.TestCase):
         for patch in patches:
             expected_x.append(patches[patch][0])
 
-        self.assertTrue(
-            np.allclose(expected_x, self.ho.shape_at_iteration(0)[0])
+        np.testing.assert_allclose(
+            expected_x, self.ho.shape_at_iteration(0)[0]
         )
 
     def test_shape_time_at_iteration(self):
@@ -378,11 +378,9 @@ class TestOneHorizon(unittest.TestCase):
             self.ho.shape_at_time(10465)
 
         # Test time available
-        self.assertTrue(
-            np.allclose(
-                self.ho.shape_at_time(6.4, 1e-2),
-                self.ho.shape_at_iteration(1024),
-            )
+        np.testing.assert_allclose(
+            self.ho.shape_at_time(6.4, 1e-2),
+            self.ho.shape_at_iteration(1024),
         )
 
     def test_shape_outline_at_iteration(self):
@@ -400,23 +398,19 @@ class TestOneHorizon(unittest.TestCase):
             self.ho.shape_outline_at_iteration(0, [0, 1])
 
         # Three Nones
-        self.assertTrue(
-            np.allclose(
-                self.ho.shape_outline_at_iteration(0, [None, None, None]),
-                self.ho.shape_at_iteration(0),
-            ),
-        )
+        np.testing.assert_allclose(
+            self.ho.shape_outline_at_iteration(0, [None, None, None]),
+            self.ho.shape_at_iteration(0),
+        ),
 
         # Three non-Nones
         with self.assertRaises(ValueError):
             self.ho.shape_outline_at_iteration(0, [1, 2, 3])
 
         # 1D cut
-        self.assertTrue(
-            np.allclose(
-                self.ho.shape_outline_at_iteration(0, [None, 0, 0]),
-                [np.array([5.61956723]), np.array([5.08838347])],
-            )
+        np.testing.assert_allclose(
+            self.ho.shape_outline_at_iteration(0, [None, 0, 0]),
+            [np.array([5.61956723]), np.array([5.08838347])],
         )
 
         # 2D cut with no points
@@ -437,11 +431,9 @@ class TestOneHorizon(unittest.TestCase):
             self.ho.shape_outline_at_time(10465, [None, None, 0])
 
         # Test time available
-        self.assertTrue(
-            np.allclose(
-                self.ho.shape_outline_at_time(6.4, [None, None, 0], 1e-2),
-                self.ho.shape_outline_at_iteration(1024, [None, None, 0]),
-            )
+        np.testing.assert_allclose(
+            self.ho.shape_outline_at_time(6.4, [None, None, 0], 1e-2),
+            self.ho.shape_outline_at_iteration(1024, [None, None, 0]),
         )
 
     def test_compute_horizons_separation(self):

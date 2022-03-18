@@ -48,7 +48,7 @@ class TestUniformGrid(unittest.TestCase):
         # Test dx
         geom = gd.UniformGrid([101, 101], [1, 1], x1=[101, 51])
 
-        self.assertTrue(np.allclose(geom.dx, [1, 0.5]))
+        np.testing.assert_allclose(geom.dx, [1, 0.5])
         self.assertIs(geom.delta, geom.dx)
         self.assertIs(geom.origin, geom.x0)
 
@@ -63,7 +63,7 @@ class TestUniformGrid(unittest.TestCase):
         # Test x1
         geom2 = gd.UniformGrid([101, 101], [1, 1], dx=[1, 0.5])
 
-        self.assertTrue(np.allclose(geom2.x1, [101, 51]))
+        np.testing.assert_allclose(geom2.x1, [101, 51])
 
         # Test num_ghost
         self.assertCountEqual(geom.num_ghost, np.zeros(2))
@@ -108,8 +108,8 @@ class TestUniformGrid(unittest.TestCase):
         self.assertEqual(geom5.num_extended_dimensions, 2)
 
         # Test lowest and highest vertices
-        self.assertTrue(np.allclose(geom5.lowest_vertex, [0.5, 0.75, 0]))
-        self.assertTrue(np.allclose(geom5.highest_vertex, [101.5, 51.25, 0]))
+        np.testing.assert_allclose(geom5.lowest_vertex, [0.5, 0.75, 0])
+        np.testing.assert_allclose(geom5.highest_vertex, [101.5, 51.25, 0])
 
         # Test case with shape with ones and given x1
         with self.assertRaises(ValueError):
@@ -160,17 +160,13 @@ class TestUniformGrid(unittest.TestCase):
         self.assertCountEqual(geom.indices_to_coordinates([1, 3]), [2, 3.5])
         self.assertCountEqual(geom.coordinates_to_indices([2, 3.5]), [1, 3])
         # Vector input
-        self.assertTrue(
-            np.allclose(
-                geom.indices_to_coordinates([[1, 3], [2, 4]]),
-                [[2, 3.5], [3, 4]],
-            )
+        np.testing.assert_allclose(
+            geom.indices_to_coordinates([[1, 3], [2, 4]]),
+            [[2, 3.5], [3, 4]],
         )
-        self.assertTrue(
-            np.allclose(
-                geom.coordinates_to_indices([[2, 3.5], [3, 4]]),
-                [[1, 3], [2, 4]],
-            )
+        np.testing.assert_allclose(
+            geom.coordinates_to_indices([[2, 3.5], [3, 4]]),
+            [[1, 3], [2, 4]],
         )
 
     def test__in__(self):
@@ -229,20 +225,20 @@ class TestUniformGrid(unittest.TestCase):
         y = np.linspace(2, 9, 15)
 
         # Test coordinates_1d
-        self.assertTrue(np.allclose(geom4.coordinates_1d[0], x))
-        self.assertTrue(np.allclose(geom4.coordinates_1d[1], y))
+        np.testing.assert_allclose(geom4.coordinates_1d[0], x)
+        np.testing.assert_allclose(geom4.coordinates_1d[1], y)
 
         c0 = geom4.coordinates(as_meshgrid=True)
 
         X, Y = np.meshgrid(x, y)
 
-        self.assertTrue(np.allclose(c0[0], X))
-        self.assertTrue(np.allclose(c0[1], Y))
+        np.testing.assert_allclose(c0[0], X)
+        np.testing.assert_allclose(c0[1], Y)
 
         c1 = geom4.coordinates()
 
-        self.assertTrue(np.allclose(c1[0], x))
-        self.assertTrue(np.allclose(c1[1], y))
+        np.testing.assert_allclose(c1[0], x)
+        np.testing.assert_allclose(c1[1], y)
 
         with self.assertRaises(ValueError):
             geom4.coordinates(as_meshgrid=True, as_same_shape=True)
@@ -251,8 +247,8 @@ class TestUniformGrid(unittest.TestCase):
         shaped_array = geom4.coordinates(as_same_shape=True)
         self.assertCountEqual(shaped_array[0].shape, geom4.shape)
         # We check that the first column is the same as the coordinates
-        self.assertTrue(
-            np.allclose(shaped_array[0][:, 0], geom4.coordinates()[0])
+        np.testing.assert_allclose(
+            shaped_array[0][:, 0], geom4.coordinates()[0]
         )
 
     def test__getitem__(self):
@@ -533,13 +529,13 @@ class TestUniformGridData(unittest.TestCase):
         # Second derivative should still be a -sin
         sin_wave.partial_differentiate(0, order=2)
 
-        self.assertTrue(
-            np.allclose(-sin_wave.data, original_sin.data, atol=1e-3)
+        np.testing.assert_allclose(
+            -sin_wave.data, original_sin.data, atol=1e-3
         )
 
         gradient = original_sin.gradient(order=2)
-        self.assertTrue(
-            np.allclose(-gradient[0].data, original_sin.data, atol=1e-3)
+        np.testing.assert_allclose(
+            -gradient[0].data, original_sin.data, atol=1e-3
         )
 
         # Masked data
@@ -768,12 +764,10 @@ class TestUniformGridData(unittest.TestCase):
 
         expected = [1, 2]
 
-        self.assertTrue(
-            np.allclose(
-                expected, data2d.coordinates_at_maximum(absolute=False)
-            )
+        np.testing.assert_allclose(
+            expected, data2d.coordinates_at_maximum(absolute=False)
         )
-        self.assertTrue(np.allclose(expected, data2d.coordinates_at_minimum()))
+        np.testing.assert_allclose(expected, data2d.coordinates_at_minimum())
 
     def test_save_load(self):
 
@@ -913,18 +907,14 @@ class TestUniformGridData(unittest.TestCase):
         )
 
         # Vector input
-        self.assertTrue(
-            np.allclose(
-                sin_data_complex.evaluate_with_spline(
-                    [[np.pi / 3], [np.pi / 4]]
-                ),
-                np.array(
-                    [
-                        (1 + 1j) * np.sin(np.pi / 3),
-                        (1 + 1j) * np.sin(np.pi / 4),
-                    ]
-                ),
-            )
+        np.testing.assert_allclose(
+            sin_data_complex.evaluate_with_spline([[np.pi / 3], [np.pi / 4]]),
+            np.array(
+                [
+                    (1 + 1j) * np.sin(np.pi / 3),
+                    (1 + 1j) * np.sin(np.pi / 4),
+                ]
+            ),
         )
 
         # Vector input in, vector input out
@@ -943,20 +933,16 @@ class TestUniformGridData(unittest.TestCase):
         )
 
         # Vector input
-        self.assertTrue(
-            np.allclose(
-                prod_data_complex.evaluate_with_spline([(1, 0), (2, 3)]),
-                np.array([(1 + 1j) * 2, (1 + 1j) * 10]),
-            )
+        np.testing.assert_allclose(
+            prod_data_complex.evaluate_with_spline([(1, 0), (2, 3)]),
+            np.array([(1 + 1j) * 2, (1 + 1j) * 10]),
         )
 
-        self.assertTrue(
-            np.allclose(
-                prod_data_complex.evaluate_with_spline(
-                    [[(1, 0), (2, 3)], [(3, 1), (0, 0)]]
-                ),
-                np.array([[(1 + 1j) * 2, (1 + 1j) * 10], [(1 + 1j) * 9, 0]]),
-            )
+        np.testing.assert_allclose(
+            prod_data_complex.evaluate_with_spline(
+                [[(1, 0), (2, 3)], [(3, 1), (0, 0)]]
+            ),
+            np.array([[(1 + 1j) * 2, (1 + 1j) * 10], [(1 + 1j) * 9, 0]]),
         )
 
         # Real data
@@ -981,8 +967,8 @@ class TestUniformGridData(unittest.TestCase):
         sin_data = gdu.sample_function(np.sin, 12000, 0, 2 * np.pi)
         linspace = gd.UniformGrid(101, x0=0, x1=3)
         output = sin_data(linspace)
-        self.assertTrue(
-            np.allclose(output.data, np.sin(linspace.coordinates()))
+        np.testing.assert_allclose(
+            output.data, np.sin(linspace.coordinates()[0])
         )
 
         # Incompatible dimensions
@@ -1060,8 +1046,8 @@ class TestUniformGridData(unittest.TestCase):
         hist = sin_data.histogram()
         expected_hist = np.histogram(sin_data.data, range=(-1, 1), bins=400)
 
-        self.assertTrue(np.allclose(expected_hist[0], hist[0]))
-        self.assertTrue(np.allclose(expected_hist[1], hist[1]))
+        np.testing.assert_allclose(expected_hist[0], hist[0], rtol=2e-6)
+        np.testing.assert_allclose(expected_hist[1], hist[1], rtol=2e-6)
 
         # Test with weights
         weights = sin_data.copy()
@@ -1072,8 +1058,8 @@ class TestUniformGridData(unittest.TestCase):
             sin_data.data, range=(-1, 1), bins=400, weights=weights.data
         )
 
-        self.assertTrue(np.allclose(expected_hist[0], hist[0]))
-        self.assertTrue(np.allclose(expected_hist[1], hist[1]))
+        np.testing.assert_allclose(expected_hist[0], hist[0], rtol=2e-6)
+        np.testing.assert_allclose(expected_hist[1], hist[1], rtol=2e-6)
 
     def test_percentiles(self):
 
@@ -1085,18 +1071,14 @@ class TestUniformGridData(unittest.TestCase):
         self.assertAlmostEqual(lin_data.percentiles(0.5), np.pi)
 
         # Vector input
-        self.assertTrue(
-            np.allclose(
-                lin_data.percentiles([0.25, 0.5]), np.array([np.pi / 2, np.pi])
-            )
+        np.testing.assert_allclose(
+            lin_data.percentiles([0.25, 0.5]), np.array([np.pi / 2, np.pi])
         )
 
         # Not normalized
-        self.assertTrue(
-            np.allclose(
-                lin_data.percentiles([250, 500], relative=False),
-                np.array([np.pi / 2, np.pi]),
-            )
+        np.testing.assert_allclose(
+            lin_data.percentiles([250, 500], relative=False),
+            np.array([np.pi / 2, np.pi]),
         )
 
     def test_mean_integral_norm1_norm2(self):
@@ -1144,7 +1126,7 @@ class TestUniformGridData(unittest.TestCase):
         )
 
         self.assertEqual(resampled.grid, new_grid)
-        self.assertTrue(np.allclose(resampled.data, exp_resampled.data))
+        np.testing.assert_allclose(resampled.data, exp_resampled.data)
 
         # Check that the method of the spline is linear
         self.assertEqual(prod_data_complex.spline_imag.method, "linear")
@@ -1154,8 +1136,8 @@ class TestUniformGridData(unittest.TestCase):
             new_grid, piecewise_constant=True
         )
 
-        self.assertTrue(
-            np.allclose(resampled_nearest.data, exp_resampled.data, atol=1e-3)
+        np.testing.assert_allclose(
+            resampled_nearest.data, exp_resampled.data, rtol=1e-3
         )
 
         # Check that the method of the spline hasn't linear
@@ -1237,11 +1219,9 @@ class TestUniformGridData(unittest.TestCase):
 
         grid_data = gdu.sample_function_from_uniformgrid(square, self.geom)
 
-        self.assertTrue(
-            np.allclose(
-                grid_data.coordinates_from_grid()[0],
-                self.geom.coordinates()[0],
-            )
+        np.testing.assert_allclose(
+            grid_data.coordinates_from_grid()[0],
+            self.geom.coordinates()[0],
         )
 
         # This is a list of UniformGridData
@@ -1253,10 +1233,8 @@ class TestUniformGridData(unittest.TestCase):
             )
 
         # Here we test coordiantes_meshgrid()
-        self.assertTrue(
-            np.allclose(
-                grid_data.coordinates_meshgrid()[0], self.geom.coordinates()[0]
-            )
+        np.testing.assert_allclose(
+            grid_data.coordinates_meshgrid()[0][0], self.geom.coordinates()[0]
         )
 
     def test_properties(self):
@@ -1276,7 +1254,7 @@ class TestUniformGridData(unittest.TestCase):
         self.assertEqual(grid_data.component, self.geom.component)
         self.assertEqual(grid_data.time, self.geom.time)
         self.assertEqual(grid_data.iteration, self.geom.iteration)
-        self.assertTrue(np.allclose(grid_data.data_xyz, grid_data.data.T))
+        np.testing.assert_allclose(grid_data.data_xyz, grid_data.data.T)
 
     def test__getitem__(self):
         def square(x, y):
@@ -1871,7 +1849,7 @@ class TestHierarchicalGridData(unittest.TestCase):
         # Uniform grid as input
         grid = gd.UniformGrid([3, 5], x0=[0, 1], x1=[2, 5])
         grid_data = gdu.sample_function_from_uniformgrid(product, grid)
-        self.assertTrue(np.allclose(hg3(grid), grid_data.data))
+        np.testing.assert_allclose(hg3(grid), grid_data.data)
 
         # Test masked
         hg_masked = km.arcsin(gd.HierarchicalGridData(self.grid_data_two_comp))
@@ -2003,11 +1981,11 @@ class TestHierarchicalGridData(unittest.TestCase):
         # Second derivative should still be a -sin
         sin_wave.partial_differentiate(0, order=2)
 
-        self.assertTrue(
-            np.allclose(-sin_wave[0][0].data, original_sin1.data, atol=1e-3)
+        np.testing.assert_allclose(
+            -sin_wave[0][0].data, original_sin1.data, atol=1e-3
         )
-        self.assertTrue(
-            np.allclose(-sin_wave[1][0].data, original_sin2.data, atol=1e-3)
+        np.testing.assert_allclose(
+            -sin_wave[1][0].data, original_sin2.data, atol=1e-3
         )
 
         # Test _call_component_method with non-string name
@@ -2022,12 +2000,13 @@ class TestHierarchicalGridData(unittest.TestCase):
         # Along the first direction (it's a HierarchicalGridData)
         partial_x = gradient[0]
 
-        self.assertTrue(
-            np.allclose(-partial_x[0][0].data, original_sin1.data, atol=1e-3)
+        np.testing.assert_allclose(
+            -partial_x[0][0].data, original_sin1.data, atol=1e-3
         )
+
         # First refinement_level
-        self.assertTrue(
-            np.allclose(-partial_x[1][0].data, original_sin2.data, atol=1e-3)
+        np.testing.assert_allclose(
+            -partial_x[1][0].data, original_sin2.data, atol=1e-3
         )
 
     def test_slice(self):
@@ -2081,8 +2060,8 @@ class TestHierarchicalGridData(unittest.TestCase):
 
         point = sin_wave.coordinates_at_maximum()
 
-        self.assertTrue(np.allclose(sin_wave(point), sin_wave.abs_max()))
+        np.testing.assert_allclose(sin_wave(point), sin_wave.abs_max())
 
         point_min = sin_wave.coordinates_at_minimum(absolute=False)
 
-        self.assertTrue(np.allclose(sin_wave(point_min), sin_wave.min()))
+        np.testing.assert_allclose(sin_wave(point_min), sin_wave.min())

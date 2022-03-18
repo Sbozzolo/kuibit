@@ -77,13 +77,13 @@ class TestCactusWaves(unittest.TestCase):
         # The period of sin(x) is 2 pi, so we pick pcut = 1e10
         integral = gwdum._fixed_frequency_integrated(tts, 1e10)
 
-        self.assertTrue(np.allclose(integral.t, t))
-        self.assertTrue(np.allclose(integral.y, -np.cos(t), atol=5e-4))
+        np.testing.assert_allclose(integral.t, t)
+        np.testing.assert_allclose(integral.y, -np.cos(t), atol=5e-4)
 
         # The second integral should be sin(x)
         integral2 = gwdum._fixed_frequency_integrated(tts, 1e10, order=2)
 
-        self.assertTrue(np.allclose(integral2.y, -np.sin(t), atol=5e-4))
+        np.testing.assert_allclose(integral2.y, -np.sin(t), atol=5e-4)
 
         # Now, let's see the opposite case in which the frequency is lower than
         # any frequencies. The output should be the same timeseries we started
@@ -92,8 +92,8 @@ class TestCactusWaves(unittest.TestCase):
         # cosine. pcut = 1e-4 -> omega_threshold = 2 pi / pcut = 2 pi * 1e4
         # Hence, the timeseries is divided by 1e-4
         integral3 = gwdum._fixed_frequency_integrated(tts, 1e-4)
-        self.assertTrue(
-            np.allclose(integral3.y * 2 * np.pi * 1e4, -np.cos(t), atol=1e-3)
+        np.testing.assert_allclose(
+            integral3.y * 2 * np.pi * 1e4, -np.cos(t), atol=1e-3
         )
 
         # Check warning for irregularly spaced
@@ -120,13 +120,9 @@ class TestCactusWaves(unittest.TestCase):
         # We do not need to test the FFI, hopefully that is already tested
 
         # Test window = set verything to 0
-        self.assertTrue(
-            np.allclose(
-                self.psi4.get_strain_lm(
-                    2, 2, 0.1, window_function=lambda x: 0
-                ).y,
-                0,
-            )
+        np.testing.assert_allclose(
+            self.psi4.get_strain_lm(2, 2, 0.1, window_function=lambda x: 0).y,
+            0,
         )
 
         psi4lm = self.psi4[(2, 2)]
@@ -140,44 +136,36 @@ class TestCactusWaves(unittest.TestCase):
             ham_psi4lm, 0.1, order=2
         ).y
 
-        self.assertTrue(
-            np.allclose(
-                self.psi4.get_strain_lm(
-                    2, 2, 0.1, window_function=signal.hamming, trim_ends=False
-                ).y,
-                ffi_ham,
-            )
+        np.testing.assert_allclose(
+            self.psi4.get_strain_lm(
+                2, 2, 0.1, window_function=signal.hamming, trim_ends=False
+            ).y,
+            ffi_ham,
         )
 
         # Test window is a string, like hamming
-        self.assertTrue(
-            np.allclose(
-                self.psi4.get_strain_lm(
-                    2, 2, 0.1, window_function="hamming", trim_ends=False
-                ).y,
-                ffi_ham,
-            )
+        np.testing.assert_allclose(
+            self.psi4.get_strain_lm(
+                2, 2, 0.1, window_function="hamming", trim_ends=False
+            ).y,
+            ffi_ham,
         )
 
         # Test no window
-        self.assertTrue(
-            np.allclose(
-                self.psi4.get_strain_lm(2, 2, 0.1, trim_ends=False).y,
-                self.psi4._fixed_frequency_integrated(psi4lm, 0.1, order=2).y,
-            )
+        np.testing.assert_allclose(
+            self.psi4.get_strain_lm(2, 2, 0.1, trim_ends=False).y,
+            self.psi4._fixed_frequency_integrated(psi4lm, 0.1, order=2).y,
         )
 
         # Test trim ends
-        self.assertTrue(
-            np.allclose(
-                self.psi4.get_strain_lm(2, 2, 0.1, trim_ends=True).y,
-                self.psi4._fixed_frequency_integrated(psi4lm, 0.1, order=2)
-                .cropped(
-                    init=self.psi4[(2, 2)].tmin + 0.1,
-                    end=self.psi4[(2, 2)].tmax - 0.1,
-                )
-                .y,
+        np.testing.assert_allclose(
+            self.psi4.get_strain_lm(2, 2, 0.1, trim_ends=True).y,
+            self.psi4._fixed_frequency_integrated(psi4lm, 0.1, order=2)
+            .cropped(
+                init=self.psi4[(2, 2)].tmin + 0.1,
+                end=self.psi4[(2, 2)].tmax - 0.1,
             )
+            .y,
         )
 
     def test_get_strain(self):
@@ -201,8 +189,8 @@ class TestCactusWaves(unittest.TestCase):
             + self.psi4.get_strain_lm(2, 2, 0.1).y * y2
         )
 
-        self.assertTrue(
-            np.allclose(strain, self.psi4.get_strain(theta, phi, 0.1).y)
+        np.testing.assert_allclose(
+            strain, self.psi4.get_strain(theta, phi, 0.1).y
         )
 
     def test_get_observed_strain(self):
