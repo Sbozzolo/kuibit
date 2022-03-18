@@ -110,18 +110,14 @@ class TestVisualizeMatplotlib(unittest.TestCase):
         # Valid (passing x0 and x1)
         ret2 = dec_func_grid(data=hg, shape=ugd.shape, x0=ugd.x0, x1=ugd.x1)
         # Check coordinates (which checks the resampling)
-        self.assertTrue(
-            np.allclose(
-                ret2[1]["coordinates"][0], ugd.coordinates_from_grid()[0]
-            )
+        np.testing.assert_allclose(
+            ret2[1]["coordinates"][0], ugd.coordinates_from_grid()[0]
         )
 
         # Not passing x0 and x1
         ret2b = dec_func_grid(data=hg, shape=ugd.shape)
-        self.assertTrue(
-            np.allclose(
-                ret2b[1]["coordinates"][0], ugd.coordinates_from_grid()[0]
-            )
+        np.testing.assert_allclose(
+            ret2b[1]["coordinates"][0], ugd.coordinates_from_grid()[0]
         )
 
         # We create an empty OneGridFunctionASCII and populate it with ugd
@@ -138,11 +134,10 @@ class TestVisualizeMatplotlib(unittest.TestCase):
         ret3 = dec_func_grid(
             data=cactus_ascii, iteration=0, shape=ugd.shape, xlabel="x"
         )
-        self.assertTrue(
-            np.allclose(
-                ret3[1]["coordinates"][0], ugd.coordinates_from_grid()[0]
-            )
+        np.testing.assert_allclose(
+            ret3[1]["coordinates"][0], ugd.coordinates_from_grid()[0]
         )
+
         # Test xlabel and ylabel
         self.assertEqual(ret3[1]["xlabel"], "x")
 
@@ -289,18 +284,14 @@ class TestVisualizeMatplotlib(unittest.TestCase):
         with self.assertRaises(ValueError):
             viz.plot_horizon_on_plane_at_time(ah, 0, "bob")
 
-        self.assertTrue(
-            np.allclose(
-                viz.plot_horizon(shape)[0].xy,
-                viz.plot_horizon_on_plane_at_iteration(ah, 0, "xy")[0].xy,
-            )
+        np.testing.assert_allclose(
+            viz.plot_horizon(shape)[0].xy,
+            viz.plot_horizon_on_plane_at_iteration(ah, 0, "xy")[0].xy,
         )
 
-        self.assertTrue(
-            np.allclose(
-                viz.plot_horizon(shape)[0].xy,
-                viz.plot_horizon_on_plane_at_time(ah, 0, "xy")[0].xy,
-            )
+        np.testing.assert_allclose(
+            viz.plot_horizon(shape)[0].xy,
+            viz.plot_horizon_on_plane_at_time(ah, 0, "xy")[0].xy,
         )
 
         with self.assertRaises(RuntimeError):

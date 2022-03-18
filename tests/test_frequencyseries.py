@@ -62,7 +62,7 @@ class TestFrequencySeries(unittest.TestCase):
         f2 = self.f * 2
         fs_copy.f = f2
 
-        self.assertTrue(np.allclose(fs_copy.f, f2))
+        np.testing.assert_allclose(fs_copy.f, f2)
 
     def test_df(self):
 
@@ -136,11 +136,11 @@ class TestFrequencySeries(unittest.TestCase):
         # Complex
         ts = self.FS_c.to_TimeSeries()
 
-        self.assertTrue(np.allclose(ts.y, self.y_c))
+        np.testing.assert_allclose(ts.y, self.y_c, atol=1e-14)
 
         # real
         ts_r = self.FS.to_TimeSeries()
-        self.assertTrue(np.allclose(ts_r.y, self.y))
+        np.testing.assert_allclose(ts_r.y, self.y, atol=1e-14)
 
         # Masked
         with self.assertRaises(RuntimeError):
