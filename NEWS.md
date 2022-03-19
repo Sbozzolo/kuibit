@@ -10,7 +10,8 @@
 
 #### Features
 - Added linear momentum lost by gravitational waves along the x and y directions
-  (starting from a contribution by @konrad-topolski)
+  (starting from a contribution by @konrad-topolski,
+  [#25](https://github.com/Sbozzolo/kuibit/pull/25))
 - Added `Tree` data structure
 
 #### Bug fixes
@@ -19,6 +20,8 @@
 - Windowing uneven signals is no longer allowed
 - Correctly remove ghost zones for 1-2D HDF5 files
 - Fix deprecation warning for Matplotlib 3.4
+- Fix `is_masked` after removing a mask (thanks @ekwessel,
+  [#28](https://github.com/Sbozzolo/kuibit/issues/28))
 
 #### Breaking changes
 - The `merge_refinement_levels` function in `HierarchicalGridData` has been

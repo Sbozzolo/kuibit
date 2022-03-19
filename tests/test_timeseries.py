@@ -1156,6 +1156,9 @@ class TestTimeseries(unittest.TestCase):
 
         np.testing.assert_allclose(t[50:], ts_mask.y)
 
+        # When we remove a mask, the series should be non masked
+        self.assertFalse(ts_mask.is_masked())
+
     def test_mask_apply(self):
 
         ts_mask = ts.TimeSeries(
