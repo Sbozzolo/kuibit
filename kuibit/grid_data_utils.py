@@ -42,10 +42,12 @@ import re
 from bz2 import open as bopen
 from gzip import open as gopen
 from os.path import splitext
+from typing import Iterable
 
 import numpy as np
 
 from kuibit import grid_data as gd
+from kuibit.uniform_grid import UniformGrid
 
 
 def common_bounding_box(grids):
@@ -63,7 +65,7 @@ def common_bounding_box(grids):
         raise TypeError("common_bounding_box takes a list")
 
     # Check that they are all UniformGrids
-    if not all(isinstance(g, gd.UniformGrid) for g in grids):
+    if not all(isinstance(g, UniformGrid) for g in grids):
         raise TypeError("common_bounding_boxes takes a list of UniformGrid")
 
     # We have to check that the number of dimensions is the same
@@ -93,11 +95,13 @@ def common_bounding_box(grids):
     return (x0, x1)
 
 
-def merge_uniform_grids(grids, component=-1):
+def merge_uniform_grids(
+    grids: Iterable[UniformGrid], component: int = -1
+) -> UniformGrid:
     """Return a new grid that covers all the grids in the list.
 
-    All geometries must belong to the same refinement level and have the same
-    grid spacing.
+    All geometries must belong to the same refinement level, have the same grid
+    spacing, time, iteration, and number of ghost zones.
 
     :param geoms: list of grid geometries.
     :type geoms:  list of :py:class:`~.UniformGrid`
@@ -109,17 +113,35 @@ def merge_uniform_grids(grids, component=-1):
     if not hasattr(grids, "__len__"):
         raise TypeError("merge_uniform_grids takes a list")
 
-    if not all(isinstance(g, gd.UniformGrid) for g in grids):
+    if not all(isinstance(g, UniformGrid) for g in grids):
         raise TypeError("merge_uniform_grids works only with UniformGrid")
 
-    # Check that all the grids have the same refinement levels
-    ref_levels = {g.ref_level for g in grids}
+    def _extract_property(property: str):
+        """Check that all the grids have the same X and return it.
 
-    if len(ref_levels) != 1:
-        raise ValueError("Can only merge grids on same refinement level.")
+        If they don't, raise an error.
 
-    # Extract the only element from the set (using tuple unpacking)
-    (ref_level,) = ref_levels
+        NOTE: We are ignoring floating point precision here.
+        """
+
+        try:
+            all_properties = {getattr(g, property) for g in grids}
+        except TypeError:
+            # num_ghost is probably a NumPy array, so it is not hashable.
+            # Here we make sure that we can put it in a set.
+            all_properties = {tuple(getattr(g, property)) for g in grids}
+
+        if len(all_properties) != 1:
+            raise ValueError(f"Can only merge grids with the same {property}.")
+
+        # Extract the only element from the set (using tuple unpacking)
+        (property,) = all_properties
+        return property
+
+    ref_level = _extract_property("ref_level")
+    time = _extract_property("time")
+    iteration = _extract_property("iteration")
+    num_ghost = _extract_property("num_ghost")
 
     dx = [g.dx for g in grids]
 
@@ -135,8 +157,15 @@ def merge_uniform_grids(grids, component=-1):
     # dx here is a list of all the dx, we just want one (they are all the same)
     shape = ((x1 - x0) / dx[0] + 1.5).astype(np.int64)
 
-    return gd.UniformGrid(
-        shape, x0=x0, dx=dx[0], ref_level=ref_level, component=component
+    return UniformGrid(
+        shape,
+        x0=x0,
+        dx=dx[0],
+        ref_level=ref_level,
+        component=component,
+        time=time,
+        iteration=iteration,
+        num_ghost=num_ghost,
     )
 
 
@@ -264,7 +293,7 @@ def sample_function_from_uniformgrid(function, grid):
     :rtype:       :py:class:`~.UniformGridData`
 
     """
-    if not isinstance(grid, gd.UniformGrid):
+    if not isinstance(grid, UniformGrid):
         raise TypeError("grid has to be a UniformGrid")
 
     # The try except block checks that the function supplied has the correct

@@ -14,6 +14,8 @@
 - Fix deprecation warning for Matplotlib 3.4
 - Fix `is_masked` after removing a mask (thanks @ekwessel,
   [#28](https://github.com/Sbozzolo/kuibit/issues/28))
+- Fix some information not being propagated by
+  `grid_data_utils.merge_uniform_grids`.
 
 #### New examples
 
