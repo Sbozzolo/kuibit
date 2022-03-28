@@ -62,18 +62,22 @@ class TestCactusTimers(unittest.TestCase):
 
         base = os.getcwd()
 
-        self.assertDictEqual(
-            self.timers.tree_files,
-            {
-                0: [
-                    base + "/tests/tov/output-0000/static_tov/timertree.0.xml",
-                    base + "/tests/tov/output-0001/static_tov/timertree.0.xml",
-                ],
-                1: [
-                    base + "/tests/tov/output-0000/static_tov/timertree.1.xml",
-                    base + "/tests/tov/output-0001/static_tov/timertree.1.xml",
-                ],
-            },
+        self.assertTrue(
+            base + "/tests/tov/output-0000/static_tov/timertree.0.xml"
+            in self.timers.tree_files[0]
+        )
+        self.assertTrue(
+            base + "/tests/tov/output-0001/static_tov/timertree.0.xml"
+            in self.timers.tree_files[0]
+        )
+
+        self.assertTrue(
+            base + "/tests/tov/output-0000/static_tov/timertree.1.xml"
+            in self.timers.tree_files[1]
+        )
+        self.assertTrue(
+            base + "/tests/tov/output-0001/static_tov/timertree.1.xml"
+            in self.timers.tree_files[1]
         )
 
     def test_getitem(self):
