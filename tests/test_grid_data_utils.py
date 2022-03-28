@@ -80,7 +80,9 @@ class TestGridDataUtils(unittest.TestCase):
         with self.assertRaises(TypeError):
             gdu.merge_uniform_grids([1, 2])
 
-        geom1 = gd.UniformGrid([101, 101], x0=[1, 1], x1=[3, 5], ref_level=1)
+        geom1 = gd.UniformGrid(
+            [101, 101], x0=[1, 1], x1=[3, 5], ref_level=1, time=5
+        )
         geom2 = gd.UniformGrid([101, 101], x0=[1, 1], x1=[10, 5], ref_level=2)
 
         # Different ref levels
@@ -93,12 +95,47 @@ class TestGridDataUtils(unittest.TestCase):
         with self.assertRaises(ValueError):
             gdu.merge_uniform_grids([geom1, geom3])
 
+        # Different time
+        with self.assertRaises(ValueError):
+            gdu.merge_uniform_grids(
+                [
+                    gd.UniformGrid([101, 101], x0=[1, 1], x1=[3, 5], time=1),
+                    gd.UniformGrid([101, 101], x0=[1, 1], x1=[3, 5], time=2),
+                ]
+            )
+
+        # Different iteration
+        with self.assertRaises(ValueError):
+            gdu.merge_uniform_grids(
+                [
+                    gd.UniformGrid(
+                        [101, 101], x0=[1, 1], x1=[3, 5], iteration=1
+                    ),
+                    gd.UniformGrid(
+                        [101, 101], x0=[1, 1], x1=[3, 5], iteration=2
+                    ),
+                ]
+            )
+
+        # Different num_ghost
+        with self.assertRaises(ValueError):
+            gdu.merge_uniform_grids(
+                [
+                    gd.UniformGrid(
+                        [101, 101], x0=[1, 1], x1=[3, 5], num_ghost=[1, 2]
+                    ),
+                    gd.UniformGrid(
+                        [101, 101], x0=[1, 1], x1=[3, 5], num_ghost=[2, 2]
+                    ),
+                ]
+            )
+
         geom4 = gd.UniformGrid(
-            [101, 101], x0=[0, -2], dx=geom1.dx, ref_level=1
+            [101, 101], x0=[0, -2], dx=geom1.dx, ref_level=1, time=5
         )
 
         expected_geom = gd.UniformGrid(
-            [151, 176], x0=[0, -2], x1=[3, 5], dx=geom1.dx, ref_level=1
+            [151, 176], x0=[0, -2], x1=[3, 5], dx=geom1.dx, ref_level=1, time=5
         )
 
         self.assertEqual(
