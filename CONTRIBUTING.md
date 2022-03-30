@@ -101,7 +101,7 @@ are (make sure to read below this list!):
 4. Add tests, all the test in `kuibit` must pass.
 5. Add documentation. This must include comments in the code, docstrings, user
    documentation, and possibly examples.
-6. Add your change to `NEWS.md`, and `features.rst`.
+6. Add an entry to `NEWS.md` and possibly `features.rst`. Give yourself credit.
 7. Run `black -l 79`.
 8. Run `isort --profile black`.
 9. Optionally, run other static analysis tools like `pylint`, and/or `flake8` to
