@@ -155,6 +155,9 @@ class TimersDir:
                 process_number = int(filename_match.group(1))
                 self.tree_files.setdefault(process_number, []).append(path)
 
+        # Let's sort the dictionary by key
+        self.tree_files = dict(sorted(self.tree_files.items()))
+
         self.__average: Optional[Tree] = None
         self.__median: Optional[Tree] = None
 
