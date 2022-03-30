@@ -116,7 +116,7 @@ def merge_uniform_grids(
     if not all(isinstance(g, UniformGrid) for g in grids):
         raise TypeError("merge_uniform_grids works only with UniformGrid")
 
-    def _extract_property(property: str):
+    def _extract_property(property_: str):
         """Check that all the grids have the same X and return it.
 
         If they don't, raise an error.
@@ -125,18 +125,20 @@ def merge_uniform_grids(
         """
 
         try:
-            all_properties = {getattr(g, property) for g in grids}
+            all_properties = {getattr(g, property_) for g in grids}
         except TypeError:
             # num_ghost is probably a NumPy array, so it is not hashable.
             # Here we make sure that we can put it in a set.
-            all_properties = {tuple(getattr(g, property)) for g in grids}
+            all_properties = {tuple(getattr(g, property_)) for g in grids}
 
         if len(all_properties) != 1:
-            raise ValueError(f"Can only merge grids with the same {property}.")
+            raise ValueError(
+                f"Can only merge grids with the same {property_}."
+            )
 
         # Extract the only element from the set (using tuple unpacking)
-        (property,) = all_properties
-        return property
+        (property_,) = all_properties
+        return property_
 
     ref_level = _extract_property("ref_level")
     time = _extract_property("time")
