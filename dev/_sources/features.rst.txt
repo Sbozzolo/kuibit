@@ -105,6 +105,7 @@ Multipoles and waves
 - Compute antenna responses.
 - Compute signal to noise ratio from strain.
 - Compute redshift from luminosity distance.
+- Compute the effective strain amplitude.
 - Compute mismatch between the 2,2 modes of two waves for multiple detectors.
 - Access sensitivity curves of known detectors (e.g., LISA, or Cosmic Explorer).
 

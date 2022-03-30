@@ -48,7 +48,7 @@ Compute the antenna pattern :math:`F` for Hanford, Livingston, and the Virgo
 interferometers for a given source localization (as right ascension and
 declination in degrees, and the UTC time). The antenna pattern is used to
 compute the strain measured by a detector with the formula. The output of this
-:py:meth:`antenna_responses_from_sky_localization` is a ``Detectors``, a
+:py:func:`~.antenna_responses_from_sky_localization` is a ``Detectors``, a
 ``namedtuple`` with attributes ``hanford``, ``livingston``, and ``virgo``, each
 containing a standard tuple with the responses of that detector for the cross
 and plus polarizations.
@@ -63,15 +63,37 @@ and plus polarizations.
    ((Fc_H, Fp_H), (Fc_L, Fp_L), (Fc_V, Fp_V)) = antenna
 
 If you are working with a single generic detector, you can use
-:py:meth:`antenna_responses` which takes the spherical angles with respect to
+:py:func:`~.antenna_responses` which takes the spherical angles with respect to
 a detector on the :math:`z=0` plane and with arms on the two other directions.
 
 signal_to_noise_ratio_from_strain
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-:py:meth:`signal_to_noise_ratio_from_strain` takes a strain, a noise curve, and
+:py:func:`~.signal_to_noise_ratio_from_strain` takes a strain, a noise curve, and
 two boundary frequencies and return the signal-to-noise ratio as
 
-.. :math:
+.. math::
 
-   `\rho^2 = 4 \int_{f_{\mathrm{min}}}^{f_{\mathrm{max}}}\frac{\|\tilde{h}\|^2}{S_n(f)}df`
+   \rho^2 = 4 \int_{f_{\mathrm{min}}}^{f_{\mathrm{max}}}\frac{\|\tilde{h}\|^2}{S_n(f)}df
+
+effective_amplitude_spectral_density
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+:py:func:`~.effective_amplitude_spectral_density` computes an effective amplitude
+spectral density given a gravitational strain. The strain is copied and
+optionally windowed prior to being converted into frequency space. The effective
+amplitude spectral density is defined as
+
+.. math::
+
+   h_{\rm eff}(f) = f \sqrt{(|\tilde{h}_{+}(f)|^2 + |\tilde{h}_{\times}(f)|^2) / 2}
+
+
+The effective amplitude spectral density is an useful quantity to estimate
+detectability of signals given the sensitivity curve of a detector.
+
+
+.. note::
+
+   By default, ``kuibit`` works with ``r_ext h``, where ``r_ext`` is the
+   extraction radius and ``h`` the complex strain. Be careful with this!

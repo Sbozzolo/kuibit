@@ -93,7 +93,7 @@ azimulathal one.</p>
 interferometers for a given source localization (as right ascension and
 declination in degrees, and the UTC time). The antenna pattern is used to
 compute the strain measured by a detector with the formula. The output of this
-<code class="xref py py-meth docutils literal notranslate"><span class="pre">antenna_responses_from_sky_localization()</span></code> is a <code class="docutils literal notranslate"><span class="pre">Detectors</span></code>, a
+<a class="reference internal" href="gw_utils_ref.html#kuibit.gw_utils.antenna_responses_from_sky_localization" title="kuibit.gw_utils.antenna_responses_from_sky_localization"><code class="xref py py-func docutils literal notranslate"><span class="pre">antenna_responses_from_sky_localization()</span></code></a> is a <code class="docutils literal notranslate"><span class="pre">Detectors</span></code>, a
 <code class="docutils literal notranslate"><span class="pre">namedtuple</span></code> with attributes <code class="docutils literal notranslate"><span class="pre">hanford</span></code>, <code class="docutils literal notranslate"><span class="pre">livingston</span></code>, and <code class="docutils literal notranslate"><span class="pre">virgo</span></code>, each
 containing a standard tuple with the responses of that detector for the cross
 and plus polarizations.</p>
@@ -106,13 +106,31 @@ and plus polarizations.</p>
 </pre></div>
 </div>
 <p>If you are working with a single generic detector, you can use
-<code class="xref py py-meth docutils literal notranslate"><span class="pre">antenna_responses()</span></code> which takes the spherical angles with respect to
+<a class="reference internal" href="gw_utils_ref.html#kuibit.gw_utils.antenna_responses" title="kuibit.gw_utils.antenna_responses"><code class="xref py py-func docutils literal notranslate"><span class="pre">antenna_responses()</span></code></a> which takes the spherical angles with respect to
 a detector on the <span class="math notranslate nohighlight">\(z=0\)</span> plane and with arms on the two other directions.</p>
 </section>
 <section id="signal-to-noise-ratio-from-strain">
 <h2>signal_to_noise_ratio_from_strain<a class="headerlink" href="#signal-to-noise-ratio-from-strain" title="Permalink to this headline">¶</a></h2>
-<p><code class="xref py py-meth docutils literal notranslate"><span class="pre">signal_to_noise_ratio_from_strain()</span></code> takes a strain, a noise curve, and
+<p><a class="reference internal" href="gw_utils_ref.html#kuibit.gw_utils.signal_to_noise_ratio_from_strain" title="kuibit.gw_utils.signal_to_noise_ratio_from_strain"><code class="xref py py-func docutils literal notranslate"><span class="pre">signal_to_noise_ratio_from_strain()</span></code></a> takes a strain, a noise curve, and
 two boundary frequencies and return the signal-to-noise ratio as</p>
+<div class="math notranslate nohighlight">
+\[\rho^2 = 4 \int_{f_{\mathrm{min}}}^{f_{\mathrm{max}}}\frac{\|\tilde{h}\|^2}{S_n(f)}df\]</div>
+</section>
+<section id="effective-amplitude-spectral-density">
+<h2>effective_amplitude_spectral_density<a class="headerlink" href="#effective-amplitude-spectral-density" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference internal" href="gw_utils_ref.html#kuibit.gw_utils.effective_amplitude_spectral_density" title="kuibit.gw_utils.effective_amplitude_spectral_density"><code class="xref py py-func docutils literal notranslate"><span class="pre">effective_amplitude_spectral_density()</span></code></a> computes an effective amplitude
+spectral density given a gravitational strain. The strain is copied and
+optionally windowed prior to being converted into frequency space. The effective
+amplitude spectral density is defined as</p>
+<div class="math notranslate nohighlight">
+\[h_{\rm eff}(f) = f \sqrt{(|\tilde{h}_{+}(f)|^2 + |\tilde{h}_{\times}(f)|^2) / 2}\]</div>
+<p>The effective amplitude spectral density is an useful quantity to estimate
+detectability of signals given the sensitivity curve of a detector.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>By default, <code class="docutils literal notranslate"><span class="pre">kuibit</span></code> works with <code class="docutils literal notranslate"><span class="pre">r_ext</span> <span class="pre">h</span></code>, where <code class="docutils literal notranslate"><span class="pre">r_ext</span></code> is the
+extraction radius and <code class="docutils literal notranslate"><span class="pre">h</span></code> the complex strain. Be careful with this!</p>
+</div>
 </section>
 </section>
 
@@ -135,6 +153,7 @@ two boundary frequencies and return the signal-to-noise ratio as</p>
 <li><a class="reference internal" href="#sylm">sYlm</a></li>
 <li><a class="reference internal" href="#antenna-responses">antenna_responses</a></li>
 <li><a class="reference internal" href="#signal-to-noise-ratio-from-strain">signal_to_noise_ratio_from_strain</a></li>
+<li><a class="reference internal" href="#effective-amplitude-spectral-density">effective_amplitude_spectral_density</a></li>
 </ul>
 </li>
 </ul>

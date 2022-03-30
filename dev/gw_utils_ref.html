@@ -75,6 +75,8 @@ angle.</p></li>
 responses for known detectors at a given sky localization.</p></li>
 <li><p><a class="reference internal" href="#kuibit.gw_utils.signal_to_noise_ratio_from_strain" title="kuibit.gw_utils.signal_to_noise_ratio_from_strain"><code class="xref py py-func docutils literal notranslate"><span class="pre">signal_to_noise_ratio_from_strain()</span></code></a>: compute the signal to noise
 for a given signal and a given noise curve.</p></li>
+<li><p><a class="reference internal" href="#kuibit.gw_utils.effective_amplitude_spectral_density" title="kuibit.gw_utils.effective_amplitude_spectral_density"><code class="xref py py-func docutils literal notranslate"><span class="pre">effective_amplitude_spectral_density()</span></code></a>: compute an effective (
+polarization-averaged) amplitude spectral density (ASD) from a strain signal.</p></li>
 </ul>
 <dl class="py class">
 <dt class="sig sig-object py" id="kuibit.gw_utils.Detectors">
@@ -169,6 +171,35 @@ interferometers.</p>
 </dd>
 <dt class="field-odd">Return type</dt>
 <dd class="field-odd"><p>namedtuple with fields hanford, livingston, and virgo</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="kuibit.gw_utils.effective_amplitude_spectral_density">
+<span class="sig-prename descclassname"><span class="pre">kuibit.gw_utils.</span></span><span class="sig-name descname"><span class="pre">effective_amplitude_spectral_density</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">strain</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">window_function</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/kuibit/gw_utils.html#effective_amplitude_spectral_density"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kuibit.gw_utils.effective_amplitude_spectral_density" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the effective amplitude spectral density for a given
+strain.</p>
+<p>If <code class="docutils literal notranslate"><span class="pre">window_function</span></code> is not None, the window will be applied to the
+signal. All the unknown arguments are passed to the window function.</p>
+<p>The effective amplitude spectral density is computed for a strain (h)
+as <span class="math notranslate nohighlight">\(h_{\rm eff}(f) = f * \sqrt{(|h_{+}|^2 + |h_{\times}|^2) / 2.0}\)</span>
+(see for instance 1604.00246)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>strain</strong> (<a class="reference internal" href="timeseries_ref.html#kuibit.timeseries.TimeSeries" title="kuibit.timeseries.TimeSeries"><code class="xref py py-class docutils literal notranslate"><span class="pre">TimeSeries</span></code></a>) – Gravitational-wave strain.</p></li>
+<li><p><strong>window_function</strong> (<em>callable</em><em>, </em><em>str</em><em>, or </em><em>None</em>) – If not None, apply <code class="docutils literal notranslate"><span class="pre">window_function</span></code> to the
+series before computing the strain.</p></li>
+<li><p><strong>kwargs</strong> (<em>args</em><em>,</em>) – All the additional parameters are passed to
+the window function.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Effective amplitude spectral density</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="frequencyseries_ref.html#kuibit.frequencyseries.FrequencySeries" title="kuibit.frequencyseries.FrequencySeries"><code class="xref py py-class docutils literal notranslate"><span class="pre">FrequencySeries</span></code></a></p>
 </dd>
 </dl>
 </dd></dl>

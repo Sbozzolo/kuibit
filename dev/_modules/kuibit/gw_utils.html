@@ -84,9 +84,10 @@
 <span class="sd">  angle.</span>
 <span class="sd">- :py:func:`~.antenna_responses_from_sky_localization`: compute the antenna</span>
 <span class="sd">  responses for known detectors at a given sky localization.</span>
-
 <span class="sd">- :py:func:`~.signal_to_noise_ratio_from_strain`: compute the signal to noise</span>
 <span class="sd">  for a given signal and a given noise curve.</span>
+<span class="sd">- :py:func:`~.effective_amplitude_spectral_density`: compute an effective (</span>
+<span class="sd">  polarization-averaged) amplitude spectral density (ASD) from a strain signal.</span>
 
 <span class="sd">&quot;&quot;&quot;</span>
 
@@ -576,6 +577,63 @@
     <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span>
         <span class="n">h_fft</span><span class="o">.</span><span class="n">inner_product</span><span class="p">(</span><span class="n">h_fft</span><span class="p">,</span> <span class="n">noises</span><span class="o">=</span><span class="n">noise</span><span class="p">,</span> <span class="n">fmin</span><span class="o">=</span><span class="n">fmin</span><span class="p">,</span> <span class="n">fmax</span><span class="o">=</span><span class="n">fmax</span><span class="p">)</span>
     <span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="effective_amplitude_spectral_density"><a class="viewcode-back" href="../../gw_utils_ref.html#kuibit.gw_utils.effective_amplitude_spectral_density">[docs]</a><span class="k">def</span> <span class="nf">effective_amplitude_spectral_density</span><span class="p">(</span>
+    <span class="n">strain</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="n">window_function</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span>
+<span class="p">):</span>
+    <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Return the effective amplitude spectral density for a given</span>
+<span class="sd">    strain.</span>
+
+<span class="sd">    If ``window_function`` is not None, the window will be applied to the</span>
+<span class="sd">    signal. All the unknown arguments are passed to the window function.</span>
+
+<span class="sd">    The effective amplitude spectral density is computed for a strain (h)</span>
+<span class="sd">    as :math:`h_{\rm eff}(f) = f * \sqrt{(|h_{+}|^2 + |h_{\times}|^2) / 2.0}`</span>
+<span class="sd">    (see for instance 1604.00246)</span>
+
+<span class="sd">    :param strain: Gravitational-wave strain.</span>
+<span class="sd">    :type strain: :py:class:`~.TimeSeries`</span>
+<span class="sd">    :param window_function: If not None, apply ``window_function`` to the</span>
+<span class="sd">                            series before computing the strain.</span>
+<span class="sd">    :type window_function: callable, str, or None</span>
+<span class="sd">    :param args, kwargs: All the additional parameters are passed to</span>
+<span class="sd">                         the window function.</span>
+
+<span class="sd">    :returns: Effective amplitude spectral density</span>
+<span class="sd">    :rtype: :py:class:`~.FrequencySeries`</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">strain</span><span class="p">,</span> <span class="n">ts</span><span class="o">.</span><span class="n">TimeSeries</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;Strain has to be a TimeSeries&quot;</span><span class="p">)</span>
+
+    <span class="c1"># First, ensure we operate on a regularly sampled copy</span>
+    <span class="n">strain_regular</span> <span class="o">=</span> <span class="n">strain</span><span class="o">.</span><span class="n">regular_resampled</span><span class="p">()</span>
+
+    <span class="c1"># Next, we window to avoid spectral leakage</span>
+    <span class="k">if</span> <span class="n">window_function</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">strain_regular</span><span class="o">.</span><span class="n">window</span><span class="p">(</span><span class="n">window_function</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+    <span class="c1"># We extract the plus and cross components of the strain</span>
+
+    <span class="c1"># Note: for an unaltered kuibit strain, this will in reality be</span>
+    <span class="c1"># r * hp, r * hc respectively</span>
+    <span class="n">h_plus</span> <span class="o">=</span> <span class="n">strain_regular</span><span class="o">.</span><span class="n">real</span><span class="p">()</span>
+    <span class="n">h_cross</span> <span class="o">=</span> <span class="o">-</span><span class="n">strain_regular</span><span class="o">.</span><span class="n">imag</span><span class="p">()</span>
+
+    <span class="c1"># Then, we take the Fourier transform. By extracting hp and hc seperately we</span>
+    <span class="c1"># obtain the real signal only in the positive frequency space</span>
+    <span class="n">hp_fft</span> <span class="o">=</span> <span class="n">h_plus</span><span class="o">.</span><span class="n">to_FrequencySeries</span><span class="p">()</span>
+    <span class="n">hc_fft</span> <span class="o">=</span> <span class="n">h_cross</span><span class="o">.</span><span class="n">to_FrequencySeries</span><span class="p">()</span>
+
+    <span class="c1"># Finally, we can compute the effective strain amplitude power spectral</span>
+    <span class="c1"># density akin to [Eq (8-9) in 1604.00246]. To save some space, we write</span>
+    <span class="c1"># the return value is `hp_fft`.</span>
+    <span class="n">h_eff</span> <span class="o">=</span> <span class="n">hp_fft</span>
+    <span class="n">h_eff</span><span class="o">.</span><span class="n">fft</span> <span class="o">=</span> <span class="n">h_eff</span><span class="o">.</span><span class="n">f</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">((</span><span class="n">hp_fft</span><span class="o">.</span><span class="n">amp</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="n">hc_fft</span><span class="o">.</span><span class="n">amp</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span> <span class="o">/</span> <span class="mf">2.0</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">h_eff</span></div>
 </pre></div>
 
             <div class="clearer"></div>
