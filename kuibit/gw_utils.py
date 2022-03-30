@@ -37,9 +37,10 @@ The functions provided are:
   angle.
 - :py:func:`~.antenna_responses_from_sky_localization`: compute the antenna
   responses for known detectors at a given sky localization.
-
 - :py:func:`~.signal_to_noise_ratio_from_strain`: compute the signal to noise
   for a given signal and a given noise curve.
+- :py:func:`~.effective_amplitude_spectral_density`: compute an effective (
+  polarization-averaged) amplitude spectral density (ASD) from a strain signal.
 
 """
 
@@ -529,3 +530,60 @@ def signal_to_noise_ratio_from_strain(
     return np.sqrt(
         h_fft.inner_product(h_fft, noises=noise, fmin=fmin, fmax=fmax)
     )
+
+
+def effective_amplitude_spectral_density(
+    strain, *args, window_function=None, **kwargs
+):
+    r"""Return the effective amplitude spectral density for a given
+    strain.
+
+    If ``window_function`` is not None, the window will be applied to the
+    signal. All the unknown arguments are passed to the window function.
+
+    The effective amplitude spectral density is computed for a strain (h)
+    as :math:`h_{\rm eff}(f) = f * \sqrt{(|h_{+}|^2 + |h_{\times}|^2) / 2.0}`
+    (see for instance 1604.00246)
+
+    :param strain: Gravitational-wave strain.
+    :type strain: :py:class:`~.TimeSeries`
+    :param window_function: If not None, apply ``window_function`` to the
+                            series before computing the strain.
+    :type window_function: callable, str, or None
+    :param args, kwargs: All the additional parameters are passed to
+                         the window function.
+
+    :returns: Effective amplitude spectral density
+    :rtype: :py:class:`~.FrequencySeries`
+
+    """
+
+    if not isinstance(strain, ts.TimeSeries):
+        raise TypeError("Strain has to be a TimeSeries")
+
+    # First, ensure we operate on a regularly sampled copy
+    strain_regular = strain.regular_resampled()
+
+    # Next, we window to avoid spectral leakage
+    if window_function is not None:
+        strain_regular.window(window_function, *args, **kwargs)
+
+    # We extract the plus and cross components of the strain
+
+    # Note: for an unaltered kuibit strain, this will in reality be
+    # r * hp, r * hc respectively
+    h_plus = strain_regular.real()
+    h_cross = -strain_regular.imag()
+
+    # Then, we take the Fourier transform. By extracting hp and hc seperately we
+    # obtain the real signal only in the positive frequency space
+    hp_fft = h_plus.to_FrequencySeries()
+    hc_fft = h_cross.to_FrequencySeries()
+
+    # Finally, we can compute the effective strain amplitude power spectral
+    # density akin to [Eq (8-9) in 1604.00246]. To save some space, we write
+    # the return value is `hp_fft`.
+    h_eff = hp_fft
+    h_eff.fft = h_eff.f * np.sqrt((hp_fft.amp**2 + hc_fft.amp**2) / 2.0)
+
+    return h_eff

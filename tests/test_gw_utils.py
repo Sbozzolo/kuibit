@@ -21,6 +21,8 @@ import numpy as np
 
 from kuibit import gw_utils as gwu
 from kuibit import timeseries as ts
+from kuibit.frequencyseries import FrequencySeries
+from kuibit.simdir import SimDir
 
 
 class TestGWUtils(unittest.TestCase):
@@ -145,3 +147,39 @@ class TestGWUtils(unittest.TestCase):
             ),
             np.sqrt(h_fft.inner_product(h_fft, noises=None, fmin=1, fmax=10)),
         )
+
+    def test_effective_amplitude_spectral_density(self):
+
+        # Test when strain is not timeseries
+        with self.assertRaises(TypeError):
+            gwu.signal_to_noise_ratio_from_strain(1)
+
+        sd = SimDir("tests/gwsample")
+        det = sd.gws[91.46]
+        strain = det.get_strain_lm(2, 2, 120)
+        computed_heff = gwu.effective_amplitude_spectral_density(
+            strain, 0.1, window_function="tukey"
+        )
+
+        strain_windowed = strain.tukey_windowed(0.1)
+
+        strain_plus, strain_cross = (
+            strain_windowed.real(),
+            -strain_windowed.imag(),
+        )
+        strain_plus_fft, strain_cross_fft = (
+            strain_plus.to_FrequencySeries(),
+            strain_cross.to_FrequencySeries(),
+        )
+
+        freqs = strain_plus_fft.f
+        vals = (
+            strain_plus_fft.f
+            * (0.5 * (strain_plus_fft.amp**2 + strain_cross_fft.amp**2))
+            ** 0.5
+        )
+
+        expected_heff = FrequencySeries(freqs, vals)
+
+        np.testing.assert_allclose(expected_heff.f, computed_heff.f)
+        np.testing.assert_allclose(expected_heff.fft, computed_heff.fft)

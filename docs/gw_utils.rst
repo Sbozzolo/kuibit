@@ -75,3 +75,16 @@ two boundary frequencies and return the signal-to-noise ratio as
 .. :math:
 
    `\rho^2 = 4 \int_{f_{\mathrm{min}}}^{f_{\mathrm{max}}}\frac{\|\tilde{h}\|^2}{S_n(f)}df`
+
+effective_amplitude_spectral_density
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+:py:meth:`effective_amplitude_spectral_density` from a strain and an optional 
+window function, return the effective amplitdue spectral density as a 
+function of frequency. The strain is copied and windowed prior to being 
+converted into frequency space.  The effective amplitude spectral
+density is returned as
+
+.. :math:
+
+   `h_{\rm eff}(f) = f * \sqrt{(|h_{+}|^2 + |h_{\times}|^2) / 2.0}`

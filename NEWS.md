@@ -13,6 +13,9 @@
   (starting from a contribution by @konrad-topolski,
   [#25](https://github.com/Sbozzolo/kuibit/pull/25))
 - Added `Tree` data structure
+- Added `effective_amplitude_spectral_density` within `gw_utils` (starting from
+  a contribution by @irrationalnumbers,
+  [#27](https://github.com/Sbozzolo/kuibit/pull/27))
 
 #### Bug fixes
 - Added error in `_plot_horizon_on_plane` when the horizon cannot be plotted
