@@ -11,6 +11,9 @@
 - Added linear momentum lost by gravitational waves along the x and y directions
   (starting from a contribution by @konrad-topolski)
 - Added `Tree` data structure
+- Added `effective_amplitude_spectral_density` within `gw_utils` (starting from
+  a contribution by @irrationalnumbers,
+  [#27](https://github.com/Sbozzolo/kuibit/pull/27))
 
 #### New `tree` module
 
