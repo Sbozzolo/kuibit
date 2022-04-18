@@ -14,6 +14,7 @@
 - Added `effective_amplitude_spectral_density` within `gw_utils` (starting from
   a contribution by @irrationalnumbers,
   [#27](https://github.com/Sbozzolo/kuibit/pull/27))
+- Added fourth order accuracy in finite differences of grid functions
 
 #### New `tree` module
 

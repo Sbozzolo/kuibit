@@ -533,6 +533,18 @@ class TestUniformGridData(unittest.TestCase):
             -sin_wave.data, original_sin.data, atol=1e-3
         )
 
+        # print(original_sin.data)
+        # print(-original_sin.partial_differentiated(0, order=2, accuracy_order=4).data)
+
+        # Test fourth oder
+        np.testing.assert_allclose(
+            -original_sin.partial_differentiated(
+                0, order=2, accuracy_order=4
+            ).data,
+            original_sin.data,
+            atol=1e-5,
+        )
+
         gradient = original_sin.gradient(order=2)
         np.testing.assert_allclose(
             -gradient[0].data, original_sin.data, atol=1e-3
@@ -541,6 +553,10 @@ class TestUniformGridData(unittest.TestCase):
         # Masked data
         with self.assertRaises(RuntimeError):
             self.ug_masked.partial_differentiated(0)
+
+        # Accuracy order not available
+        with self.assertRaises(NotImplementedError):
+            original_sin.partial_differentiated(0, accuracy_order=3)
 
     def test_ghost_zones_remove(self):
 

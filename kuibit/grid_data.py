@@ -1456,7 +1456,7 @@ class UniformGridData(BaseNumerical):
             self.mask_applied, mask, ignore_existing=ignore_existing
         )
 
-    def partial_differentiated(self, direction, order=1):
+    def partial_differentiated(self, direction, order=1, accuracy_order=2):
         """Return a :py:class:`~.UniformGridData` that is the numerical
         order-differentiation of the present grid_data along a given direction.
         (``order`` = number of derivatives, ie ``order=2`` is second derivative)
@@ -1471,6 +1471,8 @@ class UniformGridData(BaseNumerical):
         :type order: int
         :param direction: Direction of the partial derivative.
         :type direction: int
+        :param accuracy_order: Order of accuracy of the finite difference scheme.
+        :type accuracy_order: int
 
         :returns:  New :py:class:`~.UniformGridData` with derivative.
         :rtype:    :py:class:`~.UniformGridData`
@@ -1487,15 +1489,112 @@ class UniformGridData(BaseNumerical):
                 f"{direction} is not available"
             )
 
-        ret_value = self.data.copy()
-        for _num_deriv in range(order):
-
-            ret_value = np.gradient(
-                ret_value, self.dx[direction], axis=direction, edge_order=2
+        if self.shape[direction] < accuracy_order + 1:
+            raise ValueError(
+                f"Need at least {accuracy_order + 1} points for finite difference."
             )
+
+        ret_value = np.zeros_like(self.data)
+
+        def slicer(index0: int, index1: int) -> slice:
+            """Create a slicer objects between indices index0 and index1 along the direction
+            where the derivative is taken. Everything else is left untouched
+
+            """
+            slice_ = [slice(None) for _ in self.shape]
+            slice_[direction] = slice(index0, index1)
+            return tuple(slice_)
+
+        def slicer1(index0: int) -> slice:
+            """Create a slicer objects that isolated the given ``index0`` along the
+            direction of the derivative.
+
+            """
+            # If index0 is -1, we are considering the end of the list
+            index1 = index0 + 1 if index0 != -1 else None
+            return slicer(index0, index1)
+
+        dx = self.dx[direction]
+
+        # We will set data to _ret_value after we computed each oder
+        data = self.data
+
+        for _num_deriv in range(order):
+            if accuracy_order == 2:
+                # Bulk, equivalent to f[i] - f[i + i]) / 2 dx
+                ret_value[slicer(1, -1)] = (
+                    data[slicer(2, None)] - data[slicer(0, -2)]
+                ) / (2 * dx)
+                # Second order forward difference for first element
+                # -(3*y[0] - 4*y[1] + y[2]) / (2*dx)
+                ret_value[slicer1(0)] = -(
+                    3 * data[slicer1(0)]
+                    - 4 * data[slicer1(1)]
+                    + data[slicer1(2)]
+                ) / (2 * dx)
+                # Backwards difference final element
+                # (3*y[-1] - 4*y[-2] + y[-3]) / (2*dx)
+                ret_value[slicer1(-1)] = (
+                    3 * data[slicer1(-1)]
+                    - 4 * data[slicer1(-2)]
+                    + data[slicer1(-3)]
+                ) / (2 * dx)
+            elif accuracy_order == 4:
+                # Coefficients computed with
+                # https://web.media.mit.edu/~crtaylor/calculator.html
+
+                # Bulk, equivalent to (f[:4] - 8*f[1:-3] + 8*f[3:-1] - f[4:])/12.0
+                ret_value[slicer(2, -2)] = (
+                    data[slicer(None, -4)]
+                    - 8.0 * data[slicer(1, -3)]
+                    + 8.0 * data[slicer(3, -1)]
+                    - data[slicer(4, None)]
+                ) / (12.0 * dx)
+                # Fourth order partially forward difference for second element
+                # (-3*f[0]-10*f[1]+18*f[2]-6*f[3]+1*f[4])/(12 dx)
+                ret_value[slicer1(1)] = (
+                    -3 * data[slicer1(0)]
+                    - 10 * data[slicer1(1)]
+                    + 18 * data[slicer1(2)]
+                    - 6 * data[slicer1(3)]
+                    + 1 * data[slicer1(4)]
+                ) / (12 * dx)
+                # Fourth order fully forward difference for first element
+                # (-25*f[0]+48*f[1]-36*f[2]+16*f[3]-3*f[4])/(12dx)
+                ret_value[slicer1(0)] = (
+                    -25 * data[slicer1(0)]
+                    + 48 * data[slicer1(1)]
+                    - 36 * data[slicer1(2)]
+                    + 16 * data[slicer1(3)]
+                    - 3 * data[slicer1(4)]
+                ) / (12 * dx)
+                # Fourth order fully backward difference for last element
+                # (3*f[-5]-16*f[-4]+36*f[-3]-48*f[-2]+25*f[-1])/(12*dx)
+                ret_value[slicer1(-1)] = -(
+                    -25 * data[slicer1(-1)]
+                    + 48 * data[slicer1(-2)]
+                    - 36 * data[slicer1(-3)]
+                    + 16 * data[slicer1(-4)]
+                    - 3 * data[slicer1(-5)]
+                ) / (12 * dx)
+                # Fourth order partially backward difference for the second to last
+                # (-1*f[-4]+6*f[-3]-18*f[-3]+10*f[-2]+3*f[-1])/(12*dx)
+                ret_value[slicer1(-2)] = -(
+                    -3 * data[slicer1(-1)]
+                    - 10 * data[slicer1(-2)]
+                    + 18 * data[slicer1(-3)]
+                    - 6 * data[slicer1(-4)]
+                    + 1 * data[slicer1(-5)]
+                ) / (12 * dx)
+            else:
+                raise NotImplementedError(
+                    f"Accuracy order {accuracy_order} not implemented"
+                )
+
+            data = ret_value.copy()
         return type(self)(self.grid, ret_value)
 
-    def gradient(self, order=1):
+    def gradient(self, order=1, accuracy_order=2):
         """Return a list :py:class:`~.UniformGridData` that are the numerical
         order-differentiation of the present grid_data along all the directions.
         (``order`` = number of derivatives, ie ``order=2`` is second derivative)
@@ -1510,17 +1609,22 @@ class UniformGridData(BaseNumerical):
         :type order: int
         :param direction: Direction of the partial derivative.
         :type direction: int
+        :param accuracy_order: Order of accuracy of the finite difference scheme.
+        :type accuracy_order: int
+
         :returns:  list of :py:class:`~.UniformGridData` with partial derivative
                    along the directions.
         :rtype:    list of :py:class:`~.UniformGridData`
 
         """
         return [
-            self.partial_differentiated(direction, order=order)
+            self.partial_differentiated(
+                direction, order=order, accuracy_order=accuracy_order
+            )
             for direction in range(self.num_dimensions)
         ]
 
-    def partial_differentiate(self, dimension, order=1):
+    def partial_differentiate(self, dimension, order=1, accuracy_order=2):
         """Derive the data with numerical finite difference along a given direction
         (``order`` = number of derivatives, ie ``order=2`` is second derivative).
 
@@ -1534,10 +1638,15 @@ class UniformGridData(BaseNumerical):
         :type order: int
         :param direction: Direction of the partial derivative.
         :type direction: int
+        :param accuracy_order: Order of accuracy of the finite difference scheme.
+        :type accuracy_order: int
 
         """
         self._apply_to_self(
-            self.partial_differentiated, dimension, order=order
+            self.partial_differentiated,
+            dimension,
+            order=order,
+            accuracy_order=accuracy_order,
         )
 
     def _coordinates_at(self, where, absolute):
@@ -2878,7 +2987,7 @@ class HierarchicalGridData(BaseNumerical):
             for dim in range(self.num_dimensions)
         ]
 
-    def partial_differentiated(self, direction, order=1):
+    def partial_differentiated(self, direction, order=1, accuracy_order=2):
         """Return a :py:class:`~.HierarchicalGridData` that is the numerical
         order-differentiation of the present grid_data along a given direction.
         (order = number of derivatives, ie ``order=2`` is second derivative)
@@ -2893,16 +3002,21 @@ class HierarchicalGridData(BaseNumerical):
         :type order: int
         :param direction: Direction of the partial derivative.
         :type direction: int
+        :param accuracy_order: Order of accuracy of the finite difference scheme.
+        :type accuracy_order: int
 
         :returns:  New :py:class:`~.HierarchicalGridData` with derivative.
         :rtype:    :py:class:`~.HierarchicalGridData`
 
         """
         return self._call_component_method(
-            "partial_differentiated", direction, order=order
+            "partial_differentiated",
+            direction,
+            order=order,
+            accuracy_order=accuracy_order,
         )
 
-    def gradient(self, order=1):
+    def gradient(self, order=1, accuracy_order=2):
         """Return a list :py:class:`~.HierarchicalGridData` that are the numerical
         order-differentiation of the present grid_data along all the directions.
         (order = number of derivatives, ie ``order=2`` is second derivative)
@@ -2915,16 +3029,21 @@ class HierarchicalGridData(BaseNumerical):
 
         :param order: Order of derivative (e.g. 2 = second derivative).
         :type order: int
+        :param accuracy_order: Order of accuracy of the finite difference scheme.
+        :type accuracy_order: int
         :returns: list of :py:class:`~.HierarchicalGridData` with partial
                   derivative along all the directions.
         :rtype:  list of :py:class:`~.HierarchicalGridData`
 
         """
         return self._call_component_method(
-            "gradient", method_returns_list=True, order=order
+            "gradient",
+            method_returns_list=True,
+            order=order,
+            accuracy_order=accuracy_order,
         )
 
-    def partial_differentiate(self, direction, order=1):
+    def partial_differentiate(self, direction, order=1, accuracy_order=2):
         """Apply a numerical differentiatin along the specified direction.
 
         The derivative is calulated as centered differencing in the interior
@@ -2937,13 +3056,18 @@ class HierarchicalGridData(BaseNumerical):
         :type order: int
         :param direction: Direction of the partial derivative.
         :type direction: int
+        :param accuracy_order: Order of accuracy of the finite difference scheme.
+        :type accuracy_order: int
 
         :returns: Derivative along the specified direction.
         :rtype: list of :py:class:`~.HierarchicalGridData`
 
         """
         return self._apply_to_self(
-            self.partial_differentiated, direction, order=order
+            self.partial_differentiated,
+            direction,
+            order=order,
+            accuracy_order=accuracy_order,
         )
 
     def ghost_zones_removed(self):
