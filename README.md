@@ -41,7 +41,7 @@ pip3 install kuibit
 ```
 If they are not already available, `pip` will install all the necessary dependencies.
 
-The minimum version of Python required is 3.6.1.
+The minimum version of Python required is 3.8.
 
 If you intend to develop ``kuibit``, see [CONTRIBUTING.md](CONTRIBUTING.md) and
 follow the instruction below.
