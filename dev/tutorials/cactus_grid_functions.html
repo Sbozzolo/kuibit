@@ -5,19 +5,20 @@
 <html>
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Working with Cactus grid functions &#8212; kuibit 1.3.4 documentation</title>
-    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
-    <link rel="stylesheet" href="../_static/bizstyle.css" type="text/css" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+    <title>Working with Cactus grid functions &#8212; kuibit 1.4.0-dev0 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/bizstyle.css" />
     <link rel="stylesheet" type="text/css" href="../_static/css/custom.css" />
     
-    <script id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
     <script src="../_static/jquery.js"></script>
     <script src="../_static/underscore.js"></script>
     <script src="../_static/doctools.js"></script>
     <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
-    <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
-    <script type="text/x-mathjax-config">MathJax.Hub.Config({"tex2jax": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true, "ignoreClass": "tex2jax_ignore|mathjax_ignore|document", "processClass": "tex2jax_process|mathjax_process|math|output_area"}})</script>
+    <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+    <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     <script src="../_static/bizstyle.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
@@ -43,7 +44,7 @@
         <li class="right" >
           <a href="grid_data.html" title="Working with grid data"
              accesskey="P">previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../index.html">kuibit 1.3.4 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">kuibit 1.4.0-dev0 documentation</a> &#187;</li>
         <li class="nav-item nav-item-this"><a href="">Working with Cactus grid functions</a></li> 
       </ul>
     </div>  
@@ -263,7 +264,7 @@ div.nboutput.container div.output_area > div[class^='highlight']{
 }
 
 /* hide copybtn icon on prompts (needed for 'sphinx_copybutton') */
-.prompt a.copybtn {
+.prompt .copybtn {
     display: none;
 }
 
@@ -301,7 +302,7 @@ div.rendered_html tbody tr:hover {
   background: rgba(66, 165, 245, 0.2);
 }
 </style>
-<div class="section" id="Working-with-Cactus-grid-functions">
+<section id="Working-with-Cactus-grid-functions">
 <h1>Working with Cactus grid functions<a class="headerlink" href="#Working-with-Cactus-grid-functions" title="Permalink to this headline">¶</a></h1>
 <p>In this notebook, we learn how to read data and represent it with the classes in the <a class="reference internal" href="../grid_data.html"><span class="doc">grid_data</span></a> module. Make sure to see the example on how to work in grid data to better make use of this module (<a class="reference internal" href="grid_data.html"><span class="doc">grid_data</span></a>).</p>
 <p>As for all the objects in <code class="docutils literal notranslate"><span class="pre">kuibit</span></code>, the module for reading grid data is also structured hierarchically. Each level of this hierarchy focuses on a different subset of all the grid functions. The first level deals with dimensionality, the second on the available grid functions, and the third will be a specific variable. (Don’t worry if this is not clear, if will become clear in a second).</p>
@@ -310,8 +311,7 @@ div.rendered_html tbody tr:hover {
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">from</span> <span class="nn">kuibit.simdir</span> <span class="kn">import</span> <span class="n">SimDir</span>
 <span class="kn">from</span> <span class="nn">kuibit.grid_data</span> <span class="kn">import</span> <span class="n">UniformGrid</span>
@@ -325,8 +325,7 @@ div.rendered_html tbody tr:hover {
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">gf</span> <span class="o">=</span> <span class="n">SimDir</span><span class="p">(</span><span class="s2">&quot;../../tests/grid_functions&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">gf</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">gf</span> <span class="o">=</span> <span class="n">SimDir</span><span class="p">(</span><span class="s2">&quot;../../tests/grid_functions&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">gf</span>
 
 <span class="nb">print</span><span class="p">(</span><span class="n">gf</span><span class="p">)</span>
 </pre></div>
@@ -373,8 +372,7 @@ Available grid data of dimension 3D (xyz):
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">vars2D</span> <span class="o">=</span> <span class="n">gf</span><span class="o">.</span><span class="n">xy</span>  <span class="c1"># gf[(0, 1)] would work fine</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">vars2D</span> <span class="o">=</span> <span class="n">gf</span><span class="o">.</span><span class="n">xy</span>  <span class="c1"># gf[(0, 1)] would work fine</span>
 <span class="n">vars3D</span> <span class="o">=</span> <span class="n">gf</span><span class="o">.</span><span class="n">xyz</span>
 
 <span class="nb">print</span><span class="p">(</span><span class="n">vars3D</span><span class="p">)</span>
@@ -397,8 +395,7 @@ Available grid data of dimension 3D (xyz):
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">rho_b</span> <span class="o">=</span> <span class="n">vars2D</span><span class="o">.</span><span class="n">fields</span><span class="o">.</span><span class="n">rho_b</span>  <span class="c1"># vars2D[&#39;rho_b&#39;] would be fine</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">rho_b</span> <span class="o">=</span> <span class="n">vars2D</span><span class="o">.</span><span class="n">fields</span><span class="o">.</span><span class="n">rho_b</span>  <span class="c1"># vars2D[&#39;rho_b&#39;] would be fine</span>
 </pre></div>
 </div>
 </div>
@@ -407,8 +404,7 @@ Available grid data of dimension 3D (xyz):
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">rho0</span> <span class="o">=</span> <span class="n">rho_b</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>  <span class="c1"># this is rho at iteration 0</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">rho0</span> <span class="o">=</span> <span class="n">rho_b</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>  <span class="c1"># this is rho at iteration 0</span>
 <span class="c1"># rho0 = rho_b.get_iteration(0) is equivalent</span>
 
 <span class="c1"># To know what iterations are available:</span>
@@ -435,8 +431,7 @@ The value of rho0 at the point (1, 2) is 1.29285273509444e-10
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="nb">print</span><span class="p">(</span><span class="n">rho_b</span><span class="o">.</span><span class="n">available_times</span><span class="p">)</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="n">rho_b</span><span class="o">.</span><span class="n">available_times</span><span class="p">)</span>
 
 <span class="n">rho_final</span> <span class="o">=</span> <span class="n">rho_b</span><span class="o">.</span><span class="n">get_time</span><span class="p">(</span><span class="mf">0.5</span><span class="p">)</span>
 </pre></div>
@@ -455,8 +450,7 @@ The value of rho0 at the point (1, 2) is 1.29285273509444e-10
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">small_grid</span> <span class="o">=</span> <span class="n">UniformGrid</span><span class="p">([</span><span class="mi">10</span><span class="p">,</span> <span class="mi">10</span><span class="p">],</span> <span class="n">x0</span><span class="o">=</span><span class="p">[</span><span class="o">-</span><span class="mi">3</span><span class="p">,</span> <span class="o">-</span><span class="mi">3</span><span class="p">],</span> <span class="n">x1</span><span class="o">=</span><span class="p">[</span><span class="mi">3</span><span class="p">,</span><span class="mi">3</span><span class="p">])</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">small_grid</span> <span class="o">=</span> <span class="n">UniformGrid</span><span class="p">([</span><span class="mi">10</span><span class="p">,</span> <span class="mi">10</span><span class="p">],</span> <span class="n">x0</span><span class="o">=</span><span class="p">[</span><span class="o">-</span><span class="mi">3</span><span class="p">,</span> <span class="o">-</span><span class="mi">3</span><span class="p">],</span> <span class="n">x1</span><span class="o">=</span><span class="p">[</span><span class="mi">3</span><span class="p">,</span><span class="mi">3</span><span class="p">])</span>
 
 <span class="n">rho0_small</span> <span class="o">=</span> <span class="n">rho_b</span><span class="o">.</span><span class="n">read_on_grid</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">small_grid</span><span class="p">)</span>
 <span class="c1"># This is equivalent to</span>
@@ -477,7 +471,7 @@ The value of rho0 at the point (1, 2) is 1.29285273509444e-10
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-&lt;matplotlib.colorbar.Colorbar at 0x7f2d7281ba20&gt;
+&lt;matplotlib.colorbar.Colorbar at 0x7f8b9cf3d6a0&gt;
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
@@ -493,8 +487,7 @@ The value of rho0 at the point (1, 2) is 1.29285273509444e-10
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="kn">from</span> <span class="nn">kuibit</span> <span class="kn">import</span> <span class="n">visualize_matplotlib</span> <span class="k">as</span> <span class="n">viz</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">kuibit</span> <span class="kn">import</span> <span class="n">visualize_matplotlib</span> <span class="k">as</span> <span class="n">viz</span>
 
 <span class="n">viz</span><span class="o">.</span><span class="n">plot_contourf</span><span class="p">(</span><span class="n">rho_b</span><span class="p">,</span> <span class="n">iteration</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">x0</span><span class="o">=</span><span class="p">[</span><span class="o">-</span><span class="mi">3</span><span class="p">,</span> <span class="o">-</span><span class="mi">3</span><span class="p">],</span> <span class="n">x1</span><span class="o">=</span><span class="p">[</span><span class="mi">3</span><span class="p">,</span><span class="mi">3</span><span class="p">],</span>
                   <span class="n">shape</span><span class="o">=</span><span class="p">[</span><span class="mi">10</span><span class="p">,</span><span class="mi">10</span><span class="p">],</span> <span class="n">xlabel</span><span class="o">=</span><span class="s2">&quot;x&quot;</span><span class="p">,</span> <span class="n">ylabel</span><span class="o">=</span><span class="s2">&quot;y&quot;</span><span class="p">,</span>
@@ -508,7 +501,7 @@ The value of rho0 at the point (1, 2) is 1.29285273509444e-10
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-&lt;matplotlib.contour.QuadContourSet at 0x7f2d7237dcc0&gt;
+&lt;matplotlib.contour.QuadContourSet at 0x7f8b9a8c4a30&gt;
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
@@ -523,8 +516,7 @@ The value of rho0 at the point (1, 2) is 1.29285273509444e-10
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="kn">from</span> <span class="nn">mayavi</span> <span class="kn">import</span> <span class="n">mlab</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">mayavi</span> <span class="kn">import</span> <span class="n">mlab</span>
 <span class="n">mlab</span><span class="o">.</span><span class="n">init_notebook</span><span class="p">(</span><span class="s1">&#39;png&#39;</span><span class="p">)</span>
 
 <span class="c1"># Read 3D data on a small grid</span>
@@ -552,7 +544,7 @@ Notebook initialized with png backend.
 </div>
 <p>If you see a Minecraft Neutron Star, that’s perfect! The resolution is very low.</p>
 <p>In this notebook we explored the basics of reading simulation data. The next important step for you is to understand how to make use of <code class="docutils literal notranslate"><span class="pre">HierachicalGridData</span></code> and <code class="docutils literal notranslate"><span class="pre">UniformGridData</span></code> (because this what the reader outputs!).</p>
-</div>
+</section>
 
 
             <div class="clearer"></div>
@@ -564,17 +556,21 @@ Notebook initialized with png backend.
             <p class="logo"><a href="../index.html">
               <img class="logo" src="../_static/logo.png" alt="Logo"/>
             </a></p>
-  <h4>Previous topic</h4>
-  <p class="topless"><a href="grid_data.html"
-                        title="previous chapter">Working with grid data</a></p>
-  <h4>Next topic</h4>
-  <p class="topless"><a href="cactus_horizons.html"
-                        title="next chapter">Working with Cactus horizons</a></p>
+  <div>
+    <h4>Previous topic</h4>
+    <p class="topless"><a href="grid_data.html"
+                          title="previous chapter">Working with grid data</a></p>
+  </div>
+  <div>
+    <h4>Next topic</h4>
+    <p class="topless"><a href="cactus_horizons.html"
+                          title="next chapter">Working with Cactus horizons</a></p>
+  </div>
 <div id="searchbox" style="display: none" role="search">
   <h3 id="searchlabel">Quick search</h3>
     <div class="searchformwrapper">
     <form class="search" action="../search.html" method="get">
-      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
       <input type="submit" value="Go" />
     </form>
     </div>
@@ -599,13 +595,13 @@ Notebook initialized with png backend.
         <li class="right" >
           <a href="grid_data.html" title="Working with grid data"
              >previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../index.html">kuibit 1.3.4 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">kuibit 1.4.0-dev0 documentation</a> &#187;</li>
         <li class="nav-item nav-item-this"><a href="">Working with Cactus grid functions</a></li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">
         &#169; Copyright 2020-2022, Gabriele Bozzola.
-      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 3.5.4.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 4.4.0.
     </div>
   </body>
 </html>

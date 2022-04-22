@@ -6,12 +6,12 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>kuibit.grid_data &#8212; kuibit 1.3.4 documentation</title>
-    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
-    <link rel="stylesheet" href="../../_static/bizstyle.css" type="text/css" />
+    <title>kuibit.grid_data &#8212; kuibit 1.4.0-dev0 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/bizstyle.css" />
     <link rel="stylesheet" type="text/css" href="../../_static/css/custom.css" />
     
-    <script id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+    <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
     <script src="../../_static/jquery.js"></script>
     <script src="../../_static/underscore.js"></script>
     <script src="../../_static/doctools.js"></script>
@@ -33,7 +33,7 @@
         <li class="right" >
           <a href="../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../index.html">kuibit 1.3.4 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">kuibit 1.4.0-dev0 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="../index.html" accesskey="U">Module code</a> &#187;</li>
         <li class="nav-item nav-item-this"><a href="">kuibit.grid_data</a></li> 
       </ul>
@@ -515,7 +515,7 @@
 
         <span class="c1"># Our grid is cell-centered, so it is perfecly valid to evaluate a point</span>
         <span class="c1"># that it is outside coords, as long as it is within 0.5 * dx. For</span>
-        <span class="c1"># example, if the grid is linear from 0 to 10 with dx = 1, the pint</span>
+        <span class="c1"># example, if the grid is linear from 0 to 10 with dx = 1, the point</span>
         <span class="c1"># -0.25 is in the grid. To account for this in splines (to avoid that</span>
         <span class="c1"># they throw an error), we add another point at the two boundaries. This</span>
         <span class="c1"># point as the same value as the last point (which is equivalent to a</span>
@@ -1503,7 +1503,7 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">mask_applied</span><span class="p">,</span> <span class="n">mask</span><span class="p">,</span> <span class="n">ignore_existing</span><span class="o">=</span><span class="n">ignore_existing</span>
         <span class="p">)</span></div>
 
-<div class="viewcode-block" id="UniformGridData.partial_differentiated"><a class="viewcode-back" href="../../grid_data_ref.html#kuibit.grid_data.UniformGridData.partial_differentiated">[docs]</a>    <span class="k">def</span> <span class="nf">partial_differentiated</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">direction</span><span class="p">,</span> <span class="n">order</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+<div class="viewcode-block" id="UniformGridData.partial_differentiated"><a class="viewcode-back" href="../../grid_data_ref.html#kuibit.grid_data.UniformGridData.partial_differentiated">[docs]</a>    <span class="k">def</span> <span class="nf">partial_differentiated</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">direction</span><span class="p">,</span> <span class="n">order</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">accuracy_order</span><span class="o">=</span><span class="mi">2</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Return a :py:class:`~.UniformGridData` that is the numerical</span>
 <span class="sd">        order-differentiation of the present grid_data along a given direction.</span>
 <span class="sd">        (``order`` = number of derivatives, ie ``order=2`` is second derivative)</span>
@@ -1518,6 +1518,8 @@
 <span class="sd">        :type order: int</span>
 <span class="sd">        :param direction: Direction of the partial derivative.</span>
 <span class="sd">        :type direction: int</span>
+<span class="sd">        :param accuracy_order: Order of accuracy of the finite difference scheme.</span>
+<span class="sd">        :type accuracy_order: int</span>
 
 <span class="sd">        :returns:  New :py:class:`~.UniformGridData` with derivative.</span>
 <span class="sd">        :rtype:    :py:class:`~.UniformGridData`</span>
@@ -1534,15 +1536,112 @@
                 <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">direction</span><span class="si">}</span><span class="s2"> is not available&quot;</span>
             <span class="p">)</span>
 
-        <span class="n">ret_value</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
-        <span class="k">for</span> <span class="n">_num_deriv</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">order</span><span class="p">):</span>
-
-            <span class="n">ret_value</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">gradient</span><span class="p">(</span>
-                <span class="n">ret_value</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">dx</span><span class="p">[</span><span class="n">direction</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="n">direction</span><span class="p">,</span> <span class="n">edge_order</span><span class="o">=</span><span class="mi">2</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="n">direction</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">accuracy_order</span> <span class="o">+</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;Need at least </span><span class="si">{</span><span class="n">accuracy_order</span> <span class="o">+</span> <span class="mi">1</span><span class="si">}</span><span class="s2"> points for finite difference.&quot;</span>
             <span class="p">)</span>
+
+        <span class="n">ret_value</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros_like</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">)</span>
+
+        <span class="k">def</span> <span class="nf">slicer</span><span class="p">(</span><span class="n">index0</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">index1</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">slice</span><span class="p">:</span>
+            <span class="sd">&quot;&quot;&quot;Create a slicer objects between indices index0 and index1 along the direction</span>
+<span class="sd">            where the derivative is taken. Everything else is left untouched</span>
+
+<span class="sd">            &quot;&quot;&quot;</span>
+            <span class="n">slice_</span> <span class="o">=</span> <span class="p">[</span><span class="nb">slice</span><span class="p">(</span><span class="kc">None</span><span class="p">)</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">shape</span><span class="p">]</span>
+            <span class="n">slice_</span><span class="p">[</span><span class="n">direction</span><span class="p">]</span> <span class="o">=</span> <span class="nb">slice</span><span class="p">(</span><span class="n">index0</span><span class="p">,</span> <span class="n">index1</span><span class="p">)</span>
+            <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">slice_</span><span class="p">)</span>
+
+        <span class="k">def</span> <span class="nf">slicer1</span><span class="p">(</span><span class="n">index0</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">slice</span><span class="p">:</span>
+            <span class="sd">&quot;&quot;&quot;Create a slicer objects that isolated the given ``index0`` along the</span>
+<span class="sd">            direction of the derivative.</span>
+
+<span class="sd">            &quot;&quot;&quot;</span>
+            <span class="c1"># If index0 is -1, we are considering the end of the list</span>
+            <span class="n">index1</span> <span class="o">=</span> <span class="n">index0</span> <span class="o">+</span> <span class="mi">1</span> <span class="k">if</span> <span class="n">index0</span> <span class="o">!=</span> <span class="o">-</span><span class="mi">1</span> <span class="k">else</span> <span class="kc">None</span>
+            <span class="k">return</span> <span class="n">slicer</span><span class="p">(</span><span class="n">index0</span><span class="p">,</span> <span class="n">index1</span><span class="p">)</span>
+
+        <span class="n">dx</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dx</span><span class="p">[</span><span class="n">direction</span><span class="p">]</span>
+
+        <span class="c1"># We will set data to _ret_value after we computed each oder</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span>
+
+        <span class="k">for</span> <span class="n">_num_deriv</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">order</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">accuracy_order</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+                <span class="c1"># Bulk, equivalent to f[i] - f[i + i]) / 2 dx</span>
+                <span class="n">ret_value</span><span class="p">[</span><span class="n">slicer</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">)]</span> <span class="o">=</span> <span class="p">(</span>
+                    <span class="n">data</span><span class="p">[</span><span class="n">slicer</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="kc">None</span><span class="p">)]</span> <span class="o">-</span> <span class="n">data</span><span class="p">[</span><span class="n">slicer</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="mi">2</span><span class="p">)]</span>
+                <span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">dx</span><span class="p">)</span>
+                <span class="c1"># Second order forward difference for first element</span>
+                <span class="c1"># -(3*y[0] - 4*y[1] + y[2]) / (2*dx)</span>
+                <span class="n">ret_value</span><span class="p">[</span><span class="n">slicer1</span><span class="p">(</span><span class="mi">0</span><span class="p">)]</span> <span class="o">=</span> <span class="o">-</span><span class="p">(</span>
+                    <span class="mi">3</span> <span class="o">*</span> <span class="n">data</span><span class="p">[</span><span class="n">slicer1</span><span class="p">(</span><span class="mi">0</span><span class="p">)]</span>
+                    <span class="o">-</span> <span class="mi">4</span> <span class="o">*</span> <span class="n">data</span><span class="p">[</span><span class="n">slicer1</span><span class="p">(</span><span class="mi">1</span><span class="p">)]</span>
+                    <span class="o">+</span> <span class="n">data</span><span class="p">[</span><span class="n">slicer1</span><span class="p">(</span><span class="mi">2</span><span class="p">)]</span>
+                <span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">dx</span><span class="p">)</span>
+                <span class="c1"># Backwards difference final element</span>
+                <span class="c1"># (3*y[-1] - 4*y[-2] + y[-3]) / (2*dx)</span>
+                <span class="n">ret_value</span><span class="p">[</span><span class="n">slicer1</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)]</span> <span class="o">=</span> <span class="p">(</span>
+                    <span class="mi">3</span> <span class="o">*</span> <span class="n">data</span><span class="p">[</span><span class="n">slicer1</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)]</span>
+                    <span class="o">-</span> <span class="mi">4</span> <span class="o">*</span> <span class="n">data</span><span class="p">[</span><span class="n">slicer1</span><span class="p">(</span><span class="o">-</span><span class="mi">2</span><span class="p">)]</span>
+                    <span class="o">+</span> <span class="n">data</span><span class="p">[</span><span class="n">slicer1</span><span class="p">(</span><span class="o">-</span><span class="mi">3</span><span class="p">)]</span>
+                <span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">dx</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="n">accuracy_order</span> <span class="o">==</span> <span class="mi">4</span><span class="p">:</span>
+                <span class="c1"># Coefficients computed with</span>
+                <span class="c1"># https://web.media.mit.edu/~crtaylor/calculator.html</span>
+
+                <span class="c1"># Bulk, equivalent to (f[:4] - 8*f[1:-3] + 8*f[3:-1] - f[4:])/12.0</span>
+                <span class="n">ret_value</span><span class="p">[</span><span class="n">slicer</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="o">-</span><span class="mi">2</span><span class="p">)]</span> <span class="o">=</span> <span class="p">(</span>
+                    <span class="n">data</span><span class="p">[</span><span class="n">slicer</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="o">-</span><span class="mi">4</span><span class="p">)]</span>
+                    <span class="o">-</span> <span class="mf">8.0</span> <span class="o">*</span> <span class="n">data</span><span class="p">[</span><span class="n">slicer</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">3</span><span class="p">)]</span>
+                    <span class="o">+</span> <span class="mf">8.0</span> <span class="o">*</span> <span class="n">data</span><span class="p">[</span><span class="n">slicer</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">)]</span>
+                    <span class="o">-</span> <span class="n">data</span><span class="p">[</span><span class="n">slicer</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="kc">None</span><span class="p">)]</span>
+                <span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="mf">12.0</span> <span class="o">*</span> <span class="n">dx</span><span class="p">)</span>
+                <span class="c1"># Fourth order partially forward difference for second element</span>
+                <span class="c1"># (-3*f[0]-10*f[1]+18*f[2]-6*f[3]+1*f[4])/(12 dx)</span>
+                <span class="n">ret_value</span><span class="p">[</span><span class="n">slicer1</span><span class="p">(</span><span class="mi">1</span><span class="p">)]</span> <span class="o">=</span> <span class="p">(</span>
+                    <span class="o">-</span><span class="mi">3</span> <span class="o">*</span> <span class="n">data</span><span class="p">[</span><span class="n">slicer1</span><span class="p">(</span><span class="mi">0</span><span class="p">)]</span>
+                    <span class="o">-</span> <span class="mi">10</span> <span class="o">*</span> <span class="n">data</span><span class="p">[</span><span class="n">slicer1</span><span class="p">(</span><span class="mi">1</span><span class="p">)]</span>
+                    <span class="o">+</span> <span class="mi">18</span> <span class="o">*</span> <span class="n">data</span><span class="p">[</span><span class="n">slicer1</span><span class="p">(</span><span class="mi">2</span><span class="p">)]</span>
+                    <span class="o">-</span> <span class="mi">6</span> <span class="o">*</span> <span class="n">data</span><span class="p">[</span><span class="n">slicer1</span><span class="p">(</span><span class="mi">3</span><span class="p">)]</span>
+                    <span class="o">+</span> <span class="mi">1</span> <span class="o">*</span> <span class="n">data</span><span class="p">[</span><span class="n">slicer1</span><span class="p">(</span><span class="mi">4</span><span class="p">)]</span>
+                <span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="mi">12</span> <span class="o">*</span> <span class="n">dx</span><span class="p">)</span>
+                <span class="c1"># Fourth order fully forward difference for first element</span>
+                <span class="c1"># (-25*f[0]+48*f[1]-36*f[2]+16*f[3]-3*f[4])/(12dx)</span>
+                <span class="n">ret_value</span><span class="p">[</span><span class="n">slicer1</span><span class="p">(</span><span class="mi">0</span><span class="p">)]</span> <span class="o">=</span> <span class="p">(</span>
+                    <span class="o">-</span><span class="mi">25</span> <span class="o">*</span> <span class="n">data</span><span class="p">[</span><span class="n">slicer1</span><span class="p">(</span><span class="mi">0</span><span class="p">)]</span>
+                    <span class="o">+</span> <span class="mi">48</span> <span class="o">*</span> <span class="n">data</span><span class="p">[</span><span class="n">slicer1</span><span class="p">(</span><span class="mi">1</span><span class="p">)]</span>
+                    <span class="o">-</span> <span class="mi">36</span> <span class="o">*</span> <span class="n">data</span><span class="p">[</span><span class="n">slicer1</span><span class="p">(</span><span class="mi">2</span><span class="p">)]</span>
+                    <span class="o">+</span> <span class="mi">16</span> <span class="o">*</span> <span class="n">data</span><span class="p">[</span><span class="n">slicer1</span><span class="p">(</span><span class="mi">3</span><span class="p">)]</span>
+                    <span class="o">-</span> <span class="mi">3</span> <span class="o">*</span> <span class="n">data</span><span class="p">[</span><span class="n">slicer1</span><span class="p">(</span><span class="mi">4</span><span class="p">)]</span>
+                <span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="mi">12</span> <span class="o">*</span> <span class="n">dx</span><span class="p">)</span>
+                <span class="c1"># Fourth order fully backward difference for last element</span>
+                <span class="c1"># (3*f[-5]-16*f[-4]+36*f[-3]-48*f[-2]+25*f[-1])/(12*dx)</span>
+                <span class="n">ret_value</span><span class="p">[</span><span class="n">slicer1</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)]</span> <span class="o">=</span> <span class="o">-</span><span class="p">(</span>
+                    <span class="o">-</span><span class="mi">25</span> <span class="o">*</span> <span class="n">data</span><span class="p">[</span><span class="n">slicer1</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)]</span>
+                    <span class="o">+</span> <span class="mi">48</span> <span class="o">*</span> <span class="n">data</span><span class="p">[</span><span class="n">slicer1</span><span class="p">(</span><span class="o">-</span><span class="mi">2</span><span class="p">)]</span>
+                    <span class="o">-</span> <span class="mi">36</span> <span class="o">*</span> <span class="n">data</span><span class="p">[</span><span class="n">slicer1</span><span class="p">(</span><span class="o">-</span><span class="mi">3</span><span class="p">)]</span>
+                    <span class="o">+</span> <span class="mi">16</span> <span class="o">*</span> <span class="n">data</span><span class="p">[</span><span class="n">slicer1</span><span class="p">(</span><span class="o">-</span><span class="mi">4</span><span class="p">)]</span>
+                    <span class="o">-</span> <span class="mi">3</span> <span class="o">*</span> <span class="n">data</span><span class="p">[</span><span class="n">slicer1</span><span class="p">(</span><span class="o">-</span><span class="mi">5</span><span class="p">)]</span>
+                <span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="mi">12</span> <span class="o">*</span> <span class="n">dx</span><span class="p">)</span>
+                <span class="c1"># Fourth order partially backward difference for the second to last</span>
+                <span class="c1"># (-1*f[-4]+6*f[-3]-18*f[-3]+10*f[-2]+3*f[-1])/(12*dx)</span>
+                <span class="n">ret_value</span><span class="p">[</span><span class="n">slicer1</span><span class="p">(</span><span class="o">-</span><span class="mi">2</span><span class="p">)]</span> <span class="o">=</span> <span class="o">-</span><span class="p">(</span>
+                    <span class="o">-</span><span class="mi">3</span> <span class="o">*</span> <span class="n">data</span><span class="p">[</span><span class="n">slicer1</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)]</span>
+                    <span class="o">-</span> <span class="mi">10</span> <span class="o">*</span> <span class="n">data</span><span class="p">[</span><span class="n">slicer1</span><span class="p">(</span><span class="o">-</span><span class="mi">2</span><span class="p">)]</span>
+                    <span class="o">+</span> <span class="mi">18</span> <span class="o">*</span> <span class="n">data</span><span class="p">[</span><span class="n">slicer1</span><span class="p">(</span><span class="o">-</span><span class="mi">3</span><span class="p">)]</span>
+                    <span class="o">-</span> <span class="mi">6</span> <span class="o">*</span> <span class="n">data</span><span class="p">[</span><span class="n">slicer1</span><span class="p">(</span><span class="o">-</span><span class="mi">4</span><span class="p">)]</span>
+                    <span class="o">+</span> <span class="mi">1</span> <span class="o">*</span> <span class="n">data</span><span class="p">[</span><span class="n">slicer1</span><span class="p">(</span><span class="o">-</span><span class="mi">5</span><span class="p">)]</span>
+                <span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="mi">12</span> <span class="o">*</span> <span class="n">dx</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s2">&quot;Accuracy order </span><span class="si">{</span><span class="n">accuracy_order</span><span class="si">}</span><span class="s2"> not implemented&quot;</span>
+                <span class="p">)</span>
+
+            <span class="n">data</span> <span class="o">=</span> <span class="n">ret_value</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
         <span class="k">return</span> <span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)(</span><span class="bp">self</span><span class="o">.</span><span class="n">grid</span><span class="p">,</span> <span class="n">ret_value</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="UniformGridData.gradient"><a class="viewcode-back" href="../../grid_data_ref.html#kuibit.grid_data.UniformGridData.gradient">[docs]</a>    <span class="k">def</span> <span class="nf">gradient</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">order</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+<div class="viewcode-block" id="UniformGridData.gradient"><a class="viewcode-back" href="../../grid_data_ref.html#kuibit.grid_data.UniformGridData.gradient">[docs]</a>    <span class="k">def</span> <span class="nf">gradient</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">order</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">accuracy_order</span><span class="o">=</span><span class="mi">2</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Return a list :py:class:`~.UniformGridData` that are the numerical</span>
 <span class="sd">        order-differentiation of the present grid_data along all the directions.</span>
 <span class="sd">        (``order`` = number of derivatives, ie ``order=2`` is second derivative)</span>
@@ -1557,17 +1656,22 @@
 <span class="sd">        :type order: int</span>
 <span class="sd">        :param direction: Direction of the partial derivative.</span>
 <span class="sd">        :type direction: int</span>
+<span class="sd">        :param accuracy_order: Order of accuracy of the finite difference scheme.</span>
+<span class="sd">        :type accuracy_order: int</span>
+
 <span class="sd">        :returns:  list of :py:class:`~.UniformGridData` with partial derivative</span>
 <span class="sd">                   along the directions.</span>
 <span class="sd">        :rtype:    list of :py:class:`~.UniformGridData`</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="p">[</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">partial_differentiated</span><span class="p">(</span><span class="n">direction</span><span class="p">,</span> <span class="n">order</span><span class="o">=</span><span class="n">order</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">partial_differentiated</span><span class="p">(</span>
+                <span class="n">direction</span><span class="p">,</span> <span class="n">order</span><span class="o">=</span><span class="n">order</span><span class="p">,</span> <span class="n">accuracy_order</span><span class="o">=</span><span class="n">accuracy_order</span>
+            <span class="p">)</span>
             <span class="k">for</span> <span class="n">direction</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">num_dimensions</span><span class="p">)</span>
         <span class="p">]</span></div>
 
-<div class="viewcode-block" id="UniformGridData.partial_differentiate"><a class="viewcode-back" href="../../grid_data_ref.html#kuibit.grid_data.UniformGridData.partial_differentiate">[docs]</a>    <span class="k">def</span> <span class="nf">partial_differentiate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dimension</span><span class="p">,</span> <span class="n">order</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+<div class="viewcode-block" id="UniformGridData.partial_differentiate"><a class="viewcode-back" href="../../grid_data_ref.html#kuibit.grid_data.UniformGridData.partial_differentiate">[docs]</a>    <span class="k">def</span> <span class="nf">partial_differentiate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dimension</span><span class="p">,</span> <span class="n">order</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">accuracy_order</span><span class="o">=</span><span class="mi">2</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Derive the data with numerical finite difference along a given direction</span>
 <span class="sd">        (``order`` = number of derivatives, ie ``order=2`` is second derivative).</span>
 
@@ -1581,10 +1685,15 @@
 <span class="sd">        :type order: int</span>
 <span class="sd">        :param direction: Direction of the partial derivative.</span>
 <span class="sd">        :type direction: int</span>
+<span class="sd">        :param accuracy_order: Order of accuracy of the finite difference scheme.</span>
+<span class="sd">        :type accuracy_order: int</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_apply_to_self</span><span class="p">(</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">partial_differentiated</span><span class="p">,</span> <span class="n">dimension</span><span class="p">,</span> <span class="n">order</span><span class="o">=</span><span class="n">order</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">partial_differentiated</span><span class="p">,</span>
+            <span class="n">dimension</span><span class="p">,</span>
+            <span class="n">order</span><span class="o">=</span><span class="n">order</span><span class="p">,</span>
+            <span class="n">accuracy_order</span><span class="o">=</span><span class="n">accuracy_order</span><span class="p">,</span>
         <span class="p">)</span></div>
 
     <span class="k">def</span> <span class="nf">_coordinates_at</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">where</span><span class="p">,</span> <span class="n">absolute</span><span class="p">):</span>
@@ -2187,10 +2296,7 @@
 <span class="sd">        :returns: Refinement level number, component index, and data.</span>
 <span class="sd">        :rtype: generator of tuples (int, int, :py:class:`~.UniformGridData`)</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="c1"># TODO (FUTURE): Reverse dictionary in Python 3.8</span>
-        <span class="c1">#</span>
-        <span class="c1"># In Python 3.8 we can reverse without transforming into a list first</span>
-        <span class="k">for</span> <span class="n">ref_level</span><span class="p">,</span> <span class="n">data</span> <span class="ow">in</span> <span class="nb">reversed</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">grid_data_dict</span><span class="o">.</span><span class="n">items</span><span class="p">())):</span>
+        <span class="k">for</span> <span class="n">ref_level</span><span class="p">,</span> <span class="n">data</span> <span class="ow">in</span> <span class="nb">reversed</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">grid_data_dict</span><span class="o">.</span><span class="n">items</span><span class="p">()):</span>
             <span class="k">for</span> <span class="n">comp_index</span><span class="p">,</span> <span class="n">comp</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">data</span><span class="p">):</span>
                 <span class="k">yield</span> <span class="n">ref_level</span><span class="p">,</span> <span class="n">comp_index</span><span class="p">,</span> <span class="n">comp</span></div>
 
@@ -2723,8 +2829,9 @@
 
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">to_UniformGridData_from_grid</span><span class="p">(</span><span class="n">grid</span><span class="p">,</span> <span class="n">resample</span><span class="o">=</span><span class="n">resample</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="HierarchicalGridData.merge_refinement_levels"><a class="viewcode-back" href="../../grid_data_ref.html#kuibit.grid_data.HierarchicalGridData.merge_refinement_levels">[docs]</a>    <span class="k">def</span> <span class="nf">merge_refinement_levels</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">resample</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Combine all the available data and resample it grid that encompasses all the</span>
+<div class="viewcode-block" id="HierarchicalGridData.refinement_levels_merged"><a class="viewcode-back" href="../../grid_data_ref.html#kuibit.grid_data.HierarchicalGridData.refinement_levels_merged">[docs]</a>    <span class="k">def</span> <span class="nf">refinement_levels_merged</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">resample</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Return a new :py:class:`~.UniformGridData` with all the available</span>
+<span class="sd">        data combined and resampled to a grid that encompasses all the</span>
 <span class="sd">        components and has resolution of the finest refinement level.</span>
 
 <span class="sd">        When ``resample`` is True, data from coarser refinement levels is</span>
@@ -2769,6 +2876,15 @@
             <span class="n">iteration</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">iteration</span><span class="p">,</span>
             <span class="n">resample</span><span class="o">=</span><span class="n">resample</span><span class="p">,</span>
         <span class="p">)</span></div>
+
+<div class="viewcode-block" id="HierarchicalGridData.merge_refinement_levels"><a class="viewcode-back" href="../../grid_data_ref.html#kuibit.grid_data.HierarchicalGridData.merge_refinement_levels">[docs]</a>    <span class="k">def</span> <span class="nf">merge_refinement_levels</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">resample</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;DEPRECATED.&quot;&quot;&quot;</span>
+        <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
+            <span class="s2">&quot;merge_refinement_levels was renamed to refinement_levels_merged &quot;</span>
+            <span class="s2">&quot;and it will be removed in kuibit 1.5.0&quot;</span><span class="p">,</span>
+            <span class="n">category</span><span class="o">=</span><span class="ne">FutureWarning</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">refinement_levels_merged</span><span class="p">(</span><span class="n">resample</span><span class="o">=</span><span class="n">resample</span><span class="p">)</span></div>
 
     <span class="k">def</span> <span class="nf">_apply_to_self</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Apply the method ``f`` to ``self``, modifying ``self``.</span>
@@ -2918,7 +3034,7 @@
             <span class="k">for</span> <span class="n">dim</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">num_dimensions</span><span class="p">)</span>
         <span class="p">]</span>
 
-<div class="viewcode-block" id="HierarchicalGridData.partial_differentiated"><a class="viewcode-back" href="../../grid_data_ref.html#kuibit.grid_data.HierarchicalGridData.partial_differentiated">[docs]</a>    <span class="k">def</span> <span class="nf">partial_differentiated</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">direction</span><span class="p">,</span> <span class="n">order</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+<div class="viewcode-block" id="HierarchicalGridData.partial_differentiated"><a class="viewcode-back" href="../../grid_data_ref.html#kuibit.grid_data.HierarchicalGridData.partial_differentiated">[docs]</a>    <span class="k">def</span> <span class="nf">partial_differentiated</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">direction</span><span class="p">,</span> <span class="n">order</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">accuracy_order</span><span class="o">=</span><span class="mi">2</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Return a :py:class:`~.HierarchicalGridData` that is the numerical</span>
 <span class="sd">        order-differentiation of the present grid_data along a given direction.</span>
 <span class="sd">        (order = number of derivatives, ie ``order=2`` is second derivative)</span>
@@ -2933,16 +3049,21 @@
 <span class="sd">        :type order: int</span>
 <span class="sd">        :param direction: Direction of the partial derivative.</span>
 <span class="sd">        :type direction: int</span>
+<span class="sd">        :param accuracy_order: Order of accuracy of the finite difference scheme.</span>
+<span class="sd">        :type accuracy_order: int</span>
 
 <span class="sd">        :returns:  New :py:class:`~.HierarchicalGridData` with derivative.</span>
 <span class="sd">        :rtype:    :py:class:`~.HierarchicalGridData`</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_call_component_method</span><span class="p">(</span>
-            <span class="s2">&quot;partial_differentiated&quot;</span><span class="p">,</span> <span class="n">direction</span><span class="p">,</span> <span class="n">order</span><span class="o">=</span><span class="n">order</span>
+            <span class="s2">&quot;partial_differentiated&quot;</span><span class="p">,</span>
+            <span class="n">direction</span><span class="p">,</span>
+            <span class="n">order</span><span class="o">=</span><span class="n">order</span><span class="p">,</span>
+            <span class="n">accuracy_order</span><span class="o">=</span><span class="n">accuracy_order</span><span class="p">,</span>
         <span class="p">)</span></div>
 
-<div class="viewcode-block" id="HierarchicalGridData.gradient"><a class="viewcode-back" href="../../grid_data_ref.html#kuibit.grid_data.HierarchicalGridData.gradient">[docs]</a>    <span class="k">def</span> <span class="nf">gradient</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">order</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+<div class="viewcode-block" id="HierarchicalGridData.gradient"><a class="viewcode-back" href="../../grid_data_ref.html#kuibit.grid_data.HierarchicalGridData.gradient">[docs]</a>    <span class="k">def</span> <span class="nf">gradient</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">order</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">accuracy_order</span><span class="o">=</span><span class="mi">2</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Return a list :py:class:`~.HierarchicalGridData` that are the numerical</span>
 <span class="sd">        order-differentiation of the present grid_data along all the directions.</span>
 <span class="sd">        (order = number of derivatives, ie ``order=2`` is second derivative)</span>
@@ -2955,16 +3076,21 @@
 
 <span class="sd">        :param order: Order of derivative (e.g. 2 = second derivative).</span>
 <span class="sd">        :type order: int</span>
+<span class="sd">        :param accuracy_order: Order of accuracy of the finite difference scheme.</span>
+<span class="sd">        :type accuracy_order: int</span>
 <span class="sd">        :returns: list of :py:class:`~.HierarchicalGridData` with partial</span>
 <span class="sd">                  derivative along all the directions.</span>
 <span class="sd">        :rtype:  list of :py:class:`~.HierarchicalGridData`</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_call_component_method</span><span class="p">(</span>
-            <span class="s2">&quot;gradient&quot;</span><span class="p">,</span> <span class="n">method_returns_list</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">order</span><span class="o">=</span><span class="n">order</span>
+            <span class="s2">&quot;gradient&quot;</span><span class="p">,</span>
+            <span class="n">method_returns_list</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+            <span class="n">order</span><span class="o">=</span><span class="n">order</span><span class="p">,</span>
+            <span class="n">accuracy_order</span><span class="o">=</span><span class="n">accuracy_order</span><span class="p">,</span>
         <span class="p">)</span></div>
 
-<div class="viewcode-block" id="HierarchicalGridData.partial_differentiate"><a class="viewcode-back" href="../../grid_data_ref.html#kuibit.grid_data.HierarchicalGridData.partial_differentiate">[docs]</a>    <span class="k">def</span> <span class="nf">partial_differentiate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">direction</span><span class="p">,</span> <span class="n">order</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+<div class="viewcode-block" id="HierarchicalGridData.partial_differentiate"><a class="viewcode-back" href="../../grid_data_ref.html#kuibit.grid_data.HierarchicalGridData.partial_differentiate">[docs]</a>    <span class="k">def</span> <span class="nf">partial_differentiate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">direction</span><span class="p">,</span> <span class="n">order</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">accuracy_order</span><span class="o">=</span><span class="mi">2</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Apply a numerical differentiatin along the specified direction.</span>
 
 <span class="sd">        The derivative is calulated as centered differencing in the interior</span>
@@ -2977,13 +3103,18 @@
 <span class="sd">        :type order: int</span>
 <span class="sd">        :param direction: Direction of the partial derivative.</span>
 <span class="sd">        :type direction: int</span>
+<span class="sd">        :param accuracy_order: Order of accuracy of the finite difference scheme.</span>
+<span class="sd">        :type accuracy_order: int</span>
 
 <span class="sd">        :returns: Derivative along the specified direction.</span>
 <span class="sd">        :rtype: list of :py:class:`~.HierarchicalGridData`</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_apply_to_self</span><span class="p">(</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">partial_differentiated</span><span class="p">,</span> <span class="n">direction</span><span class="p">,</span> <span class="n">order</span><span class="o">=</span><span class="n">order</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">partial_differentiated</span><span class="p">,</span>
+            <span class="n">direction</span><span class="p">,</span>
+            <span class="n">order</span><span class="o">=</span><span class="n">order</span><span class="p">,</span>
+            <span class="n">accuracy_order</span><span class="o">=</span><span class="n">accuracy_order</span><span class="p">,</span>
         <span class="p">)</span></div>
 
 <div class="viewcode-block" id="HierarchicalGridData.ghost_zones_removed"><a class="viewcode-back" href="../../grid_data_ref.html#kuibit.grid_data.HierarchicalGridData.ghost_zones_removed">[docs]</a>    <span class="k">def</span> <span class="nf">ghost_zones_removed</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -3147,7 +3278,7 @@
   <h3 id="searchlabel">Quick search</h3>
     <div class="searchformwrapper">
     <form class="search" action="../../search.html" method="get">
-      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
       <input type="submit" value="Go" />
     </form>
     </div>
@@ -3166,14 +3297,14 @@
         <li class="right" >
           <a href="../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../index.html">kuibit 1.3.4 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">kuibit 1.4.0-dev0 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="../index.html" >Module code</a> &#187;</li>
         <li class="nav-item nav-item-this"><a href="">kuibit.grid_data</a></li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">
         &#169; Copyright 2020-2022, Gabriele Bozzola.
-      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 3.5.4.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 4.4.0.
     </div>
   </body>
 </html>

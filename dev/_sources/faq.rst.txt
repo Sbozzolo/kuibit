@@ -34,22 +34,22 @@ amount of work that needs to be done (:py:meth:`SimDir.save`,
 :py:func:`~.load_SimDir`).
 
 
-merge_refinement_levels() is too slow and/or requires too much memory
----------------------------------------------------------------------
+refinement_levels_merged() is too slow and/or requires too much memory
+----------------------------------------------------------------------
 
 When working with grid data, it is tempting to deal with
-:py:class:`~.HierarchicalGridData` using :py:meth:`~.merge_refinement_levels` so
+:py:class:`~.HierarchicalGridData` using :py:meth:`~.refinement_levels_merged` so
 that you do not have to deal with all the complexity of the various refinement
-levels. However, what :py:meth:`~.merge_refinement_levels` does is to reduce
+levels. However, what :py:meth:`~.refinement_levels_merged` does is to reduce
 everything to the highest resolution. If you have several refinement levels in a
 large grid, this would require hundreds of terabytes!
 
-:py:meth:`~.merge_refinement_levels` is provided as a convenience function for
+:py:meth:`~.refinement_levels_merged` is provided as a convenience function for
 small simulations. For larger simulations, you have to work directly with
 :py:class:`~.HierarchicalGridData` (which fully support all the various
 mathematical operations and other various methods), until you want to plot the
 result. When are ready to plot, you should use the method
-:py:meth:`~.to_UniformGridData` instead of :py:meth:`~.merge_refinement_levels`.
+:py:meth:`~.to_UniformGridData` instead of :py:meth:`~.refinement_levels_merged`.
 With this function you can control the region where you want to focus and the
 resolution that you want to work with. In this way, you can reduce the number of
 computations needed and make the problem tractable.
