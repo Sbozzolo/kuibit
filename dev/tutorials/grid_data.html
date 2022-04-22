@@ -5,20 +5,19 @@
 <html>
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
-
-    <title>Working with grid data &#8212; kuibit 1.4.0-dev0 documentation</title>
-    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
-    <link rel="stylesheet" type="text/css" href="../_static/bizstyle.css" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Working with grid data &#8212; kuibit 1.3.4 documentation</title>
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/bizstyle.css" type="text/css" />
     <link rel="stylesheet" type="text/css" href="../_static/css/custom.css" />
     
-    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+    <script id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
     <script src="../_static/jquery.js"></script>
     <script src="../_static/underscore.js"></script>
     <script src="../_static/doctools.js"></script>
     <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
-    <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
-    <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script type="text/x-mathjax-config">MathJax.Hub.Config({"tex2jax": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true, "ignoreClass": "tex2jax_ignore|mathjax_ignore|document", "processClass": "tex2jax_process|mathjax_process|math|output_area"}})</script>
     <script src="../_static/bizstyle.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
@@ -44,7 +43,7 @@
         <li class="right" >
           <a href="timeseries.html" title="Working with time series, frequency series, and unit conversion"
              accesskey="P">previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../index.html">kuibit 1.4.0-dev0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">kuibit 1.3.4 documentation</a> &#187;</li>
         <li class="nav-item nav-item-this"><a href="">Working with grid data</a></li> 
       </ul>
     </div>  
@@ -264,7 +263,7 @@ div.nboutput.container div.output_area > div[class^='highlight']{
 }
 
 /* hide copybtn icon on prompts (needed for 'sphinx_copybutton') */
-.prompt .copybtn {
+.prompt a.copybtn {
     display: none;
 }
 
@@ -302,7 +301,7 @@ div.rendered_html tbody tr:hover {
   background: rgba(66, 165, 245, 0.2);
 }
 </style>
-<section id="Working-with-grid-data">
+<div class="section" id="Working-with-grid-data">
 <h1>Working with grid data<a class="headerlink" href="#Working-with-grid-data" title="Permalink to this headline">¶</a></h1>
 <p>In this notebook, we show some of the most useful features of the <a class="reference internal" href="../grid_data.html"><span class="doc">grid_data</span></a> module.</p>
 <p>There are three important objects in <a class="reference internal" href="../grid_data.html"><span class="doc">grid_data</span></a>: - <code class="docutils literal notranslate"><span class="pre">UniformGrid</span></code> represents Cartesian grids, - <code class="docutils literal notranslate"><span class="pre">UniformGridData</span></code> represents data on <code class="docutils literal notranslate"><span class="pre">UniformGrid</span></code>, - <code class="docutils literal notranslate"><span class="pre">HierarchicalGridData</span></code> represents data on multiple grids with different spacings (a mesh-refined grid).</p>
@@ -312,7 +311,8 @@ div.rendered_html tbody tr:hover {
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">from</span> <span class="nn">kuibit</span> <span class="kn">import</span> <span class="n">grid_data</span> <span class="k">as</span> <span class="n">gd</span>
 <span class="kn">from</span> <span class="nn">kuibit</span> <span class="kn">import</span> <span class="n">grid_data_utils</span> <span class="k">as</span> <span class="n">gdu</span>
@@ -322,7 +322,7 @@ div.rendered_html tbody tr:hover {
 </pre></div>
 </div>
 </div>
-<section id="UniformGrid">
+<div class="section" id="UniformGrid">
 <h2><code class="docutils literal notranslate"><span class="pre">UniformGrid</span></code><a class="headerlink" href="#UniformGrid" title="Permalink to this headline">¶</a></h2>
 <p>To generate data, we start from preparing a grid. <code class="docutils literal notranslate"><span class="pre">kuibit</span></code> follows the conventions in <code class="docutils literal notranslate"><span class="pre">Carpet</span></code> and identifies a grid with (1) the number of points along each direction, (2) the coordinate of left bottom cell, (3) the spacing or the coordinate of the top right cell. In addition, <code class="docutils literal notranslate"><span class="pre">UniformGrid</span></code> can contain additional information, like the number of refinement level, or the time. These grids are always cell-centered.</p>
 <p>Let us create a 2D grid:</p>
@@ -330,7 +330,8 @@ div.rendered_html tbody tr:hover {
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">grid</span> <span class="o">=</span> <span class="n">gd</span><span class="o">.</span><span class="n">UniformGrid</span><span class="p">([</span><span class="mi">201</span><span class="p">,</span> <span class="mi">201</span><span class="p">],</span> <span class="c1"># Number of points</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">grid</span> <span class="o">=</span> <span class="n">gd</span><span class="o">.</span><span class="n">UniformGrid</span><span class="p">([</span><span class="mi">201</span><span class="p">,</span> <span class="mi">201</span><span class="p">],</span> <span class="c1"># Number of points</span>
                       <span class="n">x0</span><span class="o">=</span><span class="p">[</span><span class="o">-</span><span class="mi">100</span><span class="p">,</span> <span class="o">-</span><span class="mi">100</span><span class="p">],</span> <span class="c1"># origin</span>
                       <span class="n">x1</span><span class="o">=</span><span class="p">[</span><span class="mi">100</span><span class="p">,</span> <span class="mi">100</span><span class="p">]</span> <span class="c1"># other corner</span>
                       <span class="p">)</span>
@@ -342,7 +343,8 @@ div.rendered_html tbody tr:hover {
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="n">grid</span><span class="p">)</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="nb">print</span><span class="p">(</span><span class="n">grid</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -371,7 +373,8 @@ Iteration        = None
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Unit volume </span><span class="si">{</span><span class="n">grid</span><span class="o">.</span><span class="n">dv</span><span class="si">}</span><span class="s2">, number of dimensions </span><span class="si">{</span><span class="n">grid</span><span class="o">.</span><span class="n">num_dimensions</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Unit volume </span><span class="si">{</span><span class="n">grid</span><span class="o">.</span><span class="n">dv</span><span class="si">}</span><span class="s2">, number of dimensions </span><span class="si">{</span><span class="n">grid</span><span class="o">.</span><span class="n">num_dimensions</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -388,7 +391,8 @@ Unit volume 1.0, number of dimensions 2
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;The coordinate cooresponding to the index 1, 2 is </span><span class="si">{</span><span class="n">grid</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;The coordinate cooresponding to the index 1, 2 is </span><span class="si">{</span><span class="n">grid</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Is [-140, 50] in the grid?: </span><span class="si">{</span><span class="p">[</span><span class="o">-</span><span class="mi">140</span><span class="p">,</span> <span class="mi">50</span><span class="p">]</span> <span class="ow">in</span> <span class="n">grid</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
@@ -407,7 +411,8 @@ Is [-140, 50] in the grid?: False
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="n">grid</span><span class="o">.</span><span class="n">coordinates</span><span class="p">()[</span><span class="mi">0</span><span class="p">])</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="nb">print</span><span class="p">(</span><span class="n">grid</span><span class="o">.</span><span class="n">coordinates</span><span class="p">()[</span><span class="mi">0</span><span class="p">])</span>
 </pre></div>
 </div>
 </div>
@@ -435,8 +440,8 @@ Is [-140, 50] in the grid?: False
    92.   93.   94.   95.   96.   97.   98.   99.  100.]
 </pre></div></div>
 </div>
-</section>
-<section id="UniformGridData">
+</div>
+<div class="section" id="UniformGridData">
 <h2><code class="docutils literal notranslate"><span class="pre">UniformGridData</span></code><a class="headerlink" href="#UniformGridData" title="Permalink to this headline">¶</a></h2>
 <p><code class="docutils literal notranslate"><span class="pre">UniformGridData</span></code> are much more interesting. <code class="docutils literal notranslate"><span class="pre">UniformGridData</span></code> packages a <code class="docutils literal notranslate"><span class="pre">UniformGrid</span></code> and some data in the same object and provides many useful functionalities.</p>
 <p>Let us create some fake data to explore the capabilities. A simple way to generate a <code class="docutils literal notranslate"><span class="pre">UniformGridData</span></code> from a function is with <code class="docutils literal notranslate"><span class="pre">sample_function</span></code>.</p>
@@ -444,7 +449,8 @@ Is [-140, 50] in the grid?: False
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">grid_data</span> <span class="o">=</span> <span class="n">gdu</span><span class="o">.</span><span class="n">sample_function</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">:</span> <span class="n">x</span> <span class="o">*</span> <span class="n">y</span><span class="p">,</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">grid_data</span> <span class="o">=</span> <span class="n">gdu</span><span class="o">.</span><span class="n">sample_function</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">:</span> <span class="n">x</span> <span class="o">*</span> <span class="n">y</span><span class="p">,</span>
                           <span class="p">[</span><span class="mi">101</span><span class="p">,</span> <span class="mi">201</span><span class="p">],</span> <span class="c1"># shape</span>
                           <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="c1"># origin</span>
                           <span class="p">[</span><span class="mi">10</span><span class="p">,</span> <span class="mi">10</span><span class="p">]</span> <span class="c1"># other corner</span>
@@ -459,7 +465,8 @@ the x coordiante, but the y. We provide the aliaxs <code class="docutils literal
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">cf</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">contourf</span><span class="p">(</span><span class="o">*</span><span class="n">grid_data</span><span class="o">.</span><span class="n">coordinates_meshgrid</span><span class="p">(),</span> <span class="c1"># The star is to unpack the list</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">cf</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">contourf</span><span class="p">(</span><span class="o">*</span><span class="n">grid_data</span><span class="o">.</span><span class="n">coordinates_meshgrid</span><span class="p">(),</span> <span class="c1"># The star is to unpack the list</span>
                   <span class="n">grid_data</span><span class="o">.</span><span class="n">data_xyz</span><span class="p">)</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">colorbar</span><span class="p">(</span><span class="n">cf</span><span class="p">)</span>
 </pre></div>
@@ -471,7 +478,7 @@ the x coordiante, but the y. We provide the aliaxs <code class="docutils literal
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-&lt;matplotlib.colorbar.Colorbar at 0x7f6aa22c4cd0&gt;
+&lt;matplotlib.colorbar.Colorbar at 0x7f07d2e626a0&gt;
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
@@ -486,7 +493,8 @@ the x coordiante, but the y. We provide the aliaxs <code class="docutils literal
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">funky_data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">grid_data</span><span class="p">)</span> <span class="o">+</span> <span class="n">grid_data</span><span class="o">**</span><span class="mi">2</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">tanh</span><span class="p">(</span><span class="n">grid_data</span><span class="p">)</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">funky_data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">grid_data</span><span class="p">)</span> <span class="o">+</span> <span class="n">grid_data</span><span class="o">**</span><span class="mi">2</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">tanh</span><span class="p">(</span><span class="n">grid_data</span><span class="p">)</span>
 <span class="n">cf</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">contourf</span><span class="p">(</span><span class="o">*</span><span class="n">funky_data</span><span class="o">.</span><span class="n">coordinates_meshgrid</span><span class="p">(),</span> <span class="n">funky_data</span><span class="o">.</span><span class="n">data_xyz</span><span class="p">)</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">colorbar</span><span class="p">(</span><span class="n">cf</span><span class="p">)</span>
 </pre></div>
@@ -498,7 +506,7 @@ the x coordiante, but the y. We provide the aliaxs <code class="docutils literal
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-&lt;matplotlib.colorbar.Colorbar at 0x7f6a9fed8340&gt;
+&lt;matplotlib.colorbar.Colorbar at 0x7f07d2d34550&gt;
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
@@ -513,7 +521,8 @@ the x coordiante, but the y. We provide the aliaxs <code class="docutils literal
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;The absolute maximum is </span><span class="si">{</span><span class="n">funky_data</span><span class="o">.</span><span class="n">abs_max</span><span class="p">()</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;The absolute maximum is </span><span class="si">{</span><span class="n">funky_data</span><span class="o">.</span><span class="n">abs_max</span><span class="p">()</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;The absolute maximum occurs at </span><span class="si">{</span><span class="n">funky_data</span><span class="o">.</span><span class="n">coordinates_at_maximum</span><span class="p">()</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
@@ -532,7 +541,8 @@ The absolute maximum occurs at [10. 10.]
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[11]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;The value of funky_data at (2, 3) is </span><span class="si">{</span><span class="n">funky_data</span><span class="p">((</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">))</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;The value of funky_data at (2, 3) is </span><span class="si">{</span><span class="n">funky_data</span><span class="p">((</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">))</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -549,7 +559,8 @@ The value of funky_data at (2, 3) is 38.449
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[12]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;The mean of funky_data is </span><span class="si">{</span><span class="n">funky_data</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;The mean of funky_data is </span><span class="si">{</span><span class="n">funky_data</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;The integral of funky_data is </span><span class="si">{</span><span class="n">funky_data</span><span class="o">.</span><span class="n">integral</span><span class="p">()</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;The norm2 of funky_data is </span><span class="si">{</span><span class="n">funky_data</span><span class="o">.</span><span class="n">norm2</span><span class="p">()</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 
@@ -576,7 +587,7 @@ The norm2 of funky_data is 20417.836
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-[&lt;matplotlib.lines.Line2D at 0x7f6a9fe5cbb0&gt;]
+[&lt;matplotlib.lines.Line2D at 0x7f07d2cacef0&gt;]
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
@@ -592,7 +603,8 @@ The norm2 of funky_data is 20417.836
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[13]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">new_grid</span> <span class="o">=</span> <span class="n">gd</span><span class="o">.</span><span class="n">UniformGrid</span><span class="p">([</span><span class="mi">201</span><span class="p">,</span> <span class="mi">301</span><span class="p">],</span> <span class="n">x0</span><span class="o">=</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="n">x1</span><span class="o">=</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">10</span><span class="p">])</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">new_grid</span> <span class="o">=</span> <span class="n">gd</span><span class="o">.</span><span class="n">UniformGrid</span><span class="p">([</span><span class="mi">201</span><span class="p">,</span> <span class="mi">301</span><span class="p">],</span> <span class="n">x0</span><span class="o">=</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="n">x1</span><span class="o">=</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">10</span><span class="p">])</span>
 <span class="n">resampled_funky</span> <span class="o">=</span> <span class="n">funky_data</span><span class="o">.</span><span class="n">resampled</span><span class="p">(</span><span class="n">new_grid</span><span class="p">)</span>
 <span class="n">cf</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">contourf</span><span class="p">(</span><span class="o">*</span><span class="n">resampled_funky</span><span class="o">.</span><span class="n">coordinates_meshgrid</span><span class="p">(),</span> <span class="n">resampled_funky</span><span class="o">.</span><span class="n">data_xyz</span><span class="p">)</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">colorbar</span><span class="p">(</span><span class="n">cf</span><span class="p">)</span>
@@ -605,7 +617,7 @@ The norm2 of funky_data is 20417.836
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-&lt;matplotlib.colorbar.Colorbar at 0x7f6a9fe05bb0&gt;
+&lt;matplotlib.colorbar.Colorbar at 0x7f07d2bdb898&gt;
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
@@ -622,7 +634,8 @@ The norm2 of funky_data is 20417.836
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[14]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">resampled_funky</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="s2">&quot;/tmp/funky.npz&quot;</span><span class="p">)</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">resampled_funky</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="s2">&quot;/tmp/funky.npz&quot;</span><span class="p">)</span>
 
 <span class="kn">from</span> <span class="nn">kuibit.grid_data_utils</span> <span class="kn">import</span> <span class="n">load_UniformGridData</span>
 
@@ -631,8 +644,8 @@ The norm2 of funky_data is 20417.836
 </div>
 </div>
 <p>The fastest format to save data in is <code class="docutils literal notranslate"><span class="pre">npz</span></code>, but this is not always portable. The <code class="docutils literal notranslate"><span class="pre">save</span></code> method accepts many other formats, like <code class="docutils literal notranslate"><span class="pre">txt</span></code>, <code class="docutils literal notranslate"><span class="pre">dat</span></code>, and also compressed ones (e.g., <code class="docutils literal notranslate"><span class="pre">txt.gz</span></code>).</p>
-</section>
-<section id="HierarchicalGridData">
+</div>
+<div class="section" id="HierarchicalGridData">
 <h2><code class="docutils literal notranslate"><span class="pre">HierarchicalGridData</span></code><a class="headerlink" href="#HierarchicalGridData" title="Permalink to this headline">¶</a></h2>
 <p>Now that we have some familiarity with <code class="docutils literal notranslate"><span class="pre">UniformGridData</span></code>, we can move to the most important object, <code class="docutils literal notranslate"><span class="pre">HierarchicalGridData</span></code>. The relevance of this class is due to the fact that simulation data is represented with <code class="docutils literal notranslate"><span class="pre">HierarchicalGridData</span></code> objects.</p>
 <p>A <code class="docutils literal notranslate"><span class="pre">HierarchicalGridData</span></code> is a collection of <code class="docutils literal notranslate"><span class="pre">UniformGridData</span></code>, or (or more) for each refinement level.</p>
@@ -641,7 +654,8 @@ The norm2 of funky_data is 20417.836
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[15]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># 3 refinement levels</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="c1"># 3 refinement levels</span>
 <span class="n">data</span> <span class="o">=</span> <span class="p">[]</span>
 <span class="k">for</span> <span class="n">ref_level</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">3</span><span class="p">):</span>
     <span class="n">resolution</span> <span class="o">=</span> <span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="n">ref_level</span><span class="p">)</span> <span class="o">*</span> <span class="mi">20</span> <span class="o">+</span> <span class="mi">1</span>
@@ -675,7 +689,8 @@ Spacing at finest level (2): [0.33333333 0.33333333]
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[16]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">level2</span> <span class="o">=</span> <span class="n">hg</span><span class="o">.</span><span class="n">get_level</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">level2</span> <span class="o">=</span> <span class="n">hg</span><span class="o">.</span><span class="n">get_level</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -683,7 +698,8 @@ Spacing at finest level (2): [0.33333333 0.33333333]
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[17]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="nb">type</span><span class="p">(</span><span class="n">level2</span><span class="p">)</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="nb">type</span><span class="p">(</span><span class="n">level2</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -702,7 +718,8 @@ kuibit.grid_data.UniformGridData
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[18]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">more_funk</span> <span class="o">=</span> <span class="p">(</span><span class="nb">abs</span><span class="p">(</span><span class="n">hg</span><span class="p">)</span> <span class="o">+</span> <span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">log</span><span class="p">()</span> <span class="c1"># For some reasons np.log(hg) doesn&#39;t work...</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">more_funk</span> <span class="o">=</span> <span class="p">(</span><span class="nb">abs</span><span class="p">(</span><span class="n">hg</span><span class="p">)</span> <span class="o">+</span> <span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">log</span><span class="p">()</span> <span class="c1"># For some reasons np.log(hg) doesn&#39;t work...</span>
 
 <span class="c1"># We can also call the HierarchicalGridData</span>
 <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;more_funk of (2, 3) is </span><span class="si">{</span><span class="n">more_funk</span><span class="p">((</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">))</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
@@ -717,13 +734,14 @@ kuibit.grid_data.UniformGridData
 more_funk of (2, 3) is 2.565
 </pre></div></div>
 </div>
-<p>We cannot plot directly this object, because it is a complicated object. To plot it, we have to merge the refinement levels to a single <code class="docutils literal notranslate"><span class="pre">UniformGridData</span></code>. We can do this with <code class="docutils literal notranslate"><span class="pre">refinement_levels_merged()</span></code>.</p>
-<p>Note that <code class="docutils literal notranslate"><span class="pre">refinement_levels_merged</span></code> is a very expensive operation and that it is provided only for small datasets or for one-dimensional data.</p>
+<p>We cannot plot directly this object, because it is a complicated object. To plot it, we have to merge the refinement levels to a single <code class="docutils literal notranslate"><span class="pre">UniformGridData</span></code>. We can do this with <code class="docutils literal notranslate"><span class="pre">merge_refinement_levels()</span></code>.</p>
+<p>Note that <code class="docutils literal notranslate"><span class="pre">merge_refinement_levels</span></code> is a very expensive operation and that it is provided only for small datasets or for one-dimensional data.</p>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[19]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">merged</span> <span class="o">=</span> <span class="n">more_funk</span><span class="o">.</span><span class="n">refinement_levels_merged</span><span class="p">(</span><span class="n">resample</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">merged</span> <span class="o">=</span> <span class="n">more_funk</span><span class="o">.</span><span class="n">merge_refinement_levels</span><span class="p">(</span><span class="n">resample</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 <span class="n">cf</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">contourf</span><span class="p">(</span><span class="o">*</span><span class="n">merged</span><span class="o">.</span><span class="n">coordinates_meshgrid</span><span class="p">(),</span> <span class="n">merged</span><span class="o">.</span><span class="n">data_xyz</span><span class="p">)</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">colorbar</span><span class="p">(</span><span class="n">cf</span><span class="p">)</span>
 </pre></div>
@@ -735,7 +753,7 @@ more_funk of (2, 3) is 2.565
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-&lt;matplotlib.colorbar.Colorbar at 0x7f6a9fceceb0&gt;
+&lt;matplotlib.colorbar.Colorbar at 0x7f07d2ac2ac8&gt;
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
@@ -751,7 +769,8 @@ more_funk of (2, 3) is 2.565
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[20]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">small_funk</span> <span class="o">=</span> <span class="n">more_funk</span><span class="o">.</span><span class="n">to_UniformGridData</span><span class="p">([</span><span class="mi">20</span><span class="p">,</span> <span class="mi">20</span><span class="p">],</span> <span class="n">x0</span><span class="o">=</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">x1</span><span class="o">=</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="n">resample</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">small_funk</span> <span class="o">=</span> <span class="n">more_funk</span><span class="o">.</span><span class="n">to_UniformGridData</span><span class="p">([</span><span class="mi">20</span><span class="p">,</span> <span class="mi">20</span><span class="p">],</span> <span class="n">x0</span><span class="o">=</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">x1</span><span class="o">=</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="n">resample</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
 <span class="n">cf</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">contourf</span><span class="p">(</span><span class="o">*</span><span class="n">small_funk</span><span class="o">.</span><span class="n">coordinates_meshgrid</span><span class="p">(),</span> <span class="n">small_funk</span><span class="o">.</span><span class="n">data_xyz</span><span class="p">)</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">colorbar</span><span class="p">(</span><span class="n">cf</span><span class="p">)</span>
 </pre></div>
@@ -763,7 +782,7 @@ more_funk of (2, 3) is 2.565
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-&lt;matplotlib.colorbar.Colorbar at 0x7f6a9fbc91f0&gt;
+&lt;matplotlib.colorbar.Colorbar at 0x7f07d2a1bba8&gt;
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
@@ -778,7 +797,8 @@ more_funk of (2, 3) is 2.565
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[21]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Available refinement levels: </span><span class="si">{</span><span class="n">hg</span><span class="o">.</span><span class="n">refinement_levels</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Available refinement levels: </span><span class="si">{</span><span class="n">hg</span><span class="o">.</span><span class="n">refinement_levels</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Spacing of the coarsest: </span><span class="si">{</span><span class="n">hg</span><span class="o">.</span><span class="n">coarsest_dx</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Spacing of the finest: </span><span class="si">{</span><span class="n">hg</span><span class="o">.</span><span class="n">finest_dx</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Finest level: </span><span class="si">{</span><span class="n">hg</span><span class="o">.</span><span class="n">finest_level</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
@@ -793,7 +813,7 @@ more_funk of (2, 3) is 2.565
 Available refinement levels: [0, 1, 2]
 Spacing of the coarsest: [1. 1.]
 Spacing of the finest: [0.33333333 0.33333333]
-Finest level: &lt;kuibit.grid_data.UniformGridData object at 0x7f6a9fd86250&gt;
+Finest level: &lt;kuibit.grid_data.UniformGridData object at 0x7f07d2bb9080&gt;
 </pre></div></div>
 </div>
 <p>Often, we want to look at a specific cut of the data. <code class="docutils literal notranslate"><span class="pre">UniformGridData</span></code> can be sliced easily. Just prepare a <code class="docutils literal notranslate"><span class="pre">cut</span></code> array with <code class="docutils literal notranslate"><span class="pre">None</span></code> where you want to keep the dimension, and the coordiante of where you want to slice. For example, here we extract the line with <code class="docutils literal notranslate"><span class="pre">y=0.7</span></code>.</p>
@@ -801,7 +821,8 @@ Finest level: &lt;kuibit.grid_data.UniformGridData object at 0x7f6a9fd86250&gt;
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[22]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">along_y</span> <span class="o">=</span> <span class="n">small_funk</span><span class="o">.</span><span class="n">sliced</span><span class="p">([</span><span class="kc">None</span><span class="p">,</span><span class="mf">0.7</span><span class="p">])</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">along_y</span> <span class="o">=</span> <span class="n">small_funk</span><span class="o">.</span><span class="n">sliced</span><span class="p">([</span><span class="kc">None</span><span class="p">,</span><span class="mf">0.7</span><span class="p">])</span>
 <span class="nb">print</span><span class="p">(</span><span class="n">along_y</span><span class="o">.</span><span class="n">grid</span><span class="p">)</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="o">*</span><span class="n">along_y</span><span class="o">.</span><span class="n">coordinates_meshgrid</span><span class="p">(),</span> <span class="n">along_y</span><span class="o">.</span><span class="n">data</span><span class="p">)</span>
 </pre></div>
@@ -833,7 +854,7 @@ Iteration        = None
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-[&lt;matplotlib.lines.Line2D at 0x7f6a9fb72880&gt;]
+[&lt;matplotlib.lines.Line2D at 0x7f07d29ab2e8&gt;]
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
@@ -848,7 +869,8 @@ Iteration        = None
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[23]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">along_y_series</span> <span class="o">=</span> <span class="n">along_y</span><span class="o">.</span><span class="n">to_GridSeries</span><span class="p">()</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">along_y_series</span> <span class="o">=</span> <span class="n">along_y</span><span class="o">.</span><span class="n">to_GridSeries</span><span class="p">()</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">along_y_series</span><span class="p">)</span>
 </pre></div>
 </div>
@@ -859,7 +881,7 @@ Iteration        = None
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-[&lt;matplotlib.lines.Line2D at 0x7f6a9fae91c0&gt;]
+[&lt;matplotlib.lines.Line2D at 0x7f07d29196d8&gt;]
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
@@ -869,8 +891,8 @@ Iteration        = None
 <img alt="../_images/tutorials_grid_data_48_1.png" src="../_images/tutorials_grid_data_48_1.png" />
 </div>
 </div>
-</section>
-<section id="Masks">
+</div>
+<div class="section" id="Masks">
 <h2>Masks<a class="headerlink" href="#Masks" title="Permalink to this headline">¶</a></h2>
 <p>It is often useful to mask the data according to some criterion. For example, mask the atmosphere out in a GRMHD simulation. <code class="docutils literal notranslate"><span class="pre">kuibit</span></code> fully supports mask with an interface that is similar to the one implemented in <code class="docutils literal notranslate"><span class="pre">NumPy</span></code> (but some features will not work with masked data, for example interpolation).</p>
 <p>The module <code class="docutils literal notranslate"><span class="pre">kuibit.masks</span></code> provides methods to apply masked functions in case the domain is restricted. For example, for the logarithm, or arcsin:</p>
@@ -878,7 +900,8 @@ Iteration        = None
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[24]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">kuibit.masks</span> <span class="k">as</span> <span class="nn">km</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">kuibit.masks</span> <span class="k">as</span> <span class="nn">km</span>
 
 <span class="n">arcsin_funk</span> <span class="o">=</span> <span class="n">km</span><span class="o">.</span><span class="n">arcsin</span><span class="p">(</span><span class="n">more_funk</span><span class="p">)</span>
 
@@ -899,7 +922,8 @@ True
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[25]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="n">more_funk</span><span class="o">.</span><span class="n">abs_min</span><span class="p">())</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="nb">print</span><span class="p">(</span><span class="n">more_funk</span><span class="o">.</span><span class="n">abs_min</span><span class="p">())</span>
 
 <span class="n">funk_masked</span> <span class="o">=</span> <span class="n">more_funk</span><span class="o">.</span><span class="n">masked_less</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
 
@@ -921,7 +945,8 @@ True
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[26]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">funk2</span> <span class="o">=</span> <span class="n">more_funk</span> <span class="o">**</span> <span class="mi">2</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">funk2</span> <span class="o">=</span> <span class="n">more_funk</span> <span class="o">**</span> <span class="mi">2</span>
 
 <span class="n">funk2_masked</span> <span class="o">=</span> <span class="n">funk2</span><span class="o">.</span><span class="n">mask_applied</span><span class="p">(</span><span class="n">funk_masked</span><span class="o">.</span><span class="n">mask</span><span class="p">)</span>
 
@@ -937,8 +962,8 @@ True
 True
 </pre></div></div>
 </div>
-</section>
-<section id="visualize_matplotlib">
+</div>
+<div class="section" id="visualize_matplotlib">
 <h2><code class="docutils literal notranslate"><span class="pre">visualize_matplotlib</span></code><a class="headerlink" href="#visualize_matplotlib" title="Permalink to this headline">¶</a></h2>
 <p>In this tutorial we plotted all the quantities directly accessing the data. This is a pedagogical choice: you need to know how things work to be able to take full advantage of <code class="docutils literal notranslate"><span class="pre">kuibit</span></code>. However, most often the methods in the module <code class="docutils literal notranslate"><span class="pre">visualize_matplotlib</span></code> will be enough.</p>
 <p>The main functions to plot 2D data are: <code class="docutils literal notranslate"><span class="pre">plot_color</span></code> and <code class="docutils literal notranslate"><span class="pre">plot_contourf</span></code>. These take all sorts of inputs, and you should read the documentation. For example, we can plot a <code class="docutils literal notranslate"><span class="pre">UniformGridData</span></code> (the function will behave similarly with <code class="docutils literal notranslate"><span class="pre">HierarchicalGridData</span></code> or NumPy arrays).</p>
@@ -946,7 +971,8 @@ True
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[27]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">kuibit.visualize_matplotlib</span> <span class="k">as</span> <span class="nn">viz</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">kuibit.visualize_matplotlib</span> <span class="k">as</span> <span class="nn">viz</span>
 
 <span class="n">viz</span><span class="o">.</span><span class="n">plot_color</span><span class="p">(</span><span class="n">funky_data</span><span class="p">)</span>
 </pre></div>
@@ -958,7 +984,7 @@ True
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-&lt;matplotlib.image.AxesImage at 0x7f6a9f52ed60&gt;
+&lt;matplotlib.image.AxesImage at 0x7f07d2b68390&gt;
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
@@ -973,7 +999,8 @@ True
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[28]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">viz</span><span class="o">.</span><span class="n">plot_color</span><span class="p">(</span><span class="n">funky_data</span><span class="p">,</span> <span class="n">x0</span><span class="o">=</span><span class="p">[</span><span class="mi">8</span><span class="p">,</span><span class="mi">8</span><span class="p">],</span> <span class="n">x1</span><span class="o">=</span><span class="p">[</span><span class="mi">10</span><span class="p">,</span><span class="mi">10</span><span class="p">],</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">viz</span><span class="o">.</span><span class="n">plot_color</span><span class="p">(</span><span class="n">funky_data</span><span class="p">,</span> <span class="n">x0</span><span class="o">=</span><span class="p">[</span><span class="mi">8</span><span class="p">,</span><span class="mi">8</span><span class="p">],</span> <span class="n">x1</span><span class="o">=</span><span class="p">[</span><span class="mi">10</span><span class="p">,</span><span class="mi">10</span><span class="p">],</span>
                <span class="n">shape</span><span class="o">=</span><span class="p">[</span><span class="mi">50</span><span class="p">,</span> <span class="mi">50</span><span class="p">],</span> <span class="n">colorbar</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
                <span class="n">logscale</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">xlabel</span><span class="o">=</span><span class="s2">&quot;x&quot;</span><span class="p">,</span> <span class="n">ylabel</span><span class="o">=</span><span class="s2">&quot;y&quot;</span><span class="p">,</span>
                <span class="n">interpolation</span><span class="o">=</span><span class="s2">&quot;bicubic&quot;</span><span class="p">)</span>
@@ -986,7 +1013,7 @@ True
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-&lt;matplotlib.image.AxesImage at 0x7f6a9faf7b20&gt;
+&lt;matplotlib.image.AxesImage at 0x7f07d2c02e80&gt;
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
@@ -997,8 +1024,8 @@ True
 </div>
 </div>
 <p>The method <code class="docutils literal notranslate"><span class="pre">plot_contourf</span></code> works in the same way.</p>
-</section>
-</section>
+</div>
+</div>
 
 
             <div class="clearer"></div>
@@ -1010,9 +1037,8 @@ True
             <p class="logo"><a href="../index.html">
               <img class="logo" src="../_static/logo.png" alt="Logo"/>
             </a></p>
-  <div>
-    <h3><a href="../index.html">Table of Contents</a></h3>
-    <ul>
+  <h3><a href="../index.html">Table of Contents</a></h3>
+  <ul>
 <li><a class="reference internal" href="#">Working with grid data</a><ul>
 <li><a class="reference internal" href="#UniformGrid"><code class="docutils literal notranslate"><span class="pre">UniformGrid</span></code></a></li>
 <li><a class="reference internal" href="#UniformGridData"><code class="docutils literal notranslate"><span class="pre">UniformGridData</span></code></a></li>
@@ -1023,22 +1049,17 @@ True
 </li>
 </ul>
 
-  </div>
-  <div>
-    <h4>Previous topic</h4>
-    <p class="topless"><a href="timeseries.html"
-                          title="previous chapter">Working with time series, frequency series, and unit conversion</a></p>
-  </div>
-  <div>
-    <h4>Next topic</h4>
-    <p class="topless"><a href="cactus_grid_functions.html"
-                          title="next chapter">Working with Cactus grid functions</a></p>
-  </div>
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="timeseries.html"
+                        title="previous chapter">Working with time series, frequency series, and unit conversion</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="cactus_grid_functions.html"
+                        title="next chapter">Working with Cactus grid functions</a></p>
 <div id="searchbox" style="display: none" role="search">
   <h3 id="searchlabel">Quick search</h3>
     <div class="searchformwrapper">
     <form class="search" action="../search.html" method="get">
-      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="text" name="q" aria-labelledby="searchlabel" />
       <input type="submit" value="Go" />
     </form>
     </div>
@@ -1063,13 +1084,13 @@ True
         <li class="right" >
           <a href="timeseries.html" title="Working with time series, frequency series, and unit conversion"
              >previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../index.html">kuibit 1.4.0-dev0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">kuibit 1.3.4 documentation</a> &#187;</li>
         <li class="nav-item nav-item-this"><a href="">Working with grid data</a></li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">
-        &#169; Copyright 2020-2021, Gabriele Bozzola.
-      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 4.4.0.
+        &#169; Copyright 2020-2022, Gabriele Bozzola.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 3.5.4.
     </div>
   </body>
 </html>

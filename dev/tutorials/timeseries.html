@@ -5,20 +5,19 @@
 <html>
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
-
-    <title>Working with time series, frequency series, and unit conversion &#8212; kuibit 1.4.0-dev0 documentation</title>
-    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
-    <link rel="stylesheet" type="text/css" href="../_static/bizstyle.css" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Working with time series, frequency series, and unit conversion &#8212; kuibit 1.3.4 documentation</title>
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/bizstyle.css" type="text/css" />
     <link rel="stylesheet" type="text/css" href="../_static/css/custom.css" />
     
-    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+    <script id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
     <script src="../_static/jquery.js"></script>
     <script src="../_static/underscore.js"></script>
     <script src="../_static/doctools.js"></script>
     <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
-    <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
-    <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script type="text/x-mathjax-config">MathJax.Hub.Config({"tex2jax": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true, "ignoreClass": "tex2jax_ignore|mathjax_ignore|document", "processClass": "tex2jax_process|mathjax_process|math|output_area"}})</script>
     <script src="../_static/bizstyle.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
@@ -44,7 +43,7 @@
         <li class="right" >
           <a href="simdir.html" title="Working with Simulation Directories"
              accesskey="P">previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../index.html">kuibit 1.4.0-dev0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">kuibit 1.3.4 documentation</a> &#187;</li>
         <li class="nav-item nav-item-this"><a href="">Working with time series, frequency series, and unit conversion</a></li> 
       </ul>
     </div>  
@@ -264,7 +263,7 @@ div.nboutput.container div.output_area > div[class^='highlight']{
 }
 
 /* hide copybtn icon on prompts (needed for 'sphinx_copybutton') */
-.prompt .copybtn {
+.prompt a.copybtn {
     display: none;
 }
 
@@ -302,7 +301,7 @@ div.rendered_html tbody tr:hover {
   background: rgba(66, 165, 245, 0.2);
 }
 </style>
-<section id="Working-with-time-series,-frequency-series,-and-unit-conversion">
+<div class="section" id="Working-with-time-series,-frequency-series,-and-unit-conversion">
 <h1>Working with time series, frequency series, and unit conversion<a class="headerlink" href="#Working-with-time-series,-frequency-series,-and-unit-conversion" title="Permalink to this headline">¶</a></h1>
 <p>In this notebook, we show some of the most useful features of the <a class="reference internal" href="../series.html"><span class="doc">timeseries</span></a> module. To do so, we will analyze a fake gravitational-wave signal. We will also show the <a class="reference internal" href="../series.html"><span class="doc">frequencyseries</span></a> module and the <a class="reference internal" href="../unitconv.html"><span class="doc">unitconv</span></a> modules.</p>
 <p>First, let’s generate this signal.</p>
@@ -311,7 +310,8 @@ div.rendered_html tbody tr:hover {
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">from</span> <span class="nn">kuibit</span> <span class="kn">import</span> <span class="n">timeseries</span> <span class="k">as</span> <span class="n">ts</span>
 <span class="kn">from</span> <span class="nn">kuibit</span> <span class="kn">import</span> <span class="n">series</span>
@@ -326,7 +326,8 @@ div.rendered_html tbody tr:hover {
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">t</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">20</span><span class="p">,</span> <span class="mi">5000</span><span class="p">)</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">t</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">20</span><span class="p">,</span> <span class="mi">5000</span><span class="p">)</span>
 <span class="n">y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">t</span><span class="p">)</span>
 
 <span class="c1"># Generate a TimeSeries by providing the times and the values of the series</span>
@@ -339,7 +340,8 @@ div.rendered_html tbody tr:hover {
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">for</span> <span class="n">tt</span><span class="p">,</span> <span class="n">yy</span> <span class="ow">in</span> <span class="n">gw</span><span class="p">:</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="k">for</span> <span class="n">tt</span><span class="p">,</span> <span class="n">yy</span> <span class="ow">in</span> <span class="n">gw</span><span class="p">:</span>
     <span class="nb">print</span><span class="p">(</span><span class="n">tt</span><span class="p">,</span> <span class="n">yy</span><span class="p">)</span>
 </pre></div>
 </div>
@@ -5355,7 +5357,8 @@ div.rendered_html tbody tr:hover {
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">plot</span><span class="p">(</span><span class="n">ser</span><span class="p">,</span> <span class="n">lab1</span><span class="o">=</span><span class="s2">&quot;d h&quot;</span><span class="p">,</span> <span class="n">lab2</span><span class="o">=</span><span class="s2">&quot;t&quot;</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="k">def</span> <span class="nf">plot</span><span class="p">(</span><span class="n">ser</span><span class="p">,</span> <span class="n">lab1</span><span class="o">=</span><span class="s2">&quot;d h&quot;</span><span class="p">,</span> <span class="n">lab2</span><span class="o">=</span><span class="s2">&quot;t&quot;</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Plot Series ser with labels&quot;&quot;&quot;</span>
     <span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="n">lab1</span><span class="p">)</span>
     <span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="n">lab2</span><span class="p">)</span>
@@ -5377,7 +5380,8 @@ div.rendered_html tbody tr:hover {
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">noise</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">gw</span><span class="p">))</span>  <span class="c1"># Here we used len() on the TimeSeries</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">noise</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">gw</span><span class="p">))</span>  <span class="c1"># Here we used len() on the TimeSeries</span>
 <span class="n">noise_ts</span> <span class="o">=</span> <span class="n">ts</span><span class="o">.</span><span class="n">TimeSeries</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">noise</span><span class="p">)</span>
 
 <span class="n">gw</span> <span class="o">+=</span> <span class="n">noise_ts</span>
@@ -5400,7 +5404,8 @@ div.rendered_html tbody tr:hover {
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">tsmooth</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">5</span><span class="p">)</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">tsmooth</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">5</span><span class="p">)</span>
 
 <span class="k">for</span> <span class="n">tsm</span> <span class="ow">in</span> <span class="n">tsmooth</span><span class="p">:</span>
     <span class="n">smoothed</span> <span class="o">=</span> <span class="n">gw</span><span class="o">.</span><span class="n">savgol_smoothed_time</span><span class="p">(</span><span class="n">tsm</span><span class="p">)</span>
@@ -5415,7 +5420,7 @@ div.rendered_html tbody tr:hover {
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-&lt;matplotlib.legend.Legend at 0x7f8f60d4fe80&gt;
+&lt;matplotlib.legend.Legend at 0x7f49cdec1390&gt;
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
@@ -5430,7 +5435,8 @@ div.rendered_html tbody tr:hover {
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">gw</span><span class="o">.</span><span class="n">savgol_smooth_time</span><span class="p">(</span><span class="mf">1.5</span><span class="p">)</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">gw</span><span class="o">.</span><span class="n">savgol_smooth_time</span><span class="p">(</span><span class="mf">1.5</span><span class="p">)</span>
 <span class="n">plot</span><span class="p">(</span><span class="n">gw</span><span class="p">)</span>
 </pre></div>
 </div>
@@ -5447,7 +5453,8 @@ div.rendered_html tbody tr:hover {
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">gw_int</span> <span class="o">=</span> <span class="n">gw</span><span class="o">.</span><span class="n">integrated</span><span class="p">()</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">gw_int</span> <span class="o">=</span> <span class="n">gw</span><span class="o">.</span><span class="n">integrated</span><span class="p">()</span>
 <span class="n">a</span> <span class="o">=</span> <span class="mi">5</span>
 <span class="n">b</span> <span class="o">=</span> <span class="mi">10</span>
 <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;The integral from </span><span class="si">{</span><span class="n">a</span><span class="si">}</span><span class="s2"> to </span><span class="si">{</span><span class="n">b</span><span class="si">}</span><span class="s2"> is </span><span class="si">{</span><span class="n">gw_int</span><span class="p">(</span><span class="n">b</span><span class="p">)</span> <span class="o">-</span> <span class="n">gw_int</span><span class="p">(</span><span class="n">a</span><span class="p">)</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
@@ -5460,7 +5467,7 @@ div.rendered_html tbody tr:hover {
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-The integral from 5 to 10 is 2.2004
+The integral from 5 to 10 is 2.1926
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
@@ -5475,7 +5482,8 @@ The integral from 5 to 10 is 2.2004
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">gw_spline_der</span> <span class="o">=</span> <span class="n">gw</span><span class="o">.</span><span class="n">spline_differentiated</span><span class="p">()</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">gw_spline_der</span> <span class="o">=</span> <span class="n">gw</span><span class="o">.</span><span class="n">spline_differentiated</span><span class="p">()</span>
 <span class="n">gw_numer_der</span> <span class="o">=</span> <span class="n">gw</span><span class="o">.</span><span class="n">differentiated</span><span class="p">()</span>
 
 <span class="n">plot</span><span class="p">(</span><span class="n">gw_spline_der</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;spline&#39;</span><span class="p">)</span>
@@ -5490,7 +5498,7 @@ The integral from 5 to 10 is 2.2004
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-&lt;matplotlib.legend.Legend at 0x7f8f60db6160&gt;
+&lt;matplotlib.legend.Legend at 0x7f49cdd26a90&gt;
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
@@ -5506,7 +5514,8 @@ The integral from 5 to 10 is 2.2004
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">gw_imag</span> <span class="o">=</span> <span class="n">gw</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>  <span class="c1"># It is important to deep copy the object</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">gw_imag</span> <span class="o">=</span> <span class="n">gw</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>  <span class="c1"># It is important to deep copy the object</span>
 <span class="n">gw_imag</span><span class="o">.</span><span class="n">time_shift</span><span class="p">(</span><span class="mi">4</span><span class="p">)</span>
 
 <span class="n">plot</span><span class="p">(</span><span class="n">gw_imag</span><span class="p">,</span> <span class="n">lab1</span> <span class="o">=</span><span class="s2">&quot;imag (dh)&quot;</span><span class="p">)</span>
@@ -5524,7 +5533,8 @@ The integral from 5 to 10 is 2.2004
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[11]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">gw</span><span class="p">,</span> <span class="n">gw_imag</span> <span class="o">=</span> <span class="n">series</span><span class="o">.</span><span class="n">sample_common</span><span class="p">([</span><span class="n">gw</span><span class="p">,</span> <span class="n">gw_imag</span><span class="p">],</span> <span class="n">resample</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>  <span class="c1"># Resampling to common times</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">gw</span><span class="p">,</span> <span class="n">gw_imag</span> <span class="o">=</span> <span class="n">series</span><span class="o">.</span><span class="n">sample_common</span><span class="p">([</span><span class="n">gw</span><span class="p">,</span> <span class="n">gw_imag</span><span class="p">],</span> <span class="n">resample</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>  <span class="c1"># Resampling to common times</span>
 
 <span class="n">plot</span><span class="p">(</span><span class="n">gw</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;orig&quot;</span><span class="p">)</span>
 <span class="n">plot</span><span class="p">(</span><span class="n">gw_imag</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;new&quot;</span><span class="p">)</span>
@@ -5538,7 +5548,7 @@ The integral from 5 to 10 is 2.2004
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-&lt;matplotlib.legend.Legend at 0x7f8f60caa970&gt;
+&lt;matplotlib.legend.Legend at 0x7f49cdc8db00&gt;
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
@@ -5552,7 +5562,8 @@ The integral from 5 to 10 is 2.2004
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[12]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">gw_complex</span> <span class="o">=</span> <span class="n">ts</span><span class="o">.</span><span class="n">TimeSeries</span><span class="p">(</span><span class="n">gw</span><span class="o">.</span><span class="n">t</span><span class="p">,</span> <span class="n">gw</span><span class="o">.</span><span class="n">y</span> <span class="o">+</span> <span class="mi">1</span><span class="n">j</span> <span class="o">*</span> <span class="n">gw_imag</span><span class="o">.</span><span class="n">y</span><span class="p">)</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">gw_complex</span> <span class="o">=</span> <span class="n">ts</span><span class="o">.</span><span class="n">TimeSeries</span><span class="p">(</span><span class="n">gw</span><span class="o">.</span><span class="n">t</span><span class="p">,</span> <span class="n">gw</span><span class="o">.</span><span class="n">y</span> <span class="o">+</span> <span class="mi">1</span><span class="n">j</span> <span class="o">*</span> <span class="n">gw_imag</span><span class="o">.</span><span class="n">y</span><span class="p">)</span>
 
 <span class="n">plot</span><span class="p">(</span><span class="n">gw_complex</span><span class="o">.</span><span class="n">real</span><span class="p">(),</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;real&quot;</span><span class="p">)</span>
 <span class="n">plot</span><span class="p">(</span><span class="n">gw_complex</span><span class="o">.</span><span class="n">imag</span><span class="p">(),</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;imag&quot;</span><span class="p">)</span>
@@ -5566,7 +5577,7 @@ The integral from 5 to 10 is 2.2004
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-&lt;matplotlib.legend.Legend at 0x7f8f60cf2640&gt;
+&lt;matplotlib.legend.Legend at 0x7f49cdeae9e8&gt;
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
@@ -5581,7 +5592,8 @@ The integral from 5 to 10 is 2.2004
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[13]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">plot</span><span class="p">(</span><span class="n">gw_complex</span><span class="o">.</span><span class="n">abs</span><span class="p">(),</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;abs&#39;</span><span class="p">)</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">plot</span><span class="p">(</span><span class="n">gw_complex</span><span class="o">.</span><span class="n">abs</span><span class="p">(),</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;abs&#39;</span><span class="p">)</span>
 <span class="n">plot</span><span class="p">(</span><span class="n">gw_complex</span><span class="o">.</span><span class="n">unfolded_phase</span><span class="p">(),</span> <span class="n">lab1</span><span class="o">=</span><span class="s2">&quot;abs or phase&quot;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;phase&#39;</span><span class="p">)</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">()</span>
 </pre></div>
@@ -5593,7 +5605,7 @@ The integral from 5 to 10 is 2.2004
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-&lt;matplotlib.legend.Legend at 0x7f8f5eb165e0&gt;
+&lt;matplotlib.legend.Legend at 0x7f49cdcf69b0&gt;
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
@@ -5609,7 +5621,8 @@ The integral from 5 to 10 is 2.2004
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[14]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">plot</span><span class="p">(</span><span class="n">gw_complex</span><span class="o">.</span><span class="n">phase_frequency</span><span class="p">(</span><span class="n">tsmooth</span><span class="o">=</span><span class="mf">1.5</span><span class="p">),</span> <span class="n">lab1</span><span class="o">=</span><span class="s2">&quot;freq&quot;</span><span class="p">)</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">plot</span><span class="p">(</span><span class="n">gw_complex</span><span class="o">.</span><span class="n">phase_frequency</span><span class="p">(</span><span class="n">tsmooth</span><span class="o">=</span><span class="mf">1.5</span><span class="p">),</span> <span class="n">lab1</span><span class="o">=</span><span class="s2">&quot;freq&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -5625,7 +5638,8 @@ The integral from 5 to 10 is 2.2004
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[15]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">CU</span> <span class="o">=</span> <span class="n">uc</span><span class="o">.</span><span class="n">geom_umass_msun</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">CU</span> <span class="o">=</span> <span class="n">uc</span><span class="o">.</span><span class="n">geom_umass_msun</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
 
 <span class="c1"># How to convert from geometrized length to physical length?</span>
 <span class="c1"># Simply multiply times CU.length. Let&#39;s check that it is 1.477 km</span>
@@ -5647,7 +5661,8 @@ The integral from 5 to 10 is 2.2004
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[16]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">d_Mpc</span> <span class="o">=</span> <span class="mi">500</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">d_Mpc</span> <span class="o">=</span> <span class="mi">500</span>
 
 <span class="c1"># inverse = True means from geometrized to physical</span>
 <span class="n">gw_physical</span> <span class="o">=</span> <span class="n">gw_complex</span><span class="o">.</span><span class="n">time_unit_changed</span><span class="p">(</span><span class="n">CU</span><span class="o">.</span><span class="n">time</span><span class="p">,</span> <span class="n">inverse</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
@@ -5675,7 +5690,8 @@ The integral from 5 to 10 is 2.2004
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[17]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">gw_physical</span><span class="o">.</span><span class="n">mean_remove</span><span class="p">()</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">gw_physical</span><span class="o">.</span><span class="n">mean_remove</span><span class="p">()</span>
 <span class="n">gw_physical</span><span class="o">.</span><span class="n">tukey_window</span><span class="p">(</span><span class="mf">0.3</span><span class="p">)</span>
 <span class="n">plot</span><span class="p">(</span><span class="n">gw_physical</span><span class="o">.</span><span class="n">real</span><span class="p">(),</span> <span class="n">lab1</span><span class="o">=</span><span class="s2">&quot;h&quot;</span><span class="p">)</span>
 </pre></div>
@@ -5693,7 +5709,8 @@ The integral from 5 to 10 is 2.2004
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[18]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">gw_fft</span> <span class="o">=</span> <span class="n">gw_physical</span><span class="o">.</span><span class="n">to_FrequencySeries</span><span class="p">()</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">gw_fft</span> <span class="o">=</span> <span class="n">gw_physical</span><span class="o">.</span><span class="n">to_FrequencySeries</span><span class="p">()</span>
 
 <span class="c1"># Plotting the amplitude of the Fourier transform</span>
 <span class="n">plot</span><span class="p">(</span><span class="n">gw_fft</span><span class="o">.</span><span class="n">abs</span><span class="p">(),</span> <span class="n">lab1</span><span class="o">=</span><span class="s2">&quot;abs(fft)&quot;</span><span class="p">,</span> <span class="n">lab2</span><span class="o">=</span><span class="s2">&quot;f&quot;</span><span class="p">)</span>
@@ -5713,7 +5730,8 @@ The integral from 5 to 10 is 2.2004
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[19]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">gw_fft</span><span class="o">.</span><span class="n">crop</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mf">1e5</span><span class="p">)</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">gw_fft</span><span class="o">.</span><span class="n">crop</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mf">1e5</span><span class="p">)</span>
 <span class="n">plot</span><span class="p">(</span><span class="n">gw_fft</span><span class="o">.</span><span class="n">abs</span><span class="p">(),</span> <span class="n">lab1</span><span class="o">=</span><span class="s2">&quot;abs(fft)&quot;</span><span class="p">,</span> <span class="n">lab2</span><span class="o">=</span><span class="s2">&quot;f&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
@@ -5730,7 +5748,8 @@ The integral from 5 to 10 is 2.2004
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[20]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">f_peak</span> <span class="o">=</span> <span class="n">gw_fft</span><span class="o">.</span><span class="n">peaks_frequencies</span><span class="p">(</span><span class="mf">1e-27</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">f_peak</span> <span class="o">=</span> <span class="n">gw_fft</span><span class="o">.</span><span class="n">peaks_frequencies</span><span class="p">(</span><span class="mf">1e-27</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
 
 <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Frequency: </span><span class="si">{</span><span class="n">f_peak</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 <span class="n">plot</span><span class="p">(</span><span class="n">gw_fft</span><span class="o">.</span><span class="n">abs</span><span class="p">(),</span> <span class="n">lab1</span><span class="o">=</span><span class="s2">&quot;abs(fft)&quot;</span><span class="p">,</span> <span class="n">lab2</span><span class="o">=</span><span class="s2">&quot;f&quot;</span><span class="p">)</span>
@@ -5743,7 +5762,7 @@ The integral from 5 to 10 is 2.2004
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-Frequency: 64142.71
+Frequency: 64108.38
 </pre></div></div>
 </div>
 <div class="nboutput docutils container">
@@ -5752,7 +5771,7 @@ Frequency: 64142.71
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-&lt;matplotlib.lines.Line2D at 0x7f8f5e8d76a0&gt;
+&lt;matplotlib.lines.Line2D at 0x7f49d0100278&gt;
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
@@ -5768,7 +5787,8 @@ Frequency: 64142.71
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[21]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Let&#39;s mask all the point in the spectrum with value larger than 1e-27</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="c1"># Let&#39;s mask all the point in the spectrum with value larger than 1e-27</span>
 
 <span class="n">spectrum</span> <span class="o">=</span> <span class="n">gw_fft</span><span class="o">.</span><span class="n">abs</span><span class="p">()</span>
 
@@ -5793,13 +5813,13 @@ Frequency: 64142.71
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-Maximum without mask 3.123e-27
-Maximum with mask 8.194e-28
+Maximum without mask 3.085e-27
+Maximum with mask 7.966e-28
 Length with mask 8
 Length after having removed the masked points 7
 </pre></div></div>
 </div>
-</section>
+</div>
 
 
             <div class="clearer"></div>
@@ -5811,21 +5831,17 @@ Length after having removed the masked points 7
             <p class="logo"><a href="../index.html">
               <img class="logo" src="../_static/logo.png" alt="Logo"/>
             </a></p>
-  <div>
-    <h4>Previous topic</h4>
-    <p class="topless"><a href="simdir.html"
-                          title="previous chapter">Working with Simulation Directories</a></p>
-  </div>
-  <div>
-    <h4>Next topic</h4>
-    <p class="topless"><a href="grid_data.html"
-                          title="next chapter">Working with grid data</a></p>
-  </div>
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="simdir.html"
+                        title="previous chapter">Working with Simulation Directories</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="grid_data.html"
+                        title="next chapter">Working with grid data</a></p>
 <div id="searchbox" style="display: none" role="search">
   <h3 id="searchlabel">Quick search</h3>
     <div class="searchformwrapper">
     <form class="search" action="../search.html" method="get">
-      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="text" name="q" aria-labelledby="searchlabel" />
       <input type="submit" value="Go" />
     </form>
     </div>
@@ -5850,13 +5866,13 @@ Length after having removed the masked points 7
         <li class="right" >
           <a href="simdir.html" title="Working with Simulation Directories"
              >previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../index.html">kuibit 1.4.0-dev0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">kuibit 1.3.4 documentation</a> &#187;</li>
         <li class="nav-item nav-item-this"><a href="">Working with time series, frequency series, and unit conversion</a></li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">
-        &#169; Copyright 2020-2021, Gabriele Bozzola.
-      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 4.4.0.
+        &#169; Copyright 2020-2022, Gabriele Bozzola.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 3.5.4.
     </div>
   </body>
 </html>
