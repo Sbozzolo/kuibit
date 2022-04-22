@@ -6,7 +6,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>kuibit.cactus_grid_functions &#8212; kuibit 1.3.3 documentation</title>
+    <title>kuibit.cactus_grid_functions &#8212; kuibit 1.3.4 documentation</title>
     <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
     <link rel="stylesheet" href="../../_static/bizstyle.css" type="text/css" />
     <link rel="stylesheet" type="text/css" href="../../_static/css/custom.css" />
@@ -33,7 +33,7 @@
         <li class="right" >
           <a href="../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../index.html">kuibit 1.3.3 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">kuibit 1.3.4 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="../index.html" accesskey="U">Module code</a> &#187;</li>
         <li class="nav-item nav-item-this"><a href="">kuibit.cactus_grid_functions</a></li> 
       </ul>
@@ -47,7 +47,7 @@
   <h1>Source code for kuibit.cactus_grid_functions</h1><div class="highlight"><pre>
 <span></span><span class="ch">#!/usr/bin/env python3</span>
 
-<span class="c1"># Copyright (C) 2020-2021 Gabriele Bozzola</span>
+<span class="c1"># Copyright (C) 2020-2022 Gabriele Bozzola</span>
 <span class="c1">#</span>
 <span class="c1"># Inspired by code originally developed by Wolfgang Kastaun. This file may</span>
 <span class="c1"># contain algorithms and/or structures first implemented in</span>
@@ -983,7 +983,7 @@
 <span class="s2">    ([ ]c=(\d+))?       # Component</span>
 <span class="s2">    &quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">allfiles</span><span class="p">,</span> <span class="n">var_name</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">allfiles</span><span class="p">,</span> <span class="n">var_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">dimension</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Constructor.</span>
 
 <span class="sd">        :param allfiles: Paths of files associated to the variable.</span>
@@ -997,6 +997,8 @@
         <span class="c1"># the HDF5 file.</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">thorn_name</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">map</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">dimension</span> <span class="o">=</span> <span class="n">dimension</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">rx_group_name</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_pattern_group_name</span><span class="p">,</span> <span class="n">re</span><span class="o">.</span><span class="n">VERBOSE</span><span class="p">)</span>
 
@@ -1015,13 +1017,15 @@
             <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">thorn_name</span><span class="si">}</span><span class="s2">::</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">var_name</span><span class="si">}</span><span class="s2"> it=%d tl=0</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">map</span><span class="si">}</span><span class="s2">%s%s&quot;</span>
         <span class="p">)</span>
 
+        <span class="n">file_is_3D</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dimension</span><span class="p">)</span> <span class="o">==</span> <span class="mi">3</span>
+
         <span class="c1"># HDF5 files can contain ghostzones or not. Here, we can that all the</span>
         <span class="c1"># files have the same behavior (they all contain, or they all don&#39;t)</span>
         <span class="c1">#</span>
         <span class="c1"># self._are_ghostzones_in_file(path) returns True or False, so this</span>
         <span class="c1"># is a set with True, False or a mix</span>
         <span class="n">ghost_in_files</span> <span class="o">=</span> <span class="p">{</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_are_ghostzones_in_file</span><span class="p">(</span><span class="n">path</span><span class="p">)</span> <span class="k">for</span> <span class="n">path</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">allfiles</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_are_ghostzones_in_file</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">file_is_3D</span><span class="p">)</span> <span class="k">for</span> <span class="n">path</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">allfiles</span>
         <span class="p">}</span>
 
         <span class="c1"># Here we check that we only have True or False</span>
@@ -1201,11 +1205,13 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">alldata</span><span class="p">[</span><span class="n">path</span><span class="p">][</span><span class="n">iteration</span><span class="p">][</span><span class="n">ref_level</span><span class="p">][</span><span class="n">component</span><span class="p">]</span>
 
     <span class="nd">@staticmethod</span>
-    <span class="k">def</span> <span class="nf">_are_ghostzones_in_file</span><span class="p">(</span><span class="n">path</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">_are_ghostzones_in_file</span><span class="p">(</span><span class="n">path</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">is_3D_file</span><span class="p">:</span> <span class="nb">bool</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;Return whether the ghostzones were output or not.</span>
 
 <span class="sd">        :param path: File to inspect.</span>
 <span class="sd">        :type path: str</span>
+<span class="sd">        :param is_3D_file: The file contains 3D data</span>
+<span class="sd">        :type is_3D_file: bool</span>
 
 <span class="sd">        :returns: Whether ``path`` contains ghost zones.</span>
 <span class="sd">        :rtype: bool</span>
@@ -1214,13 +1220,14 @@
         <span class="c1"># This is a tricky and important function to stitch together all the</span>
         <span class="c1"># different components. Carpet has an option (technically two) to output</span>
         <span class="c1"># the ghostzones in the files. These are: output_ghost_points and</span>
-        <span class="c1"># out3D_ghosts (which is deprecated). When they are both set to yes,</span>
-        <span class="c1"># the ghostzones are output in the h5 files. When one of the two is set</span>
-        <span class="c1"># to no, the ghostzones are not output.</span>
+        <span class="c1"># out3D_ghosts (which is deprecated). For 3D files, when they are both</span>
+        <span class="c1"># set to yes, the ghostzones are output in the h5 files. When one of the</span>
+        <span class="c1"># two is set to no, the ghostzones are not output. For 2D files, when</span>
+        <span class="c1"># it depends only on the value of the first.</span>
 
         <span class="c1"># The default value of these parameters is yes</span>
-        <span class="k">with</span> <span class="n">h5py</span><span class="o">.</span><span class="n">File</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
-            <span class="n">parameters</span> <span class="o">=</span> <span class="n">f</span><span class="p">[</span><span class="s2">&quot;Parameters and Global Attributes&quot;</span><span class="p">]</span>
+        <span class="k">with</span> <span class="n">h5py</span><span class="o">.</span><span class="n">File</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">file_</span><span class="p">:</span>
+            <span class="n">parameters</span> <span class="o">=</span> <span class="n">file_</span><span class="p">[</span><span class="s2">&quot;Parameters and Global Attributes&quot;</span><span class="p">]</span>
             <span class="n">all_pars</span> <span class="o">=</span> <span class="n">parameters</span><span class="p">[</span><span class="s2">&quot;All Parameters&quot;</span><span class="p">][()]</span><span class="o">.</span><span class="n">decode</span><span class="p">()</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
             <span class="c1"># We make sure that everything is lowercase, we are case insensitive</span>
             <span class="n">iohdf5_pars</span> <span class="o">=</span> <span class="p">[</span>
@@ -1230,10 +1237,10 @@
                 <span class="ow">or</span> <span class="n">param</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;iohdf5&quot;</span><span class="p">)</span>
             <span class="p">]</span>
 
-            <span class="k">def</span> <span class="nf">is_param_true</span><span class="p">(</span><span class="n">name</span><span class="p">):</span>
+            <span class="k">def</span> <span class="nf">is_param_true</span><span class="p">(</span><span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
                 <span class="n">param</span> <span class="o">=</span> <span class="p">[</span><span class="n">p</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">iohdf5_pars</span> <span class="k">if</span> <span class="n">name</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="ow">in</span> <span class="n">p</span><span class="p">]</span>
-                <span class="c1"># When the parameters are not set, they are set to yes by</span>
-                <span class="c1"># default</span>
+                <span class="c1"># When the parameters we are interested in are not set, they are</span>
+                <span class="c1"># set to yes by default</span>
                 <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">param</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
                     <span class="k">return</span> <span class="kc">True</span>
 
@@ -1244,9 +1251,14 @@
                     <span class="ow">or</span> <span class="p">(</span><span class="s2">&quot;1&quot;</span> <span class="ow">in</span> <span class="n">param</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
                 <span class="p">)</span>
 
-            <span class="k">return</span> <span class="n">is_param_true</span><span class="p">(</span><span class="s2">&quot;out3D_ghosts&quot;</span><span class="p">)</span> <span class="ow">and</span> <span class="n">is_param_true</span><span class="p">(</span>
-                <span class="s2">&quot;output_ghost_points&quot;</span>
-            <span class="p">)</span>
+            <span class="n">params_to_check</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;output_ghost_points&quot;</span><span class="p">}</span>
+
+            <span class="k">if</span> <span class="n">is_3D_file</span><span class="p">:</span>
+                <span class="n">params_to_check</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="s2">&quot;out3D_ghosts&quot;</span><span class="p">)</span>
+
+            <span class="c1"># Ghostzones are in the file if all the relevant parameters are set</span>
+            <span class="c1"># to true</span>
+            <span class="k">return</span> <span class="nb">all</span><span class="p">(</span><span class="n">is_param_true</span><span class="p">(</span><span class="n">param</span><span class="p">)</span> <span class="k">for</span> <span class="n">param</span> <span class="ow">in</span> <span class="n">params_to_check</span><span class="p">)</span>
 
 <div class="viewcode-block" id="OneGridFunctionH5.clear_cache"><a class="viewcode-back" href="../../cactus_grid_functions_ref.html#kuibit.cactus_grid_functions.OneGridFunctionH5.clear_cache">[docs]</a>    <span class="k">def</span> <span class="nf">clear_cache</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Remove all the cached entries.</span>
@@ -1526,7 +1538,7 @@
             <span class="c1"># We prefer h5</span>
             <span class="k">if</span> <span class="n">var_name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_vars_h5_files</span><span class="p">:</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">_vars</span><span class="p">[</span><span class="n">var_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">OneGridFunctionH5</span><span class="p">(</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">_vars_h5_files</span><span class="p">[</span><span class="n">var_name</span><span class="p">],</span> <span class="n">var_name</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_vars_h5_files</span><span class="p">[</span><span class="n">var_name</span><span class="p">],</span> <span class="n">var_name</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">dimension</span>
                 <span class="p">)</span>
             <span class="k">elif</span> <span class="n">var_name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_vars_ascii_files</span><span class="p">:</span>
                 <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">num_ghost</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
@@ -1774,13 +1786,13 @@
         <li class="right" >
           <a href="../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../index.html">kuibit 1.3.3 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">kuibit 1.3.4 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="../index.html" >Module code</a> &#187;</li>
         <li class="nav-item nav-item-this"><a href="">kuibit.cactus_grid_functions</a></li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">
-        &#169; Copyright 2020-2021, Gabriele Bozzola.
+        &#169; Copyright 2020-2022, Gabriele Bozzola.
       Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 3.5.4.
     </div>
   </body>
