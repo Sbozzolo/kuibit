@@ -1194,7 +1194,7 @@ def _plot_horizon_on_plane(
         "yz": (0, None, None),
     }
 
-    if plane not in cut.keys():
+    if plane not in cut:
         raise ValueError(f"Plane has to be one of {list(cut.keys())}")
 
     if plot_type == "iteration":

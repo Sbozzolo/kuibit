@@ -158,7 +158,7 @@ a plane. Optionally, it also plots the outline of the horizons."""
                 )
                 # Now, we update ah_coords over that coordinate by subtracting
                 # the center of mass from each apparent horizon
-                ah_coords[coord] = [ah - com for ah in ah_coords[coord]]
+                ah_coord = [ah - com for ah in ah_coords[coord]]
 
         to_plot_x, to_plot_y = args.plane
         logger.debug(f"Plotting on the x axis {to_plot_x}")
