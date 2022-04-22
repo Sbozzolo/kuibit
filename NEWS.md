@@ -2,6 +2,9 @@
 
 ## Version 1.3.4 (Under Development)
 
+#### General
+- Improvements to documentation and docstrings
+
 #### Bug fixes
 
 - Added error in `_plot_horizon_on_plane` when the horizon cannot be plotted
