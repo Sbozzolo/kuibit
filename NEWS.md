@@ -1,5 +1,11 @@
 # Changelog
 
+## Version 1.3.4 (Under Development)
+
+#### Bug fixes
+
+- Added error in `_plot_horizon_on_plane` when the horizon cannot be plotted
+
 ## Version 1.3.3 (19 November 2021)
 
 #### Bug fixes
