@@ -19,11 +19,11 @@ sys.path.insert(0, os.path.abspath('..'))
 # -- Project information -----------------------------------------------------
 
 project = 'kuibit'
-copyright = '2020-2021, Gabriele Bozzola'
+copyright = '2020-2022, Gabriele Bozzola'
 author = 'Gabriele Bozzola'
 
 # The full version, including alpha/beta/rc tags
-release = '1.3.3'
+release = '1.3.4'
 
 
 # -- General configuration ---------------------------------------------------

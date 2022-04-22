@@ -1,6 +1,6 @@
 # Changelog
 
-## Version 1.3.4 (Under Development)
+## Version 1.3.4 (22 April 2022)
 
 #### General
 - Improvements to documentation and docstrings
