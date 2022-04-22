@@ -139,6 +139,7 @@ When releasing a new version, these are the steps:
 - Edit `kuibit/__init__.py`.
 - Edit `tests/test_kuibit.py`.
 - Edit `docs/conf.py`.
+- Edit `docs/features.rst`
 - Update the dependencies with `poetry update`.
 - Run the tests.
 - Tag a release.
