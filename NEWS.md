@@ -12,6 +12,8 @@
 - Windowing uneven signals is no longer allowed
 - Correctly remove ghost zones for 1-2D HDF5 files
 - Fix deprecation warning for Matplotlib 3.4
+- Fix `is_masked` after removing a mask (thanks @ekwessel,
+  [#28](https://github.com/Sbozzolo/kuibit/issues/28))
 
 #### New examples
 

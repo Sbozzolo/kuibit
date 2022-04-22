@@ -315,7 +315,7 @@ class BaseSeries(BaseNumerical):
         """
         return issubclass(self.y.dtype.type, complex)
 
-    def is_masked(self):
+    def is_masked(self) -> bool:
         """Return whether the x or y are masked.
 
         :returns:  True if the x or y are masked, false if it is not.
@@ -670,7 +670,11 @@ class BaseSeries(BaseNumerical):
         """
         if self.is_masked():
             mask = np.invert(self.mask)
-            return type(self)(self.x[mask], self.y[mask], True)
+            return type(self)(
+                np.ma.compressed(self.x[mask]),
+                np.ma.compressed(self.y[mask]),
+                True,
+            )
 
         # We can copy the spline
         return self.copy()
