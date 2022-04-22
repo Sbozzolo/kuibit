@@ -1,0 +1,1438 @@
+
+
+<!doctype html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>kuibit.visualize_matplotlib &#8212; kuibit 1.3.4 documentation</title>
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/bizstyle.css" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/css/custom.css" />
+    
+    <script id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+    <script src="../../_static/jquery.js"></script>
+    <script src="../../_static/underscore.js"></script>
+    <script src="../../_static/doctools.js"></script>
+    <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="../../_static/bizstyle.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0" />
+    <!--[if lt IE 9]>
+    <script src="_static/css3-mediaqueries.js"></script>
+    <![endif]-->
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">kuibit 1.3.4 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../index.html" accesskey="U">Module code</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">kuibit.visualize_matplotlib</a></li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for kuibit.visualize_matplotlib</h1><div class="highlight"><pre>
+<span></span><span class="ch">#!/usr/bin/env python3</span>
+
+<span class="c1"># Copyright (C) 2020-2022 Gabriele Bozzola</span>
+<span class="c1">#</span>
+<span class="c1"># Inspired by code originally developed by Wolfgang Kastaun. This file may</span>
+<span class="c1"># contain algorithms and/or structures first implemented in</span>
+<span class="c1"># GitHub:wokast/PyCactus/PostCactus/visualize.py</span>
+<span class="c1">#</span>
+<span class="c1"># This program is free software; you can redistribute it and/or modify it under</span>
+<span class="c1"># the terms of the GNU General Public License as published by the Free Software</span>
+<span class="c1"># Foundation; either version 3 of the License, or (at your option) any later</span>
+<span class="c1"># version.</span>
+<span class="c1">#</span>
+<span class="c1"># This program is distributed in the hope that it will be useful, but WITHOUT</span>
+<span class="c1"># ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS</span>
+<span class="c1"># FOR A PARTICULAR PURPOSE. See the GNU General Public License for more</span>
+<span class="c1"># details.</span>
+<span class="c1">#</span>
+<span class="c1"># You should have received a copy of the GNU General Public License along with</span>
+<span class="c1"># this program; if not, see &lt;https://www.gnu.org/licenses/&gt;.</span>
+
+<span class="sd">&quot;&quot;&quot;The :py:mod:`~.visualize_matplotlib` module provides methods to plot</span>
+<span class="sd">``kuibit`` objects with matplotlib and other convenience functions.</span>
+
+<span class="sd">Utilities:</span>
+
+<span class="sd">- :py:func:`~.setup_matplotlib` adjusts the configuration in matplotlib.</span>
+<span class="sd">- :py:func:`~.add_text_to_corner` adds a label near an edge or a corner of</span>
+<span class="sd">  a figure (useful for annotations like time).</span>
+<span class="sd">- :py:func:`~.save` saves the figure, optionally with tikzplotlib.</span>
+<span class="sd">- :py:func:`~.save_from_dir_filename_ext` saves the figure and assembles the</span>
+<span class="sd">  name automatically from the output directory, file name and extension.</span>
+<span class="sd">- :py:func:`~.set_axis_limits` sets the range on the two axes of a given axis.</span>
+<span class="sd">  :py:func:`~.set_axis_limits_from_args` does the same but reading the data</span>
+<span class="sd">  from a given ``args`` (from ``ArgParse``).</span>
+
+<span class="sd">Two decorators:</span>
+
+<span class="sd">- :py:func:`~.preprocess_plot`. The goal of this is to add support to the</span>
+<span class="sd">  keyword arguments ``figure`` and ``axis``. If you decorate a function with</span>
+<span class="sd">  :py:func:`~.preprocess_plot` and the function takes those two arguments, then</span>
+<span class="sd">  the decorator will automatically check if the arguments were passed and if not</span>
+<span class="sd">  set the correct default.</span>
+
+<span class="sd">- :py:func:`~.preprocess_plot_grid`. This decorator takes some form of grid data</span>
+<span class="sd">  and returns a NumPy array (and other useful quantities). Functions decorated</span>
+<span class="sd">  with :py:func:`~.preprocess_plot_grid` automatically gain support for</span>
+<span class="sd">  :py:class:`~.HierarchicalGridData` and :py:class:`~.UniformGridData`, so they</span>
+<span class="sd">  only need to worry about plotting NumPy arrays. Functions have to take a</span>
+<span class="sd">  positional argument ``data`` and a keyword argument ``coordinates``.</span>
+
+<span class="sd">Grid data:</span>
+
+<span class="sd">- :py:func:`~.plot_color` to plot directly some data with its value.</span>
+<span class="sd">- :py:func:`~.plot_contourf` to draw a filled contour plot using the data.</span>
+
+<span class="sd">Horizons:</span>
+
+<span class="sd">- :py:func:`~.plot_horizon` to plot a given shape in 2D.</span>
+<span class="sd">- :py:func:`~.plot_horizon_on_plane_at_iteration` to plot a given horizon</span>
+<span class="sd">   at a given iteration in 2D.</span>
+<span class="sd">- :py:func:`~.plot_horizon_on_plane_at_time` to plot a given horizon</span>
+<span class="sd">   at a given time in 2D.</span>
+
+<span class="sd">Most of the functions here take optional arguments ``figure`` and ``axis``. You</span>
+<span class="sd">can specify them, or the current ones will be used.</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">itertools</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">warnings</span>
+
+<span class="kn">import</span> <span class="nn">matplotlib</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">tikzplotlib</span>
+<span class="kn">from</span> <span class="nn">matplotlib.patches</span> <span class="kn">import</span> <span class="n">Rectangle</span>
+<span class="kn">from</span> <span class="nn">mpl_toolkits.axes_grid1</span> <span class="kn">import</span> <span class="n">make_axes_locatable</span>
+<span class="kn">from</span> <span class="nn">mpl_toolkits.mplot3d</span> <span class="kn">import</span> <span class="n">Axes3D</span>
+
+<span class="kn">from</span> <span class="nn">kuibit</span> <span class="kn">import</span> <span class="n">grid_data</span> <span class="k">as</span> <span class="n">gd</span>
+<span class="kn">from</span> <span class="nn">kuibit.cactus_grid_functions</span> <span class="kn">import</span> <span class="n">BaseOneGridFunction</span>
+
+<span class="c1"># UTILITIES</span>
+
+
+<div class="viewcode-block" id="setup_matplotlib"><a class="viewcode-back" href="../../visualize_matplotlib_ref.html#kuibit.visualize_matplotlib.setup_matplotlib">[docs]</a><span class="k">def</span> <span class="nf">setup_matplotlib</span><span class="p">(</span><span class="n">params</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Setup matplotlib with some reasonable defaults for better plots.</span>
+
+<span class="sd">    If ``params`` is provided, add these parameters to matplotlib&#39;s settings</span>
+<span class="sd">    (``params`` updates ``matplotlib.rcParams``).</span>
+
+<span class="sd">    Matplotlib behaves differently on different machines. With this, we make</span>
+<span class="sd">    sure that we set all the relevant paramters that we care of to the value we</span>
+<span class="sd">    prefer. The default values are highly opinionated.</span>
+
+<span class="sd">    :param params: Parameters to update matplotlib with.</span>
+<span class="sd">    :type params: dict</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">matplotlib</span><span class="o">.</span><span class="n">rcParams</span><span class="o">.</span><span class="n">update</span><span class="p">(</span>
+        <span class="p">{</span>
+            <span class="s2">&quot;lines.markersize&quot;</span><span class="p">:</span> <span class="mi">4</span><span class="p">,</span>
+            <span class="s2">&quot;axes.labelsize&quot;</span><span class="p">:</span> <span class="mi">16</span><span class="p">,</span>
+            <span class="s2">&quot;font.weight&quot;</span><span class="p">:</span> <span class="s2">&quot;light&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;font.size&quot;</span><span class="p">:</span> <span class="mi">16</span><span class="p">,</span>
+            <span class="s2">&quot;legend.fontsize&quot;</span><span class="p">:</span> <span class="mi">16</span><span class="p">,</span>
+            <span class="s2">&quot;xtick.labelsize&quot;</span><span class="p">:</span> <span class="mi">13</span><span class="p">,</span>
+            <span class="s2">&quot;ytick.labelsize&quot;</span><span class="p">:</span> <span class="mi">13</span><span class="p">,</span>
+            <span class="s2">&quot;axes.formatter.limits&quot;</span><span class="p">:</span> <span class="p">[</span><span class="o">-</span><span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">],</span>
+            <span class="s2">&quot;xtick.minor.visible&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+            <span class="s2">&quot;ytick.minor.visible&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+            <span class="s2">&quot;image.cmap&quot;</span><span class="p">:</span> <span class="s2">&quot;inferno&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;legend.fancybox&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+            <span class="s2">&quot;legend.edgecolor&quot;</span><span class="p">:</span> <span class="s2">&quot;inherit&quot;</span><span class="p">,</span>
+        <span class="p">}</span>
+    <span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">params</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">matplotlib</span><span class="o">.</span><span class="n">rcParams</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">params</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="preprocess_plot"><a class="viewcode-back" href="../../visualize_matplotlib_ref.html#kuibit.visualize_matplotlib.preprocess_plot">[docs]</a><span class="k">def</span> <span class="nf">preprocess_plot</span><span class="p">(</span><span class="n">func</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Decorator to set-up plot functions.</span>
+
+<span class="sd">    When we plot anything, there is always some boilerplate that has to be</span>
+<span class="sd">    executed. For example, we want to provide an axis keyword so that the user</span>
+<span class="sd">    can specify where to plot, but if the keyword is not provided, we want to</span>
+<span class="sd">    plot on the current figure.</span>
+
+<span class="sd">    Essentially, this decorator sets default values. Why don&#39;t we do</span>
+<span class="sd">    axis=plt.gca() then? The problem is that the default values are set when</span>
+<span class="sd">    the function is defined, not when it is called. So, this will not work.</span>
+
+<span class="sd">    This decorator takes care of everything.</span>
+
+<span class="sd">    1. It handles the axis keyword setting it to plt.gca() if it was not</span>
+<span class="sd">       provided.</span>
+<span class="sd">    2. It handles the figure keyword setting it to plt.gcf() if it was not</span>
+<span class="sd">       provided.</span>
+
+<span class="sd">    func has to take as keyword arguments:</span>
+<span class="sd">    1. &#39;axis=None&#39;, where the plot will be plot, or plt.gca() if None</span>
+<span class="sd">    2. &#39;figure=None&#39;, where the plot will be plot, or plt.gcf() if None</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">inner</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="c1"># Setdetault addes the key if it is not already there</span>
+        <span class="n">kwargs</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="s2">&quot;axis&quot;</span><span class="p">,</span> <span class="n">plt</span><span class="o">.</span><span class="n">gca</span><span class="p">())</span>
+        <span class="n">kwargs</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="s2">&quot;figure&quot;</span><span class="p">,</span> <span class="n">plt</span><span class="o">.</span><span class="n">gcf</span><span class="p">())</span>
+        <span class="k">return</span> <span class="n">func</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">inner</span></div>
+
+
+<div class="viewcode-block" id="preprocess_plot_grid"><a class="viewcode-back" href="../../visualize_matplotlib_ref.html#kuibit.visualize_matplotlib.preprocess_plot_grid">[docs]</a><span class="k">def</span> <span class="nf">preprocess_plot_grid</span><span class="p">(</span><span class="n">func</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Decorator to set-up plot functions that plot grid data.</span>
+
+<span class="sd">    This decorator extends :py:func:`~.preprocess_plot` for specific functions.</span>
+
+<span class="sd">    1. It handles differt types to plot what intuitively one would want to</span>
+<span class="sd">       plot.</span>
+<span class="sd">    1a. If the data is a NumPy array with shape 2, just pass the data,</span>
+<span class="sd">        otherwise raise an error</span>
+<span class="sd">    1b. If the data is a NumPy array, just pass the data.</span>
+<span class="sd">    1c. If data is :py:class:`~.UniformGridData`, pass the data and the</span>
+<span class="sd">        coordinates.</span>
+<span class="sd">    1d. If data is :py:class:`~.HierarchicalGridData`, read resample it to</span>
+<span class="sd">        the given grid, then pass do 1c.</span>
+<span class="sd">    1e. If data is a :py:class:`~.BaseOneGridFunction`, we read the iteration</span>
+<span class="sd">        and pass to 1d.</span>
+
+<span class="sd">    func has to take as keyword arguments (in addition to the ones in</span>
+<span class="sd">    :py:func`~.preprocess_plot`):</span>
+<span class="sd">    1. &#39;data&#39;. data will be passed as a NumPy array, unless it is</span>
+<span class="sd">               already so.</span>
+<span class="sd">    2. &#39;coordinates=None&#39;. coordinates will be passed as a list of NumPy</span>
+<span class="sd">                           arrays, unless it is not None. Each NumPy</span>
+<span class="sd">                           array is the coordinates along one axis.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="nd">@preprocess_plot</span>
+    <span class="k">def</span> <span class="nf">inner</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="c1"># The flow is: We check if data is BaseOneGridFunction or derived. If</span>
+        <span class="c1"># yes, we read the requested iteration. Then, we check if data is</span>
+        <span class="c1"># HierachicalGridData, if yes, we resample to UniformGridData. Then we</span>
+        <span class="c1"># work with UniformGridData and handle coordinates, finally we work</span>
+        <span class="c1"># with NumPy arrays, which is what we pass to the function.</span>
+
+        <span class="k">def</span> <span class="nf">attr_not_available</span><span class="p">(</span><span class="n">attr</span><span class="p">):</span>
+            <span class="sd">&quot;&quot;&quot;This is a helper function to see if the user passed an attribute</span>
+<span class="sd">            or if the attribute is None</span>
+<span class="sd">            &quot;&quot;&quot;</span>
+            <span class="k">return</span> <span class="n">attr</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">kwargs</span> <span class="ow">or</span> <span class="n">kwargs</span><span class="p">[</span><span class="n">attr</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">None</span>
+
+        <span class="k">def</span> <span class="nf">default_or_kwargs</span><span class="p">(</span><span class="n">attr</span><span class="p">,</span> <span class="n">default</span><span class="p">):</span>
+            <span class="sd">&quot;&quot;&quot;Return default if the attribute is not available in kwargs, otherwise return</span>
+<span class="sd">            the attribute</span>
+
+<span class="sd">            &quot;&quot;&quot;</span>
+            <span class="k">if</span> <span class="n">attr_not_available</span><span class="p">(</span><span class="n">attr</span><span class="p">):</span>
+                <span class="k">return</span> <span class="n">default</span>
+            <span class="k">return</span> <span class="n">kwargs</span><span class="p">[</span><span class="n">attr</span><span class="p">]</span>
+
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">BaseOneGridFunction</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">attr_not_available</span><span class="p">(</span><span class="s2">&quot;iteration&quot;</span><span class="p">):</span>
+                <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span>
+                    <span class="s2">&quot;Data has multiple iterations, specify what do you want to plot&quot;</span>
+                <span class="p">)</span>
+
+            <span class="c1"># Overwrite data with HierarchicalGridData</span>
+            <span class="n">data</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;iteration&quot;</span><span class="p">]]</span>
+
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">gd</span><span class="o">.</span><span class="n">HierarchicalGridData</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">attr_not_available</span><span class="p">(</span><span class="s2">&quot;shape&quot;</span><span class="p">):</span>
+                <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span>
+                    <span class="s2">&quot;The data must be resampled but the shape was not provided&quot;</span>
+                <span class="p">)</span>
+
+            <span class="c1"># If x0 or x1 are None, we use the ones of the grid</span>
+            <span class="n">x0</span> <span class="o">=</span> <span class="n">default_or_kwargs</span><span class="p">(</span><span class="s2">&quot;x0&quot;</span><span class="p">,</span> <span class="n">data</span><span class="o">.</span><span class="n">x0</span><span class="p">)</span>
+            <span class="n">x1</span> <span class="o">=</span> <span class="n">default_or_kwargs</span><span class="p">(</span><span class="s2">&quot;x1&quot;</span><span class="p">,</span> <span class="n">data</span><span class="o">.</span><span class="n">x1</span><span class="p">)</span>
+            <span class="n">resample</span> <span class="o">=</span> <span class="n">default_or_kwargs</span><span class="p">(</span><span class="s2">&quot;resample&quot;</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
+
+            <span class="c1"># Overwrite data with UniformGridData</span>
+            <span class="k">if</span> <span class="n">data</span><span class="o">.</span><span class="n">is_masked</span><span class="p">():</span>
+                <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
+                    <span class="s2">&quot;Mask information will be lost with the resampling&quot;</span>
+                <span class="p">)</span>
+
+            <span class="n">data</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">to_UniformGridData</span><span class="p">(</span>
+                <span class="n">shape</span><span class="o">=</span><span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;shape&quot;</span><span class="p">],</span> <span class="n">x0</span><span class="o">=</span><span class="n">x0</span><span class="p">,</span> <span class="n">x1</span><span class="o">=</span><span class="n">x1</span><span class="p">,</span> <span class="n">resample</span><span class="o">=</span><span class="n">resample</span>
+            <span class="p">)</span>
+
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">gd</span><span class="o">.</span><span class="n">UniformGridData</span><span class="p">):</span>
+            <span class="c1"># We check if the user has passed coordinates too.</span>
+            <span class="k">if</span> <span class="s2">&quot;coordinates&quot;</span> <span class="ow">in</span> <span class="n">kwargs</span> <span class="ow">and</span> <span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;coordinates&quot;</span><span class="p">]</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
+                    <span class="s2">&quot;Ignoring provided coordinates (data is UniformGridData).&quot;</span>
+                    <span class="s2">&quot; To specify boundaries, use x0 and x1.&quot;</span>
+                <span class="p">)</span>
+
+            <span class="c1"># If x0 or x1 are None, we use the ones of the grid</span>
+            <span class="n">x0</span> <span class="o">=</span> <span class="n">default_or_kwargs</span><span class="p">(</span><span class="s2">&quot;x0&quot;</span><span class="p">,</span> <span class="n">data</span><span class="o">.</span><span class="n">x0</span><span class="p">)</span>
+            <span class="n">x1</span> <span class="o">=</span> <span class="n">default_or_kwargs</span><span class="p">(</span><span class="s2">&quot;x1&quot;</span><span class="p">,</span> <span class="n">data</span><span class="o">.</span><span class="n">x1</span><span class="p">)</span>
+            <span class="c1"># If x0 or x1 are provided, then we resample. So, we don&#39;t resample</span>
+            <span class="c1"># only if x0 AND x1 are not provided.</span>
+            <span class="n">resampling</span> <span class="o">=</span> <span class="ow">not</span> <span class="p">(</span>
+                <span class="n">attr_not_available</span><span class="p">(</span><span class="s2">&quot;x0&quot;</span><span class="p">)</span> <span class="ow">and</span> <span class="n">attr_not_available</span><span class="p">(</span><span class="s2">&quot;x1&quot;</span><span class="p">)</span>
+            <span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">resampling</span> <span class="ow">and</span> <span class="n">attr_not_available</span><span class="p">(</span><span class="s2">&quot;shape&quot;</span><span class="p">):</span>
+                <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span>
+                    <span class="s2">&quot;The data must be resampled but the shape was not provided&quot;</span>
+                <span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">resampling</span><span class="p">:</span>
+                <span class="n">resample</span> <span class="o">=</span> <span class="n">default_or_kwargs</span><span class="p">(</span><span class="s2">&quot;resample&quot;</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
+                <span class="n">new_grid</span> <span class="o">=</span> <span class="n">gd</span><span class="o">.</span><span class="n">UniformGrid</span><span class="p">(</span><span class="n">shape</span><span class="o">=</span><span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;shape&quot;</span><span class="p">],</span> <span class="n">x0</span><span class="o">=</span><span class="n">x0</span><span class="p">,</span> <span class="n">x1</span><span class="o">=</span><span class="n">x1</span><span class="p">)</span>
+
+                <span class="k">if</span> <span class="n">data</span><span class="o">.</span><span class="n">is_masked</span><span class="p">():</span>
+                    <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
+                        <span class="s2">&quot;Mask information will be lost with the resampling&quot;</span>
+                    <span class="p">)</span>
+
+                <span class="n">data</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">resampled</span><span class="p">(</span>
+                    <span class="n">new_grid</span><span class="p">,</span> <span class="n">piecewise_constant</span><span class="o">=</span><span class="p">(</span><span class="ow">not</span> <span class="n">resample</span><span class="p">)</span>
+                <span class="p">)</span>
+
+            <span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;coordinates&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">coordinates_from_grid</span><span class="p">()</span>
+            <span class="c1"># Overwrite data with NumPy array</span>
+            <span class="n">data</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">data_xyz</span>
+
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="ow">and</span> <span class="n">data</span><span class="o">.</span><span class="n">ndim</span> <span class="o">!=</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Only 2-dimensional data can be plotted&quot;</span><span class="p">)</span>
+
+        <span class="c1"># TODO: Check that coordinates are compatible with data</span>
+
+        <span class="c1"># We remove what we don&#39;t need from kwargs, so that it is not</span>
+        <span class="c1"># accidentally passed to the function</span>
+        <span class="k">def</span> <span class="nf">remove_attributes</span><span class="p">(</span><span class="o">*</span><span class="n">attributes</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">attr</span> <span class="ow">in</span> <span class="n">attributes</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">attr</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="p">:</span>
+                    <span class="k">del</span> <span class="n">kwargs</span><span class="p">[</span><span class="n">attr</span><span class="p">]</span>
+
+        <span class="n">remove_attributes</span><span class="p">(</span><span class="s2">&quot;shape&quot;</span><span class="p">,</span> <span class="s2">&quot;x0&quot;</span><span class="p">,</span> <span class="s2">&quot;x1&quot;</span><span class="p">,</span> <span class="s2">&quot;iteration&quot;</span><span class="p">,</span> <span class="s2">&quot;resample&quot;</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">func</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">inner</span></div>
+
+
+<span class="k">def</span> <span class="nf">_process_anchor_info</span><span class="p">(</span><span class="n">anchor</span><span class="p">,</span> <span class="n">offset</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Prepare the correct arguments for text_function in</span>
+<span class="sd">    :py:func:`~.add_text_to_corner`</span>
+
+<span class="sd">    :param anchor: Where to place the text? This is defined</span>
+<span class="sd">                 via cardinal points (e.g., NW for top left).</span>
+<span class="sd">    :type anchor: str</span>
+<span class="sd">    :param offset: How far from the edge to put the text? In percentage</span>
+<span class="sd">                   of the entire figure.</span>
+<span class="sd">    :type offset: float</span>
+
+<span class="sd">    :returns: Horizontal position, vertical position, horizontal alignment</span>
+<span class="sd">             vertical alignment.</span>
+<span class="sd">    :rtype: tuple</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># This function has been split off add_text_to_corner only because it is</span>
+    <span class="c1"># easier to test this way.</span>
+    <span class="n">possible_combinations</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="n">n1</span> <span class="o">+</span> <span class="n">n2</span> <span class="k">for</span> <span class="n">n1</span><span class="p">,</span> <span class="n">n2</span> <span class="ow">in</span> <span class="n">itertools</span><span class="o">.</span><span class="n">product</span><span class="p">(</span><span class="s2">&quot;NSWE&quot;</span><span class="p">,</span> <span class="n">repeat</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span> <span class="k">if</span> <span class="n">n1</span> <span class="o">!=</span> <span class="n">n2</span>
+    <span class="p">]</span> <span class="o">+</span> <span class="p">[</span><span class="s2">&quot;N&quot;</span><span class="p">,</span> <span class="s2">&quot;S&quot;</span><span class="p">,</span> <span class="s2">&quot;W&quot;</span><span class="p">,</span> <span class="s2">&quot;E&quot;</span><span class="p">]</span>
+
+    <span class="k">if</span> <span class="n">anchor</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">possible_combinations</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Given anchor is invalid. Use cardinal points.&quot;</span><span class="p">)</span>
+
+    <span class="c1"># Now we have to parse the cardinal points to find where</span>
+    <span class="c1"># to put the</span>
+
+    <span class="n">ver_al</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">ver_pos</span> <span class="o">=</span> <span class="mf">0.5</span>
+    <span class="k">if</span> <span class="s2">&quot;S&quot;</span> <span class="ow">in</span> <span class="n">anchor</span><span class="p">:</span>
+        <span class="n">ver_al</span> <span class="o">=</span> <span class="s2">&quot;bottom&quot;</span>
+        <span class="n">ver_pos</span> <span class="o">=</span> <span class="n">offset</span>
+    <span class="k">elif</span> <span class="s2">&quot;N&quot;</span> <span class="ow">in</span> <span class="n">anchor</span><span class="p">:</span>
+        <span class="n">ver_al</span> <span class="o">=</span> <span class="s2">&quot;top&quot;</span>
+        <span class="n">ver_pos</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">-</span> <span class="n">offset</span>
+
+    <span class="n">hor_al</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">hor_pos</span> <span class="o">=</span> <span class="mf">0.5</span>
+    <span class="k">if</span> <span class="s2">&quot;E&quot;</span> <span class="ow">in</span> <span class="n">anchor</span><span class="p">:</span>
+        <span class="n">hor_al</span> <span class="o">=</span> <span class="s2">&quot;right&quot;</span>
+        <span class="n">hor_pos</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">-</span> <span class="n">offset</span>
+    <span class="k">elif</span> <span class="s2">&quot;W&quot;</span> <span class="ow">in</span> <span class="n">anchor</span><span class="p">:</span>
+        <span class="n">hor_al</span> <span class="o">=</span> <span class="s2">&quot;left&quot;</span>
+        <span class="n">hor_pos</span> <span class="o">=</span> <span class="n">offset</span>
+
+    <span class="k">return</span> <span class="n">hor_pos</span><span class="p">,</span> <span class="n">ver_pos</span><span class="p">,</span> <span class="n">hor_al</span><span class="p">,</span> <span class="n">ver_al</span>
+
+
+<span class="nd">@preprocess_plot</span>
+<span class="k">def</span> <span class="nf">add_text_to_corner</span><span class="p">(</span><span class="n">text</span><span class="p">,</span> <span class="n">anchor</span><span class="o">=</span><span class="s2">&quot;SE&quot;</span><span class="p">,</span> <span class="n">figure</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">offset</span><span class="o">=</span><span class="mf">0.01</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Add text to a figure.</span>
+
+<span class="sd">    Specify the location of the label using cardinal points (NSWE).</span>
+<span class="sd">    For example, SE is bottom right.</span>
+
+<span class="sd">    :param anchor: Where to place the text? This is defined</span>
+<span class="sd">                 via cardinal points (e.g., NW for top left).</span>
+<span class="sd">    :type anchor: str</span>
+<span class="sd">    :param offset: How far from the edge to put the text? In percentage</span>
+<span class="sd">                   of the entire figure.</span>
+<span class="sd">    :type offset: float</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># text_function is the correct function to use depending if we are working</span>
+    <span class="c1"># with 2D or 3D plots.</span>
+
+    <span class="n">text_function</span> <span class="o">=</span> <span class="n">axis</span><span class="o">.</span><span class="n">text2D</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">axis</span><span class="p">,</span> <span class="n">Axes3D</span><span class="p">)</span> <span class="k">else</span> <span class="n">axis</span><span class="o">.</span><span class="n">text</span>
+
+    <span class="n">hor_pos</span><span class="p">,</span> <span class="n">ver_pos</span><span class="p">,</span> <span class="n">hor_al</span><span class="p">,</span> <span class="n">ver_al</span> <span class="o">=</span> <span class="n">_process_anchor_info</span><span class="p">(</span><span class="n">anchor</span><span class="p">,</span> <span class="n">offset</span><span class="p">)</span>
+
+    <span class="n">kwargs</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">if</span> <span class="n">hor_al</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">kwargs</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="s2">&quot;horizontalalignment&quot;</span><span class="p">:</span> <span class="n">hor_al</span><span class="p">})</span>
+
+    <span class="k">if</span> <span class="n">ver_al</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">kwargs</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="s2">&quot;verticalalignment&quot;</span><span class="p">:</span> <span class="n">ver_al</span><span class="p">})</span>
+
+    <span class="k">return</span> <span class="n">text_function</span><span class="p">(</span>
+        <span class="n">hor_pos</span><span class="p">,</span> <span class="n">ver_pos</span><span class="p">,</span> <span class="n">text</span><span class="p">,</span> <span class="n">transform</span><span class="o">=</span><span class="n">figure</span><span class="o">.</span><span class="n">transFigure</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span>
+    <span class="p">)</span>
+
+
+<span class="nd">@preprocess_plot</span>
+<span class="k">def</span> <span class="nf">save</span><span class="p">(</span>
+    <span class="n">outputpath</span><span class="p">,</span>
+    <span class="n">figure</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">axis</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">tikz_clean_figure</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+<span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Save figure to the given location.</span>
+
+<span class="sd">    If the file extension is ``.tikz``, the file will be saved with</span>
+<span class="sd">    ``tikzplotlib``.</span>
+
+<span class="sd">    Unknown arguments are passed to the ``matplotlib.savefig`` or</span>
+<span class="sd">    ``tikzplotlib.save`` (depending on the extension). In this second case, if</span>
+<span class="sd">    ``tikz_clean_figure = True``, unknown arguments are first passed to</span>
+<span class="sd">    ``tikzplotlib.clean_figure``.</span>
+
+<span class="sd">    :param outputpath:  Output path with or without extension. If the</span>
+<span class="sd">                        extension is ``.tikz``, the file is saved with</span>
+<span class="sd">                        ``tikzplotlib``.</span>
+<span class="sd">    :type outputpath:  str</span>
+<span class="sd">    :param figure: If passed, plot on this figure. If not passed (or if None),</span>
+<span class="sd">                   use the current figure.</span>
+<span class="sd">    :type figure: ``matplotlib.pyplot.figure``</span>
+
+<span class="sd">    :param tikz_clean_figure: If ``tikzplotlib`` is begin used, reduce the size</span>
+<span class="sd">                              of the output ``tikz`` file. When this is set to</span>
+<span class="sd">                              True, unknown arguments are first passed to</span>
+<span class="sd">                              ``tikzplotlib.clean_figure``, then to</span>
+<span class="sd">                              ``tikzplotlib.save``. ``tikzplotlib.clean_figure``</span>
+<span class="sd">                              will change the given figure.</span>
+<span class="sd">    :type tikz_clean_figure: bool</span>
+
+<span class="sd">    :param axis: If passed, plot on this axis. If not passed (or if None), use</span>
+<span class="sd">                 the current axis.</span>
+<span class="sd">    :type axis: ``matplotlib.pyplot.axis``</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">splitext</span><span class="p">(</span><span class="n">outputpath</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;.tikz&quot;</span><span class="p">:</span>
+
+        <span class="c1"># If clean_figure is True, we extract from kwargs those argument</span>
+        <span class="c1"># that tikzplotlib.clean_figure would take. For this, we need to</span>
+        <span class="c1"># know what argument that function takes.</span>
+        <span class="c1">#</span>
+        <span class="c1"># Form https://stackoverflow.com/a/40363565</span>
+        <span class="k">if</span> <span class="n">tikz_clean_figure</span><span class="p">:</span>
+            <span class="n">args_names</span> <span class="o">=</span> <span class="n">tikzplotlib</span><span class="o">.</span><span class="n">clean_figure</span><span class="o">.</span><span class="vm">__code__</span><span class="o">.</span><span class="n">co_varnames</span><span class="p">[</span>
+                <span class="p">:</span> <span class="n">tikzplotlib</span><span class="o">.</span><span class="n">clean_figure</span><span class="o">.</span><span class="vm">__code__</span><span class="o">.</span><span class="n">co_argcount</span>
+            <span class="p">]</span>
+
+            <span class="n">kwargs_clean_figure</span> <span class="o">=</span> <span class="p">{}</span>
+
+            <span class="c1"># We split kwargs in those that are supposed to be passed to</span>
+            <span class="c1"># clean_figure and those that have to be passed to save. For this,</span>
+            <span class="c1"># we iterate over the arguments taken by clean_figure, if they are</span>
+            <span class="c1"># in kwargs, then we move them to a new dictionary</span>
+            <span class="k">for</span> <span class="n">arg</span> <span class="ow">in</span> <span class="n">args_names</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">arg</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="p">:</span>
+                    <span class="n">kwargs_clean_figure</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="n">arg</span><span class="p">:</span> <span class="n">kwargs</span><span class="p">[</span><span class="n">arg</span><span class="p">]})</span>
+                    <span class="k">del</span> <span class="n">kwargs</span><span class="p">[</span><span class="n">arg</span><span class="p">]</span>
+
+            <span class="n">tikzplotlib</span><span class="o">.</span><span class="n">clean_figure</span><span class="p">(</span><span class="n">fig</span><span class="o">=</span><span class="n">figure</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs_clean_figure</span><span class="p">)</span>
+
+        <span class="n">tikzplotlib</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">outputpath</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">figure</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="n">outputpath</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+
+<span class="nd">@preprocess_plot</span>
+<span class="k">def</span> <span class="nf">save_from_dir_filename_ext</span><span class="p">(</span>
+    <span class="n">output_dir</span><span class="p">,</span>
+    <span class="n">file_name</span><span class="p">,</span>
+    <span class="n">file_ext</span><span class="p">,</span>
+    <span class="n">figure</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">axis</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">tikz_clean_figure</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+<span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Save figure to a location defined by a folder, a name, and an extension.</span>
+
+<span class="sd">    If the ``file_ext`` is ``tikz``, the file will be saved with</span>
+<span class="sd">    ``tikzplotlib``.</span>
+
+<span class="sd">    Unknown arguments are passed to the ``matplotlib.savefig`` or</span>
+<span class="sd">    ``tikzplotlib.save`` (depending on the extension).</span>
+
+<span class="sd">    :param output_dir: Path of a directory where to save the figure</span>
+<span class="sd">    :type output_dir: str</span>
+<span class="sd">    :param file_name: Name of the file.</span>
+<span class="sd">    :type file_name: str</span>
+<span class="sd">    :param file_extension: Extension of the file, with or without dot.</span>
+<span class="sd">    :type file_extension: str</span>
+<span class="sd">    :param figure: If passed, plot on this figure. If not passed (or if None),</span>
+<span class="sd">                   use the current figure.</span>
+<span class="sd">    :type figure: ``matplotlib.pyplot.figure``</span>
+
+<span class="sd">    :param axis: If passed, plot on this axis. If not passed (or if None), use</span>
+<span class="sd">                 the current axis.</span>
+<span class="sd">    :type axis: ``matplotlib.pyplot.axis``</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">ext</span> <span class="o">=</span> <span class="n">file_ext</span> <span class="k">if</span> <span class="n">file_ext</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;.&quot;</span> <span class="k">else</span> <span class="sa">f</span><span class="s2">&quot;.</span><span class="si">{</span><span class="n">file_ext</span><span class="si">}</span><span class="s2">&quot;</span>
+    <span class="n">outputpath</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">output_dir</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">file_name</span><span class="si">}{</span><span class="n">ext</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">save</span><span class="p">(</span>
+        <span class="n">outputpath</span><span class="p">,</span>
+        <span class="n">figure</span><span class="o">=</span><span class="n">figure</span><span class="p">,</span>
+        <span class="n">axis</span><span class="o">=</span><span class="n">axis</span><span class="p">,</span>
+        <span class="n">tikz_clean_figure</span><span class="o">=</span><span class="n">tikz_clean_figure</span><span class="p">,</span>
+        <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+    <span class="p">)</span>
+
+
+<span class="nd">@preprocess_plot</span>
+<span class="k">def</span> <span class="nf">set_axis_limits</span><span class="p">(</span>
+    <span class="n">xmin</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">xmax</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">ymin</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">ymax</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">figure</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="kc">None</span>
+<span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Set limits on the two axes of axis.</span>
+
+<span class="sd">    :param xmin: Minimum on the horizontal axis.</span>
+<span class="sd">    :type xmin: float</span>
+<span class="sd">    :param xmax: Maximum on the horizontal axis.</span>
+<span class="sd">    :type xmax: float</span>
+<span class="sd">    :param ymin: Minimum on the horizontal axis.</span>
+<span class="sd">    :type ymin: float</span>
+<span class="sd">    :param ymax: Maximum on the vertical axis.</span>
+<span class="sd">    :type ymax: float</span>
+
+<span class="sd">    :param figure: If passed, plot on this figure. If not passed (or if None),</span>
+<span class="sd">                   use the current figure.</span>
+<span class="sd">    :type figure: ``matplotlib.pyplot.figure``</span>
+
+<span class="sd">    :param axis: If passed, plot on this axis. If not passed (or if None), use</span>
+<span class="sd">                 the current axis.</span>
+<span class="sd">    :type axis: ``matplotlib.pyplot.axis``</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">axis</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">xlim</span><span class="o">=</span><span class="p">(</span><span class="n">xmin</span><span class="p">,</span> <span class="n">xmax</span><span class="p">),</span> <span class="n">ylim</span><span class="o">=</span><span class="p">(</span><span class="n">ymin</span><span class="p">,</span> <span class="n">ymax</span><span class="p">))</span>
+
+
+<span class="nd">@preprocess_plot</span>
+<span class="k">def</span> <span class="nf">set_axis_limits_from_args</span><span class="p">(</span><span class="n">args</span><span class="p">,</span> <span class="n">figure</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Set limits on the two axes of axis with data read from ``args``.</span>
+
+<span class="sd">    It uses the ``xmin``, ``xmax``, ``ymin``, ``ymax`` attributes.</span>
+
+<span class="sd">    :param args: Options provided by the user.</span>
+<span class="sd">    :type args: `argparse.Namespace`</span>
+
+<span class="sd">    :param figure: If passed, plot on this figure. If not passed (or if None),</span>
+<span class="sd">                   use the current figure.</span>
+<span class="sd">    :type figure: ``matplotlib.pyplot.figure``</span>
+
+<span class="sd">    :param axis: If passed, plot on this axis. If not passed (or if None), use</span>
+<span class="sd">                 the current axis.</span>
+<span class="sd">    :type axis: ``matplotlib.pyplot.axis``</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">set_axis_limits</span><span class="p">(</span>
+        <span class="n">xmin</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">xmin</span><span class="p">,</span>
+        <span class="n">xmax</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">xmax</span><span class="p">,</span>
+        <span class="n">ymin</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">ymin</span><span class="p">,</span>
+        <span class="n">ymax</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">ymax</span><span class="p">,</span>
+        <span class="n">figure</span><span class="o">=</span><span class="n">figure</span><span class="p">,</span>
+        <span class="n">axis</span><span class="o">=</span><span class="n">axis</span><span class="p">,</span>
+    <span class="p">)</span>
+
+
+<div class="viewcode-block" id="get_figname"><a class="viewcode-back" href="../../visualize_matplotlib_ref.html#kuibit.visualize_matplotlib.get_figname">[docs]</a><span class="k">def</span> <span class="nf">get_figname</span><span class="p">(</span><span class="n">args</span><span class="p">,</span> <span class="n">default</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Return the figure name checking if the user has passed one.</span>
+
+<span class="sd">    If it is defined, return ``args.figname``, otherwise return default.</span>
+
+<span class="sd">    :param args: Options provided by the user.</span>
+<span class="sd">    :type args: `argparse.Namespace`</span>
+<span class="sd">    :param default: Default name if ``figname`` is not in ``args``.</span>
+<span class="sd">    :type default: str</span>
+
+<span class="sd">    :returns: Name of the output figure.</span>
+<span class="sd">    :rtype: str</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">args</span><span class="o">.</span><span class="n">figname</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">default</span>
+    <span class="c1"># figname is not None</span>
+    <span class="k">return</span> <span class="n">args</span><span class="o">.</span><span class="n">figname</span></div>
+
+
+<span class="c1"># GRID FUNCTIONS</span>
+
+
+<span class="k">def</span> <span class="nf">_vmin_vmax_extend</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">vmin</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">vmax</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Helper function to decide what to do with the colorbar (to extend it or not?).&quot;&quot;&quot;</span>
+
+    <span class="n">colorbar_extend</span> <span class="o">=</span> <span class="s2">&quot;neither&quot;</span>
+
+    <span class="k">if</span> <span class="n">vmin</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">vmin</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">min</span><span class="p">()</span>
+
+    <span class="k">if</span> <span class="n">data</span><span class="o">.</span><span class="n">min</span><span class="p">()</span> <span class="o">&lt;</span> <span class="n">vmin</span><span class="p">:</span>
+        <span class="n">colorbar_extend</span> <span class="o">=</span> <span class="s2">&quot;min&quot;</span>
+
+    <span class="k">if</span> <span class="n">vmax</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">vmax</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">max</span><span class="p">()</span>
+
+    <span class="k">if</span> <span class="n">data</span><span class="o">.</span><span class="n">max</span><span class="p">()</span> <span class="o">&gt;</span> <span class="n">vmax</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">colorbar_extend</span> <span class="o">==</span> <span class="s2">&quot;min&quot;</span><span class="p">:</span>
+            <span class="n">colorbar_extend</span> <span class="o">=</span> <span class="s2">&quot;both&quot;</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">colorbar_extend</span> <span class="o">=</span> <span class="s2">&quot;max&quot;</span>
+
+    <span class="k">return</span> <span class="n">vmin</span><span class="p">,</span> <span class="n">vmax</span><span class="p">,</span> <span class="n">colorbar_extend</span>
+
+
+<span class="c1"># All the difficult stuff is in preprocess_plot_grid</span>
+<span class="nd">@preprocess_plot_grid</span>
+<span class="k">def</span> <span class="nf">_plot_grid</span><span class="p">(</span>
+    <span class="n">data</span><span class="p">,</span>
+    <span class="n">plot_type</span><span class="o">=</span><span class="s2">&quot;color&quot;</span><span class="p">,</span>
+    <span class="n">figure</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">axis</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">coordinates</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">xlabel</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">ylabel</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">colorbar</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="n">label</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">logscale</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="n">vmin</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">vmax</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">aspect_ratio</span><span class="o">=</span><span class="s2">&quot;equal&quot;</span><span class="p">,</span>
+    <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+<span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Backend of the :py:func:`~.plot_color` and similar functions.</span>
+
+<span class="sd">    The type of plot is specified by the variable ``plot_type``.</span>
+
+<span class="sd">    Unknown arguments are passed to</span>
+<span class="sd">    ``imshow`` if plot is color</span>
+<span class="sd">    ``contourf`` if plot is contourf.</span>
+<span class="sd">    ``contour`` if plot is contour.</span>
+
+<span class="sd">    :param plot_type: Type of plot. It can be: &#39;color&#39;, &#39;contourf&#39;, &#39;contour&#39;.</span>
+<span class="sd">    :type plot_type: str</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">_known_plot_types</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;color&quot;</span><span class="p">,</span> <span class="s2">&quot;contourf&quot;</span><span class="p">,</span> <span class="s2">&quot;contour&quot;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">plot_type</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">_known_plot_types</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;Unknown plot_type </span><span class="si">{</span><span class="n">plot_type</span><span class="si">}</span><span class="s2"> (Options available </span><span class="si">{</span><span class="n">_known_plot_types</span><span class="si">}</span><span class="s2">)&quot;</span>
+        <span class="p">)</span>
+
+    <span class="c1"># Considering all the effort put in preprocess_plot_grid, we we can plot</span>
+    <span class="c1"># as we were plotting normal NumPy arrays.</span>
+
+    <span class="k">if</span> <span class="n">logscale</span><span class="p">:</span>
+        <span class="c1"># We mask the values that are smaller or equal than 0</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ma</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+
+    <span class="n">vmin</span><span class="p">,</span> <span class="n">vmax</span><span class="p">,</span> <span class="n">colorbar_extend</span> <span class="o">=</span> <span class="n">_vmin_vmax_extend</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">vmin</span><span class="o">=</span><span class="n">vmin</span><span class="p">,</span> <span class="n">vmax</span><span class="o">=</span><span class="n">vmax</span><span class="p">)</span>
+
+    <span class="c1"># To implement vmin and vmax, we clamp the data to vmin and vmax instead of</span>
+    <span class="c1"># using the options in matplotlib. This greatly simplifies handling things</span>
+    <span class="c1"># like colormaps.</span>
+    <span class="n">data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">clip</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">vmin</span><span class="p">,</span> <span class="n">vmax</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">aspect_ratio</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">axis</span><span class="o">.</span><span class="n">set_aspect</span><span class="p">(</span><span class="n">aspect_ratio</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">xlabel</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">axis</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="n">xlabel</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">ylabel</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">axis</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="n">ylabel</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">plot_type</span> <span class="o">==</span> <span class="s2">&quot;color&quot;</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">coordinates</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">grid</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># We assume equally-spaced points.</span>
+
+            <span class="c1"># TODO: (Refactoring)</span>
+            <span class="c1">#</span>
+            <span class="c1"># This is not a very pythonic way to write this...</span>
+
+            <span class="n">X</span><span class="p">,</span> <span class="n">Y</span> <span class="o">=</span> <span class="n">coordinates</span>
+
+            <span class="n">dx</span><span class="p">,</span> <span class="n">dy</span> <span class="o">=</span> <span class="n">X</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">X</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">Y</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">Y</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">grid</span> <span class="o">=</span> <span class="p">[</span>
+                <span class="n">X</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="n">dx</span><span class="p">,</span>
+                <span class="n">X</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="n">dx</span><span class="p">,</span>
+                <span class="n">Y</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="n">dy</span><span class="p">,</span>
+                <span class="n">Y</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="n">dy</span><span class="p">,</span>
+            <span class="p">]</span>
+
+        <span class="n">image</span> <span class="o">=</span> <span class="n">axis</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span>
+            <span class="n">data</span><span class="p">,</span> <span class="n">vmin</span><span class="o">=</span><span class="n">vmin</span><span class="p">,</span> <span class="n">vmax</span><span class="o">=</span><span class="n">vmax</span><span class="p">,</span> <span class="n">origin</span><span class="o">=</span><span class="s2">&quot;lower&quot;</span><span class="p">,</span> <span class="n">extent</span><span class="o">=</span><span class="n">grid</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span>
+        <span class="p">)</span>
+    <span class="k">elif</span> <span class="n">plot_type</span> <span class="o">==</span> <span class="s2">&quot;contourf&quot;</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">coordinates</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;You must provide the coordiantes with plot_type = </span><span class="si">{</span><span class="n">plot_type</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="p">)</span>
+        <span class="n">image</span> <span class="o">=</span> <span class="n">axis</span><span class="o">.</span><span class="n">contourf</span><span class="p">(</span>
+            <span class="o">*</span><span class="n">coordinates</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">extend</span><span class="o">=</span><span class="n">colorbar_extend</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span>
+        <span class="p">)</span>
+    <span class="k">elif</span> <span class="n">plot_type</span> <span class="o">==</span> <span class="s2">&quot;contour&quot;</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">coordinates</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;You must provide the coordiantes with plot_type = </span><span class="si">{</span><span class="n">plot_type</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="p">)</span>
+        <span class="c1"># We need to pass the levels for the contours</span>
+        <span class="k">if</span> <span class="s2">&quot;levels&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;You must provide the levels with plot_type = </span><span class="si">{</span><span class="n">plot_type</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="p">)</span>
+        <span class="n">image</span> <span class="o">=</span> <span class="n">axis</span><span class="o">.</span><span class="n">contour</span><span class="p">(</span>
+            <span class="o">*</span><span class="n">coordinates</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">extend</span><span class="o">=</span><span class="n">colorbar_extend</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span>
+        <span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">colorbar</span><span class="p">:</span>
+        <span class="n">plot_colorbar</span><span class="p">(</span><span class="n">image</span><span class="p">,</span> <span class="n">figure</span><span class="o">=</span><span class="n">figure</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="n">axis</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="n">label</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">image</span>
+
+
+<div class="viewcode-block" id="plot_contourf"><a class="viewcode-back" href="../../visualize_matplotlib_ref.html#kuibit.visualize_matplotlib.plot_contourf">[docs]</a><span class="k">def</span> <span class="nf">plot_contourf</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Plot the given data drawing filled contours.</span>
+
+<span class="sd">    You can pass (everything is processed by :py:func:`~.preprocess_plot_grid` so</span>
+<span class="sd">    that at the end we have a 2D NumPy array):</span>
+<span class="sd">    - A 2D NumPy array,</span>
+<span class="sd">    - A :py:class:`~.UniformGridData`,</span>
+<span class="sd">    - A :py:class:`~.HierarchicalGridData`,</span>
+<span class="sd">    - A :py:class:`~.BaseOneGridFunction`.</span>
+
+<span class="sd">    Depending on what you pass, you might need additional arguments.</span>
+
+<span class="sd">    If you pass a :py:class:`~.BaseOneGridFunction`, you need also to pass</span>
+<span class="sd">    ``iteration``, and ``shape``. If you pass</span>
+<span class="sd">    :py:class:`~.HierarchicalGridData`, you also need to pass ``shape``. In all</span>
+<span class="sd">    cases you can also pass ``x0`` and ``x1`` to define origin and corner of the</span>
+<span class="sd">    grid. You can pass the option ``resample=True`` if you want to do bilinear</span>
+<span class="sd">    resampling at the grid data level, otherwise, nearest neighbor resampling is</span>
+<span class="sd">    done. When you pass the NumPy array, you also have to pass the</span>
+<span class="sd">    ``coordinates``.</span>
+
+<span class="sd">    All the unknown arguments are passed to ``contourf``.</span>
+
+<span class="sd">    .. note</span>
+
+<span class="sd">       Read the documentation for a concise table on what arguments are</span>
+<span class="sd">       supported.</span>
+
+<span class="sd">    :param data: Data that has to be plotted. The function expects a 2D NumPy</span>
+<span class="sd">                 array, but the decorator :py:func:`~.preprocess_plot_grid`</span>
+<span class="sd">                 allows it to take different kind of data.</span>
+<span class="sd">    :type data: 2D NumPy array, or object that can be cast to 2D NumPy array.</span>
+
+<span class="sd">    :param x0: Lowermost leftmost coordinate to plot. If passed, resampling will</span>
+<span class="sd">               be performed.</span>
+<span class="sd">    :type x0: 2D array or list</span>
+
+<span class="sd">    :param x1: Uppermost rightmost coordinate to plot. If passed, resampling will</span>
+<span class="sd">               be performed.</span>
+<span class="sd">    :type x1: 2D array or list</span>
+
+<span class="sd">    :param coordiantes: Coordinates to use for the plot. Used only if data is a</span>
+<span class="sd">                        NumPy array.</span>
+<span class="sd">    :type coordinates: 2D array or list</span>
+
+<span class="sd">    :param shape: Resolution of the image. This parameter is used if resampling</span>
+<span class="sd">                  is needed or requested.</span>
+<span class="sd">    :type shape: tuple or list</span>
+
+<span class="sd">    :param iteration: Iteration to plot. Relevant only if data is a</span>
+<span class="sd">                      :py:class:`~.BaseOneGridData`.</span>
+<span class="sd">    :type iteration: int</span>
+
+<span class="sd">    :param resample: If resampling has to be done, do bilinear resampling at the</span>
+<span class="sd">                     level of the grid data. If not passed, use nearest neighbors.</span>
+<span class="sd">    :type resample: bool</span>
+
+<span class="sd">    :param logscale: If True, take the log10 of the data before plotting.</span>
+<span class="sd">    :type logscale: bool</span>
+
+<span class="sd">    :param colorbar: If True, add a colorbar.</span>
+<span class="sd">    :type colorbar: bool</span>
+
+<span class="sd">    :param vmin: Remove all the data below this value. If logscale, this has to</span>
+<span class="sd">                 be the log10.</span>
+<span class="sd">    :type vmin: float</span>
+<span class="sd">    :param vmax: Remove all the data above this value. If logscale, this has to</span>
+<span class="sd">                 be the log10.</span>
+<span class="sd">    :type vmax: float</span>
+
+<span class="sd">    :param xlabel: Label of the x axis. If None (or not passed), no label is</span>
+<span class="sd">                   placed.</span>
+<span class="sd">    :type xlabel: str</span>
+
+<span class="sd">    :param ylabel: Label of the y axis. If None (or not passed), no label is</span>
+<span class="sd">                   placed.</span>
+<span class="sd">    :type ylabel: str</span>
+
+<span class="sd">    :param aspect_ratio: Aspect ratio of the plot, as passed to the function</span>
+<span class="sd">                         ``set_aspect_ratio`` in matplotlib.</span>
+<span class="sd">    :type aspect_ratio: str</span>
+
+<span class="sd">    :param figure: If passed, plot on this figure. If not passed (or if None),</span>
+<span class="sd">                   use the current figure.</span>
+<span class="sd">    :type figure: ``matplotlib.pyplot.figure``</span>
+
+<span class="sd">    :param axis: If passed, plot on this axis. If not passed (or if None), use</span>
+<span class="sd">                 the current axis.</span>
+<span class="sd">    :type axis: ``matplotlib.pyplot.axis``</span>
+
+<span class="sd">    :param kwargs: All the unknown arguments are passed to ``imshow``.</span>
+<span class="sd">    :type kwargs: dict</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># This function is a convinence function around _plot_grid.</span>
+    <span class="k">return</span> <span class="n">_plot_grid</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">plot_type</span><span class="o">=</span><span class="s2">&quot;contourf&quot;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="plot_color"><a class="viewcode-back" href="../../visualize_matplotlib_ref.html#kuibit.visualize_matplotlib.plot_color">[docs]</a><span class="k">def</span> <span class="nf">plot_color</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Plot the given data.</span>
+
+<span class="sd">    You can pass (everything is processed by :py:func:`~.preprocess_plot_grid` so</span>
+<span class="sd">    that at the end we have a 2D NumPy array):</span>
+<span class="sd">    - A 2D NumPy array,</span>
+<span class="sd">    - A :py:class:`~.UniformGridData`,</span>
+<span class="sd">    - A :py:class:`~.HierarchicalGridData`,</span>
+<span class="sd">    - A :py:class:`~.BaseOneGridFunction`.</span>
+
+<span class="sd">    Depending on what you pass, you might need additional arguments.</span>
+
+<span class="sd">    If you pass a :py:class:`~.BaseOneGridFunction`, you need also to pass</span>
+<span class="sd">    ``iteration``, and ``shape``. If you pass</span>
+<span class="sd">    :py:class:`~.HierarchicalGridData`, you also need to pass ``shape``. In all</span>
+<span class="sd">    cases you can also pass ``x0`` and ``x1`` to define origin and corner of the</span>
+<span class="sd">    grid. You can pass the option ``resample=True`` if you want to do bilinear</span>
+<span class="sd">    resampling at the grid data level, otherwise, nearest neighbor resampling is</span>
+<span class="sd">    done. When you pass the NumPy array, passing ``coordinates`` will argument</span>
+<span class="sd">    will make sure that those coordinates are used.</span>
+
+<span class="sd">    All the unknown arguments are passed to ``imshow``.</span>
+
+<span class="sd">    .. note</span>
+
+<span class="sd">       Read the documentation for a concise table on what arguments are</span>
+<span class="sd">       supported.</span>
+
+<span class="sd">    :param data: Data that has to be plotted. The function expects a 2D NumPy</span>
+<span class="sd">                 array, but the decorator :py:func:`~.preprocess_plot_grid`</span>
+<span class="sd">                 allows it to take different kind of data.</span>
+<span class="sd">    :type data: 2D NumPy array, or object that can be cast to 2D NumPy array.</span>
+
+<span class="sd">    :param x0: Lowermost leftmost coordinate to plot. If passed, resampling will</span>
+<span class="sd">               be performed.</span>
+<span class="sd">    :type x0: 2D array or list</span>
+
+<span class="sd">    :param x1: Uppermost rightmost coordinate to plot. If passed, resampling will</span>
+<span class="sd">               be performed.</span>
+<span class="sd">    :type x1: 2D array or list</span>
+
+<span class="sd">    :param coordiantes: Coordinates to use for the plot. Used only if data is a</span>
+<span class="sd">                        NumPy array.</span>
+<span class="sd">    :type coordinates: 2D array or list</span>
+
+<span class="sd">    :param shape: Resolution of the image. This parameter is used if resampling</span>
+<span class="sd">                  is needed or requested.</span>
+<span class="sd">    :type shape: tuple or list</span>
+
+<span class="sd">    :param iteration: Iteration to plot. Relevant only if data is a</span>
+<span class="sd">                      :py:class:`~.BaseOneGridData`.</span>
+<span class="sd">    :type iteration: int</span>
+
+<span class="sd">    :param resample: If resampling has to be done, do bilinear resampling at the</span>
+<span class="sd">                     level of the grid data. If not passed, use nearest neighbors.</span>
+<span class="sd">    :type resample: bool</span>
+
+<span class="sd">    :param logscale: If True, take the log10 of the data before plotting.</span>
+<span class="sd">    :type logscale: bool</span>
+
+<span class="sd">    :param colorbar: If True, add a colorbar.</span>
+<span class="sd">    :type colorbar: bool</span>
+
+<span class="sd">    :param vmin: Remove all the data below this value. If logscale, this has to</span>
+<span class="sd">                 be the log10.</span>
+<span class="sd">    :type vmin: float</span>
+<span class="sd">    :param vmax: Remove all the data above this value. If logscale, this has to</span>
+<span class="sd">                 be the log10.</span>
+<span class="sd">    :type vmax: float</span>
+
+<span class="sd">    :param xlabel: Label of the x axis. If None (or not passed), no label is</span>
+<span class="sd">                   placed.</span>
+<span class="sd">    :type xlabel: str</span>
+
+<span class="sd">    :param ylabel: Label of the y axis. If None (or not passed), no label is</span>
+<span class="sd">                   placed.</span>
+<span class="sd">    :type ylabel: str</span>
+
+<span class="sd">    :param aspect_ratio: Aspect ratio of the plot, as passed to the function</span>
+<span class="sd">                         ``set_aspect_ratio`` in matplotlib.</span>
+<span class="sd">    :type aspect_ratio: str</span>
+
+<span class="sd">    :param figure: If passed, plot on this figure. If not passed (or if None),</span>
+<span class="sd">                   use the current figure.</span>
+<span class="sd">    :type figure: ``matplotlib.pyplot.figure``</span>
+
+<span class="sd">    :param axis: If passed, plot on this axis. If not passed (or if None), use</span>
+<span class="sd">                 the current axis.</span>
+<span class="sd">    :type axis: ``matplotlib.pyplot.axis``</span>
+
+<span class="sd">    :param kwargs: All the unknown arguments are passed to ``imshow``.</span>
+<span class="sd">    :type kwargs: dict</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># This function is a convinence function around _plot_grid.</span>
+    <span class="k">return</span> <span class="n">_plot_grid</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">plot_type</span><span class="o">=</span><span class="s2">&quot;color&quot;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="plot_contour"><a class="viewcode-back" href="../../visualize_matplotlib_ref.html#kuibit.visualize_matplotlib.plot_contour">[docs]</a><span class="k">def</span> <span class="nf">plot_contour</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">levels</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Plot the given data drawing the contours.</span>
+
+<span class="sd">    You can pass (everything is processed by :py:func:`~.preprocess_plot_grid` so</span>
+<span class="sd">    that at the end we have a 2D NumPy array):</span>
+<span class="sd">    - A 2D NumPy array,</span>
+<span class="sd">    - A :py:class:`~.UniformGridData`,</span>
+<span class="sd">    - A :py:class:`~.HierarchicalGridData`,</span>
+<span class="sd">    - A :py:class:`~.BaseOneGridFunction`.</span>
+
+<span class="sd">    Depending on what you pass, you might need additional arguments.</span>
+
+<span class="sd">    If you pass a :py:class:`~.BaseOneGridFunction`, you need also to pass</span>
+<span class="sd">    ``iteration``, and ``shape``. If you pass</span>
+<span class="sd">    :py:class:`~.HierarchicalGridData`, you also need to pass ``shape``. In all</span>
+<span class="sd">    cases you can also pass ``x0`` and ``x1`` to define origin and corner of the</span>
+<span class="sd">    grid. You can pass the option ``resample=True`` if you want to do bilinear</span>
+<span class="sd">    resampling at the grid data level, otherwise, nearest neighbor resampling is</span>
+<span class="sd">    done. When you pass the NumPy array, you also have to pass the</span>
+<span class="sd">    ``coordinates``.</span>
+
+<span class="sd">    ``levels`` can be an integer (the number of levels), or an array with the</span>
+<span class="sd">    specific values where to put the levels.</span>
+
+<span class="sd">    All the unknown arguments are passed to ``contour``.</span>
+
+<span class="sd">    .. note</span>
+
+<span class="sd">       Read the documentation for a concise table on what arguments are</span>
+<span class="sd">       supported.</span>
+
+<span class="sd">    :param data: Data that has to be plotted. The function expects a 2D NumPy</span>
+<span class="sd">                 array, but the decorator :py:func:`~.preprocess_plot_grid`</span>
+<span class="sd">                 allows it to take different kind of data.</span>
+<span class="sd">    :type data: 2D NumPy array, or object that can be cast to 2D NumPy array.</span>
+
+<span class="sd">    :param x0: Lowermost leftmost coordinate to plot. If passed, resampling will</span>
+<span class="sd">               be performed.</span>
+<span class="sd">    :type x0: 2D array or list</span>
+
+<span class="sd">    :param x1: Uppermost rightmost coordinate to plot. If passed, resampling will</span>
+<span class="sd">               be performed.</span>
+<span class="sd">    :type x1: 2D array or list</span>
+
+<span class="sd">    :param coordiantes: Coordinates to use for the plot. Used only if data is a</span>
+<span class="sd">                        NumPy array.</span>
+<span class="sd">    :type coordinates: 2D array or list</span>
+
+<span class="sd">    :param shape: Resolution of the image. This parameter is used if resampling</span>
+<span class="sd">                  is needed or requested.</span>
+<span class="sd">    :type shape: tuple or list</span>
+
+<span class="sd">    :param iteration: Iteration to plot. Relevant only if data is a</span>
+<span class="sd">                      :py:class:`~.BaseOneGridData`.</span>
+<span class="sd">    :type iteration: int</span>
+
+<span class="sd">    :param resample: If resampling has to be done, do bilinear resampling at the</span>
+<span class="sd">                     level of the grid data. If not passed, use nearest neighbors.</span>
+<span class="sd">    :type resample: bool</span>
+
+<span class="sd">    :param logscale: If True, take the log10 of the data before plotting.</span>
+<span class="sd">    :type logscale: bool</span>
+
+<span class="sd">    :param colorbar: If True, add a colorbar.</span>
+<span class="sd">    :type colorbar: bool</span>
+
+<span class="sd">    :param vmin: Remove all the data below this value. If logscale, this has to</span>
+<span class="sd">                 be the log10.</span>
+<span class="sd">    :type vmin: float</span>
+<span class="sd">    :param vmax: Remove all the data above this value. If logscale, this has to</span>
+<span class="sd">                 be the log10.</span>
+<span class="sd">    :type vmax: float</span>
+
+<span class="sd">    :param xlabel: Label of the x axis. If None (or not passed), no label is</span>
+<span class="sd">                   placed.</span>
+<span class="sd">    :type xlabel: str</span>
+
+<span class="sd">    :param ylabel: Label of the y axis. If None (or not passed), no label is</span>
+<span class="sd">                   placed.</span>
+<span class="sd">    :type ylabel: str</span>
+
+<span class="sd">    :param levels: If int, the number of levels, if array, the specific levels</span>
+<span class="sd">                   where to place the contour lines.</span>
+<span class="sd">    :type levels: int or list</span>
+
+<span class="sd">    :param aspect_ratio: Aspect ratio of the plot, as passed to the function</span>
+<span class="sd">                         ``set_aspect_ratio`` in matplotlib.</span>
+<span class="sd">    :type aspect_ratio: str</span>
+
+<span class="sd">    :param figure: If passed, plot on this figure. If not passed (or if None),</span>
+<span class="sd">                   use the current figure.</span>
+<span class="sd">    :type figure: ``matplotlib.pyplot.figure``</span>
+
+<span class="sd">    :param axis: If passed, plot on this axis. If not passed (or if None), use</span>
+<span class="sd">                 the current axis.</span>
+<span class="sd">    :type axis: ``matplotlib.pyplot.axis``</span>
+
+<span class="sd">    :param kwargs: All the unknown arguments are passed to ``imshow``.</span>
+<span class="sd">    :type kwargs: dict</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># This function is a convinence function around _plot_grid.</span>
+    <span class="k">return</span> <span class="n">_plot_grid</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">plot_type</span><span class="o">=</span><span class="s2">&quot;contour&quot;</span><span class="p">,</span> <span class="n">levels</span><span class="o">=</span><span class="n">levels</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
+
+
+<span class="nd">@preprocess_plot</span>
+<span class="k">def</span> <span class="nf">plot_colorbar</span><span class="p">(</span>
+    <span class="n">mpl_artist</span><span class="p">,</span>
+    <span class="n">figure</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">axis</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">label</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">where</span><span class="o">=</span><span class="s2">&quot;right&quot;</span><span class="p">,</span>
+    <span class="n">size</span><span class="o">=</span><span class="s2">&quot;5%&quot;</span><span class="p">,</span>
+    <span class="n">pad</span><span class="o">=</span><span class="mf">0.25</span><span class="p">,</span>
+    <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+<span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Add a colorbar to an existing image.</span>
+
+<span class="sd">    :param mpl_artist: Image from which to generate the colorbar.</span>
+<span class="sd">    :type mpl_artist: ``matplotlib.cm.ScalarMappable``</span>
+<span class="sd">    :param figure: If passed, plot on this figure. If not passed (or if None),</span>
+<span class="sd">                   use the current figure.</span>
+<span class="sd">    :type figure: ``matplotlib.pyplot.figure``</span>
+
+<span class="sd">    :param axis: If passed, plot on this axis. If not passed (or if None), use</span>
+<span class="sd">                 the current axis.</span>
+<span class="sd">    :type axis: ``matplotlib.pyplot.axis``</span>
+<span class="sd">    :param label: Label to place near the colorbar.</span>
+<span class="sd">    :type label: str</span>
+<span class="sd">    :param where: Where to place the colorbar (left, right, bottom, top).</span>
+<span class="sd">    :type where: str</span>
+<span class="sd">    :param size: Width of the colorbar with respect to ``axis``.</span>
+<span class="sd">    :type size: float</span>
+<span class="sd">    :param pad: Pad between the colorbar and ``axis``.</span>
+<span class="sd">    :type pad: float</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># The next two lines guarantee that the colorbar is the same size as</span>
+    <span class="c1"># the plot. From https://stackoverflow.com/a/18195921</span>
+    <span class="n">divider</span> <span class="o">=</span> <span class="n">make_axes_locatable</span><span class="p">(</span><span class="n">axis</span><span class="p">)</span>
+    <span class="n">cax</span> <span class="o">=</span> <span class="n">divider</span><span class="o">.</span><span class="n">append_axes</span><span class="p">(</span><span class="n">where</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="n">size</span><span class="p">,</span> <span class="n">pad</span><span class="o">=</span><span class="n">pad</span><span class="p">)</span>
+    <span class="n">cb</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">colorbar</span><span class="p">(</span><span class="n">mpl_artist</span><span class="p">,</span> <span class="n">cax</span><span class="o">=</span><span class="n">cax</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">label</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">cb</span><span class="o">.</span><span class="n">set_label</span><span class="p">(</span><span class="n">label</span><span class="p">)</span>
+
+    <span class="c1"># When we draw a colorbar, that changes the selected axis. We do not</span>
+    <span class="c1"># want that, so we select back the original one.</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">sca</span><span class="p">(</span><span class="n">axis</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">cb</span>
+
+
+<span class="nd">@preprocess_plot</span>
+<span class="k">def</span> <span class="nf">plot_components_boundaries</span><span class="p">(</span>
+    <span class="n">hierarchical_data</span><span class="p">,</span> <span class="n">figure</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">remove_ghosts</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span>
+<span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Plot the boundaries of all the components available in the data.</span>
+
+<span class="sd">    If the components in a given refinement levels can be merged into a single</span>
+<span class="sd">    one, they be.</span>
+
+<span class="sd">    By default, the grids are plotted with black boundaries. This can be</span>
+<span class="sd">    customized passing the ``edgecolor`` argument.</span>
+
+<span class="sd">    :param hierarchical_data: 2D :py:class:`~.HierarchicalGridData` from which</span>
+<span class="sd">                              to extract the grid structure.</span>
+<span class="sd">    :type hierarchical_data: :py:class:`~.HierarchicalGridData`,</span>
+
+<span class="sd">    :param remove_ghosts: If True, ghosts zones are not included in the plotted</span>
+<span class="sd">                          grids.</span>
+<span class="sd">    :type remove_ghosts: bool</span>
+
+<span class="sd">    :param kwargs: All the unknown arguments are passed to ``Rectangle``.</span>
+<span class="sd">    :type kwargs: dict</span>
+
+<span class="sd">    :param figure: If passed, plot on this figure. If not passed (or if None),</span>
+<span class="sd">                   use the current figure.</span>
+<span class="sd">    :type figure: ``matplotlib.pyplot.figure``</span>
+
+<span class="sd">    :param axis: If passed, plot on this axis. If not passed (or if None), use</span>
+<span class="sd">                 the current axis.</span>
+<span class="sd">    :type axis: ``matplotlib.pyplot.axis``</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">hierarchical_data</span><span class="p">,</span> <span class="n">gd</span><span class="o">.</span><span class="n">HierarchicalGridData</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;The input has to be a HierarchicalGridData&quot;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">hierarchical_data</span><span class="o">.</span><span class="n">num_dimensions</span> <span class="o">!=</span> <span class="mi">2</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Only 2D HierarchicalGridData can be plotted&quot;</span><span class="p">)</span>
+
+    <span class="c1"># Add default color</span>
+    <span class="k">if</span> <span class="s2">&quot;edgecolor&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="p">:</span>
+        <span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;edgecolor&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;black&quot;</span>
+
+    <span class="k">for</span> <span class="n">_1</span><span class="p">,</span> <span class="n">_2</span><span class="p">,</span> <span class="n">comp</span> <span class="ow">in</span> <span class="n">hierarchical_data</span><span class="p">:</span>
+
+        <span class="c1"># grid is the UniformGrid of the component under consideration with or</span>
+        <span class="c1"># without ghost zones depending on the value of remove_ghosts</span>
+        <span class="n">grid</span> <span class="o">=</span> <span class="n">comp</span><span class="o">.</span><span class="n">grid</span><span class="o">.</span><span class="n">ghost_zones_removed</span><span class="p">()</span> <span class="k">if</span> <span class="n">remove_ghosts</span> <span class="k">else</span> <span class="n">comp</span><span class="o">.</span><span class="n">grid</span>
+
+        <span class="c1"># comp.highest_vertex and comp.lowest_vertex are 2D NumPy arrays, so</span>
+        <span class="c1"># comp.highest_vertex - comp.lowest_vertex is the length of the</span>
+        <span class="c1"># component along the two directions. We unpack it to width and height.</span>
+        <span class="c1"># We need vertices as opposed to x0 and x1 because we want to take into</span>
+        <span class="c1"># account the size of the boundary cells</span>
+        <span class="n">width</span><span class="p">,</span> <span class="n">height</span> <span class="o">=</span> <span class="n">grid</span><span class="o">.</span><span class="n">highest_vertex</span> <span class="o">-</span> <span class="n">grid</span><span class="o">.</span><span class="n">lowest_vertex</span>
+        <span class="n">axis</span><span class="o">.</span><span class="n">add_patch</span><span class="p">(</span>
+            <span class="n">Rectangle</span><span class="p">(</span>
+                <span class="n">grid</span><span class="o">.</span><span class="n">lowest_vertex</span><span class="p">,</span> <span class="n">width</span><span class="p">,</span> <span class="n">height</span><span class="p">,</span> <span class="n">facecolor</span><span class="o">=</span><span class="s2">&quot;none&quot;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span>
+            <span class="p">)</span>
+        <span class="p">)</span>
+
+
+<span class="c1"># HORIZONS</span>
+
+
+<span class="nd">@preprocess_plot</span>
+<span class="k">def</span> <span class="nf">plot_horizon</span><span class="p">(</span>
+    <span class="n">shape</span><span class="p">,</span>
+    <span class="n">color</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">edgecolor</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">alpha</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">figure</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">axis</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+<span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Plot outline of horizon in 2D.</span>
+
+<span class="sd">    Unknown arguments are passed to the ``fill`` function.</span>
+
+<span class="sd">    :param shape: Shape of the horizon as returned by</span>
+<span class="sd">                  `~.shape_outline_at_iteration` or `~.shape_outline_at_time`.</span>
+<span class="sd">    :type shape: two NumPy arrays</span>
+<span class="sd">    :param color: Color of the interior of the horizon.</span>
+<span class="sd">    :type color: color as supported by Matplotlib</span>
+<span class="sd">    :param edgecolor: Color of the edge of the horizon.</span>
+<span class="sd">    :type edgecolor: color as supported by Matplotlib</span>
+<span class="sd">    :param alpha:  Opacity of the horizon.</span>
+<span class="sd">    :type alpha:  float</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">axis</span><span class="o">.</span><span class="n">fill</span><span class="p">(</span>
+        <span class="o">*</span><span class="n">shape</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">color</span><span class="p">,</span> <span class="n">edgecolor</span><span class="o">=</span><span class="n">edgecolor</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="n">alpha</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span>
+    <span class="p">)</span>
+
+
+<span class="nd">@preprocess_plot</span>
+<span class="k">def</span> <span class="nf">_plot_horizon_on_plane</span><span class="p">(</span>
+    <span class="n">horizon</span><span class="p">,</span>
+    <span class="n">plot_type</span><span class="o">=</span><span class="s2">&quot;iteration&quot;</span><span class="p">,</span>
+    <span class="n">iteration</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">time</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">plane</span><span class="o">=</span><span class="s2">&quot;xy&quot;</span><span class="p">,</span>
+    <span class="n">time_tolerance</span><span class="o">=</span><span class="mf">1e-10</span><span class="p">,</span>
+    <span class="n">color</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">edgecolor</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">alpha</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">figure</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">axis</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+<span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Backend for :py:func:`~.plot_horizon_on_plane_at_iteration` and</span>
+<span class="sd">    :py:func:`~.plot_horizon_on_plane_at_time`.</span>
+
+<span class="sd">    Unknown arguments are passed to :py:func:`~.plot_horizon`.</span>
+
+<span class="sd">    :param horizon: Horizon to plot.</span>
+<span class="sd">    :type horizon: :py:class:`~.OneHorizon`</span>
+<span class="sd">    :param iteration: Iteration to plot.</span>
+<span class="sd">    :type iteration: int</span>
+<span class="sd">    :param plane: Plane where to plot (options: `xy`, `xz`, `yz`)</span>
+<span class="sd">    :type plane: str</span>
+<span class="sd">    :param time: Time to plot.</span>
+<span class="sd">    :type time: float</span>
+<span class="sd">    :param time_tolerance: Tolerance in the determination of the time.</span>
+<span class="sd">    :type time_tolerance: float</span>
+<span class="sd">    :param color: Color of the interior of the horizon.</span>
+<span class="sd">    :type color: color as supported by Matplotlib</span>
+<span class="sd">    :param edgecolor: Color of the edge of the horizon.</span>
+<span class="sd">    :type edgecolor: color as supported by Matplotlib</span>
+<span class="sd">    :param alpha:  Opacity of the horizon.</span>
+<span class="sd">    :type alpha:  float</span>
+<span class="sd">    :param figure: If passed, plot on this figure. If not passed (or if None),</span>
+<span class="sd">                   use the current figure.</span>
+<span class="sd">    :type figure: ``matplotlib.pyplot.figure``</span>
+<span class="sd">    :param axis: If passed, plot on this axis. If not passed (or if None), use</span>
+<span class="sd">                 the current axis.</span>
+<span class="sd">    :type axis: ``matplotlib.pyplot.axis``</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">cut</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s2">&quot;xy&quot;</span><span class="p">:</span> <span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span>
+        <span class="s2">&quot;xz&quot;</span><span class="p">:</span> <span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span>
+        <span class="s2">&quot;yz&quot;</span><span class="p">:</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span>
+    <span class="p">}</span>
+
+    <span class="k">if</span> <span class="n">plane</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">cut</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Plane has to be one of </span><span class="si">{</span><span class="nb">list</span><span class="p">(</span><span class="n">cut</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">plot_type</span> <span class="o">==</span> <span class="s2">&quot;iteration&quot;</span><span class="p">:</span>
+        <span class="n">shape</span> <span class="o">=</span> <span class="n">horizon</span><span class="o">.</span><span class="n">shape_outline_at_iteration</span><span class="p">(</span><span class="n">iteration</span><span class="p">,</span> <span class="n">cut</span><span class="p">[</span><span class="n">plane</span><span class="p">])</span>
+    <span class="k">elif</span> <span class="n">plot_type</span> <span class="o">==</span> <span class="s2">&quot;time&quot;</span><span class="p">:</span>
+        <span class="n">shape</span> <span class="o">=</span> <span class="n">horizon</span><span class="o">.</span><span class="n">shape_outline_at_time</span><span class="p">(</span>
+            <span class="n">time</span><span class="p">,</span> <span class="n">cut</span><span class="p">[</span><span class="n">plane</span><span class="p">],</span> <span class="n">tolerance</span><span class="o">=</span><span class="n">time_tolerance</span>
+        <span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">shape</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span>
+            <span class="s2">&quot;No outline found on given plane. &quot;</span>
+            <span class="s2">&quot;This might be due to lack of shape interpolation&quot;</span>
+        <span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">plot_horizon</span><span class="p">(</span>
+        <span class="n">shape</span><span class="p">,</span>
+        <span class="n">color</span><span class="o">=</span><span class="n">color</span><span class="p">,</span>
+        <span class="n">edgecolor</span><span class="o">=</span><span class="n">edgecolor</span><span class="p">,</span>
+        <span class="n">alpha</span><span class="o">=</span><span class="n">alpha</span><span class="p">,</span>
+        <span class="n">figure</span><span class="o">=</span><span class="n">figure</span><span class="p">,</span>
+        <span class="n">axis</span><span class="o">=</span><span class="n">axis</span><span class="p">,</span>
+        <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+    <span class="p">)</span>
+
+
+<span class="nd">@preprocess_plot</span>
+<span class="k">def</span> <span class="nf">plot_horizon_on_plane_at_iteration</span><span class="p">(</span>
+    <span class="n">horizon</span><span class="p">,</span>
+    <span class="n">iteration</span><span class="p">,</span>
+    <span class="n">plane</span><span class="p">,</span>
+    <span class="n">color</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">edgecolor</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">alpha</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">figure</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">axis</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+<span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Plot outline of horizon in 2D on a given plane at a given iteration.</span>
+
+<span class="sd">    Unknown arguments are passed to :py:func:`~.plot_horizon`.</span>
+
+<span class="sd">    .. warning::</span>
+
+<span class="sd">       When you take a cross section (an outline) of an horizon, ``kuibit``</span>
+<span class="sd">       finds points that are within a threshold to the plane that cuts the</span>
+<span class="sd">       surface. However, the way points are distributed on apparent horizons is</span>
+<span class="sd">       highly non-uniform. So, if you are cutting the horizon along an axis that</span>
+<span class="sd">       is not one of the coordinate ones (for the horizon), it is likely that</span>
+<span class="sd">       too few points will be close enough to the intersecting plane, resulting</span>
+<span class="sd">       in a malformed or absent outline. In some distant future, ``kuibit`` will</span>
+<span class="sd">       perform interpolations to solve this problem.</span>
+
+<span class="sd">    :param horizon: Horizon to plot.</span>
+<span class="sd">    :type horizon: :py:class:`~.OneHorizon`</span>
+<span class="sd">    :param iteration: Iteration to plot.</span>
+<span class="sd">    :type iteration: int</span>
+<span class="sd">    :param plane: Plane where to plot (options: `xy`, `xz`, `yz`)</span>
+<span class="sd">    :type plane: str</span>
+<span class="sd">    :param color: Color of the interior of the horizon.</span>
+<span class="sd">    :type color: color as supported by Matplotlib</span>
+<span class="sd">    :param edgecolor: Color of the edge of the horizon.</span>
+<span class="sd">    :type edgecolor: color as supported by Matplotlib</span>
+<span class="sd">    :param alpha:  Opacity of the horizon.</span>
+<span class="sd">    :type alpha:  float</span>
+<span class="sd">    :param figure: If passed, plot on this figure. If not passed (or if None),</span>
+<span class="sd">                   use the current figure.</span>
+<span class="sd">    :type figure: ``matplotlib.pyplot.figure``</span>
+<span class="sd">    :param axis: If passed, plot on this axis. If not passed (or if None), use</span>
+<span class="sd">                 the current axis.</span>
+<span class="sd">    :type axis: ``matplotlib.pyplot.axis``</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">_plot_horizon_on_plane</span><span class="p">(</span>
+        <span class="n">horizon</span><span class="p">,</span>
+        <span class="n">plot_type</span><span class="o">=</span><span class="s2">&quot;iteration&quot;</span><span class="p">,</span>
+        <span class="n">plane</span><span class="o">=</span><span class="n">plane</span><span class="p">,</span>
+        <span class="n">iteration</span><span class="o">=</span><span class="n">iteration</span><span class="p">,</span>
+        <span class="n">color</span><span class="o">=</span><span class="n">color</span><span class="p">,</span>
+        <span class="n">edgecolor</span><span class="o">=</span><span class="n">edgecolor</span><span class="p">,</span>
+        <span class="n">alpha</span><span class="o">=</span><span class="n">alpha</span><span class="p">,</span>
+        <span class="n">figure</span><span class="o">=</span><span class="n">figure</span><span class="p">,</span>
+        <span class="n">axis</span><span class="o">=</span><span class="n">axis</span><span class="p">,</span>
+        <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+    <span class="p">)</span>
+
+
+<span class="nd">@preprocess_plot</span>
+<span class="k">def</span> <span class="nf">plot_horizon_on_plane_at_time</span><span class="p">(</span>
+    <span class="n">horizon</span><span class="p">,</span>
+    <span class="n">time</span><span class="p">,</span>
+    <span class="n">plane</span><span class="p">,</span>
+    <span class="n">time_tolerance</span><span class="o">=</span><span class="mf">1e-10</span><span class="p">,</span>
+    <span class="n">color</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">edgecolor</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">alpha</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">figure</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">axis</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+<span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Plot outline of horizon in 2D on a given plane at a given time.</span>
+
+<span class="sd">    Unknown arguments are passed to :py:func:`~.plot_horizon`.</span>
+
+<span class="sd">    .. warning::</span>
+
+<span class="sd">       When you take a cross section (an outline) of an horizon, ``kuibit``</span>
+<span class="sd">       finds points that are within a threshold to the plane that cuts the</span>
+<span class="sd">       surface. However, the way points are distributed on apparent horizons is</span>
+<span class="sd">       highly non-uniform. So, if you are cutting the horizon along an axis that</span>
+<span class="sd">       is not one of the coordinate ones (for the horizon), it is likely that</span>
+<span class="sd">       too few points will be close enough to the intersecting plane, resulting</span>
+<span class="sd">       in a malformed or absent outline. In some distant future, ``kuibit`` will</span>
+<span class="sd">       perform interpolations to solve this problem.</span>
+
+<span class="sd">    :param horizon: Horizon to plot.</span>
+<span class="sd">    :type horizon: :py:class:`~.OneHorizon`</span>
+<span class="sd">    :param time: Time to plot.</span>
+<span class="sd">    :type time: float</span>
+<span class="sd">    :param time_tolerance: Tolerance in the determination of the time.</span>
+<span class="sd">    :type time_tolerance: float</span>
+<span class="sd">    :param plane: Plane where to plot (options: `xy`, `xz`, `yz`)</span>
+<span class="sd">    :type plane: str</span>
+<span class="sd">    :param color: Color of the interior of the horizon.</span>
+<span class="sd">    :type color: color as supported by Matplotlib</span>
+<span class="sd">    :param edgecolor: Color of the edge of the horizon.</span>
+<span class="sd">    :type edgecolor: color as supported by Matplotlib</span>
+<span class="sd">    :param alpha:  Opacity of the horizon.</span>
+<span class="sd">    :type alpha:  float</span>
+<span class="sd">    :param figure: If passed, plot on this figure. If not passed (or if None),</span>
+<span class="sd">                   use the current figure.</span>
+<span class="sd">    :type figure: ``matplotlib.pyplot.figure``</span>
+<span class="sd">    :param axis: If passed, plot on this axis. If not passed (or if None), use</span>
+<span class="sd">                 the current axis.</span>
+<span class="sd">    :type axis: ``matplotlib.pyplot.axis``</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">return</span> <span class="n">_plot_horizon_on_plane</span><span class="p">(</span>
+        <span class="n">horizon</span><span class="p">,</span>
+        <span class="n">plane</span><span class="o">=</span><span class="n">plane</span><span class="p">,</span>
+        <span class="n">plot_type</span><span class="o">=</span><span class="s2">&quot;time&quot;</span><span class="p">,</span>
+        <span class="n">time_tolerance</span><span class="o">=</span><span class="n">time_tolerance</span><span class="p">,</span>
+        <span class="n">time</span><span class="o">=</span><span class="n">time</span><span class="p">,</span>
+        <span class="n">color</span><span class="o">=</span><span class="n">color</span><span class="p">,</span>
+        <span class="n">edgecolor</span><span class="o">=</span><span class="n">edgecolor</span><span class="p">,</span>
+        <span class="n">alpha</span><span class="o">=</span><span class="n">alpha</span><span class="p">,</span>
+        <span class="n">figure</span><span class="o">=</span><span class="n">figure</span><span class="p">,</span>
+        <span class="n">axis</span><span class="o">=</span><span class="n">axis</span><span class="p">,</span>
+        <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+    <span class="p">)</span>
+</pre></div>
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="../../index.html">
+              <img class="logo" src="../../_static/logo.png" alt="Logo"/>
+            </a></p>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">kuibit 1.3.4 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../index.html" >Module code</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">kuibit.visualize_matplotlib</a></li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2020-2022, Gabriele Bozzola.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 3.5.4.
+    </div>
+  </body>
+</html>

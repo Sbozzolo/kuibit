@@ -1,0 +1,433 @@
+
+
+<!doctype html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Reference on kuibit.cactus_horizons &#8212; kuibit 1.3.4 documentation</title>
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="_static/bizstyle.css" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="_static/css/custom.css" />
+    
+    <script id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/doctools.js"></script>
+    <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="_static/bizstyle.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Reference on kuibit.gw_utils" href="gw_utils_ref.html" />
+    <link rel="prev" title="Reference on kuibit.cactus_waves" href="cactus_waves_ref.html" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0" />
+    <!--[if lt IE 9]>
+    <script src="_static/css3-mediaqueries.js"></script>
+    <![endif]-->
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="gw_utils_ref.html" title="Reference on kuibit.gw_utils"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="cactus_waves_ref.html" title="Reference on kuibit.cactus_waves"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">kuibit 1.3.4 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">Reference on kuibit.cactus_horizons</a></li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="module-kuibit.cactus_horizons">
+<span id="reference-on-kuibit-cactus-horizons"></span><h1>Reference on kuibit.cactus_horizons<a class="headerlink" href="#module-kuibit.cactus_horizons" title="Permalink to this headline">¶</a></h1>
+<p>The <a class="reference internal" href="#module-kuibit.cactus_horizons" title="kuibit.cactus_horizons"><code class="xref py py-mod docutils literal notranslate"><span class="pre">cactus_horizons</span></code></a> module provides classes to access the
+information about apparent horizons from QuasiLocalMeasures and AHFinderDirect
+(including shape files).</p>
+<p>The main class is <a class="reference internal" href="#kuibit.cactus_horizons.HorizonsDir" title="kuibit.cactus_horizons.HorizonsDir"><code class="xref py py-class docutils literal notranslate"><span class="pre">HorizonsDir</span></code></a> which collects all available data
+from a <a class="reference internal" href="simdir_ref.html#kuibit.simdir.SimDir" title="kuibit.simdir.SimDir"><code class="xref py py-class docutils literal notranslate"><span class="pre">SimDir</span></code></a>. This is a dictionary-like object whose values can
+be accessed providing two integers. The first is the QuasiLocalMeasures index,
+the second is the AHFinderDirect (we need two indices because at the moment we
+have no way to connect the two indexing systems). If only one of the two is
+available, the other index can be a dummy.</p>
+<p>Once an horizon is selected with a combination of QLM and AHFinderDirect
+indices, the resulting object is a <a class="reference internal" href="#kuibit.cactus_horizons.OneHorizon" title="kuibit.cactus_horizons.OneHorizon"><code class="xref py py-class docutils literal notranslate"><span class="pre">OneHorizon</span></code></a>.
+<a class="reference internal" href="#kuibit.cactus_horizons.OneHorizon" title="kuibit.cactus_horizons.OneHorizon"><code class="xref py py-class docutils literal notranslate"><span class="pre">OneHorizon</span></code></a> contains as attributes all the QLM variables.
+Similarly, the attribute <code class="docutils literal notranslate"><span class="pre">ah</span></code> contains all the variables read from
+AHFinderDirect. All of these are represented as <a class="reference internal" href="timeseries_ref.html#kuibit.timeseries.TimeSeries" title="kuibit.timeseries.TimeSeries"><code class="xref py py-class docutils literal notranslate"><span class="pre">TimeSeries</span></code></a>.
+<a class="reference internal" href="#kuibit.cactus_horizons.OneHorizon" title="kuibit.cactus_horizons.OneHorizon"><code class="xref py py-class docutils literal notranslate"><span class="pre">OneHorizon</span></code></a> also contains the shapes of the horizons (if the files
+are found), which can be accessed with the methods
+<a class="reference internal" href="#kuibit.cactus_horizons.OneHorizon.shape_at_iteration" title="kuibit.cactus_horizons.OneHorizon.shape_at_iteration"><code class="xref py py-meth docutils literal notranslate"><span class="pre">shape_at_iteration()</span></code></a> and <a class="reference internal" href="#kuibit.cactus_horizons.OneHorizon.shape_outline_at_iteration" title="kuibit.cactus_horizons.OneHorizon.shape_outline_at_iteration"><code class="xref py py-meth docutils literal notranslate"><span class="pre">shape_outline_at_iteration()</span></code></a>.</p>
+<p>The module contains also functions to work with horizons:</p>
+<ul class="simple">
+<li><p><a class="reference internal" href="#kuibit.cactus_horizons.compute_horizons_separation" title="kuibit.cactus_horizons.compute_horizons_separation"><code class="xref py py-func docutils literal notranslate"><span class="pre">compute_horizons_separation()</span></code></a>, which takes
+two <a class="reference internal" href="#kuibit.cactus_horizons.OneHorizon" title="kuibit.cactus_horizons.OneHorizon"><code class="xref py py-class docutils literal notranslate"><span class="pre">OneHorizon</span></code></a> and returns the timeseries of their separation</p></li>
+</ul>
+<dl class="py class">
+<dt id="kuibit.cactus_horizons.HorizonsDir">
+<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">kuibit.cactus_horizons.</span></code><code class="sig-name descname"><span class="pre">HorizonsDir</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sd</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/kuibit/cactus_horizons.html#HorizonsDir"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kuibit.cactus_horizons.HorizonsDir" title="Permalink to this definition">¶</a></dt>
+<dd><p>Class to collect information on apparent horizons
+available from thorns AHFinderDirect and QuasiLocalMeasures.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Variables</dt>
+<dd class="field-odd"><p><strong>found_any</strong> – True if at least one horizon was found.</p>
+</dd>
+</dl>
+<p>AHFinderDirect and QuasiLocalMeasures have different indexing. You must
+provide both when accessing a file. In the future, the map between the
+two indexing systems will be inferred from the paramter file.</p>
+<p>Constructor.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>sd</strong> (<a class="reference internal" href="simdir_ref.html#kuibit.simdir.SimDir" title="kuibit.simdir.SimDir"><em>SimDir</em></a>) – SimDir object providing access to data directory.</p>
+</dd>
+</dl>
+<dl class="py method">
+<dt id="kuibit.cactus_horizons.HorizonsDir.available_apparent_horizons">
+<em class="property"><span class="pre">property</span> </em><code class="sig-name descname"><span class="pre">available_apparent_horizons</span></code><a class="headerlink" href="#kuibit.cactus_horizons.HorizonsDir.available_apparent_horizons" title="Permalink to this definition">¶</a></dt>
+<dd><p>Horizons in AH indexing with associated data.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Indices of the AH horizons found in the data.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>list</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="kuibit.cactus_horizons.HorizonsDir.available_qlm_horizons">
+<em class="property"><span class="pre">property</span> </em><code class="sig-name descname"><span class="pre">available_qlm_horizons</span></code><a class="headerlink" href="#kuibit.cactus_horizons.HorizonsDir.available_qlm_horizons" title="Permalink to this definition">¶</a></dt>
+<dd><p>Horizons in QLM indexing with associated data.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Indices of the QLM horizons found in the data.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>list</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="kuibit.cactus_horizons.HorizonsDir.get_apparent_horizon">
+<code class="sig-name descname"><span class="pre">get_apparent_horizon</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ah</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/kuibit/cactus_horizons.html#HorizonsDir.get_apparent_horizon"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kuibit.cactus_horizons.HorizonsDir.get_apparent_horizon" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a <code class="xref py py-func docutils literal notranslate"><span class="pre">OneHorizon()</span></code> corresponding to an horizon as
+found by AHFinderDirect.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>ah</strong> (<em>int</em>) – AHFinderDirect index.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Apparent horizon.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><code class="xref py py-func docutils literal notranslate"><span class="pre">OneHorizon()</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="kuibit.cactus_horizons.HorizonsDir.get_qlm_horizon">
+<code class="sig-name descname"><span class="pre">get_qlm_horizon</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">qlm</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/kuibit/cactus_horizons.html#HorizonsDir.get_qlm_horizon"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kuibit.cactus_horizons.HorizonsDir.get_qlm_horizon" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a <code class="xref py py-func docutils literal notranslate"><span class="pre">OneHorizon()</span></code> corresponding to an horizon as
+analyzed by QuasiLocalMeasures.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>qlm</strong> (<em>int</em>) – QuasiLocalMeasures index.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>QuasiLocalMeasures horizon.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><code class="xref py py-func docutils literal notranslate"><span class="pre">OneHorizon()</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt id="kuibit.cactus_horizons.OneHorizon">
+<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">kuibit.cactus_horizons.</span></code><code class="sig-name descname"><span class="pre">OneHorizon</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">qlm_vars</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ah_vars</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">shape_files</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/kuibit/cactus_horizons.html#OneHorizon"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kuibit.cactus_horizons.OneHorizon" title="Permalink to this definition">¶</a></dt>
+<dd><p>This class represents properties of an apparent horizon
+computed from the quasi-isolated horizon formalism.</p>
+<p>All the variables from QuasiLocalMeasures are available as
+<a class="reference internal" href="timeseries_ref.html#kuibit.timeseries.TimeSeries" title="kuibit.timeseries.TimeSeries"><code class="xref py py-class docutils literal notranslate"><span class="pre">TimeSeries</span></code></a> as attributes. All the ones from AHFinderDirect are
+attributes of the attribute <code class="docutils literal notranslate"><span class="pre">ah</span></code>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Variables</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>formation_time</strong> – First time at which the horizon has been found
+(as from AHFinderDirect).</p></li>
+<li><p><strong>mass_final</strong> – QLM mass at the last iteration available.</p></li>
+<li><p><strong>spin_final</strong> – QLM spin (angular momentum) at the last iteration available.</p></li>
+<li><p><strong>dimensionless_spin_final</strong> – Dimensionless spin computed from QLM variables
+at the last iteration available.</p></li>
+<li><p><strong>shape_available</strong> – Whether the shape files are available.</p></li>
+<li><p><strong>shape_iterations</strong> – Iterations at which the shape is available.</p></li>
+<li><p><strong>shape_iterations_min</strong> – First iteration at which the shape is available.</p></li>
+<li><p><strong>shape_iterations_max</strong> – Last iteration at which the shape is available.</p></li>
+<li><p><strong>shape_times</strong> – Times at which the shape is available.</p></li>
+<li><p><strong>shape_times_min</strong> – First time at which the shape is available.</p></li>
+<li><p><strong>shape_times_max</strong> – Last time at which the shape is available.</p></li>
+<li><p><strong>ah</strong> – All the variables from AHFinderDirect as <a class="reference internal" href="timeseries_ref.html#kuibit.timeseries.TimeSeries" title="kuibit.timeseries.TimeSeries"><code class="xref py py-class docutils literal notranslate"><span class="pre">TimeSeries</span></code></a>.</p></li>
+</ul>
+</dd>
+</dl>
+<p>Constructor.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>qlm_vars</strong> (<em>dict</em>) – Dictionary that maps the name of the QLM variable with
+the associated <a class="reference internal" href="timeseries_ref.html#kuibit.timeseries.TimeSeries" title="kuibit.timeseries.TimeSeries"><code class="xref py py-class docutils literal notranslate"><span class="pre">TimeSeries</span></code></a>.</p></li>
+<li><p><strong>ah_vars</strong> (<em>dict</em>) – Dictionary that maps the name of the AH variable with
+the associated <a class="reference internal" href="timeseries_ref.html#kuibit.timeseries.TimeSeries" title="kuibit.timeseries.TimeSeries"><code class="xref py py-class docutils literal notranslate"><span class="pre">TimeSeries</span></code></a>.</p></li>
+<li><p><strong>shape_files</strong> (<em>dict</em>) – Dictionary that maps the iteration to the files where
+to find the shape at that iteration.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt id="kuibit.cactus_horizons.OneHorizon.ah_origin_at_iteration">
+<code class="sig-name descname"><span class="pre">ah_origin_at_iteration</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">iteration</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/kuibit/cactus_horizons.html#OneHorizon.ah_origin_at_iteration"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kuibit.cactus_horizons.OneHorizon.ah_origin_at_iteration" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the AH origin at the given iteration.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>iteration</strong> (<em>int</em>) – Iteration number.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Origin of the horizon as from AHFinderDirect.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>3D NumPy array</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="kuibit.cactus_horizons.OneHorizon.get_ah_property">
+<code class="sig-name descname"><span class="pre">get_ah_property</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">key</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/kuibit/cactus_horizons.html#OneHorizon.get_ah_property"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kuibit.cactus_horizons.OneHorizon.get_ah_property" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a property from AHFinderDirect as timeseries.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>key</strong> (<em>str</em>) – AH property.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>AH property as a function of time.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="timeseries_ref.html#kuibit.timeseries.TimeSeries" title="kuibit.timeseries.TimeSeries"><code class="xref py py-class docutils literal notranslate"><span class="pre">TimeSeries</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="kuibit.cactus_horizons.OneHorizon.shape_at_iteration">
+<code class="sig-name descname"><span class="pre">shape_at_iteration</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">iteration</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/kuibit/cactus_horizons.html#OneHorizon.shape_at_iteration"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kuibit.cactus_horizons.OneHorizon.shape_at_iteration" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the shape of the horizon as 3 arrays with the
+coordinates of the points.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>iteration</strong> (<em>int</em>) – Iteration number.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Shape of the horizon.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>three lists of 2D NumPy arrays, one for each
+coordinate. The list is over the different patches.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="kuibit.cactus_horizons.OneHorizon.shape_at_time">
+<code class="sig-name descname"><span class="pre">shape_at_time</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">time</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tolerance</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1e-10</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/kuibit/cactus_horizons.html#OneHorizon.shape_at_time"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kuibit.cactus_horizons.OneHorizon.shape_at_time" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the shape of the horizon as 3 arrays with the
+coordinates of the points.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>time</strong> (<em>float</em>) – Time.</p></li>
+<li><p><strong>tolerance</strong> (<em>float</em>) – Tolerance in determining the time.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Shape of the horizon.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>three lists of 2D NumPy arrays, one for each
+coordinate. The list is over the different patches.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="kuibit.cactus_horizons.OneHorizon.shape_outline_at_iteration">
+<code class="sig-name descname"><span class="pre">shape_outline_at_iteration</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">iteration</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cut</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/kuibit/cactus_horizons.html#OneHorizon.shape_outline_at_iteration"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kuibit.cactus_horizons.OneHorizon.shape_outline_at_iteration" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the cut of the 3D shape on a specified plane.</p>
+<p><code class="docutils literal notranslate"><span class="pre">cut</span></code> has to be a 3D tuple or list with None on the dimensions you
+want to keep, and the value of the other coordinates. For example, if
+you want the outline at z = 3 on the xy plane, <code class="docutils literal notranslate"><span class="pre">cut</span></code> has to be
+<code class="docutils literal notranslate"><span class="pre">(None,</span> <span class="pre">None,</span> <span class="pre">3)</span></code>.</p>
+<p>No interpolation is performed, so results are not accurate when the cut
+is not along one of the major directions centered in the origin of the
+horizon.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>iteration</strong> (<em>int</em>) – Iteration number.</p></li>
+<li><p><strong>cut</strong> (<em>3D tuple</em>) – How should the horizon be sliced?</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Coordinates of AH outline.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>tuple of two 1D NumPy arrays.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="kuibit.cactus_horizons.OneHorizon.shape_outline_at_time">
+<code class="sig-name descname"><span class="pre">shape_outline_at_time</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">time</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cut</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tolerance</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1e-10</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/kuibit/cactus_horizons.html#OneHorizon.shape_outline_at_time"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kuibit.cactus_horizons.OneHorizon.shape_outline_at_time" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the cut of the 3D shape on a specified plane.</p>
+<p><code class="docutils literal notranslate"><span class="pre">cut</span></code> has to be a 3D tuple or list with None on the dimensions you
+want to keep, and the value of the other coordinates. For example, if
+you want the outline at z = 3 on the xy plane, <code class="docutils literal notranslate"><span class="pre">cut</span></code> has to be
+<code class="docutils literal notranslate"><span class="pre">(None,</span> <span class="pre">None,</span> <span class="pre">3)</span></code>.</p>
+<p>No interpolation is performed, so results are not accurate when the cut
+is not along one of the major directions centered in the origin of the
+horizon.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>time</strong> (<em>float</em>) – Time.</p></li>
+<li><p><strong>tolerance</strong> (<em>float</em>) – Tolerance in determining the time.</p></li>
+<li><p><strong>cut</strong> (<em>3D tuple</em>) – How should the horizon be sliced?</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Coordinates of AH outline.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>tuple of two 1D NumPy arrays.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="kuibit.cactus_horizons.OneHorizon.shape_time_at_iteration">
+<code class="sig-name descname"><span class="pre">shape_time_at_iteration</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">iteration</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/kuibit/cactus_horizons.html#OneHorizon.shape_time_at_iteration"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kuibit.cactus_horizons.OneHorizon.shape_time_at_iteration" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the time corresponding to the given iteration using the information
+from the shape files.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>iteration</strong> (<em>int</em>) – Iteration number.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Time at the given iteration.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt id="kuibit.cactus_horizons.compute_horizons_separation">
+<code class="sig-prename descclassname"><span class="pre">kuibit.cactus_horizons.</span></code><code class="sig-name descname"><span class="pre">compute_horizons_separation</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">horizon1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">horizon2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">resample</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/kuibit/cactus_horizons.html#compute_horizons_separation"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kuibit.cactus_horizons.compute_horizons_separation" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compute the coordinate separation between the centroids of two horizons.</p>
+<p>The information from the apparent horizons is used (contained in the
+BHDiagnostics files).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>horizon1</strong> (<a class="reference internal" href="#kuibit.cactus_horizons.OneHorizon" title="kuibit.cactus_horizons.OneHorizon"><code class="xref py py-class docutils literal notranslate"><span class="pre">OneHorizon</span></code></a>) – First horizon.</p></li>
+<li><p><strong>horizon2</strong> (<a class="reference internal" href="#kuibit.cactus_horizons.OneHorizon" title="kuibit.cactus_horizons.OneHorizon"><code class="xref py py-class docutils literal notranslate"><span class="pre">OneHorizon</span></code></a>) – Second horizon.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Coordinate distance between the two centroids, sampled over both
+the horizons are available.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="timeseries_ref.html#kuibit.timeseries.TimeSeries" title="kuibit.timeseries.TimeSeries"><code class="xref py py-class docutils literal notranslate"><span class="pre">TimeSeries</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="index.html">
+              <img class="logo" src="_static/logo.png" alt="Logo"/>
+            </a></p>
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="cactus_waves_ref.html"
+                        title="previous chapter">Reference on kuibit.cactus_waves</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="gw_utils_ref.html"
+                        title="next chapter">Reference on kuibit.gw_utils</a></p>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="gw_utils_ref.html" title="Reference on kuibit.gw_utils"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="cactus_waves_ref.html" title="Reference on kuibit.cactus_waves"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">kuibit 1.3.4 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">Reference on kuibit.cactus_horizons</a></li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2020-2022, Gabriele Bozzola.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 3.5.4.
+    </div>
+  </body>
+</html>

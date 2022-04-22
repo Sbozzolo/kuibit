@@ -1,0 +1,1295 @@
+
+
+<!doctype html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Reference on kuibit.frequencyseries &#8212; kuibit 1.3.4 documentation</title>
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="_static/bizstyle.css" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="_static/css/custom.css" />
+    
+    <script id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/doctools.js"></script>
+    <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script type="text/x-mathjax-config">MathJax.Hub.Config({"tex2jax": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true, "ignoreClass": "tex2jax_ignore|mathjax_ignore|document", "processClass": "tex2jax_process|mathjax_process|math|output_area"}})</script>
+    <script src="_static/bizstyle.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Reference on kuibit.cactus_grid_functions" href="cactus_grid_functions_ref.html" />
+    <link rel="prev" title="Reference on kuibit.timeseries" href="timeseries_ref.html" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0" />
+    <!--[if lt IE 9]>
+    <script src="_static/css3-mediaqueries.js"></script>
+    <![endif]-->
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="cactus_grid_functions_ref.html" title="Reference on kuibit.cactus_grid_functions"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="timeseries_ref.html" title="Reference on kuibit.timeseries"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">kuibit 1.3.4 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">Reference on kuibit.frequencyseries</a></li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="module-kuibit.frequencyseries">
+<span id="reference-on-kuibit-frequencyseries"></span><h1>Reference on kuibit.frequencyseries<a class="headerlink" href="#module-kuibit.frequencyseries" title="Permalink to this headline">¶</a></h1>
+<p>The <a class="reference internal" href="#module-kuibit.frequencyseries" title="kuibit.frequencyseries"><code class="xref py py-mod docutils literal notranslate"><span class="pre">frequencyseries</span></code></a> module provides a representation of
+frequency series.</p>
+<p><a class="reference internal" href="#kuibit.frequencyseries.FrequencySeries" title="kuibit.frequencyseries.FrequencySeries"><code class="xref py py-class docutils literal notranslate"><span class="pre">FrequencySeries</span></code></a> can be evenly or unevenly sampled, real or
+complex. They support all the mathematical operations and operators you may
+expect, and have additional methods, which include ones for taking derivatives,
+integrals, apply windows, smooth the signal, take inverse Fourier transform, and
+more. Most of these methods are available in two flavors: those that return a
+new <a class="reference internal" href="#kuibit.frequencyseries.FrequencySeries" title="kuibit.frequencyseries.FrequencySeries"><code class="xref py py-class docutils literal notranslate"><span class="pre">FrequencySeries</span></code></a>, and those which modify the object in place. The
+latter have names with imperative verbs.</p>
+<p>As in <a class="reference internal" href="timeseries_ref.html#kuibit.timeseries.TimeSeries" title="kuibit.timeseries.TimeSeries"><code class="xref py py-class docutils literal notranslate"><span class="pre">TimeSeries</span></code></a>, <a class="reference internal" href="#kuibit.frequencyseries.FrequencySeries" title="kuibit.frequencyseries.FrequencySeries"><code class="xref py py-class docutils literal notranslate"><span class="pre">FrequencySeries</span></code></a> are derived from
+the <a class="reference internal" href="series_ref.html#kuibit.series.BaseSeries" title="kuibit.series.BaseSeries"><code class="xref py py-class docutils literal notranslate"><span class="pre">BaseSeries</span></code></a>, which in turn is derived from the abstract class
+<code class="xref py py-class docutils literal notranslate"><span class="pre">BaseNumerical</span></code>. Some of the capabilities of
+<a class="reference internal" href="#kuibit.frequencyseries.FrequencySeries" title="kuibit.frequencyseries.FrequencySeries"><code class="xref py py-class docutils literal notranslate"><span class="pre">FrequencySeries</span></code></a> (e.g., overloading the mathematical operators) are
+implemented in the parent classes.</p>
+<p>Additionally, two functions are defined in this module
+<a class="reference internal" href="#kuibit.frequencyseries.load_FrequencySeries" title="kuibit.frequencyseries.load_FrequencySeries"><code class="xref py py-func docutils literal notranslate"><span class="pre">load_FrequencySeries()</span></code></a> and <a class="reference internal" href="#kuibit.frequencyseries.load_noise_curve" title="kuibit.frequencyseries.load_noise_curve"><code class="xref py py-func docutils literal notranslate"><span class="pre">load_noise_curve()</span></code></a>. Both loads
+<a class="reference internal" href="#kuibit.frequencyseries.FrequencySeries" title="kuibit.frequencyseries.FrequencySeries"><code class="xref py py-class docutils literal notranslate"><span class="pre">FrequencySeries</span></code></a> from a text file, but <a class="reference internal" href="#kuibit.frequencyseries.load_noise_curve" title="kuibit.frequencyseries.load_noise_curve"><code class="xref py py-func docutils literal notranslate"><span class="pre">load_noise_curve()</span></code></a>
+is a simpler interface for real-valued signals.</p>
+<dl class="py class">
+<dt id="kuibit.frequencyseries.FrequencySeries">
+<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">kuibit.frequencyseries.</span></code><code class="sig-name descname"><span class="pre">FrequencySeries</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">f</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fft</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">guarantee_f_is_monotonic</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/kuibit/frequencyseries.html#FrequencySeries"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kuibit.frequencyseries.FrequencySeries" title="Permalink to this definition">¶</a></dt>
+<dd><p>Class representing a Fourier spectrum.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Variables</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><a class="reference internal" href="#kuibit.frequencyseries.FrequencySeries.f" title="kuibit.frequencyseries.FrequencySeries.f"><strong>f</strong></a> (<em>1D NumPy array</em><em> or </em><em>float</em>) – Frequency</p></li>
+<li><p><a class="reference internal" href="#kuibit.frequencyseries.FrequencySeries.fft" title="kuibit.frequencyseries.FrequencySeries.fft"><strong>fft</strong></a> (<em>1D NumPy array</em><em> or </em><em>float</em>) – Fourier transform</p></li>
+</ul>
+</dd>
+</dl>
+<p>Create a <a class="reference internal" href="#kuibit.frequencyseries.FrequencySeries" title="kuibit.frequencyseries.FrequencySeries"><code class="xref py py-class docutils literal notranslate"><span class="pre">FrequencySeries</span></code></a> providing frequencies and the value at
+those frequencies.</p>
+<p>It is your duty to make sure everything makes sense!</p>
+<p>When <code class="docutils literal notranslate"><span class="pre">guarantee_f_is_monotonic</span></code> is True, no checks will be perform to
+make sure that f is monotonically increasing (increasing performance).
+This should is used internally whenever a new series is returned from
+self (since we have already checked that <code class="docutils literal notranslate"><span class="pre">f</span></code> is good.) or in performance
+critical routines.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>f</strong> (<em>1D NumPy array</em><em> or </em><em>float</em>) – Frequencies.</p></li>
+<li><p><strong>fft</strong> (<em>1D NumPy array</em><em> or </em><em>float</em>) – Fourier transform.</p></li>
+<li><p><strong>guarantee_f_is_monotonic</strong> (<em>bool</em>) – If true, it will be assumes that <code class="docutils literal notranslate"><span class="pre">f</span></code> is
+monotonically increasing.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt id="kuibit.frequencyseries.FrequencySeries.abs_max">
+<code class="sig-name descname"><span class="pre">abs_max</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#kuibit.frequencyseries.FrequencySeries.abs_max" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the maximum of the absolute value</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="kuibit.frequencyseries.FrequencySeries.abs_min">
+<code class="sig-name descname"><span class="pre">abs_min</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#kuibit.frequencyseries.FrequencySeries.abs_min" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the minimum of the absolute value</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="kuibit.frequencyseries.FrequencySeries.abs_nanmax">
+<code class="sig-name descname"><span class="pre">abs_nanmax</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#kuibit.frequencyseries.FrequencySeries.abs_nanmax" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the maximum of the absolute value ignoring NaNs</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="kuibit.frequencyseries.FrequencySeries.abs_nanmin">
+<code class="sig-name descname"><span class="pre">abs_nanmin</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#kuibit.frequencyseries.FrequencySeries.abs_nanmin" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the minimum of the absolute value ignoring NaNs</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="kuibit.frequencyseries.FrequencySeries.amp">
+<em class="property"><span class="pre">property</span> </em><code class="sig-name descname"><span class="pre">amp</span></code><a class="headerlink" href="#kuibit.frequencyseries.FrequencySeries.amp" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the amplitude of frequencies.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Amplitude of the series.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>1d NumPy array</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="kuibit.frequencyseries.FrequencySeries.amplitude">
+<em class="property"><span class="pre">property</span> </em><code class="sig-name descname"><span class="pre">amplitude</span></code><a class="headerlink" href="#kuibit.frequencyseries.FrequencySeries.amplitude" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the amplitude of frequencies.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Amplitude of the series.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>1d NumPy array</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="kuibit.frequencyseries.FrequencySeries.band_pass">
+<code class="sig-name descname"><span class="pre">band_pass</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fmin</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fmax</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/kuibit/frequencyseries.html#FrequencySeries.band_pass"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kuibit.frequencyseries.FrequencySeries.band_pass" title="Permalink to this definition">¶</a></dt>
+<dd><p>Remove all the frequencies below <code class="docutils literal notranslate"><span class="pre">fmin</span></code> and above <code class="docutils literal notranslate"><span class="pre">fmax</span></code>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>fmin</strong> (<em>float</em>) – Minimum frequency.</p></li>
+<li><p><strong>fmax</strong> (<em>float</em>) – Maximum frequency.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="kuibit.frequencyseries.FrequencySeries.band_passed">
+<code class="sig-name descname"><span class="pre">band_passed</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fmin</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fmax</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/kuibit/frequencyseries.html#FrequencySeries.band_passed"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kuibit.frequencyseries.FrequencySeries.band_passed" title="Permalink to this definition">¶</a></dt>
+<dd><p>Remove frequencies outside the given range <code class="docutils literal notranslate"><span class="pre">fmin,</span> <span class="pre">fmax</span></code>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>fmin</strong> (<em>float</em>) – Minimum frequency.</p></li>
+<li><p><strong>fmax</strong> (<em>float</em>) – Maximum frequency.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="kuibit.frequencyseries.FrequencySeries.clip">
+<code class="sig-name descname"><span class="pre">clip</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">init</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">end</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#kuibit.frequencyseries.FrequencySeries.clip" title="Permalink to this definition">¶</a></dt>
+<dd><p>Remove data outside the the interval <code class="docutils literal notranslate"><span class="pre">[init,</span> <span class="pre">end]</span></code>. If
+<code class="docutils literal notranslate"><span class="pre">init</span></code> or <code class="docutils literal notranslate"><span class="pre">end</span></code> are not specified or None, it does not remove
+anything from this side.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>init</strong> (<em>float</em><em> or </em><em>None</em>) – Data with <code class="docutils literal notranslate"><span class="pre">x</span> <span class="pre">&lt;=</span> <span class="pre">init</span></code> will be removed.</p></li>
+<li><p><strong>end</strong> (<em>float</em><em> or </em><em>None</em>) – Data with <code class="docutils literal notranslate"><span class="pre">x</span> <span class="pre">&gt;=</span> <span class="pre">init</span></code> will be removed.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="kuibit.frequencyseries.FrequencySeries.clipped">
+<code class="sig-name descname"><span class="pre">clipped</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">init</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">end</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#kuibit.frequencyseries.FrequencySeries.clipped" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a series with data removed outside the interval <code class="docutils literal notranslate"><span class="pre">[init,</span> <span class="pre">end]</span></code>. If
+<code class="docutils literal notranslate"><span class="pre">init</span></code> or <code class="docutils literal notranslate"><span class="pre">end</span></code> are not specified or None, it does not remove
+anything from this side.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>init</strong> (<em>float</em><em> or </em><em>None</em>) – Data with <code class="docutils literal notranslate"><span class="pre">x</span> <span class="pre">&lt;=</span> <span class="pre">init</span></code> will be removed.</p></li>
+<li><p><strong>end</strong> (<em>float</em><em> or </em><em>None</em>) – Data with <code class="docutils literal notranslate"><span class="pre">x</span> <span class="pre">&gt;=</span> <span class="pre">init</span></code> will be removed.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Series with enforced minimum and maximum</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="series_ref.html#kuibit.series.BaseSeries" title="kuibit.series.BaseSeries"><code class="xref py py-class docutils literal notranslate"><span class="pre">BaseSeries</span></code></a> or derived class</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="kuibit.frequencyseries.FrequencySeries.copy">
+<code class="sig-name descname"><span class="pre">copy</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#kuibit.frequencyseries.FrequencySeries.copy" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a deep copy.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Deep copy of the series.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><a class="reference internal" href="series_ref.html#kuibit.series.BaseSeries" title="kuibit.series.BaseSeries"><code class="xref py py-class docutils literal notranslate"><span class="pre">BaseSeries</span></code></a> or derived class</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="kuibit.frequencyseries.FrequencySeries.crop">
+<code class="sig-name descname"><span class="pre">crop</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">init</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">end</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#kuibit.frequencyseries.FrequencySeries.crop" title="Permalink to this definition">¶</a></dt>
+<dd><p>Remove data outside the the interval <code class="docutils literal notranslate"><span class="pre">[init,</span> <span class="pre">end]</span></code>. If
+<code class="docutils literal notranslate"><span class="pre">init</span></code> or <code class="docutils literal notranslate"><span class="pre">end</span></code> are not specified or None, it does not remove
+anything from this side.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>init</strong> (<em>float</em><em> or </em><em>None</em>) – Data with <code class="docutils literal notranslate"><span class="pre">x</span> <span class="pre">&lt;=</span> <span class="pre">init</span></code> will be removed.</p></li>
+<li><p><strong>end</strong> (<em>float</em><em> or </em><em>None</em>) – Data with <code class="docutils literal notranslate"><span class="pre">x</span> <span class="pre">&gt;=</span> <span class="pre">init</span></code> will be removed.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="kuibit.frequencyseries.FrequencySeries.cropped">
+<code class="sig-name descname"><span class="pre">cropped</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">init</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">end</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#kuibit.frequencyseries.FrequencySeries.cropped" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a series with data removed outside the interval <code class="docutils literal notranslate"><span class="pre">[init,</span> <span class="pre">end]</span></code>. If
+<code class="docutils literal notranslate"><span class="pre">init</span></code> or <code class="docutils literal notranslate"><span class="pre">end</span></code> are not specified or None, it does not remove
+anything from this side.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>init</strong> (<em>float</em><em> or </em><em>None</em>) – Data with <code class="docutils literal notranslate"><span class="pre">x</span> <span class="pre">&lt;=</span> <span class="pre">init</span></code> will be removed.</p></li>
+<li><p><strong>end</strong> (<em>float</em><em> or </em><em>None</em>) – Data with <code class="docutils literal notranslate"><span class="pre">x</span> <span class="pre">&gt;=</span> <span class="pre">init</span></code> will be removed.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Series with enforced minimum and maximum</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="series_ref.html#kuibit.series.BaseSeries" title="kuibit.series.BaseSeries"><code class="xref py py-class docutils literal notranslate"><span class="pre">BaseSeries</span></code></a> or derived class</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="kuibit.frequencyseries.FrequencySeries.df">
+<em class="property"><span class="pre">property</span> </em><code class="sig-name descname"><span class="pre">df</span></code><a class="headerlink" href="#kuibit.frequencyseries.FrequencySeries.df" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the spacing (<code class="docutils literal notranslate"><span class="pre">delta_f</span></code>) if the series is regularly sampled,
+otherwise raise error.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Frequency spacing (<code class="docutils literal notranslate"><span class="pre">delta_f</span></code>).</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="kuibit.frequencyseries.FrequencySeries.differentiate">
+<code class="sig-name descname"><span class="pre">differentiate</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">order</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#kuibit.frequencyseries.FrequencySeries.differentiate" title="Permalink to this definition">¶</a></dt>
+<dd><p>Differentiate with the numerical order-differentiation.</p>
+<p>The optional parameter <code class="docutils literal notranslate"><span class="pre">order</span></code> specifies the order of the derivative.</p>
+<p>The derivative is calulated as centered differencing in the interior
+and one-sided derivatives at the boundaries. Higher orders are computed
+applying the same rule recursively.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>order</strong> (<em>int</em>) – Order of derivative (e.g. 2 = second derivative).</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="kuibit.frequencyseries.FrequencySeries.differentiated">
+<code class="sig-name descname"><span class="pre">differentiated</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">order</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#kuibit.frequencyseries.FrequencySeries.differentiated" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a series that is the numerical order-differentiation of
+the present series.</p>
+<p>The optional parameter <code class="docutils literal notranslate"><span class="pre">order</span></code> specifies the order of the derivative.</p>
+<p>The derivative is calulated as centered differencing in the interior
+and one-sided derivatives at the boundaries. Higher orders are computed
+applying the same rule recursively.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>order</strong> (<em>int</em>) – Order of derivative (e.g. 2 = second derivative).</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>New series with derivative.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="series_ref.html#kuibit.series.BaseSeries" title="kuibit.series.BaseSeries"><code class="xref py py-class docutils literal notranslate"><span class="pre">BaseSeries</span></code></a> or derived class</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="kuibit.frequencyseries.FrequencySeries.evaluate_with_spline">
+<code class="sig-name descname"><span class="pre">evaluate_with_spline</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ext</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#kuibit.frequencyseries.FrequencySeries.evaluate_with_spline" title="Permalink to this definition">¶</a></dt>
+<dd><p>Evaluate the spline on the points <code class="docutils literal notranslate"><span class="pre">x</span></code>.</p>
+<p>Values outside the interval are extrapolated if <code class="docutils literal notranslate"><span class="pre">ext=0</span></code>, set to 0 if
+<code class="docutils literal notranslate"><span class="pre">ext=1</span></code>, raise a <code class="docutils literal notranslate"><span class="pre">ValueError</span></code> if <code class="docutils literal notranslate"><span class="pre">ext=2</span></code>, or if <code class="docutils literal notranslate"><span class="pre">ext=3</span></code>, return
+the boundary value.</p>
+<p>This method is meant to be used only if you want to use a different ext
+for a specific call, otherwise, just use __call__.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>x</strong> (<em>1D NumPy array of float</em>) – Array of x where to evaluate the series or single x.</p></li>
+<li><p><strong>ext</strong> (<em>int</em>) – How to deal values outside the bounaries. Values outside the
+interval are extrapolated if <code class="docutils literal notranslate"><span class="pre">ext=0</span></code>, set to 0 if
+<code class="docutils literal notranslate"><span class="pre">ext=1</span></code>, raise a ValueError if <code class="docutils literal notranslate"><span class="pre">ext=2</span></code>, or if <code class="docutils literal notranslate"><span class="pre">ext=3</span></code>,
+return the boundary value.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Values of the series evaluated on the input x.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>1D NumPy array or float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="kuibit.frequencyseries.FrequencySeries.f">
+<em class="property"><span class="pre">property</span> </em><code class="sig-name descname"><span class="pre">f</span></code><a class="headerlink" href="#kuibit.frequencyseries.FrequencySeries.f" title="Permalink to this definition">¶</a></dt>
+<dd><p>Frequencies.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Frequencies.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>1d NumPy array</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="kuibit.frequencyseries.FrequencySeries.fft">
+<em class="property"><span class="pre">property</span> </em><code class="sig-name descname"><span class="pre">fft</span></code><a class="headerlink" href="#kuibit.frequencyseries.FrequencySeries.fft" title="Permalink to this definition">¶</a></dt>
+<dd><p>Fourier components.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Fourier components.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>1d NumPy array</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="kuibit.frequencyseries.FrequencySeries.fmax">
+<em class="property"><span class="pre">property</span> </em><code class="sig-name descname"><span class="pre">fmax</span></code><a class="headerlink" href="#kuibit.frequencyseries.FrequencySeries.fmax" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the maximum frequency.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Maximum frequency of the series.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="kuibit.frequencyseries.FrequencySeries.fmin">
+<em class="property"><span class="pre">property</span> </em><code class="sig-name descname"><span class="pre">fmin</span></code><a class="headerlink" href="#kuibit.frequencyseries.FrequencySeries.fmin" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the minimum frequency.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Minimum frequency of the series.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="kuibit.frequencyseries.FrequencySeries.frange">
+<em class="property"><span class="pre">property</span> </em><code class="sig-name descname"><span class="pre">frange</span></code><a class="headerlink" href="#kuibit.frequencyseries.FrequencySeries.frange" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the range of frequencies.
+The range is defined as the maximum frequency minus the minimum.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Range of the series (<code class="docutils literal notranslate"><span class="pre">f_max</span></code> - <code class="docutils literal notranslate"><span class="pre">f_min</span></code>).</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="kuibit.frequencyseries.FrequencySeries.high_pass">
+<code class="sig-name descname"><span class="pre">high_pass</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">f</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/kuibit/frequencyseries.html#FrequencySeries.high_pass"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kuibit.frequencyseries.FrequencySeries.high_pass" title="Permalink to this definition">¶</a></dt>
+<dd><p>Remove all the frequencies smaller than f</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>f</strong> (<em>float</em>) – Frequency below which series will be zeroed.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="kuibit.frequencyseries.FrequencySeries.high_passed">
+<code class="sig-name descname"><span class="pre">high_passed</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">f</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/kuibit/frequencyseries.html#FrequencySeries.high_passed"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kuibit.frequencyseries.FrequencySeries.high_passed" title="Permalink to this definition">¶</a></dt>
+<dd><p>Remove frequencies lower or equal than the given.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>f</strong> (<em>float</em>) – Frequency below which series will be zeroed.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>High-passed <a class="reference internal" href="#kuibit.frequencyseries.FrequencySeries" title="kuibit.frequencyseries.FrequencySeries"><code class="xref py py-class docutils literal notranslate"><span class="pre">FrequencySeries</span></code></a>.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="#kuibit.frequencyseries.FrequencySeries" title="kuibit.frequencyseries.FrequencySeries"><code class="xref py py-class docutils literal notranslate"><span class="pre">FrequencySeries</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="kuibit.frequencyseries.FrequencySeries.index">
+<em class="property"><span class="pre">property</span> </em><code class="sig-name descname"><span class="pre">index</span></code><a class="headerlink" href="#kuibit.frequencyseries.FrequencySeries.index" title="Permalink to this definition">¶</a></dt>
+<dd><p>Fake pandas properties, to make Series objects plottable by
+matplotlib.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="kuibit.frequencyseries.FrequencySeries.inner_product">
+<code class="sig-name descname"><span class="pre">inner_product</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">other</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fmin</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fmax</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">inf</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">noises</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">same_domain</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/kuibit/frequencyseries.html#FrequencySeries.inner_product"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kuibit.frequencyseries.FrequencySeries.inner_product" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compute the (network) inner product with another <a class="reference internal" href="#kuibit.frequencyseries.FrequencySeries" title="kuibit.frequencyseries.FrequencySeries"><code class="xref py py-class docutils literal notranslate"><span class="pre">FrequencySeries</span></code></a>.</p>
+<p>This is defined as:</p>
+<p><span class="math notranslate nohighlight">\((h_1, h_2) = 4 \Re \int_{f_min}^{f_max} \frac{h_1 h_2^*}{S_n}\)</span></p>
+<p>where <code class="docutils literal notranslate"><span class="pre">S_n</span></code> is the noise curve, and <code class="docutils literal notranslate"><span class="pre">h_1</span></code>, <code class="docutils literal notranslate"><span class="pre">h_2</span></code> the series.</p>
+<p>In case multiple noise curves are supplied, compute</p>
+<p><span class="math notranslate nohighlight">\((h_1, h_2) = \sum_{detectors}
+4 \Re \int_{f_min}^{f_max} \frac{h_1 h_2^*}{S_n}\)</span></p>
+<p>This is the network inner product. To compute this quantity, you have
+to provide a list of noises.</p>
+<p>We assume that the <a class="reference internal" href="#kuibit.frequencyseries.FrequencySeries" title="kuibit.frequencyseries.FrequencySeries"><code class="xref py py-class docutils literal notranslate"><span class="pre">FrequencySeries</span></code></a> are zero outside of the
+interval of definition, so if <code class="docutils literal notranslate"><span class="pre">fmax</span></code> (<code class="docutils literal notranslate"><span class="pre">fmin</span></code>) is larger (smaller)
+than the one available, it is effectively set to the one available.</p>
+<p>Since Fourier typically transforms explode at fmin = 0, the result of
+the integration is highly sensitive to regions near that frequency.</p>
+<p>If <code class="docutils literal notranslate"><span class="pre">same_domain</span></code> is True, it is assumed that all the
+<a class="reference internal" href="#kuibit.frequencyseries.FrequencySeries" title="kuibit.frequencyseries.FrequencySeries"><code class="xref py py-class docutils literal notranslate"><span class="pre">FrequencySeries</span></code></a> involved are defined over the same
+frequencies. Turning this on speeds up computations, but it will result
+in incorrect results if the assumption is violated. If it is False, the
+domain of definition of the series is checked, if it is not the same for
+all the series, then they will be resampled.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>other</strong> (<a class="reference internal" href="#kuibit.frequencyseries.FrequencySeries" title="kuibit.frequencyseries.FrequencySeries"><code class="xref py py-class docutils literal notranslate"><span class="pre">FrequencySeries</span></code></a>) – Second frequency series in the inner product.</p></li>
+<li><p><strong>fmin</strong> (<em>float</em>) – Remove frequencies below this value.</p></li>
+<li><p><strong>fmax</strong> (<em>float</em>) – Remove frequencies above this value.</p></li>
+<li><p><strong>noise</strong> (<a class="reference internal" href="#kuibit.frequencyseries.FrequencySeries" title="kuibit.frequencyseries.FrequencySeries"><code class="xref py py-class docutils literal notranslate"><span class="pre">FrequencySeries</span></code></a>, list
+of <a class="reference internal" href="#kuibit.frequencyseries.FrequencySeries" title="kuibit.frequencyseries.FrequencySeries"><code class="xref py py-class docutils literal notranslate"><span class="pre">FrequencySeries</span></code></a> or None) – If None, no weight is applied.</p></li>
+<li><p><strong>same_domain</strong> (<em>bool</em>) – Whether to assume that the <a class="reference internal" href="#kuibit.frequencyseries.FrequencySeries" title="kuibit.frequencyseries.FrequencySeries"><code class="xref py py-class docutils literal notranslate"><span class="pre">FrequencySeries</span></code></a>
+are defined over the same frequencies. If you can
+guarantee this, the computation will be faster.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Inner product between <code class="docutils literal notranslate"><span class="pre">self</span></code> and <code class="docutils literal notranslate"><span class="pre">other</span></code>.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="kuibit.frequencyseries.FrequencySeries.integrate">
+<code class="sig-name descname"><span class="pre">integrate</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dx</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#kuibit.frequencyseries.FrequencySeries.integrate" title="Permalink to this definition">¶</a></dt>
+<dd><p>Integrate series with method of the rectangles.</p>
+<p>The spacing <code class="docutils literal notranslate"><span class="pre">dx</span></code> can be optionally provided. If provided, it will be
+used (increasing performance), otherwise it will be computed internally.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="kuibit.frequencyseries.FrequencySeries.integrated">
+<code class="sig-name descname"><span class="pre">integrated</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dx</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#kuibit.frequencyseries.FrequencySeries.integrated" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a series that is the integral computed with method of
+the rectangles.</p>
+<p>The spacing <code class="docutils literal notranslate"><span class="pre">dx</span></code> can be optionally provided. If provided, it will be
+used (increasing performance), otherwise it will be computed internally.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>dx</strong> (<em>float</em><em> or </em><em>None</em>) – Delta x in the independent variable. If None it will be
+computed internally.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>New series with the cumulative integral.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="series_ref.html#kuibit.series.BaseSeries" title="kuibit.series.BaseSeries"><code class="xref py py-class docutils literal notranslate"><span class="pre">BaseSeries</span></code></a> or derived class</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="kuibit.frequencyseries.FrequencySeries.is_complex">
+<code class="sig-name descname"><span class="pre">is_complex</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#kuibit.frequencyseries.FrequencySeries.is_complex" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return whether the data is complex.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>True if the data is complex, false if it is not.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="kuibit.frequencyseries.FrequencySeries.is_masked">
+<code class="sig-name descname"><span class="pre">is_masked</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span> &#x2192; <span class="pre">bool</span><a class="headerlink" href="#kuibit.frequencyseries.FrequencySeries.is_masked" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return whether the x or y are masked.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>True if the x or y are masked, false if it is not.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="kuibit.frequencyseries.FrequencySeries.is_regularly_sampled">
+<code class="sig-name descname"><span class="pre">is_regularly_sampled</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#kuibit.frequencyseries.FrequencySeries.is_regularly_sampled" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return whether the series is regularly sampled.</p>
+<p>If the series is only one point, an error is raised.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Is the series regularly sampled?</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="kuibit.frequencyseries.FrequencySeries.low_pass">
+<code class="sig-name descname"><span class="pre">low_pass</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">f</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/kuibit/frequencyseries.html#FrequencySeries.low_pass"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kuibit.frequencyseries.FrequencySeries.low_pass" title="Permalink to this definition">¶</a></dt>
+<dd><p>Remove frequencies higher or equal than <code class="docutils literal notranslate"><span class="pre">f</span></code> (absolute value).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>f</strong> (<em>float</em>) – Frequency above which series will be zeroed.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="kuibit.frequencyseries.FrequencySeries.low_passed">
+<code class="sig-name descname"><span class="pre">low_passed</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">f</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/kuibit/frequencyseries.html#FrequencySeries.low_passed"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kuibit.frequencyseries.FrequencySeries.low_passed" title="Permalink to this definition">¶</a></dt>
+<dd><p>Remove frequencies higher or equal than the given.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>f</strong> (<em>float</em>) – Frequency above which the series will be zeroed.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Low-passed <a class="reference internal" href="#kuibit.frequencyseries.FrequencySeries" title="kuibit.frequencyseries.FrequencySeries"><code class="xref py py-class docutils literal notranslate"><span class="pre">FrequencySeries</span></code></a>.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="#kuibit.frequencyseries.FrequencySeries" title="kuibit.frequencyseries.FrequencySeries"><code class="xref py py-class docutils literal notranslate"><span class="pre">FrequencySeries</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="kuibit.frequencyseries.FrequencySeries.mask">
+<em class="property"><span class="pre">property</span> </em><code class="sig-name descname"><span class="pre">mask</span></code><a class="headerlink" href="#kuibit.frequencyseries.FrequencySeries.mask" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return where the data is valid (according to the mask).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Array of True/False of the same length of the data.
+False where the data is valid, true where is not.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>1D array of bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="kuibit.frequencyseries.FrequencySeries.mask_applied">
+<code class="sig-name descname"><span class="pre">mask_applied</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mask</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ignore_existing</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#kuibit.frequencyseries.FrequencySeries.mask_applied" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a new series with given mask applied to the data.</p>
+<p>If a previous mask already exists, the new mask will be added on top,
+unless <code class="docutils literal notranslate"><span class="pre">ignore_existing</span></code> is True.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>mask</strong> (<em>1D NumPy array</em>) – Array of booleans that identify where the data is invalid.
+This can be obtained with the method <a class="reference internal" href="#kuibit.frequencyseries.FrequencySeries.mask" title="kuibit.frequencyseries.FrequencySeries.mask"><code class="xref py py-meth docutils literal notranslate"><span class="pre">mask()</span></code></a>.</p></li>
+<li><p><strong>ignore_existing</strong> (<em>bool</em>) – If True, overwrite any previously existing mask.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>New series with mask applied.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="series_ref.html#kuibit.series.BaseSeries" title="kuibit.series.BaseSeries"><code class="xref py py-class docutils literal notranslate"><span class="pre">BaseSeries</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="kuibit.frequencyseries.FrequencySeries.mask_apply">
+<code class="sig-name descname"><span class="pre">mask_apply</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mask</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ignore_existing</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#kuibit.frequencyseries.FrequencySeries.mask_apply" title="Permalink to this definition">¶</a></dt>
+<dd><p>Apply given mask.</p>
+<p>If a previous mask already exists, the new mask will be added on top,
+unless <code class="docutils literal notranslate"><span class="pre">ignore_existing</span></code> is True.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>mask</strong> (<em>1D NumPy array</em>) – Array of booleans that identify where the data is invalid.
+This can be obtained with the method <a class="reference internal" href="#kuibit.frequencyseries.FrequencySeries.mask" title="kuibit.frequencyseries.FrequencySeries.mask"><code class="xref py py-meth docutils literal notranslate"><span class="pre">mask()</span></code></a>.</p></li>
+<li><p><strong>ignore_existing</strong> (<em>bool</em>) – If True, overwrite any previously existing mask.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="kuibit.frequencyseries.FrequencySeries.mask_equal">
+<code class="sig-name descname"><span class="pre">mask_equal</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#kuibit.frequencyseries.FrequencySeries.mask_equal" title="Permalink to this definition">¶</a></dt>
+<dd><p>Mask where data is equal to given value.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="kuibit.frequencyseries.FrequencySeries.mask_greater">
+<code class="sig-name descname"><span class="pre">mask_greater</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#kuibit.frequencyseries.FrequencySeries.mask_greater" title="Permalink to this definition">¶</a></dt>
+<dd><p>Mask where data is greater to given value.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="kuibit.frequencyseries.FrequencySeries.mask_greater_equal">
+<code class="sig-name descname"><span class="pre">mask_greater_equal</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#kuibit.frequencyseries.FrequencySeries.mask_greater_equal" title="Permalink to this definition">¶</a></dt>
+<dd><p>Mask where data is greater or equal to given value.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="kuibit.frequencyseries.FrequencySeries.mask_inside">
+<code class="sig-name descname"><span class="pre">mask_inside</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value2</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#kuibit.frequencyseries.FrequencySeries.mask_inside" title="Permalink to this definition">¶</a></dt>
+<dd><p>Mask where data is inside the given values.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="kuibit.frequencyseries.FrequencySeries.mask_invalid">
+<code class="sig-name descname"><span class="pre">mask_invalid</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#kuibit.frequencyseries.FrequencySeries.mask_invalid" title="Permalink to this definition">¶</a></dt>
+<dd><p>Mask where data is invalid (NaNs of infs).</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="kuibit.frequencyseries.FrequencySeries.mask_less">
+<code class="sig-name descname"><span class="pre">mask_less</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#kuibit.frequencyseries.FrequencySeries.mask_less" title="Permalink to this definition">¶</a></dt>
+<dd><p>Mask where data is less to given value.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="kuibit.frequencyseries.FrequencySeries.mask_less_equal">
+<code class="sig-name descname"><span class="pre">mask_less_equal</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#kuibit.frequencyseries.FrequencySeries.mask_less_equal" title="Permalink to this definition">¶</a></dt>
+<dd><p>Mask where data is less or equal to given value.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="kuibit.frequencyseries.FrequencySeries.mask_not_equal">
+<code class="sig-name descname"><span class="pre">mask_not_equal</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#kuibit.frequencyseries.FrequencySeries.mask_not_equal" title="Permalink to this definition">¶</a></dt>
+<dd><p>Mask where data is not equal to given value.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="kuibit.frequencyseries.FrequencySeries.mask_outside">
+<code class="sig-name descname"><span class="pre">mask_outside</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value2</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#kuibit.frequencyseries.FrequencySeries.mask_outside" title="Permalink to this definition">¶</a></dt>
+<dd><p>Mask where data is outside the given values.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="kuibit.frequencyseries.FrequencySeries.mask_remove">
+<code class="sig-name descname"><span class="pre">mask_remove</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#kuibit.frequencyseries.FrequencySeries.mask_remove" title="Permalink to this definition">¶</a></dt>
+<dd><p>Remove masked values.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="kuibit.frequencyseries.FrequencySeries.mask_removed">
+<code class="sig-name descname"><span class="pre">mask_removed</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#kuibit.frequencyseries.FrequencySeries.mask_removed" title="Permalink to this definition">¶</a></dt>
+<dd><p>Remove masked value.</p>
+<p>Return a new series with valid values only.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>A new series with only valid values.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><a class="reference internal" href="series_ref.html#kuibit.series.BaseSeries" title="kuibit.series.BaseSeries"><code class="xref py py-class docutils literal notranslate"><span class="pre">BaseSeries</span></code></a> or derived class</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="kuibit.frequencyseries.FrequencySeries.masked_equal">
+<code class="sig-name descname"><span class="pre">masked_equal</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#kuibit.frequencyseries.FrequencySeries.masked_equal" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a new objected masked where data is equal to given value.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="kuibit.frequencyseries.FrequencySeries.masked_greater">
+<code class="sig-name descname"><span class="pre">masked_greater</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#kuibit.frequencyseries.FrequencySeries.masked_greater" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a new objected masked where data is greater to given value.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="kuibit.frequencyseries.FrequencySeries.masked_greater_equal">
+<code class="sig-name descname"><span class="pre">masked_greater_equal</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#kuibit.frequencyseries.FrequencySeries.masked_greater_equal" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a new objected masked where data is greater or equal to given value.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="kuibit.frequencyseries.FrequencySeries.masked_inside">
+<code class="sig-name descname"><span class="pre">masked_inside</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value2</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#kuibit.frequencyseries.FrequencySeries.masked_inside" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a new objected masked where data is inside the given values.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="kuibit.frequencyseries.FrequencySeries.masked_invalid">
+<code class="sig-name descname"><span class="pre">masked_invalid</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#kuibit.frequencyseries.FrequencySeries.masked_invalid" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a new objected masked where data is invalid (NaNs or infs).</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="kuibit.frequencyseries.FrequencySeries.masked_less">
+<code class="sig-name descname"><span class="pre">masked_less</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#kuibit.frequencyseries.FrequencySeries.masked_less" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a new objected masked where data is less to given value.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="kuibit.frequencyseries.FrequencySeries.masked_less_equal">
+<code class="sig-name descname"><span class="pre">masked_less_equal</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#kuibit.frequencyseries.FrequencySeries.masked_less_equal" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a new objected masked where data is less or equal to given value.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="kuibit.frequencyseries.FrequencySeries.masked_not_equal">
+<code class="sig-name descname"><span class="pre">masked_not_equal</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#kuibit.frequencyseries.FrequencySeries.masked_not_equal" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a new objected masked where data is not equal to given value.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="kuibit.frequencyseries.FrequencySeries.masked_outside">
+<code class="sig-name descname"><span class="pre">masked_outside</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value2</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#kuibit.frequencyseries.FrequencySeries.masked_outside" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a new objected masked where data is outside the given values.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="kuibit.frequencyseries.FrequencySeries.nans_remove">
+<code class="sig-name descname"><span class="pre">nans_remove</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#kuibit.frequencyseries.FrequencySeries.nans_remove" title="Permalink to this definition">¶</a></dt>
+<dd><p>Filter out nans/infinite values.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="kuibit.frequencyseries.FrequencySeries.nans_removed">
+<code class="sig-name descname"><span class="pre">nans_removed</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#kuibit.frequencyseries.FrequencySeries.nans_removed" title="Permalink to this definition">¶</a></dt>
+<dd><p>Filter out nans/infinite values.
+Return a new series with finite values only.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>A new series with only finite values.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><a class="reference internal" href="series_ref.html#kuibit.series.BaseSeries" title="kuibit.series.BaseSeries"><code class="xref py py-class docutils literal notranslate"><span class="pre">BaseSeries</span></code></a> or derived class</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="kuibit.frequencyseries.FrequencySeries.negative_frequencies_remove">
+<code class="sig-name descname"><span class="pre">negative_frequencies_remove</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/kuibit/frequencyseries.html#FrequencySeries.negative_frequencies_remove"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kuibit.frequencyseries.FrequencySeries.negative_frequencies_remove" title="Permalink to this definition">¶</a></dt>
+<dd><p>Remove all the frequencies smaller than 0.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="kuibit.frequencyseries.FrequencySeries.negative_frequencies_removed">
+<code class="sig-name descname"><span class="pre">negative_frequencies_removed</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/kuibit/frequencyseries.html#FrequencySeries.negative_frequencies_removed"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kuibit.frequencyseries.FrequencySeries.negative_frequencies_removed" title="Permalink to this definition">¶</a></dt>
+<dd><p>Remove frequencies lower than 0.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Frequencyeseries with only positive frequencies.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><a class="reference internal" href="#kuibit.frequencyseries.FrequencySeries" title="kuibit.frequencyseries.FrequencySeries"><code class="xref py py-class docutils literal notranslate"><span class="pre">FrequencySeries</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="kuibit.frequencyseries.FrequencySeries.normalize">
+<code class="sig-name descname"><span class="pre">normalize</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/kuibit/frequencyseries.html#FrequencySeries.normalize"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kuibit.frequencyseries.FrequencySeries.normalize" title="Permalink to this definition">¶</a></dt>
+<dd><p>Scale values so that the maximum of the amplitude is 1.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="kuibit.frequencyseries.FrequencySeries.normalized">
+<code class="sig-name descname"><span class="pre">normalized</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/kuibit/frequencyseries.html#FrequencySeries.normalized"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kuibit.frequencyseries.FrequencySeries.normalized" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a new <a class="reference internal" href="#kuibit.frequencyseries.FrequencySeries" title="kuibit.frequencyseries.FrequencySeries"><code class="xref py py-class docutils literal notranslate"><span class="pre">FrequencySeries</span></code></a> with maximum amplitude of 1.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Normalized <a class="reference internal" href="#kuibit.frequencyseries.FrequencySeries" title="kuibit.frequencyseries.FrequencySeries"><code class="xref py py-class docutils literal notranslate"><span class="pre">FrequencySeries</span></code></a> series.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><a class="reference internal" href="#kuibit.frequencyseries.FrequencySeries" title="kuibit.frequencyseries.FrequencySeries"><code class="xref py py-class docutils literal notranslate"><span class="pre">FrequencySeries</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="kuibit.frequencyseries.FrequencySeries.overlap">
+<code class="sig-name descname"><span class="pre">overlap</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">other</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fmin</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fmax</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">inf</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">noises</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">same_domain</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/kuibit/frequencyseries.html#FrequencySeries.overlap"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kuibit.frequencyseries.FrequencySeries.overlap" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compute the (network) overlap.</p>
+<p>This is defined as:</p>
+<p><span class="math notranslate nohighlight">\(\textrm{overlap} = (h_1, h_2) / \sqrt{(h_1, h_1)(h_2, h_2)}\)</span></p>
+<p>where <code class="docutils literal notranslate"><span class="pre">h_1</span></code>, <code class="docutils literal notranslate"><span class="pre">h_2</span></code> are the series.</p>
+<p>To compute is the network overlap, you have to provide a list of noises.</p>
+<p>We assume that the <a class="reference internal" href="#kuibit.frequencyseries.FrequencySeries" title="kuibit.frequencyseries.FrequencySeries"><code class="xref py py-class docutils literal notranslate"><span class="pre">FrequencySeries</span></code></a> are zero outside of the
+interval of definition, so if <code class="docutils literal notranslate"><span class="pre">fmax</span></code> (<code class="docutils literal notranslate"><span class="pre">fmin</span></code>) is larger (smaller)
+than the one available, it is effectively set to the one available.</p>
+<p>Since Fourier typically transforms explode at fmin = 0, the result of
+the integration is highly sensitive to regions near that frequency.</p>
+<p>If <code class="docutils literal notranslate"><span class="pre">same_domain</span></code> is True, it is assumed that all the
+<a class="reference internal" href="#kuibit.frequencyseries.FrequencySeries" title="kuibit.frequencyseries.FrequencySeries"><code class="xref py py-class docutils literal notranslate"><span class="pre">FrequencySeries</span></code></a> involved are defined over the same
+frequencies. Turning this on speeds up computations, but it will result
+in incorrect results if the assumption is violated. If it is False, the
+domain of definition of the series is checked, if it is not the same for
+all the series, then they will be resampled.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>other</strong> (<a class="reference internal" href="#kuibit.frequencyseries.FrequencySeries" title="kuibit.frequencyseries.FrequencySeries"><code class="xref py py-class docutils literal notranslate"><span class="pre">FrequencySeries</span></code></a>) – Second frequency series in the overlap.</p></li>
+<li><p><strong>fmin</strong> (<em>float</em>) – Remove frequencies below this value.</p></li>
+<li><p><strong>fmax</strong> (<em>float</em>) – Remove frequencies above this value.</p></li>
+<li><p><strong>noise</strong> ((list of) <a class="reference internal" href="#kuibit.frequencyseries.FrequencySeries" title="kuibit.frequencyseries.FrequencySeries"><code class="xref py py-class docutils literal notranslate"><span class="pre">FrequencySeries</span></code></a> or None) – If None, no weight is applied. If it is a list,
+the netowrk overlap is computed.</p></li>
+<li><p><strong>same_domain</strong> (<em>bool</em>) – Whether to assume that the <a class="reference internal" href="#kuibit.frequencyseries.FrequencySeries" title="kuibit.frequencyseries.FrequencySeries"><code class="xref py py-class docutils literal notranslate"><span class="pre">FrequencySeries</span></code></a>
+are defined over the same frequencies. If you can
+guarantee this, the computation will be faster.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Overlap between <code class="docutils literal notranslate"><span class="pre">self</span></code> and <code class="docutils literal notranslate"><span class="pre">other</span></code>.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="kuibit.frequencyseries.FrequencySeries.peaks">
+<code class="sig-name descname"><span class="pre">peaks</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">amp_threshold</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/kuibit/frequencyseries.html#FrequencySeries.peaks"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kuibit.frequencyseries.FrequencySeries.peaks" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the location and amplitude of the peaks of the amplitude.</p>
+<p>Peaks at the boundaries are not considered.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>amp_threshold</strong> (<em>float</em>) – Ignore peaks smaller than this value.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Peaks of the amplitude as list of tuples of three elements:
+frequency of the bin in which the peak is, fitted frequency of
+the maximum with parabolic approximation, amplitude of the peak.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>List of tuples of three elements.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="kuibit.frequencyseries.FrequencySeries.peaks_frequencies">
+<code class="sig-name descname"><span class="pre">peaks_frequencies</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">amp_threshold</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/kuibit/frequencyseries.html#FrequencySeries.peaks_frequencies"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kuibit.frequencyseries.FrequencySeries.peaks_frequencies" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the frequencies of the peaks of the amplitude larger
+than <code class="docutils literal notranslate"><span class="pre">amp_threshold</span></code>.</p>
+<p>The frequency is computed with a quadratic fit using the left and right
+neighbors.</p>
+<p>Peaks at the boundaries are not considered.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>amp_threshold</strong> (<em>float</em>) – Ignore peaks smaller than this value.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Fitted frequencies of the peaks of the amplitude.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>1d NumPy array</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="kuibit.frequencyseries.FrequencySeries.resample">
+<code class="sig-name descname"><span class="pre">resample</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">new_x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ext</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">piecewise_constant</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#kuibit.frequencyseries.FrequencySeries.resample" title="Permalink to this definition">¶</a></dt>
+<dd><p>Resample the series to new independent variable new_x.</p>
+<p>If you want to resample without using the spline, and you want a nearest
+neighbor resampling, pass the keyword <code class="docutils literal notranslate"><span class="pre">piecewise_constant=True</span></code>.
+This may be a good choice for data with large discontinuities, where the
+splines are ineffective.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>new_x</strong> (<em>1D NumPy array</em><em> or </em><em>list of float</em>) – New independent variable.</p></li>
+<li><p><strong>ext</strong> (<em>0 for extrapolation</em><em>, </em><em>1 for returning zero</em><em>, </em><em>2 for ValueError</em><em>,
+</em><em>3 for extending the boundary</em>) – How to handle points outside the interval.</p></li>
+<li><p><strong>piecewise_constant</strong> (<em>bool</em>) – Do not use splines, use the nearest neighbors.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="kuibit.frequencyseries.FrequencySeries.resampled">
+<code class="sig-name descname"><span class="pre">resampled</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">new_x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ext</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">piecewise_constant</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#kuibit.frequencyseries.FrequencySeries.resampled" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a new series resampled from this to new_x.</p>
+<p>You can specify the details of the spline with the method make_spline.</p>
+<p>If you want to resample without using the spline, and you want a nearest
+neighbor resampling, pass the keyword <code class="docutils literal notranslate"><span class="pre">piecewise_constant=True</span></code>.
+This may be a good choice for data with large discontinuities, where the
+splines are ineffective.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>new_x</strong> (<em>1D NumPy array</em><em> or </em><em>list of float</em>) – New independent variable.</p></li>
+<li><p><strong>ext</strong> (0 for extrapolation, 1 for returning zero, 2 for <code class="docutils literal notranslate"><span class="pre">ValueError</span></code>,
+3 for extending the boundary) – How to handle points outside the data interval.</p></li>
+<li><p><strong>piecewise_constant</strong> (<em>bool</em>) – Do not use splines, use the nearest neighbors.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Resampled series.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="series_ref.html#kuibit.series.BaseSeries" title="kuibit.series.BaseSeries"><code class="xref py py-class docutils literal notranslate"><span class="pre">BaseSeries</span></code></a> or derived class</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="kuibit.frequencyseries.FrequencySeries.save">
+<code class="sig-name descname"><span class="pre">save</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file_name</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#kuibit.frequencyseries.FrequencySeries.save" title="Permalink to this definition">¶</a></dt>
+<dd><p>Saves into simple ASCII format with 2 columns <code class="docutils literal notranslate"><span class="pre">(x,</span> <span class="pre">y)</span></code>
+for real valued data and 3 columns <code class="docutils literal notranslate"><span class="pre">(x,</span> <span class="pre">Re(y),</span> <span class="pre">Im(y))</span></code>
+for complex valued data.</p>
+<p>Unknown arguments are passed to <code class="docutils literal notranslate"><span class="pre">NumPy.savetxt</span></code>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>file_name</strong> (<em>str</em>) – Path (with extension) of the output file.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="kuibit.frequencyseries.FrequencySeries.savgol_smooth">
+<code class="sig-name descname"><span class="pre">savgol_smooth</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">window_size</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">order</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">3</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#kuibit.frequencyseries.FrequencySeries.savgol_smooth" title="Permalink to this definition">¶</a></dt>
+<dd><p>Smooth the series with a Savitzky-Golay filter with window of
+size <code class="docutils literal notranslate"><span class="pre">window_size</span></code> and order <code class="docutils literal notranslate"><span class="pre">order</span></code>.</p>
+<p>This is just like a regular “Moving average” filter, but instead of
+just calculating the average, a polynomial (usually 2nd or 4th order)
+fit is made for every point, and only the “middle” point is chosen.
+Since 2nd (or 4th) order information is concerned at every point, the
+bias introduced in “moving average” approach at local maxima or minima,
+is circumvented.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>window_size</strong> (<em>int</em>) – Number of points of the smoothing window (needs to
+be odd).</p></li>
+<li><p><strong>order</strong> (<em>int</em>) – Order of the filter.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="kuibit.frequencyseries.FrequencySeries.savgol_smoothed">
+<code class="sig-name descname"><span class="pre">savgol_smoothed</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">window_size</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">order</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">3</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#kuibit.frequencyseries.FrequencySeries.savgol_smoothed" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a smoothed series with a Savitzky-Golay filter with
+window of size <code class="docutils literal notranslate"><span class="pre">window_size</span></code> and order <code class="docutils literal notranslate"><span class="pre">order</span></code>.</p>
+<p>This is just like a regular “Moving average” filter, but instead of
+just calculating the average, a polynomial (usually 2nd or 4th order)
+fit is made for every point, and only the “middle” point is chosen.
+Since 2nd (or 4th) order information is concerned at every point, the
+bias introduced in “moving average” approach at local maxima or minima,
+is circumvented.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>window_size</strong> (<em>int</em>) – Number of points of the smoothing window (needs to
+be odd).</p></li>
+<li><p><strong>order</strong> (<em>int</em>) – Order of the filter.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>New smoothed series.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="series_ref.html#kuibit.series.BaseSeries" title="kuibit.series.BaseSeries"><code class="xref py py-class docutils literal notranslate"><span class="pre">BaseSeries</span></code></a> or derived class</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="kuibit.frequencyseries.FrequencySeries.spline_differentiate">
+<code class="sig-name descname"><span class="pre">spline_differentiate</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">order</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#kuibit.frequencyseries.FrequencySeries.spline_differentiate" title="Permalink to this definition">¶</a></dt>
+<dd><p>Differentiate the series using the spline representation.</p>
+<p>The optional parameter <code class="docutils literal notranslate"><span class="pre">order</span></code> specifies the order of the derivative.</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>The values at the boundary are typically not accurate.</p>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>order</strong> (<em>int</em>) – Order of derivative (e.g. 2 = second derivative).</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="kuibit.frequencyseries.FrequencySeries.spline_differentiated">
+<code class="sig-name descname"><span class="pre">spline_differentiated</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">order</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#kuibit.frequencyseries.FrequencySeries.spline_differentiated" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a series that is the derivative of the current one using
+the spline representation.</p>
+<p>The optional parameter <code class="docutils literal notranslate"><span class="pre">order</span></code> specifies the order of the derivative.</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>The values at the boundary are typically not accurate.</p>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>order</strong> (<em>int</em>) – Order of derivative (e.g. 2 = second derivative).</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>New series with derivative</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="series_ref.html#kuibit.series.BaseSeries" title="kuibit.series.BaseSeries"><code class="xref py py-class docutils literal notranslate"><span class="pre">BaseSeries</span></code></a> or derived class</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="kuibit.frequencyseries.FrequencySeries.to_TimeSeries">
+<code class="sig-name descname"><span class="pre">to_TimeSeries</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/kuibit/frequencyseries.html#FrequencySeries.to_TimeSeries"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kuibit.frequencyseries.FrequencySeries.to_TimeSeries" title="Permalink to this definition">¶</a></dt>
+<dd><p>Perform a inverse Fourier transform.</p>
+<p>If only positive frequencies are found, we will assume that the
+original signal was real.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Inverse Fourier transform.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><a class="reference internal" href="timeseries_ref.html#kuibit.timeseries.TimeSeries" title="kuibit.timeseries.TimeSeries"><code class="xref py py-class docutils literal notranslate"><span class="pre">TimeSeries</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="kuibit.frequencyseries.FrequencySeries.values">
+<em class="property"><span class="pre">property</span> </em><code class="sig-name descname"><span class="pre">values</span></code><a class="headerlink" href="#kuibit.frequencyseries.FrequencySeries.values" title="Permalink to this definition">¶</a></dt>
+<dd><p>Fake pandas properties, to make Series objects plottable by
+matplotlib.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="kuibit.frequencyseries.FrequencySeries.x_at_abs_maximum_y">
+<code class="sig-name descname"><span class="pre">x_at_abs_maximum_y</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#kuibit.frequencyseries.FrequencySeries.x_at_abs_maximum_y" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the value of x when abs(y) is maximum.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Value of x when abs(y) is maximum.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="kuibit.frequencyseries.FrequencySeries.x_at_abs_minimum_y">
+<code class="sig-name descname"><span class="pre">x_at_abs_minimum_y</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#kuibit.frequencyseries.FrequencySeries.x_at_abs_minimum_y" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the value of x when abs(y) is minimum.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Value of x when abs(y) is minimum.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="kuibit.frequencyseries.FrequencySeries.x_at_maximum_y">
+<code class="sig-name descname"><span class="pre">x_at_maximum_y</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#kuibit.frequencyseries.FrequencySeries.x_at_maximum_y" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the value of x when y is maximum.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Value of x when y is maximum.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="kuibit.frequencyseries.FrequencySeries.x_at_minimum_y">
+<code class="sig-name descname"><span class="pre">x_at_minimum_y</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#kuibit.frequencyseries.FrequencySeries.x_at_minimum_y" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the value of x when y is minimum.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Value of x when y is minimum.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="kuibit.frequencyseries.FrequencySeries.xmax">
+<em class="property"><span class="pre">property</span> </em><code class="sig-name descname"><span class="pre">xmax</span></code><a class="headerlink" href="#kuibit.frequencyseries.FrequencySeries.xmax" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the maximum of the independent variable x.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Rvalue</dt>
+<dd class="field-odd"><p>Maximum of x</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="kuibit.frequencyseries.FrequencySeries.xmin">
+<em class="property"><span class="pre">property</span> </em><code class="sig-name descname"><span class="pre">xmin</span></code><a class="headerlink" href="#kuibit.frequencyseries.FrequencySeries.xmin" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the minimum of the independent variable x.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Rvalue</dt>
+<dd class="field-odd"><p>Minimum of x.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt id="kuibit.frequencyseries.load_FrequencySeries">
+<code class="sig-prename descclassname"><span class="pre">kuibit.frequencyseries.</span></code><code class="sig-name descname"><span class="pre">load_FrequencySeries</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">complex_on_two_columns</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/kuibit/frequencyseries.html#load_FrequencySeries"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kuibit.frequencyseries.load_FrequencySeries" title="Permalink to this definition">¶</a></dt>
+<dd><p>Load a text file as a <a class="reference internal" href="#kuibit.frequencyseries.FrequencySeries" title="kuibit.frequencyseries.FrequencySeries"><code class="xref py py-class docutils literal notranslate"><span class="pre">FrequencySeries</span></code></a>.</p>
+<p>The backend is <code class="docutils literal notranslate"><span class="pre">np.loadtxt</span></code>, and the unknown arguments passed to this
+function are given to <code class="docutils literal notranslate"><span class="pre">np.loadtxt</span></code>. This can be used, for example, to
+specify the columns of the file that have to be read.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>path</strong> (<em>str</em>) – Path of the file to be loaded.</p></li>
+<li><p><strong>complex_on_two_columns</strong> (<em>bool</em>) – When true, it is assumed that the real and
+the imaginary parts of the frequency series
+are on two columns. Otherwise, on one.
+This has to be False to load real data
+(e.g., noise curves).</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Loaded data as <a class="reference internal" href="#kuibit.frequencyseries.FrequencySeries" title="kuibit.frequencyseries.FrequencySeries"><code class="xref py py-class docutils literal notranslate"><span class="pre">FrequencySeries</span></code></a>.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="#kuibit.frequencyseries.FrequencySeries" title="kuibit.frequencyseries.FrequencySeries"><code class="xref py py-class docutils literal notranslate"><span class="pre">FrequencySeries</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="kuibit.frequencyseries.load_noise_curve">
+<code class="sig-prename descclassname"><span class="pre">kuibit.frequencyseries.</span></code><code class="sig-name descname"><span class="pre">load_noise_curve</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/kuibit/frequencyseries.html#load_noise_curve"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kuibit.frequencyseries.load_noise_curve" title="Permalink to this definition">¶</a></dt>
+<dd><p>Load a noise curve as a <a class="reference internal" href="#kuibit.frequencyseries.FrequencySeries" title="kuibit.frequencyseries.FrequencySeries"><code class="xref py py-class docutils literal notranslate"><span class="pre">FrequencySeries</span></code></a>.</p>
+<p>Unknown arguments are passed to <code class="docutils literal notranslate"><span class="pre">np.loadtxt</span></code>.</p>
+<p>This is syntactic sugar for the function <code class="xref py py-func docutils literal notranslate"><span class="pre">()</span></code></p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>path</strong> (<em>str</em>) – Path of the file to be loaded.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Noise curve.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="#kuibit.frequencyseries.FrequencySeries" title="kuibit.frequencyseries.FrequencySeries"><code class="xref py py-class docutils literal notranslate"><span class="pre">FrequencySeries</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="index.html">
+              <img class="logo" src="_static/logo.png" alt="Logo"/>
+            </a></p>
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="timeseries_ref.html"
+                        title="previous chapter">Reference on kuibit.timeseries</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="cactus_grid_functions_ref.html"
+                        title="next chapter">Reference on kuibit.cactus_grid_functions</a></p>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="cactus_grid_functions_ref.html" title="Reference on kuibit.cactus_grid_functions"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="timeseries_ref.html" title="Reference on kuibit.timeseries"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">kuibit 1.3.4 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">Reference on kuibit.frequencyseries</a></li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2020-2022, Gabriele Bozzola.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 3.5.4.
+    </div>
+  </body>
+</html>
