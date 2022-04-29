@@ -115,7 +115,7 @@ if __name__ == "__main__":
                 variable_name = variable
 
             logger.debug("Merging refinement levels")
-            data = data.merge_refinement_levels().to_GridSeries()
+            data = data.refinement_levels_merged().to_GridSeries()
 
             if args.logscale:
                 label = f"log10({variable_name})"
