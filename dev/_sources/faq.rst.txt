@@ -1,6 +1,17 @@
 Frequently Asked Questions
 =============================================
 
+How do I access grid data as NumPy arrays?
+------------------------------------------
+
+``kuibit`` defines its own high-level types to keep complexity under control.
+Sometimes, however, one wants to have full control over how the data is stored
+and manipulated. Suppose ``grid_fun`` is the grid function for which you want to
+access the data over for the refinement level ``i`` and component ``j`` as NumPy
+array. ``grid_fun[i][j]`` is a :py:class:`~.UniformGridData`, a higher-level
+object that contains data, coordinates, and additional metadata. For here,
+``grid_fun[i][j].data`` is the NumPy array with the actual data.
+
 Some of the attributes in SimDir are slow
 -----------------------------------------
 
