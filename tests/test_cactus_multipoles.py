@@ -65,6 +65,16 @@ class TestCactusMultipoles(unittest.TestCase):
         self.assertEqual(mult1.copy(), mult1)
         self.assertIsNot(mult1.copy(), mult1)
 
+        # test crop()
+        mult1_copy = mult1.copy()
+        expected_data = [(2, 2, self.ts1.cropped(init=0.1, end=0.2))]
+        self.assertEqual(
+            mult1_copy.cropped(init=0.1, end=0.2),
+            mp.MultipoleOneDet(100, expected_data),
+        )
+        mult1_copy.crop(init=0.1, end=0.2)
+        self.assertEqual(mult1_copy, mp.MultipoleOneDet(100, expected_data))
+
         # test available_
         self.assertCountEqual(mult1.available_l, {2})
         self.assertCountEqual(mult2.available_l, {2})

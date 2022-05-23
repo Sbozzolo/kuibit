@@ -43,6 +43,7 @@ up with a series of brackets or dots to access the actual data. For example, if
 
 import os
 import re
+from typing import Optional
 
 import h5py
 import numpy as np
@@ -153,6 +154,28 @@ class MultipoleOneDet:
         :rtype: :py:class:`~.MultipoleOneDet`
         """
         return type(self)(self.dist, self.data, self.l_min)
+
+    def crop(self, init: Optional[float] = None, end: Optional[float] = None):
+        """Remove all the data before ``init`` and after ``end``.
+
+        If ``init`` or ``end`` are not specified, do not crop on that side.
+        """
+        for _, _, ts in self.data:
+            ts.crop(init=init, end=end)
+
+    def cropped(
+        self, init: Optional[float] = None, end: Optional[float] = None
+    ):
+        """Return a copy where the data is cropped in the provided interval.
+
+        If ``init`` or ``end`` are not specified, do not crop on that side.
+
+        :returns: Copy of ``self`` with data cropped.
+        :rtype: :py:class:`~.MultipoleOneDet`
+        """
+        ret = self.copy()
+        ret.crop(init=init, end=end)
+        return ret
 
     def __contains__(self, key):
         return key in self._multipoles

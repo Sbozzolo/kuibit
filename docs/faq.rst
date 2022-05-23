@@ -71,8 +71,8 @@ I want to pre-process Psi4 before computing the strain
 :py:class:`~.GravitationalWavesOneDet` contains methods to compute quantities
 from ``Psi4``, but sometimes is desirable to perform some operations on ``Psi4``
 first. The easiest way to do so is to create a new
-:py:class:`~.GravitationalWavesOneDet` with the new data. For instance, to crop
-the ``Psi4``:
+:py:class:`~.GravitationalWavesOneDet` with the new data. For instance, to
+smooth ``Psi4`` (with the Savitzky-Golay filter):
 
 .. code-block::
 
@@ -81,8 +81,12 @@ the ``Psi4``:
    data = []
 
    for mult_l, mult_m, ts in wav:
-       data.append([mult_l, mult_m, ts.cropped(init=T_MIN, end=T_MAX)])
+       data.append([mult_l, mult_m, ts.savgol_smoothed(window_size=11)])
 
    new_wav = GravitationalWavesOneDet(wav.dist, data)
 
 where ``wav`` is the old ``GravitationalWavesOneDet``, ``new_wav`` the new one.
+
+Another common operation is cropping the data (e.g., to remove junk radiation).
+You can use the same approach, or use directly the `~.:py:meth:crop` or
+`~.:py:meth:cropped` methods.
