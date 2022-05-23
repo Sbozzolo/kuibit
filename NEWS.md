@@ -15,6 +15,7 @@
   a contribution by @irrationalnumbers,
   [#27](https://github.com/Sbozzolo/kuibit/pull/27))
 - Added fourth order accuracy in finite differences of grid functions
+- Added `copy` to gravitational and electromagnetic waves
 
 #### New `tree` module
 

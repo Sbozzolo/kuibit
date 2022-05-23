@@ -74,6 +74,16 @@ class GravitationalWavesOneDet(mp.MultipoleOneDet):
 
         super().__init__(dist, data, 2)
 
+    def copy(self):
+        """Return a deep copy.
+
+        :returns: Deep copy of ``self``.
+        :rtype: :py:class:`~.GravitationalWavesOneDet`
+        """
+        # TODO: (Refactor) Call super().copy()
+        # This method ought to call the same method in the base class.
+        return type(self)(self.dist, self.data)
+
     # staticmethod means that this function will be allocated by python only
     # once, since it doesn't depend on the detail of the instance
     @staticmethod
@@ -1256,6 +1266,16 @@ class ElectromagneticWavesOneDet(mp.MultipoleOneDet):
     def __init__(self, dist, data):
 
         super().__init__(dist, data, 1)
+
+    def copy(self):
+        """Return a deep copy.
+
+        :returns: Deep copy of ``self``.
+        :rtype: :py:class:`~.ElectromagneticWavesOneDet`
+        """
+        # TODO: (Refactor) Call super().copy()
+        # This method ought to call the same method in the base class.
+        return type(self)(self.dist, self.data)
 
     def get_power_lm(self, mult_l, mult_m):
         """Return the instantaneous power in the mode (l, m).

@@ -51,6 +51,12 @@ class TestCactusWaves(unittest.TestCase):
         self.assertEqual(gw.l_min, 2)
         self.assertEqual(em.l_min, 1)
 
+        # test copy
+        gw_copy = gw.copy()
+        em_copy = em.copy()
+        self.assertEqual(gw, gw_copy)
+        self.assertEqual(em, em_copy)
+
     def test_get_psi4_lm(self):
 
         self.assertEqual(
