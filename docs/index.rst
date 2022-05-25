@@ -207,6 +207,7 @@ Reference material (classes, functions, ...)
    testimonials.rst
    features.rst
    faq.rst
+   citations.rst
    simdir_ref.rst
    series_ref.rst
    timeseries_ref.rst
@@ -234,7 +235,6 @@ A kuibit (also known as *kukuipad* harvest pole) is the tool traditionally used
 by the Tohono O'odham people to reach the fruit of the Saguaro cacti during the
 harvesting season. In the same way, this package is a tool that you can use to
 collect the fruit of your ``Cactus`` simulations.
-
 
 Credits
 -------
@@ -277,6 +277,9 @@ consider citing ``kuibit`` if you find the software useful. You can use the foll
 
 ``kuibit`` is built with ``NumPy``, ``SciPy``, and ``h5py``, and optionally uses
 ``matplotlib``, ``mayavi``, and ``numba``. Consider citing these packages too.
+
+For a list of papers that cite ``kuibit``, see :doc:`Papers citing this software
+<citations>`.
 
 Disclaimer
 ------------

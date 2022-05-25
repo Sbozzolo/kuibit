@@ -36,7 +36,9 @@ extensions = ['sphinx.ext.autodoc',
               'sphinx.ext.autosectionlabel',
               'sphinx.ext.mathjax',
               'sphinx.ext.viewcode',
-              'nbsphinx'
+              'nbsphinx',
+              'sphinxcontrib.bibtex',
+              'sphinxcontrib.citations',
               ]
 
 autosectionlabel_prefix_document = True
@@ -77,3 +79,6 @@ html_show_sourcelink = False
 html_theme_options = {
     "maincolor": "#228B22",
 }
+
+citations_ads_token = os.environ["ADS_API"]
+citations_bibcode_list = ["2021JOSS....6.3099B"]

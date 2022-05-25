@@ -37,6 +37,8 @@ jobs:
         if: steps.cached-poetry-dependencies.outputs.cache-hit != 'true'
 
       - name: Produce documentation
+        env:
+            ADS_API: ${{ secrets.ADS_API }}
         run: |
           sudo apt-get update
           sudo apt-get install -y pandoc
