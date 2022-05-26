@@ -54,6 +54,24 @@
             
   <section id="frequently-asked-questions">
 <h1>Frequently Asked Questions<a class="headerlink" href="#frequently-asked-questions" title="Permalink to this headline">¶</a></h1>
+<section id="what-is-the-userwarning-unused-redundant-file-warning">
+<h2>What is the <code class="docutils literal notranslate"><span class="pre">UserWarning:</span> <span class="pre">Unused</span> <span class="pre">(redundant)</span> <span class="pre">file:</span></code> warning?<a class="headerlink" href="#what-is-the-userwarning-unused-redundant-file-warning" title="Permalink to this headline">¶</a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">kuibit</span></code> scans recursively the simulation directory to find what data is
+available and organizes it. The warning <code class="docutils literal notranslate"><span class="pre">UserWarning:</span> <span class="pre">Unused</span> <span class="pre">(redundant)</span> <span class="pre">file</span></code>
+is emitted when multiple different files claim to contain the same data (for
+instance, two grid data files containing the same iteration). A common example
+that lead to such scenario is restarting a simulation when the previous
+checkpoint could not be produced. More specifically, for instance,
+<code class="docutils literal notranslate"><span class="pre">output-0000</span></code> ran successfully and produced a checkpoint, the simulation is
+restarted from there and data is saved in <code class="docutils literal notranslate"><span class="pre">output-0001</span></code>. However, the
+checkpoint could not be created (for example, because of quota issues or other
+crashes). When the simulation is restarted again, a new folder <code class="docutils literal notranslate"><span class="pre">output-0002</span></code>
+is produced and the run starts from the checkpoint associated to
+<code class="docutils literal notranslate"><span class="pre">output-0000</span></code>. In this case, <code class="docutils literal notranslate"><span class="pre">output-0002</span></code> will initially contain
+overlapping iterations as in <code class="docutils literal notranslate"><span class="pre">output-0001</span></code>. If <code class="docutils literal notranslate"><span class="pre">output-0001</span></code> is not removed,
+<code class="docutils literal notranslate"><span class="pre">kubit</span></code> will issue a warning.</p>
+<p>The default policy in <code class="docutils literal notranslate"><span class="pre">kuibit</span></code> is to use the most recent data.</p>
+</section>
 <section id="how-do-i-access-grid-data-as-numpy-arrays">
 <h2>How do I access grid data as NumPy arrays?<a class="headerlink" href="#how-do-i-access-grid-data-as-numpy-arrays" title="Permalink to this headline">¶</a></h2>
 <p><code class="docutils literal notranslate"><span class="pre">kuibit</span></code> defines its own high-level types to keep complexity under control.
@@ -150,6 +168,7 @@ You can use the same approach, or use directly the <cite>~.:py:meth:crop</cite> 
     <h3><a href="index.html">Table of Contents</a></h3>
     <ul>
 <li><a class="reference internal" href="#">Frequently Asked Questions</a><ul>
+<li><a class="reference internal" href="#what-is-the-userwarning-unused-redundant-file-warning">What is the <code class="docutils literal notranslate"><span class="pre">UserWarning:</span> <span class="pre">Unused</span> <span class="pre">(redundant)</span> <span class="pre">file:</span></code> warning?</a></li>
 <li><a class="reference internal" href="#how-do-i-access-grid-data-as-numpy-arrays">How do I access grid data as NumPy arrays?</a></li>
 <li><a class="reference internal" href="#some-of-the-attributes-in-simdir-are-slow">Some of the attributes in SimDir are slow</a></li>
 <li><a class="reference internal" href="#refinement-levels-merged-is-too-slow-and-or-requires-too-much-memory">refinement_levels_merged() is too slow and/or requires too much memory</a></li>
