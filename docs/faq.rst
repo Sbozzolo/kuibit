@@ -1,6 +1,27 @@
 Frequently Asked Questions
 =============================================
 
+What is the ``UserWarning: Unused (redundant) file:`` warning?
+--------------------------------------------------------------
+
+``kuibit`` scans recursively the simulation directory to find what data is
+available and organizes it. The warning ``UserWarning: Unused (redundant) file``
+is emitted when multiple different files claim to contain the same data (for
+instance, two grid data files containing the same iteration). A common example
+that lead to such scenario is restarting a simulation when the previous
+checkpoint could not be produced. More specifically, for instance,
+``output-0000`` ran successfully and produced a checkpoint, the simulation is
+restarted from there and data is saved in ``output-0001``. However, the
+checkpoint could not be created (for example, because of quota issues or other
+crashes). When the simulation is restarted again, a new folder ``output-0002``
+is produced and the run starts from the checkpoint associated to
+``output-0000``. In this case, ``output-0002`` will initially contain
+overlapping iterations as in ``output-0001``. If ``output-0001`` is not removed,
+``kubit`` will issue a warning.
+
+The default policy in ``kuibit`` is to use the most recent data.
+
+
 How do I access grid data as NumPy arrays?
 ------------------------------------------
 
