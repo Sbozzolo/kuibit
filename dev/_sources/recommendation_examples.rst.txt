@@ -84,3 +84,6 @@ For ``fish``:
 .. code-block:: sh
 
     for f in (ls "bins"); register-python-argcomplete --shell fish $f > ~/.config/fish/completions/$f.fish; end
+
+Here ``bins`` is the folder where the example scripts are located (the same
+folder that you would put in your ``PATH``).
