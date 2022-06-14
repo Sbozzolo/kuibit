@@ -5,6 +5,7 @@
 #### Bug fixes
 - Fix str representation of multipoles
 - Fix implicit plotting of `Series` for `matplotlib >= 3.5.2`
+- Fix `test_init` in `test_cactus_grid_function`
 
 ## Version 1.3.4 (22 April 2022)
 

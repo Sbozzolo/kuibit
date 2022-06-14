@@ -472,9 +472,9 @@ class TestOneGridFunction(unittest.TestCase):
         # Let's check this first one
         #
         # We have to remove the blank lines from the count
-        expected_data = np.loadtxt(
-            self.rho_star_file, usecols=(12,), max_rows=875
-        )
+        expected_data = np.loadtxt(self.rho_star_file, usecols=(12,))[
+            : 29 * 29
+        ]
 
         expected_grid = grid_data.UniformGrid(
             [29, 29],
