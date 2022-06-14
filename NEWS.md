@@ -1,5 +1,10 @@
 # Changelog
 
+## Version 1.3.5 (14 June 2022)
+
+#### Bug fixes
+- Fix str representation of multipoles
+
 ## Version 1.3.4 (22 April 2022)
 
 #### General

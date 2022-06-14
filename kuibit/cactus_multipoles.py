@@ -186,7 +186,7 @@ class MultipoleOneDet:
         return self._multipoles.keys()
 
     def __str__(self):
-        ret = f"(l, m) available: {self.keys()}"
+        ret = f"(l, m) available: {list(self.keys())}"
         if self.missing_lm:
             ret += f" (missing: {list(self.missing_lm)})"
         return ret
