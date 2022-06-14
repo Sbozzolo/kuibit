@@ -43,6 +43,21 @@ from kuibit.attr_dict import AttributeDictionary
 from kuibit.numerical import BaseNumerical
 
 
+class _AttributeDictionaryNumPy(AttributeDictionary):
+    """Class that maps a dictionary to attributes and that has a method
+    ``to_numpy``.
+
+    This is used only to fake being Pandas so that Series can be plotted with
+    matplotlib. See comments in BaseSeries.
+
+    """
+
+    def to_numpy(self):
+        # This method only makes sense in the context of faking pandas. See
+        # comments in BaseSeries about this.
+        return self.values
+
+
 # Note, we test this class testing its derived class TimeSeries
 class BaseSeries(BaseNumerical):
     """Base class (not intended for direct use) for generic series data in
@@ -227,14 +242,42 @@ class BaseSeries(BaseNumerical):
     # function is checked if the index property is available, in which case,
     # index.values and values are returned. We use this to make our objects
     # plottable.
-    # The function in matplotlib is:
+    # The function in matplotlib < 3.5.3 is:
     # try:
     #    return y.index.values, y.values
     # except AttributeError:
     #    y = _check_1d(y)
     #    return np.arange(y.shape[0], dtype=float), y
     #
-    # If we provide index.values and values, we can return x and y
+    # It got updated to
+    # try:
+    #     return y.index.to_numpy(), y.to_numpy()
+    # except AttributeError:
+    #     pass
+    # try:
+    #     y = _check_1d(y)
+    # except (np.VisibleDeprecationWarning, ValueError):
+    #     # NumPy 1.19 will warn on ragged input, and we can't actually use it.
+    #     pass
+    # else:
+    #     return np.arange(y.shape[0], dtype=float), y
+    # raise ValueError('Input could not be cast to an at-least-1D NumPy array')
+    #
+    # Let us try to be compatible with both (luckily, we can easily do that).
+    #
+    # For the older version, if we provide index.values and values, we can
+    # return x and y.
+    #
+    # For the newer version, we also have to provide the correct methods named
+    # `to_numpy` to both this class and the object that is return by the index
+    # attribute. So, we define a _AttributeDictionaryNumPy class that does that.
+
+    def to_numpy(self):
+        """Return the data as NumPy array. Equivalent to ``self.y``.
+
+        This function is here to enable compatibility matplotlib.
+        """
+        return self.y
 
     @property
     def values(self):
@@ -248,7 +291,7 @@ class BaseSeries(BaseNumerical):
         """Fake pandas properties, to make Series objects plottable by
         matplotlib.
         """
-        return AttributeDictionary({"values": self.x})
+        return _AttributeDictionaryNumPy({"values": self.x})
 
     @property
     def mask(self):

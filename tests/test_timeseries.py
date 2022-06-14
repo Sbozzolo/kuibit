@@ -135,6 +135,12 @@ class TestTimeseries(unittest.TestCase):
         self.assertIs(self.TS.index.values, self.TS.x)
         self.assertIs(self.TS.values, self.TS.y)
 
+    def test_to_numpy(self):
+
+        # to_numpy is used by matplotlib >= 3.5.2 for implicit plotting
+        self.assertIs(self.TS.to_numpy(), self.TS.y)
+        self.assertIs(self.TS.index.to_numpy(), self.TS.x)
+
     def test_len(self):
         self.assertEqual(len(self.TS), 100)
 
