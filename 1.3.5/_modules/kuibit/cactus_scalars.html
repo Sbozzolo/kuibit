@@ -1,0 +1,541 @@
+
+
+<!doctype html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>kuibit.cactus_scalars &#8212; kuibit 1.3.5 documentation</title>
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/bizstyle.css" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/css/custom.css" />
+    
+    <script id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+    <script src="../../_static/jquery.js"></script>
+    <script src="../../_static/underscore.js"></script>
+    <script src="../../_static/doctools.js"></script>
+    <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="../../_static/bizstyle.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0" />
+    <!--[if lt IE 9]>
+    <script src="_static/css3-mediaqueries.js"></script>
+    <![endif]-->
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">kuibit 1.3.5 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../index.html" accesskey="U">Module code</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">kuibit.cactus_scalars</a></li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for kuibit.cactus_scalars</h1><div class="highlight"><pre>
+<span></span><span class="ch">#!/usr/bin/env python3</span>
+
+<span class="c1"># Copyright (C) 2020-2022 Gabriele Bozzola</span>
+<span class="c1">#</span>
+<span class="c1"># Based on code originally developed by Wolfgang Kastaun. This file may contain</span>
+<span class="c1"># algorithms and/or structures first implemented in</span>
+<span class="c1"># GitHub:wokast/PyCactus/PostCactus/cactus_scalars.py</span>
+<span class="c1">#</span>
+<span class="c1"># This program is free software; you can redistribute it and/or modify it under</span>
+<span class="c1"># the terms of the GNU General Public License as published by the Free Software</span>
+<span class="c1"># Foundation; either version 3 of the License, or (at your option) any later</span>
+<span class="c1"># version.</span>
+<span class="c1">#</span>
+<span class="c1"># This program is distributed in the hope that it will be useful, but WITHOUT</span>
+<span class="c1"># ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS</span>
+<span class="c1"># FOR A PARTICULAR PURPOSE. See the GNU General Public License for more</span>
+<span class="c1"># details.</span>
+<span class="c1">#</span>
+<span class="c1"># You should have received a copy of the GNU General Public License along with</span>
+<span class="c1"># this program; if not, see &lt;https://www.gnu.org/licenses/&gt;.</span>
+
+<span class="sd">&quot;&quot;&quot;The :py:mod:`~.cactus_scalars` module provides simple interfaces to access</span>
+<span class="sd">time series data as output by CarpetASCII, including all the reductions.</span>
+
+<span class="sd">There are multiple classes defined in this module:</span>
+
+<span class="sd">- :py:class`~.ScalarsDir` interfaces with :py:class:`~.SimDir` and organizes the</span>
+<span class="sd">  data according to their reduction. This is a dictionary-like object with keys</span>
+<span class="sd">  the possible reduction (e.g., ``max``, ``average``, ``norm2``). -</span>
+<span class="sd">- :py:class`~.AllScalars` takes all the files that correspond to a given reduction</span>
+<span class="sd">  and organize them according to the variables they contain.</span>
+<span class="sd">- :py:class`~.OneScalar` represents one single scalar variable, with data that</span>
+<span class="sd">  is represented as :py:class:`~.TimeSeries` objects. :py:class`~.AllScalars` contains</span>
+<span class="sd">  many :py:class`~.OneScalar` objects.</span>
+
+<span class="sd">These are hierarchical classes, one containing the others, so one typically ends</span>
+<span class="sd">up with a series of brackets or dots to access the actual data. For example, if</span>
+<span class="sd">``sim`` is a :py:class:`~.SimDir`, ``sim.ts.max[&#39;rho_b&#39;]`` is maximum of</span>
+<span class="sd">``rho_b`` represented as :py:class:`~.TimeSeries`.</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">re</span>
+<span class="kn">from</span> <span class="nn">bz2</span> <span class="kn">import</span> <span class="nb">open</span> <span class="k">as</span> <span class="n">bopen</span>
+<span class="kn">from</span> <span class="nn">functools</span> <span class="kn">import</span> <span class="n">lru_cache</span>
+<span class="kn">from</span> <span class="nn">gzip</span> <span class="kn">import</span> <span class="nb">open</span> <span class="k">as</span> <span class="n">gopen</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
+<span class="kn">from</span> <span class="nn">kuibit</span> <span class="kn">import</span> <span class="n">simdir</span>
+<span class="kn">from</span> <span class="nn">kuibit</span> <span class="kn">import</span> <span class="n">timeseries</span> <span class="k">as</span> <span class="n">ts</span>
+<span class="kn">from</span> <span class="nn">kuibit.attr_dict</span> <span class="kn">import</span> <span class="n">pythonize_name_dict</span>
+<span class="kn">from</span> <span class="nn">kuibit.cactus_ascii_utils</span> <span class="kn">import</span> <span class="n">scan_header</span>
+
+
+<div class="viewcode-block" id="OneScalar"><a class="viewcode-back" href="../../cactus_scalars_ref.html#kuibit.cactus_scalars.OneScalar">[docs]</a><span class="k">class</span> <span class="nc">OneScalar</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Read scalar data produced by CarpetASCII.</span>
+
+<span class="sd">    :py:class:`~.OneScalar` is a dictionary-like object with keys the variables</span>
+<span class="sd">    and values the :py:class:`~.TimeSeries`.</span>
+
+<span class="sd">    Single variable per file or single file per group are supported. In the</span>
+<span class="sd">    latter case, the header is inspected to understand the content of the file.</span>
+<span class="sd">    Compressed files (gz and bz2) are supported too.</span>
+
+<span class="sd">    :py:class:`~.OneScalar` represents one scalar file, there can be multiple</span>
+<span class="sd">    variables inside, (if it was output with ``one_file_per_group = yes``).</span>
+
+<span class="sd">    :ivar path: Path of the file.</span>
+<span class="sd">    :type path: str</span>
+<span class="sd">    :ivar folder: Path of the folder that contains the file.</span>
+<span class="sd">    :type folder: str</span>
+<span class="sd">    :ivar reduction_type: Type of reduction.</span>
+<span class="sd">    :type reduction_type: str</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># What is this pattern?</span>
+    <span class="c1"># Let&#39;s understand it. We have ^ and $, so we match the entire string and</span>
+    <span class="c1"># we have seven capturing groups.</span>
+    <span class="c1"># 1: (\w+) matches any number of characters greater than 0 (w = word)</span>
+    <span class="c1"># 2: ((-(\w+))|(\[\d+\]))? optionally match one of the two</span>
+    <span class="c1"># 3: Matched - with followed by 4: any word</span>
+    <span class="c1"># 5: Matches brackets with a number inside</span>
+    <span class="c1"># In between match a dot (\.)</span>
+    <span class="c1"># 6: (minimum|maximum|norm1|norm2|norm_inf|average|scalars)? optionally match one</span>
+    <span class="c1">#    of those</span>
+    <span class="c1"># In between match .asc (\.asc)</span>
+    <span class="c1"># 7: (\.(gz|bz2))? optionally match .gz or .bz2</span>
+
+    <span class="c1"># We want to match file names like hydrobase-press.maximum.asc or</span>
+    <span class="c1"># hydrobase-vel[0].maximum.asc</span>
+    <span class="c1">#</span>
+    <span class="c1"># The .scalars. file is the one generated with the option</span>
+    <span class="c1"># all_reductions_in_one_file</span>
+
+    <span class="n">_pattern_filename</span> <span class="o">=</span> <span class="sa">r</span><span class="s2">&quot;&quot;&quot;</span>
+<span class="s2">    ^(\w+)</span>
+<span class="s2">    ((-(\w+))|(\[\d+\]))?</span>
+<span class="s2">    \.(minimum|maximum|norm1|norm2|norm_inf|average|scalars)?</span>
+<span class="s2">    \.asc</span>
+<span class="s2">    (\.(gz|bz2))?$&quot;&quot;&quot;</span>
+
+    <span class="n">_rx_filename</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="n">_pattern_filename</span><span class="p">,</span> <span class="n">re</span><span class="o">.</span><span class="n">VERBOSE</span><span class="p">)</span>
+
+    <span class="n">_reduction_types</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s2">&quot;minimum&quot;</span><span class="p">:</span> <span class="s2">&quot;min&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;maximum&quot;</span><span class="p">:</span> <span class="s2">&quot;max&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;norm1&quot;</span><span class="p">:</span> <span class="s2">&quot;norm1&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;norm2&quot;</span><span class="p">:</span> <span class="s2">&quot;norm2&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;norm_inf&quot;</span><span class="p">:</span> <span class="s2">&quot;infnorm&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;average&quot;</span><span class="p">:</span> <span class="s2">&quot;average&quot;</span><span class="p">,</span>
+        <span class="kc">None</span><span class="p">:</span> <span class="s2">&quot;scalar&quot;</span><span class="p">,</span>
+    <span class="p">}</span>
+
+    <span class="c1"># What function to use to open the file?</span>
+    <span class="c1"># What mode?</span>
+    <span class="n">_decompressor</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="kc">None</span><span class="p">:</span> <span class="p">(</span><span class="nb">open</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span><span class="p">),</span>
+        <span class="s2">&quot;gz&quot;</span><span class="p">:</span> <span class="p">(</span><span class="n">gopen</span><span class="p">,</span> <span class="s2">&quot;rt&quot;</span><span class="p">),</span>
+        <span class="s2">&quot;bz2&quot;</span><span class="p">:</span> <span class="p">(</span><span class="n">bopen</span><span class="p">,</span> <span class="s2">&quot;rt&quot;</span><span class="p">),</span>
+    <span class="p">}</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Constructor.</span>
+
+<span class="sd">        Here we understand what the file contains.</span>
+
+<span class="sd">        :param path: Path of the file.</span>
+<span class="sd">        :type path: str</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">path</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+        <span class="c1"># The _vars_columns dictionary contains a mapping between the various variables</span>
+        <span class="c1"># and the column numbers in which they are stored.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_vars_columns</span> <span class="o">=</span> <span class="p">{}</span>
+
+        <span class="c1"># The _vars dictionary maps variables with the TimeSeries. It is used to</span>
+        <span class="c1"># cached loaded data.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_vars</span> <span class="o">=</span> <span class="p">{}</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">folder</span><span class="p">,</span> <span class="n">filename</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">path</span><span class="p">)</span>
+
+        <span class="n">filename_match</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_rx_filename</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">filename_match</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Name scheme not recognized for </span><span class="si">{</span><span class="n">filename</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+        <span class="c1"># variable_name1 may be a thorn name (e.g. hydrobase-press)</span>
+        <span class="c1"># Or the actual variable name (e.g. H)</span>
+        <span class="p">(</span>
+            <span class="n">variable_name1</span><span class="p">,</span>
+            <span class="n">_0</span><span class="p">,</span>
+            <span class="n">_1</span><span class="p">,</span>
+            <span class="n">variable_name2</span><span class="p">,</span>
+            <span class="n">index_in_brackets</span><span class="p">,</span>
+            <span class="n">reduction_type</span><span class="p">,</span>
+            <span class="n">_2</span><span class="p">,</span>
+            <span class="n">compression_method</span><span class="p">,</span>
+        <span class="p">)</span> <span class="o">=</span> <span class="n">filename_match</span><span class="o">.</span><span class="n">groups</span><span class="p">()</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_compression_method</span> <span class="o">=</span> <span class="n">compression_method</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">reduction_type</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">reduction_type</span> <span class="k">if</span> <span class="n">reduction_type</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="s2">&quot;scalar&quot;</span>
+        <span class="p">)</span>
+
+        <span class="c1"># If the file contains multiple variables, we will scan the header</span>
+        <span class="c1"># immediately to understand the content. If not, we scan the header</span>
+        <span class="c1"># only when needed</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_is_one_file_per_group</span> <span class="o">=</span> <span class="n">variable_name2</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_was_header_scanned</span> <span class="o">=</span> <span class="kc">False</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_is_one_file_per_group</span><span class="p">:</span>
+            <span class="c1"># We need the variable names</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_scan_header</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">variable_name</span> <span class="o">=</span> <span class="n">variable_name1</span>
+            <span class="k">if</span> <span class="n">index_in_brackets</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">variable_name</span> <span class="o">+=</span> <span class="n">index_in_brackets</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_vars_columns</span> <span class="o">=</span> <span class="p">{</span><span class="n">variable_name</span><span class="p">:</span> <span class="kc">None</span><span class="p">}</span>
+
+    <span class="k">def</span> <span class="nf">_scan_header</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="c1"># Call scan_header with the right argument</span>
+
+        <span class="n">extended_format</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">reduction_type</span> <span class="o">==</span> <span class="s2">&quot;scalar&quot;</span>
+
+        <span class="c1"># What method to we need to use to open the file?</span>
+        <span class="c1"># opener can be open, gopen, or bopen depending on the extension</span>
+        <span class="c1"># of the file</span>
+        <span class="n">opener</span><span class="p">,</span> <span class="n">opener_mode</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_decompressor</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_compression_method</span><span class="p">]</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_time_column</span><span class="p">,</span> <span class="n">columns_info</span> <span class="o">=</span> <span class="n">scan_header</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">path</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_is_one_file_per_group</span><span class="p">,</span>
+            <span class="n">extended_format</span><span class="p">,</span>
+            <span class="n">opener</span><span class="o">=</span><span class="n">opener</span><span class="p">,</span>
+            <span class="n">opener_mode</span><span class="o">=</span><span class="n">opener_mode</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_is_one_file_per_group</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_vars_columns</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">columns_info</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># There is only one data_column</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_vars_columns</span> <span class="o">=</span> <span class="p">{</span>
+                <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_vars_columns</span><span class="o">.</span><span class="n">keys</span><span class="p">())[</span><span class="mi">0</span><span class="p">]:</span> <span class="n">columns_info</span>
+            <span class="p">}</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_was_header_scanned</span> <span class="o">=</span> <span class="kc">True</span>
+
+<div class="viewcode-block" id="OneScalar.load"><a class="viewcode-back" href="../../cactus_scalars_ref.html#kuibit.cactus_scalars.OneScalar.load">[docs]</a>    <span class="nd">@lru_cache</span><span class="p">(</span><span class="mi">128</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">load</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">variable</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Read file and return a TimeSeries with the requested variable.</span>
+
+<span class="sd">        :param variable: Requested variable.</span>
+<span class="sd">        :type variable: str</span>
+
+<span class="sd">        :returns: :py:class:`~.TimeSeries` with requested variable as read from</span>
+<span class="sd">                  file</span>
+<span class="sd">        :rtype: :py:class:`~.TimeSeries`</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_was_header_scanned</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_scan_header</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="n">variable</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">variable</span><span class="si">}</span><span class="s2"> not available&quot;</span><span class="p">)</span>
+
+        <span class="n">column_number</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_vars_columns</span><span class="p">[</span><span class="n">variable</span><span class="p">]</span>
+        <span class="n">t</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">loadtxt</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">path</span><span class="p">,</span>
+            <span class="n">unpack</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+            <span class="n">ndmin</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
+            <span class="n">usecols</span><span class="o">=</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_time_column</span><span class="p">,</span> <span class="n">column_number</span><span class="p">),</span>
+        <span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">ts</span><span class="o">.</span><span class="n">remove_duplicated_iters</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span></div>
+
+    <span class="k">def</span> <span class="fm">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">key</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_vars</span><span class="p">:</span>
+            <span class="c1"># Error checking is done in __load__</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_vars</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_vars</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
+
+    <span class="k">def</span> <span class="fm">__contains__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_vars_columns</span>
+
+<div class="viewcode-block" id="OneScalar.keys"><a class="viewcode-back" href="../../cactus_scalars_ref.html#kuibit.cactus_scalars.OneScalar.keys">[docs]</a>    <span class="k">def</span> <span class="nf">keys</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Return the list of variables available.</span>
+
+<span class="sd">        :returns: Variables in the file</span>
+<span class="sd">        :rtype:   dict_keys</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_vars_columns</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span></div></div>
+
+
+<div class="viewcode-block" id="AllScalars"><a class="viewcode-back" href="../../cactus_scalars_ref.html#kuibit.cactus_scalars.AllScalars">[docs]</a><span class="k">class</span> <span class="nc">AllScalars</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Helper class to read various types of scalar data in a list of files and</span>
+<span class="sd">    properly order them. The core of this object is the ``_vars`` dictionary</span>
+<span class="sd">    which contains the location of all the files for a specific variable and</span>
+<span class="sd">    reduction (as :py:class:`~.OneScalar`).</span>
+
+<span class="sd">    :py:class:`~.AllScalars` is a dictionary-like object, using the bracket notation</span>
+<span class="sd">    you can access values with as TimeSeries. Alternatively, you can access the</span>
+<span class="sd">    data as attributes of the ``fields`` attribute.</span>
+
+<span class="sd">    :ivar reduction_type: Type of reduction.</span>
+<span class="sd">    :type reduction_type: str</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">allfiles</span><span class="p">,</span> <span class="n">reduction_type</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Constructor.</span>
+
+<span class="sd">        :param allfiles: List of all the files</span>
+<span class="sd">        :type allfiles: list of str</span>
+<span class="sd">        :param reduction_type: Type of reduction.</span>
+<span class="sd">        :type reduction_type: str</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">reduction_type</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">reduction_type</span><span class="p">)</span>
+
+        <span class="c1"># TODO: Is it necessary to have the folder level?</span>
+        <span class="c1"># Probably not, so remove it</span>
+
+        <span class="c1"># _vars_readers is like _vars_readers[&#39;variable&#39;][&#39;folder&#39;] -&gt;</span>
+        <span class="c1"># OneScalar(f) _vars_readers[&#39;variable&#39;] is a dictionary with as keys</span>
+        <span class="c1"># the folders where to find the files associated to the variable and the</span>
+        <span class="c1"># reduction reduction_type</span>
+        <span class="c1">#</span>
+        <span class="c1"># OneScalar objects act as readers.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_vars_readers</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">file_</span> <span class="ow">in</span> <span class="n">allfiles</span><span class="p">:</span>
+            <span class="c1"># We only save those that variables are well-behaved</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">cactusascii_file</span> <span class="o">=</span> <span class="n">OneScalar</span><span class="p">(</span><span class="n">file_</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">cactusascii_file</span><span class="o">.</span><span class="n">reduction_type</span> <span class="o">==</span> <span class="n">reduction_type</span><span class="p">:</span>
+                    <span class="k">for</span> <span class="n">var</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="n">cactusascii_file</span><span class="o">.</span><span class="n">keys</span><span class="p">()):</span>
+                        <span class="c1"># We add to the _vars_readers dictionary the mapping:</span>
+                        <span class="c1"># [var][folder] to OneScalar(f)</span>
+                        <span class="n">folder</span> <span class="o">=</span> <span class="n">cactusascii_file</span><span class="o">.</span><span class="n">folder</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">_vars_readers</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="n">var</span><span class="p">,</span> <span class="p">{})[</span>
+                            <span class="n">folder</span>
+                        <span class="p">]</span> <span class="o">=</span> <span class="n">cactusascii_file</span>
+            <span class="k">except</span> <span class="ne">RuntimeError</span><span class="p">:</span>
+                <span class="k">pass</span>
+
+        <span class="c1"># We cache the results in _vars, a dictionary with keys the variables</span>
+        <span class="c1"># and values the timeseries.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_vars</span> <span class="o">=</span> <span class="p">{}</span>
+
+        <span class="c1"># What pythonize_name_dict does is to make the various variables</span>
+        <span class="c1"># accessible as attributes, e.g. self.fields.rho</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fields</span> <span class="o">=</span> <span class="n">pythonize_name_dict</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">keys</span><span class="p">()),</span> <span class="bp">self</span><span class="o">.</span><span class="fm">__getitem__</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="fm">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">key</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s2"> not available&quot;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">key</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_vars</span><span class="p">:</span>
+            <span class="c1"># We read all the files associated to variable key</span>
+            <span class="n">folders</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_vars_readers</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
+            <span class="n">series</span> <span class="o">=</span> <span class="p">[</span><span class="n">f</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">folders</span><span class="o">.</span><span class="n">values</span><span class="p">()]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_vars</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">ts</span><span class="o">.</span><span class="n">combine_ts</span><span class="p">(</span><span class="n">series</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_vars</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
+
+    <span class="k">def</span> <span class="fm">__contains__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_vars_readers</span>
+
+<div class="viewcode-block" id="AllScalars.keys"><a class="viewcode-back" href="../../cactus_scalars_ref.html#kuibit.cactus_scalars.AllScalars.keys">[docs]</a>    <span class="k">def</span> <span class="nf">keys</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Return the available variables corresponding to the given reduction.</span>
+
+<span class="sd">        :returns: Variables with given reduction</span>
+<span class="sd">        :rtype:   dict_keys</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_vars_readers</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="AllScalars.get"><a class="viewcode-back" href="../../cactus_scalars_ref.html#kuibit.cactus_scalars.AllScalars.get">[docs]</a>    <span class="k">def</span> <span class="nf">get</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Return variable if available, else return the default value.</span>
+
+<span class="sd">        :param key: Requested variable.</span>
+<span class="sd">        :type key: str</span>
+<span class="sd">        :param default: Returned value if ``variable`` is not available.</span>
+<span class="sd">        :type default: any</span>
+
+<span class="sd">        :returns: :py:class:`~.TimeSeries` of the requested variable</span>
+<span class="sd">        :rtype: :py:class:`~.TimeSeries`</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="bp">self</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
+
+        <span class="k">return</span> <span class="n">default</span></div>
+
+    <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">ret</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;Available </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">reduction_type</span><span class="si">}</span><span class="s2"> timeseries:</span><span class="se">\n</span><span class="s2">&quot;</span>
+        <span class="n">ret</span> <span class="o">+=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span><span class="si">}</span><span class="se">\n</span><span class="s2">&quot;</span>
+        <span class="k">return</span> <span class="n">ret</span></div>
+
+
+<div class="viewcode-block" id="ScalarsDir"><a class="viewcode-back" href="../../cactus_scalars_ref.html#kuibit.cactus_scalars.ScalarsDir">[docs]</a><span class="k">class</span> <span class="nc">ScalarsDir</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;This class provides acces to various types of scalar data in a given</span>
+<span class="sd">    simulation directory. Typically used from a :py:class:`~.SimDir` instance.</span>
+<span class="sd">    The different scalars are available as attributes:</span>
+
+<span class="sd">    :ivar scalar:    access to grid scalars.</span>
+<span class="sd">    :ivar minimum:   access to minimum reduction.</span>
+<span class="sd">    :ivar maximum:   access to maximum reduction.</span>
+<span class="sd">    :ivar norm1:     access to norm1 reduction.</span>
+<span class="sd">    :ivar norm2:     access to norm2 reduction.</span>
+<span class="sd">    :ivar average:   access to average reduction.</span>
+<span class="sd">    :ivar infnorm:   access to inf-norm reduction.</span>
+
+<span class="sd">    Each of those works as a dictionary mapping variable names to</span>
+<span class="sd">    :py:class:`~.TimeSeries` instances.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># TODO: Implement the following, possibly in a clean way</span>
+
+    <span class="c1"># .. note::</span>
+    <span class="c1">#    infnorm is reconstructed from min and max if infnorm</span>
+    <span class="c1">#    itself is not available.</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sd</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;The constructor is not intended for direct use.</span>
+
+<span class="sd">        :param sd: Simulation directory</span>
+<span class="sd">        :type sd:  :py:class:`~.SimDir` instance.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">sd</span><span class="p">,</span> <span class="n">simdir</span><span class="o">.</span><span class="n">SimDir</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;Input is not SimDir&quot;</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">path</span> <span class="o">=</span> <span class="n">sd</span><span class="o">.</span><span class="n">path</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">point</span> <span class="o">=</span> <span class="n">AllScalars</span><span class="p">(</span><span class="n">sd</span><span class="o">.</span><span class="n">allfiles</span><span class="p">,</span> <span class="s2">&quot;scalar&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">scalar</span> <span class="o">=</span> <span class="n">AllScalars</span><span class="p">(</span><span class="n">sd</span><span class="o">.</span><span class="n">allfiles</span><span class="p">,</span> <span class="s2">&quot;scalar&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">minimum</span> <span class="o">=</span> <span class="n">AllScalars</span><span class="p">(</span><span class="n">sd</span><span class="o">.</span><span class="n">allfiles</span><span class="p">,</span> <span class="s2">&quot;minimum&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">maximum</span> <span class="o">=</span> <span class="n">AllScalars</span><span class="p">(</span><span class="n">sd</span><span class="o">.</span><span class="n">allfiles</span><span class="p">,</span> <span class="s2">&quot;maximum&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">norm1</span> <span class="o">=</span> <span class="n">AllScalars</span><span class="p">(</span><span class="n">sd</span><span class="o">.</span><span class="n">allfiles</span><span class="p">,</span> <span class="s2">&quot;norm1&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">norm2</span> <span class="o">=</span> <span class="n">AllScalars</span><span class="p">(</span><span class="n">sd</span><span class="o">.</span><span class="n">allfiles</span><span class="p">,</span> <span class="s2">&quot;norm2&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">average</span> <span class="o">=</span> <span class="n">AllScalars</span><span class="p">(</span><span class="n">sd</span><span class="o">.</span><span class="n">allfiles</span><span class="p">,</span> <span class="s2">&quot;average&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">infnorm</span> <span class="o">=</span> <span class="n">AllScalars</span><span class="p">(</span><span class="n">sd</span><span class="o">.</span><span class="n">allfiles</span><span class="p">,</span> <span class="s2">&quot;infnorm&quot;</span><span class="p">)</span>
+
+        <span class="c1"># Aliases</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">max</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">maximum</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">min</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">minimum</span>
+
+    <span class="k">def</span> <span class="fm">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">reduction</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">reduction</span><span class="p">)</span>
+
+<div class="viewcode-block" id="ScalarsDir.get"><a class="viewcode-back" href="../../cactus_scalars_ref.html#kuibit.cactus_scalars.ScalarsDir.get">[docs]</a>    <span class="k">def</span> <span class="nf">get</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Return a reduction if available, else return the default value.</span>
+
+<span class="sd">        :param key: Requested reduction.</span>
+<span class="sd">        :type key: str</span>
+<span class="sd">        :param default: Returned value if ``reduction`` is not available.</span>
+<span class="sd">        :type default: any</span>
+
+<span class="sd">        :returns: Collection of all the variables with a given reduction.</span>
+<span class="sd">        :rtype: :py:class:`~.AllScalars`</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="p">[</span>
+            <span class="s2">&quot;point&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;scalar&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;minimum&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;maximum&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;norm1&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;norm2&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;average&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;infnorm&quot;</span><span class="p">,</span>
+        <span class="p">]:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
+
+        <span class="k">return</span> <span class="n">default</span></div>
+
+    <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s2">&quot;Folder </span><span class="si">%s</span><span class="se">\n</span><span class="si">%s</span><span class="se">\n</span><span class="si">%s</span><span class="se">\n</span><span class="si">%s</span><span class="se">\n</span><span class="si">%s</span><span class="se">\n</span><span class="si">%s</span><span class="se">\n</span><span class="si">%s</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">path</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">scalar</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">minimum</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">maximum</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">norm1</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">norm2</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">average</span><span class="p">,</span>
+        <span class="p">)</span></div>
+</pre></div>
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="../../index.html">
+              <img class="logo" src="../../_static/logo.png" alt="Logo"/>
+            </a></p>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">kuibit 1.3.5 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../index.html" >Module code</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">kuibit.cactus_scalars</a></li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2020-2022, Gabriele Bozzola.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 3.5.4.
+    </div>
+  </body>
+</html>

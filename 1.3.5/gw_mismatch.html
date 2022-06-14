@@ -1,0 +1,325 @@
+
+
+<!doctype html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Mismatch between gravitational waves &#8212; kuibit 1.3.5 documentation</title>
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="_static/bizstyle.css" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="_static/css/custom.css" />
+    
+    <script id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/doctools.js"></script>
+    <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script type="text/x-mathjax-config">MathJax.Hub.Config({"tex2jax": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true, "ignoreClass": "tex2jax_ignore|mathjax_ignore|document", "processClass": "tex2jax_process|mathjax_process|math|output_area"}})</script>
+    <script src="_static/bizstyle.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Grid functions" href="grid_data.html" />
+    <link rel="prev" title="Gravitational-wave utilities" href="gw_utils.html" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0" />
+    <!--[if lt IE 9]>
+    <script src="_static/css3-mediaqueries.js"></script>
+    <![endif]-->
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="grid_data.html" title="Grid functions"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="gw_utils.html" title="Gravitational-wave utilities"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">kuibit 1.3.5 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">Mismatch between gravitational waves</a></li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="mismatch-between-gravitational-waves">
+<h1>Mismatch between gravitational waves<a class="headerlink" href="#mismatch-between-gravitational-waves" title="Permalink to this headline">¶</a></h1>
+<p><code class="docutils literal notranslate"><span class="pre">kuibit</span></code> has a module to compute the mismatch between two gravitational
+waves (currently, only for the <span class="math notranslate nohighlight">\(l=2\)</span>, <span class="math notranslate nohighlight">\(m=2\)</span> mode). See,
+<a class="reference internal" href="gw_mismatch_ref.html#module-kuibit.gw_mismatch"><span class="std std-ref">Reference on kuibit.gw_mismatch</span></a>, for a comprehensive
+reference.</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>You have to read carefully and understand everything in this page to use and
+interpret the results from <a class="reference internal" href="gw_mismatch_ref.html#module-kuibit.gw_mismatch" title="kuibit.gw_mismatch"><code class="xref py py-mod docutils literal notranslate"><span class="pre">gw_mismatch</span></code></a>. In some cases, misusing
+the functions will lead to incorrect results without raising any error. The
+code has a lot of comments, you are encouraged to read them.</p>
+</div>
+<div class="section" id="overlap-and-mismatch">
+<h2>Overlap and mismatch<a class="headerlink" href="#overlap-and-mismatch" title="Permalink to this headline">¶</a></h2>
+<p>Given <span class="math notranslate nohighlight">\(h_1\)</span> and <span class="math notranslate nohighlight">\(h_2\)</span> gravitational-wave strains, one can compute
+the overlap between the two as</p>
+<div class="math notranslate nohighlight">
+\[\mathrm{overlap}(h_1, h_2) = \frac{(h_1, h_2)}{\sqrt{(h_1, h_1)(h_2, h_2)}}\]</div>
+<p>where</p>
+<div class="math notranslate nohighlight">
+\[(h_1, h_2) = 4 \Re \int_{f_min}^{f_max} \frac{\tilde{h}_1(f) \tilde{h}_2^*(f)}{S_n(f)} df\]</div>
+<p>is the inner product between <span class="math notranslate nohighlight">\(h_1\)</span> and <span class="math notranslate nohighlight">\(h_2\)</span>, the tildas indicate
+Fourier transform, and <span class="math notranslate nohighlight">\(S_n(f)\)</span> is the power spectral density (typically
+in units of one over Hertz). In case multiple detectors are considered, the
+inner product is the sum of the inner products of each detector (with their own
+spectral noise density).</p>
+<p>From the overlap, one computes the mismatch between two waves. The mismatch
+(also known as unfaithfulness) is the overlap marginalized over some unknown
+quantities (more on this later). If <span class="math notranslate nohighlight">\(h_1\)</span> is an observed signal and
+<span class="math notranslate nohighlight">\(h_2\)</span> a template, the numerical value of mismatch is related to the
+signal-to-noise ratio needed to experimentally distinguish <span class="math notranslate nohighlight">\(h_1\)</span> from
+<span class="math notranslate nohighlight">\(h_2\)</span>.</p>
+<p>Typically, the mismatch is defined as</p>
+<div class="math notranslate nohighlight">
+\[\textrm{mismatch}(h_1, h_2) = \max_{\phi, t, \psi} \textrm{overlap}(h_1, h_2)\]</div>
+<p>where the max is taken over polarization angles, phase and time shifts. Again,
+if multiple detectors are considered, the overlap has to be computed with the
+network inner product (sum of all the inner products). If only the <span class="math notranslate nohighlight">\(l =
+2\)</span>, <span class="math notranslate nohighlight">\(m = 2\)</span> mode is considered, phase and polarization shifts are
+degenerate, so one can consider only one of the two. In <a class="reference internal" href="gw_mismatch_ref.html#module-kuibit.gw_mismatch" title="kuibit.gw_mismatch"><code class="xref py py-mod docutils literal notranslate"><span class="pre">gw_mismatch</span></code></a>,
+we implement the mismatch computation for a network of detectors restricting to
+the <span class="math notranslate nohighlight">\(l = 2\)</span>, <span class="math notranslate nohighlight">\(m = 2\)</span>.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The approach implemented here is probably not the best. One can compute the
+overlap directly form <span class="math notranslate nohighlight">\(\Psi_4\)</span>, since the fixed frequency integration
+already returns the Fourier transform. This would avoid taking an additional
+Fourier transform, and would avoid all the problems with windowing and
+zero-padding. If I had to write this code again, I would follow this
+approach. Hopefully, the work was not completely useless because the current
+method is more easily generalizable to cases that are not <span class="math notranslate nohighlight">\(l = 2\)</span>,
+<span class="math notranslate nohighlight">\(m = 2\)</span>.</p>
+</div>
+</div>
+<div class="section" id="network-mismatch-from-psi4">
+<h2>network_mismatch_from_psi4<a class="headerlink" href="#network-mismatch-from-psi4" title="Permalink to this headline">¶</a></h2>
+<p><code class="xref py py-meth docutils literal notranslate"><span class="pre">network_mismatch_from_psi4()</span></code> is the function the most general
+interface and the one you will be most likely to use if you are interested in
+working with actual LIGO-Virgo data.</p>
+<p>Before we start, it is important to stress that computing the mismatch is an
+optimization problem. As it is always the case, it is difficult to determine if
+the value found is a local maximum or the absolute one. <code class="docutils literal notranslate"><span class="pre">PostCacuts</span></code>
+implements a simple grid search. This is an inefficient but robust method.
+However, to work well, it is important to provide reasonable limits. For the
+polarization, we search from 0 to <span class="math notranslate nohighlight">\(2 \pi\)</span>, and we take as input the
+extremes of the search for time shifts. You should start providing physical
+values, inspect the result, and refine your search. In should also expand the
+bounds to make sure that you are localizing the absolute maximum.</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p><code class="docutils literal notranslate"><span class="pre">kuibit</span></code> has no way to determine if the maximum found is the absolute
+one. It is your job to set the limits of the search in a meaningful way.</p>
+</div>
+<p>To make up for the algorithmic inefficiency, <code class="docutils literal notranslate"><span class="pre">kuibit</span></code> optionally uses
+<a class="reference external" href="https://numba.pydata.org/">numba</a> to speed up the search. Using numba enables
+high-resolution searches that would not be possible otherwise. Numba compiles
+the main mismatch function (<code class="xref py py-meth docutils literal notranslate"><span class="pre">_mismatch_core_numerical()</span></code>) to machine
+code to achieve native performances. Numba requires a substantial overhead to do
+this, so for small searches it is not convenient to use it. Therefore,
+<code class="docutils literal notranslate"><span class="pre">kuibit</span></code> activates numba only when the size of the parameter space is
+larger than 2500 elements. If you want to use numba with fewer elements, you can
+set <code class="docutils literal notranslate"><span class="pre">force_numba</span></code> to <code class="docutils literal notranslate"><span class="pre">True</span></code>. This may be faster in some cases (for example,
+for very long arrays). To use numba, make sure that the package is available (it
+is installed among the <code class="docutils literal notranslate"><span class="pre">extras</span></code>).</p>
+<p>The limits of the serach are specified by the paramters <code class="docutils literal notranslate"><span class="pre">time_shift_start</span></code> and
+<code class="docutils literal notranslate"><span class="pre">time_shift_end</span></code> for time shifts, and they are always from 0 to <span class="math notranslate nohighlight">\(2 \pi\)</span>
+for polarization shifts. The number of points inspected is <code class="docutils literal notranslate"><span class="pre">num_time_shifts</span></code>
+and <code class="docutils literal notranslate"><span class="pre">num_polarization_shifts</span></code>.</p>
+<p><code class="xref py py-meth docutils literal notranslate"><span class="pre">network_mismatch_from_psi4()</span></code> takes the two <span class="math notranslate nohighlight">\(\Psi_4\)</span> and compute
+the strains from there. Hence, you have to provide all the quantities you would
+need for computing the strains: <code class="docutils literal notranslate"><span class="pre">pcut</span></code>, <code class="docutils literal notranslate"><span class="pre">window_function</span></code>, and the arguments
+to the window function. <span class="math notranslate nohighlight">\(\Psi_4\)</span> are passed as
+<a class="reference internal" href="cactus_waves_ref.html#kuibit.cactus_waves.GravitationalWavesOneDet" title="kuibit.cactus_waves.GravitationalWavesOneDet"><code class="xref py py-class docutils literal notranslate"><span class="pre">GravitationalWavesOneDet</span></code></a>, as they are found in
+<a class="reference internal" href="simdir_ref.html#kuibit.simdir.SimDir" title="kuibit.simdir.SimDir"><code class="xref py py-class docutils literal notranslate"><span class="pre">SimDir</span></code></a>, when a radius is specified for gravitational waves.
+<code class="docutils literal notranslate"><span class="pre">window_function</span></code> can be <code class="docutils literal notranslate"><span class="pre">None</span></code>, a string (indicating one of the buil-in
+windows), or a function that implements a custom-window.</p>
+<p>Since the operation requires taking Fourier transform, we provide ways to
+pre-process the strain signals. First, the window function that you provide to
+compute the strain from <span class="math notranslate nohighlight">\(\Psi_4\)</span> will be used to window also the strain.
+Second, the signal is zero padded so that it has a total of <code class="docutils literal notranslate"><span class="pre">num_zero_pad</span></code>
+points. <code class="docutils literal notranslate"><span class="pre">num_zero_pad</span></code> is not the number of zeros added: it is the final
+length of the signal.</p>
+<p>An important quantity you may want to provide is the noise curve associated to
+the detectors. For this <code class="xref py py-meth docutils literal notranslate"><span class="pre">network_mismatch_from_psi4()</span></code> takes a
+paramters, <code class="docutils literal notranslate"><span class="pre">noises</span></code>. This can be None, in which case the mismatch will be
+computed with no noise. If <code class="docutils literal notranslate"><span class="pre">noises</span></code> is not None, then, it has to be a
+<code class="docutils literal notranslate"><span class="pre">Detectors</span></code> object (<a class="reference internal" href="gw_utils.html#detectors"><span class="std std-ref">Detectors</span></a>) with each entry being a
+<a class="reference internal" href="frequencyseries_ref.html#kuibit.frequencyseries.FrequencySeries" title="kuibit.frequencyseries.FrequencySeries"><code class="xref py py-class docutils literal notranslate"><span class="pre">FrequencySeries</span></code></a> with the noise power spectral densities. At the
+moment, <code class="docutils literal notranslate"><span class="pre">Detectors</span></code> are set to work with the LIGO and Virgo interferometers.
+In case you want to disable one of the detectors, set the entry to -1 (see
+example below). You can also set one entry to <code class="docutils literal notranslate"><span class="pre">None</span></code> so that its contribution
+is computed without noise.</p>
+<p>In case you want to remove part of the signal from the comparison, you can use
+the two paramters <code class="docutils literal notranslate"><span class="pre">time_to_keep_after_max</span></code> and <code class="docutils literal notranslate"><span class="pre">time_removed_beginning</span></code>. The
+first sets how much signal to keep after the peak, everything else after that is
+removed. The second controls how much signal to remove at the very beginning.
+They are always provided in computational units. You may need to set
+<code class="docutils literal notranslate"><span class="pre">trim_ends=False</span></code> if you want to have finer control on how much signal to
+consider. For a meaningful comparison, it is important that the time limits are
+set properly, if they are not, the window function may produce incorrect results
+(because the two series are windowed in physically different ways). Visualize
+your data to make sure that the comparison is meaningful!</p>
+<p>Typically, we perform simulations in some geometrized units, but we want to
+compare signals using actual noise (in physical units). For this, you can
+provide the mass scales in solar masses of the two signals. The waves are
+assumed to be in geometrized units in which <code class="docutils literal notranslate"><span class="pre">M=1</span></code>. If you provide the mass
+scales, they are converted in waveform with <code class="docutils literal notranslate"><span class="pre">M=mass_scale_msun</span> <span class="pre">*</span> <span class="pre">M_sun</span></code>.
+Additionally, if you provide a mass scale, you can provide a distance in
+megaparsec. The signal will be redshifted according to the cosmological redshift
+corresponding to that distance (assuming standard LCDM). Moreover, you have to
+provide the sky localization of the event with the paramters
+<code class="docutils literal notranslate"><span class="pre">right_ascension</span></code>, <code class="docutils literal notranslate"><span class="pre">declination</span></code>, and <code class="docutils literal notranslate"><span class="pre">time_utc</span></code>. In case you want to work
+with <code class="docutils literal notranslate"><span class="pre">theta</span></code> and <code class="docutils literal notranslate"><span class="pre">phi</span></code>, you should use the
+<code class="xref py py-meth docutils literal notranslate"><span class="pre">mismatch_from_strains()</span></code> function.</p>
+<p>A (roughly) complete example would look like:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span> <span class="n">mass_scale</span> <span class="o">=</span> <span class="mi">65</span>
+ <span class="n">CU</span> <span class="o">=</span> <span class="n">unitconv</span><span class="o">.</span><span class="n">geom_umass_msun</span><span class="p">(</span><span class="n">mass_scale</span><span class="p">)</span>
+
+ <span class="n">pcut1</span> <span class="o">=</span> <span class="mi">120</span>
+ <span class="n">pcut2</span> <span class="o">=</span> <span class="mi">140</span>
+
+ <span class="n">fmin</span> <span class="o">=</span> <span class="mi">20</span>
+ <span class="n">fmax</span> <span class="o">=</span> <span class="mi">512</span>
+
+ <span class="n">rex</span> <span class="o">=</span> <span class="mi">110</span>  <span class="c1"># Extraction radius</span>
+
+ <span class="n">psi1</span> <span class="o">=</span> <span class="n">simdir</span><span class="o">.</span><span class="n">SimDir</span><span class="p">(</span><span class="s2">&quot;folder1&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">gws</span><span class="p">[</span><span class="n">rex</span><span class="p">]</span>
+ <span class="n">psi2</span> <span class="o">=</span> <span class="n">simdir</span><span class="o">.</span><span class="n">SimDir</span><span class="p">(</span><span class="s2">&quot;folder2&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">gws</span><span class="p">[</span><span class="n">rex</span><span class="p">]</span>
+
+ <span class="n">distance</span> <span class="o">=</span> <span class="mi">500</span>  <span class="c1"># Mpc</span>
+
+ <span class="n">noise_hanford</span> <span class="o">=</span> <span class="n">load_FrequencySeries</span><span class="p">(</span><span class="s2">&quot;ligo.dat&quot;</span><span class="p">,</span> <span class="n">usecols</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+ <span class="n">noise_livingston</span> <span class="o">=</span> <span class="n">load_FrequencySeries</span><span class="p">(</span><span class="s2">&quot;ligo.dat&quot;</span><span class="p">,</span> <span class="n">usecols</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">))</span>
+
+ <span class="c1"># -1 disables Virgo</span>
+ <span class="n">noises</span> <span class="o">=</span> <span class="n">Detectors</span><span class="p">(</span><span class="n">virgo</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span>
+                    <span class="n">hanford</span><span class="o">=</span><span class="n">noise_hanford</span><span class="p">,</span>
+                    <span class="n">livingston</span><span class="o">=</span><span class="n">noise_livingston</span><span class="p">)</span>
+
+<span class="k">return</span> <span class="n">gw_mismatch</span><span class="o">.</span><span class="n">network_mismatch_from_psi4</span><span class="p">(</span><span class="n">psi1</span><span class="p">,</span>
+                                              <span class="n">psi2</span><span class="p">,</span>
+                                              <span class="mi">8</span><span class="p">,</span>
+                                              <span class="o">-</span><span class="mi">70</span><span class="p">,</span>
+                                              <span class="s2">&quot;2015-09-14 09:50:45&quot;</span><span class="p">,</span>
+                                              <span class="n">pcut1</span><span class="p">,</span>
+                                              <span class="n">pcut2</span><span class="p">,</span>
+                                              <span class="mf">0.125</span><span class="p">,</span>  <span class="c1"># tukey alpha</span>
+                                              <span class="n">noises</span><span class="o">=</span><span class="n">noises</span><span class="p">,</span>
+                                              <span class="n">trim_ends</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                                              <span class="n">window_function</span><span class="o">=</span><span class="s1">&#39;tukey&#39;</span><span class="p">,</span>
+                                              <span class="n">mass_scale1_msun</span><span class="o">=</span><span class="n">mass_scale</span><span class="p">,</span>
+                                              <span class="n">mass_scale2_msun</span><span class="o">=</span><span class="n">mass_scale</span><span class="p">,</span>
+                                              <span class="n">distance1</span><span class="o">=</span><span class="n">distance</span><span class="p">,</span>
+                                              <span class="n">distance2</span><span class="o">=</span><span class="n">distance</span><span class="p">,</span>
+                                              <span class="n">fmin</span><span class="o">=</span><span class="n">fmin</span><span class="p">,</span>
+                                              <span class="n">fmax</span><span class="o">=</span><span class="n">fmax</span><span class="p">,</span>
+                                              <span class="n">num_time_shifts</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span>
+                                              <span class="n">num_zero_pad</span><span class="o">=</span><span class="mi">2</span><span class="o">**</span><span class="mi">18</span><span class="p">,</span>
+                                              <span class="n">num_polarization_shifts</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span>
+                                              <span class="n">time_shift_start</span><span class="o">=-</span><span class="mi">10</span> <span class="o">*</span> <span class="n">CU</span><span class="o">.</span><span class="n">time</span><span class="p">,</span>
+                                              <span class="n">time_shift_end</span><span class="o">=</span><span class="mi">10</span> <span class="o">*</span> <span class="n">CU</span><span class="o">.</span><span class="n">time</span><span class="p">,</span>
+                                              <span class="n">time_to_keep_after_max</span><span class="o">=</span><span class="mi">400</span><span class="p">,</span>
+                                              <span class="n">time_removed_beginning</span><span class="o">=</span><span class="mi">200</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>In case you want to compute the optimal mismatch considering only one detector,
+you can use the function <code class="xref py py-meth docutils literal notranslate"><span class="pre">one_detector_mismatch_from_psi4()</span></code>, which is
+similar to <code class="xref py py-meth docutils literal notranslate"><span class="pre">network_mismatch_from_psi4()</span></code> but considers only one
+detector.</p>
+</div>
+<div class="section" id="mismatch-from-strains">
+<h2>mismatch_from_strains<a class="headerlink" href="#mismatch-from-strains" title="Permalink to this headline">¶</a></h2>
+<p><code class="xref py py-meth docutils literal notranslate"><span class="pre">mismatch_from_strains()</span></code> implements a more low-level interface to
+compute the mismatch between the waveforms. Internally, this is what is used by
+<code class="xref py py-meth docutils literal notranslate"><span class="pre">network_mismatch_from_psi4()</span></code>.</p>
+<p>With <code class="xref py py-meth docutils literal notranslate"><span class="pre">mismatch_from_strains()</span></code> you are responsible of providing valid
+strain data <code class="docutils literal notranslate"><span class="pre">h1</span></code> and <code class="docutils literal notranslate"><span class="pre">h2</span></code>, as well as <code class="docutils literal notranslate"><span class="pre">antenna_patterns</span></code> and <code class="docutils literal notranslate"><span class="pre">noises</span></code>.
+Here, <code class="docutils literal notranslate"><span class="pre">antenna_patterns</span></code> and <code class="docutils literal notranslate"><span class="pre">noises</span></code> are lists where the corresponding
+index represents the same detector.</p>
+<p>If you want to learn how the mismatch computation works, read the comments in
+the code of this function.</p>
+</div>
+</div>
+
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="index.html">
+              <img class="logo" src="_static/logo.png" alt="Logo"/>
+            </a></p>
+  <h3><a href="index.html">Table of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Mismatch between gravitational waves</a><ul>
+<li><a class="reference internal" href="#overlap-and-mismatch">Overlap and mismatch</a></li>
+<li><a class="reference internal" href="#network-mismatch-from-psi4">network_mismatch_from_psi4</a></li>
+<li><a class="reference internal" href="#mismatch-from-strains">mismatch_from_strains</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="gw_utils.html"
+                        title="previous chapter">Gravitational-wave utilities</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="grid_data.html"
+                        title="next chapter">Grid functions</a></p>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="grid_data.html" title="Grid functions"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="gw_utils.html" title="Gravitational-wave utilities"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">kuibit 1.3.5 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">Mismatch between gravitational waves</a></li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2020-2022, Gabriele Bozzola.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 3.5.4.
+    </div>
+  </body>
+</html>
