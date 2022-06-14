@@ -88,7 +88,7 @@ illustrate how examples work.
    plot_grid_var.py
 
 
-  If you saved them in the folder,
+If you saved them in the folder,
 
 .. code-block:: sh
 

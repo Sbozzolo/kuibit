@@ -69,9 +69,9 @@ the ``Psi4``:
 
    data = []
 
-    for mult_l, mult_m, ts in wav:
-        data.append([mult_l, mult_m, ts.cropped(init=T_MIN, end=T_MAX)])
+   for mult_l, mult_m, ts in wav:
+       data.append([mult_l, mult_m, ts.cropped(init=T_MIN, end=T_MAX)])
 
-    new_wav = GravitationalWavesOneDet(wav.dist, data)
+   new_wav = GravitationalWavesOneDet(wav.dist, data)
 
 where ``wav`` is the old ``GravitationalWavesOneDet``, ``new_wav`` the new one.

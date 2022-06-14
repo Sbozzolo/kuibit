@@ -6,7 +6,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>kuibit.series &#8212; kuibit 1.3.4 documentation</title>
+    <title>kuibit.series &#8212; kuibit 1.3.5 documentation</title>
     <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
     <link rel="stylesheet" href="../../_static/bizstyle.css" type="text/css" />
     <link rel="stylesheet" type="text/css" href="../../_static/css/custom.css" />
@@ -33,7 +33,7 @@
         <li class="right" >
           <a href="../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../index.html">kuibit 1.3.4 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">kuibit 1.3.5 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="../index.html" accesskey="U">Module code</a> &#187;</li>
         <li class="nav-item nav-item-this"><a href="">kuibit.series</a></li> 
       </ul>
@@ -88,6 +88,21 @@
 
 <span class="kn">from</span> <span class="nn">kuibit.attr_dict</span> <span class="kn">import</span> <span class="n">AttributeDictionary</span>
 <span class="kn">from</span> <span class="nn">kuibit.numerical</span> <span class="kn">import</span> <span class="n">BaseNumerical</span>
+
+
+<span class="k">class</span> <span class="nc">_AttributeDictionaryNumPy</span><span class="p">(</span><span class="n">AttributeDictionary</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Class that maps a dictionary to attributes and that has a method</span>
+<span class="sd">    ``to_numpy``.</span>
+
+<span class="sd">    This is used only to fake being Pandas so that Series can be plotted with</span>
+<span class="sd">    matplotlib. See comments in BaseSeries.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">to_numpy</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="c1"># This method only makes sense in the context of faking pandas. See</span>
+        <span class="c1"># comments in BaseSeries about this.</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">values</span>
 
 
 <span class="c1"># Note, we test this class testing its derived class TimeSeries</span>
@@ -274,14 +289,42 @@
     <span class="c1"># function is checked if the index property is available, in which case,</span>
     <span class="c1"># index.values and values are returned. We use this to make our objects</span>
     <span class="c1"># plottable.</span>
-    <span class="c1"># The function in matplotlib is:</span>
+    <span class="c1"># The function in matplotlib &lt; 3.5.3 is:</span>
     <span class="c1"># try:</span>
     <span class="c1">#    return y.index.values, y.values</span>
     <span class="c1"># except AttributeError:</span>
     <span class="c1">#    y = _check_1d(y)</span>
     <span class="c1">#    return np.arange(y.shape[0], dtype=float), y</span>
     <span class="c1">#</span>
-    <span class="c1"># If we provide index.values and values, we can return x and y</span>
+    <span class="c1"># It got updated to</span>
+    <span class="c1"># try:</span>
+    <span class="c1">#     return y.index.to_numpy(), y.to_numpy()</span>
+    <span class="c1"># except AttributeError:</span>
+    <span class="c1">#     pass</span>
+    <span class="c1"># try:</span>
+    <span class="c1">#     y = _check_1d(y)</span>
+    <span class="c1"># except (np.VisibleDeprecationWarning, ValueError):</span>
+    <span class="c1">#     # NumPy 1.19 will warn on ragged input, and we can&#39;t actually use it.</span>
+    <span class="c1">#     pass</span>
+    <span class="c1"># else:</span>
+    <span class="c1">#     return np.arange(y.shape[0], dtype=float), y</span>
+    <span class="c1"># raise ValueError(&#39;Input could not be cast to an at-least-1D NumPy array&#39;)</span>
+    <span class="c1">#</span>
+    <span class="c1"># Let us try to be compatible with both (luckily, we can easily do that).</span>
+    <span class="c1">#</span>
+    <span class="c1"># For the older version, if we provide index.values and values, we can</span>
+    <span class="c1"># return x and y.</span>
+    <span class="c1">#</span>
+    <span class="c1"># For the newer version, we also have to provide the correct methods named</span>
+    <span class="c1"># `to_numpy` to both this class and the object that is return by the index</span>
+    <span class="c1"># attribute. So, we define a _AttributeDictionaryNumPy class that does that.</span>
+
+<div class="viewcode-block" id="BaseSeries.to_numpy"><a class="viewcode-back" href="../../series_ref.html#kuibit.series.BaseSeries.to_numpy">[docs]</a>    <span class="k">def</span> <span class="nf">to_numpy</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Return the data as NumPy array. Equivalent to ``self.y``.</span>
+
+<span class="sd">        This function is here to enable compatibility matplotlib.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">y</span></div>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">values</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -295,7 +338,7 @@
         <span class="sd">&quot;&quot;&quot;Fake pandas properties, to make Series objects plottable by</span>
 <span class="sd">        matplotlib.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="n">AttributeDictionary</span><span class="p">({</span><span class="s2">&quot;values&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="p">})</span>
+        <span class="k">return</span> <span class="n">_AttributeDictionaryNumPy</span><span class="p">({</span><span class="s2">&quot;values&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="p">})</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">mask</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -1132,7 +1175,7 @@
         <li class="right" >
           <a href="../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../index.html">kuibit 1.3.4 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">kuibit 1.3.5 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="../index.html" >Module code</a> &#187;</li>
         <li class="nav-item nav-item-this"><a href="">kuibit.series</a></li> 
       </ul>
