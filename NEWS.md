@@ -1,5 +1,11 @@
 # Changelog
 
+## Version 1.4.0 (Under Development)
+
+#### Features
+- Added linear momentum lost by gravitational waves along the x and y directions
+  (starting from a contribution by @konrad-topolski)
+
 ## Version 1.3.6 (5 July 2022)
 
 #### Bug fixes
