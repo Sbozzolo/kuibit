@@ -1,5 +1,8 @@
 # Changelog
 
+#### General
+- Add option to change default colormap for `plot_grid_var.py` and `grid_var` examples
+
 ## Version 1.3.5 (14 June 2022)
 
 #### Bug fixes

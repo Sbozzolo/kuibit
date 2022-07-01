@@ -36,8 +36,6 @@ from kuibit.visualize_matplotlib import (
 #       well.
 
 if __name__ == "__main__":
-    setup_matplotlib()
-
     desc = f"""\
 {kah.get_program_name()} plot a given grid function.
 
@@ -109,7 +107,19 @@ This is much faster but it is not as accurate."""
         action="store_true",
         help="Whether to take the absolute value.",
     )
+    parser.add_argument(
+        "--cmap",
+        help="Set matplotlib built-in cmap. default: inferno",
+        default=None,
+        type=str,
+    )
     args = kah.get_args(parser)
+
+    params = None
+    if args.cmap is not None:
+        params = {"image.cmap": args.cmap}
+
+    setup_matplotlib(params=params)
 
     # Parse arguments
 
