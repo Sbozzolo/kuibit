@@ -91,6 +91,12 @@ def mopi_add_custom_options(parser):
         action="store_true",
         help="Whether to take the absolute value.",
     )
+    parser.add_argument(
+        "--cmap",
+        help="Set matplotlib built-in cmap. default: inferno",
+        default=None,
+        type=str,
+    )
 
 
 class MOPIMovie:
@@ -130,7 +136,11 @@ class MOPIMovie:
         # Here we plot a frame. This function has to take the output path and
         # the identifier of what is a frame (in this case, an iteration).
 
-        setup_matplotlib()
+        params = None
+        if self.args.cmap is not None:
+            params = {"image.cmap": self.args.cmap}
+
+        setup_matplotlib(params=params)
         clear_figure()
 
         if self.args.absolute:
