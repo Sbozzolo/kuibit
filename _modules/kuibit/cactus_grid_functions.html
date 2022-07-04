@@ -795,6 +795,7 @@
             <span class="n">current_iteration</span> <span class="o">=</span> <span class="kc">None</span>
             <span class="n">current_ref_level</span> <span class="o">=</span> <span class="kc">None</span>
             <span class="n">current_component</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="n">current_time</span> <span class="o">=</span> <span class="kc">None</span>
             <span class="n">current_x</span> <span class="o">=</span> <span class="p">[]</span>
             <span class="n">current_y</span> <span class="o">=</span> <span class="p">[]</span>
             <span class="n">current_z</span> <span class="o">=</span> <span class="p">[]</span>
@@ -818,6 +819,9 @@
                 <span class="k">if</span> <span class="n">current_component</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
                     <span class="n">current_component</span> <span class="o">=</span> <span class="n">line_data</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span>
 
+                <span class="k">if</span> <span class="n">current_time</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="n">current_time</span> <span class="o">=</span> <span class="n">line_data</span><span class="p">[</span><span class="mi">8</span><span class="p">]</span>
+
                 <span class="c1"># If iteration, component, or refinement level changes, we</span>
                 <span class="c1"># write the data, else we continue reading</span>
                 <span class="k">if</span> <span class="p">(</span>
@@ -832,8 +836,6 @@
                     <span class="n">alldata_ref_level</span> <span class="o">=</span> <span class="n">alldata_iteration</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span>
                         <span class="nb">int</span><span class="p">(</span><span class="n">current_ref_level</span><span class="p">),</span> <span class="p">{}</span>
                     <span class="p">)</span>
-
-                    <span class="n">current_time</span> <span class="o">=</span> <span class="n">line_data</span><span class="p">[</span><span class="mi">8</span><span class="p">]</span>
 
                     <span class="n">uniform_grid_data</span> <span class="o">=</span> <span class="n">current_data_to_UniformGridData</span><span class="p">(</span>
                         <span class="n">current_x</span><span class="p">,</span>
@@ -860,6 +862,7 @@
                     <span class="n">current_iteration</span> <span class="o">=</span> <span class="n">line_data</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
                     <span class="n">current_ref_level</span> <span class="o">=</span> <span class="n">line_data</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
                     <span class="n">current_component</span> <span class="o">=</span> <span class="n">line_data</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span>
+                    <span class="n">current_time</span> <span class="o">=</span> <span class="n">line_data</span><span class="p">[</span><span class="mi">8</span><span class="p">]</span>
                     <span class="n">current_x</span> <span class="o">=</span> <span class="p">[]</span>
                     <span class="n">current_y</span> <span class="o">=</span> <span class="p">[]</span>
                     <span class="n">current_z</span> <span class="o">=</span> <span class="p">[]</span>
