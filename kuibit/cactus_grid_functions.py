@@ -748,6 +748,7 @@ class OneGridFunctionASCII(BaseOneGridFunction):
             current_iteration = None
             current_ref_level = None
             current_component = None
+            current_time = None
             current_x = []
             current_y = []
             current_z = []
@@ -771,6 +772,9 @@ class OneGridFunctionASCII(BaseOneGridFunction):
                 if current_component is None:
                     current_component = line_data[3]
 
+                if current_time is None:
+                    current_time = line_data[8]
+
                 # If iteration, component, or refinement level changes, we
                 # write the data, else we continue reading
                 if (
@@ -785,8 +789,6 @@ class OneGridFunctionASCII(BaseOneGridFunction):
                     alldata_ref_level = alldata_iteration.setdefault(
                         int(current_ref_level), {}
                     )
-
-                    current_time = line_data[8]
 
                     uniform_grid_data = current_data_to_UniformGridData(
                         current_x,
@@ -813,6 +815,7 @@ class OneGridFunctionASCII(BaseOneGridFunction):
                     current_iteration = line_data[0]
                     current_ref_level = line_data[2]
                     current_component = line_data[3]
+                    current_time = line_data[8]
                     current_x = []
                     current_y = []
                     current_z = []

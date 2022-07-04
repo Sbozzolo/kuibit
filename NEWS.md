@@ -1,5 +1,11 @@
 # Changelog
 
+## Version 1.3.6 (Under Development)
+
+#### Bug fixes
+- Fix time incorrectly read in ASCII data (thanks @AuroraDysis,
+  [#30](https://github.com/Sbozzolo/kuibit/issues/30))
+
 ## Version 1.3.5 (14 June 2022)
 
 #### Bug fixes
