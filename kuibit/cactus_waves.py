@@ -1339,6 +1339,345 @@ class ElectromagneticWavesOneDet(mp.MultipoleOneDet):
 
     # Angular momentum is not computed by any public thorns.
 
+    def get_force_lm(self, mult_l, mult_m, direction=2):
+        r"""Return the instantaneous linear momentum along the given direction
+        lost in the mode (l, m).
+
+        :param mult_l: l multipole moment.
+        :type mult_t: int
+        :param mult_m: m multipole moment.
+        :type mult_m: int
+        :param direction: Direction of the force to compute (0: x, 1: y, 2: z).
+        :type direction: int
+
+        :returns: Instantaneous force along the given axis in the mode ``(l, m)``
+                  as a function of time.
+        :rtype: :py:class:`~TimeSeries`
+        """
+        if not 0 <= direction <= 2:
+            raise ValueError("Direction has to be 0 (x), 1 (y), or 2 (z)")
+
+        def a_lm(el, em):
+            return np.sqrt((el - em) * (el + em + 1)) / (2 * el * (el + 1))
+
+        def b_lm(el, em):
+            return (
+                1
+                / (2 * el)
+                * np.sqrt(
+                    ((el - 1) * (el + 1) * (el + em) * (el + em - 1))
+                    / ((2 * el - 1) * (2 * el + 1))
+                )
+            )
+
+        def c_lm(el, em):
+            return em / (el * (el + 1))
+
+        def d_lm(el, em):
+            num = np.sqrt((el - 1) * (el + 1) * (el - em) * (el + em))
+            den = el * np.sqrt((2 * el - 1) * (2 * el + 1))
+            return num / den
+
+        if direction in (0, 1):
+
+            # Pp = phi2_lm * [(a_lm * conj(phi2_l(m+1))
+            #                + b_l(-m) * conj(phi2_(l-1)(m+1))
+            #                - b_(l+1)(m+1) * conj(phi2_(l+1)(m+1)))]
+            # Pp = phi2_lm * conj(A + B + C)
+            #
+            # (We move the conjugate outside given that all the coefficients
+            #  are real)
+            if (mult_l, mult_m + 1) in self:
+                A = a_lm(mult_l, mult_m) * self[(mult_l, mult_m + 1)]
+            else:
+                A = ts.TimeSeries(
+                    self[(mult_l, mult_m)].t,
+                    np.zeros_like(self[(mult_l, mult_m)].y),
+                )
+            if (mult_l - 1, mult_m + 1) in self:
+                B = b_lm(mult_l, -mult_m) * self[(mult_l - 1, mult_m + 1)]
+            else:
+                B = ts.TimeSeries(A.t, np.zeros_like(A.y))
+            if (mult_l + 1, mult_m + 1) in self:
+                C = (
+                    -b_lm(mult_l + 1, mult_m + 1)
+                    * self[(mult_l + 1, mult_m + 1)]
+                )
+            else:
+                C = ts.TimeSeries(A.t, np.zeros_like(A.y))
+
+            Pp = self[(mult_l, mult_m)] * np.conj(A + B + C)
+
+            if direction == 0:
+                return self.dist**2 / (2 * np.pi) * Pp.real()
+
+            if direction == 1:
+                return self.dist**2 / (2 * np.pi) * Pp.imag()
+
+        # direction == 2
+
+        # Pz = phi2_lm [(c_lm * conj(phi2_lm)
+        #                + d_lm * conj(phi2_(l-1)m)
+        #                + d_(l+1)m * conj(phi2(l+1)m))]
+        # Pz= phi2_lm *  conj(A + B + C)
+        #
+        # (We move the conjugate outside given that all the coefficients
+        #  are real)
+
+        A = c_lm(mult_l, mult_m) * self[(mult_l, mult_m)]
+        if (mult_l - 1, mult_m) in self:
+            B = d_lm(mult_l, mult_m) * self[(mult_l - 1, mult_m)]
+        else:
+            B = ts.TimeSeries(A.t, np.zeros_like(A.y))
+
+        if (mult_l + 1, mult_m) in self:
+            C = d_lm(mult_l + 1, mult_m) * self[(mult_l + 1, mult_m)]
+        else:
+            C = ts.TimeSeries(A.t, np.zeros_like(A.y))
+
+        Pz = self[(mult_l, mult_m)] * np.conj(A + B + C)
+
+        # The imaginary part is zero, so we make the signal real
+        return self.dist**2 / (4 * np.pi) * Pz.real()
+
+    def get_force_x_lm(self, mult_l, mult_m):
+        r"""Return the instantaneous linear momentum along the x direction
+        lost in the mode (l, m).
+
+        :param mult_l: l multipole moment.
+        :type mult_t: int
+        :param mult_m: m multipole moment.
+        :type mult_m: int
+
+        :returns: Instantaneous force along the z axis in the mode ``(l, m)``
+                  as a function of time.
+        :rtype: :py:class:`~TimeSeries`
+        """
+        return self.get_force_lm(mult_l, mult_m, direction=0)
+
+    def get_force_y_lm(self, mult_l, mult_m):
+        r"""Return the instantaneous linear momentum along the y direction
+        lost in the mode (l, m).
+
+        This is computed with Eq. (3.15) in Ruiz 2008 (0707.4654).
+
+        :param mult_l: l multipole moment.
+        :type mult_t: int
+        :param mult_m: m multipole moment.
+        :type mult_m: int
+
+        :returns: Instantaneous force along the z axis in the mode ``(l, m)``
+                  as a function of time.
+        :rtype: :py:class:`~TimeSeries`
+        """
+        return self.get_force_lm(mult_l, mult_m, direction=1)
+
+    def get_force_z_lm(self, mult_l, mult_m):
+        r"""Return the instantaneous linear momentum along the z direction
+        lost in the mode (l, m).
+
+        This is computed with Eq. (3.15) in Ruiz 2008 (0707.4654).
+
+        :param mult_l: l multipole moment.
+        :type mult_t: int
+        :param mult_m: m multipole moment.
+        :type mult_m: int
+
+        :returns: Instantaneous force along the z axis in the mode ``(l, m)``
+                  as a function of time.
+        :rtype: :py:class:`~TimeSeries`
+        """
+        return self.get_force_lm(mult_l, mult_m, direction=2)
+
+    def get_linear_momentum_lm(self, mult_l, mult_m, direction=2):
+        """Return the cumulative linear momentum lost along the given direction in the
+        mode (l, m).
+
+        :param mult_l: l multipole moment.
+        :type mult_t: int
+        :param mult_m: m multipole moment.
+        :type mult_m: int
+        :param direction: Direction of the linear momentum to compute (0: x, 1:
+                          y, 2: z).
+        :type direction: int
+
+        :returns: Linear momentum along the given direction lost up to the time t
+                  in the mode ``(l, m)`` as a function of time.
+        :rtype: :py:class:`~TimeSeries`
+
+        """
+        return self.get_force_lm(
+            mult_l, mult_m, direction=direction
+        ).integrated()
+
+    def get_linear_momentum_x_lm(self, mult_l, mult_m):
+        """Return the cumulative linear momentum lost along the x direction
+        in the mode (l, m).
+
+        :param mult_l: l multipole moment.
+        :type mult_t: int
+        :param mult_m: m multipole moment.
+        :type mult_m: int
+
+        :returns: Linear momentum along the x direction lost up to the time t
+                  in the mode ``(l, m)`` as a function of time.
+        :rtype: :py:class:`~TimeSeries`
+        """
+        return self.get_force_x_lm(mult_l, mult_m).integrated()
+
+    def get_linear_momentum_y_lm(self, mult_l, mult_m):
+        """Return the cumulative linear momentum lost along the y direction
+        in the mode (l, m).
+
+        :param mult_l: l multipole moment.
+        :type mult_t: int
+        :param mult_m: m multipole moment.
+        :type mult_m: int
+
+        :returns: Linear momentum along the y direction lost up to the time t
+                  in the mode ``(l, m)`` as a function of time.
+        :rtype: :py:class:`~TimeSeries`
+        """
+        return self.get_force_y_lm(mult_l, mult_m).integrated()
+
+    def get_linear_momentum_z_lm(self, mult_l, mult_m):
+        """Return the cumulative linear momentum lost along the z direction
+        in the mode (l, m).
+
+        :param mult_l: l multipole moment.
+        :type mult_t: int
+        :param mult_m: m multipole moment.
+        :type mult_m: int
+
+        :returns: Linear momentum along the z direction lost up to the time t
+                  in the mode ``(l, m)`` as a function of time.
+        :rtype: :py:class:`~TimeSeries`
+        """
+        return self.get_force_z_lm(mult_l, mult_m).integrated()
+
+    def get_total_force(self, direction=2, l_max=None):
+        """Return the total force along the given direction in all the modes
+        up to ``l_max``.
+
+        :param l_max: Ignore multipoles with l > l_max
+        :type l_max: int
+        :param direction: Direction of the linear momentum to compute (0: x, 1:
+                          y, 2: z).
+        :type direction: int
+
+        :returns: Instantaneous total force along the given direction in the
+                  modes up to  ``l_max`` as a function of time.
+        :rtype: :py:class:`~TimeSeries`
+
+        """
+
+        def forclm(_1, mult_l, mult_m, _2):
+            return self.get_force_lm(mult_l, mult_m, direction=direction)
+
+        return self.total_function_on_available_lm(forclm, l_max=l_max)
+
+    def get_total_force_x(self, l_max=None):
+        """Return the total force along the x direction in all the modes
+        up to ``l_max``.
+
+        :param l_max: Ignore multipoles with l > l_max
+        :type l_max: int
+
+        :returns: Instantaneous total force along the x direction in the
+                  modes up to  ``l_max`` as a function of time.
+        :rtype: :py:class:`~TimeSeries`
+
+        """
+        return self.get_total_force(direction=0, l_max=l_max)
+
+    def get_total_force_y(self, l_max=None):
+        """Return the total force along the y direction in all the modes
+        up to ``l_max``.
+
+        :param l_max: Ignore multipoles with l > l_max
+        :type l_max: int
+
+        :returns: Instantaneous total force along the y direction in the
+                  modes up to  ``l_max`` as a function of time.
+        :rtype: :py:class:`~TimeSeries`
+
+        """
+        return self.get_total_force(direction=1, l_max=l_max)
+
+    def get_total_force_z(self, l_max=None):
+        """Return the total force along the z direction in all the modes
+        up to ``l_max``.
+
+        :param l_max: Ignore multipoles with l > l_max
+        :type l_max: int
+
+        :returns: Instantaneous total force along the z direction in the
+                  modes up to  ``l_max`` as a function of time.
+        :rtype: :py:class:`~TimeSeries`
+
+        """
+        return self.get_total_force(direction=2, l_max=l_max)
+
+    def get_total_linear_momentum(self, direction=2, l_max=None):
+        """Return the cumulative linear momentum lost in all the modes up to ``l_max``.
+
+        :param l_max: Ignore multipoles with l > l_max
+        :type l_max: int
+        :param direction: Direction of the linear momentum to compute (0: x, 1:
+                          y, 2: z).
+        :type direction: int
+
+        :returns: Cumulative total linear momentum along the x direction lost
+                  up to time in the modes up to  ``l_max`` as a function of time.
+         :rtype: :py:class:`~TimeSeries`
+
+        """
+        return self.get_total_force(
+            direction=direction, l_max=l_max
+        ).integrated()
+
+    def get_total_linear_momentum_x(self, l_max=None):
+        """Return the cumulative linear momentum lost in all the modes up to ``l_max``
+        in the x direction.
+
+         :param l_max: Ignore multipoles with l > l_max
+         :type l_max: int
+
+        :returns: Cumulative total linear momentum along the x direction lost
+                  up to time in the modes up to  ``l_max`` as a function of time.
+         :rtype: :py:class:`~TimeSeries`
+
+        """
+        return self.get_total_force_x(l_max).integrated()
+
+    def get_total_linear_momentum_y(self, l_max=None):
+        """Return the cumulative linear momentum lost in all the modes up to ``l_max``
+        in the y direction.
+
+         :param l_max: Ignore multipoles with l > l_max
+         :type l_max: int
+
+        :returns: Cumulative total linear momentum along the y direction lost
+                  up to time in the modes up to  ``l_max`` as a function of time.
+         :rtype: :py:class:`~TimeSeries`
+
+        """
+        return self.get_total_force_y(l_max).integrated()
+
+    def get_total_linear_momentum_z(self, l_max=None):
+        """Return the cumulative linear momentum lost in all the modes up to ``l_max``
+        in the z direction.
+
+         :param l_max: Ignore multipoles with l > l_max
+         :type l_max: int
+
+        :returns: Cumulative total linear momentum along the z direction lost
+                  up to time in the modes up to  ``l_max`` as a function of time.
+         :rtype: :py:class:`~TimeSeries`
+
+        """
+        return self.get_total_force_z(l_max).integrated()
+
 
 class WavesDir(mp.MultipoleAllDets):
     """This class provides acces gravitational-wave data at different radii.

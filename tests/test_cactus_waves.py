@@ -31,6 +31,8 @@ class TestCactusWaves(unittest.TestCase):
         self.sim = sd.SimDir("tests/tov")
         self.gwdir = cw.GravitationalWavesDir(self.sim)
         self.psi4 = self.gwdir[110.69]
+        self.emdir = cw.ElectromagneticWavesDir(self.sim)
+        self.phi2 = self.emdir[110.69]
 
     def test_WavesOneDet(self):
 
@@ -258,8 +260,7 @@ class TestCactusWaves(unittest.TestCase):
 
     def test_get_power_energy_em(self):
 
-        emdir = cw.ElectromagneticWavesDir(self.sim)
-        phi2 = emdir[110.69]
+        phi2 = self.phi2
         phi2lm = phi2[(2, 2)]
 
         power_lm = phi2.dist**2 / (4 * np.pi) * np.abs(phi2lm) ** 2
@@ -278,6 +279,184 @@ class TestCactusWaves(unittest.TestCase):
 
         self.assertEqual(total_power, phi2.get_total_power())
         self.assertEqual(total_power.integrated(), phi2.get_total_energy())
+
+    def test_get_force_linear_momentum_em(self):
+
+        # Test the z component with the 2,2 mode, so
+        # dPz/dt should be r^2 / 4 pi * phi2_22 * conj(phi2_22) * 1 / 3
+
+        # Test of the other components is below (we need more components)
+
+        phi2lm = self.phi2[(2, 2)]
+
+        mult_l, mult_m = 2, 2
+        c_lm = mult_m / (mult_l * (mult_l + 1))
+
+        phi2lm_2 = c_lm * np.conj(phi2lm)
+
+        force_lm = (
+            self.phi2.dist**2 / (4 * np.pi) * (phi2lm * phi2lm_2).real()
+        )
+
+        self.assertEqual(force_lm, self.phi2.get_force_z_lm(2, 2))
+
+        with self.assertRaises(ValueError):
+            self.phi2.get_force_lm(2, 2, direction=4)
+
+        self.assertEqual(
+            self.phi2.get_force_lm(2, 2, direction=2),
+            self.phi2.get_force_z_lm(2, 2),
+        )
+
+        self.assertEqual(
+            force_lm.integrated(),
+            self.phi2.get_linear_momentum_z_lm(2, 2),
+        )
+
+        # get_linear_momentum_lm
+        self.assertEqual(
+            self.phi2.get_linear_momentum_lm(2, 2, direction=2),
+            self.phi2.get_linear_momentum_z_lm(2, 2),
+        )
+
+        # Total linear momentum
+        total_force_z = (
+            self.phi2.get_force_z_lm(2, 2)
+            + self.phi2.get_force_z_lm(2, 1)
+            + self.phi2.get_force_z_lm(2, 0)
+            + self.phi2.get_force_z_lm(2, -1)
+            + self.phi2.get_force_z_lm(2, -2)
+        )
+
+        self.assertEqual(total_force_z, self.phi2.get_total_force_z())
+        self.assertEqual(
+            total_force_z.integrated(),
+            self.phi2.get_total_linear_momentum_z(),
+        )
+
+        # total
+        self.assertEqual(total_force_z, self.phi2.get_total_force(direction=2))
+        self.assertEqual(
+            total_force_z.integrated(),
+            self.phi2.get_total_linear_momentum(direction=2),
+        )
+
+        # Now we want to test a case with l, m = 3, 2, and for which we have
+        # l = 2 and l = 4.  We are going to fake these momenta in a copy
+        # of self.phi2.
+
+        # We multiply times some numbers so that they are not exactly the same
+
+        dist = self.phi2.dist
+        multipoles = [
+            (2, 2, 2 * self.phi2[(2, 2)]),
+            (3, 1, 3 * self.phi2[(2, 2)]),
+            (3, 2, 4 * self.phi2[(2, 2)]),
+            (4, 2, 5 * self.phi2[(2, 2)]),
+        ]
+
+        phi2_234 = cw.ElectromagneticWavesOneDet(dist, multipoles)
+
+        el, em = 3, 1
+
+        a_lm = np.sqrt((el - em) * (el + em + 1)) / (2 * el * (el + 1))
+        b_lmm = (
+            1
+            / (2 * el)
+            * np.sqrt(
+                ((el - 1) * (el + 1) * (el - em) * (el - em - 1))
+                / ((2 * el - 1) * (2 * el + 1))
+            )
+        )
+        b_l1m1 = (
+            1
+            / (2 * el + 2)
+            * np.sqrt(
+                (el * (el + 2) * (el + em + 2) * (el + em + 1))
+                / ((2 * el + 1) * (2 * el + 3))
+            )
+        )
+
+        phi2lm_xy_2 = (
+            a_lm * np.conj(phi2_234[3, 2])
+            + b_lmm * np.conj(phi2_234[2, 2])
+            - b_l1m1 * np.conj(phi2_234[4, 2])
+        )
+
+        Pp_lm = (
+            phi2_234.dist**2 / (2 * np.pi) * (phi2_234[el, em] * phi2lm_xy_2)
+        )
+
+        self.assertEqual(Pp_lm.real(), phi2_234.get_force_x_lm(3, 1))
+        self.assertEqual(Pp_lm.imag(), phi2_234.get_force_y_lm(3, 1))
+
+        # There's only one component
+        self.assertEqual(
+            phi2_234.get_force_x_lm(3, 1),
+            phi2_234.get_total_force(direction=0),
+        )
+        self.assertEqual(
+            phi2_234.get_force_y_lm(3, 1),
+            phi2_234.get_total_force(direction=1),
+        )
+
+        self.assertEqual(
+            Pp_lm.real().integrated(),
+            phi2_234.get_linear_momentum_x_lm(3, 1),
+        )
+        self.assertEqual(
+            Pp_lm.imag().integrated(),
+            phi2_234.get_linear_momentum_y_lm(3, 1),
+        )
+
+        self.assertEqual(
+            Pp_lm.real().integrated(),
+            phi2_234.get_total_linear_momentum_x(),
+        )
+        self.assertEqual(
+            Pp_lm.imag().integrated(),
+            phi2_234.get_total_linear_momentum_y(),
+        )
+        self.assertEqual(
+            Pp_lm.imag().integrated(),
+            phi2_234.get_total_linear_momentum(direction=1),
+        )
+
+        # z direction
+
+        el, em = 3, 2
+
+        c_lm = em / (el * (el + 1))
+        d_lm = (
+            1
+            / el
+            * np.sqrt(
+                ((el - 1) * (el + 1) * (el - em) * (el + em))
+                / ((2 * el - 1) * (2 * el + 1))
+            )
+        )
+        d_l1m = (
+            1
+            / (el + 1)
+            * np.sqrt(
+                (el * (el + 2) * (el + 1 - em) * (el + 1 + em))
+                / ((2 * el + 1) * (2 * el + 3))
+            )
+        )
+
+        phi2lm_z_2 = (
+            c_lm * np.conj(phi2_234[3, 2])
+            + d_lm * np.conj(phi2_234[2, 2])
+            + d_l1m * np.conj(phi2_234[4, 2])
+        )
+
+        force_z_lm = (
+            phi2_234.dist**2
+            / (4 * np.pi)
+            * (phi2_234[el, em] * phi2lm_z_2).real()
+        )
+
+        self.assertEqual(force_z_lm, phi2_234.get_force_z_lm(3, 2))
 
     def test_get_torque_angular_momentum(self):
 
@@ -579,7 +758,7 @@ class TestCactusWaves(unittest.TestCase):
             isinstance(self.gwdir[110.69], cw.GravitationalWavesOneDet)
         )
         self.assertTrue(
-            isinstance(emdir[110.69], cw.ElectromagneticWavesOneDet)
+            isinstance(self.emdir[110.69], cw.ElectromagneticWavesOneDet)
         )
 
     def test_extrapolation(self):

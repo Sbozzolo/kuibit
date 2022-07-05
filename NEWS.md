@@ -19,6 +19,7 @@
 - Added `crop` and `cropped` to multipole data
 - `setup_matplotlib` now takes an optional parameter `rc_param_file` to configure
   matplotlib using a file
+- Added computation of linear momentum lost by electromagnetic waves
 
 #### New `tree` module
 
