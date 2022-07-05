@@ -31,7 +31,6 @@ from kuibit.visualize_matplotlib import (
 )
 
 if __name__ == "__main__":
-    setup_matplotlib()
 
     desc = f"""{kah.get_program_name()} plots the coordinate radius of a given
 apparent horizon as a function of time. If --dx is passed, then add a y-axis
@@ -59,6 +58,7 @@ all covered by the given resolution."""
     )
 
     args = kah.get_args(parser)
+    setup_matplotlib(rc_par_file=args.mpl_rc_file)
 
     # Parse arguments
 

@@ -31,7 +31,6 @@ from kuibit.visualize_matplotlib import (
 )
 
 if __name__ == "__main__":
-    setup_matplotlib()
 
     desc = """\
 
@@ -105,6 +104,7 @@ window of time defined by tmin and tmax."""
         help="Maximum radius at which perform the average (default: %(default)s)",
     )
     args = kah.get_args(parser)
+    setup_matplotlib(rc_par_file=args.mpl_rc_file)
 
     tmin, tmax, var_name, = (
         args.tmin,

@@ -31,7 +31,6 @@ from kuibit.visualize_matplotlib import (
 )
 
 if __name__ == "__main__":
-    setup_matplotlib()
 
     desc = f"""{kah.get_program_name()} plots the trajectories of given apparent horizons on
 a plane. Optionally, it also plots the outline of the horizons."""
@@ -69,6 +68,7 @@ a plane. Optionally, it also plots the outline of the horizons."""
         action="store_true",
     )
     args = kah.get_args(parser)
+    setup_matplotlib(rc_par_file=args.mpl_rc_file)
 
     # Parse arguments
 

@@ -17,6 +17,8 @@
 - Added fourth order accuracy in finite differences of grid functions
 - Added `copy` to gravitational and electromagnetic waves
 - Added `crop` and `cropped` to multipole data
+- `setup_matplotlib` now takes an optional parameter `rc_param_file` to configure
+  matplotlib using a file
 
 #### New `tree` module
 

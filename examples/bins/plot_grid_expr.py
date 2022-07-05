@@ -39,7 +39,6 @@ from kuibit.visualize_matplotlib import (
 #       well.
 
 if __name__ == "__main__":
-    setup_matplotlib()
 
     desc = f"""\
 {kah.get_program_name()} plot a given expression involving grid functions.
@@ -104,6 +103,7 @@ This is much faster but it is not as accurate."""
         type=float,
     )
     args = kah.get_args(parser)
+    setup_matplotlib(rc_par_file=args.mpl_rc_file)
 
     # Parse arguments
 

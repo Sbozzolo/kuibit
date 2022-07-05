@@ -206,6 +206,12 @@ def add_figure_to_parser(parser, default_figname=None, add_limits=False):
         help="Extension of the output figure (default: %(default)s).",
     )
     parser.add_argument(
+        "--mpl-rc-file",
+        type=str,
+        env_var="KBIT_MPL_RC_FILE",
+        help="Configuration file for matplotlib.",
+    )
+    parser.add_argument(
         "--tikz-clean-figure",
         action="store_true",
         help="Reduce the size of the figure when saving to a TikZ file.",

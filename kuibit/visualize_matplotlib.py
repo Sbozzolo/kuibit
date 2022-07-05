@@ -70,6 +70,7 @@ can specify them, or the current ones will be used.
 import itertools
 import os
 import warnings
+from typing import Any, Dict, Optional
 
 import matplotlib
 import matplotlib.pyplot as plt
@@ -85,11 +86,17 @@ from kuibit.cactus_grid_functions import BaseOneGridFunction
 # UTILITIES
 
 
-def setup_matplotlib(params=None):
+def setup_matplotlib(
+    params: Optional[Dict[str, Any]] = None, rc_par_file: str = None
+) -> None:
     """Setup matplotlib with some reasonable defaults for better plots.
 
     If ``params`` is provided, add these parameters to matplotlib's settings
     (``params`` updates ``matplotlib.rcParams``).
+
+    If ``rc_par_file`` is provided, first set the parameters reading the values
+    from the ``rc_par_file``. (``params`` has the precedence over the parameters
+    read from the file.)
 
     Matplotlib behaves differently on different machines. With this, we make
     sure that we set all the relevant paramters that we care of to the value we
@@ -97,6 +104,12 @@ def setup_matplotlib(params=None):
 
     :param params: Parameters to update matplotlib with.
     :type params: dict
+
+    :param rc_par_file: File where to read parameters. The file has to use
+                        matplotlib's configuration language. ``params``
+                        overwrites the values set from this file, but this file
+                        overrides the default values set in this function.
+    :type rc_par_file: str
 
     """
 
@@ -117,6 +130,9 @@ def setup_matplotlib(params=None):
             "legend.edgecolor": "inherit",
         }
     )
+
+    if rc_par_file is not None:
+        matplotlib.rc_file(rc_par_file)
 
     if params is not None:
         matplotlib.rcParams.update(params)

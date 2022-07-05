@@ -30,7 +30,6 @@ from kuibit.visualize_matplotlib import (
 )
 
 if __name__ == "__main__":
-    setup_matplotlib()
 
     desc = """\
 {kah.get_program_name()} plots a grid function on one of the coordinate axis. 1D
@@ -76,6 +75,7 @@ data is used if available, otherwise higher dimensional data is used."""
         help="Axis to plot (default: %(default)s)",
     )
     args = kah.get_args(parser)
+    setup_matplotlib(rc_par_file=args.mpl_rc_file)
 
     iteration, var_name, axis = args.iteration, args.variable, args.axis
 

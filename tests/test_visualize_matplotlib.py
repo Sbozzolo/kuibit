@@ -16,6 +16,7 @@
 # this program; if not, see <https://www.gnu.org/licenses/>.
 
 import os
+import tempfile
 import unittest
 
 # We use the agg backend because it should work everywhere
@@ -45,6 +46,15 @@ class TestVisualizeMatplotlib(unittest.TestCase):
         # Test with optional argument
         viz.setup_matplotlib({"font.size": 18})
         self.assertEqual(matplotlib.rcParams["font.size"], 18)
+
+        # Test with rc file
+        with tempfile.TemporaryDirectory() as tmpdir:
+            path = os.path.join(tmpdir, "matplotlib.rc")
+            with open(path, "w") as tmpfile:
+                tmpfile.write("image.cmap: viridis")
+
+            viz.setup_matplotlib(rc_par_file=path)
+        self.assertEqual(matplotlib.rcParams["image.cmap"], "viridis")
 
     def test_preprocess_plot_functions(self):
 

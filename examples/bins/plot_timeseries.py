@@ -30,7 +30,6 @@ from kuibit.visualize_matplotlib import (
 )
 
 if __name__ == "__main__":
-    setup_matplotlib()
 
     desc = f"""\
 {kah.get_program_name()} plots a given timeseries as output by CarpetIOASCII.
@@ -64,6 +63,7 @@ if __name__ == "__main__":
         "--logyaxis", help="Use a logarithmic y axis.", action="store_true"
     )
     args = kah.get_args(parser)
+    setup_matplotlib(rc_par_file=args.mpl_rc_file)
 
     logger = logging.getLogger(__name__)
 
