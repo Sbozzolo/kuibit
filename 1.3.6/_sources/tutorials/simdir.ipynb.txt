@@ -1,0 +1,325 @@
+{
+ "cells": [
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "# Working with Simulation Directories\n",
+    "\n",
+    "Analyzing simulation data is as important as running the simulation itself. In this notebook, we will see how we easily access all the data using the [SimDir](../simdir.rst) module.\n",
+    "\n",
+    "(This notebook is meant to be converted in Sphinx documentation and not used directly.)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "from kuibit import simdir as sd"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "Loading simulation data is as easy as generating `SimDir` objects. Just provide the path, and kuibit will do the rest."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "sim = sd.SimDir(\"../../tests/tov\")"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "We can get an overview of what is available by printing `sim`:"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "print(sim)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "This is a long output because we have a lot of available data! Everything that is printed is the output is easily accessible through `SimDir`. Moreover, the loading of data is lazy and the result is cached: computations are done only when needed, and all the subsequent calls will be immediate.\n",
+    "\n",
+    "If you have thorns with custom output, you have to extend `kuibit` to analyze them. `SimDir` has multiple submodules to handle the different kind of data. Let us explore them."
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "## SimDir and pickles"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "`SimDir` performs some operations only when they needed. This work has be done every time the Python interpreter is killed. In some cases, it is useful to save the progress to files, resulting in faster execution times. This can be done with pickles. The simplest way to do so is as follows."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {
+    "scrolled": true
+   },
+   "outputs": [],
+   "source": [
+    "with sd.SimDir(\"../../tests/tov\", pickle_file=\"/tmp/sim.pickle\") as sim2:\n",
+    "    print(sim2)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "When this code is run, `kuibit` checks if a pickle file exists in `/tmp/sim.pickle`. If yes, it will load it, effectively \"resuming a previous session\". At the end of the `with` block, the file is updated with the new work done. If the file did not exist initially, it will be created.\n",
+    "\n",
+    "It is important to be careful when working with pickles as the risk of stale objects is high. If the data is changing (e.g., new restarts are added), it is likely that it will result in errors. \n",
+    "\n",
+    "It is always possible to save the state of a `SimDir` using the `save` method and reads back the data with the `load_SimDir` function"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "sim.save(\"/tmp/saved.pickle\") # The filename can be anything\n",
+    "sim3 = sd.load_SimDir(\"/tmp/saved.pickle\")"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "## `cactus_scalars`\n",
+    "The [cactus_scalars](../cactus_scalars.rst) module understands ASCII files as output by CarpetASCII. It supports all the reductions (maximum, minimum, ...), 0d files, as well as scalar data. Using regular expression on the header of the file, `cactus_scalars` can process one variable per file and multiple variables per file. In `SimDir`, you can access scalars with the `ts` or `timeseries` attributes. "
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "timeseries = sim.ts\n",
+    "# equivalent: timeseries = sim.timeseries"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "If we printed `timeseries`, we would find part of the output from `SimDir`. This is because the printed output from `SimDir` is obtained printing all the different submodules. Another way to see the available variable for a secific reduction is with the `keys` method:"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "timeseries.maximum.keys()"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "There are equivalent three different way to access those variables as [timeseries](../series.rst). The different methods are nearly equivalent."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "rho_max1 = timeseries.maximum.fields.rho\n",
+    "rho_max2 = timeseries.maximum['rho']\n",
+    "rho_max3 = timeseries.maximum.get('rho')"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "These objects are [timeseries](../series.rst), which are extremely convienent representation of data evolving in time. These series span multiple simulation restarts and have files in different folders: `kuibit` does all the hard work to find the files and combine them. Moreover, they `timeseries` have a lot of features, as you can see in the [timeseries tutorial](timeseries.ipynb)."
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "## `cactus_multipoles` and `cactus_waves`"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "Gravitational waves are one of the most important quantities in numerical relativity simulations. Typically, these are computed using the Newman-Penrose formalism and extracted in terms of their multipolar components. `kuibit` fully supports the `Multipole` thorn with the [cactus_multipoles](../cactus_multipoles.rst) module. The `sim.multipoles` attribute contains multipolar data. This is a dictionary-like object with keys the various variable for which multipolar data is available."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "print(sim.multipoles.keys())"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "Once a variable is selected, the returned object is once again a dictionary with keys the various extracion radii."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "print(sim.multipoles[\"phi2\"].keys())\n",
+    "phi2_0 = sim.multipoles[\"phi2\"][91.46]\n",
+    "\n",
+    "print(phi2_0.available_lm)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "Selected the extraction radius, the variable contains all the various multipole l and m available. (HDF5 data is preferred in this.) Each component is then a timeseries."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "phi2_0_22 = phi2_0[2,2]\n",
+    "print(type(phi2_0_22))"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "Gravitational waves have a dedicated interface that is based on `cactus_multipole` and adds new specific features. Gravitational waves can be accessed with the `.gravitationalwaves` or `.gws` attributes."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "psi4 = sim.gws\n",
+    "\n",
+    "radius0 = psi4.radii[0]\n",
+    "\n",
+    "# Example of specific function\n",
+    "print(\"Max GW power for l = 2, m = 2:\", psi4[radius0].get_power_lm(2, 2, 100).max())"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "## `cactus_grid_functions`\n",
+    "\n",
+    "The `.gridfunctions` (or `.gf`) attribute is used to access grid data, using the [cactus_grid_functions](../cactus_grid_functions.rst) module. The structure is similar to time series. "
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "print(sim.gf)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "# rest-mass density on the xy plane at iteration 0\n",
+    "rho = sim.gf.xy[\"rho\"][0]"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "For more information of grid data, check out the [grid_data tutorial](grid_data.ipynb)."
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "## `cactus_horizons`\n",
+    "\n",
+    "`kuibit` can read horizon data from `QuasiLocalMeasures` and `AHFinderDirect`. The module that is responsible for this is [cactus_horizons](../cactus_horizons.rst). Horizon information is in the `.horizon` attribute. "
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "## `cactus_timers`\n",
+    "\n",
+    "If timing information is present, it can be accessed with the `.timers` attribute. This is provided by the [cactus_timers](../cactus_timers.rst) modules. "
+   ]
+  }
+ ],
+ "metadata": {
+  "kernelspec": {
+   "display_name": "Python 3 (ipykernel)",
+   "language": "python",
+   "name": "python3"
+  },
+  "language_info": {
+   "codemirror_mode": {
+    "name": "ipython",
+    "version": 3
+   },
+   "file_extension": ".py",
+   "mimetype": "text/x-python",
+   "name": "python",
+   "nbconvert_exporter": "python",
+   "pygments_lexer": "ipython3",
+   "version": "3.10.4"
+  }
+ },
+ "nbformat": 4,
+ "nbformat_minor": 4
+}

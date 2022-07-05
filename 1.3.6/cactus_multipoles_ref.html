@@ -1,0 +1,369 @@
+
+
+<!doctype html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Reference on kuibit.cactus_multipoles &#8212; kuibit 1.3.6 documentation</title>
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="_static/bizstyle.css" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="_static/css/custom.css" />
+    
+    <script id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/doctools.js"></script>
+    <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="_static/bizstyle.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Reference on kuibit.cactus_waves" href="cactus_waves_ref.html" />
+    <link rel="prev" title="Reference on kuibit.cactus_scalars" href="cactus_scalars_ref.html" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0" />
+    <!--[if lt IE 9]>
+    <script src="_static/css3-mediaqueries.js"></script>
+    <![endif]-->
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="cactus_waves_ref.html" title="Reference on kuibit.cactus_waves"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="cactus_scalars_ref.html" title="Reference on kuibit.cactus_scalars"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">kuibit 1.3.6 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">Reference on kuibit.cactus_multipoles</a></li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="module-kuibit.cactus_multipoles">
+<span id="reference-on-kuibit-cactus-multipoles"></span><h1>Reference on kuibit.cactus_multipoles<a class="headerlink" href="#module-kuibit.cactus_multipoles" title="Permalink to this headline">¶</a></h1>
+<p>This module provides access to data saved by the Multipole thorn.</p>
+<p>There are multiple classes defined in this module:</p>
+<ul class="simple">
+<li><p>:py:class`~.MultipolesDir` interfaces with <a class="reference internal" href="simdir_ref.html#kuibit.simdir.SimDir" title="kuibit.simdir.SimDir"><code class="xref py py-class docutils literal notranslate"><span class="pre">SimDir</span></code></a> and organizes the
+data according to the variable available. This is a dictionary-like object with keys
+the variable names.</p></li>
+<li><p>:py:class`~.MultipoleAllDets` takes all the files that correspond to a given variable
+and organize them according to the extraction radius.</p></li>
+<li><p>:py:class`~.MultipoleOneDet` represents one single extraction radius, for a single
+variable. It is a dictionary-like object with keys the multipolar numbers and values
+the multipolar decomposition represented as represented as <a class="reference internal" href="timeseries_ref.html#kuibit.timeseries.TimeSeries" title="kuibit.timeseries.TimeSeries"><code class="xref py py-class docutils literal notranslate"><span class="pre">TimeSeries</span></code></a>
+objects.</p></li>
+</ul>
+<p>These are hierarchical classes, one containing the others, so one typically ends
+up with a series of brackets or dots to access the actual data. For example, if
+<code class="docutils literal notranslate"><span class="pre">sim</span></code> is a <a class="reference internal" href="simdir_ref.html#kuibit.simdir.SimDir" title="kuibit.simdir.SimDir"><code class="xref py py-class docutils literal notranslate"><span class="pre">SimDir</span></code></a>, <code class="docutils literal notranslate"><span class="pre">sim.multipoles['rho_b'][100][2,2]</span></code> is
+(2,2) decomposition of <code class="docutils literal notranslate"><span class="pre">rho_b</span></code> at radius 100 represented as
+<a class="reference internal" href="timeseries_ref.html#kuibit.timeseries.TimeSeries" title="kuibit.timeseries.TimeSeries"><code class="xref py py-class docutils literal notranslate"><span class="pre">TimeSeries</span></code></a>.</p>
+<dl class="py class">
+<dt id="kuibit.cactus_multipoles.MultipoleAllDets">
+<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">kuibit.cactus_multipoles.</span></code><code class="sig-name descname"><span class="pre">MultipoleAllDets</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">l_min</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/kuibit/cactus_multipoles.html#MultipoleAllDets"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kuibit.cactus_multipoles.MultipoleAllDets" title="Permalink to this definition">¶</a></dt>
+<dd><p>This class collects available surfaces with multipole data.</p>
+<p>It is a dictionary-like object with keys the spherical surface radius, and
+values <a class="reference internal" href="#kuibit.cactus_multipoles.MultipoleOneDet" title="kuibit.cactus_multipoles.MultipoleOneDet"><code class="xref py py-class docutils literal notranslate"><span class="pre">MultipoleOneDet</span></code></a> object. Iteration is supported, sorted by
+ascending radius. You can iterate over all the radii and all the available l
+and m with a nested loop.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Variables</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>radii</strong> – Available surface radii.</p></li>
+<li><p><strong>r_outer</strong> – Radius of the outermost detector.</p></li>
+<li><p><strong>l_min</strong> – l smaller than l_min are dropped.</p></li>
+<li><p><strong>outermost</strong> – Outermost detector.</p></li>
+<li><p><strong>available_lm</strong> – Available components as tuple (l,m).</p></li>
+<li><p><strong>available_l</strong> – List of available l.</p></li>
+<li><p><strong>available_m</strong> – List of available m.</p></li>
+</ul>
+</dd>
+</dl>
+<p>Constructor.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>data</strong> (<em>list of tuples</em>) – List of tuples with <code class="docutils literal notranslate"><span class="pre">(multipole_l,</span> <span class="pre">multipole_m,</span>
+<span class="pre">extraction_radius,</span> <span class="pre">[timeseries])</span></code>, where
+<code class="docutils literal notranslate"><span class="pre">[timeseries]</span></code> is a list of the <a class="reference internal" href="timeseries_ref.html#kuibit.timeseries.TimeSeries" title="kuibit.timeseries.TimeSeries"><code class="xref py py-class docutils literal notranslate"><span class="pre">TimeSeries</span></code></a>
+associated.</p>
+</dd>
+</dl>
+<dl class="py method">
+<dt id="kuibit.cactus_multipoles.MultipoleAllDets.copy">
+<code class="sig-name descname"><span class="pre">copy</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/kuibit/cactus_multipoles.html#MultipoleAllDets.copy"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kuibit.cactus_multipoles.MultipoleAllDets.copy" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a deep copy.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Deep copy of <code class="docutils literal notranslate"><span class="pre">self</span></code>.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><a class="reference internal" href="#kuibit.cactus_multipoles.MultipoleAllDets" title="kuibit.cactus_multipoles.MultipoleAllDets"><code class="xref py py-class docutils literal notranslate"><span class="pre">MultipoleAllDets</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="kuibit.cactus_multipoles.MultipoleAllDets.has_detector">
+<code class="sig-name descname"><span class="pre">has_detector</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mult_l</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mult_m</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dist</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/kuibit/cactus_multipoles.html#MultipoleAllDets.has_detector"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kuibit.cactus_multipoles.MultipoleAllDets.has_detector" title="Permalink to this definition">¶</a></dt>
+<dd><p>Check if a given multipole component extracted at a given
+distance is available.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>mult_l</strong> (<em>int</em>) – Multipole component l.</p></li>
+<li><p><strong>mult_m</strong> (<em>int</em>) – Multipole component m.</p></li>
+<li><p><strong>dist</strong> (<em>float</em>) – Distance of the detector.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>If available or not.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="kuibit.cactus_multipoles.MultipoleAllDets.keys">
+<code class="sig-name descname"><span class="pre">keys</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/kuibit/cactus_multipoles.html#MultipoleAllDets.keys"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kuibit.cactus_multipoles.MultipoleAllDets.keys" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return available extraction radii.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Available extraction radii.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>dict_keys</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt id="kuibit.cactus_multipoles.MultipoleOneDet">
+<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">kuibit.cactus_multipoles.</span></code><code class="sig-name descname"><span class="pre">MultipoleOneDet</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dist</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">l_min</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/kuibit/cactus_multipoles.html#MultipoleOneDet"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kuibit.cactus_multipoles.MultipoleOneDet" title="Permalink to this definition">¶</a></dt>
+<dd><p>This class collects multipole components of a specific variable
+a given spherical surface.</p>
+<p>Multipoles are tightly connected with gravitational waves, so morally a
+sphere where multipoles are computed is a “detector”. Hence, the name
+of the class.</p>
+<p><a class="reference internal" href="#kuibit.cactus_multipoles.MultipoleOneDet" title="kuibit.cactus_multipoles.MultipoleOneDet"><code class="xref py py-class docutils literal notranslate"><span class="pre">MultipoleOneDet</span></code></a> is a dictionary-like object with components as
+the tuples (l,m) and values the corresponding multipolar decomposition as a
+<a class="reference internal" href="timeseries_ref.html#kuibit.timeseries.TimeSeries" title="kuibit.timeseries.TimeSeries"><code class="xref py py-class docutils literal notranslate"><span class="pre">TimeSeries</span></code></a> object. Alternatively, this can also be called
+directly <code class="docutils literal notranslate"><span class="pre">multipoleonedet(l,m)</span></code>. Iteration is supported and yields tuples
+<code class="docutils literal notranslate"><span class="pre">(l,</span> <span class="pre">m,</span> <span class="pre">data)</span></code>, which can be used to loop through all the multipoles
+available.</p>
+<p>The reason we allow for <code class="docutils literal notranslate"><span class="pre">l_min</span></code> is to remove those files that are not
+necessary when considering gravitational waves (l&lt;2).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Variables</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>dist</strong> (<em>float</em>) – Radius of the sphere.</p></li>
+<li><p><strong>radius</strong> – Radius of the sphere.</p></li>
+<li><p><strong>l_min</strong> – l smaller than <code class="docutils literal notranslate"><span class="pre">l_min</span></code> are dropped.</p></li>
+<li><p><strong>available_l</strong> – Available l values.</p></li>
+<li><p><strong>available_m</strong> – Available m values.</p></li>
+<li><p><strong>available_m</strong> – set</p></li>
+<li><p><strong>available_lm</strong> – Available <code class="docutils literal notranslate"><span class="pre">(l,</span> <span class="pre">m)</span></code> values.</p></li>
+<li><p><strong>available_lm</strong> – set of tuples</p></li>
+<li><p><strong>missing_lm</strong> – Missing (l, m) values to have all from <code class="docutils literal notranslate"><span class="pre">l_min</span></code> to <code class="docutils literal notranslate"><span class="pre">l_max</span></code>.</p></li>
+<li><p><strong>missing_lm</strong> – set of tuples</p></li>
+</ul>
+</dd>
+</dl>
+<p>Constructor.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>dist</strong> (<em>float</em>) – Radius of the spherical surface.</p></li>
+<li><p><strong>data</strong> (list of tuple <code class="docutils literal notranslate"><span class="pre">(l,</span> <span class="pre">m,</span> <span class="pre">timeseries)</span></code>) – List of tuples with the two multipolar numbers and
+the data as <a class="reference internal" href="timeseries_ref.html#kuibit.timeseries.TimeSeries" title="kuibit.timeseries.TimeSeries"><code class="xref py py-class docutils literal notranslate"><span class="pre">TimeSeries</span></code></a>.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Variables</dt>
+<dd class="field-even"><p><strong>l_min</strong> – l smaller than <code class="docutils literal notranslate"><span class="pre">l_min</span></code> are dropped.</p>
+</dd>
+</dl>
+<dl class="py method">
+<dt id="kuibit.cactus_multipoles.MultipoleOneDet.copy">
+<code class="sig-name descname"><span class="pre">copy</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/kuibit/cactus_multipoles.html#MultipoleOneDet.copy"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kuibit.cactus_multipoles.MultipoleOneDet.copy" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a deep copy.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Deep copy of <code class="docutils literal notranslate"><span class="pre">self</span></code>.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><a class="reference internal" href="#kuibit.cactus_multipoles.MultipoleOneDet" title="kuibit.cactus_multipoles.MultipoleOneDet"><code class="xref py py-class docutils literal notranslate"><span class="pre">MultipoleOneDet</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="kuibit.cactus_multipoles.MultipoleOneDet.keys">
+<code class="sig-name descname"><span class="pre">keys</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/kuibit/cactus_multipoles.html#MultipoleOneDet.keys"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kuibit.cactus_multipoles.MultipoleOneDet.keys" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return available multipolar numbers.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Available multipolar numbers.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>dict_keys</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="kuibit.cactus_multipoles.MultipoleOneDet.total_function_on_available_lm">
+<code class="sig-name descname"><span class="pre">total_function_on_available_lm</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">function</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">l_max</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/kuibit/cactus_multipoles.html#MultipoleOneDet.total_function_on_available_lm"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kuibit.cactus_multipoles.MultipoleOneDet.total_function_on_available_lm" title="Permalink to this definition">¶</a></dt>
+<dd><p>Evaluate <code class="docutils literal notranslate"><span class="pre">function</span></code> on each multipole and accumulate the result.</p>
+<p><code class="docutils literal notranslate"><span class="pre">total_function_on_available_lm</span></code> will call <code class="docutils literal notranslate"><span class="pre">function</span></code> with the
+following arguments:</p>
+<p><code class="docutils literal notranslate"><span class="pre">function(timeseries,</span> <span class="pre">mult_l,</span> <span class="pre">mult_m,</span> <span class="pre">dist,</span> <span class="pre">*args,</span> <span class="pre">**kwargs)</span></code></p>
+<p>If <code class="docutils literal notranslate"><span class="pre">function</span></code> does not need some paramters, it should use take
+the <code class="docutils literal notranslate"><span class="pre">*args</span></code> argument to ignore the additional paramters that
+are always passed <code class="docutils literal notranslate"><span class="pre">(l,</span> <span class="pre">m,</span> <span class="pre">r)</span></code>.</p>
+<p>Values of l larger than <code class="docutils literal notranslate"><span class="pre">l_max</span></code> are ignored.</p>
+<p>This method is used to compute quantities like the total power in
+gravitational waves.</p>
+<p><code class="docutils literal notranslate"><span class="pre">function</span></code> can take additional paramters passed directly from
+<code class="docutils literal notranslate"><span class="pre">total_function_on_available_lm</span></code> (e.g. <code class="docutils literal notranslate"><span class="pre">pcut</span></code> for FFI).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Params function</dt>
+<dd class="field-odd"><p>Function that has to be applied on each multipole.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Sum of function applied to each monopole</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>return type of function</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt id="kuibit.cactus_multipoles.MultipolesDir">
+<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">kuibit.cactus_multipoles.</span></code><code class="sig-name descname"><span class="pre">MultipolesDir</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sd</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/kuibit/cactus_multipoles.html#MultipolesDir"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kuibit.cactus_multipoles.MultipolesDir" title="Permalink to this definition">¶</a></dt>
+<dd><p>This class provides acces to various types of multipole data in a given
+simulation directory.</p>
+<p>This class is like a dictionary, you can access its values using the
+brackets operator, with values that are <code class="xref py py-mod docutils literal notranslate"><span class="pre">MultipoleAllDets</span></code>. These
+contain the full multipolar description for all the available radii. Files
+are lazily loaded. If both HDF5 and ASCII are present, HDF5 are preferred.
+There’s no attempt to combine the two. Alternatively, you can access
+variables with <code class="docutils literal notranslate"><span class="pre">get</span></code> or with <code class="docutils literal notranslate"><span class="pre">fields.var_name</span></code>.</p>
+<p>Constructor.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>sd</strong> (<a class="reference internal" href="simdir_ref.html#kuibit.simdir.SimDir" title="kuibit.simdir.SimDir"><code class="xref py py-class docutils literal notranslate"><span class="pre">SimDir</span></code></a>) – Simulation directory.</p>
+</dd>
+</dl>
+<dl class="py method">
+<dt id="kuibit.cactus_multipoles.MultipolesDir.get">
+<code class="sig-name descname"><span class="pre">get</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">key</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">default</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/kuibit/cactus_multipoles.html#MultipolesDir.get"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kuibit.cactus_multipoles.MultipolesDir.get" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a the multipolar data for the given variable if available, else return
+the default value.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>key</strong> (<em>str</em>) – Requested variable.</p></li>
+<li><p><strong>default</strong> (<em>any</em>) – Returned value if <code class="docutils literal notranslate"><span class="pre">key</span></code> is not available.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Collection of all the multipolar data for the given variable.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="#kuibit.cactus_multipoles.MultipoleAllDets" title="kuibit.cactus_multipoles.MultipoleAllDets"><code class="xref py py-class docutils literal notranslate"><span class="pre">MultipoleAllDets</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="kuibit.cactus_multipoles.MultipolesDir.keys">
+<code class="sig-name descname"><span class="pre">keys</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/kuibit/cactus_multipoles.html#MultipolesDir.keys"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kuibit.cactus_multipoles.MultipolesDir.keys" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return available variables with multipolar data.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Available variables that have multipolar data.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>dict_keys</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="index.html">
+              <img class="logo" src="_static/logo.png" alt="Logo"/>
+            </a></p>
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="cactus_scalars_ref.html"
+                        title="previous chapter">Reference on kuibit.cactus_scalars</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="cactus_waves_ref.html"
+                        title="next chapter">Reference on kuibit.cactus_waves</a></p>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="cactus_waves_ref.html" title="Reference on kuibit.cactus_waves"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="cactus_scalars_ref.html" title="Reference on kuibit.cactus_scalars"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">kuibit 1.3.6 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">Reference on kuibit.cactus_multipoles</a></li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2020-2022, Gabriele Bozzola.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 3.5.4.
+    </div>
+  </body>
+</html>

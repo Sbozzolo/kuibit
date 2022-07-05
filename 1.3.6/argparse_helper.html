@@ -1,0 +1,187 @@
+
+
+<!doctype html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Building command-line scripts &#8212; kuibit 1.3.6 documentation</title>
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="_static/bizstyle.css" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="_static/css/custom.css" />
+    
+    <script id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/doctools.js"></script>
+    <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="_static/bizstyle.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="A quick introduction to motionpicture" href="motionpicture.html" />
+    <link rel="prev" title="Visualizing data with matplotlib" href="visualize_matplotlib.html" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0" />
+    <!--[if lt IE 9]>
+    <script src="_static/css3-mediaqueries.js"></script>
+    <![endif]-->
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="motionpicture.html" title="A quick introduction to motionpicture"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="visualize_matplotlib.html" title="Visualizing data with matplotlib"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">kuibit 1.3.6 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">Building command-line scripts</a></li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="building-command-line-scripts">
+<h1>Building command-line scripts<a class="headerlink" href="#building-command-line-scripts" title="Permalink to this headline">¶</a></h1>
+<p><code class="docutils literal notranslate"><span class="pre">kuibit</span></code> is a library and it is designed to assist you in performing your
+analyses. Hence, <code class="docutils literal notranslate"><span class="pre">kuibit</span></code> supports multiple workflows. A possible choice
+consists in writing command-line executables to perform specific tasks (most of
+the scripts in <code class="docutils literal notranslate"><span class="pre">examples/bins</span></code> are built for this kind of workflow, so you can
+use them as example, or you can directly use them). For example, it is useful to
+have a script <code class="docutils literal notranslate"><span class="pre">plot_grid.py</span></code> that takes a simulation folder and a variable
+name and plots a 2D snapshot of such variable. The module
+<a class="reference internal" href="argparse_helper_ref.html#module-kuibit.argparse_helper" title="kuibit.argparse_helper"><code class="xref py py-mod docutils literal notranslate"><span class="pre">argparse_helper</span></code></a> contains functions to make writing such scripts
+easier (<a class="reference internal" href="argparse_helper_ref.html#module-kuibit.argparse_helper"><span class="std std-ref">Reference on kuibit.argparse_helper</span></a>).</p>
+<div class="section" id="argparse-and-argparse-helper">
+<h2>Argparse and argparse_helper<a class="headerlink" href="#argparse-and-argparse-helper" title="Permalink to this headline">¶</a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">argparse</span></code> is a built-in module in Python used to read information from the
+command line. <a class="reference internal" href="argparse_helper_ref.html#module-kuibit.argparse_helper" title="kuibit.argparse_helper"><code class="xref py py-mod docutils literal notranslate"><span class="pre">argparse_helper</span></code></a> provides functions that automatically
+populate <code class="docutils literal notranslate"><span class="pre">argparse</span></code> with common options and reasonable defaults. The minimum
+working example is simply</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">kuibit</span> <span class="kn">import</span> <span class="n">argparse_helper</span> <span class="k">as</span> <span class="n">kah</span>
+
+<span class="n">desc</span> <span class="o">=</span> <span class="s2">&quot;This is an example&quot;</span>
+<span class="n">parser</span> <span class="o">=</span> <span class="n">kah</span><span class="o">.</span><span class="n">init_argparse</span><span class="p">(</span><span class="n">desc</span><span class="p">)</span>
+<span class="n">args</span> <span class="o">=</span> <span class="n">kah</span><span class="o">.</span><span class="n">get_args</span><span class="p">(</span><span class="n">parser</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>This will populate the options <code class="docutils literal notranslate"><span class="pre">configfile</span></code>, <code class="docutils literal notranslate"><span class="pre">verbose</span></code>, <code class="docutils literal notranslate"><span class="pre">datadir</span></code>,
+<code class="docutils literal notranslate"><span class="pre">outdir</span></code>, and <code class="docutils literal notranslate"><span class="pre">ignore_symlinks</span></code>, which can be accessed with <code class="docutils literal notranslate"><span class="pre">args.varname</span></code>
+(e.g., <code class="docutils literal notranslate"><span class="pre">args.verbose</span></code>), or with <code class="docutils literal notranslate"><span class="pre">args.fields['varname']</span></code>. <code class="docutils literal notranslate"><span class="pre">kuibit</span></code>
+supports being configured with configfiles, which can be useful to control
+scripts with many options. The method <code class="xref py py-meth docutils literal notranslate"><span class="pre">get_args()</span></code> takes the parser
+object and process the command-line data.</p>
+<p><code class="docutils literal notranslate"><span class="pre">parser</span></code> can be extended with more common options. For example, if you are
+working with grid data, you will likely will want to specify grid extents. To
+add common grid options, use the method <code class="xref py py-meth docutils literal notranslate"><span class="pre">add_grid_to_parser()</span></code>, which
+adds arguments like <code class="docutils literal notranslate"><span class="pre">origin</span></code>, <code class="docutils literal notranslate"><span class="pre">corner</span></code>, and <code class="docutils literal notranslate"><span class="pre">resolution</span></code>.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">kuibit</span> <span class="kn">import</span> <span class="n">argparse_helper</span> <span class="k">as</span> <span class="n">kah</span>
+
+<span class="n">desc</span> <span class="o">=</span> <span class="s2">&quot;This is an example&quot;</span>
+<span class="n">parser</span> <span class="o">=</span> <span class="n">kah</span><span class="o">.</span><span class="n">init_argparse</span><span class="p">(</span><span class="n">desc</span><span class="p">)</span>
+<span class="n">kah</span><span class="o">.</span><span class="n">add_grid_to_parser</span><span class="p">(</span><span class="n">parser</span><span class="p">)</span>
+<span class="n">args</span> <span class="o">=</span> <span class="n">kah</span><span class="o">.</span><span class="n">get_args</span><span class="p">(</span><span class="n">parser</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Often, the default arguments are not enough and you want to add your own. This
+can be achieved with the method <code class="docutils literal notranslate"><span class="pre">add_argument</span></code>, as in the following example:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">kuibit</span> <span class="kn">import</span> <span class="n">argparse_helper</span> <span class="k">as</span> <span class="n">kah</span>
+
+<span class="n">desc</span> <span class="o">=</span> <span class="s2">&quot;This is an example&quot;</span>
+<span class="n">parser</span> <span class="o">=</span> <span class="n">kah</span><span class="o">.</span><span class="n">init_argparse</span><span class="p">(</span><span class="n">desc</span><span class="p">)</span>
+<span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span>
+     <span class="s2">&quot;--variable&quot;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="nb">str</span><span class="p">,</span> <span class="n">required</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Variable to plot&quot;</span>
+<span class="p">)</span>
+<span class="n">kah</span><span class="o">.</span><span class="n">add_grid_to_parser</span><span class="p">(</span><span class="n">parser</span><span class="p">)</span>
+<span class="n">args</span> <span class="o">=</span> <span class="n">kah</span><span class="o">.</span><span class="n">get_args</span><span class="p">(</span><span class="n">parser</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="groups-of-options-available">
+<h2>Groups of options available<a class="headerlink" href="#groups-of-options-available" title="Permalink to this headline">¶</a></h2>
+<p>The groups of options that are currently available are:</p>
+<ul class="simple">
+<li><p><a class="reference internal" href="argparse_helper_ref.html#kuibit.argparse_helper.add_grid_to_parser" title="kuibit.argparse_helper.add_grid_to_parser"><code class="xref py py-func docutils literal notranslate"><span class="pre">add_grid_to_parser()</span></code></a>, for operations that involve grids</p></li>
+<li><p><a class="reference internal" href="argparse_helper_ref.html#kuibit.argparse_helper.add_figure_to_parser" title="kuibit.argparse_helper.add_figure_to_parser"><code class="xref py py-func docutils literal notranslate"><span class="pre">add_figure_to_parser()</span></code></a>, for operations that involve making figures</p></li>
+<li><p><a class="reference internal" href="argparse_helper_ref.html#kuibit.argparse_helper.add_horizon_to_parser" title="kuibit.argparse_helper.add_horizon_to_parser"><code class="xref py py-func docutils literal notranslate"><span class="pre">add_horizon_to_parser()</span></code></a>, for operations that involve plotting
+horizons</p></li>
+</ul>
+<p>You should check the <a class="reference internal" href="argparse_helper_ref.html#module-kuibit.argparse_helper"><span class="std std-ref">Reference on kuibit.argparse_helper</span></a> to figure out exactly what options are added by each
+function.</p>
+</div>
+</div>
+
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="index.html">
+              <img class="logo" src="_static/logo.png" alt="Logo"/>
+            </a></p>
+  <h3><a href="index.html">Table of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Building command-line scripts</a><ul>
+<li><a class="reference internal" href="#argparse-and-argparse-helper">Argparse and argparse_helper</a></li>
+<li><a class="reference internal" href="#groups-of-options-available">Groups of options available</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="visualize_matplotlib.html"
+                        title="previous chapter">Visualizing data with matplotlib</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="motionpicture.html"
+                        title="next chapter">A quick introduction to motionpicture</a></p>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="motionpicture.html" title="A quick introduction to motionpicture"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="visualize_matplotlib.html" title="Visualizing data with matplotlib"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">kuibit 1.3.6 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">Building command-line scripts</a></li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2020-2022, Gabriele Bozzola.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 3.5.4.
+    </div>
+  </body>
+</html>

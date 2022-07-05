@@ -1,0 +1,35 @@
+What users say about kuibit
+==================================================
+
+In this page, we collect short reviews by users. If you want to add your review,
+feel free to open an issue on GitHub, or to send to one of the maintainers via
+email or Telegram.
+
+    "I wish I had kuibit when I started working with the Einstein Toolkit."
+
+    -- Gabriele Bozzola, PhD candidate at The University of Arizona (2020)
+
+    "As a PhD with no previous experience in numerical relativity, kuibit enabled
+    me to analyze simulations, instead of spending months to understand and
+    write programs only to read the simulation data.
+
+    It allowed me to focus on the science."
+
+    -- Stamatis Vretinaris, PhD student at Radbout University (2021)
+
+    "By making the process of parsing, processing, and visualizing my
+    Cactus-produced data far simpler than any other tool, Kuibit has made me
+    realize how much my old methods for doing these things were holding me back.
+
+    I find myself asking more and better scientific questions now that exploring
+    my data and making diverse visualizations is not the time sink it used to
+    be."
+
+    -- Erik Wessel, PhD candidate at The University of Arizona (2021)
+
+    "With Kuibit, I could use my favorite way (in Jupyter notebook) of working
+    with simulation data which no other tool currently provides. Moreover, it
+    follows best practices in making the details of data easily available to
+    work with. I would recommend it to any beginner into Cactus data analysis."
+
+    -- Rahul Kashyap, Postdoctoral Scholar in the Eberly College of Science, Pennsylvania State University (2021)
