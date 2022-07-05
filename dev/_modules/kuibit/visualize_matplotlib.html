@@ -117,6 +117,7 @@
 <span class="kn">import</span> <span class="nn">itertools</span>
 <span class="kn">import</span> <span class="nn">os</span>
 <span class="kn">import</span> <span class="nn">warnings</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Optional</span>
 
 <span class="kn">import</span> <span class="nn">matplotlib</span>
 <span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
@@ -132,11 +133,17 @@
 <span class="c1"># UTILITIES</span>
 
 
-<div class="viewcode-block" id="setup_matplotlib"><a class="viewcode-back" href="../../visualize_matplotlib_ref.html#kuibit.visualize_matplotlib.setup_matplotlib">[docs]</a><span class="k">def</span> <span class="nf">setup_matplotlib</span><span class="p">(</span><span class="n">params</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<div class="viewcode-block" id="setup_matplotlib"><a class="viewcode-back" href="../../visualize_matplotlib_ref.html#kuibit.visualize_matplotlib.setup_matplotlib">[docs]</a><span class="k">def</span> <span class="nf">setup_matplotlib</span><span class="p">(</span>
+    <span class="n">params</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">rc_par_file</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;Setup matplotlib with some reasonable defaults for better plots.</span>
 
 <span class="sd">    If ``params`` is provided, add these parameters to matplotlib&#39;s settings</span>
 <span class="sd">    (``params`` updates ``matplotlib.rcParams``).</span>
+
+<span class="sd">    If ``rc_par_file`` is provided, first set the parameters reading the values</span>
+<span class="sd">    from the ``rc_par_file``. (``params`` has the precedence over the parameters</span>
+<span class="sd">    read from the file.)</span>
 
 <span class="sd">    Matplotlib behaves differently on different machines. With this, we make</span>
 <span class="sd">    sure that we set all the relevant paramters that we care of to the value we</span>
@@ -144,6 +151,12 @@
 
 <span class="sd">    :param params: Parameters to update matplotlib with.</span>
 <span class="sd">    :type params: dict</span>
+
+<span class="sd">    :param rc_par_file: File where to read parameters. The file has to use</span>
+<span class="sd">                        matplotlib&#39;s configuration language. ``params``</span>
+<span class="sd">                        overwrites the values set from this file, but this file</span>
+<span class="sd">                        overrides the default values set in this function.</span>
+<span class="sd">    :type rc_par_file: str</span>
 
 <span class="sd">    &quot;&quot;&quot;</span>
 
@@ -164,6 +177,9 @@
             <span class="s2">&quot;legend.edgecolor&quot;</span><span class="p">:</span> <span class="s2">&quot;inherit&quot;</span><span class="p">,</span>
         <span class="p">}</span>
     <span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">rc_par_file</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">matplotlib</span><span class="o">.</span><span class="n">rc_file</span><span class="p">(</span><span class="n">rc_par_file</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="n">params</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">matplotlib</span><span class="o">.</span><span class="n">rcParams</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">params</span><span class="p">)</span></div>
