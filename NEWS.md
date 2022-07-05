@@ -1,6 +1,6 @@
 # Changelog
 
-## Version 1.3.6 (Under Development)
+## Version 1.3.6 (5 July 2022)
 
 #### Bug fixes
 - Fix time incorrectly read in ASCII data (thanks @AuroraDysis,
