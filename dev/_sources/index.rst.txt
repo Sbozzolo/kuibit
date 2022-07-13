@@ -11,7 +11,8 @@ restarts, reading HDF5 files, ...). ``kuibit`` represent simulation data in
 a high-level and intuitive way, and provides some commonly used routines in
 numerical-relativity (e.g., computing the strain of gravitational waves).
 A video introduction about ``kuibit`` can be found on
-`YouTube <https://www.youtube.com/watch?v=7-F2xh-m31A>`_.
+`YouTube <https://www.youtube.com/watch?v=7-F2xh-m31A>`_ (a
+`tutorial <https://youtu.be/14YOQ6SqTUU>`_ is also available)
 The YouTube series
 `Using kuibit <https://www.youtube.com/playlist?list=PLIVVtc6RlFxpi3BiF6KTWd3z4TTQ5hY06>`_
 contains video tutorials on ``kuibit``.
