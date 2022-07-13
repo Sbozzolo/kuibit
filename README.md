@@ -102,6 +102,7 @@ compiling the documentation will fail.
 ## Videos
 
 Here is a list of videos describing `kuibit` and how to use it:
+- [Tutorial: Post-processing Cactus simulations with Python](https://youtu.be/14YOQ6SqTUU)
 - [Introduction on kuibit - Einstein Toolkit Seminar, 2021](https://www.youtube.com/watch?v=7-F2xh-m31A)
 - [Using kuibit](https://www.youtube.com/playlist?list=PLIVVtc6RlFxpi3BiF6KTWd3z4TTQ5hY06)
 - [kuibit - Einstein Toolkit Summer School, 2021](https://youtu.be/g-JlXfLvUZU)
