@@ -751,8 +751,6 @@ class TestCactusWaves(unittest.TestCase):
         with self.assertRaises(TypeError):
             cw.ElectromagneticWavesDir(0)
 
-        emdir = cw.ElectromagneticWavesDir(self.sim)
-
         # Check type
         self.assertTrue(
             isinstance(self.gwdir[110.69], cw.GravitationalWavesOneDet)
