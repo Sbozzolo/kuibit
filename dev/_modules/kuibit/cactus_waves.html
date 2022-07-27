@@ -1382,9 +1382,348 @@
 <span class="sd">        :rtype: :py:class:`~TimeSeries`</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_total_power</span><span class="p">(</span><span class="n">l_max</span><span class="o">=</span><span class="n">l_max</span><span class="p">)</span><span class="o">.</span><span class="n">integrated</span><span class="p">()</span></div></div>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_total_power</span><span class="p">(</span><span class="n">l_max</span><span class="o">=</span><span class="n">l_max</span><span class="p">)</span><span class="o">.</span><span class="n">integrated</span><span class="p">()</span></div>
 
     <span class="c1"># Angular momentum is not computed by any public thorns.</span>
+
+<div class="viewcode-block" id="ElectromagneticWavesOneDet.get_force_lm"><a class="viewcode-back" href="../../cactus_waves_ref.html#kuibit.cactus_waves.ElectromagneticWavesOneDet.get_force_lm">[docs]</a>    <span class="k">def</span> <span class="nf">get_force_lm</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mult_l</span><span class="p">,</span> <span class="n">mult_m</span><span class="p">,</span> <span class="n">direction</span><span class="o">=</span><span class="mi">2</span><span class="p">):</span>
+        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Return the instantaneous linear momentum along the given direction</span>
+<span class="sd">        lost in the mode (l, m).</span>
+
+<span class="sd">        :param mult_l: l multipole moment.</span>
+<span class="sd">        :type mult_t: int</span>
+<span class="sd">        :param mult_m: m multipole moment.</span>
+<span class="sd">        :type mult_m: int</span>
+<span class="sd">        :param direction: Direction of the force to compute (0: x, 1: y, 2: z).</span>
+<span class="sd">        :type direction: int</span>
+
+<span class="sd">        :returns: Instantaneous force along the given axis in the mode ``(l, m)``</span>
+<span class="sd">                  as a function of time.</span>
+<span class="sd">        :rtype: :py:class:`~TimeSeries`</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="mi">0</span> <span class="o">&lt;=</span> <span class="n">direction</span> <span class="o">&lt;=</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Direction has to be 0 (x), 1 (y), or 2 (z)&quot;</span><span class="p">)</span>
+
+        <span class="k">def</span> <span class="nf">a_lm</span><span class="p">(</span><span class="n">el</span><span class="p">,</span> <span class="n">em</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">((</span><span class="n">el</span> <span class="o">-</span> <span class="n">em</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="n">el</span> <span class="o">+</span> <span class="n">em</span> <span class="o">+</span> <span class="mi">1</span><span class="p">))</span> <span class="o">/</span> <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">el</span> <span class="o">*</span> <span class="p">(</span><span class="n">el</span> <span class="o">+</span> <span class="mi">1</span><span class="p">))</span>
+
+        <span class="k">def</span> <span class="nf">b_lm</span><span class="p">(</span><span class="n">el</span><span class="p">,</span> <span class="n">em</span><span class="p">):</span>
+            <span class="k">return</span> <span class="p">(</span>
+                <span class="mi">1</span>
+                <span class="o">/</span> <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">el</span><span class="p">)</span>
+                <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span>
+                    <span class="p">((</span><span class="n">el</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="n">el</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="n">el</span> <span class="o">+</span> <span class="n">em</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="n">el</span> <span class="o">+</span> <span class="n">em</span> <span class="o">-</span> <span class="mi">1</span><span class="p">))</span>
+                    <span class="o">/</span> <span class="p">((</span><span class="mi">2</span> <span class="o">*</span> <span class="n">el</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">el</span> <span class="o">+</span> <span class="mi">1</span><span class="p">))</span>
+                <span class="p">)</span>
+            <span class="p">)</span>
+
+        <span class="k">def</span> <span class="nf">c_lm</span><span class="p">(</span><span class="n">el</span><span class="p">,</span> <span class="n">em</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">em</span> <span class="o">/</span> <span class="p">(</span><span class="n">el</span> <span class="o">*</span> <span class="p">(</span><span class="n">el</span> <span class="o">+</span> <span class="mi">1</span><span class="p">))</span>
+
+        <span class="k">def</span> <span class="nf">d_lm</span><span class="p">(</span><span class="n">el</span><span class="p">,</span> <span class="n">em</span><span class="p">):</span>
+            <span class="n">num</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">((</span><span class="n">el</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="n">el</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="n">el</span> <span class="o">-</span> <span class="n">em</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="n">el</span> <span class="o">+</span> <span class="n">em</span><span class="p">))</span>
+            <span class="n">den</span> <span class="o">=</span> <span class="n">el</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">((</span><span class="mi">2</span> <span class="o">*</span> <span class="n">el</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">el</span> <span class="o">+</span> <span class="mi">1</span><span class="p">))</span>
+            <span class="k">return</span> <span class="n">num</span> <span class="o">/</span> <span class="n">den</span>
+
+        <span class="k">if</span> <span class="n">direction</span> <span class="ow">in</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">):</span>
+
+            <span class="c1"># Pp = phi2_lm * [(a_lm * conj(phi2_l(m+1))</span>
+            <span class="c1">#                + b_l(-m) * conj(phi2_(l-1)(m+1))</span>
+            <span class="c1">#                - b_(l+1)(m+1) * conj(phi2_(l+1)(m+1)))]</span>
+            <span class="c1"># Pp = phi2_lm * conj(A + B + C)</span>
+            <span class="c1">#</span>
+            <span class="c1"># (We move the conjugate outside given that all the coefficients</span>
+            <span class="c1">#  are real)</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">mult_l</span><span class="p">,</span> <span class="n">mult_m</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="ow">in</span> <span class="bp">self</span><span class="p">:</span>
+                <span class="n">A</span> <span class="o">=</span> <span class="n">a_lm</span><span class="p">(</span><span class="n">mult_l</span><span class="p">,</span> <span class="n">mult_m</span><span class="p">)</span> <span class="o">*</span> <span class="bp">self</span><span class="p">[(</span><span class="n">mult_l</span><span class="p">,</span> <span class="n">mult_m</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">A</span> <span class="o">=</span> <span class="n">ts</span><span class="o">.</span><span class="n">TimeSeries</span><span class="p">(</span>
+                    <span class="bp">self</span><span class="p">[(</span><span class="n">mult_l</span><span class="p">,</span> <span class="n">mult_m</span><span class="p">)]</span><span class="o">.</span><span class="n">t</span><span class="p">,</span>
+                    <span class="n">np</span><span class="o">.</span><span class="n">zeros_like</span><span class="p">(</span><span class="bp">self</span><span class="p">[(</span><span class="n">mult_l</span><span class="p">,</span> <span class="n">mult_m</span><span class="p">)]</span><span class="o">.</span><span class="n">y</span><span class="p">),</span>
+                <span class="p">)</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">mult_l</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="n">mult_m</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="ow">in</span> <span class="bp">self</span><span class="p">:</span>
+                <span class="n">B</span> <span class="o">=</span> <span class="n">b_lm</span><span class="p">(</span><span class="n">mult_l</span><span class="p">,</span> <span class="o">-</span><span class="n">mult_m</span><span class="p">)</span> <span class="o">*</span> <span class="bp">self</span><span class="p">[(</span><span class="n">mult_l</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="n">mult_m</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">B</span> <span class="o">=</span> <span class="n">ts</span><span class="o">.</span><span class="n">TimeSeries</span><span class="p">(</span><span class="n">A</span><span class="o">.</span><span class="n">t</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros_like</span><span class="p">(</span><span class="n">A</span><span class="o">.</span><span class="n">y</span><span class="p">))</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">mult_l</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">mult_m</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="ow">in</span> <span class="bp">self</span><span class="p">:</span>
+                <span class="n">C</span> <span class="o">=</span> <span class="p">(</span>
+                    <span class="o">-</span><span class="n">b_lm</span><span class="p">(</span><span class="n">mult_l</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">mult_m</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+                    <span class="o">*</span> <span class="bp">self</span><span class="p">[(</span><span class="n">mult_l</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">mult_m</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)]</span>
+                <span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">C</span> <span class="o">=</span> <span class="n">ts</span><span class="o">.</span><span class="n">TimeSeries</span><span class="p">(</span><span class="n">A</span><span class="o">.</span><span class="n">t</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros_like</span><span class="p">(</span><span class="n">A</span><span class="o">.</span><span class="n">y</span><span class="p">))</span>
+
+            <span class="n">Pp</span> <span class="o">=</span> <span class="bp">self</span><span class="p">[(</span><span class="n">mult_l</span><span class="p">,</span> <span class="n">mult_m</span><span class="p">)]</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">conj</span><span class="p">(</span><span class="n">A</span> <span class="o">+</span> <span class="n">B</span> <span class="o">+</span> <span class="n">C</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">direction</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">dist</span><span class="o">**</span><span class="mi">2</span> <span class="o">/</span> <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">)</span> <span class="o">*</span> <span class="n">Pp</span><span class="o">.</span><span class="n">real</span><span class="p">()</span>
+
+            <span class="k">if</span> <span class="n">direction</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">dist</span><span class="o">**</span><span class="mi">2</span> <span class="o">/</span> <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">)</span> <span class="o">*</span> <span class="n">Pp</span><span class="o">.</span><span class="n">imag</span><span class="p">()</span>
+
+        <span class="c1"># direction == 2</span>
+
+        <span class="c1"># Pz = phi2_lm [(c_lm * conj(phi2_lm)</span>
+        <span class="c1">#                + d_lm * conj(phi2_(l-1)m)</span>
+        <span class="c1">#                + d_(l+1)m * conj(phi2(l+1)m))]</span>
+        <span class="c1"># Pz= phi2_lm *  conj(A + B + C)</span>
+        <span class="c1">#</span>
+        <span class="c1"># (We move the conjugate outside given that all the coefficients</span>
+        <span class="c1">#  are real)</span>
+
+        <span class="n">A</span> <span class="o">=</span> <span class="n">c_lm</span><span class="p">(</span><span class="n">mult_l</span><span class="p">,</span> <span class="n">mult_m</span><span class="p">)</span> <span class="o">*</span> <span class="bp">self</span><span class="p">[(</span><span class="n">mult_l</span><span class="p">,</span> <span class="n">mult_m</span><span class="p">)]</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">mult_l</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="n">mult_m</span><span class="p">)</span> <span class="ow">in</span> <span class="bp">self</span><span class="p">:</span>
+            <span class="n">B</span> <span class="o">=</span> <span class="n">d_lm</span><span class="p">(</span><span class="n">mult_l</span><span class="p">,</span> <span class="n">mult_m</span><span class="p">)</span> <span class="o">*</span> <span class="bp">self</span><span class="p">[(</span><span class="n">mult_l</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="n">mult_m</span><span class="p">)]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">B</span> <span class="o">=</span> <span class="n">ts</span><span class="o">.</span><span class="n">TimeSeries</span><span class="p">(</span><span class="n">A</span><span class="o">.</span><span class="n">t</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros_like</span><span class="p">(</span><span class="n">A</span><span class="o">.</span><span class="n">y</span><span class="p">))</span>
+
+        <span class="k">if</span> <span class="p">(</span><span class="n">mult_l</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">mult_m</span><span class="p">)</span> <span class="ow">in</span> <span class="bp">self</span><span class="p">:</span>
+            <span class="n">C</span> <span class="o">=</span> <span class="n">d_lm</span><span class="p">(</span><span class="n">mult_l</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">mult_m</span><span class="p">)</span> <span class="o">*</span> <span class="bp">self</span><span class="p">[(</span><span class="n">mult_l</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">mult_m</span><span class="p">)]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">C</span> <span class="o">=</span> <span class="n">ts</span><span class="o">.</span><span class="n">TimeSeries</span><span class="p">(</span><span class="n">A</span><span class="o">.</span><span class="n">t</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros_like</span><span class="p">(</span><span class="n">A</span><span class="o">.</span><span class="n">y</span><span class="p">))</span>
+
+        <span class="n">Pz</span> <span class="o">=</span> <span class="bp">self</span><span class="p">[(</span><span class="n">mult_l</span><span class="p">,</span> <span class="n">mult_m</span><span class="p">)]</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">conj</span><span class="p">(</span><span class="n">A</span> <span class="o">+</span> <span class="n">B</span> <span class="o">+</span> <span class="n">C</span><span class="p">)</span>
+
+        <span class="c1"># The imaginary part is zero, so we make the signal real</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">dist</span><span class="o">**</span><span class="mi">2</span> <span class="o">/</span> <span class="p">(</span><span class="mi">4</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">)</span> <span class="o">*</span> <span class="n">Pz</span><span class="o">.</span><span class="n">real</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="ElectromagneticWavesOneDet.get_force_x_lm"><a class="viewcode-back" href="../../cactus_waves_ref.html#kuibit.cactus_waves.ElectromagneticWavesOneDet.get_force_x_lm">[docs]</a>    <span class="k">def</span> <span class="nf">get_force_x_lm</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mult_l</span><span class="p">,</span> <span class="n">mult_m</span><span class="p">):</span>
+        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Return the instantaneous linear momentum along the x direction</span>
+<span class="sd">        lost in the mode (l, m).</span>
+
+<span class="sd">        :param mult_l: l multipole moment.</span>
+<span class="sd">        :type mult_t: int</span>
+<span class="sd">        :param mult_m: m multipole moment.</span>
+<span class="sd">        :type mult_m: int</span>
+
+<span class="sd">        :returns: Instantaneous force along the z axis in the mode ``(l, m)``</span>
+<span class="sd">                  as a function of time.</span>
+<span class="sd">        :rtype: :py:class:`~TimeSeries`</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_force_lm</span><span class="p">(</span><span class="n">mult_l</span><span class="p">,</span> <span class="n">mult_m</span><span class="p">,</span> <span class="n">direction</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="ElectromagneticWavesOneDet.get_force_y_lm"><a class="viewcode-back" href="../../cactus_waves_ref.html#kuibit.cactus_waves.ElectromagneticWavesOneDet.get_force_y_lm">[docs]</a>    <span class="k">def</span> <span class="nf">get_force_y_lm</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mult_l</span><span class="p">,</span> <span class="n">mult_m</span><span class="p">):</span>
+        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Return the instantaneous linear momentum along the y direction</span>
+<span class="sd">        lost in the mode (l, m).</span>
+
+<span class="sd">        This is computed with Eq. (3.15) in Ruiz 2008 (0707.4654).</span>
+
+<span class="sd">        :param mult_l: l multipole moment.</span>
+<span class="sd">        :type mult_t: int</span>
+<span class="sd">        :param mult_m: m multipole moment.</span>
+<span class="sd">        :type mult_m: int</span>
+
+<span class="sd">        :returns: Instantaneous force along the z axis in the mode ``(l, m)``</span>
+<span class="sd">                  as a function of time.</span>
+<span class="sd">        :rtype: :py:class:`~TimeSeries`</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_force_lm</span><span class="p">(</span><span class="n">mult_l</span><span class="p">,</span> <span class="n">mult_m</span><span class="p">,</span> <span class="n">direction</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="ElectromagneticWavesOneDet.get_force_z_lm"><a class="viewcode-back" href="../../cactus_waves_ref.html#kuibit.cactus_waves.ElectromagneticWavesOneDet.get_force_z_lm">[docs]</a>    <span class="k">def</span> <span class="nf">get_force_z_lm</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mult_l</span><span class="p">,</span> <span class="n">mult_m</span><span class="p">):</span>
+        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Return the instantaneous linear momentum along the z direction</span>
+<span class="sd">        lost in the mode (l, m).</span>
+
+<span class="sd">        This is computed with Eq. (3.15) in Ruiz 2008 (0707.4654).</span>
+
+<span class="sd">        :param mult_l: l multipole moment.</span>
+<span class="sd">        :type mult_t: int</span>
+<span class="sd">        :param mult_m: m multipole moment.</span>
+<span class="sd">        :type mult_m: int</span>
+
+<span class="sd">        :returns: Instantaneous force along the z axis in the mode ``(l, m)``</span>
+<span class="sd">                  as a function of time.</span>
+<span class="sd">        :rtype: :py:class:`~TimeSeries`</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_force_lm</span><span class="p">(</span><span class="n">mult_l</span><span class="p">,</span> <span class="n">mult_m</span><span class="p">,</span> <span class="n">direction</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="ElectromagneticWavesOneDet.get_linear_momentum_lm"><a class="viewcode-back" href="../../cactus_waves_ref.html#kuibit.cactus_waves.ElectromagneticWavesOneDet.get_linear_momentum_lm">[docs]</a>    <span class="k">def</span> <span class="nf">get_linear_momentum_lm</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mult_l</span><span class="p">,</span> <span class="n">mult_m</span><span class="p">,</span> <span class="n">direction</span><span class="o">=</span><span class="mi">2</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Return the cumulative linear momentum lost along the given direction in the</span>
+<span class="sd">        mode (l, m).</span>
+
+<span class="sd">        :param mult_l: l multipole moment.</span>
+<span class="sd">        :type mult_t: int</span>
+<span class="sd">        :param mult_m: m multipole moment.</span>
+<span class="sd">        :type mult_m: int</span>
+<span class="sd">        :param direction: Direction of the linear momentum to compute (0: x, 1:</span>
+<span class="sd">                          y, 2: z).</span>
+<span class="sd">        :type direction: int</span>
+
+<span class="sd">        :returns: Linear momentum along the given direction lost up to the time t</span>
+<span class="sd">                  in the mode ``(l, m)`` as a function of time.</span>
+<span class="sd">        :rtype: :py:class:`~TimeSeries`</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_force_lm</span><span class="p">(</span>
+            <span class="n">mult_l</span><span class="p">,</span> <span class="n">mult_m</span><span class="p">,</span> <span class="n">direction</span><span class="o">=</span><span class="n">direction</span>
+        <span class="p">)</span><span class="o">.</span><span class="n">integrated</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="ElectromagneticWavesOneDet.get_linear_momentum_x_lm"><a class="viewcode-back" href="../../cactus_waves_ref.html#kuibit.cactus_waves.ElectromagneticWavesOneDet.get_linear_momentum_x_lm">[docs]</a>    <span class="k">def</span> <span class="nf">get_linear_momentum_x_lm</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mult_l</span><span class="p">,</span> <span class="n">mult_m</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Return the cumulative linear momentum lost along the x direction</span>
+<span class="sd">        in the mode (l, m).</span>
+
+<span class="sd">        :param mult_l: l multipole moment.</span>
+<span class="sd">        :type mult_t: int</span>
+<span class="sd">        :param mult_m: m multipole moment.</span>
+<span class="sd">        :type mult_m: int</span>
+
+<span class="sd">        :returns: Linear momentum along the x direction lost up to the time t</span>
+<span class="sd">                  in the mode ``(l, m)`` as a function of time.</span>
+<span class="sd">        :rtype: :py:class:`~TimeSeries`</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_force_x_lm</span><span class="p">(</span><span class="n">mult_l</span><span class="p">,</span> <span class="n">mult_m</span><span class="p">)</span><span class="o">.</span><span class="n">integrated</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="ElectromagneticWavesOneDet.get_linear_momentum_y_lm"><a class="viewcode-back" href="../../cactus_waves_ref.html#kuibit.cactus_waves.ElectromagneticWavesOneDet.get_linear_momentum_y_lm">[docs]</a>    <span class="k">def</span> <span class="nf">get_linear_momentum_y_lm</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mult_l</span><span class="p">,</span> <span class="n">mult_m</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Return the cumulative linear momentum lost along the y direction</span>
+<span class="sd">        in the mode (l, m).</span>
+
+<span class="sd">        :param mult_l: l multipole moment.</span>
+<span class="sd">        :type mult_t: int</span>
+<span class="sd">        :param mult_m: m multipole moment.</span>
+<span class="sd">        :type mult_m: int</span>
+
+<span class="sd">        :returns: Linear momentum along the y direction lost up to the time t</span>
+<span class="sd">                  in the mode ``(l, m)`` as a function of time.</span>
+<span class="sd">        :rtype: :py:class:`~TimeSeries`</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_force_y_lm</span><span class="p">(</span><span class="n">mult_l</span><span class="p">,</span> <span class="n">mult_m</span><span class="p">)</span><span class="o">.</span><span class="n">integrated</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="ElectromagneticWavesOneDet.get_linear_momentum_z_lm"><a class="viewcode-back" href="../../cactus_waves_ref.html#kuibit.cactus_waves.ElectromagneticWavesOneDet.get_linear_momentum_z_lm">[docs]</a>    <span class="k">def</span> <span class="nf">get_linear_momentum_z_lm</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mult_l</span><span class="p">,</span> <span class="n">mult_m</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Return the cumulative linear momentum lost along the z direction</span>
+<span class="sd">        in the mode (l, m).</span>
+
+<span class="sd">        :param mult_l: l multipole moment.</span>
+<span class="sd">        :type mult_t: int</span>
+<span class="sd">        :param mult_m: m multipole moment.</span>
+<span class="sd">        :type mult_m: int</span>
+
+<span class="sd">        :returns: Linear momentum along the z direction lost up to the time t</span>
+<span class="sd">                  in the mode ``(l, m)`` as a function of time.</span>
+<span class="sd">        :rtype: :py:class:`~TimeSeries`</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_force_z_lm</span><span class="p">(</span><span class="n">mult_l</span><span class="p">,</span> <span class="n">mult_m</span><span class="p">)</span><span class="o">.</span><span class="n">integrated</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="ElectromagneticWavesOneDet.get_total_force"><a class="viewcode-back" href="../../cactus_waves_ref.html#kuibit.cactus_waves.ElectromagneticWavesOneDet.get_total_force">[docs]</a>    <span class="k">def</span> <span class="nf">get_total_force</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">direction</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">l_max</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Return the total force along the given direction in all the modes</span>
+<span class="sd">        up to ``l_max``.</span>
+
+<span class="sd">        :param l_max: Ignore multipoles with l &gt; l_max</span>
+<span class="sd">        :type l_max: int</span>
+<span class="sd">        :param direction: Direction of the linear momentum to compute (0: x, 1:</span>
+<span class="sd">                          y, 2: z).</span>
+<span class="sd">        :type direction: int</span>
+
+<span class="sd">        :returns: Instantaneous total force along the given direction in the</span>
+<span class="sd">                  modes up to  ``l_max`` as a function of time.</span>
+<span class="sd">        :rtype: :py:class:`~TimeSeries`</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">def</span> <span class="nf">forclm</span><span class="p">(</span><span class="n">_1</span><span class="p">,</span> <span class="n">mult_l</span><span class="p">,</span> <span class="n">mult_m</span><span class="p">,</span> <span class="n">_2</span><span class="p">):</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_force_lm</span><span class="p">(</span><span class="n">mult_l</span><span class="p">,</span> <span class="n">mult_m</span><span class="p">,</span> <span class="n">direction</span><span class="o">=</span><span class="n">direction</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">total_function_on_available_lm</span><span class="p">(</span><span class="n">forclm</span><span class="p">,</span> <span class="n">l_max</span><span class="o">=</span><span class="n">l_max</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="ElectromagneticWavesOneDet.get_total_force_x"><a class="viewcode-back" href="../../cactus_waves_ref.html#kuibit.cactus_waves.ElectromagneticWavesOneDet.get_total_force_x">[docs]</a>    <span class="k">def</span> <span class="nf">get_total_force_x</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">l_max</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Return the total force along the x direction in all the modes</span>
+<span class="sd">        up to ``l_max``.</span>
+
+<span class="sd">        :param l_max: Ignore multipoles with l &gt; l_max</span>
+<span class="sd">        :type l_max: int</span>
+
+<span class="sd">        :returns: Instantaneous total force along the x direction in the</span>
+<span class="sd">                  modes up to  ``l_max`` as a function of time.</span>
+<span class="sd">        :rtype: :py:class:`~TimeSeries`</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_total_force</span><span class="p">(</span><span class="n">direction</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">l_max</span><span class="o">=</span><span class="n">l_max</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="ElectromagneticWavesOneDet.get_total_force_y"><a class="viewcode-back" href="../../cactus_waves_ref.html#kuibit.cactus_waves.ElectromagneticWavesOneDet.get_total_force_y">[docs]</a>    <span class="k">def</span> <span class="nf">get_total_force_y</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">l_max</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Return the total force along the y direction in all the modes</span>
+<span class="sd">        up to ``l_max``.</span>
+
+<span class="sd">        :param l_max: Ignore multipoles with l &gt; l_max</span>
+<span class="sd">        :type l_max: int</span>
+
+<span class="sd">        :returns: Instantaneous total force along the y direction in the</span>
+<span class="sd">                  modes up to  ``l_max`` as a function of time.</span>
+<span class="sd">        :rtype: :py:class:`~TimeSeries`</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_total_force</span><span class="p">(</span><span class="n">direction</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">l_max</span><span class="o">=</span><span class="n">l_max</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="ElectromagneticWavesOneDet.get_total_force_z"><a class="viewcode-back" href="../../cactus_waves_ref.html#kuibit.cactus_waves.ElectromagneticWavesOneDet.get_total_force_z">[docs]</a>    <span class="k">def</span> <span class="nf">get_total_force_z</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">l_max</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Return the total force along the z direction in all the modes</span>
+<span class="sd">        up to ``l_max``.</span>
+
+<span class="sd">        :param l_max: Ignore multipoles with l &gt; l_max</span>
+<span class="sd">        :type l_max: int</span>
+
+<span class="sd">        :returns: Instantaneous total force along the z direction in the</span>
+<span class="sd">                  modes up to  ``l_max`` as a function of time.</span>
+<span class="sd">        :rtype: :py:class:`~TimeSeries`</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_total_force</span><span class="p">(</span><span class="n">direction</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">l_max</span><span class="o">=</span><span class="n">l_max</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="ElectromagneticWavesOneDet.get_total_linear_momentum"><a class="viewcode-back" href="../../cactus_waves_ref.html#kuibit.cactus_waves.ElectromagneticWavesOneDet.get_total_linear_momentum">[docs]</a>    <span class="k">def</span> <span class="nf">get_total_linear_momentum</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">direction</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">l_max</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Return the cumulative linear momentum lost in all the modes up to ``l_max``.</span>
+
+<span class="sd">        :param l_max: Ignore multipoles with l &gt; l_max</span>
+<span class="sd">        :type l_max: int</span>
+<span class="sd">        :param direction: Direction of the linear momentum to compute (0: x, 1:</span>
+<span class="sd">                          y, 2: z).</span>
+<span class="sd">        :type direction: int</span>
+
+<span class="sd">        :returns: Cumulative total linear momentum along the x direction lost</span>
+<span class="sd">                  up to time in the modes up to  ``l_max`` as a function of time.</span>
+<span class="sd">         :rtype: :py:class:`~TimeSeries`</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_total_force</span><span class="p">(</span>
+            <span class="n">direction</span><span class="o">=</span><span class="n">direction</span><span class="p">,</span> <span class="n">l_max</span><span class="o">=</span><span class="n">l_max</span>
+        <span class="p">)</span><span class="o">.</span><span class="n">integrated</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="ElectromagneticWavesOneDet.get_total_linear_momentum_x"><a class="viewcode-back" href="../../cactus_waves_ref.html#kuibit.cactus_waves.ElectromagneticWavesOneDet.get_total_linear_momentum_x">[docs]</a>    <span class="k">def</span> <span class="nf">get_total_linear_momentum_x</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">l_max</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Return the cumulative linear momentum lost in all the modes up to ``l_max``</span>
+<span class="sd">        in the x direction.</span>
+
+<span class="sd">         :param l_max: Ignore multipoles with l &gt; l_max</span>
+<span class="sd">         :type l_max: int</span>
+
+<span class="sd">        :returns: Cumulative total linear momentum along the x direction lost</span>
+<span class="sd">                  up to time in the modes up to  ``l_max`` as a function of time.</span>
+<span class="sd">         :rtype: :py:class:`~TimeSeries`</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_total_force_x</span><span class="p">(</span><span class="n">l_max</span><span class="p">)</span><span class="o">.</span><span class="n">integrated</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="ElectromagneticWavesOneDet.get_total_linear_momentum_y"><a class="viewcode-back" href="../../cactus_waves_ref.html#kuibit.cactus_waves.ElectromagneticWavesOneDet.get_total_linear_momentum_y">[docs]</a>    <span class="k">def</span> <span class="nf">get_total_linear_momentum_y</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">l_max</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Return the cumulative linear momentum lost in all the modes up to ``l_max``</span>
+<span class="sd">        in the y direction.</span>
+
+<span class="sd">         :param l_max: Ignore multipoles with l &gt; l_max</span>
+<span class="sd">         :type l_max: int</span>
+
+<span class="sd">        :returns: Cumulative total linear momentum along the y direction lost</span>
+<span class="sd">                  up to time in the modes up to  ``l_max`` as a function of time.</span>
+<span class="sd">         :rtype: :py:class:`~TimeSeries`</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_total_force_y</span><span class="p">(</span><span class="n">l_max</span><span class="p">)</span><span class="o">.</span><span class="n">integrated</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="ElectromagneticWavesOneDet.get_total_linear_momentum_z"><a class="viewcode-back" href="../../cactus_waves_ref.html#kuibit.cactus_waves.ElectromagneticWavesOneDet.get_total_linear_momentum_z">[docs]</a>    <span class="k">def</span> <span class="nf">get_total_linear_momentum_z</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">l_max</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Return the cumulative linear momentum lost in all the modes up to ``l_max``</span>
+<span class="sd">        in the z direction.</span>
+
+<span class="sd">         :param l_max: Ignore multipoles with l &gt; l_max</span>
+<span class="sd">         :type l_max: int</span>
+
+<span class="sd">        :returns: Cumulative total linear momentum along the z direction lost</span>
+<span class="sd">                  up to time in the modes up to  ``l_max`` as a function of time.</span>
+<span class="sd">         :rtype: :py:class:`~TimeSeries`</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_total_force_z</span><span class="p">(</span><span class="n">l_max</span><span class="p">)</span><span class="o">.</span><span class="n">integrated</span><span class="p">()</span></div></div>
 
 
 <div class="viewcode-block" id="WavesDir"><a class="viewcode-back" href="../../cactus_waves_ref.html#kuibit.cactus_waves.WavesDir">[docs]</a><span class="k">class</span> <span class="nc">WavesDir</span><span class="p">(</span><span class="n">mp</span><span class="o">.</span><span class="n">MultipoleAllDets</span><span class="p">):</span>

@@ -97,7 +97,7 @@ Multipoles and waves
   - force/linear momentum along lost via gravitational waves (one or multiple modes),
   - power/energy lost via gravitational waves (one or multiple modes),
   - torque/angular momentum along the z axis lost via gravitational waves (one or multiple modes),
-  - Compute the last two for electromagnetic waves from ``Phi2``.
+  - Compute the same for electromagnetic waves from ``Phi2``.
 
 - Extrapolate waves at infinity with polynomial expansion in real/imaginary parts or amplitude and phase.
 - Compute spin-weigthed spherical harmonics.
