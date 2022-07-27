@@ -1004,53 +1004,64 @@ class OneGridFunctionH5(BaseOneGridFunction):
         """
         # This will give us an overview of what is available in the provided
         # file. We keep a collection of all these in the variable self.alldata
-        with h5py.File(path, "r") as f:
-            for group in f.keys():
-                matched = self.rx_group_name.match(group)
-                # If this is not an interesting group, just skip it
-                if not matched:
-                    continue
+        try:
+            with h5py.File(path, "r") as f:
+                for group in f.keys():
+                    matched = self.rx_group_name.match(group)
+                    # If this is not an interesting group, just skip it
+                    if not matched:
+                        continue
 
-                (
-                    thorn_name,
-                    var_name,
-                    iteration,
-                    time_level,
-                    map_,
-                    _,
-                    ref_level,
-                    _,
-                    component,
-                ) = matched.groups()
+                    (
+                        thorn_name,
+                        var_name,
+                        iteration,
+                        time_level,
+                        map_,
+                        _,
+                        ref_level,
+                        _,
+                        component,
+                    ) = matched.groups()
 
-                if var_name != self.var_name:
-                    continue
+                    if var_name != self.var_name:
+                        continue
 
-                time_level = int(time_level)
+                    time_level = int(time_level)
 
-                # We only care about the current timelevel
-                if time_level != 0:
-                    continue
+                    # We only care about the current timelevel
+                    if time_level != 0:
+                        continue
 
-                if self.thorn_name is None:
-                    self.thorn_name = thorn_name
+                    if self.thorn_name is None:
+                        self.thorn_name = thorn_name
 
-                if self.map is None:
-                    self.map = map_
+                    if self.map is None:
+                        self.map = map_
 
-                component = -1 if matched.group(9) is None else int(component)
-                # This is important to support grid arrays, which do not have a
-                # refinement level
-                ref_level = -1 if matched.group(7) is None else int(ref_level)
+                    component = (
+                        -1 if matched.group(9) is None else int(component)
+                    )
+                    # This is important to support grid arrays, which do not have a
+                    # refinement level
+                    ref_level = (
+                        -1 if matched.group(7) is None else int(ref_level)
+                    )
 
-                # Here is where we prepare are nested alldata dictionary
-                alldata_file = self.alldata.setdefault(path, {})
-                alldata_iteration = alldata_file.setdefault(int(iteration), {})
-                alldata_ref_level = alldata_iteration.setdefault(ref_level, {})
+                    # Here is where we prepare are nested alldata dictionary
+                    alldata_file = self.alldata.setdefault(path, {})
+                    alldata_iteration = alldata_file.setdefault(
+                        int(iteration), {}
+                    )
+                    alldata_ref_level = alldata_iteration.setdefault(
+                        ref_level, {}
+                    )
 
-                # We set the actual data to None, and we will read it in
-                # _read_component_as_uniform_grid_data upon request
-                alldata_ref_level.setdefault(int(component), None)
+                    # We set the actual data to None, and we will read it in
+                    # _read_component_as_uniform_grid_data upon request
+                    alldata_ref_level.setdefault(int(component), None)
+        except RuntimeError as exce:
+            raise RuntimeError(f"File {path} cannot be processed") from exce
 
     def _grid_from_dataset(self, dataset, iteration, ref_level, component):
         """Return a :py:class:`~.UniformGrid` from a given HDF5 dataset.
@@ -1116,16 +1127,19 @@ class OneGridFunctionH5(BaseOneGridFunction):
         """
         ref_level_str = f" rl={ref_level}" if (ref_level >= 0) else ""
         component_str = f" c={component}" if (component >= 0) else ""
-        with h5py.File(path, "r") as f:
-            try:
-                yield f[
-                    self.dataset_format
-                    % (iteration, ref_level_str, component_str)
-                ]
-            finally:
-                # All the hard work is done by the other 'with' statement.
-                # We don't need to do anything here.
-                pass
+        try:
+            with h5py.File(path, "r") as f:
+                try:
+                    yield f[
+                        self.dataset_format
+                        % (iteration, ref_level_str, component_str)
+                    ]
+                finally:
+                    # All the hard work is done by the other 'with' statement.
+                    # We don't need to do anything here.
+                    pass
+        except RuntimeError as exce:
+            raise RuntimeError(f"File {f} cannot be processed") from exce
 
     def _read_component_as_uniform_grid_data(
         self, path, iteration, ref_level, component
@@ -1183,39 +1197,44 @@ class OneGridFunctionH5(BaseOneGridFunction):
         # it depends only on the value of the first.
 
         # The default value of these parameters is yes
-        with h5py.File(path, "r") as file_:
-            parameters = file_["Parameters and Global Attributes"]
-            all_pars = parameters["All Parameters"][()].decode().split("\n")
-            # We make sure that everything is lowercase, we are case insensitive
-            iohdf5_pars = [
-                param.lower()
-                for param in all_pars
-                if param.lower().startswith("carpetiohdf5")
-                or param.lower().startswith("iohdf5")
-            ]
-
-            def is_param_true(name: str) -> bool:
-                param = [p for p in iohdf5_pars if name.lower() in p]
-                # When the parameters we are interested in are not set, they are
-                # set to yes by default
-                if len(param) == 0:
-                    return True
-
-                # The parameter is set
-                return (
-                    ("true" in param[0])
-                    or ("yes" in param[0])
-                    or ("1" in param[0])
+        try:
+            with h5py.File(path, "r") as file_:
+                parameters = file_["Parameters and Global Attributes"]
+                all_pars = (
+                    parameters["All Parameters"][()].decode().split("\n")
                 )
+                # We make sure that everything is lowercase, we are case insensitive
+                iohdf5_pars = [
+                    param.lower()
+                    for param in all_pars
+                    if param.lower().startswith("carpetiohdf5")
+                    or param.lower().startswith("iohdf5")
+                ]
 
-            params_to_check = {"output_ghost_points"}
+                def is_param_true(name: str) -> bool:
+                    param = [p for p in iohdf5_pars if name.lower() in p]
+                    # When the parameters we are interested in are not set, they are
+                    # set to yes by default
+                    if len(param) == 0:
+                        return True
 
-            if is_3D_file:
-                params_to_check.add("out3D_ghosts")
+                    # The parameter is set
+                    return (
+                        ("true" in param[0])
+                        or ("yes" in param[0])
+                        or ("1" in param[0])
+                    )
 
-            # Ghostzones are in the file if all the relevant parameters are set
-            # to true
-            return all(is_param_true(param) for param in params_to_check)
+                params_to_check = {"output_ghost_points"}
+
+                if is_3D_file:
+                    params_to_check.add("out3D_ghosts")
+
+                # Ghostzones are in the file if all the relevant parameters are set
+                # to true
+                return all(is_param_true(param) for param in params_to_check)
+        except RuntimeError as exce:
+            raise RuntimeError(f"File {file_} cannot be processed") from exce
 
     def clear_cache(self):
         """Remove all the cached entries.
@@ -1408,18 +1427,24 @@ class AllGridFunctions:
                     rx_group_name = re.compile(
                         OneGridFunctionH5._pattern_group_name, re.VERBOSE
                     )
-                    with h5py.File(f, "r") as h5f:
-                        # Here group is in the sense of HDF5 group
-                        for group in h5f.keys():
-                            group_matched = rx_group_name.match(group)
-                            # If this is not an interesting group, just skip it
-                            if not group_matched:
-                                continue
-                            variable_name = group_matched.group(2)
-                            var_list = self._vars_h5_files.setdefault(
-                                variable_name, set()
-                            )
-                            var_list.add(f)
+                    try:
+                        with h5py.File(f, "r") as h5f:
+                            # Here group is in the sense of HDF5 group
+                            for group in h5f.keys():
+                                group_matched = rx_group_name.match(group)
+                                # If this is not an interesting group, just skip it
+                                if not group_matched:
+                                    continue
+                                variable_name = group_matched.group(2)
+                                var_list = self._vars_h5_files.setdefault(
+                                    variable_name, set()
+                                )
+                                var_list.add(f)
+                    except RuntimeError as exce:
+                        raise RuntimeError(
+                            f"File {h5f} cannot be processed"
+                        ) from exce
+
             elif matched_ascii is not None:
                 # As in the case of H5 files, we first need to understand if
                 # the output is with "one_group_per_file". If yes, we have to

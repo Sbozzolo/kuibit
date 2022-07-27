@@ -551,20 +551,24 @@ class MultipolesDir:
         # This regex matches : l(number)_m(-number)_r(number)
         fieldname_pattern = re.compile(r"l(\d+)_m([-]?\d+)_r([0-9.]+)")
 
-        with h5py.File(path, "r") as data:
-
-            # Loop over the groups in the hdf5
-            for entry in data.keys():
-                matched = fieldname_pattern.match(entry)
-                if matched:
-                    mult_l = int(matched.group(1))
-                    mult_m = int(matched.group(2))
-                    radius = float(matched.group(3))
-                    # Read the actual data
-                    a = data[entry][()].T
-                    complex_mp = a[1] + 1j * a[2]
-                    ts = timeseries.remove_duplicated_iters(a[0], complex_mp)
-                    alldets.append((mult_l, mult_m, radius, ts))
+        try:
+            with h5py.File(path, "r") as data:
+                # Loop over the groups in the hdf5
+                for entry in data.keys():
+                    matched = fieldname_pattern.match(entry)
+                    if matched:
+                        mult_l = int(matched.group(1))
+                        mult_m = int(matched.group(2))
+                        radius = float(matched.group(3))
+                        # Read the actual data
+                        a = data[entry][()].T
+                        complex_mp = a[1] + 1j * a[2]
+                        ts = timeseries.remove_duplicated_iters(
+                            a[0], complex_mp
+                        )
+                        alldets.append((mult_l, mult_m, radius, ts))
+        except RuntimeError as exce:
+            raise RuntimeError(f"File {data} cannot be processed") from exce
 
         return alldets
 
