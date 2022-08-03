@@ -260,7 +260,14 @@ across a given dimension. The relevant method is
 optional argument). This will only work if the grid crosses 0 along the given
 dimension and if the resulting grid is a valid equispaced grid (so 0 has to be
 part of the coordinates, or the data has to be such that it yields a uniform
-grid).
+grid). Similarly, it is possible to undo rotational symmetries (pi-symmetry)
+using the :py:meth:`~.rotation180_symmetry_undone` method. This function takes
+two mandatory arguments, the first is the dimension for which the data has to be
+filled (in Carpet it is always the x axis, so ``0``), and the second is the
+plane over which the rotation happens specified by providing the two dimensions
+involved (in Carpet rotation is always about the z axis, so this parameters
+should always be ``(0, 1)``). The sign of the filled data can be flipped by
+passing ``-1`` to the parity keyword (this is useful for vectors and tensors).
 
 HierarchicalGridData
 --------------------

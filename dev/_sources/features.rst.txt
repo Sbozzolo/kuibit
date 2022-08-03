@@ -143,6 +143,7 @@ Grid Data
   - changing grid spacing (up/down sampling);
   - Fourier Transform;
   - undo reflection symmetries;
+  - undo rotational symmetries;
   - computing grid coordiantes (for plotting or operations involving the coordinates);
 
 - Read multiple iterations as spacetime ``HierarchicalGridData`` (to take advantage of multilinear interpolation in space and time).

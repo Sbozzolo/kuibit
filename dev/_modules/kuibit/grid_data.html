@@ -86,9 +86,12 @@
 <span class="sd">with.</span>
 
 <span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">annotations</span>
+
 <span class="kn">import</span> <span class="nn">warnings</span>
 <span class="kn">from</span> <span class="nn">bisect</span> <span class="kn">import</span> <span class="n">bisect_right</span>
 <span class="kn">from</span> <span class="nn">os.path</span> <span class="kn">import</span> <span class="n">splitext</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Iterable</span><span class="p">,</span> <span class="n">Optional</span>
 
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">from</span> <span class="nn">scipy</span> <span class="kn">import</span> <span class="n">interpolate</span><span class="p">,</span> <span class="n">linalg</span>
@@ -1012,8 +1015,15 @@
         <span class="sd">&quot;&quot;&quot;Remove all the ghost zones.&quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_apply_to_self</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ghost_zones_removed</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="UniformGridData.reflection_symmetry_undone"><a class="viewcode-back" href="../../grid_data_ref.html#kuibit.grid_data.UniformGridData.reflection_symmetry_undone">[docs]</a>    <span class="k">def</span> <span class="nf">reflection_symmetry_undone</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dimension</span><span class="p">,</span> <span class="n">parity</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Return a new UniformGridData with reflection symmetry undo for the given dimension.</span>
+    <span class="k">def</span> <span class="nf">_roto_reflection_symmetry_undone</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">dimension</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+        <span class="n">parity</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
+        <span class="n">second_reflect_dimension</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">UniformGridData</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Core routine to undo reflections and rotations.</span>
+
+<span class="sd">        Undo a reflection about the given dimension.</span>
 
 <span class="sd">        The parameter ``parity`` determines how to fill the data.</span>
 
@@ -1023,23 +1033,78 @@
 <span class="sd">        We assume that the reflection will always be from the positive side to</span>
 <span class="sd">        the negative. Pre-existing data in the negative side will be overwritten.</span>
 
-<span class="sd">        This will change the shape of the object.</span>
+<span class="sd">        Under certain conditions (which are always met in simulations with</span>
+<span class="sd">        Carpet), undoing a rotation180 symmetry is the same as undoing a</span>
+<span class="sd">        reflection symmetry combined with reversing the new data along the other</span>
+<span class="sd">        dimension involved in the rotation.</span>
 
-<span class="sd">        :param dimension: Dimension that has to be reflected.</span>
-<span class="sd">        :type dimension: int</span>
+<span class="sd">        Consider the pictorial representation of a grid:</span>
 
-<span class="sd">        :param parity: Fill the data assuming that the function is even (parity = 1),</span>
-<span class="sd">                       or odd (parity = -1).</span>
-<span class="sd">        :type parity: 1 or -1</span>
+<span class="sd">                 y</span>
+<span class="sd">                 |</span>
+<span class="sd">                 |    O</span>
+<span class="sd">                 |</span>
+<span class="sd">        ------------------- x</span>
+<span class="sd">                 |</span>
+<span class="sd">                 |</span>
+<span class="sd">                 |</span>
 
-<span class="sd">        :returns: New :py:class:`UniformGridData` with values explicitly set for</span>
-<span class="sd">                  reflected data.</span>
-<span class="sd">        :rtype: :py:class:`~.UniformGridData`</span>
+<span class="sd">        First, we perform a reflection along x, and we get</span>
+
+<span class="sd">                 y</span>
+<span class="sd">                 |</span>
+<span class="sd">            O    |    O</span>
+<span class="sd">                 |</span>
+<span class="sd">        ------------------- x</span>
+<span class="sd">                 |</span>
+<span class="sd">                 |</span>
+<span class="sd">                 |</span>
+
+<span class="sd">        Next, we reverse the newly copied data</span>
+
+<span class="sd">                 y</span>
+<span class="sd">                 |</span>
+<span class="sd">                 |    O</span>
+<span class="sd">                 |</span>
+<span class="sd">        ------------------- x</span>
+<span class="sd">                 |</span>
+<span class="sd">            O    |</span>
+<span class="sd">                 |</span>
+
+
+<span class="sd">        This is a rotation!</span>
+
+<span class="sd">        Note that this makes sense only if the grid is symmetric along the other</span>
+<span class="sd">        axes. So, what we have to do is reverse the array for the other axis in</span>
+<span class="sd">        the plane of rotation.</span>
+
+<span class="sd">        This is why there&#39;s a second parameter ``second_reflect_axis``. This is</span>
+<span class="sd">        a second reflection that occurs only in the part of data that has been</span>
+<span class="sd">        newly minted. For it to work, the grid has to be symmetric in this</span>
+<span class="sd">        direction.</span>
+
+<span class="sd">        :param dimension: Along which dimension to fill in the data</span>
+<span class="sd">        :type parity: int</span>
+<span class="sd">        :param parity: Multiplied the filled that with this value. Useful to</span>
+<span class="sd">                       change sign of vectors.</span>
+<span class="sd">        :type parity: int</span>
+<span class="sd">        :param second_reflect_dimension:</span>
+<span class="sd">        :type second_reflect_dimension: int</span>
+
+<span class="sd">        :returns: New :py:class:`UniformGridData` with data filled with points</span>
+<span class="sd">                  obtained by applying one reflection or two.</span>
+<span class="sd">        :rtype: :py:class:`UniformGridData`</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">parity</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;Parity has to be either 1 or -1, cannot be </span><span class="si">{</span><span class="n">parity</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="p">)</span>
 
-        <span class="c1"># NOTE: this cannot be applied to HierarchicalGridData. In that case we would</span>
-        <span class="c1"># need to add new components all together.</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="mi">0</span> <span class="o">&lt;=</span> <span class="n">dimension</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">num_dimensions</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;Dimension has to be between 0 and </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">num_dimensions</span><span class="si">}</span><span class="s2"> (it is </span><span class="si">{</span><span class="n">dimension</span><span class="si">}</span><span class="s2">)&quot;</span>
+            <span class="p">)</span>
 
         <span class="c1"># We assume that we are going to reflect from the positive side to the</span>
         <span class="c1"># negative</span>
@@ -1048,10 +1113,15 @@
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">x0</span><span class="p">[</span><span class="n">dimension</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Cannot reflect data that does not cross 0&quot;</span><span class="p">)</span>
 
-        <span class="k">if</span> <span class="n">parity</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">):</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-                <span class="sa">f</span><span class="s2">&quot;Parity has to be either 1 or -1, cannot be </span><span class="si">{</span><span class="n">parity</span><span class="si">}</span><span class="s2">&quot;</span>
-            <span class="p">)</span>
+        <span class="k">if</span> <span class="n">second_reflect_dimension</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="c1"># The grid has to be symmetric if we reflect along a second dimension</span>
+            <span class="k">if</span> <span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">x0</span><span class="p">[</span><span class="n">second_reflect_dimension</span><span class="p">]</span>
+                <span class="o">!=</span> <span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">x1</span><span class="p">[</span><span class="n">second_reflect_dimension</span><span class="p">]</span>
+            <span class="p">):</span>
+                <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s2">&quot;Grid is not symmetric in the </span><span class="si">{</span><span class="n">second_reflect_dimension</span><span class="si">}</span><span class="s2"> direction&quot;</span>
+                <span class="p">)</span>
 
         <span class="c1"># See self.grid.coordinates_to_indices():</span>
         <span class="c1"># We convert the coordinate 0.0 to the index, this will always overestimate, so</span>
@@ -1091,7 +1161,7 @@
             <span class="p">)</span>
         <span class="p">):</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-                <span class="sa">f</span><span class="s2">&quot;Grid is not symmetric along dimension </span><span class="si">{</span><span class="n">dimension</span><span class="si">}</span><span class="s2">&quot;</span>
+                <span class="sa">f</span><span class="s2">&quot;Grid is not symmetric along reflection axis </span><span class="si">{</span><span class="n">dimension</span><span class="si">}</span><span class="s2">&quot;</span>
             <span class="p">)</span>
 
         <span class="n">num_elements_to_copy</span> <span class="o">=</span> <span class="p">(</span>
@@ -1109,12 +1179,20 @@
         <span class="c1"># We overwrite it with the data</span>
         <span class="n">new_data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">new_shape</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">dtype</span><span class="p">)</span>
 
-        <span class="c1"># These are slicers that copy everything. This is what we want, except</span>
-        <span class="c1"># for the given dimension.</span>
+        <span class="c1"># First, we copy the new region</span>
+
+        <span class="c1"># The following are slicers that copy everything. This is what we want,</span>
+        <span class="c1"># except for the given dimension.</span>
         <span class="n">destination</span> <span class="o">=</span> <span class="p">[</span><span class="nb">slice</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">shape</span><span class="p">]</span>
         <span class="n">source</span> <span class="o">=</span> <span class="p">[</span><span class="nb">slice</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">shape</span><span class="p">]</span>
         <span class="c1"># Copy in indices 0, 1, ..., num_elements_to_copy - 1</span>
         <span class="n">destination</span><span class="p">[</span><span class="n">dimension</span><span class="p">]</span> <span class="o">=</span> <span class="nb">slice</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">num_elements_to_copy</span><span class="p">)</span>
+
+        <span class="c1"># If we have a second reflection to perform, we want the data to be</span>
+        <span class="c1"># reversed in this region</span>
+        <span class="k">if</span> <span class="n">second_reflect_dimension</span><span class="p">:</span>
+            <span class="n">destination</span><span class="p">[</span><span class="n">second_reflect_dimension</span><span class="p">]</span> <span class="o">=</span> <span class="nb">slice</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+
         <span class="c1"># We have to read the data backwards from the source, so we read from the end</span>
         <span class="c1"># to index_first_positive - 1 (not included)</span>
         <span class="n">source</span><span class="p">[</span><span class="n">dimension</span><span class="p">]</span> <span class="o">=</span> <span class="nb">slice</span><span class="p">(</span>
@@ -1124,6 +1202,11 @@
         <span class="p">)</span>
 
         <span class="n">new_data</span><span class="p">[</span><span class="nb">tuple</span><span class="p">(</span><span class="n">destination</span><span class="p">)]</span> <span class="o">=</span> <span class="n">parity</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="nb">tuple</span><span class="p">(</span><span class="n">source</span><span class="p">)]</span>
+
+        <span class="c1"># If we have a second reflection, the data has to be the same for the</span>
+        <span class="c1"># old region, so we restore a copy slicer.</span>
+        <span class="k">if</span> <span class="n">second_reflect_dimension</span><span class="p">:</span>
+            <span class="n">destination</span><span class="p">[</span><span class="n">second_reflect_dimension</span><span class="p">]</span> <span class="o">=</span> <span class="nb">slice</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
 
         <span class="c1"># Now we copy the data we already had</span>
         <span class="c1">#</span>
@@ -1153,7 +1236,136 @@
             <span class="n">iteration</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">grid</span><span class="o">.</span><span class="n">iteration</span><span class="p">,</span>
         <span class="p">)</span>
 
-        <span class="k">return</span> <span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)(</span><span class="n">new_grid</span><span class="p">,</span> <span class="n">new_data</span><span class="p">)</span></div>
+        <span class="k">return</span> <span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)(</span><span class="n">new_grid</span><span class="p">,</span> <span class="n">new_data</span><span class="p">)</span>
+
+<div class="viewcode-block" id="UniformGridData.rotation180_symmetry_undone"><a class="viewcode-back" href="../../grid_data_ref.html#kuibit.grid_data.UniformGridData.rotation180_symmetry_undone">[docs]</a>    <span class="k">def</span> <span class="nf">rotation180_symmetry_undone</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">dimension</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+        <span class="n">plane</span><span class="p">:</span> <span class="n">Iterable</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
+        <span class="n">parity</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">UniformGridData</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Return a new UniformGridData with rotational 180 symmetry undone.</span>
+
+<span class="sd">        `dimension` identifies the region for which we only have half of the</span>
+<span class="sd">        data (in Carpet it is always going to be 0--the x axis). `plane`</span>
+<span class="sd">        specifies where we are performing the rotation (in Carpet it is always</span>
+<span class="sd">        (0, 1)--rotation about the z axis). `plane` is specified by providing a</span>
+<span class="sd">        tuple with the two dimensions involved in the rotation (one of the two has to be `dimension`).</span>
+
+<span class="sd">        This method works only if the data crosses the value 0 along the given</span>
+<span class="sd">        dimension, and if the coordinates are symmetric with respect to the</span>
+<span class="sd">        other dimension involved in the rotation.</span>
+
+<span class="sd">        We assume that the rotation will always be from the positive side to</span>
+<span class="sd">        the negative. Pre-existing data in the negative side will be overwritten.</span>
+
+<span class="sd">        This will change the shape of the object.</span>
+
+<span class="sd">        :param dimension: Dimension about which to fill in missing data</span>
+<span class="sd">        :type dimension: int</span>
+<span class="sd">        :param plane: Plane on which the rotation occurs specified by specifying</span>
+<span class="sd">                      the two dimensions involved in the rotation.</span>
+<span class="sd">        :type plane: tuple of ints</span>
+<span class="sd">        :param parity: Fill the data assuming that the function is even (parity = 1),</span>
+<span class="sd">                       or odd (parity = -1).</span>
+<span class="sd">        :type parity: 1 or -1</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">dimension</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">plane</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="s2">&quot;Rotation plane does not include dimension for which the symmetry has to be undone&quot;</span>
+            <span class="p">)</span>
+
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">plane</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="s2">&quot;Rotation plane has to be identified by its two dimensions&quot;</span>
+            <span class="p">)</span>
+
+        <span class="c1"># We need to figure out what is the second axis involved in the rotation</span>
+        <span class="c1"># (in addition to `dimension`). So, we take the set difference between</span>
+        <span class="c1"># `set(plane)` and `{dimension}`, which returns a set with only one</span>
+        <span class="c1"># element. We use tuple unpacking to extract this element.</span>
+        <span class="p">(</span><span class="n">second_reflect_dimension</span><span class="p">,)</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">plane</span><span class="p">)</span> <span class="o">-</span> <span class="p">{</span><span class="n">dimension</span><span class="p">}</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_roto_reflection_symmetry_undone</span><span class="p">(</span>
+            <span class="n">dimension</span><span class="p">,</span>
+            <span class="n">parity</span><span class="o">=</span><span class="n">parity</span><span class="p">,</span>
+            <span class="n">second_reflect_dimension</span><span class="o">=</span><span class="n">second_reflect_dimension</span><span class="p">,</span>
+        <span class="p">)</span></div>
+
+<div class="viewcode-block" id="UniformGridData.rotation180_symmetry_undo"><a class="viewcode-back" href="../../grid_data_ref.html#kuibit.grid_data.UniformGridData.rotation180_symmetry_undo">[docs]</a>    <span class="k">def</span> <span class="nf">rotation180_symmetry_undo</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">dimension</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+        <span class="n">plane</span><span class="p">:</span> <span class="n">Iterable</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
+        <span class="n">parity</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Undo rotational 180 symmetry on the given plane for given dimension.</span>
+
+<span class="sd">        `dimension` identifies the region for which we only have half of the</span>
+<span class="sd">        data (in Carpet it is always going to be 0--the x axis). `plane`</span>
+<span class="sd">        specifies where we are performing the rotation (in Carpet it is always</span>
+<span class="sd">        (0, 1)--rotation about the z axis). `plane` is specified by providing a</span>
+<span class="sd">        tuple with the two dimensions involved in the rotation (one of the two has to be `dimension`).</span>
+
+<span class="sd">        This method works only if the data crosses the value 0 along the given</span>
+<span class="sd">        dimension, and if the coordinates are symmetric with respect to the</span>
+<span class="sd">        other dimension involved in the rotation.</span>
+
+<span class="sd">        We assume that the rotation will always be from the positive side to</span>
+<span class="sd">        the negative. Pre-existing data in the negative side will be overwritten.</span>
+
+<span class="sd">        This will change the shape of the object.</span>
+
+<span class="sd">        :param dimension: Dimension about which to fill in missing data</span>
+<span class="sd">        :type dimension: int</span>
+<span class="sd">        :param plane: Plane on which the rotation occurs specified by specifying</span>
+<span class="sd">                      the two dimensions involved in the rotation.</span>
+<span class="sd">        :type plane: tuple of ints</span>
+<span class="sd">        :param parity: Fill the data assuming that the function is even (parity = 1),</span>
+<span class="sd">                       or odd (parity = -1).</span>
+<span class="sd">        :type parity: 1 or -1</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_apply_to_self</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">rotation180_symmetry_undone</span><span class="p">,</span>
+            <span class="n">dimension</span><span class="o">=</span><span class="n">dimension</span><span class="p">,</span>
+            <span class="n">plane</span><span class="o">=</span><span class="n">plane</span><span class="p">,</span>
+            <span class="n">parity</span><span class="o">=</span><span class="n">parity</span><span class="p">,</span>
+        <span class="p">)</span></div>
+
+<div class="viewcode-block" id="UniformGridData.reflection_symmetry_undone"><a class="viewcode-back" href="../../grid_data_ref.html#kuibit.grid_data.UniformGridData.reflection_symmetry_undone">[docs]</a>    <span class="k">def</span> <span class="nf">reflection_symmetry_undone</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">dimension</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">parity</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">UniformGridData</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Return a new UniformGridData with reflection symmetry undo for the given dimension.</span>
+
+<span class="sd">        The parameter ``parity`` determines how to fill the data.</span>
+
+<span class="sd">        This method works only if the data crosses the value 0 along the given</span>
+<span class="sd">        dimension.</span>
+
+<span class="sd">        We assume that the reflection will always be from the positive side to</span>
+<span class="sd">        the negative. Pre-existing data in the negative side will be overwritten.</span>
+
+<span class="sd">        This will change the shape of the object.</span>
+
+<span class="sd">        :param dimension: Dimension that has to be reflected.</span>
+<span class="sd">        :type dimension: int</span>
+
+<span class="sd">        :param parity: Fill the data assuming that the function is even (parity = 1),</span>
+<span class="sd">                       or odd (parity = -1).</span>
+<span class="sd">        :type parity: 1 or -1</span>
+
+<span class="sd">        :returns: New :py:class:`UniformGridData` with values explicitly set for</span>
+<span class="sd">                  reflected data.</span>
+<span class="sd">        :rtype: :py:class:`~.UniformGridData`</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># NOTE: this cannot be applied to HierarchicalGridData. In that case we would</span>
+        <span class="c1"># need to add new components all together.</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_roto_reflection_symmetry_undone</span><span class="p">(</span>
+            <span class="n">dimension</span><span class="o">=</span><span class="n">dimension</span><span class="p">,</span> <span class="n">parity</span><span class="o">=</span><span class="n">parity</span><span class="p">,</span> <span class="n">second_reflect_dimension</span><span class="o">=</span><span class="kc">None</span>
+        <span class="p">)</span></div>
 
 <div class="viewcode-block" id="UniformGridData.reflection_symmetry_undo"><a class="viewcode-back" href="../../grid_data_ref.html#kuibit.grid_data.UniformGridData.reflection_symmetry_undo">[docs]</a>    <span class="k">def</span> <span class="nf">reflection_symmetry_undo</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dimension</span><span class="p">,</span> <span class="n">parity</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Undo reflection symmetry for the given dimension.</span>
