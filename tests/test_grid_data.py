@@ -526,6 +526,13 @@ class TestUniformGridData(unittest.TestCase):
         with self.assertRaises(ValueError):
             sin_wave.partial_differentiated(5)
 
+        # Error grid too small
+        sin_wave_tiny = gdu.sample_function(
+            lambda x: np.sin(x), [2], x0=[1], x1=[2]
+        )
+        with self.assertRaises(ValueError):
+            sin_wave_tiny.partial_differentiated(0, accuracy_order=4)
+
         # Second derivative should still be a -sin
         sin_wave.partial_differentiate(0, order=2)
 
