@@ -152,7 +152,7 @@ class TestGWUtils(unittest.TestCase):
 
         # Test when strain is not timeseries
         with self.assertRaises(TypeError):
-            gwu.signal_to_noise_ratio_from_strain(1)
+            gwu.effective_amplitude_spectral_density(1)
 
         sd = SimDir("tests/gwsample")
         det = sd.gws[91.46]
