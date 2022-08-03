@@ -20,6 +20,7 @@
 - `setup_matplotlib` now takes an optional parameter `rc_param_file` to configure
   matplotlib using a file
 - Added computation of linear momentum lost by electromagnetic waves
+- Added `rotation180_symmetry_undo` to undo rotational symmetries in grid data
 
 #### New `tree` module
 

@@ -39,9 +39,12 @@ reason this is useful is that ``Series`` are much simpler and leaner to work
 with.
 
 """
+from __future__ import annotations
+
 import warnings
 from bisect import bisect_right
 from os.path import splitext
+from typing import Iterable, Optional
 
 import numpy as np
 from scipy import interpolate, linalg
@@ -965,8 +968,15 @@ class UniformGridData(BaseNumerical):
         """Remove all the ghost zones."""
         self._apply_to_self(self.ghost_zones_removed)
 
-    def reflection_symmetry_undone(self, dimension, parity=1):
-        """Return a new UniformGridData with reflection symmetry undo for the given dimension.
+    def _roto_reflection_symmetry_undone(
+        self,
+        dimension: int,
+        parity: int = 1,
+        second_reflect_dimension: Optional[int] = None,
+    ) -> UniformGridData:
+        """Core routine to undo reflections and rotations.
+
+        Undo a reflection about the given dimension.
 
         The parameter ``parity`` determines how to fill the data.
 
@@ -976,23 +986,78 @@ class UniformGridData(BaseNumerical):
         We assume that the reflection will always be from the positive side to
         the negative. Pre-existing data in the negative side will be overwritten.
 
-        This will change the shape of the object.
+        Under certain conditions (which are always met in simulations with
+        Carpet), undoing a rotation180 symmetry is the same as undoing a
+        reflection symmetry combined with reversing the new data along the other
+        dimension involved in the rotation.
 
-        :param dimension: Dimension that has to be reflected.
-        :type dimension: int
+        Consider the pictorial representation of a grid:
 
-        :param parity: Fill the data assuming that the function is even (parity = 1),
-                       or odd (parity = -1).
-        :type parity: 1 or -1
+                 y
+                 |
+                 |    O
+                 |
+        ------------------- x
+                 |
+                 |
+                 |
 
-        :returns: New :py:class:`UniformGridData` with values explicitly set for
-                  reflected data.
-        :rtype: :py:class:`~.UniformGridData`
+        First, we perform a reflection along x, and we get
+
+                 y
+                 |
+            O    |    O
+                 |
+        ------------------- x
+                 |
+                 |
+                 |
+
+        Next, we reverse the newly copied data
+
+                 y
+                 |
+                 |    O
+                 |
+        ------------------- x
+                 |
+            O    |
+                 |
+
+
+        This is a rotation!
+
+        Note that this makes sense only if the grid is symmetric along the other
+        axes. So, what we have to do is reverse the array for the other axis in
+        the plane of rotation.
+
+        This is why there's a second parameter ``second_reflect_axis``. This is
+        a second reflection that occurs only in the part of data that has been
+        newly minted. For it to work, the grid has to be symmetric in this
+        direction.
+
+        :param dimension: Along which dimension to fill in the data
+        :type parity: int
+        :param parity: Multiplied the filled that with this value. Useful to
+                       change sign of vectors.
+        :type parity: int
+        :param second_reflect_dimension:
+        :type second_reflect_dimension: int
+
+        :returns: New :py:class:`UniformGridData` with data filled with points
+                  obtained by applying one reflection or two.
+        :rtype: :py:class:`UniformGridData`
 
         """
+        if parity not in (-1, 1):
+            raise ValueError(
+                f"Parity has to be either 1 or -1, cannot be {parity}"
+            )
 
-        # NOTE: this cannot be applied to HierarchicalGridData. In that case we would
-        # need to add new components all together.
+        if not (0 <= dimension < self.num_dimensions):
+            raise ValueError(
+                f"Dimension has to be between 0 and {self.num_dimensions} (it is {dimension})"
+            )
 
         # We assume that we are going to reflect from the positive side to the
         # negative
@@ -1001,10 +1066,15 @@ class UniformGridData(BaseNumerical):
         if self.x0[dimension] > 0:
             raise ValueError("Cannot reflect data that does not cross 0")
 
-        if parity not in (-1, 1):
-            raise ValueError(
-                f"Parity has to be either 1 or -1, cannot be {parity}"
-            )
+        if second_reflect_dimension is not None:
+            # The grid has to be symmetric if we reflect along a second dimension
+            if (
+                self.x0[second_reflect_dimension]
+                != -self.x1[second_reflect_dimension]
+            ):
+                raise RuntimeError(
+                    f"Grid is not symmetric in the {second_reflect_dimension} direction"
+                )
 
         # See self.grid.coordinates_to_indices():
         # We convert the coordinate 0.0 to the index, this will always overestimate, so
@@ -1044,7 +1114,7 @@ class UniformGridData(BaseNumerical):
             )
         ):
             raise ValueError(
-                f"Grid is not symmetric along dimension {dimension}"
+                f"Grid is not symmetric along reflection axis {dimension}"
             )
 
         num_elements_to_copy = (
@@ -1062,12 +1132,20 @@ class UniformGridData(BaseNumerical):
         # We overwrite it with the data
         new_data = np.zeros(new_shape, dtype=self.dtype)
 
-        # These are slicers that copy everything. This is what we want, except
-        # for the given dimension.
+        # First, we copy the new region
+
+        # The following are slicers that copy everything. This is what we want,
+        # except for the given dimension.
         destination = [slice(None, None) for _ in self.shape]
         source = [slice(None, None) for _ in self.shape]
         # Copy in indices 0, 1, ..., num_elements_to_copy - 1
         destination[dimension] = slice(0, num_elements_to_copy)
+
+        # If we have a second reflection to perform, we want the data to be
+        # reversed in this region
+        if second_reflect_dimension:
+            destination[second_reflect_dimension] = slice(None, None, -1)
+
         # We have to read the data backwards from the source, so we read from the end
         # to index_first_positive - 1 (not included)
         source[dimension] = slice(
@@ -1077,6 +1155,11 @@ class UniformGridData(BaseNumerical):
         )
 
         new_data[tuple(destination)] = parity * self.data[tuple(source)]
+
+        # If we have a second reflection, the data has to be the same for the
+        # old region, so we restore a copy slicer.
+        if second_reflect_dimension:
+            destination[second_reflect_dimension] = slice(None, None)
 
         # Now we copy the data we already had
         #
@@ -1107,6 +1190,135 @@ class UniformGridData(BaseNumerical):
         )
 
         return type(self)(new_grid, new_data)
+
+    def rotation180_symmetry_undone(
+        self,
+        dimension: int = 0,
+        plane: Iterable[int] = (0, 1),
+        parity: int = 1,
+    ) -> UniformGridData:
+        """Return a new UniformGridData with rotational 180 symmetry undone.
+
+        `dimension` identifies the region for which we only have half of the
+        data (in Carpet it is always going to be 0--the x axis). `plane`
+        specifies where we are performing the rotation (in Carpet it is always
+        (0, 1)--rotation about the z axis). `plane` is specified by providing a
+        tuple with the two dimensions involved in the rotation (one of the two has to be `dimension`).
+
+        This method works only if the data crosses the value 0 along the given
+        dimension, and if the coordinates are symmetric with respect to the
+        other dimension involved in the rotation.
+
+        We assume that the rotation will always be from the positive side to
+        the negative. Pre-existing data in the negative side will be overwritten.
+
+        This will change the shape of the object.
+
+        :param dimension: Dimension about which to fill in missing data
+        :type dimension: int
+        :param plane: Plane on which the rotation occurs specified by specifying
+                      the two dimensions involved in the rotation.
+        :type plane: tuple of ints
+        :param parity: Fill the data assuming that the function is even (parity = 1),
+                       or odd (parity = -1).
+        :type parity: 1 or -1
+
+        """
+        if dimension not in plane:
+            raise ValueError(
+                "Rotation plane does not include dimension for which the symmetry has to be undone"
+            )
+
+        if len(plane) != 2:
+            raise ValueError(
+                "Rotation plane has to be identified by its two dimensions"
+            )
+
+        # We need to figure out what is the second axis involved in the rotation
+        # (in addition to `dimension`). So, we take the set difference between
+        # `set(plane)` and `{dimension}`, which returns a set with only one
+        # element. We use tuple unpacking to extract this element.
+        (second_reflect_dimension,) = set(plane) - {dimension}
+
+        return self._roto_reflection_symmetry_undone(
+            dimension,
+            parity=parity,
+            second_reflect_dimension=second_reflect_dimension,
+        )
+
+    def rotation180_symmetry_undo(
+        self,
+        dimension: int = 0,
+        plane: Iterable[int] = (0, 1),
+        parity: int = 1,
+    ) -> None:
+        """Undo rotational 180 symmetry on the given plane for given dimension.
+
+        `dimension` identifies the region for which we only have half of the
+        data (in Carpet it is always going to be 0--the x axis). `plane`
+        specifies where we are performing the rotation (in Carpet it is always
+        (0, 1)--rotation about the z axis). `plane` is specified by providing a
+        tuple with the two dimensions involved in the rotation (one of the two has to be `dimension`).
+
+        This method works only if the data crosses the value 0 along the given
+        dimension, and if the coordinates are symmetric with respect to the
+        other dimension involved in the rotation.
+
+        We assume that the rotation will always be from the positive side to
+        the negative. Pre-existing data in the negative side will be overwritten.
+
+        This will change the shape of the object.
+
+        :param dimension: Dimension about which to fill in missing data
+        :type dimension: int
+        :param plane: Plane on which the rotation occurs specified by specifying
+                      the two dimensions involved in the rotation.
+        :type plane: tuple of ints
+        :param parity: Fill the data assuming that the function is even (parity = 1),
+                       or odd (parity = -1).
+        :type parity: 1 or -1
+        """
+        self._apply_to_self(
+            self.rotation180_symmetry_undone,
+            dimension=dimension,
+            plane=plane,
+            parity=parity,
+        )
+
+    def reflection_symmetry_undone(
+        self, dimension: int, parity: int = 1
+    ) -> UniformGridData:
+        """Return a new UniformGridData with reflection symmetry undo for the given dimension.
+
+        The parameter ``parity`` determines how to fill the data.
+
+        This method works only if the data crosses the value 0 along the given
+        dimension.
+
+        We assume that the reflection will always be from the positive side to
+        the negative. Pre-existing data in the negative side will be overwritten.
+
+        This will change the shape of the object.
+
+        :param dimension: Dimension that has to be reflected.
+        :type dimension: int
+
+        :param parity: Fill the data assuming that the function is even (parity = 1),
+                       or odd (parity = -1).
+        :type parity: 1 or -1
+
+        :returns: New :py:class:`UniformGridData` with values explicitly set for
+                  reflected data.
+        :rtype: :py:class:`~.UniformGridData`
+
+        """
+
+        # NOTE: this cannot be applied to HierarchicalGridData. In that case we would
+        # need to add new components all together.
+
+        return self._roto_reflection_symmetry_undone(
+            dimension=dimension, parity=parity, second_reflect_dimension=None
+        )
 
     def reflection_symmetry_undo(self, dimension, parity=1):
         """Undo reflection symmetry for the given dimension.

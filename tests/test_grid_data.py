@@ -614,8 +614,8 @@ class TestUniformGridData(unittest.TestCase):
         #
         # When we reflect across the x axis, we expect a new (7, 2) array:
         #
-        #  8  --  6  --  0  --  2  --  4  --  6 --  8
-        #  7  --  5  --  1  --  1  --  3  --  5 --  7
+        #  8  --  6  --  4  --  2  --  4  --  6 --  8
+        #  7  --  5  --  3  --  1  --  3  --  5 --  7
 
         # Test with grid that does not intersect zero
         with self.assertRaises(ValueError):
@@ -660,7 +660,7 @@ class TestUniformGridData(unittest.TestCase):
         # The grid looks like: (This grid contains 0)
         #
         # (-3, 2) -- (-1, 2) -- (1, 2) -- (3, 2)
-        #    |          |         |          |        |           |
+        #    |          |         |          |
         # (-3, 1) -- (-1, 1) -- (1, 1) -- (3, 1)
         #
         #
@@ -683,6 +683,66 @@ class TestUniformGridData(unittest.TestCase):
         g_no_zero.reflection_symmetry_undo(0)
 
         self.assertEqual(expected_g_no_zero, g_no_zero)
+
+    def test_rotation180_symmetry_undo(self):
+
+        g_zero = gdu.sample_function(
+            lambda x, y: 2 * x + y,
+            shape=[6, 2],
+            x0=[-2, -2],
+            x1=[3, 2],
+            time=10,
+        )
+
+        # The grid looks like: (This grid contains 0)
+        #
+        # (-2, 2) -- (-1, 2) -- (0, 2) -- (1, 2) -- (2, 2)  --  (3, 2)
+        #    |          |         |          |        |           |
+        # (-2,-2) -- (-1,-2) -- (0,-2) -- (1,-2) -- (2,-2)  --  (3,-2)
+
+        # The data is
+        #
+        #  -2  --  0  --  2  --  4  --  6 --  8
+        #  -6  -- -4  -- -2  --  0  --  2 --  4
+        #
+        # When we fill-in across the x axis, we expect a new (7, 2) array:
+        #
+        #  4  --  2  --  0  --  2  --  4  --  6 --  8
+        #  8  --  6  --  4  -- -2  --  0  --  2 --  4
+
+        expected_grid = gd.UniformGrid(
+            [7, 2], x0=[-3, -2], x1=g_zero.grid.x1, time=10
+        )
+        expected_data = np.array(
+            [[8, 4], [6, 2], [4, 0], [-2, 2], [0, 4], [2, 6], [4, 8]]
+        )
+        expected_g_zero = gd.UniformGridData(expected_grid, expected_data)
+
+        g_zero.rotation180_symmetry_undo(dimension=0, plane=(0, 1))
+
+        self.assertEqual(expected_g_zero, g_zero)
+
+        # Test wrong dimension
+        with self.assertRaises(ValueError):
+            g_zero.rotation180_symmetry_undo(dimension=-1, plane=(-1, 2))
+
+        # Test wrong plane
+        with self.assertRaises(ValueError):
+            g_zero.rotation180_symmetry_undo(dimension=0, plane=(1, 2))
+
+        # Test wrong plane (dimension)
+        with self.assertRaises(ValueError):
+            g_zero.rotation180_symmetry_undo(dimension=1, plane=(1, 2, 3))
+
+        # Test grid not symmetric along y
+        with self.assertRaises(RuntimeError):
+            gdu.sample_function(
+                lambda x, y: 2 * x + y,
+                shape=[6, 2],
+                x0=[-2, -1],
+                x1=[3, 2],
+                time=10,
+            ).rotation180_symmetry_undo(dimension=0, plane=(0, 1))
 
     def test__apply_reduction(self):
 
