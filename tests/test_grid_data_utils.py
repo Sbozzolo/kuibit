@@ -89,7 +89,9 @@ class TestGridDataUtils(unittest.TestCase):
         with self.assertRaises(ValueError):
             gdu.merge_uniform_grids([geom1, geom2])
 
-        geom3 = gd.UniformGrid([101, 101], x0=[1, 1], x1=[10, 5], ref_level=1)
+        geom3 = gd.UniformGrid(
+            [101, 101], x0=[1, 1], x1=[10, 5], ref_level=1, time=5
+        )
 
         # Different dx
         with self.assertRaises(ValueError):
