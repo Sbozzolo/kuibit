@@ -49,6 +49,7 @@ from kuibit import (
     cactus_multipoles,
     cactus_scalars,
     cactus_timers,
+    cactus_twopunctures,
     cactus_waves,
 )
 
@@ -132,6 +133,8 @@ class SimDir:
                           :py:class:`~.HorizonsDir`.
     :ivar timers:         Timer information, see
                           :py:class:`~.TimersDir`.
+    :ivar twopunctures:   Metadata information from TwoPunctures.
+                          :py:class:`~.TwoPuncturesDir`.
     :ivar multipoles:     Multipole components, see
                           :py:class:`~.CactusMultipoleDir`.
 
@@ -277,6 +280,7 @@ class SimDir:
         self.__gridfunctions = None
         self.__horizons = None
         self.__timers = None
+        self.__twopunctures = None
 
         if (pickle_file is None) or (not os.path.exists(pickle_file)):
             self._populate()
@@ -301,6 +305,7 @@ class SimDir:
         self.__gridfunctions = None
         self.__horizons = None
         self.__timers = None
+        self.__twopunctures = None
 
     def rescan(self):
         """Reset the SimDir and rescan all the files."""
@@ -394,6 +399,17 @@ class SimDir:
         if self.__timers is None:
             self.__timers = cactus_timers.TimersDir(self)
         return self.__timers
+
+    @property
+    def twopunctures(self):
+        """Return the metadata for TwoPunctures.
+
+        :returns: Interface to the metadata in TwoPunctures.
+        :rtype: :py:class:`~.TwoPuncturesDir`
+        """
+        if self.__twopunctures is None:
+            self.__twopunctures = cactus_twopunctures.TwoPuncturesDir(self)
+        return self.__twopunctures
 
     def __str__(self):
         header = f"Indexed {len(self.allfiles)} files"

@@ -163,6 +163,11 @@ Timers
 - Read and represent the XML timer output from ``Carpet``.
 - Merge different timer trees.
 
+TwoPunctures
+------------
+
+- Read and represent the metadata from ``TwoPunctures``.
+
 Visualize
 ---------
 

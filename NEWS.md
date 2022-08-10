@@ -21,6 +21,16 @@
   matplotlib using a file
 - Added computation of linear momentum lost by electromagnetic waves
 - Added `rotation180_symmetry_undo` to undo rotational symmetries in grid data
+- Added `cactus_twopunctures` to read metadata from TwoPunctures
+
+#### New `cactus_twopunctures` module
+
+`TwoPunctures` creates a metadata file that stores important physical
+information about the initial data. The new module `cactus_twopunctures` can
+read this information and present it as a dictionary. If `sim` is a
+`SimFactory`, `sim.twopunctures` will be a dictionary-like object that has as
+keys the various quantities saved by `TwoPunctures` and as values, their values
+as read from the `TwoPunctures.bbh` file.
 
 #### New `tree` module
 
