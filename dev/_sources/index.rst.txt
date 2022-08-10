@@ -102,6 +102,7 @@ Usage
    cactus_multipoles.rst
    cactus_horizons.rst
    cactus_waves.rst
+   cactus_twopunctures.rst
    masks.rst
    gw_utils.rst
    gw_mismatch.rst
@@ -218,6 +219,8 @@ Reference material (classes, functions, ...)
    cactus_multipoles_ref.rst
    cactus_waves_ref.rst
    cactus_horizons_ref.rst
+   cactus_twopunctures_ref.rst
+   cactus_timers_ref.rst
    gw_utils_ref.rst
    gw_mismatch_ref.rst
    grid_data_ref.rst
@@ -226,7 +229,6 @@ Reference material (classes, functions, ...)
    unitconv_ref.rst
    visualize_matplotlib_ref.rst
    argparse_helper_ref.rst
-   cactus_timers_ref.rst
    tree_ref.rst
 
 What is a kuibit?
