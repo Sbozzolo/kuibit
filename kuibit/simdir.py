@@ -300,6 +300,7 @@ class SimDir:
         self.__electromagneticwaves = None
         self.__gridfunctions = None
         self.__horizons = None
+        self.__timers = None
 
     def rescan(self):
         """Reset the SimDir and rescan all the files."""
