@@ -82,8 +82,10 @@
 <span class="sd">&quot;&quot;&quot;</span>
 
 <span class="kn">import</span> <span class="nn">warnings</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Tuple</span>
 
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">numpy.typing</span> <span class="k">as</span> <span class="nn">npty</span>
 <span class="kn">from</span> <span class="nn">scipy</span> <span class="kn">import</span> <span class="n">integrate</span><span class="p">,</span> <span class="n">interpolate</span><span class="p">,</span> <span class="n">signal</span>
 
 <span class="kn">from</span> <span class="nn">kuibit.attr_dict</span> <span class="kn">import</span> <span class="n">AttributeDictionary</span>
@@ -447,6 +449,77 @@
 <span class="sd">        :rtype: float</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">argmin</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">y</span><span class="p">))]</span></div>
+
+    <span class="k">def</span> <span class="nf">_local_extrema</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">y</span><span class="p">:</span> <span class="n">npty</span><span class="o">.</span><span class="n">NDArray</span><span class="p">,</span> <span class="n">include_edges</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">npty</span><span class="o">.</span><span class="n">NDArray</span><span class="p">]:</span>
+        <span class="sd">&quot;&quot;&quot;Use SciPy&#39;s ``find_peaks`` to find the local minima and maxima.</span>
+
+<span class="sd">        Unkown arguments are passed to ``find_peaks``.</span>
+
+<span class="sd">        If the signal is complex, the absolute value is taken.</span>
+
+<span class="sd">        If ``include_edges`` is True, the edges are considered among the</span>
+<span class="sd">        possible extrema.</span>
+
+<span class="sd">        :returns: Coordinate and value of the peaks.</span>
+<span class="sd">        :rtype: Tuple of NumPy arrays</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># TODO (FEATURE): Improve accuracy</span>
+        <span class="c1">#</span>
+        <span class="c1"># We can use splines or quadratic approximations to improve the location</span>
+        <span class="c1"># the peak (ie, find it within a cell)</span>
+
+        <span class="n">offset</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">if</span> <span class="n">include_edges</span><span class="p">:</span>
+            <span class="c1"># https://stackoverflow.com/a/60096220</span>
+            <span class="n">min_y</span> <span class="o">=</span> <span class="p">(</span><span class="nb">min</span><span class="p">(</span><span class="n">y</span><span class="p">),)</span>
+            <span class="n">y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">((</span><span class="n">min_y</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">min_y</span><span class="p">))</span>
+            <span class="n">offset</span> <span class="o">=</span> <span class="mi">1</span>
+
+        <span class="n">peak_indices</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">signal</span><span class="o">.</span><span class="n">find_peaks</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+        <span class="c1"># If we included the edges, we added an extra point, se we have to</span>
+        <span class="c1"># remove the offset</span>
+        <span class="n">peak_indices</span> <span class="o">=</span> <span class="n">peak_indices</span> <span class="o">-</span> <span class="n">offset</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="p">[</span><span class="n">peak_indices</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">y</span><span class="p">[</span><span class="n">peak_indices</span><span class="p">]</span>
+
+<div class="viewcode-block" id="BaseSeries.local_maxima"><a class="viewcode-back" href="../../series_ref.html#kuibit.series.BaseSeries.local_maxima">[docs]</a>    <span class="k">def</span> <span class="nf">local_maxima</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">include_edges</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">npty</span><span class="o">.</span><span class="n">NDArray</span><span class="p">]:</span>
+        <span class="sd">&quot;&quot;&quot;Use SciPy&#39;s ``find_peaks`` to find the local maxima.</span>
+
+<span class="sd">        Unkown arguments are passed to ``find_peaks``.</span>
+
+<span class="sd">        If the signal is complex, the absolute value is taken.</span>
+
+<span class="sd">        If ``include_edges`` is True, the edges are considered among the</span>
+<span class="sd">        possible maxima.</span>
+
+<span class="sd">        :returns: Coordinate and value of the peaks.</span>
+<span class="sd">        :rtype: Tuple of NumPy arrays</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">y</span> <span class="o">=</span> <span class="nb">abs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">y</span><span class="p">)</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_complex</span><span class="p">()</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">y</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_local_extrema</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="BaseSeries.local_minima"><a class="viewcode-back" href="../../series_ref.html#kuibit.series.BaseSeries.local_minima">[docs]</a>    <span class="k">def</span> <span class="nf">local_minima</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">include_edges</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">npty</span><span class="o">.</span><span class="n">NDArray</span><span class="p">]:</span>
+        <span class="sd">&quot;&quot;&quot;Use SciPy&#39;s ``find_peaks`` to find the local minima.</span>
+
+<span class="sd">        Unkown arguments are passed to ``find_peaks``.</span>
+
+<span class="sd">        If the signal is complex, the absolute value is taken.</span>
+
+<span class="sd">        If ``include_edges`` is True, the edges are considered among the</span>
+<span class="sd">        possible minima.</span>
+
+<span class="sd">        :returns: Coordinate and value of the minima.</span>
+<span class="sd">        :rtype: Tuple of NumPy arrays</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">y</span> <span class="o">=</span> <span class="o">-</span><span class="nb">abs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">y</span><span class="p">)</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_complex</span><span class="p">()</span> <span class="k">else</span> <span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">y</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_local_extrema</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
 
     <span class="k">def</span> <span class="nf">_make_spline</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="n">k</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">s</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Private function to make spline representation of the data.</span>

@@ -234,6 +234,18 @@ data, you should first removed the invalid values with
 <p>These methods return the minimum or maximum of the series. With a prefix
 <code class="docutils literal notranslate"><span class="pre">abs</span></code>, they return the minimum or maximum of the absolute value of the series.</p>
 </section>
+<section id="local-maxima-local-minima">
+<h3>local_maxima, local_minima<a class="headerlink" href="#local-maxima-local-minima" title="Permalink to this headline">¶</a></h3>
+<p>These methods locate the local extrema in the signal. If the data is complex,
+the absolute value is taken first. The return value of these methods are two
+tuples, the first with the <code class="docutils literal notranslate"><span class="pre">x</span></code> coordinates, and the second with the <code class="docutils literal notranslate"><span class="pre">y</span></code> ones
+for the peaks. Often, numerical data is noisy, so it is difficult to find the
+peaks cleanly. Internally, the methods use SciPy’s <code class="docutils literal notranslate"><span class="pre">find_peaks</span></code> <a class="reference external" href="https://docs.scipy.org/doc/scipy/reference/generated/scipy.signal.find_peaks.html">find_peaks</a>.
+All the options that can be passed to <code class="docutils literal notranslate"><span class="pre">find_peaks</span></code> can also be passed to
+<a class="reference internal" href="frequencyseries_ref.html#kuibit.frequencyseries.FrequencySeries.local_maxima" title="kuibit.frequencyseries.FrequencySeries.local_maxima"><code class="xref py py-meth docutils literal notranslate"><span class="pre">local_maxima()</span></code></a> and <a class="reference internal" href="frequencyseries_ref.html#kuibit.frequencyseries.FrequencySeries.local_minima" title="kuibit.frequencyseries.FrequencySeries.local_minima"><code class="xref py py-meth docutils literal notranslate"><span class="pre">local_minima()</span></code></a> (most of which can be
+used to set filter to find the peaks one is looking for). The optional argument
+<code class="docutils literal notranslate"><span class="pre">include_edges</span></code> controls whether the edges should be considered extrema or not.</p>
+</section>
 <section id="sample-common">
 <h3>sample_common<a class="headerlink" href="#sample-common" title="Permalink to this headline">¶</a></h3>
 <p><code class="docutils literal notranslate"><span class="pre">sample_common</span></code> has two possible uses: (1) takes a list of <code class="docutils literal notranslate"><span class="pre">Series</span></code> and
@@ -374,11 +386,12 @@ so that <code class="docutils literal notranslate"><span class="pre">abs(f)</spa
 <section id="peaks-peaks-frequencies">
 <h3>peaks, peaks_frequencies<a class="headerlink" href="#peaks-peaks-frequencies" title="Permalink to this headline">¶</a></h3>
 <p><code class="docutils literal notranslate"><span class="pre">peaks(amp_threshold)</span></code> detects the peaks (local maxima) in the amplitude of
-the spectrum that are larger than <code class="docutils literal notranslate"><span class="pre">amp_threshold</span></code>. It returns a list of
-tuples. The first element of the tuple is the frequency bin in which the maximum
-is found, the second is a estimate obtained using a quadratic fit, and the third
-is the actual value of the amplitude. <code class="docutils literal notranslate"><span class="pre">peaks_frequencies(amp_threshold)</span></code> is
-like <code class="docutils literal notranslate"><span class="pre">peaks(amp_threshold)</span></code> but returns only the fitted frequencies.</p>
+the spectrum that are larger than <code class="docutils literal notranslate"><span class="pre">amp_threshold</span></code>. This is a specialized
+version of <a class="reference internal" href="frequencyseries_ref.html#kuibit.frequencyseries.FrequencySeries.local_maxima" title="kuibit.frequencyseries.FrequencySeries.local_maxima"><code class="xref py py-meth docutils literal notranslate"><span class="pre">local_maxima()</span></code></a>. It returns a list of tuples. The first
+element of the tuple is the frequency bin in which the maximum is found, the
+second is a estimate obtained using a quadratic fit, and the third is the actual
+value of the amplitude. <code class="docutils literal notranslate"><span class="pre">peaks_frequencies(amp_threshold)</span></code> is like
+<code class="docutils literal notranslate"><span class="pre">peaks(amp_threshold)</span></code> but returns only the fitted frequencies.</p>
 <p>Often, it is better to normalize the series, so that <code class="docutils literal notranslate"><span class="pre">amp_threshold</span></code> becomes a
 percentual value of the the maximum peak.</p>
 </section>
@@ -523,6 +536,7 @@ and <code class="docutils literal notranslate"><span class="pre">other</span></c
 <li><a class="reference internal" href="#savgol-smooth">savgol_smooth</a></li>
 <li><a class="reference internal" href="#iter">iter</a></li>
 <li><a class="reference internal" href="#min-max-abs-min-abs-max">min, max, abs_min, abs_max</a></li>
+<li><a class="reference internal" href="#local-maxima-local-minima">local_maxima, local_minima</a></li>
 <li><a class="reference internal" href="#sample-common">sample_common</a></li>
 </ul>
 </li>

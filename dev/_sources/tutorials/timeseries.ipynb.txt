@@ -320,6 +320,15 @@
     "# We have to manually add the redshift\n",
     "gw_physical.redshifted(luminosity_distance_to_redshift(d_Mpc))\n",
     "\n",
+    "# And we can also find minima and maxima\n",
+    "# Data can be noisy, so there are ways to filter the good extrema\n",
+    "# See https://docs.scipy.org/doc/scipy/reference/generated/scipy.signal.find_peaks.html\n",
+    "maxima_t, maxima_y = gw_physical.real().local_maxima(prominence=0.1e-22)\n",
+    "minima_t, minima_y = gw_physical.real().local_minima(width=10)\n",
+    "\n",
+    "plt.scatter(maxima_t, maxima_y)\n",
+    "plt.scatter(minima_t, minima_y)\n",
+    "\n",
     "plot(gw_physical.real(), lab1=\"h\")"
    ]
   },
@@ -441,7 +450,7 @@
  ],
  "metadata": {
   "kernelspec": {
-   "display_name": "Python 3",
+   "display_name": "Python 3 (ipykernel)",
    "language": "python",
    "name": "python3"
   },
@@ -455,7 +464,7 @@
    "name": "python",
    "nbconvert_exporter": "python",
    "pygments_lexer": "ipython3",
-   "version": "3.8.10"
+   "version": "3.8.13"
   },
   "name": "timeseries.ipynb"
  },

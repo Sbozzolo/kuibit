@@ -5423,7 +5423,7 @@ div.rendered_html tbody tr:hover {
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-&lt;matplotlib.legend.Legend at 0x7f776cf281f0&gt;
+&lt;matplotlib.legend.Legend at 0x7f3c1424de80&gt;
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
@@ -5468,7 +5468,7 @@ div.rendered_html tbody tr:hover {
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-The integral from 5 to 10 is 2.1912
+The integral from 5 to 10 is 2.2204
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
@@ -5498,7 +5498,7 @@ The integral from 5 to 10 is 2.1912
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-&lt;matplotlib.legend.Legend at 0x7f776abf7430&gt;
+&lt;matplotlib.legend.Legend at 0x7f3c14078910&gt;
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
@@ -5546,7 +5546,7 @@ The integral from 5 to 10 is 2.1912
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-&lt;matplotlib.legend.Legend at 0x7f776ab55e20&gt;
+&lt;matplotlib.legend.Legend at 0x7f3c09fb9250&gt;
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
@@ -5574,7 +5574,7 @@ The integral from 5 to 10 is 2.1912
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-&lt;matplotlib.legend.Legend at 0x7f776ab16670&gt;
+&lt;matplotlib.legend.Legend at 0x7f3c09f7fa90&gt;
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
@@ -5601,7 +5601,7 @@ The integral from 5 to 10 is 2.1912
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-&lt;matplotlib.legend.Legend at 0x7f776ac26a30&gt;
+&lt;matplotlib.legend.Legend at 0x7f3c09f632e0&gt;
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
@@ -5666,6 +5666,15 @@ The integral from 5 to 10 is 2.1912
 
 <span class="c1"># We have to manually add the redshift</span>
 <span class="n">gw_physical</span><span class="o">.</span><span class="n">redshifted</span><span class="p">(</span><span class="n">luminosity_distance_to_redshift</span><span class="p">(</span><span class="n">d_Mpc</span><span class="p">))</span>
+
+<span class="c1"># And we can also find minima and maxima</span>
+<span class="c1"># Data can be noisy, so there are ways to filter the good extrema</span>
+<span class="c1"># See https://docs.scipy.org/doc/scipy/reference/generated/scipy.signal.find_peaks.html</span>
+<span class="n">maxima_t</span><span class="p">,</span> <span class="n">maxima_y</span> <span class="o">=</span> <span class="n">gw_physical</span><span class="o">.</span><span class="n">real</span><span class="p">()</span><span class="o">.</span><span class="n">local_maxima</span><span class="p">(</span><span class="n">prominence</span><span class="o">=</span><span class="mf">0.1e-22</span><span class="p">)</span>
+<span class="n">minima_t</span><span class="p">,</span> <span class="n">minima_y</span> <span class="o">=</span> <span class="n">gw_physical</span><span class="o">.</span><span class="n">real</span><span class="p">()</span><span class="o">.</span><span class="n">local_minima</span><span class="p">(</span><span class="n">width</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+
+<span class="n">plt</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">maxima_t</span><span class="p">,</span> <span class="n">maxima_y</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">minima_t</span><span class="p">,</span> <span class="n">minima_y</span><span class="p">)</span>
 
 <span class="n">plot</span><span class="p">(</span><span class="n">gw_physical</span><span class="o">.</span><span class="n">real</span><span class="p">(),</span> <span class="n">lab1</span><span class="o">=</span><span class="s2">&quot;h&quot;</span><span class="p">)</span>
 </pre></div>
@@ -5751,7 +5760,7 @@ The integral from 5 to 10 is 2.1912
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-Frequency: 64207.57
+Frequency: 64176.62
 </pre></div></div>
 </div>
 <div class="nboutput docutils container">
@@ -5760,7 +5769,7 @@ Frequency: 64207.57
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-&lt;matplotlib.lines.Line2D at 0x7f776ad02250&gt;
+&lt;matplotlib.lines.Line2D at 0x7f3c09e76880&gt;
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
@@ -5801,8 +5810,8 @@ Frequency: 64207.57
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-Maximum without mask 3.062e-27
-Maximum with mask 8.397e-28
+Maximum without mask 3.124e-27
+Maximum with mask 8.350e-28
 Length with mask 8
 Length after having removed the masked points 7
 </pre></div></div>
