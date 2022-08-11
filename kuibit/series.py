@@ -35,8 +35,10 @@ takes a list of series and resamples them to their common points.
 """
 
 import warnings
+from typing import Tuple
 
 import numpy as np
+import numpy.typing as npty
 from scipy import integrate, interpolate, signal
 
 from kuibit.attr_dict import AttributeDictionary
@@ -400,6 +402,77 @@ class BaseSeries(BaseNumerical):
         :rtype: float
         """
         return self.x[np.argmin(np.abs(self.y))]
+
+    def _local_extrema(
+        self, y: npty.NDArray, include_edges: bool = True, *args, **kwargs
+    ) -> Tuple[npty.NDArray]:
+        """Use SciPy's ``find_peaks`` to find the local minima and maxima.
+
+        Unkown arguments are passed to ``find_peaks``.
+
+        If the signal is complex, the absolute value is taken.
+
+        If ``include_edges`` is True, the edges are considered among the
+        possible extrema.
+
+        :returns: Coordinate and value of the peaks.
+        :rtype: Tuple of NumPy arrays
+
+        """
+        # TODO (FEATURE): Improve accuracy
+        #
+        # We can use splines or quadratic approximations to improve the location
+        # the peak (ie, find it within a cell)
+
+        offset = 0
+        if include_edges:
+            # https://stackoverflow.com/a/60096220
+            min_y = (min(y),)
+            y = np.concatenate((min_y, y, min_y))
+            offset = 1
+
+        peak_indices, _ = signal.find_peaks(y, *args, **kwargs)
+
+        # If we included the edges, we added an extra point, se we have to
+        # remove the offset
+        peak_indices = peak_indices - offset
+        return self.x[peak_indices], self.y[peak_indices]
+
+    def local_maxima(
+        self, include_edges: bool = True, *args, **kwargs
+    ) -> Tuple[npty.NDArray]:
+        """Use SciPy's ``find_peaks`` to find the local maxima.
+
+        Unkown arguments are passed to ``find_peaks``.
+
+        If the signal is complex, the absolute value is taken.
+
+        If ``include_edges`` is True, the edges are considered among the
+        possible maxima.
+
+        :returns: Coordinate and value of the peaks.
+        :rtype: Tuple of NumPy arrays
+        """
+        y = abs(self.y) if self.is_complex() else self.y
+        return self._local_extrema(y, *args, **kwargs)
+
+    def local_minima(
+        self, include_edges: bool = True, *args, **kwargs
+    ) -> Tuple[npty.NDArray]:
+        """Use SciPy's ``find_peaks`` to find the local minima.
+
+        Unkown arguments are passed to ``find_peaks``.
+
+        If the signal is complex, the absolute value is taken.
+
+        If ``include_edges`` is True, the edges are considered among the
+        possible minima.
+
+        :returns: Coordinate and value of the minima.
+        :rtype: Tuple of NumPy arrays
+        """
+        y = -abs(self.y) if self.is_complex() else -self.y
+        return self._local_extrema(y, *args, **kwargs)
 
     def _make_spline(self, *args, k=3, s=0, **kwargs):
         """Private function to make spline representation of the data.

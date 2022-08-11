@@ -610,6 +610,39 @@ class TestTimeseries(unittest.TestCase):
         self.assertGreaterEqual(sins.tmin, 1)
         self.assertLessEqual(sins.tmax, 1.4)
 
+    def test_local_minima_maxima(self):
+
+        times = np.linspace(0, 2 * np.pi, 5000)
+        values = np.cos(times)
+
+        coss = ts.TimeSeries(times, values)
+
+        # Maxima are in 0, pi
+        maxima_x, maxima_y = coss.local_maxima()
+
+        np.testing.assert_allclose(maxima_x, [0, 2 * np.pi], atol=5e-4)
+        np.testing.assert_allclose(maxima_y, [1, 1], atol=5e-4)
+
+        # Test minima with a complex signal, it should take the absolute
+
+        values = np.cos(times) + 1j * np.cos(times)
+        complex_coss = ts.TimeSeries(times, values)
+
+        # Minima are in pi/2, 3 * pi /2
+        minima_x, minima_y = complex_coss.local_minima()
+        np.testing.assert_allclose(
+            minima_x, [np.pi / 2, 3 * np.pi / 2], atol=5e-4
+        )
+        np.testing.assert_allclose(minima_y, [0, 0], atol=5e-4)
+
+        # Test with a contrived example
+        xs = [0, 2, 3]
+        ys = [0, 1, 0]
+
+        maxima_x2, maxima_y2 = ts.TimeSeries(xs, ys).local_maxima()
+        self.assertEqual(maxima_x2[0], 2)
+        self.assertEqual(maxima_y2[0], 1)
+
     def test_save(self):
 
         times = np.logspace(0, 1, 10)

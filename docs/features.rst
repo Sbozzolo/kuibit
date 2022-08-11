@@ -50,6 +50,7 @@ Time and frequency series are represented in an intuitive way. They
 - can be smoothed with the Savitzky-Golay filter;
 - can be cropped;
 - support masks;
+- can compute the local minima and maxima;
 - can be resampled to the points common points with other series.
 
 Specifically timeseries, also support:

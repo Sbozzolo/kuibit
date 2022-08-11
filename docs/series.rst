@@ -209,6 +209,20 @@ min, max, abs_min, abs_max
 These methods return the minimum or maximum of the series. With a prefix
 ``abs``, they return the minimum or maximum of the absolute value of the series.
 
+local_maxima, local_minima
+^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+These methods locate the local extrema in the signal. If the data is complex,
+the absolute value is taken first. The return value of these methods are two
+tuples, the first with the ``x`` coordinates, and the second with the ``y`` ones
+for the peaks. Often, numerical data is noisy, so it is difficult to find the
+peaks cleanly. Internally, the methods use SciPy's ``find_peaks`` `find_peaks
+<https://docs.scipy.org/doc/scipy/reference/generated/scipy.signal.find_peaks.html>`_.
+All the options that can be passed to ``find_peaks`` can also be passed to
+:py:meth:`~.local_maxima` and :py:meth:`~.local_minima` (most of which can be
+used to set filter to find the peaks one is looking for). The optional argument
+``include_edges`` controls whether the edges should be considered extrema or not.
+
 sample_common
 ^^^^^^^^^^^^^^^^^^
 
@@ -385,11 +399,12 @@ peaks, peaks_frequencies
 ^^^^^^^^^^^^^^^^^^^^^^^^
 
 ``peaks(amp_threshold)`` detects the peaks (local maxima) in the amplitude of
-the spectrum that are larger than ``amp_threshold``. It returns a list of
-tuples. The first element of the tuple is the frequency bin in which the maximum
-is found, the second is a estimate obtained using a quadratic fit, and the third
-is the actual value of the amplitude. ``peaks_frequencies(amp_threshold)`` is
-like ``peaks(amp_threshold)`` but returns only the fitted frequencies.
+the spectrum that are larger than ``amp_threshold``. This is a specialized
+version of :py:meth:`~.local_maxima`. It returns a list of tuples. The first
+element of the tuple is the frequency bin in which the maximum is found, the
+second is a estimate obtained using a quadratic fit, and the third is the actual
+value of the amplitude. ``peaks_frequencies(amp_threshold)`` is like
+``peaks(amp_threshold)`` but returns only the fitted frequencies.
 
 Often, it is better to normalize the series, so that ``amp_threshold`` becomes a
 percentual value of the the maximum peak.
