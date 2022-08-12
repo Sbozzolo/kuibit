@@ -1028,7 +1028,7 @@ class BaseSeries(BaseNumerical):
 
         :param init: Data with ``x <= init`` will be removed.
         :type init: float or None
-        :param end: Data with ``x >= init`` will be removed.
+        :param end: Data with ``x >= end`` will be removed.
         :type end: float or None
 
         :returns:  Series with enforced minimum and maximum
@@ -1054,7 +1054,7 @@ class BaseSeries(BaseNumerical):
 
         :param init: Data with ``x <= init`` will be removed.
         :type init: float or None
-        :param end: Data with ``x >= init`` will be removed.
+        :param end: Data with ``x >= end`` will be removed.
         :type end: float or None
 
         """
