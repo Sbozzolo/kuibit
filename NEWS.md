@@ -23,6 +23,7 @@
 - Added `rotation180_symmetry_undo` to undo rotational symmetries in grid data
 - Added `cactus_twopunctures` to read metadata from TwoPunctures
 - Added `local_maxima` and `local_minima` to series
+- Added `mean`, `average`, `median`, `std` reductions to series and grid data
 
 #### New `cactus_twopunctures` module
 

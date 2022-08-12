@@ -501,6 +501,13 @@ class TestTimeseries(unittest.TestCase):
         self.assertEqual(self.TS.abs_nanmin(), np.nanmin(np.abs(self.TS.y)))
         self.assertEqual(self.TS.abs_nanmax(), np.nanmax(np.abs(self.TS.y)))
 
+    def test_mean_median_std(self):
+
+        self.assertEqual(self.TS.mean(), np.mean(self.TS.y))
+        self.assertEqual(self.TS.average(), np.mean(self.TS.y))
+        self.assertEqual(self.TS.median(), np.median(self.TS.y))
+        self.assertEqual(self.TS.std(), np.std(self.TS.y))
+
     def test_zero_pad(self):
 
         # Check invalid number of points

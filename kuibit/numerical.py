@@ -117,6 +117,17 @@ class BaseNumerical(ABC):
     def max(self):
         return self._apply_reduction(np.max)
 
+    def mean(self):
+        return self._apply_reduction(np.mean)
+
+    average = mean
+
+    def median(self):
+        return self._apply_reduction(np.median)
+
+    def std(self):
+        return self._apply_reduction(np.std)
+
     def nanmin(self):
         return self._apply_reduction(np.nanmin)
 
