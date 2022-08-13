@@ -277,6 +277,10 @@ class TestOneHorizon(unittest.TestCase):
         self.assertTrue(hasattr(self.ah.ah, "area"))
         self.assertFalse(hasattr(self.sh.ah, "area"))
 
+        # Test qlm/ah_available
+        self.assertTrue(self.ho.ah_available)
+        self.assertTrue(self.ho.qlm_available)
+
         # Test formation time
         self.assertEqual(self.ho.formation_time, 0)
         self.assertEqual(self.ah.formation_time, 0)

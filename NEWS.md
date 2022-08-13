@@ -24,6 +24,7 @@
 - Added `cactus_twopunctures` to read metadata from TwoPunctures
 - Added `local_maxima` and `local_minima` to series
 - Added `mean`, `average`, `median`, `std` reductions to series and grid data
+- Added `ah_available`, `qlm_available` to `OneHorizon`
 
 #### New `cactus_twopunctures` module
 

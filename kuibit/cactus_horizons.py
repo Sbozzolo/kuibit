@@ -137,9 +137,12 @@ class OneHorizon:
         self._qlm_vars = qlm_vars
         self._ah_vars = ah_vars
 
+        self.ah_available = self._ah_vars != {}
+        self.qlm_available = self._qlm_vars != {}
+
         # We turn the var_dictionary into attributes
         for var, timeseries in self._qlm_vars.items():
-            # With this we can access properties in the following way
+            # With this we can access properties in the following way:
             # horizon.mass
             setattr(self, var, timeseries)
 
