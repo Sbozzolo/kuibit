@@ -45,6 +45,9 @@ class BaseNumerical(ABC):
        that returns function(self, other, *args, **kwargs)
     - _apply_reduction(self, function, *args, **kwargs)
        that returns function(self, *args, **kwargs)
+    - _apply_to_self(self, function, *args, **kwargs)
+       that returns applies function(self, *args, **kwargs)
+       and modifies self.
 
     """
 
@@ -58,6 +61,10 @@ class BaseNumerical(ABC):
 
     @abstractmethod
     def _apply_reduction(self, reduction, *args, **kwargs):
+        raise NotImplementedError
+
+    @abstractmethod
+    def _apply_to_self(self, function, *args, **kwargs):
         raise NotImplementedError
 
     def __add__(self, other):
