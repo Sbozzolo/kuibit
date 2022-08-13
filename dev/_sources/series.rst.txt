@@ -559,12 +559,15 @@ The :py:class:`~.BaseSeries` class is derived from a even more abstract one,
 :py:class:`~.BaseNumerical`. This class represent anything for which it
 makes sense to do calculations with. :py:class:`~.BaseNumerical` implements
 all the infrastrcture needed to overload the mathematical operations. To do
-this, derived class must define three functions:
+this, derived class must define four functions:
 - ``_apply_unary``, that describes the output of applying a function to ``self``
 (e.g., ``sin(self)``).
 - ``_apply_binary``, that describes the output of applying a function to ``self``
 and ``other`` (e.g., ``self + other``).
 - ``_apply_reduction``, that describes the output of applying a function to
 ``self`` that returns a float (e.g., ``min(self)``).
+- ``_apply_to_self``, that modifies ``self`` upon application of a function that
+returns a compatible object.
+
 
 This infrastrcture is also used by grid functions in ``kuibit``.
