@@ -5,5 +5,5 @@ plot_ah_coordinate_velocity.py
 axis for a given apparent horizon.
 
 
-.. literalinclude:: ../../../examples/bins/plot_ah_found.py
+.. literalinclude:: ../../../examples/bins/plot_ah_coordinate_velocity.py
   :language: python
