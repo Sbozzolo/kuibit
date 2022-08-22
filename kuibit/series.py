@@ -454,7 +454,9 @@ class BaseSeries(BaseNumerical):
         :rtype: Tuple of NumPy arrays
         """
         y = abs(self.y) if self.is_complex() else self.y
-        return self._local_extrema(y, *args, **kwargs)
+        return self._local_extrema(
+            y, include_edges=include_edges, *args, **kwargs
+        )
 
     def local_minima(
         self, include_edges: bool = True, *args, **kwargs
@@ -472,7 +474,9 @@ class BaseSeries(BaseNumerical):
         :rtype: Tuple of NumPy arrays
         """
         y = -abs(self.y) if self.is_complex() else -self.y
-        return self._local_extrema(y, *args, **kwargs)
+        return self._local_extrema(
+            y, include_edges=include_edges, *args, **kwargs
+        )
 
     def _make_spline(self, *args, k=3, s=0, **kwargs):
         """Private function to make spline representation of the data.
