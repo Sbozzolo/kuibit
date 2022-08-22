@@ -25,6 +25,24 @@
 - Added `local_maxima` and `local_minima` to series
 - Added `mean`, `average`, `median`, `std` reductions to series and grid data
 - Added `ah_available`, `qlm_available` to `OneHorizon`
+- Added `tensor` module
+
+#### New `tensor` module
+
+`kuibit.tensor` is a new module to provide high-level interfaces to work with
+tensorial objects. A `Tensor` can be built with collections of `TimeSeries`,
+`FrequencySeries`, `UniformGridData`, `HierarchicalGridData`, or any other class
+derived from `BaseNumerical`. `Tensor`s support all the mathematical operations
+and inherit the methods from their contained object. w are
+two new subclasses of `Tensor` that implement additional features for vector
+calculus. For example, if `bh_cen` is a `Vector` with the time evolution of the
+centroid of an horizon. `bh_cen.differentiated().norm()` will be a `TimeSeries`
+with the magnitude of the coordinate velocity as a function of time (as a
+`TimeSeries`).
+
+Currently, the number of specialized methods in `Vector` and `Matrix` is not
+large. Nonetheless, the infrastructure is in place and adding new will be
+straightforward.
 
 #### New `cactus_twopunctures` module
 

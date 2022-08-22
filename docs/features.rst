@@ -164,6 +164,15 @@ Timers
 - Read and represent the XML timer output from ``Carpet``.
 - Merge different timer trees.
 
+Tensors
+----------
+
+``Tensor`` and derive object implement containers for higher dimensional quantities, like vectors or matrices. They
+
+- collect multiple grid data/series into a single object that support all the mathematical operations;
+- inherit methods from their contained object;
+- implement specialized method for vector calculus.
+
 TwoPunctures
 ------------
 
