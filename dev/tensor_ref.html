@@ -1,0 +1,343 @@
+
+
+<!doctype html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+    <title>Reference on kuibit.tensor &#8212; kuibit 1.4.0-dev0 documentation</title>
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="_static/bizstyle.css" />
+    <link rel="stylesheet" type="text/css" href="_static/css/custom.css" />
+    
+    <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/doctools.js"></script>
+    <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="_static/bizstyle.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="prev" title="Reference on kuibit.tree" href="tree_ref.html" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0" />
+    <!--[if lt IE 9]>
+    <script src="_static/css3-mediaqueries.js"></script>
+    <![endif]-->
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="tree_ref.html" title="Reference on kuibit.tree"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">kuibit 1.4.0-dev0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">Reference on kuibit.tensor</a></li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <section id="module-kuibit.tensor">
+<span id="reference-on-kuibit-tensor"></span><h1>Reference on kuibit.tensor<a class="headerlink" href="#module-kuibit.tensor" title="Permalink to this headline">¶</a></h1>
+<p>The <a class="reference internal" href="#module-kuibit.tensor" title="kuibit.tensor"><code class="xref py py-mod docutils literal notranslate"><span class="pre">tensor</span></code></a> module provides abstractions to work with tensorial
+containers and similar.</p>
+<p>The main object defined here is <a class="reference internal" href="#kuibit.tensor.Tensor" title="kuibit.tensor.Tensor"><code class="xref py py-class docutils literal notranslate"><span class="pre">Tensor</span></code></a>, which is a that acts as
+container for any object <code class="xref py py-class docutils literal notranslate"><span class="pre">BaseNumerical</span></code>, as in
+<a class="reference internal" href="timeseries_ref.html#kuibit.timeseries.TimeSeries" title="kuibit.timeseries.TimeSeries"><code class="xref py py-class docutils literal notranslate"><span class="pre">TimeSeries</span></code></a>, or <a class="reference internal" href="grid_data_ref.html#kuibit.grid_data.UniformGridData" title="kuibit.grid_data.UniformGridData"><code class="xref py py-class docutils literal notranslate"><span class="pre">UniformGridData</span></code></a>. <a class="reference internal" href="#kuibit.tensor.Tensor" title="kuibit.tensor.Tensor"><code class="xref py py-class docutils literal notranslate"><span class="pre">Tensor</span></code></a>
+behaves as one would expect them to behave: they are high-level interfaces that
+support all the mathematical operations. <a class="reference internal" href="#kuibit.tensor.Tensor" title="kuibit.tensor.Tensor"><code class="xref py py-class docutils literal notranslate"><span class="pre">Tensor</span></code></a> also inherit the
+attributes from their contained object. For example, if the <a class="reference internal" href="#kuibit.tensor.Tensor" title="kuibit.tensor.Tensor"><code class="xref py py-class docutils literal notranslate"><span class="pre">Tensor</span></code></a>
+contains <a class="reference internal" href="timeseries_ref.html#kuibit.timeseries.TimeSeries" title="kuibit.timeseries.TimeSeries"><code class="xref py py-class docutils literal notranslate"><span class="pre">TimeSeries</span></code></a>, the tensor will dynamically acquire all the
+methods in such class.</p>
+<p>In pratice, the main way to use <a class="reference internal" href="#kuibit.tensor.Tensor" title="kuibit.tensor.Tensor"><code class="xref py py-class docutils literal notranslate"><span class="pre">Tensor</span></code></a> objects is through its
+derived classes <a class="reference internal" href="#kuibit.tensor.Vector" title="kuibit.tensor.Vector"><code class="xref py py-class docutils literal notranslate"><span class="pre">Vector</span></code></a> and <a class="reference internal" href="#kuibit.tensor.Matrix" title="kuibit.tensor.Matrix"><code class="xref py py-class docutils literal notranslate"><span class="pre">Matrix</span></code></a>, which implement
+all those features one might expect from vector calculus.</p>
+<p>Consider the following usage example:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
+<span class="kn">from</span> <span class="nn">kuibit.timeseries</span> <span class="kn">import</span> <span class="n">TimeSeries</span>
+<span class="kn">from</span> <span class="nn">kuibit.tensor</span> <span class="kn">import</span> <span class="n">Vector</span>
+
+<span class="c1"># Fake some data that describe the x, y position of two black holes</span>
+<span class="n">times</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">,</span> <span class="mi">100</span><span class="p">)</span>
+
+<span class="n">bh1_x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">times</span><span class="p">)</span>
+<span class="n">bh1_y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">times</span><span class="p">)</span>
+
+<span class="c1"># Not really realistic, but it is fake data</span>
+<span class="n">bh2_x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">times</span><span class="p">)</span>
+<span class="n">bh2_y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">times</span><span class="p">)</span>
+
+<span class="n">bh1_centroid</span> <span class="o">=</span> <span class="n">Vector</span><span class="p">([</span><span class="n">TimeSeries</span><span class="p">(</span><span class="n">times</span><span class="p">,</span> <span class="n">bh1_x</span><span class="p">),</span> <span class="n">TimeSeries</span><span class="p">(</span><span class="n">times</span><span class="p">,</span> <span class="n">bh1_y</span><span class="p">)])</span>
+<span class="n">bh2_centroid</span> <span class="o">=</span> <span class="n">Vector</span><span class="p">([</span><span class="n">TimeSeries</span><span class="p">(</span><span class="n">times</span><span class="p">,</span> <span class="n">bh2_x</span><span class="p">),</span> <span class="n">TimeSeries</span><span class="p">(</span><span class="n">times</span><span class="p">,</span> <span class="n">bh2_y</span><span class="p">)])</span>
+
+<span class="c1"># If we want to compute vx, vy</span>
+<span class="n">bh1_velocity</span> <span class="o">=</span> <span class="n">bh_centroid</span><span class="o">.</span><span class="n">differentiated</span><span class="p">()</span>  <span class="c1"># This is a Vector</span>
+
+<span class="c1"># For the distance with another</span>
+<span class="n">distance</span> <span class="o">=</span> <span class="n">bh1_centroid</span> <span class="o">-</span> <span class="n">bh2_centroid</span>  <span class="c1"># This is a Vector</span>
+
+<span class="c1"># The magnitude of the distance</span>
+<span class="n">distance</span> <span class="o">=</span> <span class="n">distance</span><span class="o">.</span><span class="n">norm</span><span class="p">()</span>   <span class="c1"># This is a TimeSeries</span>
+</pre></div>
+</div>
+<dl class="py class">
+<dt class="sig sig-object py" id="kuibit.tensor.Matrix">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">kuibit.tensor.</span></span><span class="sig-name descname"><span class="pre">Matrix</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/kuibit/tensor.html#Matrix"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kuibit.tensor.Matrix" title="Permalink to this definition">¶</a></dt>
+<dd><p>Represents a matrix in the mathematical sense.</p>
+<p>It can be used with series, or grid data, or anything that is derived from
+<code class="xref py py-class docutils literal notranslate"><span class="pre">BaseNumerical</span></code>.</p>
+<p>This abstraction is useful for matrix operations: for example, taking the
+determinant.</p>
+<p>All the operations are component-wise, and the matrix inherits all the
+methods available to the base object.</p>
+<p>Construct the Tensor by checking and processing the data.</p>
+<p>The data is flattened out and it shape is saved. The shape here is
+defined as the number of elements of the tensor along each dimension.
+For example, for a vector it would only by its length.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>data</strong> (Nested list of data derived from <code class="xref py py-class docutils literal notranslate"><span class="pre">BaseNumerical</span></code>.) – Representation of the tensor as nested lists.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="kuibit.tensor.Tensor">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">kuibit.tensor.</span></span><span class="sig-name descname"><span class="pre">Tensor</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/kuibit/tensor.html#Tensor"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kuibit.tensor.Tensor" title="Permalink to this definition">¶</a></dt>
+<dd><p>Represents a mathematical hyper-matrix (a Tensor) in N dimensions.</p>
+<p>At the moment, it is only used as a base class for <a class="reference internal" href="#kuibit.tensor.Vector" title="kuibit.tensor.Vector"><code class="xref py py-class docutils literal notranslate"><span class="pre">Vector</span></code></a> and
+<a class="reference internal" href="#kuibit.tensor.Matrix" title="kuibit.tensor.Matrix"><code class="xref py py-class docutils literal notranslate"><span class="pre">Matrix</span></code></a>. So, the class is currently not intended for direct use
+(as it does not have a lot of features). This class is not fully flashed out
+for the general case. It is here mostly as a stub for the two subclasses
+that are below. Implementing a generic tensor class is not trivial and it
+left as an exercise to the reader.</p>
+<p>This class implements the basic infrastrucutre used by <a class="reference internal" href="#kuibit.tensor.Vector" title="kuibit.tensor.Vector"><code class="xref py py-class docutils literal notranslate"><span class="pre">Vector</span></code></a>
+and <a class="reference internal" href="#kuibit.tensor.Matrix" title="kuibit.tensor.Matrix"><code class="xref py py-class docutils literal notranslate"><span class="pre">Matrix</span></code></a>. In particular, it fullfills the requirements set
+by <code class="xref py py-class docutils literal notranslate"><span class="pre">BaseNumerical</span></code> and it implements a method to broadcast
+attributes from the contained objects to the container itself.</p>
+<p>All the operations are applied component-wise. So, for example, a tensor
+times a tensor is going to be a tensor with the same shape and elements
+multiplied. Reductions return NumPy arrays.</p>
+<p>..note:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span> <span class="n">For</span> <span class="n">efficicency</span> <span class="n">of</span> <span class="n">implmentation</span><span class="p">,</span> <span class="n">data</span> <span class="ow">is</span> <span class="n">sotred</span> <span class="n">without</span> <span class="n">hierarchy</span>
+<span class="p">(</span><span class="n">i</span><span class="o">.</span><span class="n">e</span><span class="o">.</span><span class="p">,</span> <span class="s2">&quot;flattened out&quot;</span><span class="p">)</span><span class="o">.</span> <span class="n">Therefore</span><span class="p">,</span> <span class="n">the</span> <span class="n">operations</span> <span class="n">that</span> <span class="n">require</span>
+<span class="n">reconstructing</span> <span class="n">the</span> <span class="n">structure</span> <span class="n">have</span> <span class="n">some</span> <span class="n">small</span> <span class="n">overhead</span><span class="o">.</span> <span class="n">When</span><span class="p">,</span> <span class="n">possible</span>
+<span class="n">work</span> <span class="k">with</span> <span class="n">flattened</span> <span class="n">data</span><span class="o">.</span>
+</pre></div>
+</div>
+<p>Construct the Tensor by checking and processing the data.</p>
+<p>The data is flattened out and it shape is saved. The shape here is
+defined as the number of elements of the tensor along each dimension.
+For example, for a vector it would only by its length.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>data</strong> (Nested list of data derived from <code class="xref py py-class docutils literal notranslate"><span class="pre">BaseNumerical</span></code>.) – Representation of the tensor as nested lists.</p>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="kuibit.tensor.Tensor.copy">
+<span class="sig-name descname"><span class="pre">copy</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/kuibit/tensor.html#Tensor.copy"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kuibit.tensor.Tensor.copy" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a deep copy of the object.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Deep copy</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><a class="reference internal" href="#kuibit.tensor.Tensor" title="kuibit.tensor.Tensor">Tensor</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="kuibit.tensor.Tensor.data">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">data</span></span><a class="headerlink" href="#kuibit.tensor.Tensor.data" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the data with its tensorial structure.</p>
+<p>For example, if this was a Matrix, the return value would be a list of
+lists.</p>
+<p>Note, this operation is not free! Data is stored flat, so recomputing
+the structure has some overhead.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Data structured according to self.shape</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>Nested lists</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="kuibit.tensor.Tensor.flat_data">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">flat_data</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">kuibit.tensor._T</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#kuibit.tensor.Tensor.flat_data" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the data in the tensor as a flat list.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>List with all the data</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>List of type.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="kuibit.tensor.Tensor.from_shape_and_flat_data">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">from_shape_and_flat_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">shape</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">flat_data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/kuibit/tensor.html#Tensor.from_shape_and_flat_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kuibit.tensor.Tensor.from_shape_and_flat_data" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create a new <a class="reference internal" href="#kuibit.tensor.Tensor" title="kuibit.tensor.Tensor"><code class="xref py py-class docutils literal notranslate"><span class="pre">Tensor</span></code></a> from flat data and shape.</p>
+<p>No checks are performed.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="#kuibit.tensor.Tensor" title="kuibit.tensor.Tensor"><code class="xref py py-class docutils literal notranslate"><span class="pre">Tensor</span></code></a>[<code class="xref py py-class docutils literal notranslate"><span class="pre">TypeVar</span></code>(<code class="docutils literal notranslate"><span class="pre">_T</span></code>, bound= <code class="xref py py-class docutils literal notranslate"><span class="pre">BaseNumerical</span></code>)]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="kuibit.tensor.Tensor.shape">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">shape</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#kuibit.tensor.Tensor.shape" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the shape of the Tensor.</p>
+<p>The shape is defined as the number of elements in each dimension.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Shape of the tensor.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>Tuple of ints</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="kuibit.tensor.Tensor.type">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">type</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">type</span></em><a class="headerlink" href="#kuibit.tensor.Tensor.type" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the type of the contained object.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Type of the object, a class derived from
+<code class="xref py py-class docutils literal notranslate"><span class="pre">BaseNumerical</span></code></p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>type</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="kuibit.tensor.Vector">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">kuibit.tensor.</span></span><span class="sig-name descname"><span class="pre">Vector</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/kuibit/tensor.html#Vector"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kuibit.tensor.Vector" title="Permalink to this definition">¶</a></dt>
+<dd><p>Represents a vector in the mathematical sense.</p>
+<p>It can be used with series, or grid data, or anything that is derived from
+<code class="xref py py-class docutils literal notranslate"><span class="pre">BaseNumerical</span></code>.</p>
+<p>This abstraction is useful for vector operations: for example, taking the
+cross/dot products between two vectors.</p>
+<p>All the operations are component-wise, and the vector inherits all the
+methods available to the base object.</p>
+<p>Construct the Tensor by checking and processing the data.</p>
+<p>The data is flattened out and it shape is saved. The shape here is
+defined as the number of elements of the tensor along each dimension.
+For example, for a vector it would only by its length.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>data</strong> (Nested list of data derived from <code class="xref py py-class docutils literal notranslate"><span class="pre">BaseNumerical</span></code>.) – Representation of the tensor as nested lists.</p>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="kuibit.tensor.Vector.dot">
+<span class="sig-name descname"><span class="pre">dot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">other</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/kuibit/tensor.html#Vector.dot"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kuibit.tensor.Vector.dot" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the dot product with another vector.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>other</strong> (<a class="reference internal" href="#kuibit.tensor.Vector" title="kuibit.tensor.Vector"><em>Vector</em></a>) – Other vector in the dot product.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Dot product</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>Same as self.type</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="kuibit.tensor.Vector.norm">
+<span class="sig-name descname"><span class="pre">norm</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/kuibit/tensor.html#Vector.norm"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kuibit.tensor.Vector.norm" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the norm of the vector.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Norm of the vector</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>Same as self.type</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="index.html">
+              <img class="logo" src="_static/logo.png" alt="Logo"/>
+            </a></p>
+  <div>
+    <h4>Previous topic</h4>
+    <p class="topless"><a href="tree_ref.html"
+                          title="previous chapter">Reference on kuibit.tree</a></p>
+  </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="tree_ref.html" title="Reference on kuibit.tree"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">kuibit 1.4.0-dev0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">Reference on kuibit.tensor</a></li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2020-2022, Gabriele Bozzola.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 4.5.0.
+    </div>
+  </body>
+</html>
