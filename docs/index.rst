@@ -168,6 +168,7 @@ Scripts
    examples/bins/plot_ah_found.rst
    examples/bins/plot_ah_radius.rst
    examples/bins/plot_ah_separation.rst
+   examples/bins/plot_ah_trajectories.rst
    examples/bins/plot_constraints.rst
    examples/bins/plot_em_energy.rst
    examples/bins/plot_grid_var.rst

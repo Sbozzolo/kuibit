@@ -23,6 +23,7 @@ placing them in you `$PATH` so that they can be used for your simulations.
 | `plot_1d_slice`               | Plots a 1D slice of any grid functions output by Carpet. Optionally take logarithm and/or absolute value.                  |
 | `plot_1d_vars`                | Plots one or more 1D grid functions output by Carpet. Optionally take logarithm and/or absolute value.                     |
 | `plot_ah_coordinate_velocity` | Plots the coordinate velocities of a given horizon.                                                                        |
+| `plot_ah_trajectories`        | Plots the coordinate trajectories given horizons on a plane (optionally forcing the center of mass on the origin).                                                                        |
 | `plot_ah_found`               | Plots the times at which the given apparent horizons were found.                                                           |
 | `plot_ah_radius`              | Plots the coordinate radius of a given horizon as a function of time.                                                      |
 | `plot_ah_separation`          | Plots the coordinate separation between the centroids of two given apparent horizons as a function of time.                |
