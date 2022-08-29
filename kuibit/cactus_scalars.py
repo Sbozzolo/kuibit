@@ -81,7 +81,7 @@ class OneScalar:
     # we have seven capturing groups.
     # 1: (\w+) matches any number of characters greater than 0 (w = word)
     # 2: ((-(\w+))|(\[\d+\]))? optionally match one of the two
-    # 3: Matched - with followed by 4: any word
+    # 3: Matches - with followed by 4: any word
     # 5: Matches brackets with a number inside
     # In between match a dot (\.)
     # 6: (minimum|maximum|norm1|norm2|norm_inf|average|scalars)? optionally match one
