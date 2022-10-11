@@ -375,6 +375,8 @@ class TestVisualizeMatplotlib(unittest.TestCase):
         # Test with a 3D plot
         from mpl_toolkits.mplot3d import Axes3D  # noqa: F401, E402
 
+        # Clear everything before creating new axis, needed for matplotlib > 3.8
+        plt.clf()
         ax = plt.subplot(projection="3d")
         self.assertTrue(
             isinstance(
