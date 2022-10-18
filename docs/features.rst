@@ -155,13 +155,14 @@ Horizons
 ---------
 
 - Read and represent the ASCII output from ``QuasiLocalMeasures`` and ``AHFinderDirect``.
+- Read and represent the VTK output from ``QuasiLocalMeasures``.
 - Work with the shape of the horizons and their properties (as timeseries).
 - Cut the 3D shape into 2D projection along the axes centered in the origin of the horizon.
 
 Timers
 ---------
 
-- Read and represent the XML timer output from ``Carpet``.
+- Read and represent the XML timer output from ```Carpet``.
 - Merge different timer trees.
 
 Tensors

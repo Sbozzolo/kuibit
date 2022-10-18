@@ -17,6 +17,7 @@
 
 
 import os
+import re
 import unittest
 
 import numpy as np
@@ -449,3 +450,57 @@ class TestOneHorizon(unittest.TestCase):
         self.assertEqual(len(separation), 552)
         # They are the same file, so the separation should be 0 everywhere
         self.assertAlmostEqual(separation.max(), 0)
+
+    def test_vtk_available(self):
+        self.assertTrue(self.hor.get_qlm_horizon(1).vtk_available)
+        self.assertFalse(self.hor.get_apparent_horizon(1).vtk_available)
+
+        self.assertCountEqual(
+            self.hor.get_qlm_horizon(1).vtk_available_iterations, [0, 208896]
+        )
+
+    def test_vtk_variables(self):
+
+        ho = self.hor.get_qlm_horizon(1)
+
+        # Iteration not existing
+        with self.assertRaises(KeyError):
+            ho._load_vtk_at_iteration(1)
+
+        # We parse the vtk file here
+        path = ho._vtk_files[0]
+
+        with open(path) as file_:
+            lines = file_.readlines()
+
+        # Find all the variables in the VTK file by matching the header of the
+        # section
+        rx_scalars = re.compile(r"^SCALARS\s(\w+)\sfloat\s1\n$")
+
+        # We add these manually
+        variables = ["coordinates", "connectivity"]
+
+        for line in lines:
+            if match := rx_scalars.match(line):
+                variables.append(match.groups()[0])
+
+        self.assertCountEqual(
+            ho.available_vtk_variables_at_iteration(0), variables
+        )
+
+        # Let's check the coordiantes. We hard-code the indeces for the given
+        # VTK file
+        coordinates = np.loadtxt(lines[5:2817])
+
+        np.testing.assert_array_equal(
+            ho.vtk_variable_at_iteration("coordinates", 0),
+            coordinates,
+        )
+
+        # Now the connectivity. We hard-code the indeces for the given VTK file
+        connectivity = np.loadtxt(lines[2819:5555])
+
+        np.testing.assert_array_equal(
+            ho.vtk_variable_at_iteration("connectivity", 0),
+            connectivity,
+        )

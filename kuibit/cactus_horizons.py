@@ -37,24 +37,30 @@ Similarly, the attribute ``ah`` contains all the variables read from
 AHFinderDirect. All of these are represented as :py:class:`~.TimeSeries`.
 :py:class:`~.OneHorizon` also contains the shapes of the horizons (if the files
 are found), which can be accessed with the methods
-:py:meth:`~.shape_at_iteration` and :py:meth:`~.shape_outline_at_iteration`.
+:py:meth:`~.shape_at_iteration` and :py:meth:`~.shape_outline_at_iteration`. If
+VTK data is available (in ``.vtk`` files), it is processed and stored in the
+``vtk`` attribute. :py:func:~.vtk_at_it` is a function that takes an iteration
+and returns a dictionary that contains the variables defined on the horizon
+(seen as a 3D mesh).
 
 The module contains also functions to work with horizons:
 
-* :py:func:`~.compute_horizons_separation`, which takes
-  two :py:class:`~.OneHorizon` and returns the timeseries of their separation
+* :py:func:`~.compute_horizons_separation`, which takes two
+  :py:class:`~.OneHorizon` and returns the timeseries of their separation
 
 """
 
 import os
 import re
 import warnings
+from typing import Dict, List, Optional
 
 import numpy as np
+from numpy.typing import NDArray
 
-from kuibit.attr_dict import pythonize_name_dict
+from kuibit.attr_dict import AttributeDictionary, pythonize_name_dict
 from kuibit.series import sample_common
-from kuibit.timeseries import combine_ts, remove_duplicated_iters
+from kuibit.timeseries import TimeSeries, combine_ts, remove_duplicated_iters
 
 
 def compute_horizons_separation(horizon1, horizon2, resample=True):
@@ -116,11 +122,18 @@ class OneHorizon:
     :ivar shape_times: Times at which the shape is available.
     :ivar shape_times_min: First time at which the shape is available.
     :ivar shape_times_max: Last time at which the shape is available.
+    :ivar vtk_available: Whether VTK files are available.
     :ivar ah: All the variables from AHFinderDirect as :py:class:`~.TimeSeries`.
 
     """
 
-    def __init__(self, qlm_vars, ah_vars, shape_files):
+    def __init__(
+        self,
+        qlm_vars: Optional[Dict[str, TimeSeries]],
+        ah_vars: Optional[Dict[str, TimeSeries]],
+        shape_files: Optional[Dict[int, str]],
+        vtk_files: Optional[Dict[int, str]],
+    ):
         """Constructor.
 
         :param qlm_vars: Dictionary that maps the name of the QLM variable with
@@ -132,10 +145,17 @@ class OneHorizon:
         :param shape_files: Dictionary that maps the iteration to the files where
                             to find the shape at that iteration.
         :type shape_files: dict
+        :param vtk_files: Dictionary that maps the iteration to the files where
+                          to find the vtk information at that iteration.
+        :type vtk_files: dict
 
         """
-        self._qlm_vars = qlm_vars
-        self._ah_vars = ah_vars
+
+        # `self.XXXX = XXXX or {}` means set self.XXXX to XXXX if it is not
+        # None, otherwise set it to the empty dictionary.
+
+        self._qlm_vars = qlm_vars or {}
+        self._ah_vars = ah_vars or {}
 
         self.ah_available = self._ah_vars != {}
         self.qlm_available = self._qlm_vars != {}
@@ -176,7 +196,7 @@ class OneHorizon:
 
         # Now we deal with the shape. Shape files is a dictionary that maps
         # iteration to the associated file
-        self._shape_files = shape_files
+        self._shape_files = shape_files or {}
 
         self.shape_available = self._shape_files != {}
 
@@ -220,11 +240,214 @@ class OneHorizon:
             # this dictionary
             self._patches = {}
 
+        # Now let's look at the VTK files
+        self._vtk_files = vtk_files or {}
+        self.vtk_available = self._vtk_files != {}
+
+        self._vtk_vars: Dict[int, AttributeDictionary] = {}
+
     def __getitem__(self, key):
         if key not in self._qlm_vars.keys():
             raise KeyError(f"Quantity {key} does not exist")
 
         return self._qlm_vars[key]
+
+    @property
+    def vtk_available_iterations(self) -> List[int]:
+        """Return the list of iterations at which VTK data is available.
+
+        :returns: List of iteration with associated VTK data
+        :rtype: list
+        """
+        return list(self._vtk_files.keys())
+
+    def _load_vtk_at_iteration(self, iteration: int):
+        """Read and load the VTK file at the given iteration.
+
+        Raises an error when the iteration is not available.
+
+        This operation is a little bit expensive because a long text file has to
+        be parsed.
+
+        :param iteration: Desired iteration
+        :type iteration: int
+
+        """
+        if iteration not in self._vtk_files:
+            raise KeyError(
+                f"VTK files for iteration {iteration} not available"
+            )
+
+        # How are horizon VTK files structures?
+        #
+        # We learn about this in the qlm_output_vtk.F90 file in
+        # QuasiLocalMeasures.
+        #
+        # An example looks like:
+        #
+        # # vtk DataFile Version 2.0
+        # Horizon data
+        # ASCII
+        # DATASET POLYDATA
+        # POINTS  2812 float
+        # 1.74001573791400        3.37861181538478       0.465379287209538
+        # 1.73994713406270        3.38024424250911       0.465353718016011#
+        # ....
+        # 1.73994920375395        3.37697921676095      -0.465402607140582
+        #
+        # POLYGONS  2736      13680
+        # 4     0    76    77     1
+        # 4     1    77    78     2
+        # ...
+        # 4  2734  2810  2811  2735
+        # 4  2735  2811  2736  2660
+        #
+        # POINT_DATA  2812
+        #
+        # SCALARS shape float 1
+        # LOOKUP_TABLE default
+        # 0.465244618428368
+        # 0.465266176663749
+        # ...
+        # 0.466705754376149
+        #
+        # SCALARS l0 float 1
+        # LOOKUP_TABLE default
+        # 2.08814072824979
+        # ...
+        #
+        # And so on
+
+        # So, we have:
+        # 1. a first section which contains the coordinates of the points
+        # 2. a second section which describes the connectivity on the mesh
+        # 3. a number of sections with the values of the variables on the points
+
+        # We have to parse all of this (we could use a library to parse it, but
+        # it would be overkill)
+
+        # To parse the file, read it in its entirety as list of strings. Then,
+        # we find those indices that indicate different sections.
+
+        with open(self._vtk_files[iteration]) as file_:
+            lines = file_.readlines()
+
+        # At which indices do the variables start? We will use this to read the
+        # variables as NumPy arrays
+        indices_start_variables: List[int] = []
+        # Where does the coordinate section start? We'll use the POINTS word
+        index_start_coordinates = None
+        # Where does the connectivity section start? We'll use the POLYGON word
+        index_start_connectivity = None
+        for index, line in enumerate(lines):
+            if line.startswith("SCALARS"):
+                indices_start_variables.append(index)
+            elif line.startswith("POINTS"):
+                index_start_coordinates = index
+            elif line.startswith("POLYGON"):
+                index_start_connectivity = index
+
+        if index_start_coordinates is None or index_start_connectivity is None:
+            raise RuntimeError(
+                f"VTK file {self._vtk_files[iteration]} malformed"
+            )
+
+        # We add the end of the file in indices_start_variables, so that we can
+        # loop over them, except for the last one
+        indices_start_variables.append(-1)
+
+        # We extract the name of the variable by splitting on whitespces.
+        variables: Dict[str, NDArray] = {}
+
+        # Let's read the coordinates
+        variables["coordinates"] = np.loadtxt(
+            lines[index_start_coordinates + 1 : index_start_connectivity]
+        )
+        # Now the connectitivity, we have to remove 2 lines from the first occurrence of SCALARS because the
+        # section start with
+        #
+        # POINT_DATA  2812
+        #
+        # This number -2 is a little fragile!
+        variables["connectivity"] = np.loadtxt(
+            lines[
+                index_start_connectivity + 1 : indices_start_variables[0] - 2
+            ],
+            dtype=np.int64,
+        )
+
+        # We read the list "two elements at the time"
+        for index, index_next in zip(
+            indices_start_variables[:-1], indices_start_variables[1:]
+        ):
+            name = lines[index].split(" ")[1]
+            # lines[index].split(" ") looks like: ['SCALARS', 'shape', 'float', '1\n']
+
+            # We need index + 2 is because we have the lines like:
+            #
+            # SCALARS shape float 1
+            # LOOKUP_TABLE default
+            index_data = index + 2
+
+            # Read the data as NumPy arrays
+            variables[name] = np.loadtxt(lines[index_data:index_next])
+
+        self._vtk_vars[iteration] = AttributeDictionary(variables)
+
+    def available_vtk_variables_at_iteration(
+        self, iteration: int
+    ) -> List[str]:
+        """Return the variables available in the VTK file at the given iteration.
+
+        Most VTK variables are 1D arrays defined on the vertices of the horizon
+        mesh (as in ``QuasiLocalMeasures``). The only two special VTK variables
+        are ``coordiantes``, which is essentially a list of 3D coordinates of
+        the vertices, and ``connectivity``, which describes how the various
+        faces are formed.
+
+        The ``connectivity`` variables is a list of indices of the form ``4 i1
+        i2 i3 i4``, which means that the four vertices with indices ``i1 i2 i3
+        i4`` are connected by a face. In ``QuasiLocalMeasures``, faces are
+        always quadrilateral, so the first value of each element in
+        ``connectivity`` will always be 4.
+
+        :param iteration: Desired iteration
+        :type iteration: int
+        :returns: List of variables available
+        :rtype: list
+
+        """
+        return list(self.vtk_at_iteration(iteration).keys())
+
+    def vtk_at_iteration(self, iteration: int) -> AttributeDictionary:
+        """Return a dictionary-like object containing all the VTK variables at the given iteration.
+
+        :param iteration: Desired iteration
+        :type iteration: int
+        :returns: Dictionary-like object with all the VTK variables.
+        :rtype: AttributeDictionary
+        """
+        if iteration not in self._vtk_vars:
+            self._load_vtk_at_iteration(iteration)
+        return self._vtk_vars[iteration]
+
+    # Alias
+    vtk_at_it = vtk_at_iteration
+
+    def vtk_variable_at_iteration(self, key: str, iteration: int) -> NDArray:
+        """Return a variable from the VTK file at the given iteration.
+
+        See also docstring in :py:meth:`~.available_vtk_variables_at_iteration`.
+
+        :param iteration: Desired variable
+        :type iteration: int
+        :param iteration: Desired iteration
+        :type iteration: int
+        :returns: Variable
+        :rtype: NumPy array
+
+        """
+        return self.vtk_at_iteration(iteration)[key]
 
     def get_ah_property(self, key):
         """Return a property from AHFinderDirect as timeseries.
@@ -236,7 +459,7 @@ class OneHorizon:
         """
         return self._ah_vars[key]
 
-    def __str__(self):
+    def __str__(self) -> str:
         """Conversion to string.
         :returns: Human readable summary
         """
@@ -245,6 +468,8 @@ class OneHorizon:
             ret += f"Formation time: {self.formation_time:.4f}\n"
         if self.shape_available:
             ret += "Shape available\n"
+        if self.vtk_available:
+            ret += "VTK information available\n"
         if self._qlm_vars:
             ret += f"Final Mass = {self.mass_final:.3e}\n"
             ret += f"Final Angular Momentum = {self.spin_final:.3e}\n"
@@ -657,6 +882,11 @@ class HorizonsDir:
         self._populate_qlm_vars(sd)
         self._num_qlm_horizons = len(self._qlm_vars.keys())
 
+        # self._vtk_files is a dictionary that maps QLM index to a dictionary
+        # which maps iteration to full path of the corresponding vtk file
+        self._vtk_files: Dict[int, Dict[int, str]] = {}
+        self._populate_vtk_files(sd)
+
         # ah_vars is a dictionary like qlm_vars with the difference that we
         # extract information from the files BH_diagnostics.ah(\d+).gp and
         # that the index here is the Apparent Horizon index.
@@ -717,6 +947,27 @@ class HorizonsDir:
                 # names to the timeseries
                 horizon_vars = self._qlm_vars.setdefault(horizon_number, {})
                 horizon_vars[var_name_stripped] = sd.ts.scalar[var_name]
+
+    def _populate_vtk_files(self, sd):
+        # Here we a regular expression with two capturing groups
+        # 1. ^ $ means that we match the entire string
+        # 2. surface is matched to itself
+        # 3. the first capturing group, (\d+), matches any number, the QLM index
+        # 4. we match _
+        # 5. then we the iteration number
+        # 6. Finally we match .vtk
+        rx_vtk_filename = re.compile(r"^surface(\d+)_(\d+).vtk$")
+
+        for path in sd.allfiles:
+            filename = os.path.split(path)[-1]
+            matched = rx_vtk_filename.search(filename)
+            if matched is not None:
+                # We remove the leading zeros and remove 1 because
+                # qlm_calculate.F90 starts counting from 1 instead of 0
+                vtk_index = int(matched.group(1).lstrip("0")) - 1
+                # The 'or 0' is here for the special case in which iteration is 0
+                iteration = int(matched.group(2).lstrip("0") or "0")
+                self._vtk_files.setdefault(vtk_index, {})[iteration] = path
 
     def _populate_ah_vars(self, sd):
         # First, we find all the files related to apparent horizons. These
@@ -915,6 +1166,7 @@ class HorizonsDir:
             self._qlm_vars.get(qlm_index, {}),
             self._ah_vars.get(ah_index, {}),
             self._shape_files.get(ah_index, {}),
+            self._vtk_files.get(qlm_index, {}),
         )
 
     def __str__(self):

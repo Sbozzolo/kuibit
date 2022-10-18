@@ -26,6 +26,13 @@
 - Added `mean`, `average`, `median`, `std` reductions to series and grid data
 - Added `ah_available`, `qlm_available` to `OneHorizon`
 - Added `tensor` module
+- Added support to `surface*.vtk` from `QuasiLocalMeasures`
+
+#### Support to `VTK` variables from `QuasiLocalMeasures`
+
+`QuasiLocalMeasures` has an option to output its variables on the horizon. Now,
+`kuibit` can read and parse them, so it is possible to plot horizon meshes and
+variables onto the mesh.
 
 #### New `tensor` module
 
