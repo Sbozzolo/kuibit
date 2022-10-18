@@ -70,11 +70,15 @@ Similarly, the attribute <code class="docutils literal notranslate"><span class=
 AHFinderDirect. All of these are represented as <a class="reference internal" href="timeseries_ref.html#kuibit.timeseries.TimeSeries" title="kuibit.timeseries.TimeSeries"><code class="xref py py-class docutils literal notranslate"><span class="pre">TimeSeries</span></code></a>.
 <a class="reference internal" href="#kuibit.cactus_horizons.OneHorizon" title="kuibit.cactus_horizons.OneHorizon"><code class="xref py py-class docutils literal notranslate"><span class="pre">OneHorizon</span></code></a> also contains the shapes of the horizons (if the files
 are found), which can be accessed with the methods
-<a class="reference internal" href="#kuibit.cactus_horizons.OneHorizon.shape_at_iteration" title="kuibit.cactus_horizons.OneHorizon.shape_at_iteration"><code class="xref py py-meth docutils literal notranslate"><span class="pre">shape_at_iteration()</span></code></a> and <a class="reference internal" href="#kuibit.cactus_horizons.OneHorizon.shape_outline_at_iteration" title="kuibit.cactus_horizons.OneHorizon.shape_outline_at_iteration"><code class="xref py py-meth docutils literal notranslate"><span class="pre">shape_outline_at_iteration()</span></code></a>.</p>
+<a class="reference internal" href="#kuibit.cactus_horizons.OneHorizon.shape_at_iteration" title="kuibit.cactus_horizons.OneHorizon.shape_at_iteration"><code class="xref py py-meth docutils literal notranslate"><span class="pre">shape_at_iteration()</span></code></a> and <a class="reference internal" href="#kuibit.cactus_horizons.OneHorizon.shape_outline_at_iteration" title="kuibit.cactus_horizons.OneHorizon.shape_outline_at_iteration"><code class="xref py py-meth docutils literal notranslate"><span class="pre">shape_outline_at_iteration()</span></code></a>. If
+VTK data is available (in <code class="docutils literal notranslate"><span class="pre">.vtk</span></code> files), it is processed and stored in the
+<code class="docutils literal notranslate"><span class="pre">vtk</span></code> attribute. :py:func:~.vtk_at_it` is a function that takes an iteration
+and returns a dictionary that contains the variables defined on the horizon
+(seen as a 3D mesh).</p>
 <p>The module contains also functions to work with horizons:</p>
 <ul class="simple">
-<li><p><a class="reference internal" href="#kuibit.cactus_horizons.compute_horizons_separation" title="kuibit.cactus_horizons.compute_horizons_separation"><code class="xref py py-func docutils literal notranslate"><span class="pre">compute_horizons_separation()</span></code></a>, which takes
-two <a class="reference internal" href="#kuibit.cactus_horizons.OneHorizon" title="kuibit.cactus_horizons.OneHorizon"><code class="xref py py-class docutils literal notranslate"><span class="pre">OneHorizon</span></code></a> and returns the timeseries of their separation</p></li>
+<li><p><a class="reference internal" href="#kuibit.cactus_horizons.compute_horizons_separation" title="kuibit.cactus_horizons.compute_horizons_separation"><code class="xref py py-func docutils literal notranslate"><span class="pre">compute_horizons_separation()</span></code></a>, which takes two
+<a class="reference internal" href="#kuibit.cactus_horizons.OneHorizon" title="kuibit.cactus_horizons.OneHorizon"><code class="xref py py-class docutils literal notranslate"><span class="pre">OneHorizon</span></code></a> and returns the timeseries of their separation</p></li>
 </ul>
 <dl class="py class">
 <dt class="sig sig-object py" id="kuibit.cactus_horizons.HorizonsDir">
@@ -163,7 +167,7 @@ analyzed by QuasiLocalMeasures.</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="kuibit.cactus_horizons.OneHorizon">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">kuibit.cactus_horizons.</span></span><span class="sig-name descname"><span class="pre">OneHorizon</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">qlm_vars</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ah_vars</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">shape_files</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/kuibit/cactus_horizons.html#OneHorizon"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kuibit.cactus_horizons.OneHorizon" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">kuibit.cactus_horizons.</span></span><span class="sig-name descname"><span class="pre">OneHorizon</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">qlm_vars</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ah_vars</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">shape_files</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vtk_files</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/kuibit/cactus_horizons.html#OneHorizon"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kuibit.cactus_horizons.OneHorizon" title="Permalink to this definition">¶</a></dt>
 <dd><p>This class represents properties of an apparent horizon
 computed from the quasi-isolated horizon formalism.</p>
 <p>All the variables from QuasiLocalMeasures are available as
@@ -185,6 +189,7 @@ at the last iteration available.</p></li>
 <li><p><strong>shape_times</strong> – Times at which the shape is available.</p></li>
 <li><p><strong>shape_times_min</strong> – First time at which the shape is available.</p></li>
 <li><p><strong>shape_times_max</strong> – Last time at which the shape is available.</p></li>
+<li><p><strong>vtk_available</strong> – Whether VTK files are available.</p></li>
 <li><p><strong>ah</strong> – All the variables from AHFinderDirect as <a class="reference internal" href="timeseries_ref.html#kuibit.timeseries.TimeSeries" title="kuibit.timeseries.TimeSeries"><code class="xref py py-class docutils literal notranslate"><span class="pre">TimeSeries</span></code></a>.</p></li>
 </ul>
 </dd>
@@ -199,6 +204,8 @@ the associated <a class="reference internal" href="timeseries_ref.html#kuibit.ti
 the associated <a class="reference internal" href="timeseries_ref.html#kuibit.timeseries.TimeSeries" title="kuibit.timeseries.TimeSeries"><code class="xref py py-class docutils literal notranslate"><span class="pre">TimeSeries</span></code></a>.</p></li>
 <li><p><strong>shape_files</strong> (<em>dict</em>) – Dictionary that maps the iteration to the files where
 to find the shape at that iteration.</p></li>
+<li><p><strong>vtk_files</strong> (<em>dict</em>) – Dictionary that maps the iteration to the files where
+to find the vtk information at that iteration.</p></li>
 </ul>
 </dd>
 </dl>
@@ -215,6 +222,33 @@ to find the shape at that iteration.</p></li>
 </dd>
 <dt class="field-odd">Return type</dt>
 <dd class="field-odd"><p>3D NumPy array</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="kuibit.cactus_horizons.OneHorizon.available_vtk_variables_at_iteration">
+<span class="sig-name descname"><span class="pre">available_vtk_variables_at_iteration</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">iteration</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/kuibit/cactus_horizons.html#OneHorizon.available_vtk_variables_at_iteration"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kuibit.cactus_horizons.OneHorizon.available_vtk_variables_at_iteration" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the variables available in the VTK file at the given iteration.</p>
+<p>Most VTK variables are 1D arrays defined on the vertices of the horizon
+mesh (as in <code class="docutils literal notranslate"><span class="pre">QuasiLocalMeasures</span></code>). The only two special VTK variables
+are <code class="docutils literal notranslate"><span class="pre">coordiantes</span></code>, which is essentially a list of 3D coordinates of
+the vertices, and <code class="docutils literal notranslate"><span class="pre">connectivity</span></code>, which describes how the various
+faces are formed.</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">connectivity</span></code> variables is a list of indices of the form <code class="docutils literal notranslate"><span class="pre">4</span> <span class="pre">i1</span>
+<span class="pre">i2</span> <span class="pre">i3</span> <span class="pre">i4</span></code>, which means that the four vertices with indices <code class="docutils literal notranslate"><span class="pre">i1</span> <span class="pre">i2</span> <span class="pre">i3</span>
+<span class="pre">i4</span></code> are connected by a face. In <code class="docutils literal notranslate"><span class="pre">QuasiLocalMeasures</span></code>, faces are
+always quadrilateral, so the first value of each element in
+<code class="docutils literal notranslate"><span class="pre">connectivity</span></code> will always be 4.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>iteration</strong> (<em>int</em>) – Desired iteration</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>List of variables available</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>list</p>
 </dd>
 </dl>
 </dd></dl>
@@ -346,6 +380,75 @@ from the shape files.</p>
 </dd>
 <dt class="field-odd">Return type</dt>
 <dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="kuibit.cactus_horizons.OneHorizon.vtk_at_it">
+<span class="sig-name descname"><span class="pre">vtk_at_it</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">iteration</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#kuibit.cactus_horizons.OneHorizon.vtk_at_it" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a dictionary-like object containing all the VTK variables at the given iteration.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>iteration</strong> (<em>int</em>) – Desired iteration</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Dictionary-like object with all the VTK variables.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>AttributeDictionary</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="kuibit.cactus_horizons.OneHorizon.vtk_at_iteration">
+<span class="sig-name descname"><span class="pre">vtk_at_iteration</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">iteration</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/kuibit/cactus_horizons.html#OneHorizon.vtk_at_iteration"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kuibit.cactus_horizons.OneHorizon.vtk_at_iteration" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a dictionary-like object containing all the VTK variables at the given iteration.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>iteration</strong> (<em>int</em>) – Desired iteration</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Dictionary-like object with all the VTK variables.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>AttributeDictionary</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="kuibit.cactus_horizons.OneHorizon.vtk_available_iterations">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">vtk_available_iterations</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#kuibit.cactus_horizons.OneHorizon.vtk_available_iterations" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the list of iterations at which VTK data is available.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>List of iteration with associated VTK data</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>list</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="kuibit.cactus_horizons.OneHorizon.vtk_variable_at_iteration">
+<span class="sig-name descname"><span class="pre">vtk_variable_at_iteration</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">key</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">iteration</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/kuibit/cactus_horizons.html#OneHorizon.vtk_variable_at_iteration"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kuibit.cactus_horizons.OneHorizon.vtk_variable_at_iteration" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a variable from the VTK file at the given iteration.</p>
+<p>See also docstring in <a class="reference internal" href="#kuibit.cactus_horizons.OneHorizon.available_vtk_variables_at_iteration" title="kuibit.cactus_horizons.OneHorizon.available_vtk_variables_at_iteration"><code class="xref py py-meth docutils literal notranslate"><span class="pre">available_vtk_variables_at_iteration()</span></code></a>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>iteration</strong> (<em>int</em>) – Desired variable</p></li>
+<li><p><strong>iteration</strong> – Desired iteration</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Variable</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>NumPy array</p>
 </dd>
 </dl>
 </dd></dl>
