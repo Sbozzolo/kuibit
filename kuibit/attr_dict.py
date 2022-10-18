@@ -177,7 +177,7 @@ class TransformDictionary:
     def keys(self):
         """Return the list of the available elements"""
         # Like normal dictionaries
-        return list(self._elem.keys())
+        return self._elem.keys()
 
     def __contains__(self, name):
         """This allows to use the 'in' keyword."""
