@@ -353,6 +353,7 @@
         <span class="k">return</span> <span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">from_shape_and_flat_data</span><span class="p">(</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span>
             <span class="p">[</span>
+                <span class="c1"># skipcq PYL-W0212</span>
                 <span class="n">x</span><span class="o">.</span><span class="n">_apply_unary</span><span class="p">(</span><span class="n">function</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
                 <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">flat_data</span>
             <span class="p">],</span>
@@ -369,6 +370,7 @@
                 <span class="n">ret</span> <span class="o">=</span> <span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">from_shape_and_flat_data</span><span class="p">(</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span>
                     <span class="p">[</span>
+                        <span class="c1"># skipcq PYL-W0212</span>
                         <span class="n">x</span><span class="o">.</span><span class="n">_apply_binary</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">function</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
                         <span class="k">for</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">flat_data</span><span class="p">,</span> <span class="n">other</span><span class="o">.</span><span class="n">flat_data</span><span class="p">)</span>
                     <span class="p">],</span>
@@ -377,6 +379,7 @@
             <span class="n">ret</span> <span class="o">=</span> <span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">from_shape_and_flat_data</span><span class="p">(</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span>
                 <span class="p">[</span>
+                    <span class="c1"># skipcq PYL-W0212</span>
                     <span class="n">x</span><span class="o">.</span><span class="n">_apply_binary</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="n">function</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
                     <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">flat_data</span>
                 <span class="p">],</span>
@@ -387,6 +390,7 @@
         <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_restructure_data</span><span class="p">(</span>
                 <span class="p">[</span>
+                    <span class="c1"># skipcq PYL-W0212</span>
                     <span class="n">x</span><span class="o">.</span><span class="n">_apply_reduction</span><span class="p">(</span><span class="n">reduction</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
                     <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">flat_data</span>
                 <span class="p">]</span>
@@ -427,14 +431,10 @@
         <span class="k">return</span> <span class="n">ret</span></div>
 
     <span class="k">def</span> <span class="fm">__matmul__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
-        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span>
-            <span class="s2">&quot;Tensor multiplication is not implemented yet&quot;</span>
-        <span class="p">)</span>
+        <span class="k">return</span> <span class="bp">NotImplemented</span>
 
     <span class="k">def</span> <span class="fm">__rmatmul__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
-        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span>
-            <span class="s2">&quot;Tensor multiplication is not implemented yet&quot;</span>
-        <span class="p">)</span>
+        <span class="k">return</span> <span class="bp">NotImplemented</span>
 
     <span class="k">def</span> <span class="fm">__getattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">attr</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
 
