@@ -956,10 +956,7 @@ class UniformGridData(BaseNumerical):
         new_grid = self.grid.ghost_zones_removed()
         # We remove the borders from the data using the slicing operator
         slicer = tuple(
-            [
-                slice(ghost_zones, -ghost_zones)
-                for ghost_zones in self.num_ghost
-            ]
+            slice(ghost_zones, -ghost_zones) for ghost_zones in self.num_ghost
         )
         new_data = self.data[slicer]
         return type(self)(new_grid, new_data)
