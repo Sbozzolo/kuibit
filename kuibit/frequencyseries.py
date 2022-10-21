@@ -108,6 +108,7 @@ class FrequencySeries(BaseSeries):
 
     """
 
+    # skiqc PYL-W0235
     def __init__(self, f, fft, guarantee_f_is_monotonic=False):
         """Create a :py:class:`~.FrequencySeries` providing frequencies and the value at
         those frequencies.

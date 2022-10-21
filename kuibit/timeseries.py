@@ -222,6 +222,7 @@ class TimeSeries(BaseSeries):
 
     # NOTE: Are you adding a function? Document it in timeseries.rst!
 
+    # skiqc PYL-W0235
     def __init__(self, t, y, guarantee_t_is_monotonic=False):
         """Constructor.
 
