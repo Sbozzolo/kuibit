@@ -380,14 +380,10 @@ class Tensor(Generic[_T], BaseNumerical):
         return ret
 
     def __matmul__(self, other):
-        raise NotImplementedError(
-            "Tensor multiplication is not implemented yet"
-        )
+        return NotImplemented
 
     def __rmatmul__(self, other):
-        raise NotImplementedError(
-            "Tensor multiplication is not implemented yet"
-        )
+        return NotImplemented
 
     def __getattr__(self, attr: str):
 

@@ -351,9 +351,9 @@ class TestTensor(unittest.TestCase):
 
     def test_matmul(self):
         ten = kvm.Tensor([self.ts])
-        with self.assertRaises(NotImplementedError):
+        with self.assertRaises(TypeError):
             1 @ ten
-        with self.assertRaises(NotImplementedError):
+        with self.assertRaises(TypeError):
             ten @ 1
 
 
