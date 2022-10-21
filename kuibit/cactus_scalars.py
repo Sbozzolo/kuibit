@@ -438,7 +438,8 @@ class ScalarsDir:
         return default
 
     def __str__(self):
-        return "Folder %s\n%s\n%s\n%s\n%s\n%s\n%s\n" % (
+        str_ = [f"Folder {self.path}"]
+        for key in (
             self.path,
             self.scalar,
             self.minimum,
@@ -446,4 +447,6 @@ class ScalarsDir:
             self.norm1,
             self.norm2,
             self.average,
-        )
+        ):
+            str_.append(str(key))
+        return "\n".join(str_)
