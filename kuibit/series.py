@@ -598,7 +598,10 @@ class BaseSeries(BaseNumerical):
         # This can speed up some computations.
         copied = type(self).__new__(self.__class__)
         # We don't use the setters
+
+        # skipcq PYL-W0212
         copied.__data_x = self.__data_x.copy()
+        # skipcq PYL-W0212
         copied.__data_y = self.__data_y.copy()
         if not self.invalid_spline:
             # splines are tuples, with a direct call to the function

@@ -306,6 +306,7 @@ class Tensor(Generic[_T], BaseNumerical):
         return type(self).from_shape_and_flat_data(
             self.shape,
             [
+                # skipcq PYL-W0212
                 x._apply_unary(function, *args, **kwargs)
                 for x in self.flat_data
             ],
@@ -322,6 +323,7 @@ class Tensor(Generic[_T], BaseNumerical):
                 ret = type(self).from_shape_and_flat_data(
                     self.shape,
                     [
+                        # skipcq PYL-W0212
                         x._apply_binary(y, function, *args, **kwargs)
                         for x, y in zip(self.flat_data, other.flat_data)
                     ],
@@ -330,6 +332,7 @@ class Tensor(Generic[_T], BaseNumerical):
             ret = type(self).from_shape_and_flat_data(
                 self.shape,
                 [
+                    # skipcq PYL-W0212
                     x._apply_binary(other, function, *args, **kwargs)
                     for x in self.flat_data
                 ],
@@ -340,6 +343,7 @@ class Tensor(Generic[_T], BaseNumerical):
         return np.array(
             self._restructure_data(
                 [
+                    # skipcq PYL-W0212
                     x._apply_reduction(reduction, *args, **kwargs)
                     for x in self.flat_data
                 ]
