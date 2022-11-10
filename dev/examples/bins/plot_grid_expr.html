@@ -114,7 +114,7 @@ interpolations available in matplotlib.</p>
     <span class="n">desc</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;&quot;&quot;</span><span class="se">\</span>
 <span class="si">{</span><span class="n">kah</span><span class="o">.</span><span class="n">get_program_name</span><span class="p">()</span><span class="si">}</span><span class="s2"> plot a given expression involving grid functions.</span>
 <span class="s2">Use the name of the grid functions, and algebraic expressions. For example,</span>
-<span class="s2">sin(rho_b) * log(P, 10) (log(x, b) is log with base b).</span>
+<span class="s2">sin(rho_b) * log10(P).</span>
 
 <span class="s2">By default, no interpolation is performed so the image may look pixelated.</span>
 <span class="s2">There are two available modes of interpolation. The first is activated</span>
@@ -204,11 +204,11 @@ interpolations available in matplotlib.</p>
         <span class="n">reader</span> <span class="o">=</span> <span class="n">sim</span><span class="o">.</span><span class="n">gridfunctions</span><span class="p">[</span><span class="n">args</span><span class="o">.</span><span class="n">plane</span><span class="p">]</span>
         <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Variables available </span><span class="si">{</span><span class="n">reader</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 
-        <span class="n">parser</span> <span class="o">=</span> <span class="n">math_parser</span><span class="p">()</span>
+        <span class="n">exp_parser</span> <span class="o">=</span> <span class="n">math_parser</span><span class="p">()</span>
 
         <span class="c1"># We need to make sure that the correct methods are being used. That is,</span>
         <span class="c1"># not the ones in python.math.</span>
-        <span class="n">parser</span><span class="o">.</span><span class="n">ops1</span><span class="o">.</span><span class="n">update</span><span class="p">(</span>
+        <span class="n">exp_parser</span><span class="o">.</span><span class="n">ops1</span><span class="o">.</span><span class="n">update</span><span class="p">(</span>
             <span class="p">{</span>
                 <span class="s2">&quot;exp&quot;</span><span class="p">:</span> <span class="n">km</span><span class="o">.</span><span class="n">exp</span><span class="p">,</span>
                 <span class="s2">&quot;sin&quot;</span><span class="p">:</span> <span class="n">km</span><span class="o">.</span><span class="n">sin</span><span class="p">,</span>
@@ -224,7 +224,7 @@ interpolations available in matplotlib.</p>
             <span class="p">}</span>
         <span class="p">)</span>
 
-        <span class="n">variable_names</span> <span class="o">=</span> <span class="n">parser</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="n">expr</span><span class="p">)</span><span class="o">.</span><span class="n">variables</span><span class="p">()</span>
+        <span class="n">variable_names</span> <span class="o">=</span> <span class="n">exp_parser</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="n">expr</span><span class="p">)</span><span class="o">.</span><span class="n">variables</span><span class="p">()</span>
 
         <span class="c1"># vars_ is a dict that contains NumPy arrays for all the various</span>
         <span class="c1"># variables involved. We use NumPy arrays because py_expression_eval</span>
@@ -247,7 +247,7 @@ interpolations available in matplotlib.</p>
             <span class="sa">f</span><span class="s2">&quot;Plotting on grid with x0 = </span><span class="si">{</span><span class="n">x0</span><span class="si">}</span><span class="s2">, x1 = </span><span class="si">{</span><span class="n">x1</span><span class="si">}</span><span class="s2">, shape = </span><span class="si">{</span><span class="n">shape</span><span class="si">}</span><span class="s2">&quot;</span>
         <span class="p">)</span>
 
-        <span class="n">data</span> <span class="o">=</span> <span class="n">parser</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="n">expr</span><span class="p">)</span><span class="o">.</span><span class="n">evaluate</span><span class="p">(</span><span class="n">variables</span><span class="p">)</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">exp_parser</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="n">expr</span><span class="p">)</span><span class="o">.</span><span class="n">evaluate</span><span class="p">(</span><span class="n">variables</span><span class="p">)</span>
 
         <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Resampling and plotting&quot;</span><span class="p">)</span>
         <span class="n">plot_color</span><span class="p">(</span>
