@@ -43,7 +43,7 @@ if __name__ == "__main__":
     desc = f"""\
 {kah.get_program_name()} plot a given expression involving grid functions.
 Use the name of the grid functions, and algebraic expressions. For example,
-sin(rho_b) * log(P, 10) (log(x, b) is log with base b).
+sin(rho_b) * log10(P).
 
 By default, no interpolation is performed so the image may look pixelated.
 There are two available modes of interpolation. The first is activated
@@ -133,11 +133,11 @@ This is much faster but it is not as accurate."""
         reader = sim.gridfunctions[args.plane]
         logger.debug(f"Variables available {reader}")
 
-        parser = math_parser()
+        exp_parser = math_parser()
 
         # We need to make sure that the correct methods are being used. That is,
         # not the ones in python.math.
-        parser.ops1.update(
+        exp_parser.ops1.update(
             {
                 "exp": km.exp,
                 "sin": km.sin,
@@ -153,7 +153,7 @@ This is much faster but it is not as accurate."""
             }
         )
 
-        variable_names = parser.parse(expr).variables()
+        variable_names = exp_parser.parse(expr).variables()
 
         # vars_ is a dict that contains NumPy arrays for all the various
         # variables involved. We use NumPy arrays because py_expression_eval
@@ -176,7 +176,7 @@ This is much faster but it is not as accurate."""
             f"Plotting on grid with x0 = {x0}, x1 = {x1}, shape = {shape}"
         )
 
-        data = parser.parse(expr).evaluate(variables)
+        data = exp_parser.parse(expr).evaluate(variables)
 
         logger.debug("Resampling and plotting")
         plot_color(
