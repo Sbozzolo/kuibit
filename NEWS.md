@@ -3,7 +3,8 @@
 ## Version 1.4.0 (Under Development)
 
 #### General
-- Minimum version of Python required is now 3.8
+- Minimum version of Python required is now 3.8. `kuibit` now explicitly follows
+  [NEP29](https://numpy.org/neps/nep-0029-deprecation_policy.html).
 - Started gradual typing
 - Now `SimDir` can be imported directly from `kuibit` (`from kuibit import SimDir`)
 

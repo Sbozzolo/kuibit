@@ -76,7 +76,8 @@ Installation
 If they are not already available, ``pip`` will install all the necessary
 dependencies.
 
-The minimum version of Python required is 3.8.
+The minimum version of Python required is 3.8. ``kuibit`` follows
+`NEP29 <https://numpy.org/neps/nep-0029-deprecation_policy.html>`_.
 
 If you intend to extend/develop ``kuibit``, follow the instruction on
 `GitHub <https://github.com/Sbozzolo/kuibit>`_.
