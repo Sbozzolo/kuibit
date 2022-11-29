@@ -5,13 +5,14 @@
 <html>
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>plot_1d_vars.py &#8212; kuibit 1.3.6 documentation</title>
-    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
-    <link rel="stylesheet" href="../../_static/bizstyle.css" type="text/css" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+    <title>plot_1d_vars.py &#8212; kuibit 1.4.0-dev1 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/bizstyle.css" />
     <link rel="stylesheet" type="text/css" href="../../_static/css/custom.css" />
     
-    <script id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+    <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
     <script src="../../_static/jquery.js"></script>
     <script src="../../_static/underscore.js"></script>
     <script src="../../_static/doctools.js"></script>
@@ -41,7 +42,7 @@
         <li class="right" >
           <a href="plot_1d_slice.html" title="plot_1d_slice.py"
              accesskey="P">previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../index.html">kuibit 1.3.6 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">kuibit 1.4.0-dev1 documentation</a> &#187;</li>
         <li class="nav-item nav-item-this"><a href="">plot_1d_vars.py</a></li> 
       </ul>
     </div>  
@@ -51,7 +52,7 @@
         <div class="bodywrapper">
           <div class="body" role="main">
             
-  <div class="section" id="plot-1d-vars-py">
+  <section id="plot-1d-vars-py">
 <h1>plot_1d_vars.py<a class="headerlink" href="#plot-1d-vars-py" title="Permalink to this headline">¶</a></h1>
 <p><code class="docutils literal notranslate"><span class="pre">plot_1d_vars</span></code> plots the one or more 1D grid functions output by Carpet. It is
 also possible to take the logarithm in base 10 and/or the absolute value.</p>
@@ -88,7 +89,6 @@ also possible to take the logarithm in base 10 and/or the absolute value.</p>
 <span class="p">)</span>
 
 <span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
-    <span class="n">setup_matplotlib</span><span class="p">()</span>
 
     <span class="n">desc</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;&quot;&quot;</span><span class="se">\</span>
 <span class="si">{</span><span class="n">kah</span><span class="o">.</span><span class="n">get_program_name</span><span class="p">()</span><span class="si">}</span><span class="s2"> plots or more 1D grid functions output by Carpet.&quot;&quot;&quot;</span>
@@ -125,6 +125,7 @@ also possible to take the logarithm in base 10 and/or the absolute value.</p>
         <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Axis to plot (default: </span><span class="si">%(default)s</span><span class="s2">).&quot;</span><span class="p">,</span>
     <span class="p">)</span>
     <span class="n">args</span> <span class="o">=</span> <span class="n">kah</span><span class="o">.</span><span class="n">get_args</span><span class="p">(</span><span class="n">parser</span><span class="p">)</span>
+    <span class="n">setup_matplotlib</span><span class="p">(</span><span class="n">rc_par_file</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">mpl_rc_file</span><span class="p">)</span>
 
     <span class="n">iteration</span> <span class="o">=</span> <span class="n">args</span><span class="o">.</span><span class="n">iteration</span>
 
@@ -172,7 +173,7 @@ also possible to take the logarithm in base 10 and/or the absolute value.</p>
                 <span class="n">variable_name</span> <span class="o">=</span> <span class="n">variable</span>
 
             <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Merging refinement levels&quot;</span><span class="p">)</span>
-            <span class="n">data</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">merge_refinement_levels</span><span class="p">()</span><span class="o">.</span><span class="n">to_GridSeries</span><span class="p">()</span>
+            <span class="n">data</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">refinement_levels_merged</span><span class="p">()</span><span class="o">.</span><span class="n">to_GridSeries</span><span class="p">()</span>
 
             <span class="k">if</span> <span class="n">args</span><span class="o">.</span><span class="n">logscale</span><span class="p">:</span>
                 <span class="n">label</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;log10(</span><span class="si">{</span><span class="n">variable_name</span><span class="si">}</span><span class="s2">)&quot;</span>
@@ -187,7 +188,7 @@ also possible to take the logarithm in base 10 and/or the absolute value.</p>
             <span class="n">set_axis_limits_from_args</span><span class="p">(</span><span class="n">args</span><span class="p">)</span>
             <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Plotted&quot;</span><span class="p">)</span>
 
-        <span class="n">add_text_to_corner</span><span class="p">(</span><span class="sa">fr</span><span class="s2">&quot;$t = </span><span class="si">{</span><span class="n">time</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2">$&quot;</span><span class="p">)</span>
+        <span class="n">add_text_to_corner</span><span class="p">(</span><span class="sa">rf</span><span class="s2">&quot;$t = </span><span class="si">{</span><span class="n">time</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2">$&quot;</span><span class="p">)</span>
 
         <span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">()</span>
         <span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">axis</span><span class="p">)</span>
@@ -203,7 +204,7 @@ also possible to take the logarithm in base 10 and/or the absolute value.</p>
         <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;DONE&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
-</div>
+</section>
 
 
             <div class="clearer"></div>
@@ -215,17 +216,21 @@ also possible to take the logarithm in base 10 and/or the absolute value.</p>
             <p class="logo"><a href="../../index.html">
               <img class="logo" src="../../_static/logo.png" alt="Logo"/>
             </a></p>
-  <h4>Previous topic</h4>
-  <p class="topless"><a href="plot_1d_slice.html"
-                        title="previous chapter">plot_1d_slice.py</a></p>
-  <h4>Next topic</h4>
-  <p class="topless"><a href="plot_ah_coordinate_velocity.html"
-                        title="next chapter">plot_ah_coordinate_velocity.py</a></p>
+  <div>
+    <h4>Previous topic</h4>
+    <p class="topless"><a href="plot_1d_slice.html"
+                          title="previous chapter">plot_1d_slice.py</a></p>
+  </div>
+  <div>
+    <h4>Next topic</h4>
+    <p class="topless"><a href="plot_ah_coordinate_velocity.html"
+                          title="next chapter">plot_ah_coordinate_velocity.py</a></p>
+  </div>
 <div id="searchbox" style="display: none" role="search">
   <h3 id="searchlabel">Quick search</h3>
     <div class="searchformwrapper">
     <form class="search" action="../../search.html" method="get">
-      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
       <input type="submit" value="Go" />
     </form>
     </div>
@@ -250,13 +255,13 @@ also possible to take the logarithm in base 10 and/or the absolute value.</p>
         <li class="right" >
           <a href="plot_1d_slice.html" title="plot_1d_slice.py"
              >previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../index.html">kuibit 1.3.6 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">kuibit 1.4.0-dev1 documentation</a> &#187;</li>
         <li class="nav-item nav-item-this"><a href="">plot_1d_vars.py</a></li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">
         &#169; Copyright 2020-2022, Gabriele Bozzola.
-      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 3.5.4.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 4.5.0.
     </div>
   </body>
 </html>

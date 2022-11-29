@@ -6,12 +6,12 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>kuibit.cactus_horizons &#8212; kuibit 1.3.6 documentation</title>
-    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
-    <link rel="stylesheet" href="../../_static/bizstyle.css" type="text/css" />
+    <title>kuibit.cactus_horizons &#8212; kuibit 1.4.0-dev1 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/bizstyle.css" />
     <link rel="stylesheet" type="text/css" href="../../_static/css/custom.css" />
     
-    <script id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+    <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
     <script src="../../_static/jquery.js"></script>
     <script src="../../_static/underscore.js"></script>
     <script src="../../_static/doctools.js"></script>
@@ -33,7 +33,7 @@
         <li class="right" >
           <a href="../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../index.html">kuibit 1.3.6 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">kuibit 1.4.0-dev1 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="../index.html" accesskey="U">Module code</a> &#187;</li>
         <li class="nav-item nav-item-this"><a href="">kuibit.cactus_horizons</a></li> 
       </ul>
@@ -84,24 +84,30 @@
 <span class="sd">AHFinderDirect. All of these are represented as :py:class:`~.TimeSeries`.</span>
 <span class="sd">:py:class:`~.OneHorizon` also contains the shapes of the horizons (if the files</span>
 <span class="sd">are found), which can be accessed with the methods</span>
-<span class="sd">:py:meth:`~.shape_at_iteration` and :py:meth:`~.shape_outline_at_iteration`.</span>
+<span class="sd">:py:meth:`~.shape_at_iteration` and :py:meth:`~.shape_outline_at_iteration`. If</span>
+<span class="sd">VTK data is available (in ``.vtk`` files), it is processed and stored in the</span>
+<span class="sd">``vtk`` attribute. :py:func:~.vtk_at_it` is a function that takes an iteration</span>
+<span class="sd">and returns a dictionary that contains the variables defined on the horizon</span>
+<span class="sd">(seen as a 3D mesh).</span>
 
 <span class="sd">The module contains also functions to work with horizons:</span>
 
-<span class="sd">* :py:func:`~.compute_horizons_separation`, which takes</span>
-<span class="sd">  two :py:class:`~.OneHorizon` and returns the timeseries of their separation</span>
+<span class="sd">* :py:func:`~.compute_horizons_separation`, which takes two</span>
+<span class="sd">  :py:class:`~.OneHorizon` and returns the timeseries of their separation</span>
 
 <span class="sd">&quot;&quot;&quot;</span>
 
 <span class="kn">import</span> <span class="nn">os</span>
 <span class="kn">import</span> <span class="nn">re</span>
 <span class="kn">import</span> <span class="nn">warnings</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Optional</span>
 
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">numpy.typing</span> <span class="kn">import</span> <span class="n">NDArray</span>
 
-<span class="kn">from</span> <span class="nn">kuibit.attr_dict</span> <span class="kn">import</span> <span class="n">pythonize_name_dict</span>
+<span class="kn">from</span> <span class="nn">kuibit.attr_dict</span> <span class="kn">import</span> <span class="n">AttributeDictionary</span><span class="p">,</span> <span class="n">pythonize_name_dict</span>
 <span class="kn">from</span> <span class="nn">kuibit.series</span> <span class="kn">import</span> <span class="n">sample_common</span>
-<span class="kn">from</span> <span class="nn">kuibit.timeseries</span> <span class="kn">import</span> <span class="n">combine_ts</span><span class="p">,</span> <span class="n">remove_duplicated_iters</span>
+<span class="kn">from</span> <span class="nn">kuibit.timeseries</span> <span class="kn">import</span> <span class="n">TimeSeries</span><span class="p">,</span> <span class="n">combine_ts</span><span class="p">,</span> <span class="n">remove_duplicated_iters</span>
 
 
 <div class="viewcode-block" id="compute_horizons_separation"><a class="viewcode-back" href="../../cactus_horizons_ref.html#kuibit.cactus_horizons.compute_horizons_separation">[docs]</a><span class="k">def</span> <span class="nf">compute_horizons_separation</span><span class="p">(</span><span class="n">horizon1</span><span class="p">,</span> <span class="n">horizon2</span><span class="p">,</span> <span class="n">resample</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
@@ -163,11 +169,18 @@
 <span class="sd">    :ivar shape_times: Times at which the shape is available.</span>
 <span class="sd">    :ivar shape_times_min: First time at which the shape is available.</span>
 <span class="sd">    :ivar shape_times_max: Last time at which the shape is available.</span>
+<span class="sd">    :ivar vtk_available: Whether VTK files are available.</span>
 <span class="sd">    :ivar ah: All the variables from AHFinderDirect as :py:class:`~.TimeSeries`.</span>
 
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">qlm_vars</span><span class="p">,</span> <span class="n">ah_vars</span><span class="p">,</span> <span class="n">shape_files</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">qlm_vars</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">TimeSeries</span><span class="p">]],</span>
+        <span class="n">ah_vars</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">TimeSeries</span><span class="p">]],</span>
+        <span class="n">shape_files</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">str</span><span class="p">]],</span>
+        <span class="n">vtk_files</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">str</span><span class="p">]],</span>
+    <span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Constructor.</span>
 
 <span class="sd">        :param qlm_vars: Dictionary that maps the name of the QLM variable with</span>
@@ -179,14 +192,24 @@
 <span class="sd">        :param shape_files: Dictionary that maps the iteration to the files where</span>
 <span class="sd">                            to find the shape at that iteration.</span>
 <span class="sd">        :type shape_files: dict</span>
+<span class="sd">        :param vtk_files: Dictionary that maps the iteration to the files where</span>
+<span class="sd">                          to find the vtk information at that iteration.</span>
+<span class="sd">        :type vtk_files: dict</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_qlm_vars</span> <span class="o">=</span> <span class="n">qlm_vars</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_ah_vars</span> <span class="o">=</span> <span class="n">ah_vars</span>
+
+        <span class="c1"># `self.XXXX = XXXX or {}` means set self.XXXX to XXXX if it is not</span>
+        <span class="c1"># None, otherwise set it to the empty dictionary.</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_qlm_vars</span> <span class="o">=</span> <span class="n">qlm_vars</span> <span class="ow">or</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_ah_vars</span> <span class="o">=</span> <span class="n">ah_vars</span> <span class="ow">or</span> <span class="p">{}</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">ah_available</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ah_vars</span> <span class="o">!=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">qlm_available</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_qlm_vars</span> <span class="o">!=</span> <span class="p">{}</span>
 
         <span class="c1"># We turn the var_dictionary into attributes</span>
         <span class="k">for</span> <span class="n">var</span><span class="p">,</span> <span class="n">timeseries</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_qlm_vars</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-            <span class="c1"># With this we can access properties in the following way</span>
+            <span class="c1"># With this we can access properties in the following way:</span>
             <span class="c1"># horizon.mass</span>
             <span class="nb">setattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">var</span><span class="p">,</span> <span class="n">timeseries</span><span class="p">)</span>
 
@@ -196,7 +219,7 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">mass_final</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mass</span><span class="o">.</span><span class="n">y</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">spin_final</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">spin</span><span class="o">.</span><span class="n">y</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">dimensionless_spin_final</span> <span class="o">=</span> <span class="p">(</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">spin_final</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">mass_final</span> <span class="o">**</span> <span class="mi">2</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">spin_final</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">mass_final</span><span class="o">**</span><span class="mi">2</span>
             <span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">mass_final</span> <span class="o">=</span> <span class="kc">None</span>
@@ -220,7 +243,7 @@
 
         <span class="c1"># Now we deal with the shape. Shape files is a dictionary that maps</span>
         <span class="c1"># iteration to the associated file</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_shape_files</span> <span class="o">=</span> <span class="n">shape_files</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_shape_files</span> <span class="o">=</span> <span class="n">shape_files</span> <span class="ow">or</span> <span class="p">{}</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">shape_available</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_shape_files</span> <span class="o">!=</span> <span class="p">{}</span>
 
@@ -264,11 +287,214 @@
             <span class="c1"># this dictionary</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_patches</span> <span class="o">=</span> <span class="p">{}</span>
 
+        <span class="c1"># Now let&#39;s look at the VTK files</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_vtk_files</span> <span class="o">=</span> <span class="n">vtk_files</span> <span class="ow">or</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">vtk_available</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_vtk_files</span> <span class="o">!=</span> <span class="p">{}</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_vtk_vars</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="n">AttributeDictionary</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+
     <span class="k">def</span> <span class="fm">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">key</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_qlm_vars</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
             <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Quantity </span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s2"> does not exist&quot;</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_qlm_vars</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">vtk_available_iterations</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">]:</span>
+        <span class="sd">&quot;&quot;&quot;Return the list of iterations at which VTK data is available.</span>
+
+<span class="sd">        :returns: List of iteration with associated VTK data</span>
+<span class="sd">        :rtype: list</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_vtk_files</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+
+    <span class="k">def</span> <span class="nf">_load_vtk_at_iteration</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">iteration</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Read and load the VTK file at the given iteration.</span>
+
+<span class="sd">        Raises an error when the iteration is not available.</span>
+
+<span class="sd">        This operation is a little bit expensive because a long text file has to</span>
+<span class="sd">        be parsed.</span>
+
+<span class="sd">        :param iteration: Desired iteration</span>
+<span class="sd">        :type iteration: int</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">iteration</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_vtk_files</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;VTK files for iteration </span><span class="si">{</span><span class="n">iteration</span><span class="si">}</span><span class="s2"> not available&quot;</span>
+            <span class="p">)</span>
+
+        <span class="c1"># How are horizon VTK files structures?</span>
+        <span class="c1">#</span>
+        <span class="c1"># We learn about this in the qlm_output_vtk.F90 file in</span>
+        <span class="c1"># QuasiLocalMeasures.</span>
+        <span class="c1">#</span>
+        <span class="c1"># An example looks like:</span>
+        <span class="c1">#</span>
+        <span class="c1"># # vtk DataFile Version 2.0</span>
+        <span class="c1"># Horizon data</span>
+        <span class="c1"># ASCII</span>
+        <span class="c1"># DATASET POLYDATA</span>
+        <span class="c1"># POINTS  2812 float</span>
+        <span class="c1"># 1.74001573791400        3.37861181538478       0.465379287209538</span>
+        <span class="c1"># 1.73994713406270        3.38024424250911       0.465353718016011#</span>
+        <span class="c1"># ....</span>
+        <span class="c1"># 1.73994920375395        3.37697921676095      -0.465402607140582</span>
+        <span class="c1">#</span>
+        <span class="c1"># POLYGONS  2736      13680</span>
+        <span class="c1"># 4     0    76    77     1</span>
+        <span class="c1"># 4     1    77    78     2</span>
+        <span class="c1"># ...</span>
+        <span class="c1"># 4  2734  2810  2811  2735</span>
+        <span class="c1"># 4  2735  2811  2736  2660</span>
+        <span class="c1">#</span>
+        <span class="c1"># POINT_DATA  2812</span>
+        <span class="c1">#</span>
+        <span class="c1"># SCALARS shape float 1</span>
+        <span class="c1"># LOOKUP_TABLE default</span>
+        <span class="c1"># 0.465244618428368</span>
+        <span class="c1"># 0.465266176663749</span>
+        <span class="c1"># ...</span>
+        <span class="c1"># 0.466705754376149</span>
+        <span class="c1">#</span>
+        <span class="c1"># SCALARS l0 float 1</span>
+        <span class="c1"># LOOKUP_TABLE default</span>
+        <span class="c1"># 2.08814072824979</span>
+        <span class="c1"># ...</span>
+        <span class="c1">#</span>
+        <span class="c1"># And so on</span>
+
+        <span class="c1"># So, we have:</span>
+        <span class="c1"># 1. a first section which contains the coordinates of the points</span>
+        <span class="c1"># 2. a second section which describes the connectivity on the mesh</span>
+        <span class="c1"># 3. a number of sections with the values of the variables on the points</span>
+
+        <span class="c1"># We have to parse all of this (we could use a library to parse it, but</span>
+        <span class="c1"># it would be overkill)</span>
+
+        <span class="c1"># To parse the file, read it in its entirety as list of strings. Then,</span>
+        <span class="c1"># we find those indices that indicate different sections.</span>
+
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_vtk_files</span><span class="p">[</span><span class="n">iteration</span><span class="p">])</span> <span class="k">as</span> <span class="n">file_</span><span class="p">:</span>
+            <span class="n">lines</span> <span class="o">=</span> <span class="n">file_</span><span class="o">.</span><span class="n">readlines</span><span class="p">()</span>
+
+        <span class="c1"># At which indices do the variables start? We will use this to read the</span>
+        <span class="c1"># variables as NumPy arrays</span>
+        <span class="n">indices_start_variables</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="c1"># Where does the coordinate section start? We&#39;ll use the POINTS word</span>
+        <span class="n">index_start_coordinates</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="c1"># Where does the connectivity section start? We&#39;ll use the POLYGON word</span>
+        <span class="n">index_start_connectivity</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">for</span> <span class="n">index</span><span class="p">,</span> <span class="n">line</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">lines</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">line</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;SCALARS&quot;</span><span class="p">):</span>
+                <span class="n">indices_start_variables</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">index</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="n">line</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;POINTS&quot;</span><span class="p">):</span>
+                <span class="n">index_start_coordinates</span> <span class="o">=</span> <span class="n">index</span>
+            <span class="k">elif</span> <span class="n">line</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;POLYGON&quot;</span><span class="p">):</span>
+                <span class="n">index_start_connectivity</span> <span class="o">=</span> <span class="n">index</span>
+
+        <span class="k">if</span> <span class="n">index_start_coordinates</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">index_start_connectivity</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;VTK file </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_vtk_files</span><span class="p">[</span><span class="n">iteration</span><span class="p">]</span><span class="si">}</span><span class="s2"> malformed&quot;</span>
+            <span class="p">)</span>
+
+        <span class="c1"># We add the end of the file in indices_start_variables, so that we can</span>
+        <span class="c1"># loop over them, except for the last one</span>
+        <span class="n">indices_start_variables</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+
+        <span class="c1"># We extract the name of the variable by splitting on whitespces.</span>
+        <span class="n">variables</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">NDArray</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+
+        <span class="c1"># Let&#39;s read the coordinates</span>
+        <span class="n">variables</span><span class="p">[</span><span class="s2">&quot;coordinates&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">loadtxt</span><span class="p">(</span>
+            <span class="n">lines</span><span class="p">[</span><span class="n">index_start_coordinates</span> <span class="o">+</span> <span class="mi">1</span> <span class="p">:</span> <span class="n">index_start_connectivity</span><span class="p">]</span>
+        <span class="p">)</span>
+        <span class="c1"># Now the connectitivity, we have to remove 2 lines from the first occurrence of SCALARS because the</span>
+        <span class="c1"># section start with</span>
+        <span class="c1">#</span>
+        <span class="c1"># POINT_DATA  2812</span>
+        <span class="c1">#</span>
+        <span class="c1"># This number -2 is a little fragile!</span>
+        <span class="n">variables</span><span class="p">[</span><span class="s2">&quot;connectivity&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">loadtxt</span><span class="p">(</span>
+            <span class="n">lines</span><span class="p">[</span>
+                <span class="n">index_start_connectivity</span> <span class="o">+</span> <span class="mi">1</span> <span class="p">:</span> <span class="n">indices_start_variables</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="mi">2</span>
+            <span class="p">],</span>
+            <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">int64</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="c1"># We read the list &quot;two elements at the time&quot;</span>
+        <span class="k">for</span> <span class="n">index</span><span class="p">,</span> <span class="n">index_next</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span>
+            <span class="n">indices_start_variables</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">indices_start_variables</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span>
+        <span class="p">):</span>
+            <span class="n">name</span> <span class="o">=</span> <span class="n">lines</span><span class="p">[</span><span class="n">index</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot; &quot;</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span>
+            <span class="c1"># lines[index].split(&quot; &quot;) looks like: [&#39;SCALARS&#39;, &#39;shape&#39;, &#39;float&#39;, &#39;1\n&#39;]</span>
+
+            <span class="c1"># We need index + 2 is because we have the lines like:</span>
+            <span class="c1">#</span>
+            <span class="c1"># SCALARS shape float 1</span>
+            <span class="c1"># LOOKUP_TABLE default</span>
+            <span class="n">index_data</span> <span class="o">=</span> <span class="n">index</span> <span class="o">+</span> <span class="mi">2</span>
+
+            <span class="c1"># Read the data as NumPy arrays</span>
+            <span class="n">variables</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">loadtxt</span><span class="p">(</span><span class="n">lines</span><span class="p">[</span><span class="n">index_data</span><span class="p">:</span><span class="n">index_next</span><span class="p">])</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_vtk_vars</span><span class="p">[</span><span class="n">iteration</span><span class="p">]</span> <span class="o">=</span> <span class="n">AttributeDictionary</span><span class="p">(</span><span class="n">variables</span><span class="p">)</span>
+
+<div class="viewcode-block" id="OneHorizon.available_vtk_variables_at_iteration"><a class="viewcode-back" href="../../cactus_horizons_ref.html#kuibit.cactus_horizons.OneHorizon.available_vtk_variables_at_iteration">[docs]</a>    <span class="k">def</span> <span class="nf">available_vtk_variables_at_iteration</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">iteration</span><span class="p">:</span> <span class="nb">int</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+        <span class="sd">&quot;&quot;&quot;Return the variables available in the VTK file at the given iteration.</span>
+
+<span class="sd">        Most VTK variables are 1D arrays defined on the vertices of the horizon</span>
+<span class="sd">        mesh (as in ``QuasiLocalMeasures``). The only two special VTK variables</span>
+<span class="sd">        are ``coordiantes``, which is essentially a list of 3D coordinates of</span>
+<span class="sd">        the vertices, and ``connectivity``, which describes how the various</span>
+<span class="sd">        faces are formed.</span>
+
+<span class="sd">        The ``connectivity`` variables is a list of indices of the form ``4 i1</span>
+<span class="sd">        i2 i3 i4``, which means that the four vertices with indices ``i1 i2 i3</span>
+<span class="sd">        i4`` are connected by a face. In ``QuasiLocalMeasures``, faces are</span>
+<span class="sd">        always quadrilateral, so the first value of each element in</span>
+<span class="sd">        ``connectivity`` will always be 4.</span>
+
+<span class="sd">        :param iteration: Desired iteration</span>
+<span class="sd">        :type iteration: int</span>
+<span class="sd">        :returns: List of variables available</span>
+<span class="sd">        :rtype: list</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">vtk_at_iteration</span><span class="p">(</span><span class="n">iteration</span><span class="p">)</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span></div>
+
+<div class="viewcode-block" id="OneHorizon.vtk_at_iteration"><a class="viewcode-back" href="../../cactus_horizons_ref.html#kuibit.cactus_horizons.OneHorizon.vtk_at_iteration">[docs]</a>    <span class="k">def</span> <span class="nf">vtk_at_iteration</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">iteration</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">AttributeDictionary</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Return a dictionary-like object containing all the VTK variables at the given iteration.</span>
+
+<span class="sd">        :param iteration: Desired iteration</span>
+<span class="sd">        :type iteration: int</span>
+<span class="sd">        :returns: Dictionary-like object with all the VTK variables.</span>
+<span class="sd">        :rtype: AttributeDictionary</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">iteration</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_vtk_vars</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_load_vtk_at_iteration</span><span class="p">(</span><span class="n">iteration</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_vtk_vars</span><span class="p">[</span><span class="n">iteration</span><span class="p">]</span></div>
+
+    <span class="c1"># Alias</span>
+    <span class="n">vtk_at_it</span> <span class="o">=</span> <span class="n">vtk_at_iteration</span>
+
+<div class="viewcode-block" id="OneHorizon.vtk_variable_at_iteration"><a class="viewcode-back" href="../../cactus_horizons_ref.html#kuibit.cactus_horizons.OneHorizon.vtk_variable_at_iteration">[docs]</a>    <span class="k">def</span> <span class="nf">vtk_variable_at_iteration</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">iteration</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Return a variable from the VTK file at the given iteration.</span>
+
+<span class="sd">        See also docstring in :py:meth:`~.available_vtk_variables_at_iteration`.</span>
+
+<span class="sd">        :param iteration: Desired variable</span>
+<span class="sd">        :type iteration: int</span>
+<span class="sd">        :param iteration: Desired iteration</span>
+<span class="sd">        :type iteration: int</span>
+<span class="sd">        :returns: Variable</span>
+<span class="sd">        :rtype: NumPy array</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">vtk_at_iteration</span><span class="p">(</span><span class="n">iteration</span><span class="p">)[</span><span class="n">key</span><span class="p">]</span></div>
 
 <div class="viewcode-block" id="OneHorizon.get_ah_property"><a class="viewcode-back" href="../../cactus_horizons_ref.html#kuibit.cactus_horizons.OneHorizon.get_ah_property">[docs]</a>    <span class="k">def</span> <span class="nf">get_ah_property</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Return a property from AHFinderDirect as timeseries.</span>
@@ -280,7 +506,7 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ah_vars</span><span class="p">[</span><span class="n">key</span><span class="p">]</span></div>
 
-    <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;Conversion to string.</span>
 <span class="sd">        :returns: Human readable summary</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -289,6 +515,8 @@
             <span class="n">ret</span> <span class="o">+=</span> <span class="sa">f</span><span class="s2">&quot;Formation time: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">formation_time</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="se">\n</span><span class="s2">&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">shape_available</span><span class="p">:</span>
             <span class="n">ret</span> <span class="o">+=</span> <span class="s2">&quot;Shape available</span><span class="se">\n</span><span class="s2">&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">vtk_available</span><span class="p">:</span>
+            <span class="n">ret</span> <span class="o">+=</span> <span class="s2">&quot;VTK information available</span><span class="se">\n</span><span class="s2">&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_qlm_vars</span><span class="p">:</span>
             <span class="n">ret</span> <span class="o">+=</span> <span class="sa">f</span><span class="s2">&quot;Final Mass = </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">mass_final</span><span class="si">:</span><span class="s2">.3e</span><span class="si">}</span><span class="se">\n</span><span class="s2">&quot;</span>
             <span class="n">ret</span> <span class="o">+=</span> <span class="sa">f</span><span class="s2">&quot;Final Angular Momentum = </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">spin_final</span><span class="si">:</span><span class="s2">.3e</span><span class="si">}</span><span class="se">\n</span><span class="s2">&quot;</span>
@@ -701,6 +929,11 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_populate_qlm_vars</span><span class="p">(</span><span class="n">sd</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_num_qlm_horizons</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_qlm_vars</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
 
+        <span class="c1"># self._vtk_files is a dictionary that maps QLM index to a dictionary</span>
+        <span class="c1"># which maps iteration to full path of the corresponding vtk file</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_vtk_files</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_populate_vtk_files</span><span class="p">(</span><span class="n">sd</span><span class="p">)</span>
+
         <span class="c1"># ah_vars is a dictionary like qlm_vars with the difference that we</span>
         <span class="c1"># extract information from the files BH_diagnostics.ah(\d+).gp and</span>
         <span class="c1"># that the index here is the Apparent Horizon index.</span>
@@ -761,6 +994,27 @@
                 <span class="c1"># names to the timeseries</span>
                 <span class="n">horizon_vars</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_qlm_vars</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="n">horizon_number</span><span class="p">,</span> <span class="p">{})</span>
                 <span class="n">horizon_vars</span><span class="p">[</span><span class="n">var_name_stripped</span><span class="p">]</span> <span class="o">=</span> <span class="n">sd</span><span class="o">.</span><span class="n">ts</span><span class="o">.</span><span class="n">scalar</span><span class="p">[</span><span class="n">var_name</span><span class="p">]</span>
+
+    <span class="k">def</span> <span class="nf">_populate_vtk_files</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sd</span><span class="p">):</span>
+        <span class="c1"># Here we a regular expression with two capturing groups</span>
+        <span class="c1"># 1. ^ $ means that we match the entire string</span>
+        <span class="c1"># 2. surface is matched to itself</span>
+        <span class="c1"># 3. the first capturing group, (\d+), matches any number, the QLM index</span>
+        <span class="c1"># 4. we match _</span>
+        <span class="c1"># 5. then we the iteration number</span>
+        <span class="c1"># 6. Finally we match .vtk</span>
+        <span class="n">rx_vtk_filename</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;^surface(\d+)_(\d+).vtk$&quot;</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">path</span> <span class="ow">in</span> <span class="n">sd</span><span class="o">.</span><span class="n">allfiles</span><span class="p">:</span>
+            <span class="n">filename</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">path</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+            <span class="n">matched</span> <span class="o">=</span> <span class="n">rx_vtk_filename</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">matched</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="c1"># We remove the leading zeros and remove 1 because</span>
+                <span class="c1"># qlm_calculate.F90 starts counting from 1 instead of 0</span>
+                <span class="n">vtk_index</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">matched</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">lstrip</span><span class="p">(</span><span class="s2">&quot;0&quot;</span><span class="p">))</span> <span class="o">-</span> <span class="mi">1</span>
+                <span class="c1"># The &#39;or 0&#39; is here for the special case in which iteration is 0</span>
+                <span class="n">iteration</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">matched</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">lstrip</span><span class="p">(</span><span class="s2">&quot;0&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="s2">&quot;0&quot;</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_vtk_files</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="n">vtk_index</span><span class="p">,</span> <span class="p">{})[</span><span class="n">iteration</span><span class="p">]</span> <span class="o">=</span> <span class="n">path</span>
 
     <span class="k">def</span> <span class="nf">_populate_ah_vars</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sd</span><span class="p">):</span>
         <span class="c1"># First, we find all the files related to apparent horizons. These</span>
@@ -959,6 +1213,7 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">_qlm_vars</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">qlm_index</span><span class="p">,</span> <span class="p">{}),</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_ah_vars</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">ah_index</span><span class="p">,</span> <span class="p">{}),</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_shape_files</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">ah_index</span><span class="p">,</span> <span class="p">{}),</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_vtk_files</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">qlm_index</span><span class="p">,</span> <span class="p">{}),</span>
         <span class="p">)</span>
 
     <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -998,7 +1253,7 @@
   <h3 id="searchlabel">Quick search</h3>
     <div class="searchformwrapper">
     <form class="search" action="../../search.html" method="get">
-      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
       <input type="submit" value="Go" />
     </form>
     </div>
@@ -1017,14 +1272,14 @@
         <li class="right" >
           <a href="../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../index.html">kuibit 1.3.6 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">kuibit 1.4.0-dev1 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="../index.html" >Module code</a> &#187;</li>
         <li class="nav-item nav-item-this"><a href="">kuibit.cactus_horizons</a></li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">
         &#169; Copyright 2020-2022, Gabriele Bozzola.
-      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 3.5.4.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 4.5.0.
     </div>
   </body>
 </html>

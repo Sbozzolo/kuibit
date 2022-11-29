@@ -1,0 +1,8 @@
+describe_simdir.py
+=============================================
+
+``describe_simdir.py`` inspects a simulator directory and prints out everything
+that is known to ``kuibit``.
+
+.. literalinclude:: ../../../examples/bins/describe_simdir.py
+  :language: python

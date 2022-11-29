@@ -43,3 +43,36 @@ set ``cut=(None, None, 0)``.
    No interpolation is performed, so results are not accurate when the cut
    is not along one of the major directions centered in the origin of the
    horizon.
+
+VT data
+-----------------------
+
+``QuasiLocalMeasures`` can optionally output ``.vtk`` files which contain the
+horizon mesh and some internal variables defined on such meshes (when the option
+``QuasiLocalMeasures::output_vtk_every`` is positive). ``kuibit`` can parse
+these files and represent variables defined on the horizons. The attribute
+:py:meth:`~.vtk_available_iterations` returns a list with the iterations at
+which VTK data is available and the method
+:py:meth:`~.available_vtk_variables_at_iteration` returns a list with which
+variables are available at the given iteration.
+
+.. note::
+
+   As a design choice, ``.vtk`` parsing in ``kuibit`` was developed with
+   flexibility as opposed to speed. ``kuibit`` will always scan all the various
+   files without assuming much about them. ``.vtk`` can be large, so if this turns
+   out to be a performance bottleneck, please open an issue on the bug tracker.
+
+You can access the variables with the methods :py:meth:`~.vtk_at_iteration`, which
+returns a dictionary-like object with all the variables at the given iteration, or
+with :py:meth:`~.vtk_variable_at_iteration`, which returns a specific variable.
+
+There are two special variables, ``coordinates``, which is a list of the 3D
+coordinates of each vertex that form the horizon mesh, and ``connectivity``,
+which describes the faces of the horizon. The ``connectivity`` list is formed by
+NumPy arrays of the form ``4 i1 i2 i3 i4``. The first number (4) indicates that
+the mesh is formed by polygons with four sides. The other four numbers mean that
+the vertices identified by those four numbers are joined together. For example,
+``4 0 1 2 3`` means that the ``coordinates[0]``, ``coordinates[1]``,
+``coordinates[2]``, and ``coordinates[3]`` form a face of the mesh. Then, each
+variable is defined as 1D NumPy array with one value for each vertex.

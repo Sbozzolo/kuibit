@@ -1,0 +1,234 @@
+
+
+<!doctype html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+    <title>Reference on kuibit.tree &#8212; kuibit 1.4.0-dev1 documentation</title>
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="_static/bizstyle.css" />
+    <link rel="stylesheet" type="text/css" href="_static/css/custom.css" />
+    
+    <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/doctools.js"></script>
+    <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="_static/bizstyle.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Reference on kuibit.tensor" href="tensor_ref.html" />
+    <link rel="prev" title="Reference on kuibit.argparse_helper" href="argparse_helper_ref.html" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0" />
+    <!--[if lt IE 9]>
+    <script src="_static/css3-mediaqueries.js"></script>
+    <![endif]-->
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="tensor_ref.html" title="Reference on kuibit.tensor"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="argparse_helper_ref.html" title="Reference on kuibit.argparse_helper"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">kuibit 1.4.0-dev1 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">Reference on kuibit.tree</a></li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <section id="module-kuibit.tree">
+<span id="reference-on-kuibit-tree"></span><h1>Reference on kuibit.tree<a class="headerlink" href="#module-kuibit.tree" title="Permalink to this headline">¶</a></h1>
+<p>The <a class="reference internal" href="#module-kuibit.tree" title="kuibit.tree"><code class="xref py py-mod docutils literal notranslate"><span class="pre">tree</span></code></a> module provides a data structure to work with trees.</p>
+<p>The <a class="reference internal" href="#kuibit.tree.Tree" title="kuibit.tree.Tree"><code class="xref py py-class docutils literal notranslate"><span class="pre">Tree</span></code></a> describes one node of a tree with a name and a value. The
+node has any number of children, which are objects of the type
+<a class="reference internal" href="#kuibit.tree.Tree" title="kuibit.tree.Tree"><code class="xref py py-class docutils literal notranslate"><span class="pre">Tree</span></code></a> themselves. (There is no real distinction on what is a node
+and what is a tree.) Given a <a class="reference internal" href="#kuibit.tree.Tree" title="kuibit.tree.Tree"><code class="xref py py-class docutils literal notranslate"><span class="pre">Tree</span></code></a>, the children can be accessed by
+index or by name. <a class="reference internal" href="#kuibit.tree.Tree" title="kuibit.tree.Tree"><code class="xref py py-class docutils literal notranslate"><span class="pre">Tree</span></code></a> can also be exported to dictionaries or
+JSON strings.</p>
+<p>Different trees can be combined with the function <a class="reference internal" href="#kuibit.tree.merge_trees" title="kuibit.tree.merge_trees"><code class="xref py py-func docutils literal notranslate"><span class="pre">merge_trees()</span></code></a>,
+which acts in the followin way. It takes any number of nodes that share the name
+and create a new tree with that name. The children of this new tree are obtained
+by combining all the children of the given nodes, and when children have the
+same name, the new value is obtained by applying a given function (e.g., summing
+up).</p>
+<p>Currently, the main use of this structure in <code class="docutils literal notranslate"><span class="pre">kuibit</span></code> is for timers.</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="kuibit.tree.Tree">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">kuibit.tree.</span></span><span class="sig-name descname"><span class="pre">Tree</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">children</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">()</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/kuibit/tree.html#Tree"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kuibit.tree.Tree" title="Permalink to this definition">¶</a></dt>
+<dd><p>Represent one node of a tree (and recursively, the tree itself).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Variables</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>name</strong> – Name of the node.</p></li>
+<li><p><strong>value</strong> – Value of the node.</p></li>
+<li><p><strong>children</strong> – Tuple with the nodes that are children of this one.</p></li>
+</ul>
+</dd>
+</dl>
+<p>Constructor.</p>
+<dl class="py property">
+<dt class="sig sig-object py" id="kuibit.tree.Tree.is_leaf">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">is_leaf</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></em><a class="headerlink" href="#kuibit.tree.Tree.is_leaf" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return whether the node is a leaf node or not.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="kuibit.tree.Tree.to_dict">
+<span class="sig-name descname"><span class="pre">to_dict</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/kuibit/tree.html#Tree.to_dict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kuibit.tree.Tree.to_dict" title="Permalink to this definition">¶</a></dt>
+<dd><p>Convert the tree into a dictionary.</p>
+<p>The conversion happens in the following way: each node is converted into
+a dictionary with two or three elements: the name, the value, and, if
+there are children, a list of children. In turn, the children are
+represented as dictionaries in the same way.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code></p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>A dictionary representing the node and all its children.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="kuibit.tree.Tree.to_json">
+<span class="sig-name descname"><span class="pre">to_json</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/kuibit/tree.html#Tree.to_json"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kuibit.tree.Tree.to_json" title="Permalink to this definition">¶</a></dt>
+<dd><p>Convert the tree into a string with its JSON representation.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>String containing the JSON representation of the tree.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="kuibit.tree.Tree.tot_value_leaves">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">tot_value_leaves</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><a class="headerlink" href="#kuibit.tree.Tree.tot_value_leaves" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the sum of all the values in all the levas.</p>
+<p>If the node has no children, return the value of the node itself.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Cumulative values of the children.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="kuibit.tree.merge_trees">
+<span class="sig-prename descclassname"><span class="pre">kuibit.tree.</span></span><span class="sig-name descname"><span class="pre">merge_trees</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">trees</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">merge_function=&lt;built-in</span> <span class="pre">function</span> <span class="pre">sum&gt;</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/kuibit/tree.html#merge_trees"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kuibit.tree.merge_trees" title="Permalink to this definition">¶</a></dt>
+<dd><p>Combine multiple trees that start from the same place to a new one.</p>
+<p>When multiple nodes are found at the same level with the same name, apply
+<cite>merge_function</cite> to the list of values to generate the new value. The
+default is to sum them up, but another good idea would be to take the mean.</p>
+<p>The algorithm that mergers the tree is simple: it combines all the children
+of any given node (as identified by the name) across the tree. Therefore,
+the trees are meaningfully merged only if they are already relatively
+similar one with the other.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>trees</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">Iterable</span></code>[<a class="reference internal" href="#kuibit.tree.Tree" title="kuibit.tree.Tree"><code class="xref py py-class docutils literal notranslate"><span class="pre">Tree</span></code></a>]) – List of trees that have to be merged. They have to start from
+a node with the same name.</p></li>
+<li><p><strong>merge_function</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Callable</span></code>[[<code class="xref py py-class docutils literal notranslate"><span class="pre">Iterable</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>]], <code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>]) – Function that has to be applied to reduce the various
+values to a single one.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><a class="reference internal" href="#kuibit.tree.Tree" title="kuibit.tree.Tree"><code class="xref py py-class docutils literal notranslate"><span class="pre">Tree</span></code></a></p>
+</dd>
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>A new tree with all the nodes from the given trees.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="index.html">
+              <img class="logo" src="_static/logo.png" alt="Logo"/>
+            </a></p>
+  <div>
+    <h4>Previous topic</h4>
+    <p class="topless"><a href="argparse_helper_ref.html"
+                          title="previous chapter">Reference on kuibit.argparse_helper</a></p>
+  </div>
+  <div>
+    <h4>Next topic</h4>
+    <p class="topless"><a href="tensor_ref.html"
+                          title="next chapter">Reference on kuibit.tensor</a></p>
+  </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="tensor_ref.html" title="Reference on kuibit.tensor"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="argparse_helper_ref.html" title="Reference on kuibit.argparse_helper"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">kuibit 1.4.0-dev1 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">Reference on kuibit.tree</a></li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2020-2022, Gabriele Bozzola.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 4.5.0.
+    </div>
+  </body>
+</html>

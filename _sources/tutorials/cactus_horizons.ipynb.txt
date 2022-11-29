@@ -112,7 +112,7 @@
    "cell_type": "markdown",
    "metadata": {},
    "source": [
-    "`kuibit` can also work with shape data. `AHFinderDirect` uses multiple patches, we can plot an example in 3D:"
+    "`kuibit` can also work with shape data. `AHFinderDirect` uses multiple patches, we can plot an example in 3D. `matplotlib` is not the correct tool for 3D plotting, but it will convey the idea;"
    ]
   },
   {
@@ -121,12 +121,14 @@
    "metadata": {},
    "outputs": [],
    "source": [
-    "from mayavi import mlab\n",
-    "mlab.init_notebook('png')\n",
+    "import matplotlib.pyplot as plt\n",
+    "%matplotlib inline\n",
     "\n",
-    "(px, py, pz) = h1.shape_at_iteration(0)\n",
+    "px, py, pz = h1.shape_at_iteration(0)\n",
     "\n",
-    "mlab.mesh(px[0], py[0], pz[0], representation='wireframe')"
+    "ax = plt.axes(projection='3d')\n",
+    "# We plot one patch\n",
+    "ax.scatter(px[0], py[0], pz[0], color=\"black\", edgecolor='black')"
    ]
   },
   {
@@ -142,16 +144,50 @@
    "metadata": {},
    "outputs": [],
    "source": [
-    "mlab.clf()\n",
+    "ax = plt.axes(projection='3d')\n",
+    "for ind in range(len(px)):\n",
+    "    ax.scatter(px[ind], py[ind], pz[ind])"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "# Or, to make it look like a black hole\n",
+    "ax = plt.axes(projection='3d')\n",
+    "for ind in range(len(px)):\n",
+    "    ax.scatter(px[ind], py[ind], pz[ind], color=\"black\")"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "When VTK data is available (`QuasiLocalMeasures::output_vtk_every` set to a non-zero value), it is possible to work with `QuasiLocalMeasures` quantities defined on the horizon mesh. VTK data is stored in the `vtk` attribute, which is a dictionary that maps iterations to a dictionary-like object with the various variables. The most important VTK variables are `coordinates`, which are the 3D coordinates of the mesh, and `connectivity`, which describes how the various points are connected one with others. \n",
     "\n",
-    "for pnum in range(len(px)):\n",
-    "    mlab.mesh(px[pnum], py[pnum], pz[pnum], color=(0, 0, 0))\n",
+    "`Matplotlib` does not have good methods to plot meshes, so we will look at a simple example with a cloud of points. "
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {
+    "scrolled": true
+   },
+   "outputs": [],
+   "source": [
+    "coordinates = h1.vtk_at_it(0).coordinates\n",
+    "# Let's consider one VTK variable\n",
+    "psi4_real = h1.vtk_at_it(0).repsi4\n",
     "\n",
-    "# For some reasons mlab.show() doesn't produce the picture here, \n",
-    "# so, there' is an additional mlab.mesh statement. This is here\n",
-    "# just to display the picture\n",
-    "mlab.orientation_axes()\n",
-    "mlab.mesh(px[0], py[0], pz[0], color=(0,0,0))"
+    "ax = plt.axes(projection='3d')\n",
+    "# coordinates is a list of (x, y, z) points, we \n",
+    "# transpose it and unpack it to use it as argument\n",
+    "# for scatter. Then, we color it with the values of\n",
+    "# psi4_real\n",
+    "ax.scatter(*coordinates.T, c=psi4_real)"
    ]
   },
   {
@@ -227,7 +263,7 @@
    "name": "python",
    "nbconvert_exporter": "python",
    "pygments_lexer": "ipython3",
-   "version": "3.8.8"
+   "version": "3.10.7"
   }
  },
  "nbformat": 4,

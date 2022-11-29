@@ -1,0 +1,166 @@
+{
+ "cells": [
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "# Working with vector and matrices"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "In this notebook, we show some of the most useful features of the [tensor](../tensor.rst) module. The module contains abstractions to work with coherent collections of objects, like vectors. We will focus on vectors of [timeseries](../series.rst), but the same applies to [grid data](../grid_data.rst).\n",
+    "\n",
+    "As an example, we will work with same fake horizon centroid data.\n",
+    "\n",
+    "(This notebook is meant to be converted in Sphinx documentation and not used directly.)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "import matplotlib.pyplot as plt\n",
+    "import numpy as np\n",
+    "from kuibit.timeseries import TimeSeries\n",
+    "from kuibit.tensor import Vector\n",
+    "\n",
+    "%matplotlib inline"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "# First, we generate the data. We will focus on the XY plane.\n",
+    "\n",
+    "# This is an outspiral\n",
+    "t = np.linspace(0, 20, 5000)\n",
+    "x1 = t * np.sin(t)\n",
+    "y1 = t * np.cos(t)\n",
+    "x2 = -t * np.sin(t)\n",
+    "y2 = -t * np.cos(t)\n",
+    "\n",
+    "bh1 = Vector([TimeSeries(t, x1), TimeSeries(t, y1)])\n",
+    "bh2 = Vector([TimeSeries(t, x2), TimeSeries(t, y2)])"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "`bh1` and `bh2` are `Vector`s of `TimeSeries`. Let's plot them."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "plt.plot(*bh1)  # Example of unpacking the vector into the two components\n",
+    "plt.plot(bh2[0], bh2[1])"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "`Vectors` behave like mathematical vectors: we can evaluate them, or perform algebraic operations."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "distance_vector = abs(bh1 - bh2)\n",
+    "print(f\"Distance vector at t = 2 {distance_vector(2)}\")\n",
+    "\n",
+    "# We can also get the magnitude of the distance as a function of time\n",
+    "plt.plot(distance_vector.norm())\n",
+    "# distance_vector.norm() is a TimeSeries\n",
+    "plt.xlabel(\"t\")\n",
+    "plt.ylabel(\"Distance\")"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "`Vectors` inherit all the methods from the contained object. In this case, `TimeSeries`, so we can call methods like `differentiated` to take the time derivative."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "velocity1 = bh1.differentiated()\n",
+    "\n",
+    "# velocity1 is a Vector with the time derivatives\n",
+    "# plotting the first component, along the x axis\n",
+    "plt.plot(velocity1[0])\n",
+    "plt.xlabel(\"t\")\n",
+    "plt.ylabel(\"v^x\")"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "Methods that edit the object in place work too, so we could have taken the derivative with `differentiate`."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "bh1.differentiate()\n",
+    "\n",
+    "plt.plot(bh1[0])\n",
+    "plt.xlabel(\"t\")\n",
+    "plt.ylabel(\"v^x\")"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "IN this notebook, we looked at `Vector`. `Matrix` objects behave similarly. Both `Vector` and `Matrix` share infrastructure with the general `Tensor` class, which, at the moment, implements basic features to work with tensors of generic rank."
+   ]
+  }
+ ],
+ "metadata": {
+  "kernelspec": {
+   "display_name": "Python 3 (ipykernel)",
+   "language": "python",
+   "name": "python3"
+  },
+  "language_info": {
+   "codemirror_mode": {
+    "name": "ipython",
+    "version": 3
+   },
+   "file_extension": ".py",
+   "mimetype": "text/x-python",
+   "name": "python",
+   "nbconvert_exporter": "python",
+   "pygments_lexer": "ipython3",
+   "version": "3.8.13"
+  },
+  "name": "timeseries.ipynb"
+ },
+ "nbformat": 4,
+ "nbformat_minor": 4
+}

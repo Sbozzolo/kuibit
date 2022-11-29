@@ -6,12 +6,12 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>kuibit.cactus_scalars &#8212; kuibit 1.3.6 documentation</title>
-    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
-    <link rel="stylesheet" href="../../_static/bizstyle.css" type="text/css" />
+    <title>kuibit.cactus_scalars &#8212; kuibit 1.4.0-dev1 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/bizstyle.css" />
     <link rel="stylesheet" type="text/css" href="../../_static/css/custom.css" />
     
-    <script id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+    <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
     <script src="../../_static/jquery.js"></script>
     <script src="../../_static/underscore.js"></script>
     <script src="../../_static/doctools.js"></script>
@@ -33,7 +33,7 @@
         <li class="right" >
           <a href="../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../index.html">kuibit 1.3.6 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">kuibit 1.4.0-dev1 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="../index.html" accesskey="U">Module code</a> &#187;</li>
         <li class="nav-item nav-item-this"><a href="">kuibit.cactus_scalars</a></li> 
       </ul>
@@ -128,7 +128,7 @@
     <span class="c1"># we have seven capturing groups.</span>
     <span class="c1"># 1: (\w+) matches any number of characters greater than 0 (w = word)</span>
     <span class="c1"># 2: ((-(\w+))|(\[\d+\]))? optionally match one of the two</span>
-    <span class="c1"># 3: Matched - with followed by 4: any word</span>
+    <span class="c1"># 3: Matches - with followed by 4: any word</span>
     <span class="c1"># 5: Matches brackets with a number inside</span>
     <span class="c1"># In between match a dot (\.)</span>
     <span class="c1"># 6: (minimum|maximum|norm1|norm2|norm_inf|average|scalars)? optionally match one</span>
@@ -485,7 +485,8 @@
         <span class="k">return</span> <span class="n">default</span></div>
 
     <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">return</span> <span class="s2">&quot;Folder </span><span class="si">%s</span><span class="se">\n</span><span class="si">%s</span><span class="se">\n</span><span class="si">%s</span><span class="se">\n</span><span class="si">%s</span><span class="se">\n</span><span class="si">%s</span><span class="se">\n</span><span class="si">%s</span><span class="se">\n</span><span class="si">%s</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span>
+        <span class="n">str_</span> <span class="o">=</span> <span class="p">[</span><span class="sa">f</span><span class="s2">&quot;Folder </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">path</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">]</span>
+        <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="p">(</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">path</span><span class="p">,</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">scalar</span><span class="p">,</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">minimum</span><span class="p">,</span>
@@ -493,7 +494,9 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">norm1</span><span class="p">,</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">norm2</span><span class="p">,</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">average</span><span class="p">,</span>
-        <span class="p">)</span></div>
+        <span class="p">):</span>
+            <span class="n">str_</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">key</span><span class="p">))</span>
+        <span class="k">return</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">str_</span><span class="p">)</span></div>
 </pre></div>
 
             <div class="clearer"></div>
@@ -509,7 +512,7 @@
   <h3 id="searchlabel">Quick search</h3>
     <div class="searchformwrapper">
     <form class="search" action="../../search.html" method="get">
-      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
       <input type="submit" value="Go" />
     </form>
     </div>
@@ -528,14 +531,14 @@
         <li class="right" >
           <a href="../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../index.html">kuibit 1.3.6 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">kuibit 1.4.0-dev1 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="../index.html" >Module code</a> &#187;</li>
         <li class="nav-item nav-item-this"><a href="">kuibit.cactus_scalars</a></li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">
         &#169; Copyright 2020-2022, Gabriele Bozzola.
-      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 3.5.4.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 4.5.0.
     </div>
   </body>
 </html>

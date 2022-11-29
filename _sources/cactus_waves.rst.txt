@@ -131,20 +131,22 @@ TODO
    This function has not been thorougly tested!
 
 
-Energy and angular momentum
-___________________________
-
+Energy, linear, and angular momentum carried away by waves
+_____________________________________________________________________________
 
 :py:class:`~.GravitationalWavesOneDet` (and
 :py:class:`~.ElectromagneticWavesOneDet`) implements methods to compute the
-instantaneous power and torque along the z axis. To compute these quantities for
-a specific mode, just use :py:meth:`~.GravitationalWavesOneDet.get_power_lm` or
-:py:meth:`~.get_torque_z_lm`. You can also compute these quantities for all
-the available multipoles up to a given ``l_max`` using the methods
-:py:meth:`~.GravitationalWavesOneDet.get_total_power` or :py:meth:`~.get_total_torque.` The
-integrated (cumulative) versions are also available. These are the energy and
-angular momentum in gravitational waves. The methods have similar names with
-``energy`` instead of ``power`` and ``angular_momentum`` instead of ``torque_z``.
+instantaneous power, the force, and torque due to emission of waves. To compute
+these quantities for a specific mode, just use
+:py:meth:`~.GravitationalWavesOneDet.get_power_lm` or
+:py:meth:`~.get_torque_z_lm`. You can also compute these quantities for all the
+available multipoles up to a given ``l_max`` using the methods
+:py:meth:`~.GravitationalWavesOneDet.get_total_power` or
+:py:meth:`~.get_total_torque.` The integrated (cumulative) versions are also
+available. These are the energy, the linear, and angular momentum in
+gravitational waves. The methods have similar names with ``energy`` instead of
+``power``, ``linear_momentum`` instead of ``force`` , and ``angular_momentum``
+instead of ``torque_z``.
 
 ..
    .. note::
