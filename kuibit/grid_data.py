@@ -52,6 +52,7 @@ from scipy import interpolate, linalg
 from kuibit import grid_data_utils as gdu
 from kuibit.numerical import BaseNumerical
 from kuibit.series import BaseSeries
+from kuibit.tensor import Tensor
 from kuibit.uniform_grid import UniformGrid
 
 
@@ -1967,6 +1968,17 @@ class UniformGridData(BaseNumerical):
                 self.grid, function(self.data, other, *args, **kwargs)
             )
 
+        # If it is a Tensor of type(self), we have to return a Tensor
+        if isinstance(other, Tensor) and type(self) == other.type:
+            # We keep this at the high level
+            return type(other).from_shape_and_flat_data(
+                other.shape,
+                [
+                    function(ot, self, *args, **kwargs)
+                    for ot in other.flat_data
+                ],
+            )
+
         # If we are here, it is because we cannot add the two objects
         raise TypeError("I don't know how to combine these objects")
 
@@ -3092,6 +3104,17 @@ class HierarchicalGridData(BaseNumerical):
                 for data_self in self.all_components
             ]
             return type(self)(new_data)
+
+        # If it is a Tensor of type(self), we have to return a Tensor
+        if isinstance(other, Tensor) and type(self) == other.type:
+            # We keep this at the high level
+            return type(other).from_shape_and_flat_data(
+                other.shape,
+                [
+                    function(ot, self, *args, **kwargs)
+                    for ot in other.flat_data
+                ],
+            )
 
         # If we are here, it is because we cannot add the two objects
         raise TypeError("I don't know how to combine these objects")

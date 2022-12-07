@@ -43,6 +43,7 @@ from scipy import integrate, interpolate, signal
 
 from kuibit.attr_dict import AttributeDictionary
 from kuibit.numerical import BaseNumerical
+from kuibit.tensor import Tensor
 
 
 class _AttributeDictionaryNumPy(AttributeDictionary):
@@ -709,6 +710,17 @@ class BaseSeries(BaseNumerical):
         if isinstance(other, (int, float, complex)):
             return type(self)(
                 self.x, function(self.y, other, *args, **kwargs), True
+            )
+
+        # If it is a Tensor of type(self), we have to return a Tensor
+        if isinstance(other, Tensor) and type(self) == other.type:
+            # We keep this at the high level
+            return type(other).from_shape_and_flat_data(
+                other.shape,
+                [
+                    function(ot, self, *args, **kwargs)
+                    for ot in other.flat_data
+                ],
             )
 
         # If we are here, it is because we cannot add the two objects
