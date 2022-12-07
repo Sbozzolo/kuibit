@@ -173,6 +173,7 @@ Scripts
    examples/bins/plot_ah_radius.rst
    examples/bins/plot_ah_separation.rst
    examples/bins/plot_ah_trajectories.rst
+   examples/bins/plot_binary_ah_period.rst
    examples/bins/plot_charge_phi1.rst
    examples/bins/plot_constraints.rst
    examples/bins/plot_em_energy.rst
