@@ -21,7 +21,7 @@ import logging
 import matplotlib.pyplot as plt
 
 from kuibit import argparse_helper as kah
-from kuibit.cactus_horizons import compute_horizons_separation
+from kuibit.hor_utils import compute_separation
 from kuibit.simdir import SimDir
 from kuibit.visualize_matplotlib import (
     get_figname,
@@ -87,7 +87,7 @@ of two given apparent horizons."""
         h1 = sim_hor.get_apparent_horizon(args.horizons[0])
         h2 = sim_hor.get_apparent_horizon(args.horizons[1])
 
-        separation = compute_horizons_separation(h1, h2, resample=True)
+        separation = compute_separation(h1, h2, resample=True)
 
         logger.debug("Plotting separation")
         plt.plot(separation)

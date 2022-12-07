@@ -54,6 +54,7 @@ For a full list of available features, see the :doc:`features page <features>`.
   ``CarpetIOASCII``.
 - Work with horizon data from (:py:mod:`~.cactus_horizons`) as output by
   ``QuasiLocalMeasures`` and ``AHFinderDirect``.
+- Perform common operations with horizons (:py:mod:`~.hor_utils`).
 - Work with timers produced by ``Carpet``
   (:py:mod:`~.cactus_timers`).
 - Handle unit conversion, in particular from geometrized to physical
@@ -110,6 +111,7 @@ Usage
    gw_utils.rst
    gw_mismatch.rst
    grid_data.rst
+   hor_utils.rst
    sensitivity_curves.rst
    timers.rst
    tensor.rst
@@ -232,6 +234,7 @@ Reference material (classes, functions, ...)
    gw_utils_ref.rst
    gw_mismatch_ref.rst
    grid_data_ref.rst
+   hor_utils_ref.rst
    masks_ref.rst
    sensitivity_curves_ref.rst
    unitconv_ref.rst

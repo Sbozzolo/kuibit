@@ -42,12 +42,6 @@ VTK data is available (in ``.vtk`` files), it is processed and stored in the
 ``vtk`` attribute. :py:func:~.vtk_at_it` is a function that takes an iteration
 and returns a dictionary that contains the variables defined on the horizon
 (seen as a 3D mesh).
-
-The module contains also functions to work with horizons:
-
-* :py:func:`~.compute_horizons_separation`, which takes two
-  :py:class:`~.OneHorizon` and returns the timeseries of their separation
-
 """
 
 import os
@@ -69,6 +63,8 @@ def compute_horizons_separation(horizon1, horizon2, resample=True):
     The information from the apparent horizons is used (contained in the
     BHDiagnostics files).
 
+    Deprecated in favor of :py:func:`~.compute_separation`.
+
     :param horizon1: First horizon.
     :type horizon1: :py:class:`~.OneHorizon`
     :param horizon2: Second horizon.
@@ -79,6 +75,12 @@ def compute_horizons_separation(horizon1, horizon2, resample=True):
     :rtype: :py:class:`~.TimeSeries`
 
     """
+    warnings.warn(
+        "cactus_horizons.compute_horizons_separation was moved to "
+        "hor_utils.compute_separation "
+        "and it will be removed in kuibit 1.6.0",
+        category=FutureWarning,
+    )
 
     # We add sample_common to make sure that everything is defined on the same
     # interval.

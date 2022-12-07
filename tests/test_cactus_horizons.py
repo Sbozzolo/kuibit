@@ -445,7 +445,9 @@ class TestOneHorizon(unittest.TestCase):
         ho1 = self.hor[(0, 1)]
         ho2 = self.hor[(0, 2)]
 
-        separation = ch.compute_horizons_separation(ho1, ho2)
+        # Deprecated
+        with self.assertWarns(FutureWarning):
+            separation = ch.compute_horizons_separation(ho1, ho2)
 
         self.assertEqual(len(separation), 552)
         # They are the same file, so the separation should be 0 everywhere
