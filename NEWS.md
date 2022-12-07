@@ -66,6 +66,17 @@ as read from the `TwoPunctures.bbh` file.
 `kuibit.tree` is a new module that can represent tree structures. At the moment,
 it is main use is to work with timer trees.
 
+#### New `hor_utils` module
+
+`kuibit.hor_utils` is a handy new module that implements common functions needed
+when working with binary black holes. At the moment, the functions implemented
+are:
+
+- `compute_separation_vector`
+- `compute_separation`
+- `compute_center_of_mass`
+- `compute_angular_velocity_vector`
+
 #### Bug fixes
 
 - Fix passing an empty `ah_vars` to `OneHorizon`.
