@@ -335,6 +335,10 @@ class TestTensor(unittest.TestCase):
 
                 self.assertEqual(mat + data, exp_out)
 
+                # Testing the other way (the code responsible for this is in
+                # other._apply_binary, e.g. series._apply_binary)
+                self.assertEqual(data + mat, exp_out)
+
                 # Test adding a tensor with correct shape
                 self.assertEqual(mat + mat, 2 * mat)
 
