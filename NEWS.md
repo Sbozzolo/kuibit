@@ -3,7 +3,8 @@
 ## Version 1.4.0 (Under Development)
 
 #### General
-- Minimum version of Python required is now 3.8
+- Minimum version of Python required is now 3.8. `kuibit` now explicitly follows
+  [NEP29](https://numpy.org/neps/nep-0029-deprecation_policy.html).
 - Started gradual typing
 - Now `SimDir` can be imported directly from `kuibit` (`from kuibit import SimDir`)
 
@@ -65,12 +66,30 @@ as read from the `TwoPunctures.bbh` file.
 `kuibit.tree` is a new module that can represent tree structures. At the moment,
 it is main use is to work with timer trees.
 
+#### New `hor_utils` module
+
+`kuibit.hor_utils` is a handy new module that implements common functions needed
+when working with binary black holes. At the moment, the functions implemented
+are:
+
+- `compute_separation_vector`
+- `compute_separation`
+- `compute_center_of_mass`
+- `compute_angular_velocity_vector`
+
+#### Bug fixes
+
+- Fix passing an empty `ah_vars` to `OneHorizon`.
+
 #### New examples
 
 Scripts:
 
 * `describe_simdir.py`
 * `interactive_timertree.py`
+* `plot_charge_phi1.py`
+* `plot_binary_ah_angular_velocity.py`
+* `plot_binary_ah_period.py`
 
 ## Version 1.3.6 (5 July 2022)
 

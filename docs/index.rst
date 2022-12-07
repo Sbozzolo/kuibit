@@ -54,6 +54,7 @@ For a full list of available features, see the :doc:`features page <features>`.
   ``CarpetIOASCII``.
 - Work with horizon data from (:py:mod:`~.cactus_horizons`) as output by
   ``QuasiLocalMeasures`` and ``AHFinderDirect``.
+- Perform common operations with horizons (:py:mod:`~.hor_utils`).
 - Work with timers produced by ``Carpet``
   (:py:mod:`~.cactus_timers`).
 - Handle unit conversion, in particular from geometrized to physical
@@ -76,7 +77,8 @@ Installation
 If they are not already available, ``pip`` will install all the necessary
 dependencies.
 
-The minimum version of Python required is 3.8.
+The minimum version of Python required is 3.8. ``kuibit`` follows
+`NEP29 <https://numpy.org/neps/nep-0029-deprecation_policy.html>`_.
 
 If you intend to extend/develop ``kuibit``, follow the instruction on
 `GitHub <https://github.com/Sbozzolo/kuibit>`_.
@@ -109,6 +111,7 @@ Usage
    gw_utils.rst
    gw_mismatch.rst
    grid_data.rst
+   hor_utils.rst
    sensitivity_curves.rst
    timers.rst
    tensor.rst
@@ -170,6 +173,9 @@ Scripts
    examples/bins/plot_ah_radius.rst
    examples/bins/plot_ah_separation.rst
    examples/bins/plot_ah_trajectories.rst
+   examples/bins/plot_binary_ah_angular_velocity_.rst
+   examples/bins/plot_binary_ah_period.rst
+   examples/bins/plot_charge_phi1.rst
    examples/bins/plot_constraints.rst
    examples/bins/plot_em_energy.rst
    examples/bins/plot_grid_var.rst
@@ -230,6 +236,7 @@ Reference material (classes, functions, ...)
    gw_utils_ref.rst
    gw_mismatch_ref.rst
    grid_data_ref.rst
+   hor_utils_ref.rst
    masks_ref.rst
    sensitivity_curves_ref.rst
    unitconv_ref.rst
