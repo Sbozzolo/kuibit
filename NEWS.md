@@ -88,6 +88,7 @@ Scripts:
 * `describe_simdir.py`
 * `interactive_timertree.py`
 * `plot_charge_phi1.py`
+* `plot_binary_ah_angular_velocity.py`
 * `plot_binary_ah_period.py`
 
 ## Version 1.3.6 (5 July 2022)
