@@ -75,7 +75,7 @@ if __name__ == "__main__":
         reader_mult = sim.multipoles
 
         if "Phi1" not in reader_mult:
-            raise ValueError(f"Phi1 not available")
+            raise ValueError("Phi1 not available")
 
         reader = reader_mult["Phi1"]
 
@@ -91,7 +91,7 @@ if __name__ == "__main__":
 
             if (0, 0) not in detector.available_lm:
                 logger.debug(f"Available multipoles {detector.available_lm}")
-                raise ValueError(f"Phi1 l=0, m=0 not available")
+                raise ValueError("Phi1 l=0, m=0 not available")
 
             phi = detector[0, 0].real()
 
