@@ -7,7 +7,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
-    <title>Working with Cactus horizons &#8212; kuibit 1.4.0-dev0 documentation</title>
+    <title>Working with Cactus horizons &#8212; kuibit 1.4.0-dev1 documentation</title>
     <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="../_static/bizstyle.css" />
     <link rel="stylesheet" type="text/css" href="../_static/css/custom.css" />
@@ -44,7 +44,7 @@
         <li class="right" >
           <a href="cactus_grid_functions.html" title="Working with Cactus grid functions"
              accesskey="P">previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../index.html">kuibit 1.4.0-dev0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">kuibit 1.4.0-dev1 documentation</a> &#187;</li>
         <li class="nav-item nav-item-this"><a href="">Working with Cactus horizons</a></li> 
       </ul>
     </div>  
@@ -164,10 +164,11 @@ div.nboutput.container div.prompt > div {
     }
 }
 
-/* disable scrollbars on prompts */
+/* disable scrollbars and line breaks on prompts */
 div.nbinput.container div.prompt pre,
 div.nboutput.container div.prompt pre {
     overflow: hidden;
+    white-space: pre;
 }
 
 /* input/output area */
@@ -318,11 +319,11 @@ div.rendered_html tbody tr:hover {
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
-<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="kn">from</span> <span class="nn">kuibit.simdir</span> <span class="kn">import</span> <span class="n">SimDir</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>import matplotlib.pyplot as plt
+import numpy as np
+from kuibit.simdir import SimDir
 
-<span class="o">%</span><span class="k">matplotlib</span> inline
+%matplotlib inline
 </pre></div>
 </div>
 </div>
@@ -331,9 +332,9 @@ div.rendered_html tbody tr:hover {
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">hor</span> <span class="o">=</span> <span class="n">SimDir</span><span class="p">(</span><span class="s2">&quot;../../tests/horizons&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">horizons</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>hor = SimDir(&quot;../../tests/horizons&quot;).horizons
 
-<span class="nb">print</span><span class="p">(</span><span class="n">hor</span><span class="p">)</span>
+print(hor)
 </pre></div>
 </div>
 </div>
@@ -352,8 +353,8 @@ Horizons found:
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">h1</span> <span class="o">=</span> <span class="n">hor</span><span class="p">[(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">)]</span>
-<span class="nb">print</span><span class="p">(</span><span class="n">h1</span><span class="p">)</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>h1 = hor[(0, 1)]
+print(h1)
 </pre></div>
 </div>
 </div>
@@ -375,8 +376,8 @@ Final Dimensionless Spin = -1.173e-06
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="n">hor</span><span class="o">.</span><span class="n">available_qlm_horizons</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="n">hor</span><span class="o">.</span><span class="n">available_apparent_horizons</span><span class="p">)</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>print(hor.available_qlm_horizons)
+print(hor.available_apparent_horizons)
 </pre></div>
 </div>
 </div>
@@ -394,7 +395,7 @@ Final Dimensionless Spin = -1.173e-06
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">h1</span><span class="o">.</span><span class="n">mass</span><span class="p">)</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>plt.plot(h1.mass)
 </pre></div>
 </div>
 </div>
@@ -404,7 +405,7 @@ Final Dimensionless Spin = -1.173e-06
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-[&lt;matplotlib.lines.Line2D at 0x7f5be6adb2e0&gt;]
+[&lt;matplotlib.lines.Line2D at 0x7fe55ea60580&gt;]
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
@@ -419,7 +420,7 @@ Final Dimensionless Spin = -1.173e-06
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">h1</span><span class="o">.</span><span class="n">ah</span><span class="o">.</span><span class="n">area</span><span class="p">)</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>plt.plot(h1.ah.area)
 </pre></div>
 </div>
 </div>
@@ -429,7 +430,7 @@ Final Dimensionless Spin = -1.173e-06
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-[&lt;matplotlib.lines.Line2D at 0x7f5be49cc6a0&gt;]
+[&lt;matplotlib.lines.Line2D at 0x7fe55e704940&gt;]
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
@@ -444,14 +445,14 @@ Final Dimensionless Spin = -1.173e-06
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
-<span class="o">%</span><span class="k">matplotlib</span> inline
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>import matplotlib.pyplot as plt
+%matplotlib inline
 
-<span class="n">px</span><span class="p">,</span> <span class="n">py</span><span class="p">,</span> <span class="n">pz</span> <span class="o">=</span> <span class="n">h1</span><span class="o">.</span><span class="n">shape_at_iteration</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+px, py, pz = h1.shape_at_iteration(0)
 
-<span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">axes</span><span class="p">(</span><span class="n">projection</span><span class="o">=</span><span class="s1">&#39;3d&#39;</span><span class="p">)</span>
-<span class="c1"># We plot one patch</span>
-<span class="n">ax</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">px</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">py</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">pz</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;black&quot;</span><span class="p">,</span> <span class="n">edgecolor</span><span class="o">=</span><span class="s1">&#39;black&#39;</span><span class="p">)</span>
+ax = plt.axes(projection=&#39;3d&#39;)
+# We plot one patch
+ax.scatter(px[0], py[0], pz[0], color=&quot;black&quot;, edgecolor=&#39;black&#39;)
 </pre></div>
 </div>
 </div>
@@ -461,7 +462,7 @@ Final Dimensionless Spin = -1.173e-06
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-&lt;mpl_toolkits.mplot3d.art3d.Path3DCollection at 0x7f5be495f520&gt;
+&lt;mpl_toolkits.mplot3d.art3d.Path3DCollection at 0x7fe55e6a08b0&gt;
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
@@ -476,9 +477,9 @@ Final Dimensionless Spin = -1.173e-06
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">axes</span><span class="p">(</span><span class="n">projection</span><span class="o">=</span><span class="s1">&#39;3d&#39;</span><span class="p">)</span>
-<span class="k">for</span> <span class="n">ind</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">px</span><span class="p">)):</span>
-    <span class="n">ax</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">px</span><span class="p">[</span><span class="n">ind</span><span class="p">],</span> <span class="n">py</span><span class="p">[</span><span class="n">ind</span><span class="p">],</span> <span class="n">pz</span><span class="p">[</span><span class="n">ind</span><span class="p">])</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>ax = plt.axes(projection=&#39;3d&#39;)
+for ind in range(len(px)):
+    ax.scatter(px[ind], py[ind], pz[ind])
 </pre></div>
 </div>
 </div>
@@ -493,10 +494,10 @@ Final Dimensionless Spin = -1.173e-06
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Or, to make it look like a black hole</span>
-<span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">axes</span><span class="p">(</span><span class="n">projection</span><span class="o">=</span><span class="s1">&#39;3d&#39;</span><span class="p">)</span>
-<span class="k">for</span> <span class="n">ind</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">px</span><span class="p">)):</span>
-    <span class="n">ax</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">px</span><span class="p">[</span><span class="n">ind</span><span class="p">],</span> <span class="n">py</span><span class="p">[</span><span class="n">ind</span><span class="p">],</span> <span class="n">pz</span><span class="p">[</span><span class="n">ind</span><span class="p">],</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;black&quot;</span><span class="p">)</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span># Or, to make it look like a black hole
+ax = plt.axes(projection=&#39;3d&#39;)
+for ind in range(len(px)):
+    ax.scatter(px[ind], py[ind], pz[ind], color=&quot;black&quot;)
 </pre></div>
 </div>
 </div>
@@ -514,16 +515,16 @@ one with others.</p>
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">coordinates</span> <span class="o">=</span> <span class="n">h1</span><span class="o">.</span><span class="n">vtk_at_it</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">coordinates</span>
-<span class="c1"># Let&#39;s consider one VTK variable</span>
-<span class="n">psi4_real</span> <span class="o">=</span> <span class="n">h1</span><span class="o">.</span><span class="n">vtk_at_it</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">repsi4</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>coordinates = h1.vtk_at_it(0).coordinates
+# Let&#39;s consider one VTK variable
+psi4_real = h1.vtk_at_it(0).repsi4
 
-<span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">axes</span><span class="p">(</span><span class="n">projection</span><span class="o">=</span><span class="s1">&#39;3d&#39;</span><span class="p">)</span>
-<span class="c1"># coordinates is a list of (x, y, z) points, we</span>
-<span class="c1"># transpose it and unpack it to use it as argument</span>
-<span class="c1"># for scatter. Then, we color it with the values of</span>
-<span class="c1"># psi4_real</span>
-<span class="n">ax</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="o">*</span><span class="n">coordinates</span><span class="o">.</span><span class="n">T</span><span class="p">,</span> <span class="n">c</span><span class="o">=</span><span class="n">psi4_real</span><span class="p">)</span>
+ax = plt.axes(projection=&#39;3d&#39;)
+# coordinates is a list of (x, y, z) points, we
+# transpose it and unpack it to use it as argument
+# for scatter. Then, we color it with the values of
+# psi4_real
+ax.scatter(*coordinates.T, c=psi4_real)
 </pre></div>
 </div>
 </div>
@@ -533,7 +534,7 @@ one with others.</p>
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-&lt;mpl_toolkits.mplot3d.art3d.Path3DCollection at 0x7f5be0a37040&gt;
+&lt;mpl_toolkits.mplot3d.art3d.Path3DCollection at 0x7fe55e2bfdf0&gt;
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
@@ -549,11 +550,11 @@ one with others.</p>
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[11]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">cut</span> <span class="o">=</span> <span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>  <span class="c1"># Equatorial plane (z=0)</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>cut = [None, None, 0]  # Equatorial plane (z=0)
 
-<span class="n">shape</span> <span class="o">=</span> <span class="n">h1</span><span class="o">.</span><span class="n">shape_outline_at_iteration</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">cut</span><span class="p">)</span>
+shape = h1.shape_outline_at_iteration(0, cut)
 
-<span class="n">plt</span><span class="o">.</span><span class="n">fill</span><span class="p">(</span><span class="o">*</span><span class="n">shape</span><span class="p">)</span>
+plt.fill(*shape)
 </pre></div>
 </div>
 </div>
@@ -563,7 +564,7 @@ one with others.</p>
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-[&lt;matplotlib.patches.Polygon at 0x7f5be0a949a0&gt;]
+[&lt;matplotlib.patches.Polygon at 0x7fe55df96130&gt;]
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
@@ -578,9 +579,9 @@ one with others.</p>
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[12]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">kuibit</span> <span class="kn">import</span> <span class="n">visualize_matplotlib</span> <span class="k">as</span> <span class="n">viz</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>from kuibit import visualize_matplotlib as viz
 
-<span class="n">viz</span><span class="o">.</span><span class="n">plot_horizon</span><span class="p">(</span><span class="n">shape</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;r&#39;</span><span class="p">,</span> <span class="n">edgecolor</span><span class="o">=</span><span class="s1">&#39;b&#39;</span><span class="p">)</span>
+viz.plot_horizon(shape, color=&#39;r&#39;, edgecolor=&#39;b&#39;)
 </pre></div>
 </div>
 </div>
@@ -590,7 +591,7 @@ one with others.</p>
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-[&lt;matplotlib.patches.Polygon at 0x7f5be12467c0&gt;]
+[&lt;matplotlib.patches.Polygon at 0x7fe55e662f70&gt;]
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
@@ -605,7 +606,7 @@ one with others.</p>
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[13]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">viz</span><span class="o">.</span><span class="n">plot_horizon_on_plane_at_time</span><span class="p">(</span><span class="n">h1</span><span class="p">,</span> <span class="n">time</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">plane</span><span class="o">=</span><span class="s2">&quot;xy&quot;</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;g&#39;</span><span class="p">)</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>viz.plot_horizon_on_plane_at_time(h1, time=0, plane=&quot;xy&quot;, color=&#39;g&#39;)
 </pre></div>
 </div>
 </div>
@@ -615,7 +616,7 @@ one with others.</p>
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-[&lt;matplotlib.patches.Polygon at 0x7f5be11bd340&gt;]
+[&lt;matplotlib.patches.Polygon at 0x7fe55d3b4a90&gt;]
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
@@ -623,6 +624,136 @@ one with others.</p>
 </div>
 <div class="output_area docutils container">
 <img alt="../_images/tutorials_cactus_horizons_24_1.png" src="../_images/tutorials_cactus_horizons_24_1.png" />
+</div>
+</div>
+<p>There are some operations that are very common in simulations of binary black holes. For example, computing the coordinate separation between the centroids of the horizons or the angular velocity of the binary. The module <code class="docutils literal notranslate"><span class="pre">hor_utils</span></code> contains several of these functions.</p>
+<p>To illustrate some of these functions, we manually create two <code class="docutils literal notranslate"><span class="pre">OneHorizon</span></code> objects that are nicely inspiraling. The details of how this is done are not important, so you can ignore the next cell and assume you have two horizons, one three times as massive as the other one.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[14]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>from kuibit.cactus_horizons import OneHorizon
+from kuibit.timeseries import TimeSeries
+
+from kuibit import hor_utils
+
+times = np.linspace(0, 100, 1000)
+# We add a 0.1 to avoid having identically zero separation
+cen_x = 0.1 + 10 * (times[-1] - times) * np.cos(times)
+cen_y = 0.1 + 10 * (times[-1] - times) * np.sin(times)
+cen_z = np.zeros_like(times)
+area = np.ones_like(times)
+
+hor1 = OneHorizon(ah_vars={
+                    &quot;centroid_x&quot;: TimeSeries(times, cen_x),
+                    &quot;centroid_y&quot;: TimeSeries(times, cen_y),
+                    &quot;centroid_z&quot;: TimeSeries(times, cen_z),
+                    &quot;area&quot;: TimeSeries(times, area),},
+                    qlm_vars=None, shape_files=None, vtk_files=None)
+
+hor2 = OneHorizon(ah_vars={
+                    &quot;centroid_x&quot;: -TimeSeries(times, cen_x),
+                    &quot;centroid_y&quot;: -TimeSeries(times, cen_y),
+                    &quot;centroid_z&quot;: TimeSeries(times, cen_z),
+                    &quot;area&quot;: 3 * TimeSeries(times, area),},
+                    qlm_vars=None, shape_files=None, vtk_files=None)
+</pre></div>
+</div>
+</div>
+<p>First, let’s plot the tracjectory. For that, we do not need any special function.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[15]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>plt.plot(hor1.ah.centroid_x, hor1.ah.centroid_y, label=&quot;AH 1&quot;)
+plt.plot(hor2.ah.centroid_x, hor2.ah.centroid_y, label=&quot;AH 2&quot;)
+plt.xlabel(&quot;x&quot;)
+plt.ylabel(&quot;y&quot;)
+plt.legend()
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[15]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+&lt;matplotlib.legend.Legend at 0x7fe55d336460&gt;
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/tutorials_cactus_horizons_28_1.png" src="../_images/tutorials_cactus_horizons_28_1.png" />
+</div>
+</div>
+<p>This looks like a nice inspiral, but what if we moved to the frame of the center of mass? It is difficult to compute a gauge-invariant center of mass, so here we estimate it with the Netwonain formula and the irreducible mass of the horizons.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[16]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>com = hor_utils.compute_center_of_mass(hor1, hor2)
+
+# com is a Vector of TimeSeries
+com_x, com_y = com[0], com[1]
+
+plt.plot(com_x.y, com_y.y)
+plt.xlabel(&quot;x_CM&quot;)
+plt.ylabel(&quot;y_CM&quot;)
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[16]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Text(0, 0.5, &#39;y_CM&#39;)
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/tutorials_cactus_horizons_30_1.png" src="../_images/tutorials_cactus_horizons_30_1.png" />
+</div>
+</div>
+<p>We see that the center of mass is not at the center, as usually assume. We can easily adjust our orbits by subtracting the location of the center of mass, if we want to do so.</p>
+<p>Another common task is to compute the separation, and we can easily compute it along the three axis or its magnitude. The separation comes with a sign: we compute it as <code class="docutils literal notranslate"><span class="pre">hor1</span> <span class="pre">-</span> <span class="pre">hor2</span></code>.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[17]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>separation = hor_utils.compute_separation_vector(hor1, hor2)
+separation_magn = hor_utils.compute_separation(hor1, hor2)
+
+plt.plot(separation[0], label=&quot;x&quot;)
+plt.plot(separation[1], label=&quot;y&quot;)
+plt.plot(separation[2], label=&quot;z&quot;)
+plt.plot(separation_magn, label=&quot;Magnitude&quot;)
+plt.xlabel(&quot;Time&quot;)
+plt.ylabel(&quot;Separation&quot;)
+plt.legend()
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[17]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+&lt;matplotlib.legend.Legend at 0x7fe55cf849d0&gt;
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/tutorials_cactus_horizons_32_1.png" src="../_images/tutorials_cactus_horizons_32_1.png" />
 </div>
 </div>
 </section>
@@ -676,7 +807,7 @@ one with others.</p>
         <li class="right" >
           <a href="cactus_grid_functions.html" title="Working with Cactus grid functions"
              >previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../index.html">kuibit 1.4.0-dev0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">kuibit 1.4.0-dev1 documentation</a> &#187;</li>
         <li class="nav-item nav-item-this"><a href="">Working with Cactus horizons</a></li> 
       </ul>
     </div>

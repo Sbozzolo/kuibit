@@ -6,7 +6,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>kuibit.series &#8212; kuibit 1.4.0-dev0 documentation</title>
+    <title>kuibit.series &#8212; kuibit 1.4.0-dev1 documentation</title>
     <link rel="stylesheet" type="text/css" href="../../_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="../../_static/bizstyle.css" />
     <link rel="stylesheet" type="text/css" href="../../_static/css/custom.css" />
@@ -33,7 +33,7 @@
         <li class="right" >
           <a href="../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../index.html">kuibit 1.4.0-dev0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">kuibit 1.4.0-dev1 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="../index.html" accesskey="U">Module code</a> &#187;</li>
         <li class="nav-item nav-item-this"><a href="">kuibit.series</a></li> 
       </ul>
@@ -90,6 +90,7 @@
 
 <span class="kn">from</span> <span class="nn">kuibit.attr_dict</span> <span class="kn">import</span> <span class="n">AttributeDictionary</span>
 <span class="kn">from</span> <span class="nn">kuibit.numerical</span> <span class="kn">import</span> <span class="n">BaseNumerical</span>
+<span class="kn">from</span> <span class="nn">kuibit.tensor</span> <span class="kn">import</span> <span class="n">Tensor</span>
 
 
 <span class="k">class</span> <span class="nc">_AttributeDictionaryNumPy</span><span class="p">(</span><span class="n">AttributeDictionary</span><span class="p">):</span>
@@ -758,6 +759,17 @@
                 <span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="n">function</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">y</span><span class="p">,</span> <span class="n">other</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">),</span> <span class="kc">True</span>
             <span class="p">)</span>
 
+        <span class="c1"># If it is a Tensor of type(self), we have to return a Tensor</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="n">Tensor</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">==</span> <span class="n">other</span><span class="o">.</span><span class="n">type</span><span class="p">:</span>
+            <span class="c1"># We keep this at the high level</span>
+            <span class="k">return</span> <span class="nb">type</span><span class="p">(</span><span class="n">other</span><span class="p">)</span><span class="o">.</span><span class="n">from_shape_and_flat_data</span><span class="p">(</span>
+                <span class="n">other</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span>
+                <span class="p">[</span>
+                    <span class="n">function</span><span class="p">(</span><span class="n">ot</span><span class="p">,</span> <span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+                    <span class="k">for</span> <span class="n">ot</span> <span class="ow">in</span> <span class="n">other</span><span class="o">.</span><span class="n">flat_data</span>
+                <span class="p">],</span>
+            <span class="p">)</span>
+
         <span class="c1"># If we are here, it is because we cannot add the two objects</span>
         <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;I don&#39;t know how to combine these objects&quot;</span><span class="p">)</span>
 
@@ -1255,7 +1267,7 @@
         <li class="right" >
           <a href="../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../index.html">kuibit 1.4.0-dev0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">kuibit 1.4.0-dev1 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="../index.html" >Module code</a> &#187;</li>
         <li class="nav-item nav-item-this"><a href="">kuibit.series</a></li> 
       </ul>

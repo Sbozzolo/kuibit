@@ -1,0 +1,308 @@
+
+
+<!doctype html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>kuibit.hor_utils &#8212; kuibit 1.4.0-dev1 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/bizstyle.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/css/custom.css" />
+    
+    <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+    <script src="../../_static/jquery.js"></script>
+    <script src="../../_static/underscore.js"></script>
+    <script src="../../_static/doctools.js"></script>
+    <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="../../_static/bizstyle.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0" />
+    <!--[if lt IE 9]>
+    <script src="_static/css3-mediaqueries.js"></script>
+    <![endif]-->
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">kuibit 1.4.0-dev1 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../index.html" accesskey="U">Module code</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">kuibit.hor_utils</a></li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for kuibit.hor_utils</h1><div class="highlight"><pre>
+<span></span><span class="ch">#!/usr/bin/env python3</span>
+
+<span class="c1"># Copyright (C) 2022 Gabriele Bozzola</span>
+<span class="c1">#</span>
+<span class="c1"># This program is free software; you can redistribute it and/or modify it under</span>
+<span class="c1"># the terms of the GNU General Public License as published by the Free Software</span>
+<span class="c1"># Foundation; either version 3 of the License, or (at your option) any later</span>
+<span class="c1"># version.</span>
+<span class="c1">#</span>
+<span class="c1"># This program is distributed in the hope that it will be useful, but WITHOUT</span>
+<span class="c1"># ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS</span>
+<span class="c1"># FOR A PARTICULAR PURPOSE. See the GNU General Public License for more</span>
+<span class="c1"># details.</span>
+<span class="c1">#</span>
+<span class="c1"># You should have received a copy of the GNU General Public License along with</span>
+<span class="c1"># this program; if not, see &lt;https://www.gnu.org/licenses/&gt;.</span>
+
+<span class="sd">&quot;&quot;&quot;The :py:mod:`~.hor_utils` module provides functions to perform common</span>
+<span class="sd">operations using horizon(s).</span>
+
+<span class="sd">The functions provided are:</span>
+
+<span class="sd">- :py:func:`~.compute_center_of_mass`: compute the Newtonian center of mass for the</span>
+<span class="sd">  given two horizons.</span>
+<span class="sd">- :py:func:`~.compute_separation_vector`: compute the Newtonian separation vector</span>
+<span class="sd">  between the centroids of the given two horizons.</span>
+<span class="sd">- :py:func:`~.compute_separation`: compute the Newtonian separation between the centroids</span>
+<span class="sd">  of the given two horizons.</span>
+<span class="sd">- :py:func:`~.compute_angular_velocity_vector`: compute the Newtonian angular velocity vector</span>
+<span class="sd">  for the given two horizons.</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">annotations</span>
+
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">TYPE_CHECKING</span><span class="p">,</span> <span class="n">Tuple</span>
+
+<span class="kn">from</span> <span class="nn">kuibit.series</span> <span class="kn">import</span> <span class="n">sample_common</span>
+<span class="kn">from</span> <span class="nn">kuibit.tensor</span> <span class="kn">import</span> <span class="n">Vector</span>
+<span class="kn">from</span> <span class="nn">kuibit.timeseries</span> <span class="kn">import</span> <span class="n">TimeSeries</span>
+
+<span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>  <span class="c1"># pragma: no cover</span>
+    <span class="kn">from</span> <span class="nn">kuibit.cactus_horizon</span> <span class="kn">import</span> <span class="n">OneHorizon</span>
+
+
+<span class="k">def</span> <span class="nf">_two_centroids_as_Vectors</span><span class="p">(</span>
+    <span class="n">horizon1</span><span class="p">:</span> <span class="n">OneHorizon</span><span class="p">,</span> <span class="n">horizon2</span><span class="p">:</span> <span class="n">OneHorizon</span><span class="p">,</span> <span class="n">resample</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">Vector</span><span class="p">[</span><span class="n">TimeSeries</span><span class="p">],</span> <span class="n">Vector</span><span class="p">[</span><span class="n">TimeSeries</span><span class="p">]]:</span>
+    <span class="sd">&quot;&quot;&quot;Process horizon centroids.</span>
+
+<span class="sd">    The information from the apparent horizons is used (contained in the</span>
+<span class="sd">    BHDiagnostics files).</span>
+
+<span class="sd">    Here we transform the position of the centroids into :py:class:`~.Vector`</span>
+<span class="sd">    because they are easier to work with for vector operations.</span>
+
+<span class="sd">    :param horizon1: First horizon. It has to have AH information.</span>
+<span class="sd">    :type horizon1: :py:class:`~.OneHorizon`</span>
+<span class="sd">    :param horizon2: Second horizon. It has to have AH information.</span>
+<span class="sd">    :type horizon2: :py:class:`~.OneHorizon`</span>
+
+<span class="sd">    :returns: Vectors with the centroid positions</span>
+<span class="sd">    :rtype: Tuple of :py:class:`~.Vector`</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">horizon1</span><span class="o">.</span><span class="n">ah_available</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span>
+            <span class="s2">&quot;Centroid information not available for first horizon&quot;</span>
+        <span class="p">)</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">horizon2</span><span class="o">.</span><span class="n">ah_available</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span>
+            <span class="s2">&quot;Centroid information not available for second horizon&quot;</span>
+        <span class="p">)</span>
+
+    <span class="c1"># We add sample_common to make sure that everything is defined on the same</span>
+    <span class="c1"># interval.</span>
+    <span class="p">(</span><span class="n">cen1_x</span><span class="p">,</span> <span class="n">cen1_y</span><span class="p">,</span> <span class="n">cen1_z</span><span class="p">,</span> <span class="n">cen2_x</span><span class="p">,</span> <span class="n">cen2_y</span><span class="p">,</span> <span class="n">cen2_z</span><span class="p">,)</span> <span class="o">=</span> <span class="n">sample_common</span><span class="p">(</span>
+        <span class="p">(</span>
+            <span class="n">horizon1</span><span class="o">.</span><span class="n">ah</span><span class="o">.</span><span class="n">centroid_x</span><span class="p">,</span>
+            <span class="n">horizon1</span><span class="o">.</span><span class="n">ah</span><span class="o">.</span><span class="n">centroid_y</span><span class="p">,</span>
+            <span class="n">horizon1</span><span class="o">.</span><span class="n">ah</span><span class="o">.</span><span class="n">centroid_z</span><span class="p">,</span>
+            <span class="n">horizon2</span><span class="o">.</span><span class="n">ah</span><span class="o">.</span><span class="n">centroid_x</span><span class="p">,</span>
+            <span class="n">horizon2</span><span class="o">.</span><span class="n">ah</span><span class="o">.</span><span class="n">centroid_y</span><span class="p">,</span>
+            <span class="n">horizon2</span><span class="o">.</span><span class="n">ah</span><span class="o">.</span><span class="n">centroid_z</span><span class="p">,</span>
+        <span class="p">),</span>
+        <span class="n">resample</span><span class="o">=</span><span class="n">resample</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="k">return</span> <span class="n">Vector</span><span class="p">([</span><span class="n">cen1_x</span><span class="p">,</span> <span class="n">cen1_y</span><span class="p">,</span> <span class="n">cen1_z</span><span class="p">]),</span> <span class="n">Vector</span><span class="p">([</span><span class="n">cen2_x</span><span class="p">,</span> <span class="n">cen2_y</span><span class="p">,</span> <span class="n">cen2_z</span><span class="p">])</span>
+
+
+<div class="viewcode-block" id="compute_separation_vector"><a class="viewcode-back" href="../../hor_utils_ref.html#kuibit.hor_utils.compute_separation_vector">[docs]</a><span class="k">def</span> <span class="nf">compute_separation_vector</span><span class="p">(</span>
+    <span class="n">horizon1</span><span class="p">:</span> <span class="n">OneHorizon</span><span class="p">,</span> <span class="n">horizon2</span><span class="p">:</span> <span class="n">OneHorizon</span><span class="p">,</span> <span class="n">resample</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Vector</span><span class="p">[</span><span class="n">TimeSeries</span><span class="p">]:</span>
+    <span class="sd">&quot;&quot;&quot;Compute the vector coordinate separation between the centroids of two horizons.</span>
+
+<span class="sd">    The information from the apparent horizons is used (contained in the</span>
+<span class="sd">    BHDiagnostics files).</span>
+
+<span class="sd">    The separation has sign and we compute it as first horizon - second horizon.</span>
+
+
+<span class="sd">    :param horizon1: First horizon.</span>
+<span class="sd">    :type horizon1: :py:class:`~.OneHorizon`</span>
+<span class="sd">    :param horizon2: Second horizon.</span>
+<span class="sd">    :type horizon2: :py:class:`~.OneHorizon`</span>
+
+<span class="sd">    :returns: Coordinate distance vector between the two centroids,</span>
+<span class="sd">              sampled over where both the horizons are available.</span>
+<span class="sd">    :rtype: :py:class:`~.Vector` of :py:class:`~.TimeSeries`</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">ah1</span><span class="p">,</span> <span class="n">ah2</span> <span class="o">=</span> <span class="n">_two_centroids_as_Vectors</span><span class="p">(</span><span class="n">horizon1</span><span class="p">,</span> <span class="n">horizon2</span><span class="p">,</span> <span class="n">resample</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">ah1</span> <span class="o">-</span> <span class="n">ah2</span></div>
+
+
+<div class="viewcode-block" id="compute_separation"><a class="viewcode-back" href="../../hor_utils_ref.html#kuibit.hor_utils.compute_separation">[docs]</a><span class="k">def</span> <span class="nf">compute_separation</span><span class="p">(</span>
+    <span class="n">horizon1</span><span class="p">:</span> <span class="n">OneHorizon</span><span class="p">,</span> <span class="n">horizon2</span><span class="p">:</span> <span class="n">OneHorizon</span><span class="p">,</span> <span class="n">resample</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span>
+<span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Compute the coordinate separation between the centroids of two horizons.</span>
+
+<span class="sd">    The information from the apparent horizons is used (contained in the</span>
+<span class="sd">    BHDiagnostics files).</span>
+
+<span class="sd">    :param horizon1: First horizon.</span>
+<span class="sd">    :type horizon1: :py:class:`~.OneHorizon`</span>
+<span class="sd">    :param horizon2: Second horizon.</span>
+<span class="sd">    :type horizon2: :py:class:`~.OneHorizon`</span>
+
+<span class="sd">    :returns: Coordinate distance between the two centroids, sampled over both</span>
+<span class="sd">              the horizons are available.</span>
+<span class="sd">    :rtype: :py:class:`~.TimeSeries`</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">compute_separation_vector</span><span class="p">(</span><span class="n">horizon1</span><span class="p">,</span> <span class="n">horizon2</span><span class="p">,</span> <span class="n">resample</span><span class="p">)</span><span class="o">.</span><span class="n">norm</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="compute_center_of_mass"><a class="viewcode-back" href="../../hor_utils_ref.html#kuibit.hor_utils.compute_center_of_mass">[docs]</a><span class="k">def</span> <span class="nf">compute_center_of_mass</span><span class="p">(</span>
+    <span class="n">horizon1</span><span class="p">:</span> <span class="n">OneHorizon</span><span class="p">,</span> <span class="n">horizon2</span><span class="p">:</span> <span class="n">OneHorizon</span><span class="p">,</span> <span class="n">resample</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Vector</span><span class="p">[</span><span class="n">TimeSeries</span><span class="p">]:</span>
+    <span class="sd">&quot;&quot;&quot;Compute the Newtonian center of mass between the centroids of two horizons.</span>
+
+<span class="sd">    The information from the apparent horizons is used (contained in the</span>
+<span class="sd">    BHDiagnostics files). The center of mass is computed with the irreducible</span>
+<span class="sd">    mass (which is directly proportional to the area as computed by</span>
+<span class="sd">    AHFinderDirect).</span>
+
+<span class="sd">    :param horizon1: First horizon.</span>
+<span class="sd">    :type horizon1: :py:class:`~.OneHorizon`</span>
+<span class="sd">    :param horizon2: Second horizon.</span>
+<span class="sd">    :type horizon2: :py:class:`~.OneHorizon`</span>
+
+<span class="sd">    :returns: Center of mass vector between the two centroids, sampled over</span>
+<span class="sd">              where both the horizons are available.</span>
+<span class="sd">    :rtype: :py:class:`~.Vector` of :py:class:`~.TimeSeries`</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">cen1</span><span class="p">,</span> <span class="n">cen2</span> <span class="o">=</span> <span class="n">_two_centroids_as_Vectors</span><span class="p">(</span><span class="n">horizon1</span><span class="p">,</span> <span class="n">horizon2</span><span class="p">,</span> <span class="n">resample</span><span class="p">)</span>
+
+    <span class="c1"># Here we use the fact that the irreducible_mass is proportional to the</span>
+    <span class="c1"># area. We prefer using the area because it is always available when the</span>
+    <span class="c1"># centroids are available.</span>
+
+    <span class="n">area1</span><span class="p">,</span> <span class="n">area2</span> <span class="o">=</span> <span class="n">sample_common</span><span class="p">(</span>
+        <span class="p">(</span>
+            <span class="n">horizon1</span><span class="o">.</span><span class="n">ah</span><span class="o">.</span><span class="n">area</span><span class="p">,</span>
+            <span class="n">horizon2</span><span class="o">.</span><span class="n">ah</span><span class="o">.</span><span class="n">area</span><span class="p">,</span>
+        <span class="p">),</span>
+        <span class="n">resample</span><span class="o">=</span><span class="n">resample</span><span class="p">,</span>
+    <span class="p">)</span>
+
+    <span class="c1"># This is morally &quot;total mass&quot; (irreducible_mass = area / 4pi)</span>
+    <span class="n">total_area</span> <span class="o">=</span> <span class="n">area1</span> <span class="o">+</span> <span class="n">area2</span>
+
+    <span class="k">return</span> <span class="n">area1</span> <span class="o">*</span> <span class="n">cen1</span> <span class="o">/</span> <span class="n">total_area</span> <span class="o">+</span> <span class="n">area2</span> <span class="o">*</span> <span class="n">cen2</span> <span class="o">/</span> <span class="n">total_area</span></div>
+
+
+<div class="viewcode-block" id="compute_angular_velocity_vector"><a class="viewcode-back" href="../../hor_utils_ref.html#kuibit.hor_utils.compute_angular_velocity_vector">[docs]</a><span class="k">def</span> <span class="nf">compute_angular_velocity_vector</span><span class="p">(</span>
+    <span class="n">horizon1</span><span class="p">:</span> <span class="n">OneHorizon</span><span class="p">,</span> <span class="n">horizon2</span><span class="p">:</span> <span class="n">OneHorizon</span><span class="p">,</span> <span class="n">resample</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span>
+<span class="p">):</span>
+    <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Compute the angular velocity vector.</span>
+
+<span class="sd">    The information from the apparent horizons is used (contained in the</span>
+<span class="sd">    BHDiagnostics files).</span>
+
+<span class="sd">    The angular velocity vector is computed as</span>
+
+<span class="sd">    .. math::</span>
+
+<span class="sd">      \Omega = \frac{\mathbf{r} \times \mathbf{r}}{r^2}</span>
+
+<span class="sd">    :param horizon1: First horizon.</span>
+<span class="sd">    :type horizon1: :py:class:`~.OneHorizon`</span>
+<span class="sd">    :param horizon2: Second horizon.</span>
+<span class="sd">    :type horizon2: :py:class:`~.OneHorizon`</span>
+
+<span class="sd">    :returns: Vectors with the centroid positions</span>
+<span class="sd">    :rtype: Tuple of :py:class:`~.Vector`</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">sep</span> <span class="o">=</span> <span class="n">compute_separation_vector</span><span class="p">(</span><span class="n">horizon1</span><span class="p">,</span> <span class="n">horizon2</span><span class="p">,</span> <span class="n">resample</span><span class="p">)</span>
+    <span class="n">dot_sep</span> <span class="o">=</span> <span class="n">sep</span><span class="o">.</span><span class="n">differentiated</span><span class="p">()</span>
+    <span class="n">sep_sq</span> <span class="o">=</span> <span class="n">sep</span><span class="o">.</span><span class="n">norm</span><span class="p">()</span> <span class="o">**</span> <span class="mi">2</span>
+
+    <span class="c1"># TODO (Future): Use Vector.cross</span>
+
+    <span class="n">numerator</span> <span class="o">=</span> <span class="n">Vector</span><span class="p">(</span>
+        <span class="p">[</span>
+            <span class="n">sep</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="n">dot_sep</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">-</span> <span class="n">sep</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">*</span> <span class="n">dot_sep</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>
+            <span class="n">sep</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">*</span> <span class="n">dot_sep</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">sep</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="n">dot_sep</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span>
+            <span class="n">sep</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="n">dot_sep</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">sep</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="n">dot_sep</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+        <span class="p">]</span>
+    <span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">numerator</span> <span class="o">/</span> <span class="n">sep_sq</span></div>
+</pre></div>
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="../../index.html">
+              <img class="logo" src="../../_static/logo.png" alt="Logo"/>
+            </a></p>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">kuibit 1.4.0-dev1 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../index.html" >Module code</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">kuibit.hor_utils</a></li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2020-2022, Gabriele Bozzola.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 4.5.0.
+    </div>
+  </body>
+</html>

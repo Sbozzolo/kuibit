@@ -6,7 +6,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>kuibit.cactus_horizons &#8212; kuibit 1.4.0-dev0 documentation</title>
+    <title>kuibit.cactus_horizons &#8212; kuibit 1.4.0-dev1 documentation</title>
     <link rel="stylesheet" type="text/css" href="../../_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="../../_static/bizstyle.css" />
     <link rel="stylesheet" type="text/css" href="../../_static/css/custom.css" />
@@ -33,7 +33,7 @@
         <li class="right" >
           <a href="../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../index.html">kuibit 1.4.0-dev0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">kuibit 1.4.0-dev1 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="../index.html" accesskey="U">Module code</a> &#187;</li>
         <li class="nav-item nav-item-this"><a href="">kuibit.cactus_horizons</a></li> 
       </ul>
@@ -89,12 +89,6 @@
 <span class="sd">``vtk`` attribute. :py:func:~.vtk_at_it` is a function that takes an iteration</span>
 <span class="sd">and returns a dictionary that contains the variables defined on the horizon</span>
 <span class="sd">(seen as a 3D mesh).</span>
-
-<span class="sd">The module contains also functions to work with horizons:</span>
-
-<span class="sd">* :py:func:`~.compute_horizons_separation`, which takes two</span>
-<span class="sd">  :py:class:`~.OneHorizon` and returns the timeseries of their separation</span>
-
 <span class="sd">&quot;&quot;&quot;</span>
 
 <span class="kn">import</span> <span class="nn">os</span>
@@ -116,6 +110,8 @@
 <span class="sd">    The information from the apparent horizons is used (contained in the</span>
 <span class="sd">    BHDiagnostics files).</span>
 
+<span class="sd">    Deprecated in favor of :py:func:`~.compute_separation`.</span>
+
 <span class="sd">    :param horizon1: First horizon.</span>
 <span class="sd">    :type horizon1: :py:class:`~.OneHorizon`</span>
 <span class="sd">    :param horizon2: Second horizon.</span>
@@ -126,6 +122,12 @@
 <span class="sd">    :rtype: :py:class:`~.TimeSeries`</span>
 
 <span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
+        <span class="s2">&quot;cactus_horizons.compute_horizons_separation was moved to &quot;</span>
+        <span class="s2">&quot;hor_utils.compute_separation &quot;</span>
+        <span class="s2">&quot;and it will be removed in kuibit 1.6.0&quot;</span><span class="p">,</span>
+        <span class="n">category</span><span class="o">=</span><span class="ne">FutureWarning</span><span class="p">,</span>
+    <span class="p">)</span>
 
     <span class="c1"># We add sample_common to make sure that everything is defined on the same</span>
     <span class="c1"># interval.</span>
@@ -230,7 +232,7 @@
         <span class="c1"># same way as qlm_vars (as attribute). This is achieved using</span>
         <span class="c1"># pythonize_name_dict. The second argument is how we access the data.</span>
         <span class="c1"># Here we use the method get_ah_property that peeks into self._ah_vars.</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">ah</span> <span class="o">=</span> <span class="n">pythonize_name_dict</span><span class="p">(</span><span class="n">ah_vars</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_ah_property</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ah</span> <span class="o">=</span> <span class="n">pythonize_name_dict</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_ah_vars</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_ah_property</span><span class="p">)</span>
 
         <span class="c1"># We read the formation time from a variable in AH</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ah_vars</span><span class="p">:</span>
@@ -1272,7 +1274,7 @@
         <li class="right" >
           <a href="../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../index.html">kuibit 1.4.0-dev0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">kuibit 1.4.0-dev1 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="../index.html" >Module code</a> &#187;</li>
         <li class="nav-item nav-item-this"><a href="">kuibit.cactus_horizons</a></li> 
       </ul>
