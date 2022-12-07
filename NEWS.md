@@ -66,6 +66,10 @@ as read from the `TwoPunctures.bbh` file.
 `kuibit.tree` is a new module that can represent tree structures. At the moment,
 it is main use is to work with timer trees.
 
+#### Bug fixes
+
+- Fix passing an empty `ah_vars` to `OneHorizon`.
+
 #### New examples
 
 Scripts:

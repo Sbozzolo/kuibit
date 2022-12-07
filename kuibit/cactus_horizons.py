@@ -183,7 +183,7 @@ class OneHorizon:
         # same way as qlm_vars (as attribute). This is achieved using
         # pythonize_name_dict. The second argument is how we access the data.
         # Here we use the method get_ah_property that peeks into self._ah_vars.
-        self.ah = pythonize_name_dict(ah_vars, self.get_ah_property)
+        self.ah = pythonize_name_dict(self._ah_vars, self.get_ah_property)
 
         # We read the formation time from a variable in AH
         if self._ah_vars:
