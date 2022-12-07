@@ -1969,7 +1969,7 @@ class UniformGridData(BaseNumerical):
             )
 
         # If it is a Tensor of type(self), we have to return a Tensor
-        if isinstance(other, Tensor) and type(self) == other.type:
+        if isinstance(other, Tensor) and type(self) is other.type:
             # We keep this at the high level
             return type(other).from_shape_and_flat_data(
                 other.shape,
@@ -3106,7 +3106,7 @@ class HierarchicalGridData(BaseNumerical):
             return type(self)(new_data)
 
         # If it is a Tensor of type(self), we have to return a Tensor
-        if isinstance(other, Tensor) and type(self) == other.type:
+        if isinstance(other, Tensor) and type(self) is other.type:
             # We keep this at the high level
             return type(other).from_shape_and_flat_data(
                 other.shape,
