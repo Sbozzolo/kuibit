@@ -7,6 +7,7 @@
   [NEP29](https://numpy.org/neps/nep-0029-deprecation_policy.html).
 - Started gradual typing
 - Now `SimDir` can be imported directly from `kuibit` (`from kuibit import SimDir`)
+- Update logo to high resolution (and vector graphics)
 
 #### Features
 - Added linear momentum lost by gravitational waves along the x and y directions
