@@ -82,15 +82,17 @@ are:
 
 - Fix passing an empty `ah_vars` to `OneHorizon`.
 
-#### New examples
+#### New/updated examples
 
 Scripts:
 
 * `describe_simdir.py`
 * `interactive_timertree.py`
+* `print_available_iteration.py` optionally prints the corresponding time
 * `plot_charge_phi1.py`
 * `plot_binary_ah_angular_velocity.py`
 * `plot_binary_ah_period.py`
+
 
 ## Version 1.3.6 (5 July 2022)
 

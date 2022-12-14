@@ -37,6 +37,11 @@ if __name__ == "__main__":
         help="Print only for the given dimension.",
         choices=dimensions,
     )
+    parser.add_argument(
+        "--with-time",
+        help="Print also the corresponding time (takes longer to process).",
+        action="store_true",
+    )
     args = kah.get_args(parser)
 
     with SimDir(
@@ -56,6 +61,11 @@ if __name__ == "__main__":
                 args.variable
             ].available_iterations:
                 print(it, end=" ")
+                if args.with_time:
+                    time = reader[args.dimension][
+                        args.variable
+                    ].time_at_iteration(it)
+                    print(f"({time:.2f})", end=" ")
             print()
         else:
             # First we check that we have the variable
@@ -67,4 +77,9 @@ if __name__ == "__main__":
                     print(f"# {dim}")
                     for it in reader[dim][args.variable].available_iterations:
                         print(it, end=" ")
+                        if args.with_time:
+                            time = reader[dim][
+                                args.variable
+                            ].time_at_iteration(it)
+                            print(f"({time:.2f})", end=" ")
                     print()
