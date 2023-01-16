@@ -82,6 +82,11 @@ are:
 
 - Fix passing an empty `ah_vars` to `OneHorizon`.
 
+#### Detector sensitivity curves
+
+- Add more updated sensitivity curve for Einstein Telescope (ET-D) (thanks,
+  @bgiacoma, [#33](https://github.com/Sbozzolo/kuibit/issues/33)).
+
 #### New/updated examples
 
 Scripts:

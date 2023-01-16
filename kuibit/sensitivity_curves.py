@@ -121,6 +121,43 @@ def Sn_ET_B(freqs):
     return psd
 
 
+def Sn_ET_D(freqs):
+    """Return the average power spectral density noise for Einstein Telescope
+    (variant D) in 1/Hz.
+
+    .. note::
+
+        The data was downloaded from
+        https://apps.et-gw.eu/tds/?content=3&r=14065 and has range ``fmin=1``,
+        ``fmax=10000`` (Hz).
+
+    :param freqs: Frequencies in Hz over which to evaluate the sensitivity curve.
+    :type freqs: 1d NumPy array
+
+    :returns: ET-D sensitivity curve in 1/Hz.
+    :rtype: :py:class:`~.FrequencySeries`
+
+    """
+    freqs = np.asarray(freqs)
+
+    # Why is it so difficult to read files in Python packages? :(
+    data = pkgutil.get_data("kuibit", "data/ETD.dat").decode("utf8")
+    # We convert this data in a StringIO that NumPy can read, we can pass this
+    # to load_FrequencySeries, since its backend is np.loadtxt
+    #
+    # ET-D has four columns: freq, ET-D-LF, ET-D-HF, ET-D-sum. We only care
+    # about the last one
+    f, _, _, fft = np.loadtxt(StringIO(data), unpack=True)
+    asd = FrequencySeries(f, fft)
+    psd = asd**2
+
+    # Resample on the requested frequencies. ETD has some spikes, so it is
+    # better to not use splines.
+    psd.resample(freqs, piecewise_constant=True)
+
+    return psd
+
+
 def Sn_CE1(freqs):
     """Return the average power spectral density noise for Einstein Telescope in
     1/Hz.
