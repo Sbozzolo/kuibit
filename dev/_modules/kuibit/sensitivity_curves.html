@@ -168,6 +168,43 @@
     <span class="k">return</span> <span class="n">psd</span></div>
 
 
+<div class="viewcode-block" id="Sn_ET_D"><a class="viewcode-back" href="../../sensitivity_curves_ref.html#kuibit.sensitivity_curves.Sn_ET_D">[docs]</a><span class="k">def</span> <span class="nf">Sn_ET_D</span><span class="p">(</span><span class="n">freqs</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Return the average power spectral density noise for Einstein Telescope</span>
+<span class="sd">    (variant D) in 1/Hz.</span>
+
+<span class="sd">    .. note::</span>
+
+<span class="sd">        The data was downloaded from</span>
+<span class="sd">        https://apps.et-gw.eu/tds/?content=3&amp;r=14065 and has range ``fmin=1``,</span>
+<span class="sd">        ``fmax=10000`` (Hz).</span>
+
+<span class="sd">    :param freqs: Frequencies in Hz over which to evaluate the sensitivity curve.</span>
+<span class="sd">    :type freqs: 1d NumPy array</span>
+
+<span class="sd">    :returns: ET-D sensitivity curve in 1/Hz.</span>
+<span class="sd">    :rtype: :py:class:`~.FrequencySeries`</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">freqs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">freqs</span><span class="p">)</span>
+
+    <span class="c1"># Why is it so difficult to read files in Python packages? :(</span>
+    <span class="n">data</span> <span class="o">=</span> <span class="n">pkgutil</span><span class="o">.</span><span class="n">get_data</span><span class="p">(</span><span class="s2">&quot;kuibit&quot;</span><span class="p">,</span> <span class="s2">&quot;data/ETD.dat&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s2">&quot;utf8&quot;</span><span class="p">)</span>
+    <span class="c1"># We convert this data in a StringIO that NumPy can read, we can pass this</span>
+    <span class="c1"># to load_FrequencySeries, since its backend is np.loadtxt</span>
+    <span class="c1">#</span>
+    <span class="c1"># ET-D has four columns: freq, ET-D-LF, ET-D-HF, ET-D-sum. We only care</span>
+    <span class="c1"># about the last one</span>
+    <span class="n">f</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">fft</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">loadtxt</span><span class="p">(</span><span class="n">StringIO</span><span class="p">(</span><span class="n">data</span><span class="p">),</span> <span class="n">unpack</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">asd</span> <span class="o">=</span> <span class="n">FrequencySeries</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">fft</span><span class="p">)</span>
+    <span class="n">psd</span> <span class="o">=</span> <span class="n">asd</span><span class="o">**</span><span class="mi">2</span>
+
+    <span class="c1"># Resample on the requested frequencies. ETD has some spikes, so it is</span>
+    <span class="c1"># better to not use splines.</span>
+    <span class="n">psd</span><span class="o">.</span><span class="n">resample</span><span class="p">(</span><span class="n">freqs</span><span class="p">,</span> <span class="n">piecewise_constant</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">psd</span></div>
+
+
 <div class="viewcode-block" id="Sn_CE1"><a class="viewcode-back" href="../../sensitivity_curves_ref.html#kuibit.sensitivity_curves.Sn_CE1">[docs]</a><span class="k">def</span> <span class="nf">Sn_CE1</span><span class="p">(</span><span class="n">freqs</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Return the average power spectral density noise for Einstein Telescope in</span>
 <span class="sd">    1/Hz.</span>
