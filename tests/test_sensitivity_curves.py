@@ -47,6 +47,19 @@ class TestSensitivityCurves(unittest.TestCase):
             ),
         )
 
+    def test_ETD(self):
+
+        freqs = np.array([1, 1.0023060e03])
+
+        etd = sc.Sn_ET_D(freqs)
+
+        self.assertEqual(
+            etd,
+            fs.FrequencySeries(
+                freqs, [3.4959517e-17**2, 5.7819941e-25**2]
+            ),
+        )
+
     def test_CE1(self):
 
         freqs = np.array([3.0002, 3577.8])
