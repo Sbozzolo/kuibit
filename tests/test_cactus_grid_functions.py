@@ -23,6 +23,7 @@ import h5py
 import numpy as np
 
 from kuibit import cactus_grid_functions as cg
+from kuibit import cactus_ascii_utils as ca
 from kuibit import grid_data
 from kuibit import simdir as sd
 
@@ -58,6 +59,10 @@ class TestGridFunctionsDir(unittest.TestCase):
     def test_contains(self):
         self.assertIn("xyz", self.gd)
 
+    def test_contains_OpenPMDVars(self):
+        vars3D = self.gd.xyz
+        self.assertIn("wavetoyx_u", vars3D)
+
     def test__getitem(self):
         self.assertIs(self.gd["xy"], self.gd._all_griddata[(0, 1)])
 
@@ -90,6 +95,7 @@ class TestGridFunctionsDir(unittest.TestCase):
 class TestAllGridFunctions(unittest.TestCase):
     def setUp(self):
         self.gf = sd.SimDir("tests/grid_functions").gf.xy
+        self.gf_xyz = sd.SimDir("tests/grid_functions").gf.xyz
 
     def test__init(self):
         self.assertCountEqual(self.gf.dimension, (0, 1))
@@ -135,6 +141,8 @@ class TestAllGridFunctions(unittest.TestCase):
                 "int_torque_dens",
             ],
         )
+
+        self.assertCountEqual(list(self.gf._vars_openpmd_files.keys()), [])
 
         # Here we are not testing that files are correctly organized...
 
@@ -183,7 +191,7 @@ class TestAllGridFunctions(unittest.TestCase):
         with self.assertRaises(KeyError):
             self.gf["hey"]
 
-        # Test a variable from ASCII and one from HDF5
+        # Test a variable from ASCII, one from HDF5, and one from OpenPMD
 
         # We don't test the details, we just test that object is initialized
         # with the correct data
@@ -195,6 +203,20 @@ class TestAllGridFunctions(unittest.TestCase):
         filename = os.path.split(next(iter(self.gf["P"].allfiles)))[-1]
         self.assertEqual(
             filename, "illinoisgrmhd-grmhd_primitives_allbutbi.xy.h5"
+        )
+
+        # OpenPMD
+        self.assertTrue(
+            isinstance(self.gf_xyz["wavetoyx_u"], cg.OneGridFunctionOpenPMD)
+        )
+        self.assertEqual(self.gf_xyz["wavetoyx_u"].var_name, "wavetoyx_u")
+        # self.gf_xyz['wavetoy-u']allfiles is a set with two elements, the
+        # two iterations
+        filenames = {
+            os.path.split(f)[-1] for f in self.gf_xyz["wavetoyx_u"].allfiles
+        }
+        self.assertCountEqual(
+            filenames, {"batman.it00000000.bp4", "batman.it00000001.bp4"}
         )
 
         # ASCII
@@ -254,6 +276,10 @@ class TestOneGridFunction(unittest.TestCase):
         # There's only one file
         self.rho_star_file = self.rho_star.allfiles[0]
 
+        # OpenPMD
+        self.wavetoy = sd.SimDir("tests/grid_functions").gf.xyz["wavetoyx_u"]
+        self.wavetoy_file_it0 = sorted(self.wavetoy.allfiles)[0]
+
         # We are going to test all the methods of the baseclass with
         # HDF5 files
 
@@ -287,6 +313,28 @@ class TestOneGridFunction(unittest.TestCase):
             self.P._components_in_file(self.P_file, 2, 0), [0, 1]
         )
 
+        self.assertCountEqual(
+            self.wavetoy._iterations_in_file(self.wavetoy_file_it0), [0]
+        )
+        self.assertEqual(
+            self.wavetoy._min_iteration_in_file(self.wavetoy_file_it0), 0
+        )
+        self.assertEqual(
+            self.wavetoy._max_iteration_in_file(self.wavetoy_file_it0), 0
+        )
+        self.assertCountEqual(
+            self.wavetoy._ref_levels_in_file(self.wavetoy_file_it0, 0),
+            [0, 1],
+        )
+        self.assertCountEqual(
+            self.wavetoy._components_in_file(
+                self.wavetoy_file_it0,
+                0,
+                0,
+            ),
+            [0, 1, 2, 3],
+        )
+
     def test_restarts(self):
         # TODO: This test is not robust when we are dealing with only one file...
         #       Add a second file and rewrite tests.
@@ -298,6 +346,11 @@ class TestOneGridFunction(unittest.TestCase):
         self.assertEqual(self.P.max_iteration, 2)
         self.assertCountEqual(self.P.available_iterations, [0, 1, 2])
         self.assertCountEqual(self.P.iterations, [0, 1, 2])
+
+        self.assertEqual(self.wavetoy.min_iteration, 0)
+        self.assertEqual(self.wavetoy.max_iteration, 1)
+        self.assertCountEqual(self.wavetoy.available_iterations, [0, 1])
+        self.assertCountEqual(self.wavetoy.iterations, [0, 1])
 
         # Iteration not available
         with self.assertRaises(ValueError):
@@ -311,8 +364,13 @@ class TestOneGridFunction(unittest.TestCase):
         self.assertCountEqual(self.P.available_times, [0, 0.25, 0.5])
         self.assertCountEqual(self.P.times, [0, 0.25, 0.5])
 
+        self.assertCountEqual(self.wavetoy.available_times, [0, 0.0078125])
+        self.assertCountEqual(self.wavetoy.times, [0, 0.0078125])
+
     def test_iteration_at_time(self):
         self.assertEqual(self.P.iteration_at_time(0.5), 2)
+
+        self.assertEqual(self.wavetoy.iteration_at_time(0.0078125), 1)
 
         # Time not available
         with self.assertRaises(ValueError):
@@ -489,6 +547,44 @@ class TestOneGridFunction(unittest.TestCase):
         with self.assertRaises(RuntimeError):
             self.rho_star._parse_file("/tmp/wrongname")
 
+    def test_openpmd(self):
+        iteration = 0
+        component = 0
+
+        # with cg.openpmd_series(self.wavetoy_file_it0) as series:
+        #     variable = series.iterations[iteration].meshes["wavetoyx_state_lev00"]["wavetoyx_u"]
+        #     chunk = variable.available_chunks()[component]
+
+        #     # Do the actual reading
+        #     data = variable.load_chunk(
+        #         chunk.offset, chunk.extent
+        #     )
+
+        #     print("YO", chunk.extent)
+
+        #     series.flush()
+
+
+        # expected_grid = grid_data.UniformGrid(
+        #     [9, 65, 65],
+        #     x0=[-1.0, -1.0, -1.0],
+        #     x1=[1.0, 1.0, 1.0],
+        #     ref_level=0,
+        #     num_ghost=[0, 0, 0],
+        #     time=0,
+        #     iteration=0,
+        #     component=0,
+        # )
+
+        # expected_grid_data = grid_data.UniformGridData(expected_grid, data)
+
+        # self.assertEqual(
+        #     self.wavetoy._read_component_as_uniform_grid_data(
+        #         self.wavetoy_file_it0, 0, 0, 0
+        #     ),
+        #     expected_grid_data,
+        # )
+
     def test_clear_cache(self):
         # Read something
         self.P[0]
@@ -501,3 +597,53 @@ class TestOneGridFunction(unittest.TestCase):
 
         # Check that we are clear
         self.assertIsNone(self.P.alldata[self.P_file][0][0][0])
+
+
+class TestOneGridFunctionOpenPMD(unittest.TestCase):
+    def setUp(self):
+        self.gf = sd.SimDir("tests/grid_functions").gf.xyz
+
+    def test__init(self):
+        self.assertCountEqual(self.gf.dimension, (0, 1, 2))
+        # Here we check that we indexed the correct variables. We must check
+        # the OpenPMD file
+
+        # There are five files including one OpenPMD file in the test folder:
+        # 1. illinoisgrmhd-grmhd_primitives_allbutbi.xyz.asc (ASCII one group)
+        # 2. rho_star.xyz.asc (ASCII one var)
+        # 3. illinoisgrmhd-grmhd_primitives_allbutbi.xyz.file_0.h5 (HDF5 one group)
+        # 4. illinoisgrmhd-grmhd_primitives_allbutbi.xyz.file_1.h5 (HDF5 one group)
+        # 5. batman.it00000000.bp4 (OpenPMD bp4)
+
+        # Here we can we find all the variables
+
+        # assert variables from OpenPMD bp4 file
+        self.assertCountEqual(
+            list(self.gf._vars_openpmd_files.keys()),
+            [
+                "wavetoyx_rho",
+                "wavetoyx_u",
+            ],
+        )
+
+        # assert variables from h5 file
+        self.assertCountEqual(
+            list(self.gf._vars_h5_files.keys()),
+            ["P", "rho_b", "vx", "vy", "vz"],
+        )
+
+        # assert variables from ascii file
+        self.assertCountEqual(
+            list(self.gf._vars_ascii_files.keys()),
+            ["P", "rho_b", "vx", "vy", "vz", "rho_star"],
+        )
+
+    def test_allfiles(self):
+        # This is a weak test, we are just testing how many files we have...
+        # There should be 6 files including the OpenPMD bp4 files
+        self.assertEqual(len(self.gf.allfiles), 6)
+
+    def test_multiple_mesh_refinement_levels(self):
+        # wavetouyx_u variable in the OpenPMD file has 2 mesh refinement levels
+        wavetoyx_u = self.gf.fields.wavetoyx_u
+        self.assertEqual(wavetoyx_u[0].refinement_levels, [0, 1])
