@@ -29,11 +29,19 @@ There are multiple classes defined in this module:
   object with keys the possible dimensions (e.g., ``x``, ``yz``, ``xyz``).
 - :py:class`~.AllGridFunctions` takes all the files in SimDir and sort them
   according the different grid functions they contain.
+<<<<<<< HEAD
 - There are two :py:class`~.OneGridFunction` classes, one for HDF5 files and one
   for ASCII files. They describe one single grid function and they contains the
   files associated to that grid function. Both the classes are derived from the
   same abstract base class :py:class`~.OneGridFunctionBase`, which implements
   the shared methods.
+=======
+- There are three :py:class`~.OneGridFunction` classes, one for HDF5 files, one
+  for ASCII files, and one for OpenPMD files. They describe one single grid
+  function and they contains the files associated to that grid function. Both
+  the classes are derived from the same abstract base class
+  :py:class`~.OneGridFunctionBase`, which implements the shared methods.
+>>>>>>> WIP: Add support for reading OpenPMD files
 These are hierarchical classes, one containing the others, so one typically ends
 up with a series of brackets to access the actual data. For example, if ``sim``
 is a :py:class:`~.SimDir`, ``sim.gf.xy['rho_b'][0]`` is ``rho_b`` at iteration 0
@@ -65,6 +73,7 @@ from gzip import open as gopen
 
 import h5py
 import numpy as np
+import openpmd_api as openpmd_io
 
 from kuibit import grid_data, simdir
 from kuibit import grid_data_utils as gdu
@@ -1293,6 +1302,29 @@ class OneGridFunctionH5(BaseOneGridFunction):
             return dataset.attrs["time"]
 
 
+# What is a context manager?
+#
+# Context managers are useful ways to handle resources in Python. With a
+# context manager, we do not have to worry about releasing resources. Here,
+# we create a context manager that automatically closes the OpenPMD series
+# object.
+@contextmanager
+def openpmd_series(path: str):
+    """Context manager to read an OpenPMD file.
+
+    :param path: Path of the file.
+    :type path: str
+
+    """
+    series = openpmd_io.Series(path, openpmd_io.Access.read_only)
+    try:
+        yield series
+    except RuntimeError as exce:
+        raise RuntimeError(f"File {path} cannot be processed") from exce
+    finally:
+        series.close()
+
+
 class OneGridFunctionOpenPMD(BaseOneGridFunction):
     """Read grid data produced by CarpetOpenPMD files.
 
@@ -1301,41 +1333,19 @@ class OneGridFunctionOpenPMD(BaseOneGridFunction):
 
     """
 
-    # This class implements the details on how to read the data, most of the
-    # functionalities of the class are in OneGridFunctionBase.
+    # This class implements the details on how to read the data for OpenPMD
+    # files, most of the functionalities of the class are in
+    # OneGridFunctionBase.
 
-    # Let's unpack the regex, we have 7 capturing groups
+    # Let's unpack the regex
     #
-    # 1. [^:] matches any number of characters (at least one), with the
-    #    exception of ':'
-    # 2. \S+ matches any number of non-whitespace characters (at least
-    #    one).
-    #
-    # 1. and 2. are thorn and variable name, then we have
-    # 3, 4. \d+ matches a number (iteration and time level)
-    # 5. " m=0" matches this exactly, if it is present
-    # 6. \d+ matches a number (refinement level) if present
-    #    (grid arrays don't have this)
-    # Then we have two nested capturing groups
-    # ( c=(\d+))? checked whether c=NUMBER is matched,
-    # and inside we have that the component number is matched
-    #
-    # All the [ ] are meaningful blank spaces. Note, we don't have $^ because
-    # there is more that we do not want to match
-    _pattern_group_name = r"""
-    ([^:]+)             # Thorn name
-    ::
-    (\S+)               # Variable name
-    [ ]
-    it=(\d+)            # Iteration
-    [ ]
-    tl=(\d+)            # Timelevel (almost always 0)
-    ([ ]m=0)?           # Map
-    ([ ]rl=(\d+))?      # Refinement level
-    ([ ]c=(\d+))?       # Chunk
-    """
-
-    # iterations = None
+    # 1. ^ $ match the beginning and end of string
+    # 2. (\w+) match a word (the variable name)
+    # 3. _ is the literal underscore
+    # 4. (?:rl|lev) is a non-capturing group that matches the literals
+    #    rl or lev
+    # 5. (\d+) matches a number, the refinement level
+    _pattern_group_name = r"^(\w+)_(?:rl|lev)(\d+)$"
 
     def __init__(self, allfiles, var_name: str, dimension):
         """Constructor.
@@ -1346,15 +1356,10 @@ class OneGridFunctionOpenPMD(BaseOneGridFunction):
         :type var_name: str
 
         """
-
-        # We need these variables to properly find what dataset to look at in
-        # the HDF5 file.
-        self.thorn_name = None
+        self.dimension = dimension
         self.map = None
 
-        self.dimension = dimension
-
-        self.rx_group_name = re.compile(self._pattern_group_name, re.VERBOSE)
+        self._iterations_to_times = {}
 
         super().__init__(allfiles, var_name)
 
@@ -1362,35 +1367,8 @@ class OneGridFunctionOpenPMD(BaseOneGridFunction):
         if self.map is None:
             self.map = ""
 
-        # TODO (FEATURE): Make separator customizable
-        #
-        # Technically the separator :: is customizable, so we should be more
-        # flexible.
-
-        self.dataset_format = (
-            f"{self.thorn_name}::{self.var_name} it=%d tl=0{self.map}%s%s"
-        )
-
-        file_is_3D = len(self.dimension) == 3
-
-        # HDF5 files can contain ghostzones or not. Here, we can that all the
-        # files have the same behavior (they all contain, or they all don't)
-        #
-        # self._are_ghostzones_in_file(path) returns True or False, so this
-        # is a set with True, False or a mix
-        ghost_in_files = {
-            self._are_ghostzones_in_file(path, file_is_3D) for path in self.allfiles
-        }
-
-        # Here we check that we only have True or False
-        if len(ghost_in_files) != 1:
-            raise ValueError(
-                "Inconsistent IOHDF5::output_ghost_points across files"
-            )
-
-        # We know that ghost_in_files has only one element (either True or
-        # False), so we pick that (with tuple unpacking)
-        (self.are_ghostzones_in_files,) = ghost_in_files
+        # OpenPMD data does not contain ghost zones
+        self.are_ghostzones_in_files = False
 
     def _parse_file(self, path):
         """Read the content of the given file (without reading the data).
@@ -1399,154 +1377,46 @@ class OneGridFunctionOpenPMD(BaseOneGridFunction):
         :type path: str
 
         """
-        # This will give us an overview of what is available in the provided
-        # file. We keep a collection of all these in the variable self.alldata
-        rx_mesh = re.compile(r"^(\w+)_(?:rl|lev)(\d+)$")
+        rx_mesh = re.compile(self._pattern_group_name)
 
-        print("path={}".format(path))
-        self.series = io.Series(path, io.Access.read_only)
-        iter_open_pmd = self.series.iterations
-        for iter_item in iter_open_pmd.items():
-            iter_no = iter_item[0]
-            print("Iter # = {}".format(iter_no))
-            iter_obj = iter_item[1]
-            print("Iter dt={}, time={}".format(iter_obj.dt, iter_obj.time))
-            all_mesh = iter_obj.meshes
-            print("all_mesh = {}".format(all_mesh.items()))
-            time_level = 0  # int(iter_obj.time)
-            for mesh in all_mesh.items():
-                mesh_name = mesh[0]
-                mesh_obj = mesh[1]
-                print("Mesh = {}".format(mesh_name))
-                matched = rx_mesh.match(mesh_name)
-                print("matched = {}".format(matched))
-                self.thorn_name = matched.group(1)
-                ref_level = matched.group(2)
-                self.map = None
-                # Here is where we prepare are nested alldata dictionary
-                alldata_file = self.alldata.setdefault(path, {})
-                alldata_iteration = alldata_file.setdefault(int(iter_no), {})
-                alldata_ref_level = alldata_iteration.setdefault(ref_level, {})
-                for mesh_var in mesh_obj.items():  # loop through all variables in specific mesh
-                    var_name = mesh_var[0]
-                    var_data = mesh_var[1]  # 3d array
-                    print("  {} variable found".format(var_name))
-                    mrc = mesh_obj[var_name]
-                    print("  array shape = {}".format(mrc.shape))
-                    chunks = mrc.available_chunks()
-                    chunk_no = 0
-                    for chunk in chunks:
-                        component = chunk_no
-                        # We set the actual data to None, and we will read it in
-                        # _read_component_as_uniform_grid_data upon request
-                        alldata_ref_level.setdefault(component, None)
-                        chunk_no += 1
+        # TODO: (Performance)
+        #
+        # Directly find the name of the relevant mesh, instead of looping over
+        # everything.
 
-    def _grid_from_dataset(self, dataset, iteration, ref_level, component):
-        """Return a :py:class:`~.UniformGrid` from a given HDF5 dataset.
+        with openpmd_series(path) as series:
+            iter_open_pmd = series.iterations
+            for iteration, iteration_obj in iter_open_pmd.items():
+                self._iterations_to_times[iteration] = iteration_obj.time
+                all_meshes = iteration_obj.meshes
+                for mesh_name, mesh_obj in all_meshes.items():
+                    matched = rx_mesh.match(mesh_name)
+                    if matched is None:
+                        raise RuntimeError(f"Could not parse mesh {mesh_name}")
+                    ref_level = int(matched.group(2))
 
-        :param dataset: Dataset to model the grid after.
-        :type dataset: H5py.dataset #change
-        :param iteration: Iteration.
-        :type iteration: int
-        :param ref_level: Refinement level.
-        :type ref_level: int
-        :param component: Component.
-        :type component: int
+                    # Here is where we prepare are nested alldata dictionary
+                    alldata_file = self.alldata.setdefault(path, {})
+                    alldata_iteration = alldata_file.setdefault(
+                        int(iteration), {}
+                    )
+                    alldata_ref_level = alldata_iteration.setdefault(
+                        ref_level, {}
+                    )
 
-        :returns: Grid corresponding to the dataset.
-        :rtype: :py:class:`~.UniformGrid`
-
-        """
-
-        # NOTE: Why are we taking the reverse?
-        # shape = np.array(dataset.shape[::-1])
-        shape = np.array(dataset.shape)
-        time = 0
-        rx_mesh = re.compile(r"^(\w+)_(?:rl|lev)(\d+)$")
-        # With the .get we ensure that if "cctk_nghostzones" cannot be read, we
-        # have returned None, which we can test later
-        # num_ghost = dataset.attrs.get("cctk_nghostzones", None)
-        # If we do not have the ghostzones in the file, then it is as if we
-        # have ghostzones of size zero.
-        # if not self.are_ghostzones_in_files or num_ghost is None:
-        num_ghost = np.zeros_like(shape, dtype=int)
-        iter_open_pmd = self.series.iterations
-        all_mesh = iter_open_pmd[iteration].meshes
-        for k_m, m in all_mesh.items():
-            mesh = k_m
-            matched = rx_mesh.match(mesh)
-            print("  matched = {}".format(matched))
-            ref_lvl_matched = matched.group(2)
-            print("  ref_lvl matched={}".format(ref_lvl_matched))
-            if ref_level == ref_lvl_matched:
-                origin = m.grid_global_offset
-                grid_spacing = m.grid_spacing
-                axis_labels = m.axis_labels
-                grid_unit_SI = m.grid_unit_SI
-                for b in m.items():
-                    if b[0] == self.var_name:
-                        mrc = b[1]
-                        chunks = mrc.available_chunks()
-                        chunk = chunks[component]
-                        offset = chunk.offset
-                        extent = chunk.extent
-                        x0 = (origin[0] + offset[0] * grid_spacing[0],
-                              origin[1] + offset[1] * grid_spacing[1],
-                              origin[2] + offset[2] * grid_spacing[2])
-                        x1 = (x0[0] + (extent[0]-1) * grid_spacing[0],
-                              x0[1] + (extent[1]-1) * grid_spacing[1],
-                              x0[2] + (extent[2]-1) * grid_spacing[2])
-                        print("  grid_global_offset={0}, grid_spacing={1}, axis_labels={2}, grid_unit_SI={3}".format(origin, grid_spacing, axis_labels, grid_unit_SI))
-                        print("  mrc array shape={0}, x0={1}, x1={2}".format(mrc.shape, x0, x1))
-                        return grid_data.UniformGrid(
-                                shape,
-                                x0=x0,
-                                x1=x1,
-                                ref_level=ref_level,
-                                num_ghost=num_ghost,
-                                time=time,
-                                iteration=iteration,
-                                component=component,
-                        )
-
-    # get the dataset by loading mrc chunks
-    def _get_dataset(self, path, iteration, ref_level, component):
-        """Load data from chunks in OpenPMD file.
-
-        :param path: Path of the file.
-        :type path: str
-        :param iteration: Iteration.
-        :type iteration: int
-        :param ref_level: Refinement level.
-        :type ref_level: int
-        :param component: Component.
-        :type component: int
-
-        """
-
-        print("path={}".format(path))
-        rx_mesh = re.compile(r"^(\w+)_(?:rl|lev)(\d+)$")
-        self.series = io.Series(path, io.Access.read_only)
-        iter_open_pmd = self.series.iterations
-        all_mesh = iter_open_pmd[iteration].meshes
-        for k_m, m in all_mesh.items():
-            mesh = k_m
-            matched = rx_mesh.match(mesh)
-            ref_lvl_matched = matched.group(2)
-            if ref_level == ref_lvl_matched:
-                for b in m.items():
-                    if b[0] == self.var_name:
-                        mrc = b[1]
-                        print("  mrc array shape = {}".format(mrc.shape))
-                        chunks = mrc.available_chunks()
-                        chunk = chunks[component] 
-                        alp_load = mrc.load_chunk(chunk.offset, chunk.extent)
-                        self.series.flush()
-                        print("Chunk loaded. Offset={}, extent={}. [5][5][5]={}".format(
-                            chunk.offset, chunk.extent, alp_load[5][5][5])
-                        )   
-                        return alp_load
+                    # Loop through all variables in specific mesh and index all
+                    # the variables and chunks (ie, components)
+                    for variable in mesh_obj.items():
+                        var_name = variable[0]
+                        self.mesh_name = mesh_name
+                        chunks = mesh_obj[var_name].available_chunks()
+                        chunk_no = 0
+                        for _chunk in chunks:
+                            component = chunk_no
+                            # We set the actual data to None, and we will read it in
+                            # _read_component_as_uniform_grid_data upon request
+                            alldata_ref_level.setdefault(component, None)
+                            chunk_no += 1
 
     def _read_component_as_uniform_grid_data(
         self, path, iteration, ref_level, component
@@ -1566,41 +1436,53 @@ class OneGridFunctionOpenPMD(BaseOneGridFunction):
         :rtype: :py:class:`~.UniformGridData`
 
         """
+        rx_mesh = re.compile(self._pattern_group_name)
 
         if self.alldata[path][iteration][ref_level][component] is None:
-            dataset = self._get_dataset(path, iteration, ref_level, component)
-            grid = self._grid_from_dataset(dataset, iteration, ref_level, component)
-            data = dataset[()]
+            with openpmd_series(path) as series:
+                time = iterations_objs[iteration].time
+                mesh = series.iterations[iteration].meshes[]
+                for mesh_name, mesh_obj in all_meshes.items():
+                    matched = rx_mesh.match(mesh_name)
+                    if matched is None:
+                        raise RuntimeError(f"Could not parse mesh {mesh_name}")
+                    ref_level_matched = int(matched.group(2))
 
-            self.alldata[path][iteration][ref_level][
-                component
-            ] = grid_data.UniformGridData(grid, data)
+                    if ref_level == ref_level_matched:
+                        origin = np.array(mesh_obj.grid_global_offset)
+                        dx = np.array(mesh_obj.grid_spacing)
+                        for variable, variable_obj in mesh_obj.items():
+                            if variable == self.var_name:
+
+                                chunk = variable_obj.available_chunks()[
+                                    component
+                                ]
+
+                                offset = np.array(chunk.offset)
+                                shape = chunk.extent
+
+                                # Do the actual reading
+                                data = variable_obj.load_chunk(
+                                    chunk.offset, chunk.extent
+                                )
+                                series.flush()
+
+                                grid = grid_data.UniformGrid(
+                                    shape,
+                                    x0=(origin + offset * dx),
+                                    dx=dx,
+                                    ref_level=ref_level,
+                                    num_ghost=[0, 0, 0],
+                                    time=time,
+                                    iteration=iteration,
+                                    component=component,
+                                )
+
+                                self.alldata[path][iteration][ref_level][
+                                    component
+                                ] = grid_data.UniformGridData(grid, data)
 
         return self.alldata[path][iteration][ref_level][component]
-
-    @staticmethod
-    def _are_ghostzones_in_file(path: str, is_3D_file: bool) -> bool:
-        """Return whether the ghostzones were output or not.
-
-        :param path: File to inspect.
-        :type path: str
-        :param is_3D_file: The file contains 3D data
-        :type is_3D_file: bool
-
-        :returns: Whether ``path`` contains ghost zones.
-        :rtype: bool
-
-        """
-        # This is a tricky and important function to stitch together all the
-        # different components. Carpet has an option (technically two) to output
-        # the ghostzones in the files. These are: output_ghost_points and
-        # out3D_ghosts (which is deprecated). For 3D files, when they are both
-        # set to yes, the ghostzones are output in the h5 files. When one of the
-        # two is set to no, the ghostzones are not output. For 2D files, when
-        # it depends only on the value of the first.
-
-        # The default value of these parameters is yes
-        return False
 
     def clear_cache(self):
         """Remove all the cached entries.
@@ -1629,9 +1511,7 @@ class OneGridFunctionOpenPMD(BaseOneGridFunction):
         :rtype: float
 
         """
-        # If there are multiple files, we take the first.
-        # A case in which there are multiple files is with 3D data
-        return 0
+        return self._iterations_to_times[iteration]
 
 
 class AllGridFunctions:
@@ -1683,7 +1563,8 @@ class AllGridFunctions:
         (0, 1, 2): "xyz",
     }
 
-    _vars_openpmd_files = {}
+    # The oddball case is with OpenPMD files. OpenPMD files are actually folders
+    # with extension .bp4 and they are always 3D.
 
     def __init__(self, allfiles, dimension, num_ghost=None):
         """Constructor.
@@ -1746,10 +1627,17 @@ class AllGridFunctions:
         # read only one data file (data.0) to avoid reading again and again
         openpmd_pattern = r"^data\.0$"  # data.0
 
+        # OpenPMD files are very different. Instead of being single files, they
+        # are full directories. We match them by find the data.0 file, which is
+        # contained in all the OpenPMD directories. Also, OpenPMD files are
+        # always for 3D variables.
+        openpmd_pattern = r"^data\.0$"
+
         # Variable files is a dictionary, the keys are the variables, the
         # values the set of files associated to that variable
         self._vars_ascii_files = {}
         self._vars_h5_files = {}
+        self._vars_openpmd_files = {}
 
         # D&I variable file dictionary for bp files
         self._vars_openpmd_files = {}
@@ -1761,7 +1649,6 @@ class AllGridFunctions:
 
         rx_h5 = re.compile(h5_pattern)
         rx_ascii = re.compile(ascii_pattern)
-        # compiling the bp file regular expression matching pattern
         rx_openpmd = re.compile(openpmd_pattern)
 
         # Here we scan all the files and find those with a name that match
@@ -1773,9 +1660,13 @@ class AllGridFunctions:
             print("filename={}".format(filename))
             matched_h5 = rx_h5.match(filename)
             matched_ascii = rx_ascii.match(filename)
-            # applying the bp file regular expression pattern to the filename
-            matched_openpmd = rx_openpmd.match(filename)
-            print(matched_openpmd)
+            # OpenPMD files are always 3D, so we ignore them when the dimension
+            # is not xyz
+            matched_openpmd = (
+                rx_openpmd.match(filename)
+                if self._dim_names[self.dimension] == "xyz"
+                else None
+            )
 
             # If matched_pattern is not None, this is a Carpet h5 file
             if matched_h5 is not None:
@@ -1905,6 +1796,22 @@ class AllGridFunctions:
                                 )
                                 var_list.add(dir_path)
 
+            elif matched_openpmd is not None:
+                # We detected a data.0 file. Its parent directory is the actual
+                # bp4 file.
+                dir_path = os.path.split(f)[0]
+                with openpmd_series(dir_path) as series:
+                    iterations = series.iterations
+                    for _iteration, iteration_obj in iterations.items():
+                        all_meshes = iteration_obj.meshes
+                        for _mesh_name, mesh_obj in all_meshes.items():
+                            for mesh_var in mesh_obj.items():
+                                variable_name = mesh_var[0]
+                                var_list = self._vars_openpmd_files.setdefault(
+                                    variable_name, set()
+                                )
+                                var_list.add(dir_path)
+
         # What pythonize_name_dict does is to make the various variables
         # accessible as attributes, e.g. self.fields.rho
         self.fields = pythonize_name_dict(list(self.keys()), self.__getitem__)
@@ -1929,7 +1836,9 @@ class AllGridFunctions:
                 )
             elif var_name in self._vars_openpmd_files:
                 self._vars[var_name] = OneGridFunctionOpenPMD(
-                    self._vars_openpmd_files[var_name], var_name, self.dimension
+                    self._vars_openpmd_files[var_name],
+                    var_name,
+                    self.dimension,
                 )
             elif var_name in self._vars_ascii_files:
                 if self.num_ghost is None:
@@ -1987,7 +1896,11 @@ class AllGridFunctions:
         """Return the list of all the available variables."""
         # We merge the dictionaries and return the keys.
         # This automatically takes care of making sure that they keys are unique.
-        return {**self._vars_h5_files, **self._vars_ascii_files, **self._vars_openpmd_files}.keys()
+        return {
+            **self._vars_h5_files,
+            **self._vars_ascii_files,
+            **self._vars_openpmd_files,
+        }.keys()
 
     def __str__(self):
         ret = "\nAvailable grid data of dimension "
@@ -2013,6 +1926,9 @@ class AllGridFunctions:
             allfiles.update(file_list)
         for file_list in self._vars_ascii_files.values():
             allfiles.update(file_list)
+        for dir_list in self._vars_openpmd_files.values():
+            # OpenPMD files are actually directory
+            allfiles.update(dir_list)
         return allfiles
 
     def total_filesize(self, unit="MB"):
@@ -2149,4 +2065,16 @@ class GridFunctionsDir:
         allfiles = set()
         for dim in self._all_griddata.keys():
             allfiles.update(self[dim].allfiles)
+        # OpenPMD "files" are really directories, so if we want to measure their
+        # size accurately we have to open them up
+        for f_ in set(allfiles):
+            if f_.endswith(".bp4"):
+                # Remove the directory and add all the files inside
+                allfiles.remove(f_)
+                allfiles.update(
+                    {
+                        os.path.abspath(os.path.join(f_, p))
+                        for p in os.listdir(f_)
+                    }
+                )
         return total_filesize(allfiles, unit=unit)

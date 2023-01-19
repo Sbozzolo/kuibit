@@ -6,6 +6,10 @@
 - Python 3.12 is now supported, Python 3.8.1 is required for development.
 - `total_filesize` now errors out when directories are passed.
 
+#### Features
+- Added experimental support for reading OpenPMD files (with most of the
+  heavy-lifting done by @krishivbhatia)
+
 ## Version 1.4.0 (2 May 2023)
 
 #### General
