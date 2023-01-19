@@ -23,6 +23,7 @@ import h5py
 import numpy as np
 
 from kuibit import cactus_grid_functions as cg
+from kuibit import cactus_ascii_utils as ca
 from kuibit import grid_data
 from kuibit import simdir as sd
 
@@ -57,6 +58,10 @@ class TestGridFunctionsDir(unittest.TestCase):
 
     def test_contains(self):
         self.assertIn("xyz", self.gd)
+
+    def test_contains_OpenPMDVars(self):
+        vars3D = self.gd.xyz
+        self.assertIn("wavetoyx_u", vars3D)
 
     def test__getitem(self):
         self.assertIs(self.gd["xy"], self.gd._all_griddata[(0, 1)])
@@ -135,6 +140,8 @@ class TestAllGridFunctions(unittest.TestCase):
                 "int_torque_dens",
             ],
         )
+
+        self.assertCountEqual(list(self.gf._vars_openpmd_files.keys()), [])
 
         # Here we are not testing that files are correctly organized...
 
@@ -501,3 +508,58 @@ class TestOneGridFunction(unittest.TestCase):
 
         # Check that we are clear
         self.assertIsNone(self.P.alldata[self.P_file][0][0][0])
+
+
+class TestOneGridFunctionOpenPMD(unittest.TestCase):
+    def setUp(self):
+        self.gf = sd.SimDir("tests/grid_functions").gf.xyz
+
+    def test__init(self):
+        self.assertCountEqual(self.gf.dimension, (0, 1, 2))
+        # Here we check that we indexed the correct variables. We must check
+        # the OpenPMD file
+
+        # There are five files including one OpenPMD file in the test folder:
+        # 1. illinoisgrmhd-grmhd_primitives_allbutbi.xyz.asc (ASCII one group)
+        # 2. rho_star.xyz.asc (ASCII one var)
+        # 3. illinoisgrmhd-grmhd_primitives_allbutbi.xyz.file_0.h5 (HDF5 one group)
+        # 4. illinoisgrmhd-grmhd_primitives_allbutbi.xyz.file_1.h5 (HDF5 one group)
+        # 5. batman.it00000000.bp4 (OpenPMD bp4)
+
+        # Here we can we find all the variables
+
+        # assert variables from OpenPMD bp4 file
+        self.assertCountEqual(
+            list(self.gf._vars_openpmd_files.keys()),
+            [
+                "wavetoyx_eps",
+                "wavetoyx_rho_err",
+                "wavetoyx_u_err",
+                "wavetoyx_rho_rhs",
+                "wavetoyx_u_rhs",
+                "wavetoyx_rho",
+                "wavetoyx_u",
+            ],
+        )
+
+        # assert variables from h5 file
+        self.assertCountEqual(
+            list(self.gf._vars_h5_files.keys()),
+            ["P", "rho_b", "vx", "vy", "vz"],
+        )
+
+        # assert variables from ascii file
+        self.assertCountEqual(
+            list(self.gf._vars_ascii_files.keys()),
+            ["P", "rho_b", "vx", "vy", "vz", "rho_star"],
+        )
+
+    def test_allfiles(self):
+        # This is a weak test, we are just testing how many files we have...
+        # There should be 5 files including the OpenPMD bp4 files
+        self.assertEqual(len(self.gf.allfiles), 5)
+
+    def test_multiple_mesh_refinement_levels(self):
+        # wavetouyx_u variable in the OpenPMD file has 2 mesh refinement levels
+        wavetoyx_u = self.gf.fields.wavetoyx_u
+        self.assertEquals(wavetoyx_u[0].refinement_levels, [0, 1])
