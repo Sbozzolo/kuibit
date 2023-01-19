@@ -51,7 +51,7 @@ For a full list of available features, see the :doc:`features page <features>`.
   (:py:mod:`~.tensor`).
 - Work with 1D, 2D, and 3D grid functions (:py:mod:`~.grid_data`,
   :py:mod:`~.cactus_grid_functions`) as output by ``CarpetIOHDF5`` or
-  ``CarpetIOASCII``.
+  ``CarpetIOASCII``, or in OpenPMD format.
 - Work with horizon data from (:py:mod:`~.cactus_horizons`) as output by
   ``QuasiLocalMeasures`` and ``AHFinderDirect``.
 - Perform common operations with horizons (:py:mod:`~.hor_utils`).
