@@ -233,26 +233,18 @@ class UniformGrid:
         is not useful for caching small computations. Having an hash function
         solidifies the idea that this class is immutable.
         """
-        # We convert all the arrays in tuples (because they are hashable)
-        hash_shape = hash(tuple(self.shape))
-        hash_x0 = hash(tuple(self.x0))
-        hash_dx = hash(tuple(self.dx))
-        hash_num_ghost = hash(tuple(self.num_ghost))
-        hash_ref_level = hash(self.ref_level)
-        hash_component = hash(self.component)
-        hash_time = hash(self.time)
-        hash_iteration = hash(self.iteration)
-
-        # ^ = bitwise xor
-        return (
-            hash_shape
-            ^ hash_x0
-            ^ hash_dx
-            ^ hash_num_ghost
-            ^ hash_ref_level
-            ^ hash_component
-            ^ hash_time
-            ^ hash_iteration
+        # We combine information by taking the hash of the tuple, where we
+        # convert all the arrays in tuples (because they are hashable)
+        return hash(
+            (
+                tuple(self.shape),
+                tuple(self.x0),
+                tuple(self.dx),
+                self.ref_level,
+                self.component,
+                self.time,
+                self.iteration,
+            )
         )
 
     @property

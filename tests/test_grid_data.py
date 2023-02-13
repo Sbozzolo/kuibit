@@ -130,25 +130,19 @@ class TestUniformGrid(unittest.TestCase):
             iteration=1,
         )
 
-        hash_shape = hash(tuple(geom4.shape))
-        hash_x0 = hash(tuple(geom4.x0))
-        hash_dx = hash(tuple(geom4.dx))
-        hash_num_ghost = hash(tuple(geom4.num_ghost))
-        hash_ref_level = hash(geom4.ref_level)
-        hash_component = hash(geom4.component)
-        hash_time = hash(geom4.time)
-        hash_iteration = hash(geom4.iteration)
-
         self.assertEqual(
             hash(geom4),
-            hash_shape
-            ^ hash_x0
-            ^ hash_dx
-            ^ hash_num_ghost
-            ^ hash_ref_level
-            ^ hash_component
-            ^ hash_time
-            ^ hash_iteration,
+            hash(
+                (
+                    tuple(geom4.shape),
+                    tuple(geom4.x0),
+                    tuple(geom4.dx),
+                    geom4.ref_level,
+                    geom4.component,
+                    geom4.time,
+                    geom4.iteration,
+                )
+            ),
         )
 
     def test_coordinate_to_indices(self):

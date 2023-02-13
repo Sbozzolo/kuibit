@@ -83,6 +83,7 @@ are:
 - Fix passing an empty `ah_vars` to `OneHorizon`.
 - Fix floating-point comparison in `grid_data`.
 - Fix optional positional arguments to `series._local_extrema`.
+- Fix algorithm to compute hash for `UniformGrid`.
 
 #### Detector sensitivity curves
 
