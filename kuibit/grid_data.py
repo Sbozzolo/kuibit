@@ -1066,9 +1066,10 @@ class UniformGridData(BaseNumerical):
 
         if second_reflect_dimension is not None:
             # The grid has to be symmetric if we reflect along a second dimension
-            if (
-                self.x0[second_reflect_dimension]
-                != -self.x1[second_reflect_dimension]
+            if not np.isclose(
+                self.x0[second_reflect_dimension],
+                -self.x1[second_reflect_dimension],
+                atol=1e-14,
             ):
                 raise RuntimeError(
                     f"Grid is not symmetric in the {second_reflect_dimension} direction"
