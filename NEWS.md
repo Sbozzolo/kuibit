@@ -42,7 +42,7 @@ variables onto the mesh.
 tensorial objects. A `Tensor` can be built with collections of `TimeSeries`,
 `FrequencySeries`, `UniformGridData`, `HierarchicalGridData`, or any other class
 derived from `BaseNumerical`. `Tensor`s support all the mathematical operations
-and inherit the methods from their contained object. w are
+and inherit the methods from their contained object. At the moment, there are
 two new subclasses of `Tensor` that implement additional features for vector
 calculus. For example, if `bh_cen` is a `Vector` with the time evolution of the
 centroid of an horizon. `bh_cen.differentiated().norm()` will be a `TimeSeries`
