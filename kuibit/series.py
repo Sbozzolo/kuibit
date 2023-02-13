@@ -734,6 +734,14 @@ class BaseSeries(BaseNumerical):
             )
         return False
 
+    # From Python's docs: In order to conform to the object model, classes that
+    # define their own equality method should also define their own hash method,
+    # or be unhashable.
+
+    # We consider series unhashable. We could make them hashable by taking
+    # the combined hash of all the points, but this would not be useful.
+    __hash__ = None
+
     def _apply_to_self(self, f, *args, **kwargs):
         """Apply the method ``f`` to ``self``, modifying ``self``.
 

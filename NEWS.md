@@ -84,6 +84,7 @@ are:
 - Fix floating-point comparison in `grid_data`.
 - Fix optional positional arguments to `series._local_extrema`.
 - Fix algorithm to compute hash for `UniformGrid`.
+- Make classes that should not hashed unhashable.
 
 #### Detector sensitivity curves
 

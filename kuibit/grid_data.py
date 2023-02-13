@@ -1990,6 +1990,13 @@ class UniformGridData(BaseNumerical):
             and self.grid == other.grid
         )
 
+    # From Python's docs: In order to conform to the object model, classes that
+    # define their own equality method should also define their own hash method,
+    # or be unhashable.
+
+    # We consider grid data unhashable, this object also has to be unhashable.
+    __hash__ = None
+
     def fourier_transform(self):
         """Perform the multi-dimensional Fourier transform on the data.
 
@@ -2796,6 +2803,13 @@ class HierarchicalGridData(BaseNumerical):
             return False
 
         return self.all_components == other.all_components
+
+    # From Python's docs: In order to conform to the object model, classes that
+    # define their own equality method should also define their own hash method,
+    # or be unhashable.
+
+    # We consider grid data unhashable, this object also has to be unhashable.
+    __hash__ = None
 
     def _finest_component_at_point_mapping(self, coordinate):
         """Return the component of the most refined level that contains the given

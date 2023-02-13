@@ -150,6 +150,18 @@ class Tree:
             and self.children == other.children
         )
 
+    def __hash__(self) -> int:
+        """Return the hash of this object.
+
+        Since the entire tree has to be traversed, this is an expensive
+        operation!
+
+        """
+        # We add the hash mostly because we also have __eq__. Realistically,
+        # this function should not be used. We combine hashes by taking the hash
+        # of the tuple.
+        return hash((self.name, self.value, self.children))
+
 
 def merge_trees(
     trees: Iterable[Tree],

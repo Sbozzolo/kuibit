@@ -52,6 +52,18 @@ class TestTree(unittest.TestCase):
         self.assertNotEqual(self.single_node, self.one_branch)
         self.assertEqual(self.one_branch, self.one_branch)
 
+    def test_hash(self):
+        self.assertEqual(
+            hash(self.single_node),
+            hash(
+                (
+                    self.single_node.name,
+                    self.single_node.value,
+                    self.single_node.children,
+                )
+            ),
+        )
+
     def test_getitem(self):
         self.assertEqual(self.one_branch[0], self.single_node)
         self.assertEqual(self.one_branch["myname"], self.single_node)

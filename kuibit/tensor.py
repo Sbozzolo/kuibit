@@ -483,6 +483,13 @@ class Tensor(Generic[_T], BaseNumerical):
         )
         return not not_equal
 
+    # From Python's docs: In order to conform to the object model, classes that
+    # define their own equality method should also define their own hash method,
+    # or be unhashable.
+
+    # Since we consider series unhashable, this object also has to be unhashable.
+    __hash__ = None
+
 
 class Vector(Tensor[_T]):
     """Represents a vector in the mathematical sense.

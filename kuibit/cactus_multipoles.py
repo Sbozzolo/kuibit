@@ -193,6 +193,13 @@ class MultipoleOneDet:
             self.dist == other.dist and self._multipoles == other._multipoles
         )
 
+    # From Python's docs: In order to conform to the object model, classes that
+    # define their own equality method should also define their own hash method,
+    # or be unhashable.
+
+    # Since we consider series unhashable, this object also has to be unhashable.
+    __hash__ = None
+
     def __iter__(self):
         for (mult_l, mult_m), ts in sorted(self._multipoles.items()):
             yield mult_l, mult_m, ts
@@ -399,6 +406,13 @@ class MultipoleAllDets:
         if not isinstance(other, type(self)):
             return False
         return self.radii == other.radii and self._dets == other._dets
+
+    # From Python's docs: In order to conform to the object model, classes that
+    # define their own equality method should also define their own hash method,
+    # or be unhashable.
+
+    # Since we consider series unhashable, this object also has to be unhashable.
+    __hash__ = None
 
     def __len__(self):
         return len(self._dets)
