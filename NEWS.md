@@ -81,6 +81,7 @@ are:
 #### Bug fixes
 
 - Fix passing an empty `ah_vars` to `OneHorizon`.
+- Fix floating-point comparison in `grid_data`.
 
 #### Detector sensitivity curves
 
