@@ -405,7 +405,7 @@ class BaseSeries(BaseNumerical):
         return self.x[np.argmin(np.abs(self.y))]
 
     def _local_extrema(
-        self, y: npty.NDArray, include_edges: bool = True, *args, **kwargs
+        self, y: npty.NDArray, *args, include_edges: bool = True, **kwargs
     ) -> Tuple[npty.NDArray]:
         """Use SciPy's ``find_peaks`` to find the local minima and maxima.
 
@@ -440,7 +440,7 @@ class BaseSeries(BaseNumerical):
         return self.x[peak_indices], self.y[peak_indices]
 
     def local_maxima(
-        self, include_edges: bool = True, *args, **kwargs
+        self, *args, include_edges: bool = True, **kwargs
     ) -> Tuple[npty.NDArray]:
         """Use SciPy's ``find_peaks`` to find the local maxima.
 
@@ -456,11 +456,11 @@ class BaseSeries(BaseNumerical):
         """
         y = abs(self.y) if self.is_complex() else self.y
         return self._local_extrema(
-            y, include_edges=include_edges, *args, **kwargs
+            y, *args, include_edges=include_edges, **kwargs
         )
 
     def local_minima(
-        self, include_edges: bool = True, *args, **kwargs
+        self, *args, include_edges: bool = True, **kwargs
     ) -> Tuple[npty.NDArray]:
         """Use SciPy's ``find_peaks`` to find the local minima.
 
@@ -476,7 +476,7 @@ class BaseSeries(BaseNumerical):
         """
         y = -abs(self.y) if self.is_complex() else -self.y
         return self._local_extrema(
-            y, include_edges=include_edges, *args, **kwargs
+            y, *args, include_edges=include_edges, **kwargs
         )
 
     def _make_spline(self, *args, k=3, s=0, **kwargs):
