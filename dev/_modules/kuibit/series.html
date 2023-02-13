@@ -781,6 +781,14 @@
             <span class="p">)</span>
         <span class="k">return</span> <span class="kc">False</span>
 
+    <span class="c1"># From Python&#39;s docs: In order to conform to the object model, classes that</span>
+    <span class="c1"># define their own equality method should also define their own hash method,</span>
+    <span class="c1"># or be unhashable.</span>
+
+    <span class="c1"># We consider series unhashable. We could make them hashable by taking</span>
+    <span class="c1"># the combined hash of all the points, but this would not be useful.</span>
+    <span class="fm">__hash__</span> <span class="o">=</span> <span class="kc">None</span>
+
     <span class="k">def</span> <span class="nf">_apply_to_self</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Apply the method ``f`` to ``self``, modifying ``self``.</span>
 

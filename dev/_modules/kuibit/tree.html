@@ -195,7 +195,19 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="n">other</span><span class="o">.</span><span class="n">name</span>
             <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">value</span> <span class="o">==</span> <span class="n">other</span><span class="o">.</span><span class="n">value</span>
             <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">children</span> <span class="o">==</span> <span class="n">other</span><span class="o">.</span><span class="n">children</span>
-        <span class="p">)</span></div>
+        <span class="p">)</span>
+
+    <span class="k">def</span> <span class="fm">__hash__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return the hash of this object.</span>
+
+<span class="sd">        Since the entire tree has to be traversed, this is an expensive</span>
+<span class="sd">        operation!</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># We add the hash mostly because we also have __eq__. Realistically,</span>
+        <span class="c1"># this function should not be used. We combine hashes by taking the hash</span>
+        <span class="c1"># of the tuple.</span>
+        <span class="k">return</span> <span class="nb">hash</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">value</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">children</span><span class="p">))</span></div>
 
 
 <div class="viewcode-block" id="merge_trees"><a class="viewcode-back" href="../../tree_ref.html#kuibit.tree.merge_trees">[docs]</a><span class="k">def</span> <span class="nf">merge_trees</span><span class="p">(</span>

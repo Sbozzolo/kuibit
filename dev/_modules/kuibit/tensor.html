@@ -528,7 +528,14 @@
                 <span class="k">for</span> <span class="n">s</span><span class="p">,</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="nb">iter</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">flat_data</span><span class="p">),</span> <span class="nb">iter</span><span class="p">(</span><span class="n">other</span><span class="o">.</span><span class="n">flat_data</span><span class="p">))</span>
             <span class="p">)</span>
         <span class="p">)</span>
-        <span class="k">return</span> <span class="ow">not</span> <span class="n">not_equal</span></div>
+        <span class="k">return</span> <span class="ow">not</span> <span class="n">not_equal</span>
+
+    <span class="c1"># From Python&#39;s docs: In order to conform to the object model, classes that</span>
+    <span class="c1"># define their own equality method should also define their own hash method,</span>
+    <span class="c1"># or be unhashable.</span>
+
+    <span class="c1"># Since we consider series unhashable, this object also has to be unhashable.</span>
+    <span class="fm">__hash__</span> <span class="o">=</span> <span class="kc">None</span></div>
 
 
 <div class="viewcode-block" id="Vector"><a class="viewcode-back" href="../../tensor_ref.html#kuibit.tensor.Vector">[docs]</a><span class="k">class</span> <span class="nc">Vector</span><span class="p">(</span><span class="n">Tensor</span><span class="p">[</span><span class="n">_T</span><span class="p">]):</span>

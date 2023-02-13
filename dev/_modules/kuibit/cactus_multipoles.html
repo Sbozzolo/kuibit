@@ -240,6 +240,13 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">dist</span> <span class="o">==</span> <span class="n">other</span><span class="o">.</span><span class="n">dist</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">_multipoles</span> <span class="o">==</span> <span class="n">other</span><span class="o">.</span><span class="n">_multipoles</span>
         <span class="p">)</span>
 
+    <span class="c1"># From Python&#39;s docs: In order to conform to the object model, classes that</span>
+    <span class="c1"># define their own equality method should also define their own hash method,</span>
+    <span class="c1"># or be unhashable.</span>
+
+    <span class="c1"># Since we consider series unhashable, this object also has to be unhashable.</span>
+    <span class="fm">__hash__</span> <span class="o">=</span> <span class="kc">None</span>
+
     <span class="k">def</span> <span class="fm">__iter__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">for</span> <span class="p">(</span><span class="n">mult_l</span><span class="p">,</span> <span class="n">mult_m</span><span class="p">),</span> <span class="n">ts</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_multipoles</span><span class="o">.</span><span class="n">items</span><span class="p">()):</span>
             <span class="k">yield</span> <span class="n">mult_l</span><span class="p">,</span> <span class="n">mult_m</span><span class="p">,</span> <span class="n">ts</span>
@@ -446,6 +453,13 @@
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)):</span>
             <span class="k">return</span> <span class="kc">False</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">radii</span> <span class="o">==</span> <span class="n">other</span><span class="o">.</span><span class="n">radii</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dets</span> <span class="o">==</span> <span class="n">other</span><span class="o">.</span><span class="n">_dets</span>
+
+    <span class="c1"># From Python&#39;s docs: In order to conform to the object model, classes that</span>
+    <span class="c1"># define their own equality method should also define their own hash method,</span>
+    <span class="c1"># or be unhashable.</span>
+
+    <span class="c1"># Since we consider series unhashable, this object also has to be unhashable.</span>
+    <span class="fm">__hash__</span> <span class="o">=</span> <span class="kc">None</span>
 
     <span class="k">def</span> <span class="fm">__len__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_dets</span><span class="p">)</span>
