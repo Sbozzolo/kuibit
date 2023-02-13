@@ -109,6 +109,8 @@ Here is a list of videos describing `kuibit` and how to use it:
 - [Introduction on kuibit - Einstein Toolkit Seminar, 2021](https://www.youtube.com/watch?v=7-F2xh-m31A)
 - [Using kuibit](https://www.youtube.com/playlist?list=PLIVVtc6RlFxpi3BiF6KTWd3z4TTQ5hY06)
 - [kuibit - Einstein Toolkit Summer School, 2021](https://youtu.be/g-JlXfLvUZU)
+- [Tutorial: Post-processing Cactus simulations with Python - Einstein Toolkit
+  Summer School, 2022](https://www.youtube.com/watch?v=14YOQ6SqTUU)
 
 The [Using
 kuibit](https://www.youtube.com/playlist?list=PLIVVtc6RlFxpi3BiF6KTWd3z4TTQ5hY06)
