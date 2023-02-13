@@ -20,6 +20,6 @@ Available detectors are:
 - Advanced LIGO Plus (:py:meth:`~.Sn_aLIGO_plus`)
 - Voyager (:py:meth:`~.Sn_voyager`)
 - Cosmic Explorer 1 and 2 (:py:meth:`~.Sn_CE1`, :py:meth:`~.Sn_CE2`)
-- Einstein Telescope (:py:meth:`~.Sn_ET_B`)
+- Einstein Telescope (:py:meth:`~.Sn_ET_B`, :py:meth:`~.Sn_ET_D`)
 - KAGRA (:py:meth:`~.Sn_KAGRA_D`)
 - LISA (:py:meth:`~.Sn_LISA`)

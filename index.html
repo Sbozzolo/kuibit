@@ -96,6 +96,7 @@ extrapolate waves to infinity.</p></li>
 <code class="docutils literal notranslate"><span class="pre">CarpetIOASCII</span></code>.</p></li>
 <li><p>Work with horizon data from (<a class="reference internal" href="cactus_horizons_ref.html#module-kuibit.cactus_horizons" title="kuibit.cactus_horizons"><code class="xref py py-mod docutils literal notranslate"><span class="pre">cactus_horizons</span></code></a>) as output by
 <code class="docutils literal notranslate"><span class="pre">QuasiLocalMeasures</span></code> and <code class="docutils literal notranslate"><span class="pre">AHFinderDirect</span></code>.</p></li>
+<li><p>Perform common operations with horizons (<a class="reference internal" href="hor_utils_ref.html#module-kuibit.hor_utils" title="kuibit.hor_utils"><code class="xref py py-mod docutils literal notranslate"><span class="pre">hor_utils</span></code></a>).</p></li>
 <li><p>Work with timers produced by <code class="docutils literal notranslate"><span class="pre">Carpet</span></code>
 (<a class="reference internal" href="cactus_timers_ref.html#module-kuibit.cactus_timers" title="kuibit.cactus_timers"><code class="xref py py-mod docutils literal notranslate"><span class="pre">cactus_timers</span></code></a>).</p></li>
 <li><p>Handle unit conversion, in particular from geometrized to physical
@@ -108,7 +109,7 @@ extrapolate waves to infinity.</p></li>
 <section id="installation">
 <h2>Installation<a class="headerlink" href="#installation" title="Permalink to this headline">¶</a></h2>
 <p><code class="docutils literal notranslate"><span class="pre">kuibit</span></code> is available in PyPI. To install it with <cite>pip</cite></p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pip3 install kuibit
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pip3<span class="w"> </span>install<span class="w"> </span>kuibit
 </pre></div>
 </div>
 <p>If they are not already available, <code class="docutils literal notranslate"><span class="pre">pip</span></code> will install all the necessary
@@ -140,6 +141,7 @@ place where to discuss it. Alternatively, you can also open an issue on GitHub.<
 <li class="toctree-l1"><a class="reference internal" href="gw_utils.html">Gravitational-wave utilities</a></li>
 <li class="toctree-l1"><a class="reference internal" href="gw_mismatch.html">Mismatch between gravitational waves</a></li>
 <li class="toctree-l1"><a class="reference internal" href="grid_data.html">Grid functions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="hor_utils.html">Horizon utilities</a></li>
 <li class="toctree-l1"><a class="reference internal" href="sensitivity_curves.html">Sensitivity (power spectral noise) curves of known detectors</a></li>
 <li class="toctree-l1"><a class="reference internal" href="timers.html">Working with timers</a></li>
 <li class="toctree-l1"><a class="reference internal" href="tensor.html">Working with tensors</a></li>
@@ -194,6 +196,8 @@ which is automatically updated with each release.</p>
 <li class="toctree-l1"><a class="reference internal" href="examples/bins/plot_ah_radius.html">plot_ah_radius.py</a></li>
 <li class="toctree-l1"><a class="reference internal" href="examples/bins/plot_ah_separation.html">plot_ah_separation.py</a></li>
 <li class="toctree-l1"><a class="reference internal" href="examples/bins/plot_ah_trajectories.html">plot_ah_trajectories.py</a></li>
+<li class="toctree-l1"><a class="reference internal" href="examples/bins/plot_binary_ah_period.html">plot_binary_ah_period.py</a></li>
+<li class="toctree-l1"><a class="reference internal" href="examples/bins/plot_charge_phi1.html">plot_charge_phi1.py</a></li>
 <li class="toctree-l1"><a class="reference internal" href="examples/bins/plot_constraints.html">plot_constraints.py</a></li>
 <li class="toctree-l1"><a class="reference internal" href="examples/bins/plot_em_energy.html">plot_em_energy.py</a></li>
 <li class="toctree-l1"><a class="reference internal" href="examples/bins/plot_grid_var.html">plot_grid_var.py</a></li>
@@ -252,6 +256,7 @@ introduction to motionpicture</span></a>.</p>
 <li class="toctree-l1"><a class="reference internal" href="gw_utils_ref.html">Reference on kuibit.gw_utils</a></li>
 <li class="toctree-l1"><a class="reference internal" href="gw_mismatch_ref.html">Reference on kuibit.gw_mismatch</a></li>
 <li class="toctree-l1"><a class="reference internal" href="grid_data_ref.html">Reference on kuibit.grid_data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="hor_utils_ref.html">Reference on kuibit.hor_utils</a></li>
 <li class="toctree-l1"><a class="reference internal" href="masks_ref.html">Reference on kuibit.masks</a></li>
 <li class="toctree-l1"><a class="reference internal" href="sensitivity_curves_ref.html">Reference on kuibit.sensitivity_curves</a></li>
 <li class="toctree-l1"><a class="reference internal" href="unitconv_ref.html">Reference on kuibit.unitconv</a></li>
@@ -283,24 +288,24 @@ documentation.</p>
 <p><code class="docutils literal notranslate"><span class="pre">kuibit</span></code> is built and maintained by the dedication of one graduate student. Please,
 consider citing <code class="docutils literal notranslate"><span class="pre">kuibit</span></code> if you find the software useful. You can use the following
 <code class="docutils literal notranslate"><span class="pre">bibtex</span></code> key.</p>
-<div class="highlight-bibtex notranslate"><div class="highlight"><pre><span></span><span class="nc">@article</span><span class="p">{</span><span class="nl">kuibit</span><span class="p">,</span><span class="w"></span>
-<span class="w">       </span><span class="na">author</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s">{{Bozzola}, Gabriele}</span><span class="p">,</span><span class="w"></span>
-<span class="w">        </span><span class="na">title</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s">&quot;{kuibit: Analyzing Einstein Toolkit simulations with Python}&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">      </span><span class="na">journal</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s">{The Journal of Open Source Software}</span><span class="p">,</span><span class="w"></span>
-<span class="w">     </span><span class="na">keywords</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s">{numerical relativity, Python, Einstein Toolkit, astrophysics, Cactus, General Relativity and Quantum Cosmology, Astrophysics - High Energy Astrophysical Phenomena}</span><span class="p">,</span><span class="w"></span>
-<span class="w">         </span><span class="na">year</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="m">2021</span><span class="p">,</span><span class="w"></span>
-<span class="w">        </span><span class="na">month</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="nv">apr</span><span class="p">,</span><span class="w"></span>
-<span class="w">       </span><span class="na">volume</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s">{6}</span><span class="p">,</span><span class="w"></span>
-<span class="w">       </span><span class="na">number</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s">{60}</span><span class="p">,</span><span class="w"></span>
-<span class="w">          </span><span class="na">eid</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s">{3099}</span><span class="p">,</span><span class="w"></span>
-<span class="w">        </span><span class="na">pages</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s">{3099}</span><span class="p">,</span><span class="w"></span>
-<span class="w">          </span><span class="na">doi</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s">{10.21105/joss.03099}</span><span class="p">,</span><span class="w"></span>
-<span class="na">archivePrefix</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s">{arXiv}</span><span class="p">,</span><span class="w"></span>
-<span class="w">       </span><span class="na">eprint</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s">{2104.06376}</span><span class="p">,</span><span class="w"></span>
-<span class="w"> </span><span class="na">primaryClass</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s">{gr-qc}</span><span class="p">,</span><span class="w"></span>
-<span class="w">       </span><span class="na">adsurl</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s">{https://ui.adsabs.harvard.edu/abs/2021JOSS....6.3099B}</span><span class="p">,</span><span class="w"></span>
-<span class="w">      </span><span class="na">adsnote</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s">{Provided by the SAO/NASA Astrophysics Data System}</span><span class="w"></span>
-<span class="p">}</span><span class="w"></span>
+<div class="highlight-bibtex notranslate"><div class="highlight"><pre><span></span><span class="nc">@article</span><span class="p">{</span><span class="nl">kuibit</span><span class="p">,</span>
+<span class="w">       </span><span class="na">author</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s">{{Bozzola}, Gabriele}</span><span class="p">,</span>
+<span class="w">        </span><span class="na">title</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s">&quot;{kuibit: Analyzing Einstein Toolkit simulations with Python}&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="na">journal</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s">{The Journal of Open Source Software}</span><span class="p">,</span>
+<span class="w">     </span><span class="na">keywords</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s">{numerical relativity, Python, Einstein Toolkit, astrophysics, Cactus, General Relativity and Quantum Cosmology, Astrophysics - High Energy Astrophysical Phenomena}</span><span class="p">,</span>
+<span class="w">         </span><span class="na">year</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="m">2021</span><span class="p">,</span>
+<span class="w">        </span><span class="na">month</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="nv">apr</span><span class="p">,</span>
+<span class="w">       </span><span class="na">volume</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s">{6}</span><span class="p">,</span>
+<span class="w">       </span><span class="na">number</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s">{60}</span><span class="p">,</span>
+<span class="w">          </span><span class="na">eid</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s">{3099}</span><span class="p">,</span>
+<span class="w">        </span><span class="na">pages</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s">{3099}</span><span class="p">,</span>
+<span class="w">          </span><span class="na">doi</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s">{10.21105/joss.03099}</span><span class="p">,</span>
+<span class="na">archivePrefix</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s">{arXiv}</span><span class="p">,</span>
+<span class="w">       </span><span class="na">eprint</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s">{2104.06376}</span><span class="p">,</span>
+<span class="w"> </span><span class="na">primaryClass</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s">{gr-qc}</span><span class="p">,</span>
+<span class="w">       </span><span class="na">adsurl</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s">{https://ui.adsabs.harvard.edu/abs/2021JOSS....6.3099B}</span><span class="p">,</span>
+<span class="w">      </span><span class="na">adsnote</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s">{Provided by the SAO/NASA Astrophysics Data System}</span>
+<span class="p">}</span>
 </pre></div>
 </div>
 <p><code class="docutils literal notranslate"><span class="pre">kuibit</span></code> is built with <code class="docutils literal notranslate"><span class="pre">NumPy</span></code>, <code class="docutils literal notranslate"><span class="pre">SciPy</span></code>, and <code class="docutils literal notranslate"><span class="pre">h5py</span></code>, and optionally uses

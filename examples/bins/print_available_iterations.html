@@ -79,7 +79,6 @@ specify only one dimension. This script is useful for writing shell scripts.</p>
 <span class="kn">from</span> <span class="nn">kuibit.simdir</span> <span class="kn">import</span> <span class="n">SimDir</span>
 
 <span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
-
     <span class="n">desc</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;&quot;&quot;</span><span class="si">{</span><span class="n">kah</span><span class="o">.</span><span class="n">get_program_name</span><span class="p">()</span><span class="si">}</span><span class="s2"> prints the list of the available</span>
 <span class="s2">    iterations given a grid function. This can be used for shell scripts.&quot;&quot;&quot;</span>
     <span class="n">parser</span> <span class="o">=</span> <span class="n">kah</span><span class="o">.</span><span class="n">init_argparse</span><span class="p">(</span><span class="n">desc</span><span class="p">)</span>
@@ -95,6 +94,11 @@ specify only one dimension. This script is useful for writing shell scripts.</p>
         <span class="s2">&quot;--dimension&quot;</span><span class="p">,</span>
         <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Print only for the given dimension.&quot;</span><span class="p">,</span>
         <span class="n">choices</span><span class="o">=</span><span class="n">dimensions</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span>
+        <span class="s2">&quot;--with-time&quot;</span><span class="p">,</span>
+        <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Print also the corresponding time (takes longer to process).&quot;</span><span class="p">,</span>
+        <span class="n">action</span><span class="o">=</span><span class="s2">&quot;store_true&quot;</span><span class="p">,</span>
     <span class="p">)</span>
     <span class="n">args</span> <span class="o">=</span> <span class="n">kah</span><span class="o">.</span><span class="n">get_args</span><span class="p">(</span><span class="n">parser</span><span class="p">)</span>
 
@@ -115,6 +119,11 @@ specify only one dimension. This script is useful for writing shell scripts.</p>
                 <span class="n">args</span><span class="o">.</span><span class="n">variable</span>
             <span class="p">]</span><span class="o">.</span><span class="n">available_iterations</span><span class="p">:</span>
                 <span class="nb">print</span><span class="p">(</span><span class="n">it</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="s2">&quot; &quot;</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">args</span><span class="o">.</span><span class="n">with_time</span><span class="p">:</span>
+                    <span class="n">time</span> <span class="o">=</span> <span class="n">reader</span><span class="p">[</span><span class="n">args</span><span class="o">.</span><span class="n">dimension</span><span class="p">][</span>
+                        <span class="n">args</span><span class="o">.</span><span class="n">variable</span>
+                    <span class="p">]</span><span class="o">.</span><span class="n">time_at_iteration</span><span class="p">(</span><span class="n">it</span><span class="p">)</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;(</span><span class="si">{</span><span class="n">time</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">)&quot;</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="s2">&quot; &quot;</span><span class="p">)</span>
             <span class="nb">print</span><span class="p">()</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="c1"># First we check that we have the variable</span>
@@ -126,6 +135,11 @@ specify only one dimension. This script is useful for writing shell scripts.</p>
                     <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;# </span><span class="si">{</span><span class="n">dim</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
                     <span class="k">for</span> <span class="n">it</span> <span class="ow">in</span> <span class="n">reader</span><span class="p">[</span><span class="n">dim</span><span class="p">][</span><span class="n">args</span><span class="o">.</span><span class="n">variable</span><span class="p">]</span><span class="o">.</span><span class="n">available_iterations</span><span class="p">:</span>
                         <span class="nb">print</span><span class="p">(</span><span class="n">it</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="s2">&quot; &quot;</span><span class="p">)</span>
+                        <span class="k">if</span> <span class="n">args</span><span class="o">.</span><span class="n">with_time</span><span class="p">:</span>
+                            <span class="n">time</span> <span class="o">=</span> <span class="n">reader</span><span class="p">[</span><span class="n">dim</span><span class="p">][</span>
+                                <span class="n">args</span><span class="o">.</span><span class="n">variable</span>
+                            <span class="p">]</span><span class="o">.</span><span class="n">time_at_iteration</span><span class="p">(</span><span class="n">it</span><span class="p">)</span>
+                            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;(</span><span class="si">{</span><span class="n">time</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">)&quot;</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="s2">&quot; &quot;</span><span class="p">)</span>
                     <span class="nb">print</span><span class="p">()</span>
 </pre></div>
 </div>
