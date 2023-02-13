@@ -29,7 +29,6 @@ from kuibit.visualize_matplotlib import (
 )
 
 if __name__ == "__main__":
-
     desc = f"""\
 {kah.get_program_name()} plots given reductions of the constraints."""
 
@@ -56,7 +55,6 @@ if __name__ == "__main__":
         ignore_symlinks=args.ignore_symlinks,
         pickle_file=args.pickle_file,
     ) as sim:
-
         logger.debug("Prepared SimDir")
 
         reader = sim.timeseries

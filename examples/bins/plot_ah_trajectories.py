@@ -31,7 +31,6 @@ from kuibit.visualize_matplotlib import (
 )
 
 if __name__ == "__main__":
-
     desc = f"""{kah.get_program_name()} plots the trajectories of given apparent horizons on
 a plane. Optionally, it also plots the outline of the horizons."""
 
@@ -90,7 +89,6 @@ a plane. Optionally, it also plots the outline of the horizons."""
         ignore_symlinks=args.ignore_symlinks,
         pickle_file=args.pickle_file,
     ) as sim:
-
         logger.debug("Prepared SimDir")
         sim_hor = sim.horizons
 
@@ -125,7 +123,6 @@ a plane. Optionally, it also plots the outline of the horizons."""
                 masses.append(hor.ah.m_irreducible)
 
         if args.force_com_at_origin:
-
             # x_cm = sum m_i / M x_i
 
             logger.debug("Computing center of mass")

@@ -49,7 +49,6 @@ class TestFrequencySeries(unittest.TestCase):
         self.FS_cm = fs.FrequencySeries(self.f_c, np.ma.log10(self.fft_c))
 
     def test_fmin_fmax_frange(self):
-
         self.assertAlmostEqual(self.FS.fmin, 0)
         self.assertAlmostEqual(self.FS.f[0], 0)
         self.assertAlmostEqual(self.FS.fmax, 7.87816968)
@@ -57,7 +56,6 @@ class TestFrequencySeries(unittest.TestCase):
         self.assertAlmostEqual(np.amax(self.FS.amp), 3.15683911)
 
     def test_setter_f(self):
-
         fs_copy = self.FS.copy()
         f2 = self.f * 2
         fs_copy.f = f2
@@ -65,7 +63,6 @@ class TestFrequencySeries(unittest.TestCase):
         np.testing.assert_allclose(fs_copy.f, f2)
 
     def test_df(self):
-
         self.assertAlmostEqual(self.FS.df, self.f[1] - self.f[0])
         fs_copy = self.FS.copy()
         fs_copy.f[1] = 10
@@ -75,7 +72,6 @@ class TestFrequencySeries(unittest.TestCase):
             fs_copy.df
 
     def test_normalize(self):
-
         self.assertAlmostEqual(np.amax(self.FS.normalized().amp), 1)
 
         fs_copy = self.FS.copy()
@@ -88,7 +84,6 @@ class TestFrequencySeries(unittest.TestCase):
             fs_copy.normalize()
 
     def test_band_pass(self):
-
         fs_copy = self.FS.copy()
 
         self.assertLessEqual(fs_copy.low_passed(1).fmax, 1)
@@ -113,7 +108,6 @@ class TestFrequencySeries(unittest.TestCase):
         self.assertGreaterEqual(np.amin(np.abs(fs_copy.f)), 0.5)
 
     def test_negative_frequencies_remove(self):
-
         fs_copy = self.FS.copy()
 
         self.assertGreaterEqual(fs_copy.negative_frequencies_removed().fmin, 0)
@@ -121,7 +115,6 @@ class TestFrequencySeries(unittest.TestCase):
         self.assertGreaterEqual(fs_copy.fmin, 0)
 
     def test_peaks(self):
-
         # From a sin wave we are expecting two peaks
         [p1, p2] = self.FS_c.peaks()
 
@@ -132,7 +125,6 @@ class TestFrequencySeries(unittest.TestCase):
         self.assertAlmostEqual(self.FS_c.peaks_frequencies()[0], -0.15810417)
 
     def test_to_TimeSeries(self):
-
         # Complex
         ts = self.FS_c.to_TimeSeries()
 
@@ -147,7 +139,6 @@ class TestFrequencySeries(unittest.TestCase):
             self.FS_cm.to_TimeSeries()
 
     def test_inner_product(self):
-
         with self.assertRaises(TypeError):
             self.FS.inner_product(1)
 
@@ -219,7 +210,6 @@ class TestFrequencySeries(unittest.TestCase):
         )
 
     def test_overlap(self):
-
         # Overlap with self should be one
         self.assertAlmostEqual(self.FS.overlap(self.FS, fmin=0.5), 1)
 
@@ -236,7 +226,6 @@ class TestFrequencySeries(unittest.TestCase):
         f2_series = ts.TimeSeries(times, values2).to_FrequencySeries()
 
         try:
-
             # Test with PyCBC
             fmin = 5
             fmax = 15
@@ -300,7 +289,6 @@ class TestFrequencySeries(unittest.TestCase):
             pass
 
     def test_load_FrequencySeries(self):
-
         path = "tests/tov/output-0000/static_tov/mp_Phi2_l2_m-1_r110.69.asc"
         f, fft_real, fft_imag = np.loadtxt(path).T
 

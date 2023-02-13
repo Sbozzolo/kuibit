@@ -28,7 +28,6 @@ from kuibit.timeseries import TimeSeries
 
 class TestTensor(unittest.TestCase):
     def setUp(self):
-
         self.times = np.linspace(np.pi / 3, np.pi / 2, 100)
         self.values = np.sin(self.times)
         self.ts = TimeSeries(self.times, self.values)
@@ -43,7 +42,6 @@ class TestTensor(unittest.TestCase):
         self.test_data = {TimeSeries: self.ts, UniformGridData: self.ugd}
 
     def test_init(self):
-
         # Data is not iterable
         with self.assertRaises(TypeError):
             kvm.Tensor(1)
@@ -90,7 +88,6 @@ class TestTensor(unittest.TestCase):
         self.assertCountEqual(kvm.Tensor([self.ts]).shape, (1,))
 
     def test_from_shape_and_flat_data(self):
-
         tss = [TimeSeries(self.times, i * self.values) for i in range(6)]
         matrix = [[[tss[0], tss[1], tss[2]], [tss[3], tss[4], tss[5]]]]
         mat_Ten = kvm.Tensor(matrix)
@@ -101,7 +98,6 @@ class TestTensor(unittest.TestCase):
         self.assertCountEqual(mat_Ten2.shape, mat_Ten.shape)
 
     def test_data(self):
-
         tss = [TimeSeries(self.times, i * self.values) for i in range(6)]
         matrix = [[[tss[0], tss[1], tss[2]], [tss[3], tss[4], tss[5]]]]
         mat_Ten = kvm.Tensor(matrix)
@@ -109,7 +105,6 @@ class TestTensor(unittest.TestCase):
         self.assertCountEqual(mat_Ten.data, matrix)
 
     def test_eq(self):
-
         for type_, data in self.test_data.items():
             with self.subTest(type_=type_):
                 vec = kvm.Tensor([data])
@@ -138,7 +133,6 @@ class TestTensor(unittest.TestCase):
         )
 
     def test_unary_functions(self):
-
         tens = {
             TimeSeries: kvm.Tensor([self.ts]),
             UniformGridData: kvm.Tensor([self.ugd]),
@@ -240,7 +234,6 @@ class TestTensor(unittest.TestCase):
                         test_f3(fun, type_)
 
     def test_copy(self):
-
         for type_, data in self.test_data.items():
             with self.subTest(type_=type_):
                 mat = kvm.Tensor([[data, data], [data, data]])
@@ -250,7 +243,6 @@ class TestTensor(unittest.TestCase):
                 self.assertIsNot(mat, mat_copy)
 
     def test_reduction(self):
-
         # We only test one reduction
         for type_, data in self.test_data.items():
             with self.subTest(type_=type_):
@@ -261,7 +253,6 @@ class TestTensor(unittest.TestCase):
                 )
 
     def test_apply_to_self(self):
-
         # We only test one reduction
         for type_, data in self.test_data.items():
             with self.subTest(type_=type_):
@@ -271,7 +262,6 @@ class TestTensor(unittest.TestCase):
                 self.assertEqual(mat, 2 * mat_copy)
 
     def test_getattr(self):
-
         # We test with series
         mat = kvm.Tensor([[self.ts, self.ts], [self.ts, self.ts]])
 
@@ -313,7 +303,6 @@ class TestTensor(unittest.TestCase):
         self.assertEqual(mat_mean, kvm.Tensor([ts_mean_removed]))
 
     def test_apply_binary(self):
-
         # We only test one operation
         for type_, data in self.test_data.items():
             with self.subTest(type_=type_):
@@ -375,7 +364,6 @@ class TestVector(unittest.TestCase):
         self.assertEqual(self.vec[1], self.ts[1])
 
     def test_dot(self):
-
         # Not a vector
         with self.assertRaises(TypeError):
             self.vec.dot(1)

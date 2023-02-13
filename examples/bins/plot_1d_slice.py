@@ -30,7 +30,6 @@ from kuibit.visualize_matplotlib import (
 )
 
 if __name__ == "__main__":
-
     desc = """\
 {kah.get_program_name()} plots a grid function on one of the coordinate axis. 1D
 data is used if available, otherwise higher dimensional data is used."""

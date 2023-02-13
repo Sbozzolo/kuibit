@@ -60,7 +60,6 @@ class TestMasks(unittest.TestCase):
         self.hg = gd.HierarchicalGridData([self.ugd1, self.ugd2])
 
     def test_unary_functions(self):
-
         # TimeSeries
         def test_ts(name):
             ma_func = getattr(ma, name)

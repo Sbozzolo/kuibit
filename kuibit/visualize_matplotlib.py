@@ -433,7 +433,6 @@ def save(
 
     """
     if os.path.splitext(outputpath)[-1] == ".tikz":
-
         # If clean_figure is True, we extract from kwargs those argument
         # that tikzplotlib.clean_figure would take. For this, we need to
         # know what argument that function takes.
@@ -1109,7 +1108,6 @@ def plot_components_boundaries(
         kwargs["edgecolor"] = "black"
 
     for _1, _2, comp in hierarchical_data:
-
         # grid is the UniformGrid of the component under consideration with or
         # without ghost zones depending on the value of remove_ghosts
         grid = comp.grid.ghost_zones_removed() if remove_ghosts else comp.grid

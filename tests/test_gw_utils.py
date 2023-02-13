@@ -27,7 +27,6 @@ from kuibit.simdir import SimDir
 
 class TestGWUtils(unittest.TestCase):
     def test_luminosity_distance_to_redshift(self):
-
         self.assertAlmostEqual(
             gwu.luminosity_distance_to_redshift(450), 0.0948809
         )
@@ -66,7 +65,6 @@ class TestGWUtils(unittest.TestCase):
         )
 
     def test_ra_dec_to_theta_phi(self):
-
         time = "2015-09-14 09:50:45"
         angle = gwu.ra_dec_to_theta_phi(8, -70, time)
 
@@ -80,7 +78,6 @@ class TestGWUtils(unittest.TestCase):
         self.assertAlmostEqual(angle.virgo[1], -3.00853112)
 
     def test_antenna_responses(self):
-
         antenna_gw150914 = gwu.antenna_responses_from_sky_localization(
             8, -70, "2015-09-14 09:50:45"
         )
@@ -95,7 +92,6 @@ class TestGWUtils(unittest.TestCase):
         self.assertAlmostEqual(antenna_gw150914.virgo[1], 0.57442590)
 
     def test_coordinate_retarded_times(self):
-
         # Schwarzschild_radius_to_tortoise
         self.assertAlmostEqual(gwu.Schwarzschild_radius_to_tortoise(2, 0.5), 2)
 
@@ -129,7 +125,6 @@ class TestGWUtils(unittest.TestCase):
         )
 
     def test_signal_to_noise_ratio_from_strain(self):
-
         # Test strain is not timeseries
         with self.assertRaises(TypeError):
             gwu.signal_to_noise_ratio_from_strain(1)
@@ -149,7 +144,6 @@ class TestGWUtils(unittest.TestCase):
         )
 
     def test_effective_amplitude_spectral_density(self):
-
         # Test when strain is not timeseries
         with self.assertRaises(TypeError):
             gwu.effective_amplitude_spectral_density(1)

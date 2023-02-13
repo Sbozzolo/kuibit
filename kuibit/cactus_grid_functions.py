@@ -1510,7 +1510,6 @@ class AllGridFunctions:
         self.fields = pythonize_name_dict(list(self.keys()), self.__getitem__)
 
     def __getitem__(self, key):
-
         var_name = str(key)
 
         if var_name not in self:

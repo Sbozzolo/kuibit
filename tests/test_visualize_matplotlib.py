@@ -57,7 +57,6 @@ class TestVisualizeMatplotlib(unittest.TestCase):
         self.assertEqual(matplotlib.rcParams["image.cmap"], "viridis")
 
     def test_preprocess_plot_functions(self):
-
         # We test preprocess_plot with a function that returns the argument, so
         # we can check that they are what we expect
         def func(data, **kwargs):
@@ -173,7 +172,6 @@ class TestVisualizeMatplotlib(unittest.TestCase):
             dec_func_grid(data=ugd_m, shape=[10, 10], x0=[1, 3])
 
     def test_vmin_vmax_extend(self):
-
         data = np.array([1, 2])
 
         # Test vmin, vmax None
@@ -205,7 +203,6 @@ class TestVisualizeMatplotlib(unittest.TestCase):
         )
 
     def test_plot_grid(self):
-
         ugd = gdu.sample_function(
             lambda x, y: x + y, [100, 20], [0, 1], [2, 5]
         )
@@ -261,7 +258,6 @@ class TestVisualizeMatplotlib(unittest.TestCase):
         )
 
     def test_plot_colorbar(self):
-
         ugd = gdu.sample_function(
             lambda x, y: x + y, [100, 20], [0, 1], [2, 5]
         )
@@ -276,7 +272,6 @@ class TestVisualizeMatplotlib(unittest.TestCase):
         )
 
     def test_plot_horizon_shape(self):
-
         ah = SimDir("tests/horizons").horizons[0, 1]
 
         shape = ah.shape_outline_at_iteration(0, (None, None, 0))
@@ -323,7 +318,6 @@ class TestVisualizeMatplotlib(unittest.TestCase):
             viz.plot_horizon_on_plane_at_time(ah, 0, "xy")
 
     def test_plot_components_boundaries(self):
-
         # Test invalid data
         with self.assertRaises(TypeError):
             viz.plot_components_boundaries("bob")
@@ -343,7 +337,6 @@ class TestVisualizeMatplotlib(unittest.TestCase):
         viz.plot_components_boundaries(hg)
 
     def test_add_text_to_corner(self):
-
         with self.assertRaises(ValueError):
             viz._process_anchor_info("BW", 0.02)
 
@@ -386,7 +379,6 @@ class TestVisualizeMatplotlib(unittest.TestCase):
         )
 
     def test_save(self):
-
         x = np.linspace(0, 1, 100)
         y = np.sin(x)
 
@@ -421,7 +413,6 @@ class TestVisualizeMatplotlib(unittest.TestCase):
         os.remove("test.tikz")
 
     def test_save_from_dir_name_ext(self):
-
         plt.plot([1, 1], [2, 2])
         # Test without dot in the ext
         viz.save_from_dir_filename_ext(".", "test", "pdf")
@@ -434,7 +425,6 @@ class TestVisualizeMatplotlib(unittest.TestCase):
         os.remove("test.pdf")
 
     def test_figname(self):
-
         # Instead of testing with an argparse.Namespace, we create a tiny class
         # here with the attribute figname
 

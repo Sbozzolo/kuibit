@@ -31,7 +31,6 @@ from kuibit.visualize_matplotlib import (
 )
 
 if __name__ == "__main__":
-
     desc = f"""\
 {kah.get_program_name()} plots, for a given detector, the electromagnetic
 luminosity and cumulative energy as a function of time as computed from Phi2.
@@ -64,7 +63,6 @@ luminosity and cumulative energy as a function of time as computed from Phi2.
         ignore_symlinks=args.ignore_symlinks,
         pickle_file=args.pickle_file,
     ) as sim:
-
         logger.debug("Prepared SimDir")
 
         radius = sim.electromagneticwaves.radii[args.detector_num]

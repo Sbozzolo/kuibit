@@ -34,13 +34,11 @@ class TestGridFunctionsDir(unittest.TestCase):
         self.gd = cg.GridFunctionsDir(self.sim)
 
     def test_init_griddir(self):
-
         # Not a SimDir
         with self.assertRaises(TypeError):
             cg.GridFunctionsDir(0)
 
     def test_GridFunctionsDir_string_or_tuple(self):
-
         # Test not recognized dimension
         with self.assertRaises(ValueError):
             self.gd._string_or_tuple_to_dimension_index("hey")
@@ -58,18 +56,15 @@ class TestGridFunctionsDir(unittest.TestCase):
         )
 
     def test_contains(self):
-
         self.assertIn("xyz", self.gd)
 
     def test__getitem(self):
-
         self.assertIs(self.gd["xy"], self.gd._all_griddata[(0, 1)])
 
         # Use tuple as key
         self.assertIs(self.gd[(0, 1)], self.gd["xy"])
 
     def test__getattr(self):
-
         # Error for invalid attribute
         with self.assertRaises(AttributeError):
             self.gd.hey
@@ -78,11 +73,9 @@ class TestGridFunctionsDir(unittest.TestCase):
         self.assertIs(self.gd.xy, self.gd["xy"])
 
     def test__str(self):
-
         self.assertIn(str(self.gd.xyz), str(self.gd))
 
     def test_total_filesize(self):
-
         filesize_B = sum(os.path.getsize(fil) for fil in self.sim.allfiles)
         self.assertEqual(filesize_B, self.gd.total_filesize("B"))
 
@@ -146,7 +139,6 @@ class TestAllGridFunctions(unittest.TestCase):
         # Here we are not testing that files are correctly organized...
 
     def test_keys(self):
-
         self.assertCountEqual(
             self.gf.keys(),
             [
@@ -183,12 +175,10 @@ class TestAllGridFunctions(unittest.TestCase):
         )
 
     def test__contains(self):
-
         self.assertIn("P", self.gf)
         self.assertNotIn("Hey", self.gf)
 
     def test__getitem(self):
-
         # Test variable not present
         with self.assertRaises(KeyError):
             self.gf["hey"]
@@ -236,14 +226,12 @@ class TestAllGridFunctions(unittest.TestCase):
         )
 
     def test_allfiles(self):
-
         # This is a weak test, we are just testing how many files we have...
 
         # There should be 4 files
         self.assertEqual(len(self.gf.allfiles), 5)
 
     def test_total_filesize(self):
-
         size_B = sum({os.path.getsize(path) for path in self.gf.allfiles})
         self.assertEqual(size_B, self.gf.total_filesize("B"))
 
@@ -251,7 +239,6 @@ class TestAllGridFunctions(unittest.TestCase):
         self.assertEqual(size_KB, self.gf.total_filesize("KB"))
 
     def test__str(self):
-
         self.assertIn("vz", str(self.gf))
         self.assertIn("Available grid data of dimension 2D (xy)", str(self.gf))
 
@@ -279,7 +266,6 @@ class TestOneGridFunction(unittest.TestCase):
     # There's no real test here
     @mock.patch.multiple(cg.BaseOneGridFunction, __abstractmethods__=set())
     def test_baseclass(self):
-
         abs_base = cg.BaseOneGridFunction("", "")
         with self.assertRaises(NotImplementedError):
             abs_base._parse_file("")
@@ -289,7 +275,6 @@ class TestOneGridFunction(unittest.TestCase):
             abs_base.time_at_iteration("")
 
     def test__properties_in_file(self):
-
         self.assertCountEqual(
             self.P._iterations_in_file(self.P_file), [0, 1, 2]
         )
@@ -303,14 +288,12 @@ class TestOneGridFunction(unittest.TestCase):
         )
 
     def test_restarts(self):
-
         # TODO: This test is not robust when we are dealing with only one file...
         #       Add a second file and rewrite tests.
 
         self.assertCountEqual(self.P.restarts, [(0, 2, [self.P_file])])
 
     def test_iterations(self):
-
         self.assertEqual(self.P.min_iteration, 0)
         self.assertEqual(self.P.max_iteration, 2)
         self.assertCountEqual(self.P.available_iterations, [0, 1, 2])
@@ -325,12 +308,10 @@ class TestOneGridFunction(unittest.TestCase):
         self.assertEqual(self.P._files_with_iteration(1), [self.P_file])
 
     def test_times(self):
-
         self.assertCountEqual(self.P.available_times, [0, 0.25, 0.5])
         self.assertCountEqual(self.P.times, [0, 0.25, 0.5])
 
     def test_iteration_at_time(self):
-
         self.assertEqual(self.P.iteration_at_time(0.5), 2)
 
         # Time not available
@@ -338,7 +319,6 @@ class TestOneGridFunction(unittest.TestCase):
             self.P.iteration_at_time(5)
 
     def test_total_filesize(self):
-
         # We already tested that KB and MB work
         self.assertEqual(
             os.path.getsize(self.P_file), self.P.total_filesize("B")
@@ -346,7 +326,6 @@ class TestOneGridFunction(unittest.TestCase):
 
     # Here we test the details of the HDF5 reader
     def test_init_hdf5(self):
-
         self.assertEqual(self.P.thorn_name, "ILLINOISGRMHD")
         self.assertEqual(self.P.map, "")
         self.assertEqual(self.P.var_name, "P")
@@ -378,7 +357,6 @@ class TestOneGridFunction(unittest.TestCase):
         self.assertTrue(self.P.are_ghostzones_in_files)
 
     def test_read_hdf5(self):
-
         expected_grid = grid_data.UniformGrid(
             [29, 29],
             x0=[-14, -14],
@@ -411,11 +389,9 @@ class TestOneGridFunction(unittest.TestCase):
         )
 
     def test_time_at_iteration(self):
-
         self.assertEqual(self.P.time_at_iteration(2), 0.5)
 
     def test_get(self):
-
         # Iteration not present
         with self.assertRaises(KeyError):
             self.P[9]
@@ -460,7 +436,6 @@ class TestOneGridFunction(unittest.TestCase):
         # Here we test the details of the ASCII reader
 
     def test_init(self):
-
         self.assertCountEqual(
             self.rho_star._iterations_to_times, {0: 0, 1: 0.25, 2: 0.5}
         )
@@ -509,7 +484,6 @@ class TestOneGridFunction(unittest.TestCase):
             self.rho_star._parse_file("/tmp/wrongname")
 
     def test_clear_cache(self):
-
         # Read something
         self.P[0]
 

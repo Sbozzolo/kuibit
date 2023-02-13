@@ -31,7 +31,6 @@ from kuibit.visualize_matplotlib import (
 )
 
 if __name__ == "__main__":
-
     desc = f"""\
 {kah.get_program_name()} plots the gravitational-wave luminosity and cumulative
 energy as a function of time for a given detector. """
@@ -72,7 +71,6 @@ energy as a function of time for a given detector. """
         ignore_symlinks=args.ignore_symlinks,
         pickle_file=args.pickle_file,
     ) as sim:
-
         logger.debug("Prepared SimDir")
 
         radius = sim.gravitationalwaves.radii[args.detector_num]

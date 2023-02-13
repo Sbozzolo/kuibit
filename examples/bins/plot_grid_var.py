@@ -130,7 +130,6 @@ This is much faster but it is not as accurate."""
         ignore_symlinks=args.ignore_symlinks,
         pickle_file=args.pickle_file,
     ) as sim:
-
         logger.debug("Prepared SimDir")
         reader = sim.gridfunctions[args.plane]
         logger.debug(f"Variables available {reader}")

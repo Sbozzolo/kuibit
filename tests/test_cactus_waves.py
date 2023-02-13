@@ -35,7 +35,6 @@ class TestCactusWaves(unittest.TestCase):
         self.phi2 = self.emdir[110.69]
 
     def test_WavesOneDet(self):
-
         t1 = np.linspace(0, np.pi, 100)
         t2 = np.linspace(2 * np.pi, 3 * np.pi, 100)
         y1 = np.sin(t1)
@@ -60,13 +59,11 @@ class TestCactusWaves(unittest.TestCase):
         self.assertEqual(em, em_copy)
 
     def test_get_psi4_lm(self):
-
         self.assertEqual(
             self.gwdir[110.69].get_psi4_lm(2, 2), self.gwdir[110.69][(2, 2)]
         )
 
     def test__fixed_frequency_integrated(self):
-
         # First, we test the FF integration with a function (sin(x))
         # where the threshold frequency is smaller than the real frequency
         # (the period is extremely long).
@@ -110,7 +107,6 @@ class TestCactusWaves(unittest.TestCase):
             gwdum._fixed_frequency_integrated(tts, 1e-4)
 
     def test_get_strain_lm(self):
-
         with self.assertRaises(ValueError):
             self.psi4.get_strain_lm(3, 3, 1)
 
@@ -177,7 +173,6 @@ class TestCactusWaves(unittest.TestCase):
         )
 
     def test_get_strain(self):
-
         # test l_max too big
         with self.assertRaises(ValueError):
             self.psi4.get_strain(0, 0, 1, l_max=100)
@@ -202,7 +197,6 @@ class TestCactusWaves(unittest.TestCase):
         )
 
     def test_get_observed_strain(self):
-
         # Let's check with Hanford
         theta_GW, phi_GW = np.pi / 3, 0
         antennas = gwu.antenna_responses_from_sky_localization(
@@ -230,7 +224,6 @@ class TestCactusWaves(unittest.TestCase):
         self.assertEqual(strain.hanford, expected_strain)
 
     def test_get_power_energy(self):
-
         psi4lm = self.psi4[(2, 2)]
 
         psi4lm_int = self.psi4._fixed_frequency_integrated(
@@ -259,7 +252,6 @@ class TestCactusWaves(unittest.TestCase):
         )
 
     def test_get_power_energy_em(self):
-
         phi2 = self.phi2
         phi2lm = phi2[(2, 2)]
 
@@ -281,7 +273,6 @@ class TestCactusWaves(unittest.TestCase):
         self.assertEqual(total_power.integrated(), phi2.get_total_energy())
 
     def test_get_force_linear_momentum_em(self):
-
         # Test the z component with the 2,2 mode, so
         # dPz/dt should be r^2 / 4 pi * phi2_22 * conj(phi2_22) * 1 / 3
 
@@ -459,7 +450,6 @@ class TestCactusWaves(unittest.TestCase):
         self.assertEqual(force_z_lm, phi2_234.get_force_z_lm(3, 2))
 
     def test_get_torque_angular_momentum(self):
-
         psi4lm = self.psi4[(2, 2)]
 
         psi4lm_int1 = self.psi4._fixed_frequency_integrated(
@@ -543,7 +533,6 @@ class TestCactusWaves(unittest.TestCase):
             self.psi4.get_total_angular_momentum_y(0.1)
 
     def test_get_force_linear_momentum(self):
-
         # Test the z component with the 2,2 mode, so
         # dPz/dt should be r^2 / 16 pi * int psi4_22 * int conj(psi4_cc) * 2 / 3
 
@@ -743,7 +732,6 @@ class TestCactusWaves(unittest.TestCase):
         self.assertEqual(force_z_lm, psi4_234.get_force_z_lm(3, 2, 0.1))
 
     def test_WavesDir(self):
-
         # Test the error on wrong input type
         with self.assertRaises(TypeError):
             cw.GravitationalWavesDir(0)
@@ -760,7 +748,6 @@ class TestCactusWaves(unittest.TestCase):
         )
 
     def test_extrapolation(self):
-
         # Test too many radii for the extrapolation
         with self.assertRaises(RuntimeError):
             self.gwdir._extrapolate_waves_to_infinity(
@@ -803,7 +790,6 @@ class TestCactusWaves(unittest.TestCase):
         )
 
     def test_empty(self):
-
         # Test with no wave information
         empty_sim = sd.SimDir("kuibit")
         self.assertIs(empty_sim.gws.l_max, None)

@@ -419,7 +419,7 @@ class GravitationalWavesOneDet(mp.MultipoleOneDet):
 
         # Loop over the detectors in Detectors
         # antennas and coords are namedtuples Detectors
-        for (Fc, Fp) in antennas:
+        for Fc, Fp in antennas:
             strain = self.get_strain(
                 theta_gw,
                 phi_gw,
@@ -896,7 +896,6 @@ class GravitationalWavesOneDet(mp.MultipoleOneDet):
             return num / den
 
         if direction in (0, 1):
-
             # Pp_int1 = \int psi4_lm
             # Pp_int2 = \int [(a_lm * conj(psi4_l(m+1))
             #                + b_l(-m) * conj(psi4_(l-1)(m+1))
@@ -1264,7 +1263,6 @@ class ElectromagneticWavesOneDet(mp.MultipoleOneDet):
     """
 
     def __init__(self, dist, data):
-
         super().__init__(dist, data, 1)
 
     def copy(self):
@@ -1379,7 +1377,6 @@ class ElectromagneticWavesOneDet(mp.MultipoleOneDet):
             return num / den
 
         if direction in (0, 1):
-
             # Pp = phi2_lm * [(a_lm * conj(phi2_l(m+1))
             #                + b_l(-m) * conj(phi2_(l-1)(m+1))
             #                - b_(l+1)(m+1) * conj(phi2_(l+1)(m+1)))]
@@ -1721,7 +1718,6 @@ class WavesDir(mp.MultipoleAllDets):
 
         # We have to collect data only if var is available
         if var in sd.multipoles:
-
             psi4_mpalldets = sd.multipoles[var]
 
             # Now we have to prepare the data for the constructor of the base class

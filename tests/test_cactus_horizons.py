@@ -45,7 +45,6 @@ class TestHorizonsDir(unittest.TestCase):
         self.qlm_shape = ch.HorizonsDir(self.sim_shape)
 
     def test_init(self):
-
         # Testing the init tests also the _populate functions
 
         # Now let's test that self.hor has all the correct variables
@@ -144,7 +143,6 @@ class TestHorizonsDir(unittest.TestCase):
         self.assertCountEqual(self.qlm_shape._shape_files, dict_shape)
 
     def test_properties(self):
-
         self.assertCountEqual(self.hor.available_qlm_horizons, [0, 1, 2])
         self.assertCountEqual(self.ahs.available_qlm_horizons, [])
         self.assertCountEqual(self.qlm_shape.available_qlm_horizons, [0, 1, 2])
@@ -156,7 +154,6 @@ class TestHorizonsDir(unittest.TestCase):
         )
 
     def test__str(self):
-
         self.assertEqual(
             str(sd.SimDir("tests/tov").horizons), "No horizon found"
         )
@@ -168,7 +165,6 @@ class TestHorizonsDir(unittest.TestCase):
         self.assertEqual(str(self.hor), expected_str)
 
     def test__getitem__(self):
-
         # Incorrect key
         with self.assertRaises(TypeError):
             self.hor["hey"]
@@ -209,7 +205,6 @@ class TestHorizonsDir(unittest.TestCase):
             )
 
     def test_get_apparent_horizon(self):
-
         # Horizon not available
         with self.assertRaises(KeyError):
             self.hor.get_apparent_horizon(6)
@@ -224,7 +219,6 @@ class TestHorizonsDir(unittest.TestCase):
         )
 
     def test_get_qlm_horizon(self):
-
         # Horizon not available
         with self.assertRaises(KeyError):
             self.hor.get_qlm_horizon(6)
@@ -262,7 +256,6 @@ class TestOneHorizon(unittest.TestCase):
             self.sh = self.qlm_shape[(0, 1)]
 
     def test_init(self):
-
         # Check that attributes for qlm vars are set (or not)
         self.assertTrue(hasattr(self.ho, "mass"))
         self.assertFalse(hasattr(self.ah, "mass"))
@@ -304,7 +297,6 @@ class TestOneHorizon(unittest.TestCase):
         self.assertIs(self.sh.shape_time_max, None)
 
     def test__getitem(self):
-
         # Test key not available
         with self.assertRaises(KeyError):
             self.ho["hey"]
@@ -312,13 +304,11 @@ class TestOneHorizon(unittest.TestCase):
         self.assertEqual(self.ho["mass"], self.ho._qlm_vars["mass"])
 
     def test_ah_property(self):
-
         self.assertEqual(
             self.ho.get_ah_property("area"), self.ho._ah_vars["area"]
         )
 
     def test__str(self):
-
         # Test various components
         self.assertIn("Formation time", str(self.ho))
         self.assertIn("Formation time", str(self.ah))
@@ -333,7 +323,6 @@ class TestOneHorizon(unittest.TestCase):
         self.assertIn("Final Mass", str(self.sh))
 
     def test_shape(self):
-
         # Test shape information not available
         with self.assertRaises(ValueError):
             self.ah._patches_at_iteration(0)
@@ -369,7 +358,6 @@ class TestOneHorizon(unittest.TestCase):
         )
 
     def test_shape_time_at_iteration(self):
-
         # Test iteration not available
         with self.assertRaises(ValueError):
             self.ho.shape_time_at_iteration(10465)
@@ -377,7 +365,6 @@ class TestOneHorizon(unittest.TestCase):
         self.assertAlmostEqual(self.ho.shape_time_at_iteration(1024), 6.400)
 
     def test_shape_at_time(self):
-
         # Test time not available
         with self.assertRaises(ValueError):
             self.ho.shape_at_time(10465)
@@ -389,7 +376,6 @@ class TestOneHorizon(unittest.TestCase):
         )
 
     def test_shape_outline_at_iteration(self):
-
         # Iteration not present
         with self.assertRaises(ValueError):
             self.ho.shape_outline_at_iteration(10465, [0, 2, 3])
@@ -430,7 +416,6 @@ class TestOneHorizon(unittest.TestCase):
         )
 
     def test_shape_outline_at_time(self):
-
         # Test time not available
         with self.assertRaises(ValueError):
             self.ho.shape_outline_at_time(10465, [None, None, 0])
@@ -462,7 +447,6 @@ class TestOneHorizon(unittest.TestCase):
         )
 
     def test_vtk_variables(self):
-
         ho = self.hor.get_qlm_horizon(1)
 
         # Iteration not existing

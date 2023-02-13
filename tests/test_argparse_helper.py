@@ -46,7 +46,6 @@ class TestArgparseHelper(unittest.TestCase):
         self.assertEqual(args2.outdir, "test2")
 
     def test_add_grid_to_parser(self):
-
         # Wrong dimensions
         with self.assertRaises(ValueError):
             kah.add_grid_to_parser(self.parser, dimensions=5)
@@ -84,7 +83,6 @@ class TestArgparseHelper(unittest.TestCase):
         self.assertCountEqual(args.corner, [1])
 
     def test_add_figure_to_parser(self):
-
         kah.add_figure_to_parser(
             self.parser, default_figname="figure", add_limits=True
         )
@@ -95,7 +93,6 @@ class TestArgparseHelper(unittest.TestCase):
         self.assertEqual(args.xmin, 0.5)
 
     def test_add_horizon_to_parser(self):
-
         kah.add_horizon_to_parser(
             self.parser, color="w", edge_color="r", alpha=0.5, time_tolerance=1
         )
@@ -110,7 +107,6 @@ class TestArgparseHelper(unittest.TestCase):
         self.assertEqual(args.ah_time_tolerance, 1)
 
     def test_add_grid_structure_to_parser(self):
-
         kah.add_grid_structure_to_parser(
             self.parser, edge_color="r", alpha=0.5
         )

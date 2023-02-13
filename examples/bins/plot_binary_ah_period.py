@@ -32,7 +32,6 @@ from kuibit.visualize_matplotlib import (
 )
 
 if __name__ == "__main__":
-
     desc = f"""\
 {kah.get_program_name()} plots the period as on the equatorial plane as computed
 from Newtonian angular velocity of the equivalent Kepler problem. This
@@ -73,7 +72,6 @@ choose the bounds, but often you will need to manually specify --ymax and
         ignore_symlinks=args.ignore_symlinks,
         pickle_file=args.pickle_file,
     ) as sim:
-
         logger.debug("Prepared SimDir")
         sim_hor = sim.horizons
 

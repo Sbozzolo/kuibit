@@ -28,7 +28,6 @@ from kuibit import grid_data_utils as gdu
 
 class TestGridDataUtils(unittest.TestCase):
     def test_common_bounding_box(self):
-
         # Test error for not passing a list
         with self.assertRaises(TypeError):
             gdu.common_bounding_box(1)
@@ -71,7 +70,6 @@ class TestGridDataUtils(unittest.TestCase):
         )
 
     def test_merge_uniform_grids(self):
-
         # Test error for not passing a list
         with self.assertRaises(TypeError):
             gdu.merge_uniform_grids(1)
@@ -145,7 +143,6 @@ class TestGridDataUtils(unittest.TestCase):
         )
 
     def test_sample_function(self):
-
         # Test not grid as input
         with self.assertRaises(TypeError):
             gdu.sample_function_from_uniformgrid(np.sin, 0)

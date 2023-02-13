@@ -25,7 +25,6 @@ from kuibit import sensitivity_curves as sc
 
 class TestSensitivityCurves(unittest.TestCase):
     def test_LISA(self):
-
         freqs = np.array([1e-5, 1e-3])
 
         lisa = sc.Sn_LISA(freqs)
@@ -35,7 +34,6 @@ class TestSensitivityCurves(unittest.TestCase):
         )
 
     def test_ETB(self):
-
         freqs = np.array([1, 1.0023060e03])
 
         etb = sc.Sn_ET_B(freqs)
@@ -48,7 +46,6 @@ class TestSensitivityCurves(unittest.TestCase):
         )
 
     def test_ETD(self):
-
         freqs = np.array([1, 1.0023060e03])
 
         etd = sc.Sn_ET_D(freqs)
@@ -61,7 +58,6 @@ class TestSensitivityCurves(unittest.TestCase):
         )
 
     def test_CE1(self):
-
         freqs = np.array([3.0002, 3577.8])
 
         ce1 = sc.Sn_CE1(freqs)
@@ -72,7 +68,6 @@ class TestSensitivityCurves(unittest.TestCase):
         )
 
     def test_CE2(self):
-
         freqs = np.array([3.0002, 3577.8])
 
         ce2 = sc.Sn_CE2(freqs)
@@ -83,7 +78,6 @@ class TestSensitivityCurves(unittest.TestCase):
         )
 
     def test_aLIGO(self):
-
         freqs = np.array([9, 4.3015530306322887e02])
 
         aLIGO = sc.Sn_aLIGO(freqs)
@@ -97,7 +91,6 @@ class TestSensitivityCurves(unittest.TestCase):
         )
 
     def test_voyager(self):
-
         freqs = np.array([5.001, 356.92])
 
         voya = sc.Sn_voyager(freqs)
@@ -108,7 +101,6 @@ class TestSensitivityCurves(unittest.TestCase):
         )
 
     def test_KAGRA_D(self):
-
         freqs = np.array([2.2491, 479.733])
 
         kagra = sc.Sn_KAGRA_D(freqs)
@@ -119,7 +111,6 @@ class TestSensitivityCurves(unittest.TestCase):
         )
 
     def test_aLIGO_plus(self):
-
         freqs = np.array([5, 536.7])
 
         aligo = sc.Sn_aLIGO_plus(freqs)

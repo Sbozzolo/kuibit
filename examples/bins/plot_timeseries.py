@@ -30,7 +30,6 @@ from kuibit.visualize_matplotlib import (
 )
 
 if __name__ == "__main__":
-
     desc = f"""\
 {kah.get_program_name()} plots a given timeseries as output by CarpetIOASCII.
 """
@@ -87,7 +86,6 @@ if __name__ == "__main__":
         ignore_symlinks=args.ignore_symlinks,
         pickle_file=args.pickle_file,
     ) as sim:
-
         logger.debug("Prepared SimDir")
         reader = sim.timeseries[args.reduction]
         logger.debug(f"Available variables {reader}")

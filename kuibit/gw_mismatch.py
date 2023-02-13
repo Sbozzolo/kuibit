@@ -138,7 +138,6 @@ def _mismatch_core_numerical(
     # 8. Now we fill the array
 
     for index_p, p_shift in enumerate(polarization_shifts):
-
         # 9. Apply polarization shift
 
         h2_t_pshifted = h2_t * np.exp(1j * np.pi * p_shift)
@@ -174,7 +173,6 @@ def _mismatch_core_numerical(
         h2_c_fft_pshifted *= delta_t
 
         for index_t, t_shift in enumerate(time_shifts):
-
             # 12. We implement time shift is implemented as phase shift in
             #     Fourier space. We do this while computing the integral of
             #     the the inner product (we will normalize later).
@@ -184,7 +182,6 @@ def _mismatch_core_numerical(
             inner_product = np.zeros_like(h1_p_fft)
 
             for noise, antenna_pattern in zip(noises, antenna_patterns):
-
                 Fc, Fp = antenna_pattern
 
                 numerator = Fp * h1_p_fft + Fc * h1_c_fft
@@ -496,7 +493,6 @@ def mismatch_from_strains(
     inner22 = fs.FrequencySeries(h2f_p_res.f, np.zeros_like(h2f_p_res.f))
 
     for noise, antenna_pattern in zip(noises_res, antenna_patterns):
-
         Fc, Fp = antenna_pattern
 
         numerator11 = Fp * h1f_p_res + Fc * h1f_c_res

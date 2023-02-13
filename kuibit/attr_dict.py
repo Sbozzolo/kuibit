@@ -151,7 +151,6 @@ class TransformDictionary:
     """
 
     def __init__(self, elem, transform=lambda x: x):
-
         if not hasattr(elem, "items"):
             raise TypeError("Input is not dictionary-like")
 

@@ -20,7 +20,6 @@ from kuibit import argparse_helper as kah
 from kuibit.simdir import SimDir
 
 if __name__ == "__main__":
-
     desc = f"""{kah.get_program_name()} prints the list of timeseries
     available to kuibit in the given data folder."""
     parser = kah.init_argparse(desc)

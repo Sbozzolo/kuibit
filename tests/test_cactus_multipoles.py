@@ -27,7 +27,6 @@ from kuibit import timeseries as ts
 
 class TestCactusMultipoles(unittest.TestCase):
     def setUp(self):
-
         # Prepare fake multipoles
         self.t1 = np.linspace(0, 1, 100)
         self.t2 = np.linspace(2, 3, 100)
@@ -37,7 +36,6 @@ class TestCactusMultipoles(unittest.TestCase):
         self.ts2 = ts.TimeSeries(self.t2, self.y2)
 
     def test_MultipoleOneDet(self):
-
         ts_comb = ts.combine_ts([self.ts1, self.ts2])
 
         data = [(2, 2, self.ts1), (2, 2, self.ts2)]
@@ -116,7 +114,6 @@ class TestCactusMultipoles(unittest.TestCase):
         self.assertIn("missing", mult3.__str__())
 
     def test_total_function_on_available_lm(self):
-
         # The two series must have the same times
         ts3 = ts.TimeSeries(self.t1, self.y2)
         data = [(2, 2, self.ts1), (1, -1, ts3)]
@@ -169,7 +166,6 @@ class TestCactusMultipoles(unittest.TestCase):
             mult.total_function_on_available_lm(lambda x: x, l_max=1)
 
     def test_MultipoleAllDets(self):
-
         data = [(2, 2, 100, self.ts1), (2, -2, 150, self.ts2)]
 
         radii = [100, 150]
@@ -212,7 +208,6 @@ class TestCactusMultipoles(unittest.TestCase):
         self.assertCountEqual(alldets.keys(), radii)
 
     def test_has_detector(self):
-
         data = [(2, 2, 100, self.ts1), (2, -2, 150, self.ts2)]
 
         alldets = mp.MultipoleAllDets(data)
@@ -222,7 +217,6 @@ class TestCactusMultipoles(unittest.TestCase):
         self.assertTrue(alldets.has_detector(2, 2, 100))
 
     def test_MultipolesDir(self):
-
         sim = sd.SimDir("tests/tov")
         cacdir = mp.MultipolesDir(sim)
 

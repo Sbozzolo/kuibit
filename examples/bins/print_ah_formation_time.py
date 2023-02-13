@@ -22,7 +22,6 @@ from kuibit import argparse_helper as kah
 from kuibit.simdir import SimDir
 
 if __name__ == "__main__":
-
     desc = f"""{kah.get_program_name()} prints the time at which the given horizon
     was first found."""
 
@@ -57,7 +56,6 @@ if __name__ == "__main__":
         ignore_symlinks=args.ignore_symlinks,
         pickle_file=args.pickle_file,
     ) as sim:
-
         sim_hor = sim.horizons
 
         logger.debug(

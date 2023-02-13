@@ -29,7 +29,6 @@ class TestTree(unittest.TestCase):
         )
 
     def test_init(self):
-
         # Test with a simple node
         self.assertEqual(self.single_node.name, "myname")
         self.assertEqual(self.single_node.value, 2.0)
@@ -40,24 +39,20 @@ class TestTree(unittest.TestCase):
         self.assertEqual(self.one_branch.children, (self.single_node,))
 
     def test_is_left(self):
-
         self.assertTrue(self.single_node.is_leaf)
         self.assertFalse(self.one_branch.is_leaf)
 
     def test_tot_value_leaves(self):
-
         self.assertEqual(self.single_node.tot_value_leaves, 2)
         self.assertEqual(self.one_branch.tot_value_leaves, 2)
         self.assertEqual(self.two_branches.tot_value_leaves, 4)
 
     def test_eq(self):
-
         self.assertEqual(self.single_node, self.single_node)
         self.assertNotEqual(self.single_node, self.one_branch)
         self.assertEqual(self.one_branch, self.one_branch)
 
     def test_getitem(self):
-
         self.assertEqual(self.one_branch[0], self.single_node)
         self.assertEqual(self.one_branch["myname"], self.single_node)
 
@@ -98,7 +93,6 @@ class TestTree(unittest.TestCase):
         )
 
     def test_merge_trees(self):
-
         # Test unmergable tree (different base name)
         with self.assertRaises(RuntimeError):
             kt.merge_trees((self.single_node, self.one_branch))

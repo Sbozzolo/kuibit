@@ -30,7 +30,6 @@ from kuibit import grid_data_utils as gdu
 
 class TestUniformGrid(unittest.TestCase):
     def test__check_dims(self):
-
         # Test multidimensional shape
         with self.assertRaises(ValueError):
             gd.UniformGrid(np.array([[1, 2], [3, 4]]), np.array([1, 2]))
@@ -40,7 +39,6 @@ class TestUniformGrid(unittest.TestCase):
             gd.UniformGrid(np.array([100, 200]), np.array([1, 2, 3]))
 
     def test_init_getters(self):
-
         # Test error neither of dx and x1 provided
         with self.assertRaises(ValueError):
             geom = gd.UniformGrid([101, 101], [1, 1])
@@ -123,7 +121,6 @@ class TestUniformGrid(unittest.TestCase):
             )
 
     def test_hash(self):
-
         geom4 = gd.UniformGrid(
             [101, 101],
             x0=[1, 1],
@@ -170,7 +167,6 @@ class TestUniformGrid(unittest.TestCase):
         )
 
     def test__in__(self):
-
         # We test __in__ testing contains, which calls in
         geom4 = gd.UniformGrid(
             [101, 101],
@@ -198,7 +194,6 @@ class TestUniformGrid(unittest.TestCase):
         self.assertTrue(geom4.contains([1, 0.75]))
 
     def test__str(self):
-
         geom4 = gd.UniformGrid(
             [101, 101],
             x0=[1, 1],
@@ -211,7 +206,6 @@ class TestUniformGrid(unittest.TestCase):
         self.assertIn("Num ghost zones  = [3 3]", geom4.__str__())
 
     def test_coordinates(self):
-
         geom4 = gd.UniformGrid(
             [11, 15],
             x0=[1, 2],
@@ -252,7 +246,6 @@ class TestUniformGrid(unittest.TestCase):
         )
 
     def test__getitem__(self):
-
         geom4 = gd.UniformGrid(
             [11, 15],
             x0=[1, 1],
@@ -272,7 +265,6 @@ class TestUniformGrid(unittest.TestCase):
             geom4[[500, 200]]
 
     def test_flat_dimensions_removed(self):
-
         geom = gd.UniformGrid(
             [101, 101, 1],
             x0=[1, 1, 0],
@@ -294,7 +286,6 @@ class TestUniformGrid(unittest.TestCase):
         self.assertEqual(geom.flat_dimensions_removed(), geom2)
 
     def test_flat_ghost_zones_removed(self):
-
         geom = gd.UniformGrid(
             [101, 101], x0=[1, 1], dx=[1, 0.5], num_ghost=[3, 0]
         )
@@ -306,7 +297,6 @@ class TestUniformGrid(unittest.TestCase):
         self.assertEqual(geom.ghost_zones_removed(), geom2)
 
     def test_shifted(self):
-
         geom = gd.UniformGrid(
             [101, 101],
             x0=[1, 0],
@@ -332,7 +322,6 @@ class TestUniformGrid(unittest.TestCase):
             geom.shifted(2)
 
     def test_copy(self):
-
         geom = gd.UniformGrid(
             [101, 101, 1],
             x0=[1, 1, 0],
@@ -348,7 +337,6 @@ class TestUniformGrid(unittest.TestCase):
         self.assertIsNot(geom, geom2)
 
     def test__eq__(self):
-
         # The tricky part is the time and iteration
         geom0 = gd.UniformGrid([11, 11], x0=[0, 0], x1=[5, 5])
         geom1 = gd.UniformGrid([11, 11], x0=[0, 0], x1=[5, 5])
@@ -385,7 +373,6 @@ class TestUniformGridData(unittest.TestCase):
         )
 
     def test_init(self):
-
         # Test invalid input
         with self.assertRaises(TypeError):
             gd.UniformGridData(1, 0)
@@ -420,7 +407,6 @@ class TestUniformGridData(unittest.TestCase):
         self.assertCountEqual(ug_data.extended_dimensions, [True, True])
 
     def test_is_complex(self):
-
         data = np.array([i * np.linspace(1, 5, 51) for i in range(101)])
 
         ug_data = gd.UniformGridData(self.geom, data)
@@ -432,7 +418,6 @@ class TestUniformGridData(unittest.TestCase):
         self.assertTrue(ug_data_c.is_complex())
 
     def test_is_masked(self):
-
         data = np.array([i * np.linspace(1, 5, 51) for i in range(101)])
 
         ug_data = gd.UniformGridData(self.geom, data)
@@ -456,7 +441,6 @@ class TestUniformGridData(unittest.TestCase):
         )
 
     def test_mask_apply(self):
-
         data = np.array([i * np.linspace(1, 5, 51) for i in range(101)])
 
         data_masked = np.ma.masked_less(data, 3)
@@ -481,7 +465,6 @@ class TestUniformGridData(unittest.TestCase):
         self.assertEqual(ug_data_mask2, ug_data_nomask)
 
     def test_flat_dimensions_remove(self):
-
         geom = gd.UniformGrid([101, 1], x0=[0, 0], dx=[0.01, 1])
 
         data = np.array([i * np.linspace(1, 5, 1) for i in range(101)])
@@ -514,7 +497,6 @@ class TestUniformGridData(unittest.TestCase):
         )
 
     def test_partial_differentiate(self):
-
         geom = gd.UniformGrid([8001, 3], x0=[0, 0], x1=[2 * np.pi, 1])
 
         sin_wave = gdu.sample_function_from_uniformgrid(
@@ -566,7 +548,6 @@ class TestUniformGridData(unittest.TestCase):
             original_sin.partial_differentiated(0, accuracy_order=3)
 
     def test_ghost_zones_remove(self):
-
         geom = gd.UniformGrid(
             [101, 201], x0=[0, 0], x1=[100, 200], num_ghost=[1, 3]
         )
@@ -596,7 +577,6 @@ class TestUniformGridData(unittest.TestCase):
         self.assertEqual(ug_data, ug_data.copy())
 
     def test_reflection_symmetry_undo(self):
-
         g_zero = gdu.sample_function(
             lambda x, y: 2 * x + y,
             shape=[6, 2],
@@ -692,7 +672,6 @@ class TestUniformGridData(unittest.TestCase):
         self.assertEqual(expected_g_no_zero, g_no_zero)
 
     def test_rotation180_symmetry_undo(self):
-
         g_zero = gdu.sample_function(
             lambda x, y: 2 * x + y,
             shape=[6, 2],
@@ -752,7 +731,6 @@ class TestUniformGridData(unittest.TestCase):
             ).rotation180_symmetry_undo(dimension=0, plane=(0, 1))
 
     def test__apply_reduction(self):
-
         data = np.array([i * np.linspace(1, 5, 51) for i in range(101)])
 
         ug_data = gd.UniformGridData(self.geom, data)
@@ -761,7 +739,6 @@ class TestUniformGridData(unittest.TestCase):
         self.assertAlmostEqual(ug_data.max(), 500)
 
     def test__apply_binary(self):
-
         data1 = np.array([i * np.linspace(1, 5, 51) for i in range(101)])
         data2 = np.array([i**2 * np.linspace(1, 5, 51) for i in range(101)])
         ug_data1 = gd.UniformGridData(self.geom, data1)
@@ -792,7 +769,6 @@ class TestUniformGridData(unittest.TestCase):
             ug_data1 + geom
 
     def test__apply_unary(self):
-
         data1 = np.array([i * np.linspace(1, 5, 51) for i in range(101)])
         ug_data1 = gd.UniformGridData(self.geom, data1)
 
@@ -801,7 +777,6 @@ class TestUniformGridData(unittest.TestCase):
         )
 
     def test_slice(self):
-
         grid_data = gdu.sample_function_from_uniformgrid(
             lambda x, y, z: x * (y + 2) * (z + 5),
             gd.UniformGrid([10, 20, 30], x0=[0, 1, 2], dx=[1, 2, 0.1]),
@@ -838,7 +813,6 @@ class TestUniformGridData(unittest.TestCase):
         self.assertEqual(grid_data, expected_no_z)
 
     def test_coordinates_at(self):
-
         grid_2d = gd.UniformGrid([10, 20], x0=[1, 2], dx=[1, 1])
 
         data2d = gdu.sample_function_from_uniformgrid(
@@ -853,7 +827,6 @@ class TestUniformGridData(unittest.TestCase):
         np.testing.assert_allclose(expected, data2d.coordinates_at_minimum())
 
     def test_save_load(self):
-
         grid_file = "test_save_grid.dat"
         grid_file_bz = "test_save_grid.dat.bz2"
         grid_file_gz = "test_save_grid.dat.gz"
@@ -924,7 +897,6 @@ class TestUniformGridData(unittest.TestCase):
             os.remove(path)
 
     def test_splines(self):
-
         # Let's start with 1d.
         sin_data = gdu.sample_function(np.sin, 12000, 0, 2 * np.pi)
         sin_data_complex = sin_data + 1j * sin_data
@@ -1102,7 +1074,6 @@ class TestUniformGridData(unittest.TestCase):
             two_points._make_spline()
 
     def test_copy(self):
-
         sin_data = gdu.sample_function(np.sin, 1000, 0, 2 * np.pi)
 
         sin_data2 = sin_data.copy()
@@ -1112,7 +1083,6 @@ class TestUniformGridData(unittest.TestCase):
         self.assertIsNot(sin_data.grid, sin_data2.grid)
 
     def test_histogram(self):
-
         # There should be no reason why the histogram behaves differently for
         # different dimensions, so let's test it with 1d
         sin_data = gdu.sample_function(np.sin, 1000, 0, 2 * np.pi)
@@ -1145,7 +1115,6 @@ class TestUniformGridData(unittest.TestCase):
         np.testing.assert_allclose(expected_hist[1], hist[1], rtol=2e-6)
 
     def test_percentiles(self):
-
         # There should be no reason why the histogram behaves differently for
         # different dimensions, so let's test it with 1d
         lin_data = gdu.sample_function(lambda x: 1.0 * x, 1000, 0, 2 * np.pi)
@@ -1165,7 +1134,6 @@ class TestUniformGridData(unittest.TestCase):
         )
 
     def test_mean_integral_norm1_norm2(self):
-
         data = np.array([i**2 * np.linspace(1, 5, 51) for i in range(101)])
         ug_data = gd.UniformGridData(self.geom, data)
 
@@ -1349,7 +1317,6 @@ class TestUniformGridData(unittest.TestCase):
         self.assertAlmostEqual(prod_data[2, 2], 2 * 14)
 
     def test_fourier_transform(self):
-
         prod_data_complex = gdu.sample_function(
             lambda x, y: (1 + 1j) * x * (y + 2), [11, 21], [0, 10], [10, 30]
         )
@@ -1376,7 +1343,6 @@ class TestUniformGridData(unittest.TestCase):
             self.ug_masked.fourier_transform()
 
     def test_to_GridSeries(self):
-
         # Not 1D
         prod_data_complex = gdu.sample_function(
             lambda x, y: (1 + 1j) * x * (y + 2), [11, 21], [0, 10], [10, 30]
@@ -1441,7 +1407,6 @@ class TestHierarchicalGridData(unittest.TestCase):
         )
 
     def test_init(self):
-
         # Test incorrect arguments
         # Not a list
         with self.assertRaises(TypeError):
@@ -1510,7 +1475,6 @@ class TestHierarchicalGridData(unittest.TestCase):
         self.assertTrue(isinstance(hg_merged[0][0].data, np.ma.MaskedArray))
 
     def test_check_ref_factors(self):
-
         # Check a good grid, with refinement factors that are a constant
         # multiple of the finest refinement level.
         fine = gdu.sample_function(
@@ -1553,12 +1517,10 @@ class TestHierarchicalGridData(unittest.TestCase):
         )
 
     def test__getitem__(self):
-
         hg = gd.HierarchicalGridData(self.grid_data)
         self.assertEqual(hg[0], [self.expected_data])
 
     def test_get_level(self):
-
         hg = gd.HierarchicalGridData(self.grid_data)
         self.assertEqual(hg.get_level(0), self.expected_data)
 
@@ -1572,7 +1534,6 @@ class TestHierarchicalGridData(unittest.TestCase):
             hg3.get_level(0)
 
     def test_shape(self):
-
         hg = gd.HierarchicalGridData(self.grid_data)
         self.assertCountEqual(hg.shape, {0: 1})
 
@@ -1581,7 +1542,6 @@ class TestHierarchicalGridData(unittest.TestCase):
         self.assertCountEqual(hg3.shape, {0: 2})
 
     def test_properties(self):
-
         # len
         hg = gd.HierarchicalGridData(
             self.grid_data + [self.expected_data_level2]
@@ -1636,7 +1596,6 @@ class TestHierarchicalGridData(unittest.TestCase):
         self.assertIs(hg.iteration, None)
 
     def test__eq__(self):
-
         hg1 = gd.HierarchicalGridData(self.grid_data)
         hg2 = gd.HierarchicalGridData([self.expected_data_level2])
         hg3 = gd.HierarchicalGridData([self.expected_data])
@@ -1658,7 +1617,6 @@ class TestHierarchicalGridData(unittest.TestCase):
         self.assertEqual(hg3, hg3)
 
     def test_copy(self):
-
         hg1 = gd.HierarchicalGridData(self.grid_data)
         hg2 = hg1.copy()
         self.assertEqual(hg1, hg2)
@@ -1669,7 +1627,6 @@ class TestHierarchicalGridData(unittest.TestCase):
         self.assertEqual(hg3, hg4)
 
     def test_is_complex(self):
-
         hg_real = gd.HierarchicalGridData(self.grid_data_two_comp)
 
         self.assertFalse(hg_real.is_complex())
@@ -1682,7 +1639,6 @@ class TestHierarchicalGridData(unittest.TestCase):
         self.assertTrue(hg_complex.is_complex())
 
     def test_is_masked(self):
-
         hg = gd.HierarchicalGridData(self.grid_data_two_comp)
 
         self.assertFalse(hg.is_masked())
@@ -1704,7 +1660,6 @@ class TestHierarchicalGridData(unittest.TestCase):
         self.assertEqual(hg_nomasked, hg_masked)
 
     def test_iter(self):
-
         hg1 = gd.HierarchicalGridData(self.grid_data)
 
         for ref_level, comp, data in hg1:
@@ -1766,7 +1721,6 @@ class TestHierarchicalGridData(unittest.TestCase):
         self.assertEqual(sin_wave.coarsest_level, sin_wave1)
 
     def test__apply_reduction(self):
-
         hg1 = gd.HierarchicalGridData(self.grid_data)
 
         self.assertAlmostEqual(hg1.min(), 0)
@@ -1776,7 +1730,6 @@ class TestHierarchicalGridData(unittest.TestCase):
         self.assertAlmostEqual(hg3.min(), 0)
 
     def test__apply_unary(self):
-
         hg1 = gd.HierarchicalGridData(self.grid_data)
 
         def neg_product(x, y):
@@ -1800,7 +1753,6 @@ class TestHierarchicalGridData(unittest.TestCase):
         self.assertEqual(-hg3, hg4)
 
     def test__apply_binary(self):
-
         hg1 = gd.HierarchicalGridData(self.grid_data)
 
         # Test incompatible types
@@ -1844,7 +1796,6 @@ class TestHierarchicalGridData(unittest.TestCase):
         self.assertEqual(np.amax(np.abs(zero2[0][1].data)), 0)
 
     def test_finest_component_at_point(self):
-
         # Using the component mapping
 
         hg = gd.HierarchicalGridData(
@@ -1904,7 +1855,6 @@ class TestHierarchicalGridData(unittest.TestCase):
         )
 
     def test_call_evalute_with_spline(self):
-
         # Teting call is the same as evalute_with_spline
 
         hg = gd.HierarchicalGridData(self.grid_data)
@@ -1941,7 +1891,6 @@ class TestHierarchicalGridData(unittest.TestCase):
             hg_masked([(2, 3)])
 
     def test_ghost_zones_remove(self):
-
         hg = gd.HierarchicalGridData(self.grid_data_two_comp)
 
         def product(x, y):
@@ -2018,7 +1967,6 @@ class TestHierarchicalGridData(unittest.TestCase):
             hg.merge_refinement_levels()
 
     def test_coordinates(self):
-
         hg_coord = gd.HierarchicalGridData(self.grid_data).coordinates()
         # Test with multiple components
         hg2_coord = gd.HierarchicalGridData(
@@ -2031,7 +1979,6 @@ class TestHierarchicalGridData(unittest.TestCase):
         self.assertAlmostEqual(hg2_coord[1]((2, 3)), 3)
 
     def test_str(self):
-
         hg = gd.HierarchicalGridData(self.grid_data_two_comp)
         expected_str = "Available refinement levels (components):\n"
         expected_str += "0 (2)\n"
@@ -2093,7 +2040,6 @@ class TestHierarchicalGridData(unittest.TestCase):
         )
 
     def test_slice(self):
-
         hg = gd.HierarchicalGridData(self.grid_data)
 
         # Test cut is outside grid
@@ -2118,7 +2064,6 @@ class TestHierarchicalGridData(unittest.TestCase):
         self.assertEqual(hg, expected_hg)
 
     def test_coordinates_at(self):
-
         # Here we are also testing _call_component_method
 
         geom = gd.UniformGrid(

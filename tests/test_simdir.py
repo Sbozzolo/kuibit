@@ -24,13 +24,11 @@ from kuibit import simdir as sd
 
 class TestSimDir(unittest.TestCase):
     def setUp(self):
-
         # We use the output of a simple simulation to test that everything
         # is okay
         self.sim = sd.SimDir("tests/tov")
 
     def test__sanitize_path(self):
-
         with self.assertRaises(RuntimeError):
             # Not existing folder
             self.sim._sanitize_path("bubu")
@@ -40,7 +38,6 @@ class TestSimDir(unittest.TestCase):
             self.sim._sanitize_path("test_simdir")
 
     def test__scan_folders(self):
-
         # 5 par files: 2 in each output folders, and 1 in the main SIMFACTORY
         self.assertEqual(len(self.sim.parfiles), 5)
 
@@ -92,7 +89,6 @@ class TestSimDir(unittest.TestCase):
         self.assertEqual(len(sim_with_symlink.allfiles), 451)
 
     def test_pickle(self):
-
         path = "/tmp/sim.pickle"
 
         self.sim.save(path)

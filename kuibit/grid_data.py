@@ -633,7 +633,6 @@ class UniformGridData(BaseNumerical):
         if piecewise_constant or (
             self.num_dimensions != self.num_extended_dimensions
         ):
-
             ret = self._nearest_neighbor_interpolation(x_arr, ext=ext)
 
         else:
@@ -2143,7 +2142,6 @@ class HierarchicalGridData(BaseNumerical):
         # Next, we loop over all the components and check if their dx is an
         # integral multiple of dx_finest
         for comp in self.all_components:
-
             ref_level = comp.ref_level
             comp_ref_factor = comp.dx / self.finest_dx
 

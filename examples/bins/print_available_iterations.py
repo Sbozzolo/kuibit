@@ -20,7 +20,6 @@ from kuibit import argparse_helper as kah
 from kuibit.simdir import SimDir
 
 if __name__ == "__main__":
-
     desc = f"""{kah.get_program_name()} prints the list of the available
     iterations given a grid function. This can be used for shell scripts."""
     parser = kah.init_argparse(desc)

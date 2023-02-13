@@ -31,7 +31,6 @@ from kuibit.visualize_matplotlib import (
 )
 
 if __name__ == "__main__":
-
     desc = f"""\
 {kah.get_program_name()} plots or more 1D grid functions output by Carpet."""
 
@@ -94,7 +93,6 @@ if __name__ == "__main__":
                 raise ValueError(f"{var} is not available")
 
         for variable in args.variables:
-
             logger.debug(f"Reading variable {variable}")
             logger.debug(f"Variables available {reader}")
             var = reader[variable]

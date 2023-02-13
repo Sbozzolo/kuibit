@@ -59,7 +59,6 @@ class TestCactusTimers(unittest.TestCase):
         os.remove(path)
 
     def test_init(self):
-
         base = os.getcwd()
 
         self.assertTrue(
@@ -100,9 +99,7 @@ class TestCactusTimers(unittest.TestCase):
         )
 
     def test_keys(self):
-
         self.assertCountEqual(list(self.timers.keys()), [0, 1])
 
     def test_str(self):
-
         self.assertIn("[0, 1]", str(self.timers))

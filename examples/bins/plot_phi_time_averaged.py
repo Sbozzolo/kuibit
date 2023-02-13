@@ -31,7 +31,6 @@ from kuibit.visualize_matplotlib import (
 )
 
 if __name__ == "__main__":
-
     desc = """\
 
 {kah.get_program_name()} plots the azimuthal and time average of a given grid
@@ -106,7 +105,11 @@ window of time defined by tmin and tmax."""
     args = kah.get_args(parser)
     setup_matplotlib(rc_par_file=args.mpl_rc_file)
 
-    tmin, tmax, var_name, = (
+    (
+        tmin,
+        tmax,
+        var_name,
+    ) = (
         args.tmin,
         args.tmax,
         args.variable,

@@ -84,7 +84,14 @@ def compute_horizons_separation(horizon1, horizon2, resample=True):
 
     # We add sample_common to make sure that everything is defined on the same
     # interval.
-    (cen1_x, cen1_y, cen1_z, cen2_x, cen2_y, cen2_z,) = sample_common(
+    (
+        cen1_x,
+        cen1_y,
+        cen1_z,
+        cen2_x,
+        cen2_y,
+        cen2_z,
+    ) = sample_common(
         (
             horizon1.ah.centroid_x,
             horizon1.ah.centroid_y,
@@ -994,7 +1001,6 @@ class HorizonsDir:
 
         # We continue only if we find some files
         if self._num_ah_horizons > 0:
-
             # [0][0] is because the values are lists
             first_ah_file = tuple(self._ah_files.values())[0][0]
             with open(first_ah_file, "r") as fil:

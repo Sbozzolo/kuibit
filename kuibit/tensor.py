@@ -390,7 +390,6 @@ class Tensor(Generic[_T], BaseNumerical):
         return NotImplemented
 
     def __getattr__(self, attr: str):
-
         # This is how we transfer all the methods in _T to the Tensor itself.
         #
         # For example, if T is a TimeSeries, we would like to be able to call

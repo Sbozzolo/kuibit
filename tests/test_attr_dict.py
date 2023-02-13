@@ -22,7 +22,6 @@ from kuibit import attr_dict as ad
 
 class TestAttrDict(unittest.TestCase):
     def test_AttributeDictionary(self):
-
         dictionary = {"first": "a", "b": 2}
         attr_dict = ad.AttributeDictionary(dictionary)
 
@@ -49,7 +48,6 @@ class TestAttrDict(unittest.TestCase):
         self.assertCountEqual(attr_dict._elem, dictionary)
 
     def test_TransformDictionary(self):
-
         dictionary = {
             "first": [2, 1],
             "b": [3, 4],
@@ -68,7 +66,6 @@ class TestAttrDict(unittest.TestCase):
         self.assertCountEqual(tran_dict.keys(), ["first", "b", "third"])
 
     def test_pythonize_name_dict(self):
-
         names = ["energy", "rho[0]"]
 
         pyth_dict = ad.pythonize_name_dict(names)

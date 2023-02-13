@@ -22,7 +22,6 @@ from kuibit.simdir import SimDir
 
 class TestCactusTimers(unittest.TestCase):
     def test_nometadata(self):
-
         nometadata = SimDir("tests/tov").twopunctures
 
         with self.assertRaises(RuntimeError):
@@ -33,7 +32,6 @@ class TestCactusTimers(unittest.TestCase):
         self.assertFalse(nometadata.has_metadata)
 
     def test_metadata(self):
-
         sim = SimDir("tests/gwsample")
 
         met = sim.twopunctures

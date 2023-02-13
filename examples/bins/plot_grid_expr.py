@@ -39,7 +39,6 @@ from kuibit.visualize_matplotlib import (
 #       well.
 
 if __name__ == "__main__":
-
     desc = f"""\
 {kah.get_program_name()} plot a given expression involving grid functions.
 Use the name of the grid functions, and algebraic expressions. For example,
@@ -128,7 +127,6 @@ This is much faster but it is not as accurate."""
         ignore_symlinks=args.ignore_symlinks,
         pickle_file=args.pickle_file,
     ) as sim:
-
         logger.debug("Prepared SimDir")
         reader = sim.gridfunctions[args.plane]
         logger.debug(f"Variables available {reader}")

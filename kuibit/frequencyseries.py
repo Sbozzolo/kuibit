@@ -397,7 +397,6 @@ class FrequencySeries(BaseSeries):
         # is the actual inverse of taking the dft.
         #
         if self.fmin < 0:
-
             # TimeSeries.to_FrequencySeries() rearranges the frequency so that
             # negative are on the left and positive on the right. Here, we undo
             # that.

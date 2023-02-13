@@ -22,7 +22,6 @@ from kuibit import argparse_helper as kah
 from kuibit.simdir import SimDir
 
 if __name__ == "__main__":
-
     desc = f"""\
 {kah.get_program_name()} prints the point where a given grid function at a given
 iteration is maximum or minimum."""

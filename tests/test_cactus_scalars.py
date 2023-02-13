@@ -29,7 +29,6 @@ from kuibit import timeseries as ts
 
 class TestCactusScalar(unittest.TestCase):
     def test_OneScalar(self):
-
         # Filename not recogonized
         with self.assertRaises(RuntimeError):
             cs.OneScalar("123.h5")
@@ -78,7 +77,6 @@ class TestCactusScalar(unittest.TestCase):
         self.assertDictEqual(asc_bz._vars_columns, {"eps": 2})
 
     def test_OneScalar_magic_methods(self):
-
         path = "tests/tov/output-0000/static_tov/vel[0].maximum.asc"
         asc = cs.OneScalar(path)
 
@@ -87,7 +85,6 @@ class TestCactusScalar(unittest.TestCase):
         self.assertCountEqual(asc.keys(), ["vel[0]"])
 
     def test__scan_strings_for_columns(self):
-
         rx_columns = re.compile(r"^(\d+):(\w+(\[\d+\])?)$")
         rx_data_columns = re.compile(r"^# data columns: (.+)$")
 
@@ -136,7 +133,6 @@ class TestCactusScalar(unittest.TestCase):
         os.remove(path)
 
     def test_load(self):
-
         # no reduction, scalar, one file per group
         path = "tests/tov/output-0000/static_tov/carpet-timing..asc"
         asc_carp = cs.OneScalar(path)
@@ -162,7 +158,6 @@ class TestCactusScalar(unittest.TestCase):
         _ = asc.load("vel[0]")
 
     def test_AllScalars(self):
-
         sim = sd.SimDir("tests/tov")
 
         reader = cs.AllScalars(sim.allfiles, "average")
@@ -206,7 +201,6 @@ class TestCactusScalar(unittest.TestCase):
             reader["BOB"]
 
     def test_AllScalars_magic_methods(self):
-
         reader = cs.AllScalars(sd.SimDir("tests/tov").allfiles, "average")
         self.assertIn("rho", reader)
 
@@ -223,7 +217,6 @@ class TestCactusScalar(unittest.TestCase):
         self.assertEqual(1, reader.get("bubu", default=1))
 
     def test_ScalarsDir(self):
-
         # Not a SimDir
         with self.assertRaises(TypeError):
             cs.ScalarsDir(0)

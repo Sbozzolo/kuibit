@@ -70,7 +70,6 @@ class TestHorUtils(unittest.TestCase):
         )
 
     def test__two_centroids_as_Vectors(self):
-
         expected1 = Vector(
             [
                 TimeSeries(self.times, self.cen_x),
@@ -104,7 +103,6 @@ class TestHorUtils(unittest.TestCase):
             )
 
     def test_compute_separation_vector(self):
-
         expected = Vector(
             [
                 2 * TimeSeries(self.times, self.cen_x),
@@ -118,7 +116,6 @@ class TestHorUtils(unittest.TestCase):
         self.assertEqual(expected, separation_vec)
 
     def test_compute_separation(self):
-
         separation = hu.compute_separation(self.ho1, self.ho2)
 
         np.testing.assert_allclose(separation.t, self.times)

@@ -39,7 +39,6 @@ class TestGWMismatch(unittest.TestCase):
         self.ts2 = ts.TimeSeries(self.times, self.values2)
 
     def test_mismatch_from_strains(self):
-
         # Test with PyCBC.
         fmin = 10
         fmax = 15
@@ -237,7 +236,6 @@ class TestGWMismatch(unittest.TestCase):
             )
 
     def test_mismatch(self):
-
         fmin = 5
         fmax = 15
 
@@ -422,7 +420,6 @@ class TestGWMismatch(unittest.TestCase):
             pass
 
     def test_mismatch_from_psi4(self):
-
         fmin = 5
         fmax = 15
 
@@ -560,7 +557,6 @@ class TestGWMismatch(unittest.TestCase):
         )
 
     def test_mismatch_without_numba_installed(self):
-
         # We remove "njit" for the loaded module, so gwm thinks that numba is
         # not available
         if "njit" in gwm.__dict__:

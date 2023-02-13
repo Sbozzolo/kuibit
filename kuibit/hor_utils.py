@@ -76,7 +76,14 @@ def _two_centroids_as_Vectors(
 
     # We add sample_common to make sure that everything is defined on the same
     # interval.
-    (cen1_x, cen1_y, cen1_z, cen2_x, cen2_y, cen2_z,) = sample_common(
+    (
+        cen1_x,
+        cen1_y,
+        cen1_z,
+        cen2_x,
+        cen2_y,
+        cen2_z,
+    ) = sample_common(
         (
             horizon1.ah.centroid_x,
             horizon1.ah.centroid_y,

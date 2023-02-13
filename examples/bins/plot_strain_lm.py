@@ -31,7 +31,6 @@ from kuibit.visualize_matplotlib import (
 )
 
 if __name__ == "__main__":
-
     desc = f"""\
 {kah.get_program_name()} plots the (l,m) gravitational-wave strain. Optionally,
 a window function can be applied to the data before performing the integration.
@@ -97,7 +96,6 @@ the order as they appear in the TimeSeries method."""
         ignore_symlinks=args.ignore_symlinks,
         pickle_file=args.pickle_file,
     ) as sim:
-
         logger.debug("Prepared SimDir")
         reader = sim.gravitationalwaves
 

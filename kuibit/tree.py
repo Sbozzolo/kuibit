@@ -177,7 +177,6 @@ def merge_trees(
     """
 
     def walk_rec(nodes: Iterable[Tree]) -> Tree:
-
         # Check if all the trees start from the same node. We put the names into a
         # set, if the size of the set is not 1, then it means we have different
         # initial nodes.

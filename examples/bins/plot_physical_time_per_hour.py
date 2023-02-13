@@ -30,7 +30,6 @@ from kuibit.visualize_matplotlib import (
 )
 
 if __name__ == "__main__":
-
     desc = f"""\
 {kah.get_program_name()} plots how much physical time is being simulated per
 wall-time hour and day."""
@@ -57,7 +56,6 @@ wall-time hour and day."""
         ignore_symlinks=args.ignore_symlinks,
         pickle_file=args.pickle_file,
     ) as sim:
-
         logger.debug("Prepared SimDir")
 
         if "physical_time_per_hour" not in sim.ts.scalar:

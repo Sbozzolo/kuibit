@@ -23,7 +23,6 @@ from kuibit import argparse_helper as kah
 from kuibit.simdir import SimDir
 
 if __name__ == "__main__":
-
     desc = f"""{kah.get_program_name()} prints some of the interesting properties (as from
 QuasiLocalMeasures) for a given horizon at a given time. Cubic splines are used
 to interpolate between timesteps."""
@@ -62,7 +61,6 @@ to interpolate between timesteps."""
         ignore_symlinks=args.ignore_symlinks,
         pickle_file=args.pickle_file,
     ) as sim:
-
         sim_hor = sim.horizons
 
         logger.debug(

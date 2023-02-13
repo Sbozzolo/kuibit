@@ -23,7 +23,6 @@ from kuibit import argparse_helper as kah
 from kuibit.simdir import SimDir
 
 if __name__ == "__main__":
-
     desc = f"""\
 {kah.get_program_name()} creates a pickle file for the given simulation.
 If the file already exists, the simdir will be scanned again and the
