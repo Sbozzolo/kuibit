@@ -1442,7 +1442,7 @@ class AllGridFunctions:
                                 var_list.add(f)
                     except RuntimeError as exce:
                         raise RuntimeError(
-                            f"File {h5f} cannot be processed"
+                            f"File {f} cannot be processed"
                         ) from exce
 
             elif matched_ascii is not None:
