@@ -467,8 +467,9 @@ class TestOneHorizon(unittest.TestCase):
         variables = ["coordinates", "connectivity"]
 
         for line in lines:
-            if match := rx_scalars.match(line):
-                variables.append(match.groups()[0])
+            match_ = rx_scalars.match(line)
+            if match_:
+                variables.append(match_.groups()[0])
 
         self.assertCountEqual(
             ho.available_vtk_variables_at_iteration(0), variables
