@@ -1139,7 +1139,7 @@ class OneGridFunctionH5(BaseOneGridFunction):
                     # We don't need to do anything here.
                     pass
         except RuntimeError as exce:
-            raise RuntimeError(f"File {f} cannot be processed") from exce
+            raise RuntimeError(f"File {path} cannot be processed") from exce
 
     def _read_component_as_uniform_grid_data(
         self, path, iteration, ref_level, component
@@ -1234,7 +1234,7 @@ class OneGridFunctionH5(BaseOneGridFunction):
                 # to true
                 return all(is_param_true(param) for param in params_to_check)
         except RuntimeError as exce:
-            raise RuntimeError(f"File {file_} cannot be processed") from exce
+            raise RuntimeError(f"File {path} cannot be processed") from exce
 
     def clear_cache(self):
         """Remove all the cached entries.
