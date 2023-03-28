@@ -49,6 +49,13 @@ multiple ways to get the actual timeseries for a specific monopole. For instance
 The more interesting quantity is the gravitational-wave strain. To access this
 for a specific multipole, use the method :py:meth:`~.get_strain_lm()`.
 
+.. note::
+
+   ``kubit`` finds gravitational waves by finding ``psi4`` in the name of the
+   multipole variables. This is a user-adjustable parameters (in the par file),
+   so this might fail if you choose names that do not contain the word ``psi4``
+   (case insensitive).
+
 Strain
 ______
 
