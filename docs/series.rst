@@ -301,15 +301,15 @@ You can compute the discrete Fourier transform of a ``TimeSeries`` with the
 conventions are the same, except that we normalize the results. That is, instead
 of computing
 
-.. :math:
+.. math::
 
-   `A_k = \Sum_m^{n-1} a_m \extp(-2\pi i \frac{mk}{n})`
+   A_k = \sum_m^{n-1} a_m \exp(-2\pi i \frac{mk}{n})
 
 we compute
 
-.. :math:
+.. math::
 
-   `A_k = dt \Sum_m^{n-1} a_m \extp(-2\pi i \frac{mk}{n})`
+   A_k = dt \sum_m^{n-1} a_m \exp(-2\pi i \frac{mk}{n})
 
 Intuitively, this amounts to adding the measure of integration to obtain a
 "true" Fourier transform.
@@ -415,7 +415,7 @@ Inverse Fourier transform (to_TimeSeries)
 Using NumPy's ``fft``, return a ``TimeSeries`` that is the inverse Fourier
 transform. It is that ``to_TimeSeries()`` composed with ``to_FrequencySeries()``
 is the identity with the exception of the domain of definition. The time domain
-is from :math:`-1\slash (2 * \Delta f)` to :math:`1\slash (2 * \Delta f)`.
+is from :math:`-{(2 \Delta f)}^{-1}` to :math:`{(2 \Delta f)}^{-1}`.
 
 If only positive frequencies are found, we will assume that the original signal
 was real.
@@ -428,15 +428,15 @@ This uses NumPy's ``fft`` module, so the
 conventions are the same, except that we normalize the results. That is, instead
 of computing
 
-.. :math:
+.. math::
 
-   `a_m = \frac{1}{n} \Sum_k^{n-1} A_k \extp(2\pi i \frac{mk}{n})`
+   a_m = \frac{1}{n} \sum_k^{n-1} A_k \exp(2\pi i \frac{mk}{n})
 
 we compute
 
-.. :math:
+.. math::
 
-   `a_m = \frac{df}{n} \Sum_k^{n-1} A_k \extp(2\pi i \frac{mk}{n})`
+   a_m = \frac{df}{n} \sum_k^{n-1} A_k \exp(2\pi i \frac{mk}{n})
 
 Intuitively, this amounts to adding the measure of integration to obtain a
 "true" Fourier transform.
@@ -447,9 +447,9 @@ inner_product, and overlap
 Given :math:`h1, h2` frequency series and :math:`S_n` spectral noise density,
 the inner product is typically defined as
 
-.. :math:
+.. math::
 
-   `(h_1, h_2) = 4 \Re \int_{f_min}^{f_max} \frac{h_1 h_2^*}{S_n}`.
+   (h_1, h_2) = 4 \Re \int_{f_min}^{f_max} \frac{h_1 h_2^*}{S_n}
 
 The method :py:meth:`~.inner_product` computes this quantity, possibly for a
 network of detectors. If the noise is not provided, ``S_n`` will be fixed to
@@ -458,9 +458,9 @@ product for that weighted with that noise will be computed. Alternatively, if
 ``noises`` is a list of :py:class:`~.FrequencySeries`, then we will assume that
 the user wants to compute the network inner product:
 
-.. :math:
+.. math::
 
-   `(h_1, h_2)_{\textrm{network}} = \sum_{\mathrm{detectors}} (h_1, h_2)`
+   (h_1, h_2)_{\textrm{network}} = \sum_{\mathrm{detectors}} (h_1, h_2)
 
 where each detector has its own noise curve. Internally, ``h_1``, ``h_2``, and
 ``S_n`` will be resampled to a common frequency interval with the number of
@@ -479,9 +479,9 @@ be determined by the series. By default, ``f_min=0`` and ``f_max=inf``.
 
 With the inner product, one compute the overlap between two series:
 
-.. :math:
+.. math::
 
-   `\textrm{overlap} = (h_1, h_2) / \sqrt{(h_1, h_1)(h_2, h_2)}`
+   \textrm{overlap} = (h_1, h_2) / \sqrt{(h_1, h_1)(h_2, h_2)}
 
 Again, this can be unweighted, or noise-weighted, or for a network of
 detectors (if a list of noises is provided).
