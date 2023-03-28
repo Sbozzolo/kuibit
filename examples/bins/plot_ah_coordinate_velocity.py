@@ -91,7 +91,7 @@ given apparent horizon as a function of time."""
         plt.plot(vel[0], label=r"$v^x$")
         plt.plot(vel[1], label=r"$v^y$")
         plt.plot(vel[2], label=r"$v^z$")
-        plt.plot(vel.magn(), label=r"$\|v\|$")
+        plt.plot(vel.norm(), label=r"$\|v\|$")
         plt.legend()
 
         add_text_to_corner(f"AH {ah}", anchor="SW", offset=0.005)
