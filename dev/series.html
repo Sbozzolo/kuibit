@@ -311,7 +311,11 @@ cases in which splines are inaccurate.</p>
 <code class="docutils literal notranslate"><span class="pre">to_FrequencySeries</span></code> method. This uses NumPy’s <code class="docutils literal notranslate"><span class="pre">fft</span></code> module, so the
 conventions are the same, except that we normalize the results. That is, instead
 of computing</p>
+<div class="math notranslate nohighlight">
+\[A_k = \sum_m^{n-1} a_m \exp(-2\pi i \frac{mk}{n})\]</div>
 <p>we compute</p>
+<div class="math notranslate nohighlight">
+\[A_k = dt \sum_m^{n-1} a_m \exp(-2\pi i \frac{mk}{n})\]</div>
 <p>Intuitively, this amounts to adding the measure of integration to obtain a
 “true” Fourier transform.</p>
 <p>If the timeseries real, negative frequencies are
@@ -400,7 +404,7 @@ percentual value of the the maximum peak.</p>
 <p>Using NumPy’s <code class="docutils literal notranslate"><span class="pre">fft</span></code>, return a <code class="docutils literal notranslate"><span class="pre">TimeSeries</span></code> that is the inverse Fourier
 transform. It is that <code class="docutils literal notranslate"><span class="pre">to_TimeSeries()</span></code> composed with <code class="docutils literal notranslate"><span class="pre">to_FrequencySeries()</span></code>
 is the identity with the exception of the domain of definition. The time domain
-is from <span class="math notranslate nohighlight">\(-1\slash (2 * \Delta f)\)</span> to <span class="math notranslate nohighlight">\(1\slash (2 * \Delta f)\)</span>.</p>
+is from <span class="math notranslate nohighlight">\(-{(2 \Delta f)}^{-1}\)</span> to <span class="math notranslate nohighlight">\({(2 \Delta f)}^{-1}\)</span>.</p>
 <p>If only positive frequencies are found, we will assume that the original signal
 was real.</p>
 <p>Occasionally signals that are supposed to be real are turned into complex with
@@ -408,7 +412,11 @@ imaginary part that is zero to machine precision.</p>
 <p>This uses NumPy’s <code class="docutils literal notranslate"><span class="pre">fft</span></code> module, so the
 conventions are the same, except that we normalize the results. That is, instead
 of computing</p>
+<div class="math notranslate nohighlight">
+\[a_m = \frac{1}{n} \sum_k^{n-1} A_k \exp(2\pi i \frac{mk}{n})\]</div>
 <p>we compute</p>
+<div class="math notranslate nohighlight">
+\[a_m = \frac{df}{n} \sum_k^{n-1} A_k \exp(2\pi i \frac{mk}{n})\]</div>
 <p>Intuitively, this amounts to adding the measure of integration to obtain a
 “true” Fourier transform.</p>
 </section>
@@ -416,12 +424,16 @@ of computing</p>
 <h3>inner_product, and overlap<a class="headerlink" href="#inner-product-and-overlap" title="Permalink to this headline">¶</a></h3>
 <p>Given <span class="math notranslate nohighlight">\(h1, h2\)</span> frequency series and <span class="math notranslate nohighlight">\(S_n\)</span> spectral noise density,
 the inner product is typically defined as</p>
+<div class="math notranslate nohighlight">
+\[(h_1, h_2) = 4 \Re \int_{f_min}^{f_max} \frac{h_1 h_2^*}{S_n}\]</div>
 <p>The method <a class="reference internal" href="frequencyseries_ref.html#kuibit.frequencyseries.FrequencySeries.inner_product" title="kuibit.frequencyseries.FrequencySeries.inner_product"><code class="xref py py-meth docutils literal notranslate"><span class="pre">inner_product()</span></code></a> computes this quantity, possibly for a
 network of detectors. If the noise is not provided, <code class="docutils literal notranslate"><span class="pre">S_n</span></code> will be fixed to
 one. Alternatively, if the noise is a <a class="reference internal" href="frequencyseries_ref.html#kuibit.frequencyseries.FrequencySeries" title="kuibit.frequencyseries.FrequencySeries"><code class="xref py py-class docutils literal notranslate"><span class="pre">FrequencySeries</span></code></a>, the inner
 product for that weighted with that noise will be computed. Alternatively, if
 <code class="docutils literal notranslate"><span class="pre">noises</span></code> is a list of <a class="reference internal" href="frequencyseries_ref.html#kuibit.frequencyseries.FrequencySeries" title="kuibit.frequencyseries.FrequencySeries"><code class="xref py py-class docutils literal notranslate"><span class="pre">FrequencySeries</span></code></a>, then we will assume that
 the user wants to compute the network inner product:</p>
+<div class="math notranslate nohighlight">
+\[(h_1, h_2)_{\textrm{network}} = \sum_{\mathrm{detectors}} (h_1, h_2)\]</div>
 <p>where each detector has its own noise curve. Internally, <code class="docutils literal notranslate"><span class="pre">h_1</span></code>, <code class="docutils literal notranslate"><span class="pre">h_2</span></code>, and
 <code class="docutils literal notranslate"><span class="pre">S_n</span></code> will be resampled to a common frequency interval with the number of
 points of the series with fewest points. Hence, the accuracy of the computation
@@ -436,6 +448,8 @@ transform typically diverge around zero, so the result of the integration is
 not accurate). Hence, one should always use physical limits.</p>
 </div>
 <p>With the inner product, one compute the overlap between two series:</p>
+<div class="math notranslate nohighlight">
+\[\textrm{overlap} = (h_1, h_2) / \sqrt{(h_1, h_1)(h_2, h_2)}\]</div>
 <p>Again, this can be unweighted, or noise-weighted, or for a network of
 detectors (if a list of noises is provided).</p>
 <p>If you can guarantee that all the series have the same domain (including the noise),
@@ -590,7 +604,18 @@ returns a compatible object.</p>
     </form>
     </div>
 </div>
-<script>$('#searchbox').show(0);</script>
+<script>$('#searchbox').show(0);</script><div role="note" aria-label="version link">
+  <h3>Versions</h3>
+    <ul class="this-page-menu">
+      <li><a href="dev/series.html" rel="nofollow"> Development </a></li>
+      <li><a href="#" rel="nofollow"> Master </a></li>
+
+      
+      <li><a href="1.3.6/series.html" rel="nofollow"> 1.3.6 </a></li>
+      
+
+    </ul>
+ </div>
         </div>
       </div>
       <div class="clearer"></div>
@@ -615,7 +640,7 @@ returns a compatible object.</p>
       </ul>
     </div>
     <div class="footer" role="contentinfo">
-        &#169; Copyright 2020-2022, Gabriele Bozzola.
+        &#169; Copyright 2020-2023, Gabriele Bozzola.
       Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 4.3.2.
     </div>
   </body>
