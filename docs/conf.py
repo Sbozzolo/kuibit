@@ -76,6 +76,12 @@ html_logo = '../logo.png'
 
 html_show_sourcelink = False
 
+html_sidebars = {
+   '**': ['localtoc.html', 'relations.html', 'sourcelink.html', 'searchbox.html', 'versions.html'],
+}
+
+html_context = {'versions': ['1.3.6']}
+
 html_theme_options = {
     "maincolor": "#228B22",
 }
