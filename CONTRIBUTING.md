@@ -146,4 +146,5 @@ When releasing a new version, these are the steps:
 - Update the dependencies with `poetry update`.
 - Run the tests.
 - Tag a release.
+- Add a new version to the `versions` variable in `docs/conf.py`.
 - Clean up the release notes on `GitHub`.
