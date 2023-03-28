@@ -193,10 +193,10 @@ data is used if available, otherwise higher dimensional data is used."""
 
             # Here we just have to read the data
 
-            var_1D = sim.gridfunctions[axis][var_name]
+            var = sim.gridfunctions[axis][var_name]
 
             if iteration == -1:
-                iteration = var_1D.available_iterations[-1]
+                iteration = var.available_iterations[-1]
 
             time = var.time_at_iteration(iteration)
 
