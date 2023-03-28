@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-# Copyright (C) 2020-2022 Gabriele Bozzola
+# Copyright (C) 2020-2023 Gabriele Bozzola
 # Copyright (C) 2020 Wolfgang Kastaun
 #
 # This program is free software; you can redistribute it and/or modify it under
