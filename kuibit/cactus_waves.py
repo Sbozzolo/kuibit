@@ -1689,7 +1689,7 @@ class WavesDir(mp.MultipoleAllDets):
 
     """
 
-    def __init__(self, sd, l_min, var, derived_type_one_det):
+    def __init__(self, sd, l_min: int, var: str, derived_type_one_det):
         """Constructor.
 
         ``derived_type_one_det`` is the type that the values of this
@@ -1699,10 +1699,14 @@ class WavesDir(mp.MultipoleAllDets):
         :type sd: :py:class:`~.SimDir`
         :param l_min: Minimum value of ``l`` to consider.
         :type l_min: int
-        :param var: Name of the variable that has be consider
+        :param var: Name of the variable that has be considered. The constructor
+                    will pattern-match the available multipoles and find the first
+                    one that contains this name (case insensitive). Users can
+                    customize the name in the Multipole thorn settings in the par
+                    file.
         :type var: str (Psi4 or Phi2)
-        :param derived_type_one_det: Class of the derived object that
-                                     has to be initialized.
+        :param derived_type_one_det: Class of the derived object that has to be
+                                     initialized.
         :type derived_type_one_det: class
 
         """
@@ -1716,9 +1720,19 @@ class WavesDir(mp.MultipoleAllDets):
 
         data = []
 
+        # First, we need to find the actual name of the multipole. This can be
+        # customized in the par file, but it is reasonable to assume that they
+        # are going to include strings like Psi4 (or Phi2). So, we find which
+        # name contains the word "var" (case insensitive).
+        multipole_name = None
+
+        for name in sd.multipoles.keys():
+            if var.casefold() in name.casefold():
+                multipole_name = name
+
         # We have to collect data only if var is available
-        if var in sd.multipoles:
-            psi4_mpalldets = sd.multipoles[var]
+        if multipole_name:
+            psi4_mpalldets = sd.multipoles[multipole_name]
 
             # Now we have to prepare the data for the constructor of the base class
             # The data has format:

@@ -85,6 +85,8 @@ are:
 - Fix optional positional arguments to `series._local_extrema`.
 - Fix algorithm to compute hash for `UniformGrid`.
 - Make classes that should not hashed unhashable.
+- `GravitationalWaves` now find multipole variables that contain `psi4` (as
+  opposed to being identically to `Psi4`)
 
 #### Detector sensitivity curves
 
