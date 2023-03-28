@@ -181,7 +181,7 @@ Some basic useful functions are :py:meth:`~.mean`, :py:meth:`~.integral`,
 :py:meth:`~.norm1`, or :py:meth:`~.norm2`. In general, there's a
 :py:meth:`~.norm_p`, computed as
 
-.. :math:
+.. math::
 
    \| u \|_p = \left( \Delta v  \sum \|u \| \right)^{(1/p)}
 
