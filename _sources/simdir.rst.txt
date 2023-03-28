@@ -75,8 +75,8 @@ can use
 
 .. code-block:: python
 
-    timeseries = sd.ts
-    # or timeseries = sd.timeseries
+    timeseries = sim.ts
+    # or timeseries = sim.timeseries
 
 The resulting object is a :py:class:`~.ScalarsDir`. The page
 :ref:`cactus_scalars:Scalar data` contains a lot of information on how to use
@@ -87,7 +87,7 @@ decompositions`):
 
 .. code-block:: python
 
-    multipoles = sd.multipoles
+    multipoles = sim.multipoles
 
 Some useful conventions
 ------------------------
