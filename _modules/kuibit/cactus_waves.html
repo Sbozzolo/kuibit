@@ -1736,7 +1736,7 @@
 
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sd</span><span class="p">,</span> <span class="n">l_min</span><span class="p">,</span> <span class="n">var</span><span class="p">,</span> <span class="n">derived_type_one_det</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sd</span><span class="p">,</span> <span class="n">l_min</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">var</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">derived_type_one_det</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Constructor.</span>
 
 <span class="sd">        ``derived_type_one_det`` is the type that the values of this</span>
@@ -1746,10 +1746,14 @@
 <span class="sd">        :type sd: :py:class:`~.SimDir`</span>
 <span class="sd">        :param l_min: Minimum value of ``l`` to consider.</span>
 <span class="sd">        :type l_min: int</span>
-<span class="sd">        :param var: Name of the variable that has be consider</span>
+<span class="sd">        :param var: Name of the variable that has be considered. The constructor</span>
+<span class="sd">                    will pattern-match the available multipoles and find the first</span>
+<span class="sd">                    one that contains this name (case insensitive). Users can</span>
+<span class="sd">                    customize the name in the Multipole thorn settings in the par</span>
+<span class="sd">                    file.</span>
 <span class="sd">        :type var: str (Psi4 or Phi2)</span>
-<span class="sd">        :param derived_type_one_det: Class of the derived object that</span>
-<span class="sd">                                     has to be initialized.</span>
+<span class="sd">        :param derived_type_one_det: Class of the derived object that has to be</span>
+<span class="sd">                                     initialized.</span>
 <span class="sd">        :type derived_type_one_det: class</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -1763,9 +1767,19 @@
 
         <span class="n">data</span> <span class="o">=</span> <span class="p">[]</span>
 
+        <span class="c1"># First, we need to find the actual name of the multipole. This can be</span>
+        <span class="c1"># customized in the par file, but it is reasonable to assume that they</span>
+        <span class="c1"># are going to include strings like Psi4 (or Phi2). So, we find which</span>
+        <span class="c1"># name contains the word &quot;var&quot; (case insensitive).</span>
+        <span class="n">multipole_name</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">sd</span><span class="o">.</span><span class="n">multipoles</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+            <span class="k">if</span> <span class="n">var</span><span class="o">.</span><span class="n">casefold</span><span class="p">()</span> <span class="ow">in</span> <span class="n">name</span><span class="o">.</span><span class="n">casefold</span><span class="p">():</span>
+                <span class="n">multipole_name</span> <span class="o">=</span> <span class="n">name</span>
+
         <span class="c1"># We have to collect data only if var is available</span>
-        <span class="k">if</span> <span class="n">var</span> <span class="ow">in</span> <span class="n">sd</span><span class="o">.</span><span class="n">multipoles</span><span class="p">:</span>
-            <span class="n">psi4_mpalldets</span> <span class="o">=</span> <span class="n">sd</span><span class="o">.</span><span class="n">multipoles</span><span class="p">[</span><span class="n">var</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">multipole_name</span><span class="p">:</span>
+            <span class="n">psi4_mpalldets</span> <span class="o">=</span> <span class="n">sd</span><span class="o">.</span><span class="n">multipoles</span><span class="p">[</span><span class="n">multipole_name</span><span class="p">]</span>
 
             <span class="c1"># Now we have to prepare the data for the constructor of the base class</span>
             <span class="c1"># The data has format:</span>
