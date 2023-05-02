@@ -11,12 +11,12 @@ jobs:
         python-version: [ '3.7', '3.8', '3.11' ]
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
         with:
           fetch-depth: 1
 
       - name: Set up Python
-        uses: actions/setup-python@v2
+        uses: actions/setup-python@v4
         with:
           python-version: ${{ matrix.python-version }}
 
@@ -28,7 +28,7 @@ jobs:
           virtualenvs-in-project: true
 
       - name: Load cached Poetry virtualenv
-        uses: actions/cache@v2
+        uses: actions/cache@v3
         id: cached-poetry-dependencies
         with:
           path: .venv
@@ -46,7 +46,7 @@ jobs:
           poetry run coverage xml
 
       - name: Upload coverage to Codecov
-        uses: codecov/codecov-action@v2
+        uses: codecov/codecov-action@v3
         if: runner.python-version == '3.8' && github.event_name != 'pull_request'
         with:
           file: coverage.xml
