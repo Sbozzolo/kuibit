@@ -1,0 +1,162 @@
+
+
+<!doctype html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+    <title>print_available_timeseries.py &#8212; kuibit 1.4.0 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/bizstyle.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/css/custom.css" />
+    
+    <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+    <script src="../../_static/jquery.js"></script>
+    <script src="../../_static/underscore.js"></script>
+    <script src="../../_static/doctools.js"></script>
+    <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="../../_static/bizstyle.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="print_grid_point_minmax.py" href="print_grid_point_minmax.html" />
+    <link rel="prev" title="print_available_iterations.py" href="print_available_iterations.html" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0" />
+    <!--[if lt IE 9]>
+    <script src="_static/css3-mediaqueries.js"></script>
+    <![endif]-->
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="print_grid_point_minmax.html" title="print_grid_point_minmax.py"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="print_available_iterations.html" title="print_available_iterations.py"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">kuibit 1.4.0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">print_available_timeseries.py</a></li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <section id="print-available-timeseries-py">
+<h1>print_available_timeseries.py<a class="headerlink" href="#print-available-timeseries-py" title="Permalink to this headline">¶</a></h1>
+<p><code class="docutils literal notranslate"><span class="pre">print_available_timeseries</span></code> prints the list of timeseries available to
+<code class="docutils literal notranslate"><span class="pre">kuibit</span></code> in the given data folder.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="ch">#!/usr/bin/env python3</span>
+<span class="c1"># PYTHON_ARGCOMPLETE_OK</span>
+
+<span class="c1"># Copyright (C) 2021-2023 Gabriele Bozzola</span>
+<span class="c1">#</span>
+<span class="c1"># This program is free software; you can redistribute it and/or modify it under</span>
+<span class="c1"># the terms of the GNU General Public License as published by the Free Software</span>
+<span class="c1"># Foundation; either version 3 of the License, or (at your option) any later</span>
+<span class="c1"># version.</span>
+<span class="c1">#</span>
+<span class="c1"># This program is distributed in the hope that it will be useful, but WITHOUT</span>
+<span class="c1"># ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS</span>
+<span class="c1"># FOR A PARTICULAR PURPOSE. See the GNU General Public License for more</span>
+<span class="c1"># details.</span>
+<span class="c1">#</span>
+<span class="c1"># You should have received a copy of the GNU General Public License along with</span>
+<span class="c1"># this program; if not, see &lt;https://www.gnu.org/licenses/&gt;.</span>
+
+<span class="kn">from</span> <span class="nn">kuibit</span> <span class="kn">import</span> <span class="n">argparse_helper</span> <span class="k">as</span> <span class="n">kah</span>
+<span class="kn">from</span> <span class="nn">kuibit.simdir</span> <span class="kn">import</span> <span class="n">SimDir</span>
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+    <span class="n">desc</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;&quot;&quot;</span><span class="si">{</span><span class="n">kah</span><span class="o">.</span><span class="n">get_program_name</span><span class="p">()</span><span class="si">}</span><span class="s2"> prints the list of timeseries</span>
+<span class="s2">    available to kuibit in the given data folder.&quot;&quot;&quot;</span>
+    <span class="n">parser</span> <span class="o">=</span> <span class="n">kah</span><span class="o">.</span><span class="n">init_argparse</span><span class="p">(</span><span class="n">desc</span><span class="p">)</span>
+    <span class="n">args</span> <span class="o">=</span> <span class="n">kah</span><span class="o">.</span><span class="n">get_args</span><span class="p">(</span><span class="n">parser</span><span class="p">)</span>
+    <span class="k">with</span> <span class="n">SimDir</span><span class="p">(</span>
+        <span class="n">args</span><span class="o">.</span><span class="n">datadir</span><span class="p">,</span>
+        <span class="n">ignore_symlinks</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">ignore_symlinks</span><span class="p">,</span>
+        <span class="n">pickle_file</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">pickle_file</span><span class="p">,</span>
+    <span class="p">)</span> <span class="k">as</span> <span class="n">sim</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">sim</span><span class="o">.</span><span class="n">timeseries</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="../../index.html">
+              <img class="logo" src="../../_static/logo.png" alt="Logo"/>
+            </a></p>
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="print_available_iterations.html"
+                        title="previous chapter">print_available_iterations.py</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="print_grid_point_minmax.html"
+                        title="next chapter">print_grid_point_minmax.py</a></p>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script><div role="note" aria-label="version link">
+  <h3>Versions</h3>
+    <ul class="this-page-menu">
+      <li><a href="../../dev/examples/bins/print_available_timeseries.html" rel="nofollow"> Development </a></li>
+      <li><a href="#" rel="nofollow"> Master </a></li>
+
+      
+      <li><a href="../../1.3.6/examples/bins/print_available_timeseries.html" rel="nofollow"> 1.3.6 </a></li>
+      
+      <li><a href="../../1.4.0/examples/bins/print_available_timeseries.html" rel="nofollow"> 1.4.0 </a></li>
+      
+
+    </ul>
+ </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="print_grid_point_minmax.html" title="print_grid_point_minmax.py"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="print_available_iterations.html" title="print_available_iterations.py"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">kuibit 1.4.0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">print_available_timeseries.py</a></li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2020-2023, Gabriele Bozzola.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 4.3.2.
+    </div>
+  </body>
+</html>

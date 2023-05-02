@@ -1,0 +1,341 @@
+
+
+<!doctype html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>kuibit.tree &#8212; kuibit 1.4.0 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/bizstyle.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/css/custom.css" />
+    
+    <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+    <script src="../../_static/jquery.js"></script>
+    <script src="../../_static/underscore.js"></script>
+    <script src="../../_static/doctools.js"></script>
+    <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="../../_static/bizstyle.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0" />
+    <!--[if lt IE 9]>
+    <script src="_static/css3-mediaqueries.js"></script>
+    <![endif]-->
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">kuibit 1.4.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../index.html" accesskey="U">Module code</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">kuibit.tree</a></li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for kuibit.tree</h1><div class="highlight"><pre>
+<span></span><span class="ch">#!/usr/bin/env python3</span>
+
+<span class="c1"># Copyright (C) 2022-2023 Gabriele Bozzola</span>
+<span class="c1">#</span>
+<span class="c1"># This program is free software; you can redistribute it and/or modify it under</span>
+<span class="c1"># the terms of the GNU General Public License as published by the Free Software</span>
+<span class="c1"># Foundation; either version 3 of the License, or (at your option) any later</span>
+<span class="c1"># version.</span>
+<span class="c1">#</span>
+<span class="c1"># This program is distributed in the hope that it will be useful, but WITHOUT</span>
+<span class="c1"># ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS</span>
+<span class="c1"># FOR A PARTICULAR PURPOSE. See the GNU General Public License for more</span>
+<span class="c1"># details.</span>
+<span class="c1">#</span>
+<span class="c1"># You should have received a copy of the GNU General Public License along with</span>
+<span class="c1"># this program; if not, see &lt;https://www.gnu.org/licenses/&gt;.</span>
+
+<span class="sd">&quot;&quot;&quot;The :py:mod:`~.tree` module provides a data structure to work with trees.</span>
+
+<span class="sd">The :py:class:`~.Tree` describes one node of a tree with a name and a value. The</span>
+<span class="sd">node has any number of children, which are objects of the type</span>
+<span class="sd">:py:class:`~.Tree` themselves. (There is no real distinction on what is a node</span>
+<span class="sd">and what is a tree.) Given a :py:class:`~.Tree`, the children can be accessed by</span>
+<span class="sd">index or by name. :py:class:`~.Tree` can also be exported to dictionaries or</span>
+<span class="sd">JSON strings.</span>
+
+<span class="sd">Different trees can be combined with the function :py:func:`~.merge_trees`,</span>
+<span class="sd">which acts in the followin way. It takes any number of nodes that share the name</span>
+<span class="sd">and create a new tree with that name. The children of this new tree are obtained</span>
+<span class="sd">by combining all the children of the given nodes, and when children have the</span>
+<span class="sd">same name, the new value is obtained by applying a given function (e.g., summing</span>
+<span class="sd">up).</span>
+
+<span class="sd">Currently, the main use of this structure in ``kuibit`` is for timers.</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="c1"># from __future__ import annotations allows us to postpone the evaluation of</span>
+<span class="c1"># type hints. Without it, we would not be able to define type hints for a</span>
+<span class="c1"># recursive structure.</span>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">annotations</span>
+
+<span class="kn">import</span> <span class="nn">json</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">Iterable</span><span class="p">,</span> <span class="n">Union</span>
+
+
+<div class="viewcode-block" id="Tree"><a class="viewcode-back" href="../../tree_ref.html#kuibit.tree.Tree">[docs]</a><span class="k">class</span> <span class="nc">Tree</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Represent one node of a tree (and recursively, the tree itself).</span>
+
+<span class="sd">    :ivar name: Name of the node.</span>
+<span class="sd">    :ivar value: Value of the node.</span>
+<span class="sd">    :ivar children: Tuple with the nodes that are children of this one.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">children</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">Tree</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span> <span class="o">=</span> <span class="p">()</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Constructor.&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">name</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="n">value</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">children</span> <span class="o">=</span> <span class="n">children</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">is_leaf</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return whether the node is a leaf node or not.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">children</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">tot_value_leaves</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return the sum of all the values in all the levas.</span>
+
+<span class="sd">        If the node has no children, return the value of the node itself.</span>
+
+<span class="sd">        :returns: Cumulative values of the children.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_leaf</span><span class="p">:</span>
+            <span class="k">return</span> <span class="nb">sum</span><span class="p">(</span><span class="n">child</span><span class="o">.</span><span class="n">tot_value_leaves</span> <span class="k">for</span> <span class="n">child</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">children</span><span class="p">)</span>
+
+        <span class="c1"># We have no children</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">value</span>
+
+    <span class="k">def</span> <span class="fm">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">child_num_or_name</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Tree</span><span class="p">:</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">child_num_or_name</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">children</span><span class="p">[</span><span class="n">child_num_or_name</span><span class="p">]</span>
+            <span class="k">except</span> <span class="ne">IndexError</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s2">&quot;Child number </span><span class="si">{</span><span class="n">child_num_or_name</span><span class="si">}</span><span class="s2"> not available&quot;</span>
+                <span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">child</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">children</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">child</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="n">child_num_or_name</span><span class="p">:</span>
+                    <span class="k">return</span> <span class="n">child</span>
+
+            <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Child named </span><span class="si">{</span><span class="n">child_num_or_name</span><span class="si">}</span><span class="s2"> not available&quot;</span><span class="p">)</span>
+
+<div class="viewcode-block" id="Tree.to_dict"><a class="viewcode-back" href="../../tree_ref.html#kuibit.tree.Tree.to_dict">[docs]</a>    <span class="k">def</span> <span class="nf">to_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Convert the tree into a dictionary.</span>
+
+<span class="sd">        The conversion happens in the following way: each node is converted into</span>
+<span class="sd">        a dictionary with two or three elements: the name, the value, and, if</span>
+<span class="sd">        there are children, a list of children. In turn, the children are</span>
+<span class="sd">        represented as dictionaries in the same way.</span>
+
+<span class="sd">        :returns: A dictionary representing the node and all its children.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">ret_dict</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="s2">&quot;value&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">value</span><span class="p">}</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_leaf</span><span class="p">:</span>
+            <span class="n">ret_dict</span><span class="p">[</span><span class="s2">&quot;children&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span>
+                <span class="n">child</span><span class="o">.</span><span class="n">to_dict</span><span class="p">()</span> <span class="k">for</span> <span class="n">child</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">children</span>
+            <span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">ret_dict</span></div>
+
+<div class="viewcode-block" id="Tree.to_json"><a class="viewcode-back" href="../../tree_ref.html#kuibit.tree.Tree.to_json">[docs]</a>    <span class="k">def</span> <span class="nf">to_json</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Convert the tree into a string with its JSON representation.</span>
+
+<span class="sd">        :returns: String containing the JSON representation of the tree.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">to_dict</span><span class="p">())</span></div>
+
+    <span class="k">def</span> <span class="fm">__truediv__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tree</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return a new tree with all the values are divided by the given one.&quot;&quot;&quot;</span>
+
+        <span class="c1"># TODO (REFACTORING): Implement other arithmetic operations</span>
+        <span class="c1">#</span>
+        <span class="c1"># It would be straightforward to abstract away this method and implement</span>
+        <span class="c1"># all the arithmetic operations. We just need to call the correct method</span>
+        <span class="c1"># when setting value=...</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">)):</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;Given value is not a number&quot;</span><span class="p">)</span>
+
+        <span class="k">def</span> <span class="nf">walk_rec</span><span class="p">(</span><span class="n">node</span><span class="p">:</span> <span class="n">Tree</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tree</span><span class="p">:</span>
+            <span class="k">return</span> <span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)(</span>
+                <span class="n">name</span><span class="o">=</span><span class="n">node</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
+                <span class="n">value</span><span class="o">=</span><span class="n">node</span><span class="o">.</span><span class="n">value</span> <span class="o">/</span> <span class="n">value</span><span class="p">,</span>
+                <span class="n">children</span><span class="o">=</span><span class="nb">tuple</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="n">walk_rec</span><span class="p">,</span> <span class="n">node</span><span class="o">.</span><span class="n">children</span><span class="p">)),</span>
+            <span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">walk_rec</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">value</span><span class="si">}</span><span class="s2">&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__eq__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">:</span> <span class="n">Tree</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+        <span class="k">return</span> <span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="n">other</span><span class="o">.</span><span class="n">name</span>
+            <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">value</span> <span class="o">==</span> <span class="n">other</span><span class="o">.</span><span class="n">value</span>
+            <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">children</span> <span class="o">==</span> <span class="n">other</span><span class="o">.</span><span class="n">children</span>
+        <span class="p">)</span>
+
+    <span class="k">def</span> <span class="fm">__hash__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return the hash of this object.</span>
+
+<span class="sd">        Since the entire tree has to be traversed, this is an expensive</span>
+<span class="sd">        operation!</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># We add the hash mostly because we also have __eq__. Realistically,</span>
+        <span class="c1"># this function should not be used. We combine hashes by taking the hash</span>
+        <span class="c1"># of the tuple.</span>
+        <span class="k">return</span> <span class="nb">hash</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">value</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">children</span><span class="p">))</span></div>
+
+
+<div class="viewcode-block" id="merge_trees"><a class="viewcode-back" href="../../tree_ref.html#kuibit.tree.merge_trees">[docs]</a><span class="k">def</span> <span class="nf">merge_trees</span><span class="p">(</span>
+    <span class="n">trees</span><span class="p">:</span> <span class="n">Iterable</span><span class="p">[</span><span class="n">Tree</span><span class="p">],</span>
+    <span class="n">merge_function</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[[</span><span class="n">Iterable</span><span class="p">[</span><span class="nb">float</span><span class="p">]],</span> <span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tree</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Combine multiple trees that start from the same place to a new one.</span>
+
+<span class="sd">    When multiple nodes are found at the same level with the same name, apply</span>
+<span class="sd">    `merge_function` to the list of values to generate the new value. The</span>
+<span class="sd">    default is to sum them up, but another good idea would be to take the mean.</span>
+
+<span class="sd">    The algorithm that mergers the tree is simple: it combines all the children</span>
+<span class="sd">    of any given node (as identified by the name) across the tree. Therefore,</span>
+<span class="sd">    the trees are meaningfully merged only if they are already relatively</span>
+<span class="sd">    similar one with the other.</span>
+
+<span class="sd">    :param trees: List of trees that have to be merged. They have to start from</span>
+<span class="sd">                  a node with the same name.</span>
+
+<span class="sd">    :param merge_function: Function that has to be applied to reduce the various</span>
+<span class="sd">                           values to a single one.</span>
+
+<span class="sd">    :returns: A new tree with all the nodes from the given trees.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">walk_rec</span><span class="p">(</span><span class="n">nodes</span><span class="p">:</span> <span class="n">Iterable</span><span class="p">[</span><span class="n">Tree</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Tree</span><span class="p">:</span>
+        <span class="c1"># Check if all the trees start from the same node. We put the names into a</span>
+        <span class="c1"># set, if the size of the set is not 1, then it means we have different</span>
+        <span class="c1"># initial nodes.</span>
+        <span class="n">root_names</span> <span class="o">=</span> <span class="p">{</span><span class="n">node</span><span class="o">.</span><span class="n">name</span> <span class="k">for</span> <span class="n">node</span> <span class="ow">in</span> <span class="n">nodes</span><span class="p">}</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">root_names</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s2">&quot;Trees do not start with the same base node&quot;</span><span class="p">)</span>
+
+        <span class="c1"># This is the algorithm we implement to merge different trees. The</span>
+        <span class="c1"># tricky part here is to extend the children list or aggregate children</span>
+        <span class="c1"># with the same name using the function `merge_function`.</span>
+        <span class="c1">#</span>
+        <span class="c1"># First, we combine all the children in the same list. This is going to</span>
+        <span class="c1"># include duplicates, i.e. children with the same name. The next step is</span>
+        <span class="c1"># to apply this function recursively on each subgroup of children that</span>
+        <span class="c1"># share the same name. In the process, we collect the Trees as new</span>
+        <span class="c1"># children. Eventually, we reach the case in which we do not have any</span>
+        <span class="c1"># children. Threfore, the list comprehension that activates the</span>
+        <span class="c1"># recursion is not invoked (because child_groups is empty), so recursion</span>
+        <span class="c1"># stops.</span>
+
+        <span class="c1"># All the children including duplicates</span>
+        <span class="n">children</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">Tree</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">node</span> <span class="ow">in</span> <span class="n">nodes</span><span class="p">:</span>
+            <span class="n">children</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">children</span><span class="p">)</span>
+
+        <span class="c1"># Form the subgroups that share the same name. children_groups is a</span>
+        <span class="c1"># dictionary that maps names with lists of Trees (having the same name)</span>
+        <span class="n">children_groups</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">list</span><span class="p">[</span><span class="n">Tree</span><span class="p">]]</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="c1"># We go over all the children and sort them</span>
+        <span class="k">for</span> <span class="n">child</span> <span class="ow">in</span> <span class="n">children</span><span class="p">:</span>
+            <span class="n">children_groups</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="n">child</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="p">[])</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">child</span><span class="p">)</span>
+
+        <span class="c1"># Now, we apply recursively this function on the various subgroups</span>
+        <span class="n">pruned_children</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="n">walk_rec</span><span class="p">(</span><span class="n">nodes</span><span class="p">)</span> <span class="k">for</span> <span class="n">nodes</span> <span class="ow">in</span> <span class="n">children_groups</span><span class="o">.</span><span class="n">values</span><span class="p">()</span>
+        <span class="p">]</span>
+
+        <span class="c1"># root_names is a set, root_names.pop() is the only element</span>
+        <span class="k">return</span> <span class="n">Tree</span><span class="p">(</span>
+            <span class="n">name</span><span class="o">=</span><span class="n">root_names</span><span class="o">.</span><span class="n">pop</span><span class="p">(),</span>
+            <span class="n">value</span><span class="o">=</span><span class="n">merge_function</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">value</span> <span class="k">for</span> <span class="n">node</span> <span class="ow">in</span> <span class="n">nodes</span><span class="p">),</span>
+            <span class="n">children</span><span class="o">=</span><span class="nb">tuple</span><span class="p">(</span><span class="n">pruned_children</span><span class="p">),</span>
+        <span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">walk_rec</span><span class="p">(</span><span class="n">trees</span><span class="p">)</span></div>
+</pre></div>
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="../../index.html">
+              <img class="logo" src="../../_static/logo.png" alt="Logo"/>
+            </a></p>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script><div role="note" aria-label="version link">
+  <h3>Versions</h3>
+    <ul class="this-page-menu">
+      <li><a href="../../dev/_modules/kuibit/tree.html" rel="nofollow"> Development </a></li>
+      <li><a href="#" rel="nofollow"> Master </a></li>
+
+      
+      <li><a href="../../1.3.6/_modules/kuibit/tree.html" rel="nofollow"> 1.3.6 </a></li>
+      
+      <li><a href="../../1.4.0/_modules/kuibit/tree.html" rel="nofollow"> 1.4.0 </a></li>
+      
+
+    </ul>
+ </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">kuibit 1.4.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../index.html" >Module code</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">kuibit.tree</a></li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2020-2023, Gabriele Bozzola.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 4.3.2.
+    </div>
+  </body>
+</html>

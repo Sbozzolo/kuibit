@@ -1,0 +1,195 @@
+
+
+<!doctype html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+    <title>Working with timers &#8212; kuibit 1.4.0 documentation</title>
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="_static/bizstyle.css" />
+    <link rel="stylesheet" type="text/css" href="_static/css/custom.css" />
+    
+    <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/doctools.js"></script>
+    <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="_static/bizstyle.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Working with tensors" href="tensor.html" />
+    <link rel="prev" title="Sensitivity (power spectral noise) curves of known detectors" href="sensitivity_curves.html" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0" />
+    <!--[if lt IE 9]>
+    <script src="_static/css3-mediaqueries.js"></script>
+    <![endif]-->
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="tensor.html" title="Working with tensors"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="sensitivity_curves.html" title="Sensitivity (power spectral noise) curves of known detectors"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">kuibit 1.4.0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">Working with timers</a></li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <section id="working-with-timers">
+<h1>Working with timers<a class="headerlink" href="#working-with-timers" title="Permalink to this headline">¶</a></h1>
+<p>The module <a class="reference internal" href="cactus_timers_ref.html#module-kuibit.cactus_timers" title="kuibit.cactus_timers"><code class="xref py py-mod docutils literal notranslate"><span class="pre">cactus_timers</span></code></a> (<a class="reference internal" href="cactus_timers_ref.html#module-kuibit.cactus_timers"><span class="std std-ref">Reference on kuibit.cactus_timers</span></a>) can be used to read timing information from the output of
+<code class="docutils literal notranslate"><span class="pre">Carpet</span></code>. Timers are useful to profile the code and individuate bottlenecks.</p>
+<p>At the moment, only XML timers are supported. These files are output when the
+option <code class="docutils literal notranslate"><span class="pre">Carpet::output_xml_timer_tree</span></code> is set to <code class="docutils literal notranslate"><span class="pre">yes</span></code>.</p>
+<section id="trees">
+<h2>Trees<a class="headerlink" href="#trees" title="Permalink to this headline">¶</a></h2>
+<p>The way timers are represented in <code class="docutils literal notranslate"><span class="pre">kuibit</span></code> is with the <a class="reference internal" href="tree_ref.html#kuibit.tree.Tree" title="kuibit.tree.Tree"><code class="xref py py-class docutils literal notranslate"><span class="pre">Tree</span></code></a>
+structure. The tree structure is ideal because XML timers contains a report on
+the call-stack of the simulation, which is naturally hierarchical: it is the set
+of functions called, and which functions each function called, and so on. The
+only functions that are profiled are the ones that are scheduled. In <code class="docutils literal notranslate"><span class="pre">kuibit</span></code>,
+a <a class="reference internal" href="tree_ref.html#kuibit.tree.Tree" title="kuibit.tree.Tree"><code class="xref py py-class docutils literal notranslate"><span class="pre">Tree</span></code></a> is a collection of three elements: a <code class="docutils literal notranslate"><span class="pre">name</span></code>, a <code class="docutils literal notranslate"><span class="pre">value</span></code>,
+and possibly a collection of <code class="docutils literal notranslate"><span class="pre">children</span></code>. For timers, the name is the name of
+the function, the value is the total time that was spent inside this function,
+and <code class="docutils literal notranslate"><span class="pre">children</span></code> is the set of functions that were called inside this one.</p>
+<p>For example,</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Assuming tim is a Tree</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">tim</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>  <span class="c1"># main</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">tim</span><span class="o">.</span><span class="n">value</span><span class="p">)</span>  <span class="c1"># 1.4 (seconds)</span>
+
+<span class="c1"># The name of the first child</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">tim</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>  <span class="c1"># evolve</span>
+<span class="c1"># Can also be called with</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">tim</span><span class="p">[</span><span class="s2">&quot;evolve&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>  <span class="c1"># evolve</span>
+
+<span class="c1"># This prints the cumulative value of all the leaves of the tree</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">tim</span><span class="p">[</span><span class="s2">&quot;evolve&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">tot_value_leaves</span><span class="p">)</span>
+
+<span class="c1"># This can be used to transform the tree into percentual instead of seconds</span>
+<span class="n">tim_in_perc</span> <span class="o">=</span> <span class="n">tim</span> <span class="o">/</span> <span class="n">tim</span><span class="o">.</span><span class="n">tot_value_leaves</span>
+
+<span class="c1"># Trees can be exported to dictionaries of JSON</span>
+<span class="n">tim_dict</span> <span class="o">=</span> <span class="n">tim</span><span class="o">.</span><span class="n">to_dict</span><span class="p">()</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">tim</span><span class="o">.</span><span class="n">to_json</span><span class="p">())</span>
+</pre></div>
+</div>
+</section>
+<section id="timer-trees">
+<h2>Timer trees<a class="headerlink" href="#timer-trees" title="Permalink to this headline">¶</a></h2>
+<p>The easiest way to access timing information is starting from
+<a class="reference internal" href="simdir_ref.html#kuibit.simdir.SimDir" title="kuibit.simdir.SimDir"><code class="xref py py-class docutils literal notranslate"><span class="pre">SimDir</span></code></a>:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Assuming sim is a SimDir</span>
+
+<span class="n">tim</span> <span class="o">=</span> <span class="n">sim</span><span class="o">.</span><span class="n">timers</span>
+</pre></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">tim</span></code> is a <a class="reference internal" href="cactus_timers_ref.html#kuibit.cactus_timers.TimersDir" title="kuibit.cactus_timers.TimersDir"><code class="xref py py-class docutils literal notranslate"><span class="pre">TimersDir</span></code></a> object: a dictionary-like object that has
+as keys the process numbers (the various MPI ranks), and as values a
+<a class="reference internal" href="tree_ref.html#kuibit.tree.Tree" title="kuibit.tree.Tree"><code class="xref py py-class docutils literal notranslate"><span class="pre">Tree</span></code></a> with all the timing information (see above). <code class="docutils literal notranslate"><span class="pre">kuibit</span></code>
+automatically detects restarts and sums them up in a single tree. More often
+than not, however, we are not interest in timers for a specific process, but we
+want to have a general idea. In that case, we can use the <a class="reference internal" href="grid_data_ref.html#kuibit.grid_data.UniformGridData.average" title="kuibit.grid_data.UniformGridData.average"><code class="xref py py-meth docutils literal notranslate"><span class="pre">average()</span></code></a>,
+or the <a class="reference internal" href="cactus_timers_ref.html#kuibit.cactus_timers.TimersDir.median" title="kuibit.cactus_timers.TimersDir.median"><code class="xref py py-meth docutils literal notranslate"><span class="pre">median()</span></code></a> methods to obtain the average (or median) timers
+across all the processes.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Check out the examples to see a neat and useful application of this module.
+In particular, <a class="reference internal" href="examples/bins/interactive_timertree.html"><span class="doc">interactive_timertree.py</span></a></p>
+</div>
+</section>
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="index.html">
+              <img class="logo" src="_static/logo.png" alt="Logo"/>
+            </a></p>
+  <h3><a href="index.html">Table of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Working with timers</a><ul>
+<li><a class="reference internal" href="#trees">Trees</a></li>
+<li><a class="reference internal" href="#timer-trees">Timer trees</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="sensitivity_curves.html"
+                        title="previous chapter">Sensitivity (power spectral noise) curves of known detectors</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="tensor.html"
+                        title="next chapter">Working with tensors</a></p>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script><div role="note" aria-label="version link">
+  <h3>Versions</h3>
+    <ul class="this-page-menu">
+      <li><a href="dev/timers.html" rel="nofollow"> Development </a></li>
+      <li><a href="#" rel="nofollow"> Master </a></li>
+
+      
+      <li><a href="1.3.6/timers.html" rel="nofollow"> 1.3.6 </a></li>
+      
+      <li><a href="1.4.0/timers.html" rel="nofollow"> 1.4.0 </a></li>
+      
+
+    </ul>
+ </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="tensor.html" title="Working with tensors"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="sensitivity_curves.html" title="Sensitivity (power spectral noise) curves of known detectors"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">kuibit 1.4.0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">Working with timers</a></li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2020-2023, Gabriele Bozzola.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 4.3.2.
+    </div>
+  </body>
+</html>

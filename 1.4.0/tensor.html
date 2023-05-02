@@ -1,0 +1,195 @@
+
+
+<!doctype html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+    <title>Working with tensors &#8212; kuibit 1.4.0 documentation</title>
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="_static/bizstyle.css" />
+    <link rel="stylesheet" type="text/css" href="_static/css/custom.css" />
+    
+    <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/doctools.js"></script>
+    <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="_static/bizstyle.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Unit conversion and constants" href="unitconv.html" />
+    <link rel="prev" title="Working with timers" href="timers.html" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0" />
+    <!--[if lt IE 9]>
+    <script src="_static/css3-mediaqueries.js"></script>
+    <![endif]-->
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="unitconv.html" title="Unit conversion and constants"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="timers.html" title="Working with timers"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">kuibit 1.4.0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">Working with tensors</a></li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <section id="working-with-tensors">
+<h1>Working with tensors<a class="headerlink" href="#working-with-tensors" title="Permalink to this headline">¶</a></h1>
+<p>The module <a class="reference internal" href="tensor_ref.html#module-kuibit.tensor" title="kuibit.tensor"><code class="xref py py-mod docutils literal notranslate"><span class="pre">tensor</span></code></a> (<a class="reference internal" href="tensor_ref.html#module-kuibit.tensor"><span class="std std-ref">Reference on kuibit.tensor</span></a>)
+provides abstractions to work with mathematical tensors. In practice, at the
+moment, this mostly mean working with <a class="reference internal" href="tensor_ref.html#kuibit.tensor.Vector" title="kuibit.tensor.Vector"><code class="xref py py-class docutils literal notranslate"><span class="pre">Vector</span></code></a> and
+<a class="reference internal" href="tensor_ref.html#kuibit.tensor.Matrix" title="kuibit.tensor.Matrix"><code class="xref py py-class docutils literal notranslate"><span class="pre">Matrix</span></code></a> objects (both derived from <a class="reference internal" href="tensor_ref.html#kuibit.tensor.Tensor" title="kuibit.tensor.Tensor"><code class="xref py py-class docutils literal notranslate"><span class="pre">Tensor</span></code></a>).</p>
+<p>The <a class="reference internal" href="tensor_ref.html#kuibit.tensor.Tensor" title="kuibit.tensor.Tensor"><code class="xref py py-class docutils literal notranslate"><span class="pre">Tensor</span></code></a> interface is a container that takes nested lists of
+<code class="xref py py-class docutils literal notranslate"><span class="pre">BaseNumerical</span></code> data (e.g., <a class="reference internal" href="timeseries_ref.html#kuibit.timeseries.TimeSeries" title="kuibit.timeseries.TimeSeries"><code class="xref py py-class docutils literal notranslate"><span class="pre">TimeSeries</span></code></a>,
+<a class="reference internal" href="frequencyseries_ref.html#kuibit.frequencyseries.FrequencySeries" title="kuibit.frequencyseries.FrequencySeries"><code class="xref py py-class docutils literal notranslate"><span class="pre">FrequencySeries</span></code></a>, <a class="reference internal" href="grid_data_ref.html#kuibit.grid_data.UniformGridData" title="kuibit.grid_data.UniformGridData"><code class="xref py py-class docutils literal notranslate"><span class="pre">UniformGridData</span></code></a>,
+<a class="reference internal" href="grid_data_ref.html#kuibit.grid_data.HierarchicalGridData" title="kuibit.grid_data.HierarchicalGridData"><code class="xref py py-class docutils literal notranslate"><span class="pre">HierarchicalGridData</span></code></a>) and provides an high-level abstractions that
+supports all the usual mathematical operations and inherits methods from the
+contained objects. Examples will clarify what we mean with this.</p>
+<section id="vectors">
+<h2>Vectors<a class="headerlink" href="#vectors" title="Permalink to this headline">¶</a></h2>
+<p>The <a class="reference internal" href="tensor_ref.html#kuibit.tensor.Vector" title="kuibit.tensor.Vector"><code class="xref py py-class docutils literal notranslate"><span class="pre">Vector</span></code></a> implements a mathematical vector. You can make vectors
+out of anything that is derived from <code class="xref py py-class docutils literal notranslate"><span class="pre">BaseNumerical</span></code>. In <code class="docutils literal notranslate"><span class="pre">kuibit</span></code>,
+this means grid and series data. The convenience of working with
+<a class="reference internal" href="tensor_ref.html#kuibit.tensor.Vector" title="kuibit.tensor.Vector"><code class="xref py py-class docutils literal notranslate"><span class="pre">Vector</span></code></a> is that you can act on multiple components of the same
+entity in one go.</p>
+<p>For instance, assume you have the three components of the velocity field on the
+equatorial plane at a given iteration as <code class="docutils literal notranslate"><span class="pre">vx</span></code>, <code class="docutils literal notranslate"><span class="pre">vy</span></code>, <code class="docutils literal notranslate"><span class="pre">vz</span></code>.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">kuibit.tensor</span> <span class="kn">import</span> <span class="n">Vector</span>
+
+<span class="c1"># To create a vector</span>
+<span class="n">vel</span> <span class="o">=</span> <span class="n">Vector</span><span class="p">([</span><span class="n">vx</span><span class="p">,</span> <span class="n">vy</span><span class="p">,</span> <span class="n">vz</span><span class="p">])</span>
+
+<span class="c1"># Evaluate the velocity on location (2, 3)</span>
+<span class="n">vel</span><span class="p">([</span><span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">])</span>  <span class="c1"># Will return a 2-element NumPy array</span>
+
+<span class="c1"># Vectors can be indexed</span>
+<span class="n">vz</span> <span class="o">=</span> <span class="n">vel</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+
+<span class="c1"># We can compute the magnitude</span>
+<span class="n">norm</span> <span class="o">=</span> <span class="n">vel</span><span class="o">.</span><span class="n">norm</span><span class="p">()</span>  <span class="c1"># Will return a grid variable</span>
+
+<span class="c1"># Vectors support all the mathematical operations</span>
+<span class="n">vx_vy</span> <span class="o">=</span> <span class="p">(</span><span class="n">vx</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">+</span> <span class="n">vy</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">sqrt</span><span class="p">()</span>
+
+<span class="c1"># Vectors inherit all the methods from the base class:</span>
+<span class="c1"># to compute the derivative of vx_vy along the axis, we can use</span>
+<span class="c1"># the partial_differentiated method</span>
+<span class="n">deriv_x</span> <span class="o">=</span> <span class="n">vx_vy</span><span class="o">.</span><span class="n">partial_differentiated</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+
+<span class="c1"># We could also have used the in-place version (notice the imperative name)</span>
+<span class="n">vx_vy</span><span class="o">.</span><span class="n">partial_differentiate</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>This would not change much if <code class="docutils literal notranslate"><span class="pre">vx</span></code>, <code class="docutils literal notranslate"><span class="pre">vy</span></code>, and <code class="docutils literal notranslate"><span class="pre">vz</span></code> where other objects,
+like <a class="reference internal" href="timeseries_ref.html#kuibit.timeseries.TimeSeries" title="kuibit.timeseries.TimeSeries"><code class="xref py py-class docutils literal notranslate"><span class="pre">TimeSeries</span></code></a>.</p>
+</section>
+<section id="matrices-and-tensors">
+<h2>Matrices and Tensors<a class="headerlink" href="#matrices-and-tensors" title="Permalink to this headline">¶</a></h2>
+<p>The <a class="reference internal" href="tensor_ref.html#kuibit.tensor.Matrix" title="kuibit.tensor.Matrix"><code class="xref py py-class docutils literal notranslate"><span class="pre">Matrix</span></code></a> class implements a mathematical matrix of arbitrary
+dimensions. It behaves exactly like the <a class="reference internal" href="tensor_ref.html#kuibit.tensor.Vector" title="kuibit.tensor.Vector"><code class="xref py py-class docutils literal notranslate"><span class="pre">Vector</span></code></a> described in the
+previous section. At the moment, no specific matrix method is implemented, but
+all the infrastructure is in place to support them.</p>
+<p>Developing a generic <a class="reference internal" href="tensor_ref.html#kuibit.tensor.Tensor" title="kuibit.tensor.Tensor"><code class="xref py py-class docutils literal notranslate"><span class="pre">Tensor</span></code></a> class is a hard task, so, as it
+stands, <a class="reference internal" href="tensor_ref.html#kuibit.tensor.Tensor" title="kuibit.tensor.Tensor"><code class="xref py py-class docutils literal notranslate"><span class="pre">Tensor</span></code></a> is does not have many features by itself but it is
+rather the generic implementation that underpins both <a class="reference internal" href="tensor_ref.html#kuibit.tensor.Vector" title="kuibit.tensor.Vector"><code class="xref py py-class docutils literal notranslate"><span class="pre">Vector</span></code></a> and
+<a class="reference internal" href="tensor_ref.html#kuibit.tensor.Matrix" title="kuibit.tensor.Matrix"><code class="xref py py-class docutils literal notranslate"><span class="pre">Matrix</span></code></a>. For example, no notion of rank or covariance is
+implemented yet.</p>
+</section>
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="index.html">
+              <img class="logo" src="_static/logo.png" alt="Logo"/>
+            </a></p>
+  <h3><a href="index.html">Table of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Working with tensors</a><ul>
+<li><a class="reference internal" href="#vectors">Vectors</a></li>
+<li><a class="reference internal" href="#matrices-and-tensors">Matrices and Tensors</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="timers.html"
+                        title="previous chapter">Working with timers</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="unitconv.html"
+                        title="next chapter">Unit conversion and constants</a></p>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script><div role="note" aria-label="version link">
+  <h3>Versions</h3>
+    <ul class="this-page-menu">
+      <li><a href="dev/tensor.html" rel="nofollow"> Development </a></li>
+      <li><a href="#" rel="nofollow"> Master </a></li>
+
+      
+      <li><a href="1.3.6/tensor.html" rel="nofollow"> 1.3.6 </a></li>
+      
+      <li><a href="1.4.0/tensor.html" rel="nofollow"> 1.4.0 </a></li>
+      
+
+    </ul>
+ </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="unitconv.html" title="Unit conversion and constants"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="timers.html" title="Working with timers"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">kuibit 1.4.0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">Working with tensors</a></li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2020-2023, Gabriele Bozzola.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 4.3.2.
+    </div>
+  </body>
+</html>

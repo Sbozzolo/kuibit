@@ -1,0 +1,338 @@
+
+
+<!doctype html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+    <title>A quick introduction to motionpicture &#8212; kuibit 1.4.0 documentation</title>
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="_static/bizstyle.css" />
+    <link rel="stylesheet" type="text/css" href="_static/css/custom.css" />
+    
+    <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/doctools.js"></script>
+    <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="_static/bizstyle.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Working with Simulation Directories" href="tutorials/simdir.html" />
+    <link rel="prev" title="Building command-line scripts" href="argparse_helper.html" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0" />
+    <!--[if lt IE 9]>
+    <script src="_static/css3-mediaqueries.js"></script>
+    <![endif]-->
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="tutorials/simdir.html" title="Working with Simulation Directories"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="argparse_helper.html" title="Building command-line scripts"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">kuibit 1.4.0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">A quick introduction to motionpicture</a></li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <section id="a-quick-introduction-to-motionpicture">
+<h1>A quick introduction to motionpicture<a class="headerlink" href="#a-quick-introduction-to-motionpicture" title="Permalink to this headline">¶</a></h1>
+<p><a class="reference external" href="https://github.com/Sbozzolo/motionpicture">motionpicture</a> is a Python library that takes care of all the infrastructure
+needed to render frames and animate them into a video. When you install
+<code class="docutils literal notranslate"><span class="pre">kuibit</span></code>, <code class="docutils literal notranslate"><span class="pre">motionpicture</span></code> will be automatically installed. With this page,
+you will learn how the basics of how use <code class="docutils literal notranslate"><span class="pre">motionpicture</span></code>.</p>
+<section id="overall-considerations">
+<h2>Overall considerations<a class="headerlink" href="#overall-considerations" title="Permalink to this headline">¶</a></h2>
+<p>The key ingredient in <code class="docutils literal notranslate"><span class="pre">motionpicture</span></code> are <em>movie files</em>. These are Python
+files that specify how to render one frame and what constitute a frame (e.g.,
+one iteration = one frame). <code class="docutils literal notranslate"><span class="pre">kuibit</span></code> comes with a series of movie files for
+common videos (e.g., 2D plots of a given grid function) which are ready to be
+used. Later in this document, we will discuss how to write movie files.</p>
+<p>The second important element in <code class="docutils literal notranslate"><span class="pre">motionpicture</span></code> is <code class="docutils literal notranslate"><span class="pre">mopi</span></code>. <code class="docutils literal notranslate"><span class="pre">mopi</span></code> is a
+command-line executable that takes as argument a movie file and renders the
+frames and the videos. <code class="docutils literal notranslate"><span class="pre">mopi</span></code> has a lot of options that can be explored with
+the <code class="docutils literal notranslate"><span class="pre">--help</span></code> flag.</p>
+<p><code class="docutils literal notranslate"><span class="pre">motionpicture</span></code> requires <code class="docutils literal notranslate"><span class="pre">ffmpeg</span></code>, which has to be installed separately.</p>
+</section>
+<section id="animating-frames">
+<h2>Animating frames<a class="headerlink" href="#animating-frames" title="Permalink to this headline">¶</a></h2>
+<p>At level zero, <code class="docutils literal notranslate"><span class="pre">motionpicture</span></code> is a tool to glue together frames. Suppose you
+have a folder <code class="docutils literal notranslate"><span class="pre">frames</span></code> full of files <code class="docutils literal notranslate"><span class="pre">0000.png</span></code>, <code class="docutils literal notranslate"><span class="pre">0001.png</span></code>, …, and you
+want to make a video out of them. You can use <code class="docutils literal notranslate"><span class="pre">mopi</span></code> for that.</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>$<span class="w"> </span>mopi<span class="w"> </span>--only-render-movie<span class="w"> </span>--frame-name-format<span class="w"> </span><span class="s1">&#39;%04d.png&#39;</span><span class="w"> </span>--outdir<span class="w"> </span>frames<span class="w"> </span>--movie-name<span class="w"> </span>my_video
+</pre></div>
+</div>
+<p>This will create a file <code class="docutils literal notranslate"><span class="pre">my_video.mp4</span></code> with the specified frames. The advantage
+of using <code class="docutils literal notranslate"><span class="pre">mopi</span></code> for this task is that it comes with a lot of options that can be
+easily explored in the <code class="docutils literal notranslate"><span class="pre">--help</span></code>. For example,</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>$<span class="w"> </span>mopi<span class="w"> </span>--only-render-movie<span class="w"> </span>--frame-name-format<span class="w"> </span><span class="s1">&#39;%04d.png&#39;</span><span class="w"> </span>--outdir<span class="w"> </span>frames<span class="w"> </span>--movie-name<span class="w"> </span>my_video<span class="w"> </span><span class="se">\</span>
+<span class="w">       </span>--fps<span class="w"> </span><span class="m">60</span><span class="w"> </span>--extension<span class="w"> </span>webm<span class="w"> </span>--title<span class="w"> </span><span class="s2">&quot;My video&quot;</span><span class="w"> </span>--comment<span class="w"> </span><span class="s2">&quot;This is my first video with mopi&quot;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">       </span>--author<span class="w"> </span><span class="s2">&quot;Me&quot;</span>
+</pre></div>
+</div>
+</section>
+<section id="making-and-animating-frames">
+<h2>Making and animating frames<a class="headerlink" href="#making-and-animating-frames" title="Permalink to this headline">¶</a></h2>
+<p>Suppose you want to make frames, and then animate them. This is the core
+functionality of <code class="docutils literal notranslate"><span class="pre">motionpicture</span></code>, and the main benefits of using the tool is
+that you have to worry only about making one single frame, and everything else
+is taken care of (including parallelization)</p>
+<p><code class="docutils literal notranslate"><span class="pre">mopi</span></code> can take as input a Python file which defines a class <code class="docutils literal notranslate"><span class="pre">MOPIMovie</span></code>
+which contains methods to identify what is a frame and how to draw it. Such
+files can be specified with the flag <code class="docutils literal notranslate"><span class="pre">-m</span></code>, or they can be read from a folder
+defined by the environment variable <code class="docutils literal notranslate"><span class="pre">MOPI_MOVIES_DIR</span></code>. <code class="docutils literal notranslate"><span class="pre">mopi</span></code> will load the
+chosen movie and will expose all the command-line options that are defined
+there. For instance, if you defined the environment variable <code class="docutils literal notranslate"><span class="pre">MOPI_MOVIES_DIR</span></code>
+and <code class="docutils literal notranslate"><span class="pre">grid_var</span></code> is in that folder, then <code class="docutils literal notranslate"><span class="pre">mopi</span> <span class="pre">grid_var</span> <span class="pre">--help</span></code> will look like
+this:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>usage:<span class="w"> </span>mopi<span class="w"> </span><span class="o">[</span>-m<span class="w"> </span>MOVIE_FILE<span class="o">]</span><span class="w"> </span><span class="o">[</span>-c<span class="w"> </span>CONFIG<span class="o">]</span><span class="w"> </span><span class="o">[</span>--movies-dir<span class="w"> </span>MOVIES_DIR<span class="o">]</span><span class="w"> </span><span class="o">[</span>-o<span class="w"> </span>OUTDIR<span class="o">]</span><span class="w"> </span><span class="o">[</span>--snapshot<span class="w"> </span>SNAPSHOT<span class="o">]</span><span class="w"> </span><span class="o">[</span>--disable-progress-bar<span class="o">]</span><span class="w"> </span><span class="o">[</span>--parallel<span class="o">]</span>
+<span class="w">            </span><span class="o">[</span>--num-workers<span class="w"> </span>NUM_WORKERS<span class="o">]</span><span class="w"> </span><span class="o">[</span>--only-render-movie<span class="o">]</span><span class="w"> </span><span class="o">[</span>--frame-name-format<span class="w"> </span>FRAME_NAME_FORMAT<span class="o">]</span><span class="w"> </span><span class="o">[</span>-v<span class="o">]</span><span class="w"> </span><span class="o">[</span>-h<span class="o">]</span><span class="w"> </span><span class="o">[</span>--min-frame<span class="w"> </span>MIN_FRAME<span class="o">]</span>
+<span class="w">            </span><span class="o">[</span>--max-frame<span class="w"> </span>MAX_FRAME<span class="o">]</span><span class="w"> </span><span class="o">[</span>--frames-every<span class="w"> </span>FRAMES_EVERY<span class="o">]</span><span class="w"> </span><span class="o">[</span>--movie-name<span class="w"> </span>MOVIE_NAME<span class="o">]</span><span class="w"> </span><span class="o">[</span>--extension<span class="w"> </span>EXTENSION<span class="o">]</span><span class="w"> </span><span class="o">[</span>--fps<span class="w"> </span>FPS<span class="o">]</span>
+<span class="w">            </span><span class="o">[</span>--author<span class="w"> </span>AUTHOR<span class="o">]</span><span class="w"> </span><span class="o">[</span>--title<span class="w"> </span>TITLE<span class="o">]</span><span class="w"> </span><span class="o">[</span>--comment<span class="w"> </span>COMMENT<span class="o">]</span><span class="w"> </span><span class="o">[</span>--datadir<span class="w"> </span>DATADIR<span class="o">]</span><span class="w"> </span><span class="o">[</span>--resolution<span class="w"> </span>RESOLUTION<span class="o">]</span><span class="w"> </span><span class="o">[</span>-x0<span class="w"> </span>ORIGIN<span class="w"> </span>ORIGIN<span class="o">]</span>
+<span class="w">            </span><span class="o">[</span>-x1<span class="w"> </span>CORNER<span class="w"> </span>CORNER<span class="o">]</span><span class="w"> </span><span class="o">[</span>--plane<span class="w"> </span><span class="o">{</span>xy,xz,yz<span class="o">}]</span><span class="w"> </span><span class="o">[</span>--figname<span class="w"> </span>FIGNAME<span class="o">]</span><span class="w"> </span><span class="o">[</span>--fig-extension<span class="w"> </span>FIG_EXTENSION<span class="o">]</span><span class="w"> </span><span class="o">[</span>--ah-show<span class="o">]</span><span class="w"> </span><span class="o">[</span>--ah-color<span class="w"> </span>AH_COLOR<span class="o">]</span>
+<span class="w">            </span><span class="o">[</span>--ah-edge-color<span class="w"> </span>AH_EDGE_COLOR<span class="o">]</span><span class="w"> </span><span class="o">[</span>--ah-alpha<span class="w"> </span>AH_ALPHA<span class="o">]</span><span class="w"> </span><span class="o">[</span>--ah-time-tolerance<span class="w"> </span>AH_TIME_TOLERANCE<span class="o">]</span><span class="w"> </span>--variable<span class="w"> </span>VARIABLE
+<span class="w">            </span><span class="o">[</span>--multilinear-interpolate<span class="o">]</span><span class="w"> </span><span class="o">[</span>--interpolation-method<span class="w"> </span>INTERPOLATION_METHOD<span class="o">]</span><span class="w"> </span><span class="o">[</span>--colorbar<span class="o">]</span><span class="w"> </span><span class="o">[</span>--logscale<span class="o">]</span><span class="w"> </span><span class="o">[</span>--vmin<span class="w"> </span>VMIN<span class="o">]</span><span class="w"> </span><span class="o">[</span>--vmax<span class="w"> </span>VMAX<span class="o">]</span>
+<span class="w">            </span><span class="o">[</span>--absolute<span class="o">]</span>
+<span class="w">            </span><span class="o">[</span>movie<span class="o">]</span>
+
+Make<span class="w"> </span>a<span class="w"> </span>video<span class="w"> </span>specifying<span class="w"> </span>all<span class="w"> </span>the<span class="w"> </span>details<span class="w"> </span>using<span class="w"> </span>command-line<span class="w"> </span>arguments.<span class="w"> </span>To<span class="w"> </span>use<span class="w"> </span>this<span class="w"> </span>utility,<span class="w"> </span>you<span class="w"> </span>have<span class="w"> </span>to<span class="w"> </span>specify<span class="w"> </span>a<span class="w"> </span>movie.<span class="w"> </span>This<span class="w"> </span>code<span class="w"> </span>will<span class="w"> </span>look<span class="w"> </span><span class="k">for</span><span class="w"> </span>movies<span class="w"> </span><span class="k">in</span><span class="w"> </span>the<span class="w"> </span>MOPI_MOVIES_DIR,<span class="w"> </span>which<span class="w"> </span>you<span class="w"> </span>can<span class="w"> </span>customize.<span class="w"> </span>To<span class="w"> </span><span class="k">select</span><span class="w"> </span>one<span class="w"> </span>of<span class="w"> </span>these<span class="w"> </span>movies,<span class="w"> </span>just<span class="w"> </span>pass<span class="w"> </span>the<span class="w"> </span>file<span class="w"> </span>name<span class="w"> </span>as<span class="w"> </span>first<span class="w"> </span>argument.<span class="w"> </span>Alternatively,<span class="w"> </span>you<span class="w"> </span>can<span class="w"> </span>pass<span class="w"> </span>the<span class="w"> </span>argument<span class="w"> </span>-m<span class="w"> </span>and<span class="w"> </span>specify<span class="w"> </span>a<span class="w"> </span>file.
+
+General<span class="w"> </span>options:
+<span class="w">  </span>movie<span class="w">                 </span>Movie<span class="w"> </span>to<span class="w"> </span>render<span class="w"> </span>among<span class="w"> </span>the<span class="w"> </span>ones<span class="w"> </span>found<span class="w"> </span><span class="k">in</span><span class="w"> </span>MOPI_MOVIES_DIR.<span class="w"> </span>See<span class="w"> </span>bottom<span class="w"> </span>of<span class="w"> </span>the<span class="w"> </span><span class="nb">help</span><span class="w"> </span>message<span class="w"> </span><span class="k">for</span><span class="w"> </span>list.
+<span class="w">  </span>-m<span class="w"> </span>MOVIE_FILE,<span class="w"> </span>--movie-file<span class="w"> </span>MOVIE_FILE
+<span class="w">                        </span>Path<span class="w"> </span>of<span class="w"> </span>the<span class="w"> </span>movie<span class="w"> </span>file.
+<span class="w">  </span>-c<span class="w"> </span>CONFIG,<span class="w"> </span>--config<span class="w"> </span>CONFIG
+<span class="w">                        </span>Config<span class="w"> </span>file<span class="w"> </span>path
+<span class="w">  </span>--movies-dir<span class="w"> </span>MOVIES_DIR
+<span class="w">                        </span>Folder<span class="w"> </span>where<span class="w"> </span>to<span class="w"> </span>look<span class="w"> </span>form<span class="w"> </span>movies.<span class="w">   </span><span class="o">[</span>env<span class="w"> </span>var:<span class="w"> </span>MOPI_MOVIES_DIR<span class="o">]</span>
+<span class="w">  </span>-o<span class="w"> </span>OUTDIR,<span class="w"> </span>--outdir<span class="w"> </span>OUTDIR
+<span class="w">                        </span>Output<span class="w"> </span>directory<span class="w"> </span><span class="k">for</span><span class="w"> </span>frames<span class="w"> </span>and<span class="w"> </span>video.
+<span class="w">  </span>--snapshot<span class="w"> </span>SNAPSHOT<span class="w">   </span>Only<span class="w"> </span>produce<span class="w"> </span>the<span class="w"> </span>specified<span class="w"> </span>snapshot<span class="w"> </span><span class="o">(</span>useful<span class="w"> </span><span class="k">for</span><span class="w"> </span>testing<span class="o">)</span>.
+<span class="w">  </span>--disable-progress-bar
+<span class="w">                        </span>Do<span class="w"> </span>not<span class="w"> </span>display<span class="w"> </span>the<span class="w"> </span>progress<span class="w"> </span>bar<span class="w"> </span>when<span class="w"> </span>generating<span class="w"> </span>frames.
+<span class="w">  </span>--parallel<span class="w">            </span>Render<span class="w"> </span>frames<span class="w"> </span><span class="k">in</span><span class="w"> </span>parallel.
+<span class="w">  </span>--num-workers<span class="w"> </span>NUM_WORKERS
+<span class="w">                        </span>Number<span class="w"> </span>of<span class="w"> </span>cores<span class="w"> </span>to<span class="w"> </span>use<span class="w"> </span><span class="o">(</span>default:<span class="w"> </span><span class="m">8</span><span class="o">)</span>.
+<span class="w">  </span>--only-render-movie<span class="w">   </span>Do<span class="w"> </span>not<span class="w"> </span>generate<span class="w"> </span>frames<span class="w"> </span>but<span class="w"> </span>only<span class="w"> </span>render<span class="w"> </span>the<span class="w"> </span>final<span class="w"> </span>video.
+<span class="w">  </span>--frame-name-format<span class="w"> </span>FRAME_NAME_FORMAT
+<span class="w">                        </span>If<span class="w"> </span>only-render-movie<span class="w"> </span>is<span class="w"> </span>set,<span class="w"> </span>use<span class="w"> </span>this<span class="w"> </span>C-style<span class="w"> </span>frame<span class="w"> </span>name<span class="w"> </span>format<span class="w"> </span>instead<span class="w"> </span>of<span class="w"> </span>computing<span class="w"> </span>it.<span class="w"> </span>For<span class="w"> </span>example,<span class="w"> </span><span class="s1">&#39;%04d.png&#39;</span><span class="w"> </span>will<span class="w"> </span>assemble<span class="w"> </span>a<span class="w"> </span>video<span class="w"> </span>with<span class="w"> </span>frames<span class="w"> </span>with<span class="w"> </span>names<span class="w"> </span><span class="m">0000</span>.png,<span class="w"> </span><span class="m">0001</span>.png,<span class="w"> </span>and<span class="w"> </span>so<span class="w"> </span>on,<span class="w"> </span>as<span class="w"> </span>found<span class="w"> </span><span class="k">in</span><span class="w"> </span>the<span class="w"> </span>outdir<span class="w"> </span>folder.
+<span class="w">  </span>-v,<span class="w"> </span>--verbose<span class="w">         </span>Enable<span class="w"> </span>verbose<span class="w"> </span>output.
+<span class="w">  </span>-h,<span class="w"> </span>--help<span class="w">            </span>Show<span class="w"> </span>this<span class="w"> </span><span class="nb">help</span><span class="w"> </span>message<span class="w"> </span>and<span class="w"> </span>exit.
+
+Frame<span class="w"> </span>selection:
+<span class="w">  </span>--min-frame<span class="w"> </span>MIN_FRAME
+<span class="w">                        </span>Do<span class="w"> </span>not<span class="w"> </span>render<span class="w"> </span>frames<span class="w"> </span>before<span class="w"> </span>this<span class="w"> </span>one.
+<span class="w">  </span>--max-frame<span class="w"> </span>MAX_FRAME
+<span class="w">                        </span>Do<span class="w"> </span>not<span class="w"> </span>render<span class="w"> </span>frames<span class="w"> </span>after<span class="w"> </span>this<span class="w"> </span>one.
+<span class="w">  </span>--frames-every<span class="w"> </span>FRAMES_EVERY
+<span class="w">                        </span>Render<span class="w"> </span>a<span class="w"> </span>frame<span class="w"> </span>every<span class="w"> </span>N<span class="w"> </span><span class="o">(</span>default:<span class="w"> </span>render<span class="w"> </span>all<span class="w"> </span>the<span class="w"> </span>possible<span class="w"> </span>frames<span class="o">)</span>.
+
+Video<span class="w"> </span>rendering<span class="w"> </span>options:
+<span class="w">  </span>--movie-name<span class="w"> </span>MOVIE_NAME
+<span class="w">                        </span>Name<span class="w"> </span>of<span class="w"> </span>output<span class="w"> </span>video<span class="w"> </span>file,<span class="w"> </span>without<span class="w"> </span>extension<span class="w"> </span><span class="o">(</span>default:<span class="w"> </span>video<span class="o">)</span>.
+<span class="w">  </span>--extension<span class="w"> </span>EXTENSION
+<span class="w">                        </span>File<span class="w"> </span>extension<span class="w"> </span>of<span class="w"> </span>the<span class="w"> </span>video<span class="w"> </span><span class="o">(</span>default:<span class="w"> </span>mp4<span class="o">)</span>.
+<span class="w">  </span>--fps<span class="w"> </span>FPS<span class="w">             </span>Frames-per-second<span class="w"> </span>of<span class="w"> </span>the<span class="w"> </span>video<span class="w"> </span><span class="o">(</span>default:<span class="w"> </span><span class="m">25</span><span class="o">)</span>.
+<span class="w">  </span>--author<span class="w"> </span>AUTHOR<span class="w">       </span>Author<span class="w"> </span>metadata<span class="w"> </span><span class="k">in</span><span class="w"> </span>the<span class="w"> </span>final<span class="w"> </span>video.
+<span class="w">  </span>--title<span class="w"> </span>TITLE<span class="w">         </span>Title<span class="w"> </span>metadata<span class="w"> </span><span class="k">in</span><span class="w"> </span>the<span class="w"> </span>final<span class="w"> </span>video.
+<span class="w">  </span>--comment<span class="w"> </span>COMMENT<span class="w">     </span>Comment<span class="w"> </span>metadata<span class="w"> </span><span class="k">in</span><span class="w"> </span>the<span class="w"> </span>final<span class="w"> </span>video.
+
+Movie<span class="w"> </span>custom<span class="w"> </span>options:
+<span class="w">  </span>--datadir<span class="w"> </span>DATADIR<span class="w">     </span>Data<span class="w"> </span>directory.
+<span class="w">  </span>--resolution<span class="w"> </span>RESOLUTION
+<span class="w">                        </span>Resolution<span class="w"> </span>of<span class="w"> </span>the<span class="w"> </span>grid<span class="w"> </span><span class="k">in</span><span class="w"> </span>number<span class="w"> </span>of<span class="w"> </span>points<span class="w"> </span><span class="o">(</span>default:<span class="w"> </span><span class="m">500</span><span class="o">)</span>
+<span class="w">  </span>-x0<span class="w"> </span>ORIGIN<span class="w"> </span>ORIGIN,<span class="w"> </span>--origin<span class="w"> </span>ORIGIN<span class="w"> </span>ORIGIN
+<span class="w">  </span>-x1<span class="w"> </span>CORNER<span class="w"> </span>CORNER,<span class="w"> </span>--corner<span class="w"> </span>CORNER<span class="w"> </span>CORNER
+<span class="w">  </span>--plane<span class="w"> </span><span class="o">{</span>xy,xz,yz<span class="o">}</span><span class="w">    </span>Plane<span class="w"> </span>to<span class="w"> </span>plot<span class="w"> </span><span class="o">(</span>default:<span class="w"> </span>xy<span class="o">)</span>
+<span class="w">  </span>--figname<span class="w"> </span>FIGNAME<span class="w">     </span>Name<span class="w"> </span>of<span class="w"> </span>the<span class="w"> </span>output<span class="w"> </span>figure<span class="w"> </span><span class="o">(</span>not<span class="w"> </span>including<span class="w"> </span>the<span class="w"> </span>extension<span class="o">)</span>.
+<span class="w">  </span>--fig-extension<span class="w"> </span>FIG_EXTENSION
+<span class="w">                        </span>Extension<span class="w"> </span>of<span class="w"> </span>the<span class="w"> </span>output<span class="w"> </span>figure<span class="w"> </span><span class="o">(</span>default:<span class="w"> </span>png<span class="o">)</span>.<span class="w">   </span><span class="o">[</span>env<span class="w"> </span>var:<span class="w"> </span>KBIT_FIG_EXTENSION<span class="o">]</span>
+<span class="w">  </span>--variable<span class="w"> </span>VARIABLE<span class="w">   </span>Variable<span class="w"> </span>to<span class="w"> </span>plot.
+<span class="w">  </span>--multilinear-interpolate
+<span class="w">                        </span>Whether<span class="w"> </span>to<span class="w"> </span>interpolate<span class="w"> </span>to<span class="w"> </span>smooth<span class="w"> </span>data<span class="w"> </span>with<span class="w"> </span>multilinear<span class="w"> </span>interpolation<span class="w"> </span>before<span class="w"> </span>plotting.
+<span class="w">  </span>--interpolation-method<span class="w"> </span>INTERPOLATION_METHOD
+<span class="w">                        </span>Interpolation<span class="w"> </span>method<span class="w"> </span><span class="k">for</span><span class="w"> </span>the<span class="w"> </span>plot.<span class="w"> </span>See<span class="w"> </span>docs<span class="w"> </span>of<span class="w"> </span>np.imshow.<span class="w"> </span><span class="o">(</span>default:<span class="w"> </span>none<span class="o">)</span>
+<span class="w">  </span>--colorbar<span class="w">            </span>Whether<span class="w"> </span>to<span class="w"> </span>draw<span class="w"> </span>the<span class="w"> </span>color<span class="w"> </span>bar.
+<span class="w">  </span>--logscale<span class="w">            </span>Whether<span class="w"> </span>to<span class="w"> </span>use<span class="w"> </span>log<span class="w"> </span>scale.
+<span class="w">  </span>--vmin<span class="w"> </span>VMIN<span class="w">           </span>Minimum<span class="w"> </span>value<span class="w"> </span>of<span class="w"> </span>the<span class="w"> </span>variable.<span class="w"> </span>If<span class="w"> </span>logscale<span class="w"> </span>is<span class="w"> </span>True,<span class="w"> </span>this<span class="w"> </span>has<span class="w"> </span>to<span class="w"> </span>be<span class="w"> </span>the<span class="w"> </span>log.
+<span class="w">  </span>--vmax<span class="w"> </span>VMAX<span class="w">           </span>Maximum<span class="w"> </span>value<span class="w"> </span>of<span class="w"> </span>the<span class="w"> </span>variable.<span class="w"> </span>If<span class="w"> </span>logscale<span class="w"> </span>is<span class="w"> </span>True,<span class="w"> </span>this<span class="w"> </span>has<span class="w"> </span>to<span class="w"> </span>be<span class="w"> </span>the<span class="w"> </span>log.
+<span class="w">  </span>--absolute<span class="w">            </span>Whether<span class="w"> </span>to<span class="w"> </span>take<span class="w"> </span>the<span class="w"> </span>absolute<span class="w"> </span>value.
+
+No<span class="w"> </span>movies<span class="w"> </span>found<span class="w"> </span><span class="k">in</span><span class="w"> </span>the<span class="w"> </span>MOPI_MOVIES_DIR<span class="w"> </span><span class="o">(</span>.<span class="o">)</span>
+
+Args<span class="w"> </span>that<span class="w"> </span>start<span class="w"> </span>with<span class="w"> </span><span class="s1">&#39;--&#39;</span><span class="w"> </span><span class="o">(</span>eg.<span class="w"> </span>-m<span class="o">)</span><span class="w"> </span>can<span class="w"> </span>also<span class="w"> </span>be<span class="w"> </span><span class="nb">set</span><span class="w"> </span><span class="k">in</span><span class="w"> </span>a<span class="w"> </span>config<span class="w"> </span>file<span class="w"> </span><span class="o">(</span>specified<span class="w"> </span>via<span class="w"> </span>-c<span class="o">)</span>.<span class="w"> </span>Config<span class="w"> </span>file<span class="w"> </span>syntax<span class="w"> </span>allows:<span class="w"> </span><span class="nv">key</span><span class="o">=</span>value,<span class="w"> </span><span class="nv">flag</span><span class="o">=</span>true,
+<span class="nv">stuff</span><span class="o">=[</span>a,b,c<span class="o">]</span><span class="w"> </span><span class="o">(</span><span class="k">for</span><span class="w"> </span>details,<span class="w"> </span>see<span class="w"> </span>syntax<span class="w"> </span>at<span class="w"> </span>https://goo.gl/R74nmi<span class="o">)</span>.<span class="w"> </span>If<span class="w"> </span>an<span class="w"> </span>arg<span class="w"> </span>is<span class="w"> </span>specified<span class="w"> </span><span class="k">in</span><span class="w"> </span>more<span class="w"> </span>than<span class="w"> </span>one<span class="w"> </span>place,<span class="w"> </span><span class="k">then</span><span class="w"> </span>commandline<span class="w"> </span>values
+override<span class="w"> </span>environment<span class="w"> </span>variables<span class="w"> </span>which<span class="w"> </span>override<span class="w"> </span>config<span class="w"> </span>file<span class="w"> </span>values<span class="w"> </span>which<span class="w"> </span>override<span class="w"> </span>defaults.
+</pre></div>
+</div>
+<p>With this, you can now make a 2D movie of any given grid function of any given
+simulations with parameters you can control via command-line. One of the most
+useful option is <code class="docutils literal notranslate"><span class="pre">--parallel</span></code> to render frames using all the cores of the
+machine.</p>
+<p>Let us have a look at a simplified version of <code class="docutils literal notranslate"><span class="pre">grid_var</span></code>:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">kuibit</span> <span class="kn">import</span> <span class="n">argparse_helper</span> <span class="k">as</span> <span class="n">kah</span>
+<span class="kn">from</span> <span class="nn">kuibit.simdir</span> <span class="kn">import</span> <span class="n">SimDir</span>
+<span class="kn">from</span> <span class="nn">kuibit.visualize_matplotlib</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">plot_color</span><span class="p">,</span>
+    <span class="n">save</span><span class="p">,</span>
+<span class="p">)</span>
+
+
+<span class="k">def</span> <span class="nf">mopi_add_custom_options</span><span class="p">(</span><span class="n">parser</span><span class="p">):</span>
+    <span class="c1"># These are the custom options that mopi will see.</span>
+
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s2">&quot;--datadir&quot;</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="s2">&quot;.&quot;</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Data directory.&quot;</span><span class="p">)</span>
+    <span class="n">kah</span><span class="o">.</span><span class="n">add_grid_to_parser</span><span class="p">(</span><span class="n">parser</span><span class="p">,</span> <span class="n">dimensions</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+    <span class="n">kah</span><span class="o">.</span><span class="n">add_figure_to_parser</span><span class="p">(</span><span class="n">parser</span><span class="p">)</span>
+
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span>
+        <span class="s2">&quot;--variable&quot;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="nb">str</span><span class="p">,</span> <span class="n">required</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Variable to plot.&quot;</span>
+    <span class="p">)</span>
+
+<span class="k">class</span> <span class="nc">MOPIMovie</span><span class="p">:</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">args</span><span class="p">):</span>
+        <span class="c1"># Here we initialize all the objects that we need for all the frames.</span>
+        <span class="c1"># All the expensive stuff has to be done here.</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">sim</span> <span class="o">=</span> <span class="n">SimDir</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">datadir</span><span class="p">,</span> <span class="n">ignore_symlinks</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">ignore_symlinks</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">x0</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">x1</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">res</span> <span class="o">=</span> <span class="n">args</span><span class="o">.</span><span class="n">origin</span><span class="p">,</span> <span class="n">args</span><span class="o">.</span><span class="n">corner</span><span class="p">,</span> <span class="n">args</span><span class="o">.</span><span class="n">resolution</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">shape</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">res</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">res</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">reader</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sim</span><span class="o">.</span><span class="n">gridfunctions</span><span class="p">[</span><span class="n">args</span><span class="o">.</span><span class="n">plane</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">var</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">reader</span><span class="p">[</span><span class="n">args</span><span class="o">.</span><span class="n">variable</span><span class="p">]</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">iterations</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">var</span><span class="o">.</span><span class="n">available_iterations</span>
+
+    <span class="k">def</span> <span class="nf">get_frames</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="c1"># Here we define what is a &quot;frame&quot; (it is one iteration). This function</span>
+        <span class="c1"># has to return an iterable on what we want to make frames of.</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">iterations</span>
+
+    <span class="k">def</span> <span class="nf">make_frame</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="n">iteration</span><span class="p">):</span>
+        <span class="c1"># Here we plot a frame. This function has to take the output path and</span>
+        <span class="c1"># the identifier of what is a frame (in this case, an iteration).</span>
+
+        <span class="n">plot_color</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">var</span><span class="p">[</span><span class="n">iteration</span><span class="p">],</span>
+            <span class="n">x0</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">x0</span><span class="p">,</span>
+            <span class="n">x1</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">x1</span><span class="p">,</span>
+            <span class="n">shape</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span>
+            <span class="n">xlabel</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">args</span><span class="o">.</span><span class="n">plane</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+            <span class="n">ylabel</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">args</span><span class="o">.</span><span class="n">plane</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>
+            <span class="n">resample</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">args</span><span class="o">.</span><span class="n">multilinear_interpolate</span><span class="p">,</span>
+            <span class="n">colorbar</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">args</span><span class="o">.</span><span class="n">colorbar</span><span class="p">,</span>
+            <span class="n">logscale</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">args</span><span class="o">.</span><span class="n">logscale</span><span class="p">,</span>
+            <span class="n">vmin</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">args</span><span class="o">.</span><span class="n">vmin</span><span class="p">,</span>
+            <span class="n">vmax</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">args</span><span class="o">.</span><span class="n">vmax</span><span class="p">,</span>
+            <span class="n">label</span><span class="o">=</span><span class="n">label</span><span class="p">,</span>
+            <span class="n">interpolation</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">args</span><span class="o">.</span><span class="n">interpolation_method</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="n">save</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>As you see, movie files are relatively simple. They have one (optional) function
+<code class="docutils literal notranslate"><span class="pre">mopi_add_custom_options</span></code> that defines the command-line options, and a class
+<code class="docutils literal notranslate"><span class="pre">MOPIMovie</span></code>. This class has three methods: a <code class="docutils literal notranslate"><span class="pre">__init__</span></code>, which is run once
+and sets up the data that is used by all the frames, a <code class="docutils literal notranslate"><span class="pre">get_frames</span></code>, which
+defines what is a frame (here we used iteration, but it could be time, or
+anything else), and a method <code class="docutils literal notranslate"><span class="pre">make_frame</span></code> which produces a given frame. Read
+the <a class="reference external" href="https://github.com/Sbozzolo/motionpicture">official documentation</a> for a detailed description on how to write movie
+files.</p>
+</section>
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="index.html">
+              <img class="logo" src="_static/logo.png" alt="Logo"/>
+            </a></p>
+  <h3><a href="index.html">Table of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">A quick introduction to motionpicture</a><ul>
+<li><a class="reference internal" href="#overall-considerations">Overall considerations</a></li>
+<li><a class="reference internal" href="#animating-frames">Animating frames</a></li>
+<li><a class="reference internal" href="#making-and-animating-frames">Making and animating frames</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="argparse_helper.html"
+                        title="previous chapter">Building command-line scripts</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="tutorials/simdir.html"
+                        title="next chapter">Working with Simulation Directories</a></p>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script><div role="note" aria-label="version link">
+  <h3>Versions</h3>
+    <ul class="this-page-menu">
+      <li><a href="dev/motionpicture.html" rel="nofollow"> Development </a></li>
+      <li><a href="#" rel="nofollow"> Master </a></li>
+
+      
+      <li><a href="1.3.6/motionpicture.html" rel="nofollow"> 1.3.6 </a></li>
+      
+      <li><a href="1.4.0/motionpicture.html" rel="nofollow"> 1.4.0 </a></li>
+      
+
+    </ul>
+ </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="tutorials/simdir.html" title="Working with Simulation Directories"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="argparse_helper.html" title="Building command-line scripts"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">kuibit 1.4.0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">A quick introduction to motionpicture</a></li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2020-2023, Gabriele Bozzola.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 4.3.2.
+    </div>
+  </body>
+</html>

@@ -1,0 +1,670 @@
+
+
+<!doctype html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>kuibit.tensor &#8212; kuibit 1.4.0 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/bizstyle.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/css/custom.css" />
+    
+    <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+    <script src="../../_static/jquery.js"></script>
+    <script src="../../_static/underscore.js"></script>
+    <script src="../../_static/doctools.js"></script>
+    <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="../../_static/bizstyle.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0" />
+    <!--[if lt IE 9]>
+    <script src="_static/css3-mediaqueries.js"></script>
+    <![endif]-->
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">kuibit 1.4.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../index.html" accesskey="U">Module code</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">kuibit.tensor</a></li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for kuibit.tensor</h1><div class="highlight"><pre>
+<span></span><span class="ch">#!/usr/bin/env python3</span>
+
+<span class="c1"># Copyright (C) 2022-2023 Gabriele Bozzola</span>
+<span class="c1">#</span>
+<span class="c1"># This program is free software; you can redistribute it and/or modify it under</span>
+<span class="c1"># the terms of the GNU General Public License as published by the Free Software</span>
+<span class="c1"># Foundation; either version 3 of the License, or (at your option) any later</span>
+<span class="c1"># version.</span>
+<span class="c1">#</span>
+<span class="c1"># This program is distributed in the hope that it will be useful, but WITHOUT</span>
+<span class="c1"># ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS</span>
+<span class="c1"># FOR A PARTICULAR PURPOSE. See the GNU General Public License for more</span>
+<span class="c1"># details.</span>
+<span class="c1">#</span>
+<span class="c1"># You should have received a copy of the GNU General Public License along with</span>
+<span class="c1"># this program; if not, see &lt;https://www.gnu.org/licenses/&gt;.</span>
+
+<span class="sd">&quot;&quot;&quot;The :py:mod:`~.tensor` module provides abstractions to work with tensorial</span>
+<span class="sd">containers and similar.</span>
+
+<span class="sd">The main object defined here is :py:class:`~.Tensor`, which is a that acts as</span>
+<span class="sd">container for any object :py:class:`~.BaseNumerical`, as in</span>
+<span class="sd">:py:class:`~.TimeSeries`, or :py:class:`~.UniformGridData`. :py:class:`~.Tensor`</span>
+<span class="sd">behaves as one would expect them to behave: they are high-level interfaces that</span>
+<span class="sd">support all the mathematical operations. :py:class:`~.Tensor` also inherit the</span>
+<span class="sd">attributes from their contained object. For example, if the :py:class:`~.Tensor`</span>
+<span class="sd">contains :py:class:`~.TimeSeries`, the tensor will dynamically acquire all the</span>
+<span class="sd">methods in such class.</span>
+
+<span class="sd">In pratice, the main way to use :py:class:`~.Tensor` objects is through its</span>
+<span class="sd">derived classes :py:class:`~.Vector` and :py:class:`~.Matrix`, which implement</span>
+<span class="sd">all those features one might expect from vector calculus.</span>
+
+<span class="sd">Consider the following usage example:</span>
+
+<span class="sd">.. code-block:: python</span>
+
+<span class="sd">   import numpy as np</span>
+
+<span class="sd">   from kuibit.timeseries import TimeSeries</span>
+<span class="sd">   from kuibit.tensor import Vector</span>
+
+<span class="sd">   # Fake some data that describe the x, y position of two black holes</span>
+<span class="sd">   times = np.linspace(0, 2 * np.pi, 100)</span>
+
+<span class="sd">   bh1_x = np.sin(times)</span>
+<span class="sd">   bh1_y = np.cos(times)</span>
+
+<span class="sd">   # Not really realistic, but it is fake data</span>
+<span class="sd">   bh2_x = np.sin(2 * times)</span>
+<span class="sd">   bh2_y = np.cos(2 * times)</span>
+
+<span class="sd">   bh1_centroid = Vector([TimeSeries(times, bh1_x), TimeSeries(times, bh1_y)])</span>
+<span class="sd">   bh2_centroid = Vector([TimeSeries(times, bh2_x), TimeSeries(times, bh2_y)])</span>
+
+<span class="sd">   # If we want to compute vx, vy</span>
+<span class="sd">   bh1_velocity = bh_centroid.differentiated()  # This is a Vector</span>
+
+<span class="sd">   # For the distance with another</span>
+<span class="sd">   distance = bh1_centroid - bh2_centroid  # This is a Vector</span>
+
+<span class="sd">   # The magnitude of the distance</span>
+<span class="sd">   distance = distance.norm()   # This is a TimeSeries</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+
+
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">annotations</span>
+
+<span class="kn">from</span> <span class="nn">inspect</span> <span class="kn">import</span> <span class="n">getsource</span>  <span class="c1"># Used in __getattr__</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">Any</span><span class="p">,</span>
+    <span class="n">Collection</span><span class="p">,</span>
+    <span class="n">Dict</span><span class="p">,</span>
+    <span class="n">Generic</span><span class="p">,</span>
+    <span class="n">List</span><span class="p">,</span>
+    <span class="n">Optional</span><span class="p">,</span>
+    <span class="n">Set</span><span class="p">,</span>
+    <span class="n">Tuple</span><span class="p">,</span>
+    <span class="n">TypeVar</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">numpy.typing</span> <span class="k">as</span> <span class="nn">npty</span>
+
+<span class="kn">from</span> <span class="nn">kuibit.numerical</span> <span class="kn">import</span> <span class="n">BaseNumerical</span>
+
+<span class="n">_T</span> <span class="o">=</span> <span class="n">TypeVar</span><span class="p">(</span><span class="s2">&quot;_T&quot;</span><span class="p">,</span> <span class="n">bound</span><span class="o">=</span><span class="n">BaseNumerical</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="Tensor"><a class="viewcode-back" href="../../tensor_ref.html#kuibit.tensor.Tensor">[docs]</a><span class="k">class</span> <span class="nc">Tensor</span><span class="p">(</span><span class="n">Generic</span><span class="p">[</span><span class="n">_T</span><span class="p">],</span> <span class="n">BaseNumerical</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Represents a mathematical hyper-matrix (a Tensor) in N dimensions.</span>
+
+<span class="sd">    At the moment, it is only used as a base class for :py:class:`~.Vector` and</span>
+<span class="sd">    :py:class:`~.Matrix`. So, the class is currently not intended for direct use</span>
+<span class="sd">    (as it does not have a lot of features). This class is not fully flashed out</span>
+<span class="sd">    for the general case. It is here mostly as a stub for the two subclasses</span>
+<span class="sd">    that are below. Implementing a generic tensor class is not trivial and it</span>
+<span class="sd">    left as an exercise to the reader.</span>
+
+<span class="sd">    This class implements the basic infrastrucutre used by :py:class:`~.Vector`</span>
+<span class="sd">    and :py:class:`~.Matrix`. In particular, it fullfills the requirements set</span>
+<span class="sd">    by :py:class:`~.BaseNumerical` and it implements a method to broadcast</span>
+<span class="sd">    attributes from the contained objects to the container itself.</span>
+
+<span class="sd">    All the operations are applied component-wise. So, for example, a tensor</span>
+<span class="sd">    times a tensor is going to be a tensor with the same shape and elements</span>
+<span class="sd">    multiplied. Reductions return NumPy arrays.</span>
+
+<span class="sd">    ..note::</span>
+
+<span class="sd">        For efficicency of implmentation, data is sotred without hierarchy</span>
+<span class="sd">       (i.e., &quot;flattened out&quot;). Therefore, the operations that require</span>
+<span class="sd">       reconstructing the structure have some small overhead. When, possible</span>
+<span class="sd">       work with flattened data.</span>
+
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="n">Collection</span><span class="p">[</span><span class="n">_T</span><span class="p">]):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Construct the Tensor by checking and processing the data.</span>
+
+<span class="sd">        The data is flattened out and it shape is saved. The shape here is</span>
+<span class="sd">        defined as the number of elements of the tensor along each dimension.</span>
+<span class="sd">        For example, for a vector it would only by its length.</span>
+
+<span class="sd">        :param data: Representation of the tensor as nested lists.</span>
+<span class="sd">        :type data: Nested list of data derived from :py:class:`~.BaseNumerical`.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># We are going to make a design choice here. If we flatten the data, all</span>
+        <span class="c1"># the operations that are component-wise will become very easy to</span>
+        <span class="c1"># implement. Also operations that rearrange the indices will become easy</span>
+        <span class="c1"># The trade-off is that operations that need to know about</span>
+        <span class="c1"># the actual shape (e.g., maxtrix multiplication) will have to be</span>
+        <span class="c1"># implemented more carefully.</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="s2">&quot;__len__&quot;</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;data has to be iterable&quot;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;data is empty&quot;</span><span class="p">)</span>
+
+        <span class="c1"># Big brain algorithm follows. We want to allow only tensors that have a</span>
+        <span class="c1"># well defined structure and we want to record this structure. Consider</span>
+        <span class="c1"># the simple example of a matrix. Matrices look like [[a1, a2], [a3,</span>
+        <span class="c1"># a4]]. The shape of this matrix would be (2, 2). It does not make sense</span>
+        <span class="c1"># to have something like [[a1, a2], [a3, [a4]]] (notice the second []</span>
+        <span class="c1"># around a4). So, below we recursively walk through the data as if it</span>
+        <span class="c1"># was a tree. We know we reached the lowest level when we find object of</span>
+        <span class="c1"># type BaseNumerical. The first time we reach the lowest level, we</span>
+        <span class="c1"># record the depth of that level since all the branches must have the</span>
+        <span class="c1"># same depth. If any branch has a different depth, it means that the</span>
+        <span class="c1"># tree is not an hyper-matrix. The second case in which a tree would not</span>
+        <span class="c1"># be broadcastable as a hyper-matrix is that the number of elements is</span>
+        <span class="c1"># different for different branches at fixed height, as in this example</span>
+        <span class="c1"># [[a1, a2], [a3, a4, a5]]. So, at each level we record how many</span>
+        <span class="c1"># elements we have by putting them in sets. If any set has more than one</span>
+        <span class="c1"># element at any given time, it means that the data is not like a matrix.</span>
+
+        <span class="n">flattened</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">_T</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">shape</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="n">Set</span><span class="p">[</span><span class="nb">int</span><span class="p">]]</span> <span class="o">=</span> <span class="p">{}</span>
+
+        <span class="c1"># Recursively walk through the input, recording the shape</span>
+        <span class="k">def</span> <span class="nf">_walk</span><span class="p">(</span>
+            <span class="n">data</span><span class="p">,</span> <span class="n">height</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="n">depth_of_first_leaf</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="p">):</span>
+<span class="w">            </span><span class="sd">&quot;&quot;&quot;Walk recursively the tree finding inconsistencies, fattening the</span>
+<span class="sd">            data, and recording the shape.</span>
+
+<span class="sd">            &quot;&quot;&quot;</span>
+
+            <span class="n">shape</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="n">height</span><span class="p">,</span> <span class="nb">set</span><span class="p">())</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">))</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">shape</span><span class="p">[</span><span class="n">height</span><span class="p">])</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s2">&quot;The shape of the data is inconsistent&quot;</span><span class="p">)</span>
+
+            <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">data</span><span class="p">:</span>
+                <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">d</span><span class="p">,</span> <span class="n">BaseNumerical</span><span class="p">):</span>
+                    <span class="c1"># This is a leaf node</span>
+
+                    <span class="c1"># Set depth_of_first_leaf to height if it is None</span>
+                    <span class="n">depth_of_first_leaf</span> <span class="o">=</span> <span class="n">depth_of_first_leaf</span> <span class="ow">or</span> <span class="n">height</span>
+
+                    <span class="k">if</span> <span class="n">height</span> <span class="o">!=</span> <span class="n">depth_of_first_leaf</span><span class="p">:</span>
+                        <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s2">&quot;The data has inconsistent depth&quot;</span><span class="p">)</span>
+
+                    <span class="n">flattened</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">d</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">depth_of_first_leaf</span> <span class="o">=</span> <span class="n">_walk</span><span class="p">(</span>
+                        <span class="n">d</span><span class="p">,</span> <span class="n">height</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">depth_of_first_leaf</span>
+                    <span class="p">)</span>
+
+            <span class="c1"># The variable `depth_of_first_leaf` has to be carried down all the</span>
+            <span class="c1"># way, but also &quot;up&quot; from the bottom of the tree. That&#39;s why it is</span>
+            <span class="c1"># the return value, so that we can pass it up when we find it.</span>
+            <span class="k">return</span> <span class="n">depth_of_first_leaf</span>
+
+        <span class="n">_walk</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+
+        <span class="c1"># Change the sets into normal ints</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__shape</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">v</span><span class="o">.</span><span class="n">pop</span><span class="p">()</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">shape</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">__flat_data</span> <span class="o">=</span> <span class="n">flattened</span>
+
+        <span class="c1"># Check that the type is the same for all the data</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">all</span><span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">d</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">type</span><span class="p">)</span> <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">flat_data</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;data has to be of one specific type&quot;</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">shape</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="o">...</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return the shape of the Tensor.</span>
+
+<span class="sd">        The shape is defined as the number of elements in each dimension.</span>
+
+<span class="sd">        :returns: Shape of the tensor.</span>
+<span class="sd">        :rtype: Tuple of ints</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__shape</span>
+
+<div class="viewcode-block" id="Tensor.from_shape_and_flat_data"><a class="viewcode-back" href="../../tensor_ref.html#kuibit.tensor.Tensor.from_shape_and_flat_data">[docs]</a>    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">from_shape_and_flat_data</span><span class="p">(</span>
+        <span class="bp">cls</span><span class="p">,</span> <span class="n">shape</span><span class="p">:</span> <span class="n">Collection</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span> <span class="n">flat_data</span><span class="p">:</span> <span class="n">Collection</span><span class="p">[</span><span class="n">_T</span><span class="p">]</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tensor</span><span class="p">[</span><span class="n">_T</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Create a new :py:class:`~.Tensor` from flat data and shape.</span>
+
+<span class="sd">        No checks are performed.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># We set the attributes directly, so we don&#39;t use __init__ but __new__.</span>
+        <span class="n">ret</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="fm">__new__</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span>
+        <span class="n">ret</span><span class="o">.</span><span class="n">__shape</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">shape</span><span class="p">)</span>
+        <span class="n">ret</span><span class="o">.</span><span class="n">__flat_data</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">flat_data</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">ret</span></div>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">flat_data</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">_T</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return the data in the tensor as a flat list.</span>
+
+<span class="sd">        :returns: List with all the data</span>
+<span class="sd">        :rtype: List of type.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__flat_data</span>
+
+    <span class="k">def</span> <span class="nf">_restructure_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">flat_data</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Take flatten data and reshape it to the correct tensorial form.</span>
+
+<span class="sd">        :param flat_data: Data flattened out</span>
+<span class="sd">        :type: list</span>
+
+<span class="sd">        :returns: Data restructured according to self.shape.</span>
+<span class="sd">        :rtype: Nested list</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># We make groups of groups, recursively, starting from the individual</span>
+        <span class="c1"># elements.</span>
+        <span class="c1">#</span>
+        <span class="c1"># Consider the example with shape (1, 2, 3) and data = [1, 2, 3, 4, 5,</span>
+        <span class="c1"># 6]. First, we make groups of three: data = [[1, 2, 3], [4, 5, 6]],</span>
+        <span class="c1"># then we make groups of two: data = [[[1, 2, 3], [4, 5, 6]]], and then</span>
+        <span class="c1"># we make another group of one. data = [[[[1, 2, 3], [4, 5, 6]]]]. We</span>
+        <span class="c1"># end up with an extra set of brackets that is due to the fact that we</span>
+        <span class="c1"># always return a list. So, the return value of this function peels off</span>
+        <span class="c1"># that last layer.</span>
+
+        <span class="k">def</span> <span class="nf">_reconstruct</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">size</span><span class="p">):</span>
+            <span class="c1"># Make groups of length `size`</span>
+            <span class="n">ret</span> <span class="o">=</span> <span class="p">[</span><span class="n">data</span><span class="p">[</span><span class="n">i</span> <span class="p">:</span> <span class="n">i</span> <span class="o">+</span> <span class="n">size</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">),</span> <span class="n">size</span><span class="p">)]</span>
+            <span class="k">return</span> <span class="n">ret</span>
+
+        <span class="n">data</span> <span class="o">=</span> <span class="n">flat_data</span>
+
+        <span class="k">for</span> <span class="n">size</span> <span class="ow">in</span> <span class="nb">reversed</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">shape</span><span class="p">):</span>
+            <span class="n">data</span> <span class="o">=</span> <span class="n">_reconstruct</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">size</span><span class="p">)</span>
+
+        <span class="c1"># The return value is always a list, so we end up with an extra level of</span>
+        <span class="c1"># lists, which we remove</span>
+        <span class="k">return</span> <span class="n">data</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+    <span class="c1"># TODO: I do not know how to type-hint a return value that is nested lists</span>
+    <span class="c1"># with an unknown number of levels.</span>
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">data</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return the data with its tensorial structure.</span>
+
+<span class="sd">        For example, if this was a Matrix, the return value would be a list of</span>
+<span class="sd">        lists.</span>
+
+<span class="sd">        Note, this operation is not free! Data is stored flat, so recomputing</span>
+<span class="sd">        the structure has some overhead.</span>
+
+<span class="sd">        :returns: Data structured according to self.shape</span>
+<span class="sd">        :rtype: Nested lists</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_restructure_data</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">flat_data</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">type</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return the type of the contained object.</span>
+
+<span class="sd">        :returns: Type of the object, a class derived from</span>
+<span class="sd">                  :py:class:`~.BaseNumerical`</span>
+<span class="sd">        :rtype: type</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__flat_data</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+
+    <span class="k">def</span> <span class="nf">_apply_unary</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">function</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tensor</span><span class="p">[</span><span class="n">_T</span><span class="p">]:</span>
+        <span class="k">return</span> <span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">from_shape_and_flat_data</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span>
+            <span class="p">[</span>
+                <span class="c1"># skipcq PYL-W0212</span>
+                <span class="n">x</span><span class="o">.</span><span class="n">_apply_unary</span><span class="p">(</span><span class="n">function</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+                <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">flat_data</span>
+            <span class="p">],</span>
+        <span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_apply_binary</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">,</span> <span class="n">function</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tensor</span><span class="p">[</span><span class="n">_T</span><span class="p">]:</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)):</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">type</span> <span class="o">!=</span> <span class="n">other</span><span class="o">.</span><span class="n">type</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Incompatible base types&quot;</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">shape</span> <span class="o">!=</span> <span class="n">other</span><span class="o">.</span><span class="n">shape</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Tensors do not have same shape&quot;</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">ret</span> <span class="o">=</span> <span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">from_shape_and_flat_data</span><span class="p">(</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span>
+                    <span class="p">[</span>
+                        <span class="c1"># skipcq PYL-W0212</span>
+                        <span class="n">x</span><span class="o">.</span><span class="n">_apply_binary</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">function</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+                        <span class="k">for</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">flat_data</span><span class="p">,</span> <span class="n">other</span><span class="o">.</span><span class="n">flat_data</span><span class="p">)</span>
+                    <span class="p">],</span>
+                <span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">ret</span> <span class="o">=</span> <span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">from_shape_and_flat_data</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span>
+                <span class="p">[</span>
+                    <span class="c1"># skipcq PYL-W0212</span>
+                    <span class="n">x</span><span class="o">.</span><span class="n">_apply_binary</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="n">function</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+                    <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">flat_data</span>
+                <span class="p">],</span>
+            <span class="p">)</span>
+        <span class="k">return</span> <span class="n">ret</span>
+
+    <span class="k">def</span> <span class="nf">_apply_reduction</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">reduction</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">npty</span><span class="o">.</span><span class="n">NDArray</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_restructure_data</span><span class="p">(</span>
+                <span class="p">[</span>
+                    <span class="c1"># skipcq PYL-W0212</span>
+                    <span class="n">x</span><span class="o">.</span><span class="n">_apply_reduction</span><span class="p">(</span><span class="n">reduction</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+                    <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">flat_data</span>
+                <span class="p">]</span>
+            <span class="p">)</span>
+        <span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_apply_to_self</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">function</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__flat_data</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="n">function</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">flat_data</span>
+        <span class="p">]</span>
+
+    <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">val</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">npty</span><span class="o">.</span><span class="n">NDArray</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">ret</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_restructure_data</span><span class="p">([</span><span class="n">x</span><span class="p">(</span><span class="n">val</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">flat_data</span><span class="p">])</span>
+            <span class="p">)</span>
+        <span class="k">except</span> <span class="ne">AttributeError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">AttributeError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">type</span><span class="si">}</span><span class="s2"> cannot ba called&quot;</span><span class="p">)</span> <span class="kn">from</span> <span class="nn">e</span>
+
+        <span class="k">return</span> <span class="n">ret</span>
+
+<div class="viewcode-block" id="Tensor.copy"><a class="viewcode-back" href="../../tensor_ref.html#kuibit.tensor.Tensor.copy">[docs]</a>    <span class="k">def</span> <span class="nf">copy</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tensor</span><span class="p">[</span><span class="n">_T</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return a deep copy of the object.</span>
+
+<span class="sd">        :return: Deep copy</span>
+<span class="sd">        :rtype: Tensor</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">ret</span> <span class="o">=</span> <span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">from_shape_and_flat_data</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span>
+                <span class="p">[</span><span class="n">x</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">flat_data</span><span class="p">],</span>
+            <span class="p">)</span>
+        <span class="k">except</span> <span class="ne">AttributeError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">AttributeError</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">type</span><span class="si">}</span><span class="s2"> does not have a copy method&quot;</span>
+            <span class="p">)</span> <span class="kn">from</span> <span class="nn">e</span>
+
+        <span class="k">return</span> <span class="n">ret</span></div>
+
+    <span class="k">def</span> <span class="fm">__matmul__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">NotImplemented</span>
+
+    <span class="k">def</span> <span class="fm">__rmatmul__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">NotImplemented</span>
+
+    <span class="k">def</span> <span class="fm">__getattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">attr</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="c1"># This is how we transfer all the methods in _T to the Tensor itself.</span>
+        <span class="c1">#</span>
+        <span class="c1"># For example, if T is a TimeSeries, we would like to be able to call</span>
+        <span class="c1"># .partial_differentiated for all the components and create a vector out</span>
+        <span class="c1"># of it. With this, if V is a Vector of T, we will be able to call</span>
+        <span class="c1"># V.partial_differentiated and get the desired output.</span>
+        <span class="c1">#</span>
+        <span class="c1"># The return value of __getattr__ is a new function, _apply_attr. This</span>
+        <span class="c1"># _apply_attr is such that it calls the attribute we want to call with</span>
+        <span class="c1"># the arguments we pass. In addition to that, we do some basic type</span>
+        <span class="c1"># checking to return the correct type. The only caveat here is that the</span>
+        <span class="c1"># attribute has to return T or a number.</span>
+
+        <span class="c1"># We broadcast only those attributes that are in the base object</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">flat_data</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">attr</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">AttributeError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;No attribute </span><span class="si">{</span><span class="n">attr</span><span class="si">}</span><span class="s2"> in </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">type</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+        <span class="c1"># There are some nasty things that we have to do to ensure nice</span>
+        <span class="c1"># compatibility: we need to handle @property methods and methods that</span>
+        <span class="c1"># edit the object in place. For the first, we first need to see if the</span>
+        <span class="c1"># attribute is a property or not. Property attributes are not callable.</span>
+
+        <span class="c1"># Note, we are applying getattr to the class, not to the instance!</span>
+        <span class="n">is_property</span> <span class="o">=</span> <span class="nb">isinstance</span><span class="p">(</span><span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">type</span><span class="p">,</span> <span class="n">attr</span><span class="p">),</span> <span class="nb">property</span><span class="p">)</span>
+
+        <span class="c1"># For the latter, we are going to inspect the source code of the method</span>
+        <span class="c1"># as see if it calls self._apply_to_self, in which case we will do the</span>
+        <span class="c1"># same.</span>
+        <span class="k">if</span> <span class="n">is_property</span><span class="p">:</span>
+            <span class="n">source_code</span> <span class="o">=</span> <span class="n">getsource</span><span class="p">(</span><span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">type</span><span class="p">,</span> <span class="n">attr</span><span class="p">)</span><span class="o">.</span><span class="n">fget</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">source_code</span> <span class="o">=</span> <span class="n">getsource</span><span class="p">(</span><span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">type</span><span class="p">,</span> <span class="n">attr</span><span class="p">))</span>
+
+        <span class="n">applies_to_self</span> <span class="o">=</span> <span class="s2">&quot;self._apply_to_self&quot;</span> <span class="ow">in</span> <span class="n">source_code</span>
+
+        <span class="c1"># If we have a property, we should not return a callable</span>
+        <span class="k">if</span> <span class="n">is_property</span><span class="p">:</span>
+            <span class="n">new_data</span> <span class="o">=</span> <span class="p">[</span><span class="nb">getattr</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">attr</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">flat_data</span><span class="p">]</span>
+
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">new_data</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">type</span><span class="p">):</span>
+                <span class="k">return</span> <span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">from_shape_and_flat_data</span><span class="p">(</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="n">new_data</span>
+                <span class="p">)</span>
+
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">new_data</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="p">(</span><span class="nb">float</span><span class="p">,</span> <span class="nb">complex</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)):</span>
+                <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">new_data</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+
+            <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span>
+                <span class="s2">&quot;Attribute broadcasting works only for methods that return numbers or type(self)&quot;</span>
+            <span class="p">)</span>
+
+        <span class="c1"># If we have don&#39;t a property, we should return a callable that does</span>
+        <span class="c1"># pretty much the same thing</span>
+
+        <span class="k">def</span> <span class="nf">_apply_attr</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+            <span class="n">new_data</span> <span class="o">=</span> <span class="p">[</span>
+                <span class="nb">getattr</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">attr</span><span class="p">)(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">flat_data</span>
+            <span class="p">]</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">new_data</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">type</span><span class="p">):</span>
+                <span class="k">return</span> <span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">from_shape_and_flat_data</span><span class="p">(</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="n">new_data</span>
+                <span class="p">)</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">new_data</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="p">(</span><span class="nb">float</span><span class="p">,</span> <span class="nb">complex</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)):</span>
+                <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">new_data</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+
+            <span class="c1"># If the return type is None, this might mean that we are editing</span>
+            <span class="c1"># something in place. In that case, there&#39;s nothing we have to do,</span>
+            <span class="c1"># as the objects already changed</span>
+            <span class="k">if</span> <span class="n">applies_to_self</span><span class="p">:</span>
+                <span class="k">return</span> <span class="kc">None</span>
+
+            <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span>
+                <span class="s2">&quot;Attribute broadcasting works only for methods that return numbers or type(self)&quot;</span>
+            <span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">_apply_attr</span>
+
+    <span class="k">def</span> <span class="fm">__eq__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+        <span class="c1"># Let&#39;s take advantage of some shortcircuiting to reduce comparisons. We</span>
+        <span class="c1"># check three conditions that would establish inequality, and negate the</span>
+        <span class="c1"># answer. The reason is that if any of them fails, we wouldn&#39;t have to</span>
+        <span class="c1"># go to the next one. This is particularly relevant for the last</span>
+        <span class="c1"># condition, which is a little expensive to compute.</span>
+        <span class="n">not_equal</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">))</span>
+            <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">shape</span> <span class="o">!=</span> <span class="n">other</span><span class="o">.</span><span class="n">shape</span>
+            <span class="ow">or</span> <span class="nb">any</span><span class="p">(</span>
+                <span class="n">s</span> <span class="o">!=</span> <span class="n">i</span>
+                <span class="k">for</span> <span class="n">s</span><span class="p">,</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="nb">iter</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">flat_data</span><span class="p">),</span> <span class="nb">iter</span><span class="p">(</span><span class="n">other</span><span class="o">.</span><span class="n">flat_data</span><span class="p">))</span>
+            <span class="p">)</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="ow">not</span> <span class="n">not_equal</span>
+
+    <span class="c1"># From Python&#39;s docs: In order to conform to the object model, classes that</span>
+    <span class="c1"># define their own equality method should also define their own hash method,</span>
+    <span class="c1"># or be unhashable.</span>
+
+    <span class="c1"># Since we consider series unhashable, this object also has to be unhashable.</span>
+    <span class="fm">__hash__</span> <span class="o">=</span> <span class="kc">None</span></div>
+
+
+<div class="viewcode-block" id="Vector"><a class="viewcode-back" href="../../tensor_ref.html#kuibit.tensor.Vector">[docs]</a><span class="k">class</span> <span class="nc">Vector</span><span class="p">(</span><span class="n">Tensor</span><span class="p">[</span><span class="n">_T</span><span class="p">]):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Represents a vector in the mathematical sense.</span>
+
+<span class="sd">    It can be used with series, or grid data, or anything that is derived from</span>
+<span class="sd">    :py:class:`~.BaseNumerical`.</span>
+
+<span class="sd">    This abstraction is useful for vector operations: for example, taking the</span>
+<span class="sd">    cross/dot products between two vectors.</span>
+
+<span class="sd">    All the operations are component-wise, and the vector inherits all the</span>
+<span class="sd">    methods available to the base object.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__len__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Length of the vector.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">flat_data</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="fm">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">i</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">_T</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">flat_data</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+
+<div class="viewcode-block" id="Vector.dot"><a class="viewcode-back" href="../../tensor_ref.html#kuibit.tensor.Vector.dot">[docs]</a>    <span class="k">def</span> <span class="nf">dot</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">:</span> <span class="n">Vector</span><span class="p">[</span><span class="n">_T</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">_T</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return the dot product with another vector.</span>
+
+<span class="sd">        :param other: Other vector in the dot product.</span>
+<span class="sd">        :type other: Vector</span>
+
+<span class="sd">        :returns: Dot product</span>
+<span class="sd">        :rtype: Same as self.type</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="n">Vector</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;other is not a Vector&quot;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">shape</span> <span class="o">!=</span> <span class="n">other</span><span class="o">.</span><span class="n">shape</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s2">&quot;Incosistent shape&quot;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">type</span> <span class="o">!=</span> <span class="n">other</span><span class="o">.</span><span class="n">type</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;Incosistent base type&quot;</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="nb">sum</span><span class="p">(</span><span class="n">s</span> <span class="o">*</span> <span class="n">i</span> <span class="k">for</span> <span class="n">s</span><span class="p">,</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">))</span></div>
+
+<div class="viewcode-block" id="Vector.norm"><a class="viewcode-back" href="../../tensor_ref.html#kuibit.tensor.Vector.norm">[docs]</a>    <span class="k">def</span> <span class="nf">norm</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return the norm of the vector.</span>
+
+<span class="sd">        :returns: Norm of the vector</span>
+<span class="sd">        :rtype: Same as self.type</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">sqrt</span><span class="p">()</span></div></div>
+
+
+<div class="viewcode-block" id="Matrix"><a class="viewcode-back" href="../../tensor_ref.html#kuibit.tensor.Matrix">[docs]</a><span class="k">class</span> <span class="nc">Matrix</span><span class="p">(</span><span class="n">Tensor</span><span class="p">[</span><span class="n">_T</span><span class="p">]):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Represents a matrix in the mathematical sense.</span>
+
+<span class="sd">    It can be used with series, or grid data, or anything that is derived from</span>
+<span class="sd">    :py:class:`~.BaseNumerical`.</span>
+
+<span class="sd">    This abstraction is useful for matrix operations: for example, taking the</span>
+<span class="sd">    determinant.</span>
+
+<span class="sd">    All the operations are component-wise, and the matrix inherits all the</span>
+<span class="sd">    methods available to the base object.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ij</span><span class="p">:</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">_T</span><span class="p">:</span>
+        <span class="c1"># Let&#39;s see an example, the matrix [[0, 1, 2], [3, 4, 5]] has shape (2,</span>
+        <span class="c1"># 3) = (X, Y). If we want element (1, 2) = (i, j), we would have to get</span>
+        <span class="c1"># index i * Y + j</span>
+        <span class="n">i</span><span class="p">,</span> <span class="n">j</span> <span class="o">=</span> <span class="n">ij</span>
+        <span class="n">_</span><span class="p">,</span> <span class="n">Y</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">shape</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">flat_data</span><span class="p">[</span><span class="n">i</span> <span class="o">*</span> <span class="n">Y</span> <span class="o">+</span> <span class="n">j</span><span class="p">]</span></div>
+</pre></div>
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="../../index.html">
+              <img class="logo" src="../../_static/logo.png" alt="Logo"/>
+            </a></p>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script><div role="note" aria-label="version link">
+  <h3>Versions</h3>
+    <ul class="this-page-menu">
+      <li><a href="../../dev/_modules/kuibit/tensor.html" rel="nofollow"> Development </a></li>
+      <li><a href="#" rel="nofollow"> Master </a></li>
+
+      
+      <li><a href="../../1.3.6/_modules/kuibit/tensor.html" rel="nofollow"> 1.3.6 </a></li>
+      
+      <li><a href="../../1.4.0/_modules/kuibit/tensor.html" rel="nofollow"> 1.4.0 </a></li>
+      
+
+    </ul>
+ </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">kuibit 1.4.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../index.html" >Module code</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">kuibit.tensor</a></li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2020-2023, Gabriele Bozzola.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 4.3.2.
+    </div>
+  </body>
+</html>

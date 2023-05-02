@@ -1,0 +1,172 @@
+
+
+<!doctype html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+    <title>Horizon utilities &#8212; kuibit 1.4.0 documentation</title>
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="_static/bizstyle.css" />
+    <link rel="stylesheet" type="text/css" href="_static/css/custom.css" />
+    
+    <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/doctools.js"></script>
+    <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+    <script src="_static/bizstyle.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Sensitivity (power spectral noise) curves of known detectors" href="sensitivity_curves.html" />
+    <link rel="prev" title="Grid functions" href="grid_data.html" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0" />
+    <!--[if lt IE 9]>
+    <script src="_static/css3-mediaqueries.js"></script>
+    <![endif]-->
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="sensitivity_curves.html" title="Sensitivity (power spectral noise) curves of known detectors"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="grid_data.html" title="Grid functions"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">kuibit 1.4.0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">Horizon utilities</a></li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <section id="horizon-utilities">
+<h1>Horizon utilities<a class="headerlink" href="#horizon-utilities" title="Permalink to this headline">¶</a></h1>
+<p>The <a class="reference internal" href="hor_utils_ref.html#module-kuibit.hor_utils" title="kuibit.hor_utils"><code class="xref py py-mod docutils literal notranslate"><span class="pre">hor_utils</span></code></a> module contains functions that are useful in working
+with horizons and their orbits</p>
+<p><a class="reference internal" href="hor_utils_ref.html#module-kuibit.hor_utils"><span class="std std-ref">Reference on kuibit.hor_utils</span></a></p>
+<section id="separation-and-separation-vector">
+<h2>Separation and separation vector<a class="headerlink" href="#separation-and-separation-vector" title="Permalink to this headline">¶</a></h2>
+<p>In simulations of binary black holes, it is often convenient to look at the
+separation between the two horizons. This is can be easily achieved with the
+functions <a class="reference internal" href="hor_utils_ref.html#kuibit.hor_utils.compute_separation_vector" title="kuibit.hor_utils.compute_separation_vector"><code class="xref py py-func docutils literal notranslate"><span class="pre">compute_separation_vector()</span></code></a> and
+<a class="reference internal" href="hor_utils_ref.html#kuibit.hor_utils.compute_separation" title="kuibit.hor_utils.compute_separation"><code class="xref py py-func docutils literal notranslate"><span class="pre">compute_separation()</span></code></a>. These functions take two horizons as input and
+return a <a class="reference internal" href="tensor_ref.html#kuibit.tensor.Vector" title="kuibit.tensor.Vector"><code class="xref py py-class docutils literal notranslate"><span class="pre">Vector</span></code></a> and a <a class="reference internal" href="timeseries_ref.html#kuibit.timeseries.TimeSeries" title="kuibit.timeseries.TimeSeries"><code class="xref py py-class docutils literal notranslate"><span class="pre">TimeSeries</span></code></a> respectively. The
+vector is the separation along the three Cartesian coordinates, while the
+timeseries is the magnitude of the separation. Note that the vector has sign:
+the separation is always computed as <code class="docutils literal notranslate"><span class="pre">hor1</span> <span class="pre">-</span> <span class="pre">hor2</span></code>.</p>
+</section>
+<section id="newtonian-center-of-mass">
+<h2>Newtonian center of mass<a class="headerlink" href="#newtonian-center-of-mass" title="Permalink to this headline">¶</a></h2>
+<p>A second useful quantity is the center of mass. Computing the center of mass in
+a gauge-invariant way is not easy (the best way is looking at the linear
+momentum carried away by gravitational waves). However, we can easily compute
+the Newtonian center of mass:</p>
+<div class="math notranslate nohighlight">
+\[x^i_{CM} = \frac{m_1 x^i_1 + m_2 x^i_2}{m_1 + m_2}\]</div>
+<p>Note that in this formula, we use the irreducible mass and this might not be the
+most appropriate choice in presence of spin. This is implemented in
+<a class="reference internal" href="hor_utils_ref.html#kuibit.hor_utils.compute_center_of_mass" title="kuibit.hor_utils.compute_center_of_mass"><code class="xref py py-func docutils literal notranslate"><span class="pre">compute_center_of_mass()</span></code></a>.</p>
+</section>
+<section id="newtonian-angular-velocity">
+<h2>Newtonian angular velocity<a class="headerlink" href="#newtonian-angular-velocity" title="Permalink to this headline">¶</a></h2>
+<p>In the same spirit, we can compute the Newtonian angular velocity vector as</p>
+<div class="math notranslate nohighlight">
+\[\mathbf{\Omega} = \frac{\mathbf{r} \times \mathbf{\dot{r}}}{r^2}\]</div>
+<p>For orbits on the equatorial plane, the z component is the usual angular
+velocity. This is implemented in <a class="reference internal" href="hor_utils_ref.html#kuibit.hor_utils.compute_angular_velocity_vector" title="kuibit.hor_utils.compute_angular_velocity_vector"><code class="xref py py-func docutils literal notranslate"><span class="pre">compute_angular_velocity_vector()</span></code></a>.</p>
+</section>
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="index.html">
+              <img class="logo" src="_static/logo.png" alt="Logo"/>
+            </a></p>
+  <h3><a href="index.html">Table of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Horizon utilities</a><ul>
+<li><a class="reference internal" href="#separation-and-separation-vector">Separation and separation vector</a></li>
+<li><a class="reference internal" href="#newtonian-center-of-mass">Newtonian center of mass</a></li>
+<li><a class="reference internal" href="#newtonian-angular-velocity">Newtonian angular velocity</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="grid_data.html"
+                        title="previous chapter">Grid functions</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="sensitivity_curves.html"
+                        title="next chapter">Sensitivity (power spectral noise) curves of known detectors</a></p>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script><div role="note" aria-label="version link">
+  <h3>Versions</h3>
+    <ul class="this-page-menu">
+      <li><a href="dev/hor_utils.html" rel="nofollow"> Development </a></li>
+      <li><a href="#" rel="nofollow"> Master </a></li>
+
+      
+      <li><a href="1.3.6/hor_utils.html" rel="nofollow"> 1.3.6 </a></li>
+      
+      <li><a href="1.4.0/hor_utils.html" rel="nofollow"> 1.4.0 </a></li>
+      
+
+    </ul>
+ </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="sensitivity_curves.html" title="Sensitivity (power spectral noise) curves of known detectors"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="grid_data.html" title="Grid functions"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">kuibit 1.4.0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">Horizon utilities</a></li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2020-2023, Gabriele Bozzola.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 4.3.2.
+    </div>
+  </body>
+</html>

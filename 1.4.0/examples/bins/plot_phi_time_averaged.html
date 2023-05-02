@@ -1,0 +1,357 @@
+
+
+<!doctype html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+    <title>plot_phi_time_averaged.py &#8212; kuibit 1.4.0 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/bizstyle.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/css/custom.css" />
+    
+    <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+    <script src="../../_static/jquery.js"></script>
+    <script src="../../_static/underscore.js"></script>
+    <script src="../../_static/doctools.js"></script>
+    <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="../../_static/bizstyle.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="plot_phi_lm.py" href="plot_phi_lm.html" />
+    <link rel="prev" title="plot_gw_linear_momentum.py" href="plot_gw_linear_momentum.html" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0" />
+    <!--[if lt IE 9]>
+    <script src="_static/css3-mediaqueries.js"></script>
+    <![endif]-->
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="plot_phi_lm.html" title="plot_phi_lm.py"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="plot_gw_linear_momentum.html" title="plot_gw_linear_momentum.py"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">kuibit 1.4.0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">plot_phi_time_averaged.py</a></li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <section id="plot-phi-time-averaged-py">
+<h1>plot_phi_time_averaged.py<a class="headerlink" href="#plot-phi-time-averaged-py" title="Permalink to this headline">¶</a></h1>
+<p><code class="docutils literal notranslate"><span class="pre">plot_phi_time_averaged</span></code> plots the azimuthal and time average of a 2D grid
+function. The scripts interpolates the quantity over concentric rings around a
+given center, and average all the values at fixed radius. Then, these are
+averaged over a time window defined by passing <code class="docutils literal notranslate"><span class="pre">--tmin</span></code>, <code class="docutils literal notranslate"><span class="pre">--tmax</span></code>, and
+<code class="docutils literal notranslate"><span class="pre">--time-every</span></code>. This last parameter specifies the frequency of snapshots to
+use for the time average (i.e., for the time average, use one snapshot every N
+available).</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="ch">#!/usr/bin/env python3</span>
+<span class="c1"># PYTHON_ARGCOMPLETE_OK</span>
+
+<span class="c1"># Copyright (C) 2021-2023 Gabriele Bozzola</span>
+<span class="c1">#</span>
+<span class="c1"># This program is free software; you can redistribute it and/or modify it under</span>
+<span class="c1"># the terms of the GNU General Public License as published by the Free Software</span>
+<span class="c1"># Foundation; either version 3 of the License, or (at your option) any later</span>
+<span class="c1"># version.</span>
+<span class="c1">#</span>
+<span class="c1"># This program is distributed in the hope that it will be useful, but WITHOUT</span>
+<span class="c1"># ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS</span>
+<span class="c1"># FOR A PARTICULAR PURPOSE. See the GNU General Public License for more</span>
+<span class="c1"># details.</span>
+<span class="c1">#</span>
+<span class="c1"># You should have received a copy of the GNU General Public License along with</span>
+<span class="c1"># this program; if not, see &lt;https://www.gnu.org/licenses/&gt;.</span>
+
+<span class="kn">import</span> <span class="nn">logging</span>
+
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
+<span class="kn">from</span> <span class="nn">kuibit</span> <span class="kn">import</span> <span class="n">argparse_helper</span> <span class="k">as</span> <span class="n">kah</span>
+<span class="kn">from</span> <span class="nn">kuibit.simdir</span> <span class="kn">import</span> <span class="n">SimDir</span>
+<span class="kn">from</span> <span class="nn">kuibit.visualize_matplotlib</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">add_text_to_corner</span><span class="p">,</span>
+    <span class="n">save_from_dir_filename_ext</span><span class="p">,</span>
+    <span class="n">set_axis_limits</span><span class="p">,</span>
+    <span class="n">setup_matplotlib</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+    <span class="n">desc</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;</span><span class="se">\</span>
+
+<span class="s2">{kah.get_program_name()} plots the azimuthal and time average of a given grid</span>
+<span class="s2">function around a given center. The script interpolates the data onto concentric</span>
+<span class="s2">rings and takes the average at a fixed radius. Then, this is averaged over a</span>
+<span class="s2">window of time defined by tmin and tmax.&quot;&quot;&quot;</span>
+
+    <span class="n">parser</span> <span class="o">=</span> <span class="n">kah</span><span class="o">.</span><span class="n">init_argparse</span><span class="p">(</span><span class="n">desc</span><span class="p">)</span>
+    <span class="n">kah</span><span class="o">.</span><span class="n">add_figure_to_parser</span><span class="p">(</span><span class="n">parser</span><span class="p">,</span> <span class="n">add_limits</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span>
+        <span class="s2">&quot;--variable&quot;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="nb">str</span><span class="p">,</span> <span class="n">required</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Variable to plot.&quot;</span>
+    <span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span>
+        <span class="s2">&quot;--plane&quot;</span><span class="p">,</span>
+        <span class="nb">type</span><span class="o">=</span><span class="nb">str</span><span class="p">,</span>
+        <span class="n">choices</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;xy&quot;</span><span class="p">,</span> <span class="s2">&quot;xz&quot;</span><span class="p">,</span> <span class="s2">&quot;yz&quot;</span><span class="p">],</span>
+        <span class="n">default</span><span class="o">=</span><span class="s2">&quot;xy&quot;</span><span class="p">,</span>
+        <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Plane to consider (default: </span><span class="si">%(default)s</span><span class="s2">).&quot;</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span>
+        <span class="s2">&quot;--tmin&quot;</span><span class="p">,</span>
+        <span class="nb">type</span><span class="o">=</span><span class="nb">float</span><span class="p">,</span>
+        <span class="n">required</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Minimum time in the time window.&quot;</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span>
+        <span class="s2">&quot;--tmax&quot;</span><span class="p">,</span>
+        <span class="nb">type</span><span class="o">=</span><span class="nb">float</span><span class="p">,</span>
+        <span class="n">required</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Minimum time in the time window.&quot;</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span>
+        <span class="s2">&quot;--resolution&quot;</span><span class="p">,</span>
+        <span class="nb">type</span><span class="o">=</span><span class="nb">int</span><span class="p">,</span>
+        <span class="n">default</span><span class="o">=</span><span class="mi">300</span><span class="p">,</span>
+        <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Resolution to use for the x axis.&quot;</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span>
+        <span class="s2">&quot;--phi-resolution&quot;</span><span class="p">,</span>
+        <span class="nb">type</span><span class="o">=</span><span class="nb">int</span><span class="p">,</span>
+        <span class="n">default</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span>
+        <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Resolution to use for the phi averaging.&quot;</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span>
+        <span class="s2">&quot;--time-every&quot;</span><span class="p">,</span>
+        <span class="nb">type</span><span class="o">=</span><span class="nb">int</span><span class="p">,</span>
+        <span class="n">default</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+        <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Use one snapshot every this number of available ones (default: </span><span class="si">%(default)s</span><span class="s2">).&quot;</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add</span><span class="p">(</span>
+        <span class="s2">&quot;--logscale&quot;</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Use a logarithmic y scale.&quot;</span><span class="p">,</span> <span class="n">action</span><span class="o">=</span><span class="s2">&quot;store_true&quot;</span>
+    <span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span>
+        <span class="s2">&quot;--absolute&quot;</span><span class="p">,</span>
+        <span class="n">action</span><span class="o">=</span><span class="s2">&quot;store_true&quot;</span><span class="p">,</span>
+        <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Whether to take the absolute value.&quot;</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span>
+        <span class="s2">&quot;--center&quot;</span><span class="p">,</span>
+        <span class="nb">type</span><span class="o">=</span><span class="nb">float</span><span class="p">,</span>
+        <span class="n">nargs</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
+        <span class="n">default</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span>
+        <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Center around which to perform the average (default: </span><span class="si">%(default)s</span><span class="s2">)&quot;</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span>
+        <span class="s2">&quot;--max-radius&quot;</span><span class="p">,</span>
+        <span class="nb">type</span><span class="o">=</span><span class="nb">float</span><span class="p">,</span>
+        <span class="n">default</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+        <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Maximum radius at which perform the average (default: </span><span class="si">%(default)s</span><span class="s2">)&quot;</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="n">args</span> <span class="o">=</span> <span class="n">kah</span><span class="o">.</span><span class="n">get_args</span><span class="p">(</span><span class="n">parser</span><span class="p">)</span>
+    <span class="n">setup_matplotlib</span><span class="p">(</span><span class="n">rc_par_file</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">mpl_rc_file</span><span class="p">)</span>
+
+    <span class="p">(</span>
+        <span class="n">tmin</span><span class="p">,</span>
+        <span class="n">tmax</span><span class="p">,</span>
+        <span class="n">var_name</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="n">args</span><span class="o">.</span><span class="n">tmin</span><span class="p">,</span>
+        <span class="n">args</span><span class="o">.</span><span class="n">tmax</span><span class="p">,</span>
+        <span class="n">args</span><span class="o">.</span><span class="n">variable</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="n">X0</span><span class="p">,</span> <span class="n">Y0</span> <span class="o">=</span> <span class="n">args</span><span class="o">.</span><span class="n">center</span>
+
+    <span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">args</span><span class="o">.</span><span class="n">verbose</span><span class="p">:</span>
+        <span class="n">logging</span><span class="o">.</span><span class="n">basicConfig</span><span class="p">(</span><span class="nb">format</span><span class="o">=</span><span class="s2">&quot;</span><span class="si">%(asctime)s</span><span class="s2"> - </span><span class="si">%(message)s</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">setLevel</span><span class="p">(</span><span class="n">logging</span><span class="o">.</span><span class="n">DEBUG</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">args</span><span class="o">.</span><span class="n">figname</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">figname</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">var_name</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">args</span><span class="o">.</span><span class="n">plane</span><span class="si">}</span><span class="s2">_phi_time_averaged&quot;</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">figname</span> <span class="o">=</span> <span class="n">args</span><span class="o">.</span><span class="n">figname</span>
+
+    <span class="k">with</span> <span class="n">SimDir</span><span class="p">(</span>
+        <span class="n">args</span><span class="o">.</span><span class="n">datadir</span><span class="p">,</span>
+        <span class="n">ignore_symlinks</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">ignore_symlinks</span><span class="p">,</span>
+        <span class="n">pickle_file</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">pickle_file</span><span class="p">,</span>
+    <span class="p">)</span> <span class="k">as</span> <span class="n">sim</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Prepared SimDir&quot;</span><span class="p">)</span>
+
+        <span class="n">reader</span> <span class="o">=</span> <span class="n">sim</span><span class="o">.</span><span class="n">gridfunctions</span><span class="p">[</span><span class="n">args</span><span class="o">.</span><span class="n">plane</span><span class="p">]</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Variables available </span><span class="si">{</span><span class="n">reader</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+        <span class="n">var</span> <span class="o">=</span> <span class="n">reader</span><span class="p">[</span><span class="n">var_name</span><span class="p">]</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Read variable </span><span class="si">{</span><span class="n">args</span><span class="o">.</span><span class="n">variable</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+        <span class="n">times</span> <span class="o">=</span> <span class="n">var</span><span class="o">.</span><span class="n">available_times</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Available time </span><span class="si">{</span><span class="n">times</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+        <span class="n">selected_times</span> <span class="o">=</span> <span class="p">[</span><span class="n">time</span> <span class="k">for</span> <span class="n">time</span> <span class="ow">in</span> <span class="n">times</span> <span class="k">if</span> <span class="n">tmin</span> <span class="o">&lt;=</span> <span class="n">time</span> <span class="o">&lt;=</span> <span class="n">tmax</span><span class="p">]</span>
+        <span class="n">selected_times</span> <span class="o">=</span> <span class="n">selected_times</span><span class="p">[::</span> <span class="n">args</span><span class="o">.</span><span class="n">time_every</span><span class="p">]</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Selected times </span><span class="si">{</span><span class="n">selected_times</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+        <span class="c1"># The equations are</span>
+        <span class="c1"># X = X0 + R * cos(phi)</span>
+        <span class="c1"># Y = Y0 + R * sin(phi)</span>
+
+        <span class="c1"># We prepare the polar grid that we want evaluate</span>
+        <span class="n">angles</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">,</span> <span class="n">args</span><span class="o">.</span><span class="n">phi_resolution</span><span class="p">)</span>
+        <span class="c1"># R_min is not set to zero because it would be pointless</span>
+        <span class="n">radii</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mf">1e-5</span><span class="p">,</span> <span class="n">args</span><span class="o">.</span><span class="n">max_radius</span><span class="p">,</span> <span class="n">args</span><span class="o">.</span><span class="n">resolution</span><span class="p">)</span>
+
+        <span class="c1"># These are the points where we are going to evaluate the variable. They</span>
+        <span class="c1"># are a series of concentric rings.</span>
+        <span class="n">points</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span>
+            <span class="p">[</span>
+                <span class="p">[</span>
+                    <span class="p">(</span><span class="n">X0</span> <span class="o">+</span> <span class="n">R</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">phi</span><span class="p">),</span> <span class="n">Y0</span> <span class="o">+</span> <span class="n">R</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">phi</span><span class="p">))</span>
+                    <span class="k">for</span> <span class="n">phi</span> <span class="ow">in</span> <span class="n">angles</span>
+                <span class="p">]</span>
+                <span class="k">for</span> <span class="n">R</span> <span class="ow">in</span> <span class="n">radii</span>
+            <span class="p">]</span>
+        <span class="p">)</span>
+
+        <span class="c1"># We are going to collect all the results in values, and the end we do</span>
+        <span class="c1"># the time averaging. So first, we do the phi averaging, then the time</span>
+        <span class="c1"># one. The variable ret_values contains the phi-averaged quantity.</span>
+        <span class="n">ret_values</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">resolution</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">time</span> <span class="ow">in</span> <span class="n">selected_times</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Working on time </span><span class="si">{</span><span class="n">time</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+            <span class="n">var_at_time</span> <span class="o">=</span> <span class="n">var</span><span class="o">.</span><span class="n">get_time</span><span class="p">(</span><span class="n">time</span><span class="p">)</span>
+
+            <span class="n">values_at_time</span> <span class="o">=</span> <span class="n">var_at_time</span><span class="p">(</span><span class="n">points</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">args</span><span class="o">.</span><span class="n">logscale</span><span class="p">:</span>
+                <span class="n">val_time</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="n">values_at_time</span><span class="p">)</span>
+
+            <span class="c1"># Phi-averaging</span>
+            <span class="n">phi_averaged_at_time</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">values_at_time</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+
+            <span class="n">ret_values</span> <span class="o">+=</span> <span class="n">phi_averaged_at_time</span>
+
+            <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">radii</span><span class="p">,</span> <span class="n">phi_averaged_at_time</span><span class="p">,</span> <span class="n">linewidth</span><span class="o">=</span><span class="mf">0.2</span><span class="p">,</span> <span class="n">c</span><span class="o">=</span><span class="s2">&quot;gray&quot;</span><span class="p">)</span>
+
+        <span class="c1"># Time-averaging</span>
+        <span class="n">ret_values</span> <span class="o">/=</span> <span class="nb">len</span><span class="p">(</span><span class="n">selected_times</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">args</span><span class="o">.</span><span class="n">logscale</span><span class="p">:</span>
+            <span class="n">label</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;log10(</span><span class="si">{</span><span class="n">var_name</span><span class="si">}</span><span class="s2">)&quot;</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">label</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">var_name</span><span class="si">}</span><span class="s2">&quot;</span>
+
+        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Using label </span><span class="si">{</span><span class="n">label</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Plotting variable </span><span class="si">{</span><span class="n">var_name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">radii</span><span class="p">,</span> <span class="n">ret_values</span><span class="p">)</span>
+
+        <span class="n">add_text_to_corner</span><span class="p">(</span>
+            <span class="sa">rf</span><span class="s2">&quot;$t \in (</span><span class="si">{</span><span class="n">selected_times</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2">, </span><span class="si">{</span><span class="n">selected_times</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2">)$&quot;</span>
+        <span class="p">)</span>
+        <span class="n">add_text_to_corner</span><span class="p">(</span><span class="sa">rf</span><span class="s2">&quot;Center = </span><span class="si">{</span><span class="n">X0</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2">, </span><span class="si">{</span><span class="n">Y0</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">anchor</span><span class="o">=</span><span class="s2">&quot;NW&quot;</span><span class="p">)</span>
+
+        <span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s2">&quot;Radius&quot;</span><span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="n">label</span><span class="p">)</span>
+        <span class="n">set_axis_limits</span><span class="p">(</span><span class="n">xmin</span><span class="o">=</span><span class="n">radii</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">xmax</span><span class="o">=</span><span class="n">radii</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+
+        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Saving&quot;</span><span class="p">)</span>
+        <span class="n">save_from_dir_filename_ext</span><span class="p">(</span>
+            <span class="n">args</span><span class="o">.</span><span class="n">outdir</span><span class="p">,</span>
+            <span class="n">figname</span><span class="p">,</span>
+            <span class="n">args</span><span class="o">.</span><span class="n">fig_extension</span><span class="p">,</span>
+            <span class="n">tikz_clean_figure</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">tikz_clean_figure</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;DONE&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="../../index.html">
+              <img class="logo" src="../../_static/logo.png" alt="Logo"/>
+            </a></p>
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="plot_gw_linear_momentum.html"
+                        title="previous chapter">plot_gw_linear_momentum.py</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="plot_phi_lm.html"
+                        title="next chapter">plot_phi_lm.py</a></p>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script><div role="note" aria-label="version link">
+  <h3>Versions</h3>
+    <ul class="this-page-menu">
+      <li><a href="../../dev/examples/bins/plot_phi_time_averaged.html" rel="nofollow"> Development </a></li>
+      <li><a href="#" rel="nofollow"> Master </a></li>
+
+      
+      <li><a href="../../1.3.6/examples/bins/plot_phi_time_averaged.html" rel="nofollow"> 1.3.6 </a></li>
+      
+      <li><a href="../../1.4.0/examples/bins/plot_phi_time_averaged.html" rel="nofollow"> 1.4.0 </a></li>
+      
+
+    </ul>
+ </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="plot_phi_lm.html" title="plot_phi_lm.py"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="plot_gw_linear_momentum.html" title="plot_gw_linear_momentum.py"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">kuibit 1.4.0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">plot_phi_time_averaged.py</a></li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2020-2023, Gabriele Bozzola.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 4.3.2.
+    </div>
+  </body>
+</html>

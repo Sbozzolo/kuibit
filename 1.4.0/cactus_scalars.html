@@ -1,0 +1,196 @@
+
+
+<!doctype html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+    <title>Scalar data &#8212; kuibit 1.4.0 documentation</title>
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="_static/bizstyle.css" />
+    <link rel="stylesheet" type="text/css" href="_static/css/custom.css" />
+    
+    <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/doctools.js"></script>
+    <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="_static/bizstyle.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Working with multipolar decompositions" href="cactus_multipoles.html" />
+    <link rel="prev" title="Time and frequency series" href="series.html" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0" />
+    <!--[if lt IE 9]>
+    <script src="_static/css3-mediaqueries.js"></script>
+    <![endif]-->
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="cactus_multipoles.html" title="Working with multipolar decompositions"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="series.html" title="Time and frequency series"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">kuibit 1.4.0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">Scalar data</a></li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <section id="scalar-data">
+<h1>Scalar data<a class="headerlink" href="#scalar-data" title="Permalink to this headline">¶</a></h1>
+<p>Scalar output are common in several simulations, with the most notable example
+being reductions (max, min, average, …). The module <a class="reference internal" href="cactus_scalars_ref.html#module-kuibit.cactus_scalars" title="kuibit.cactus_scalars"><code class="xref py py-mod docutils literal notranslate"><span class="pre">cactus_scalars</span></code></a>
+(<a class="reference internal" href="cactus_scalars_ref.html#module-kuibit.cactus_scalars"><span class="std std-ref">Reference on kuibit.cactus_scalars</span></a>) handles these
+quantities. Data is loaded lazily.</p>
+<section id="what-data-can-be-read">
+<h2>What data can be read?<a class="headerlink" href="#what-data-can-be-read" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference internal" href="cactus_scalars_ref.html#kuibit.cactus_scalars.OneScalar" title="kuibit.cactus_scalars.OneScalar"><code class="xref py py-class docutils literal notranslate"><span class="pre">OneScalar</span></code></a> reads files produced by <code class="docutils literal notranslate"><span class="pre">CarpetASCII</span></code>. It
+recognizes transparently <code class="docutils literal notranslate"><span class="pre">gz</span></code> and <code class="docutils literal notranslate"><span class="pre">bz2</span></code> compressed files and it works with
+multiple variables in one file, or different files for each variable. In the
+former case, <a class="reference internal" href="cactus_scalars_ref.html#kuibit.cactus_scalars.OneScalar" title="kuibit.cactus_scalars.OneScalar"><code class="xref py py-class docutils literal notranslate"><span class="pre">OneScalar</span></code></a> reads the <code class="docutils literal notranslate"><span class="pre">column</span> <span class="pre">format</span></code> line in
+the file and deduces the content. <a class="reference internal" href="cactus_scalars_ref.html#kuibit.cactus_scalars.OneScalar" title="kuibit.cactus_scalars.OneScalar"><code class="xref py py-class docutils literal notranslate"><span class="pre">OneScalar</span></code></a> can return
+a <a class="reference internal" href="timeseries_ref.html#kuibit.timeseries.TimeSeries" title="kuibit.timeseries.TimeSeries"><code class="xref py py-class docutils literal notranslate"><span class="pre">TimeSeries</span></code></a> with the time evolution of the various scalars.</p>
+</section>
+<section id="accessing-data">
+<h2>Accessing data<a class="headerlink" href="#accessing-data" title="Permalink to this headline">¶</a></h2>
+<p>One typically does not use directly <a class="reference internal" href="cactus_scalars_ref.html#kuibit.cactus_scalars.OneScalar" title="kuibit.cactus_scalars.OneScalar"><code class="xref py py-class docutils literal notranslate"><span class="pre">OneScalar</span></code></a>, but
+<a class="reference internal" href="cactus_scalars_ref.html#kuibit.cactus_scalars.ScalarsDir" title="kuibit.cactus_scalars.ScalarsDir"><code class="xref py py-class docutils literal notranslate"><span class="pre">ScalarsDir</span></code></a>. This class takes as input a <a class="reference internal" href="simdir_ref.html#kuibit.simdir.SimDir" title="kuibit.simdir.SimDir"><code class="xref py py-class docutils literal notranslate"><span class="pre">SimDir</span></code></a> and
+organizes the various type of scalar data available. <a class="reference internal" href="simdir_ref.html#kuibit.simdir.SimDir" title="kuibit.simdir.SimDir"><code class="xref py py-class docutils literal notranslate"><span class="pre">SimDir</span></code></a>
+internally organizes its scalar data as <a class="reference internal" href="cactus_scalars_ref.html#kuibit.cactus_scalars.ScalarsDir" title="kuibit.cactus_scalars.ScalarsDir"><code class="xref py py-class docutils literal notranslate"><span class="pre">ScalarsDir</span></code></a>, so this
+documentation is of interest to the scalars in <a class="reference internal" href="simdir_ref.html#kuibit.simdir.SimDir" title="kuibit.simdir.SimDir"><code class="xref py py-class docutils literal notranslate"><span class="pre">SimDir</span></code></a>.</p>
+<p>You can also print the content of a <a class="reference internal" href="cactus_scalars_ref.html#kuibit.cactus_scalars.ScalarsDir" title="kuibit.cactus_scalars.ScalarsDir"><code class="xref py py-class docutils literal notranslate"><span class="pre">ScalarsDir</span></code></a>:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">kuibit.cactus_scalars</span> <span class="k">as</span> <span class="nn">cs</span>
+<span class="kn">import</span> <span class="nn">kuibit.simdir</span> <span class="k">as</span> <span class="nn">sd</span>
+
+<span class="n">sim</span> <span class="o">=</span> <span class="n">sd</span><span class="o">.</span><span class="n">SimDir</span><span class="p">(</span><span class="s2">&quot;simulation&quot;</span><span class="p">)</span>
+
+<span class="c1"># The following three are equivalent</span>
+<span class="n">timeseries</span> <span class="o">=</span> <span class="n">sim</span><span class="o">.</span><span class="n">ts</span>
+<span class="n">timeseries</span> <span class="o">=</span> <span class="n">sim</span><span class="o">.</span><span class="n">timeseries</span>
+<span class="n">timeseries</span> <span class="o">=</span> <span class="n">cs</span><span class="o">.</span><span class="n">ScalarsDir</span><span class="p">(</span><span class="n">sim</span><span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="n">timeseries</span><span class="p">)</span>
+
+<span class="c1"># Extract of possible output:</span>
+
+<span class="c1"># Available norm1 timeseries:</span>
+<span class="c1"># [&#39;H&#39;, &#39;M1&#39;, &#39;M2&#39;, &#39;M3&#39;, &#39;kxx&#39;, &#39;kxy&#39;, &#39;kxz&#39;, &#39;kyy&#39;, &#39;kyz&#39;, &#39;kzz&#39;, &#39;press&#39;, &#39;alp&#39;, &#39;eps&#39;, &#39;vel[0]&#39;, &#39;vel[1]&#39;, &#39;vel[2]&#39;, &#39;rho&#39;, &#39;gxx&#39;, &#39;gxy&#39;, &#39;gxz&#39;, &#39;gyy&#39;, &#39;gyz&#39;, &#39;gzz&#39;]</span>
+
+<span class="c1"># Available norm2 timeseries:</span>
+<span class="c1"># [&#39;rho&#39;, &#39;M1&#39;, &#39;M2&#39;, &#39;M3&#39;, &#39;press&#39;, &#39;H&#39;, &#39;vel[0]&#39;, &#39;vel[1]&#39;, &#39;vel[2]&#39;, &#39;alp&#39;, &#39;gxx&#39;, &#39;gxy&#39;, &#39;gxz&#39;, &#39;gyy&#39;, &#39;gyz&#39;, &#39;gzz&#39;, &#39;kxx&#39;, &#39;kxy&#39;, &#39;kxz&#39;, &#39;kyy&#39;, &#39;kyz&#39;, &#39;kzz&#39;, &#39;eps&#39;]</span>
+
+<span class="c1"># .....</span>
+</pre></div>
+</div>
+<p>The easieast way to access data is using the brackets operator, or using the
+<code class="docutils literal notranslate"><span class="pre">get</span></code> function. (You can also access reductions in the same way.)</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">rho_max</span> <span class="o">=</span> <span class="n">timeseries</span><span class="o">.</span><span class="n">maximum</span><span class="p">[</span><span class="s1">&#39;rho&#39;</span><span class="p">]</span>
+<span class="c1"># or</span>
+<span class="n">rho_max</span> <span class="o">=</span> <span class="n">timeseries</span><span class="o">.</span><span class="n">maximum</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;rho&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Yet another way is to use the <code class="docutils literal notranslate"><span class="pre">.fields</span></code> attribute:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">rho_max</span> <span class="o">=</span> <span class="n">timeseries</span><span class="o">.</span><span class="n">maximum</span><span class="o">.</span><span class="n">fields</span><span class="o">.</span><span class="n">rho</span>
+</pre></div>
+</div>
+<p>Clearly, instead of <code class="docutils literal notranslate"><span class="pre">maximum</span></code>, you can use any reduction you want. Use
+<code class="docutils literal notranslate"><span class="pre">scalars</span></code> for scalar values.</p>
+<p>The return values of all these calls are <a class="reference internal" href="timeseries_ref.html#kuibit.timeseries.TimeSeries" title="kuibit.timeseries.TimeSeries"><code class="xref py py-class docutils literal notranslate"><span class="pre">TimeSeries</span></code></a>. The page
+<a class="reference internal" href="series.html#time-and-frequency-series"><span class="std std-ref">Time and frequency series</span></a> has abundant information about these
+objects.</p>
+</section>
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="index.html">
+              <img class="logo" src="_static/logo.png" alt="Logo"/>
+            </a></p>
+  <h3><a href="index.html">Table of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Scalar data</a><ul>
+<li><a class="reference internal" href="#what-data-can-be-read">What data can be read?</a></li>
+<li><a class="reference internal" href="#accessing-data">Accessing data</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="series.html"
+                        title="previous chapter">Time and frequency series</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="cactus_multipoles.html"
+                        title="next chapter">Working with multipolar decompositions</a></p>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script><div role="note" aria-label="version link">
+  <h3>Versions</h3>
+    <ul class="this-page-menu">
+      <li><a href="dev/cactus_scalars.html" rel="nofollow"> Development </a></li>
+      <li><a href="#" rel="nofollow"> Master </a></li>
+
+      
+      <li><a href="1.3.6/cactus_scalars.html" rel="nofollow"> 1.3.6 </a></li>
+      
+      <li><a href="1.4.0/cactus_scalars.html" rel="nofollow"> 1.4.0 </a></li>
+      
+
+    </ul>
+ </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="cactus_multipoles.html" title="Working with multipolar decompositions"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="series.html" title="Time and frequency series"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">kuibit 1.4.0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">Scalar data</a></li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2020-2023, Gabriele Bozzola.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 4.3.2.
+    </div>
+  </body>
+</html>
