@@ -23,7 +23,7 @@ copyright = "2020-2023, Gabriele Bozzola"
 author = "Gabriele Bozzola"
 
 # The full version, including alpha/beta/rc tags
-release = "1.4.0-dev2"
+release = "1.4.0"
 
 
 # -- General configuration ---------------------------------------------------
@@ -87,7 +87,7 @@ html_sidebars = {
     ],
 }
 
-html_context = {"versions": ["1.3.6"]}
+html_context = {"versions": ["1.3.6", "1.4.0"]}
 
 html_theme_options = {
     "maincolor": "#228B22",

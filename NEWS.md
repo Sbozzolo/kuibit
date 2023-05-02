@@ -1,6 +1,6 @@
 # Changelog
 
-## Version 1.4.0 (Under Development)
+## Version 1.4.0 (2 May 2023)
 
 #### General
 - Minimum version of Python required is now 3.7. `kuibit` now explicitly follows
