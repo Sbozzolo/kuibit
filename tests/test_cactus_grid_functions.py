@@ -23,6 +23,7 @@ import h5py
 import numpy as np
 
 from kuibit import cactus_grid_functions as cg
+from kuibit import cactus_ascii_utils as ca
 from kuibit import grid_data
 from kuibit import simdir as sd
 
@@ -57,6 +58,10 @@ class TestGridFunctionsDir(unittest.TestCase):
 
     def test_contains(self):
         self.assertIn("xyz", self.gd)
+
+    def test_contains_OpenPMDVars(self):
+        vars3D = self.gd.xyz
+        self.assertIn("admbase_alp", vars3D)
 
     def test__getitem(self):
         self.assertIs(self.gd["xy"], self.gd._all_griddata[(0, 1)])
@@ -134,6 +139,12 @@ class TestAllGridFunctions(unittest.TestCase):
                 "int_surface_density",
                 "int_torque_dens",
             ],
+        )
+
+        self.assertCountEqual(
+            list(self.gf._vars_openpmd_files.keys()),
+            [
+            ]
         )
 
         # Here we are not testing that files are correctly organized...
@@ -495,3 +506,70 @@ class TestOneGridFunction(unittest.TestCase):
 
         # Check that we are clear
         self.assertIsNone(self.P.alldata[self.P_file][0][0][0])
+
+
+class TestOneGridFunctionsOpenPMD(unittest.TestCase):
+    def setUp(self):
+        self.gf = sd.SimDir("tests/grid_functions").gf.xyz
+
+    def test__init(self):
+        self.assertCountEqual(self.gf.dimension, (0, 1, 2))
+
+        # Test wrong number of ghosts
+        with self.assertRaises(ValueError):
+            cg.AllGridFunctions(
+                self.gf.allfiles, dimension=(0, 1), num_ghost=(4,)
+            )
+
+        # Here we check that we indexed the correct variables. We must check
+        # HDF5 files and ASCII files with both one variable per file and one
+        # group per file.
+
+        # There are four file in the test folder:
+        # 1. illinoisgrmhd-grmhd_primitives_allbutbi.xy.asc (ASCII one group)
+        # 2. rho_star.xy.asc (ASCII one var)
+        # 3. rho.xy.h5 (HDF5 one var)
+        # 4. illinoisgrmhd-grmhd_primitives_allbutbi.xy.h5 (HDF5 one group)
+        #
+        # In ASCII files we also check for compressed files
+
+        # Here we can we find all the variables
+        self.assertCountEqual(
+            list(self.gf._vars_openpmd_files.keys()),
+            ['admbase_alp', 'admbase_kxx', 'admbase_kxy', 'admbase_kxz', 'admbase_kyy', 
+             'admbase_kyz', 'admbase_kzz', 'admbase_gxx', 'admbase_gxy', 'admbase_gxz',
+             'admbase_gyy', 'admbase_gyz', 'admbase_gzz', 'admbase_betax', 'admbase_betay',
+             'admbase_betaz', 'weyl_psi0im', 'weyl_psi0re', 'weyl_psi1im', 'weyl_psi1re',
+             'weyl_psi2im', 'weyl_psi2re', 'weyl_psi3im', 'weyl_psi3re', 'weyl_psi4im',
+             'weyl_psi4re', 'z4c_allc'
+            ]
+        )
+
+        self.assertCountEqual(
+            list(self.gf._vars_h5_files.keys()),
+            ['P', 'rho_b', 'vx', 'vy', 'vz'
+            ],
+        )
+
+        self.assertCountEqual(
+            list(self.gf._vars_ascii_files.keys()),
+            ['P', 'rho_b', 'vx', 'vy', 'vz', 'rho_star'
+            ],
+        )
+
+    def test_allfiles(self):
+        # This is a weak test, we are just testing how many files we have...
+
+        # There should be 4 files
+        self.assertEqual(len(self.gf.allfiles), 5)
+
+    def test_total_filesize(self):
+        size_B = sum({os.path.getsize(path) if os.path.isfile(path) else ca.get_dir_size(path) for path in self.gf.allfiles})
+        self.assertEqual(size_B, self.gf.total_filesize("B"))
+
+        size_KB = size_B / 1024
+        self.assertEqual(size_KB, self.gf.total_filesize("KB"))
+
+    def test__str(self):
+        self.assertIn("vz", str(self.gf))
+        self.assertIn("Available grid data of dimension 3D (xyz)", str(self.gf))

@@ -226,6 +226,17 @@ def scan_header(
     return time_column, data_column
 
 
+def get_dir_size(path='.'):
+    total = 0
+    with os.scandir(path) as it:
+        for entry in it:
+            if entry.is_file():
+                total += entry.stat().st_size
+            elif entry.is_dir():
+                total += get_dir_size(entry.path)
+    return total
+
+
 def total_filesize(allfiles, unit="MB"):
     """Return the total size of the given files.
     Available units B, KB, MB and GB
@@ -244,4 +255,4 @@ def total_filesize(allfiles, unit="MB"):
     units = {"B": 1, "KB": 1024, "MB": 1024**2, "GB": 1024**3}
     if unit not in units:
         raise ValueError(f"Invalid unit: expected one of {list(units.keys())}")
-    return sum(os.path.getsize(path) for path in set(allfiles)) / units[unit]
+    return sum(os.path.getsize(path) if os.path.isfile(path) else get_dir_size(path) for path in set(allfiles)) / units[unit]
