@@ -61,7 +61,7 @@ class TestGridFunctionsDir(unittest.TestCase):
 
     def test_contains_OpenPMDVars(self):
         vars3D = self.gd.xyz
-        self.assertIn("admbase_alp", vars3D)
+        self.assertIn("admbasex_alp", vars3D)
 
     def test__getitem(self):
         self.assertIs(self.gd["xy"], self.gd._all_griddata[(0, 1)])
@@ -536,12 +536,12 @@ class TestOneGridFunctionsOpenPMD(unittest.TestCase):
         # Here we can we find all the variables
         self.assertCountEqual(
             list(self.gf._vars_openpmd_files.keys()),
-            ['admbase_alp', 'admbase_kxx', 'admbase_kxy', 'admbase_kxz', 'admbase_kyy', 
-             'admbase_kyz', 'admbase_kzz', 'admbase_gxx', 'admbase_gxy', 'admbase_gxz',
-             'admbase_gyy', 'admbase_gyz', 'admbase_gzz', 'admbase_betax', 'admbase_betay',
-             'admbase_betaz', 'weyl_psi0im', 'weyl_psi0re', 'weyl_psi1im', 'weyl_psi1re',
+            ['admbasex_alp', 'admbasex_kxx', 'admbasex_kxy', 'admbasex_kxz', 'admbasex_kyy', 
+             'admbasex_kyz', 'admbasex_kzz', 'admbasex_gxx', 'admbasex_gxy', 'admbasex_gxz',
+             'admbasex_gyy', 'admbasex_gyz', 'admbasex_gzz', 'admbasex_betax', 'admbasex_betay',
+             'admbasex_betaz', 'weyl_psi0im', 'weyl_psi0re', 'weyl_psi1im', 'weyl_psi1re',
              'weyl_psi2im', 'weyl_psi2re', 'weyl_psi3im', 'weyl_psi3re', 'weyl_psi4im',
-             'weyl_psi4re', 'z4c_allc'
+             'weyl_psi4re', 'z4c_allc', 'carpetx_regrid_error'
             ]
         )
 
