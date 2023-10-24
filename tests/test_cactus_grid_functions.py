@@ -433,6 +433,12 @@ class TestOneGridFunction(unittest.TestCase):
             expected_hgd.to_UniformGridData_from_grid(new_grid),
         )
 
+        # Test read on grid with resample = True
+        self.assertEqual(
+            self.P.read_on_grid(0, new_grid, resample=True),
+            expected_hgd.to_UniformGridData_from_grid(new_grid, resample=True),
+        )
+
         # Here we test the details of the ASCII reader
 
     def test_init(self):
