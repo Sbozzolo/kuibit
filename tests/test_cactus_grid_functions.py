@@ -61,7 +61,7 @@ class TestGridFunctionsDir(unittest.TestCase):
 
     def test_contains_OpenPMDVars(self):
         vars3D = self.gd.xyz
-        self.assertIn("admbasex_alp", vars3D)
+        self.assertIn('wavetoyx_u', vars3D)
 
     def test__getitem(self):
         self.assertIs(self.gd["xy"], self.gd._all_griddata[(0, 1)])
@@ -536,12 +536,8 @@ class TestOneGridFunctionsOpenPMD(unittest.TestCase):
         # Here we can we find all the variables
         self.assertCountEqual(
             list(self.gf._vars_openpmd_files.keys()),
-            ['admbasex_alp', 'admbasex_kxx', 'admbasex_kxy', 'admbasex_kxz', 'admbasex_kyy', 
-             'admbasex_kyz', 'admbasex_kzz', 'admbasex_gxx', 'admbasex_gxy', 'admbasex_gxz',
-             'admbasex_gyy', 'admbasex_gyz', 'admbasex_gzz', 'admbasex_betax', 'admbasex_betay',
-             'admbasex_betaz', 'weyl_psi0im', 'weyl_psi0re', 'weyl_psi1im', 'weyl_psi1re',
-             'weyl_psi2im', 'weyl_psi2re', 'weyl_psi3im', 'weyl_psi3re', 'weyl_psi4im',
-             'weyl_psi4re', 'z4c_allc', 'carpetx_regrid_error'
+            ['wavetoyx_eps', 'wavetoyx_rho_err', 'wavetoyx_u_err', 'wavetoyx_rho_rhs', 
+             'wavetoyx_u_rhs', 'wavetoyx_rho', 'wavetoyx_u'
             ]
         )
 
@@ -569,6 +565,11 @@ class TestOneGridFunctionsOpenPMD(unittest.TestCase):
 
         size_KB = size_B / 1024
         self.assertEqual(size_KB, self.gf.total_filesize("KB"))
+
+    def test_refinement_levels(self):
+        wavetoyx_u = self.gf.fields.wavetoyx_u
+        wavetoyx_u0=wavetoyx_u[0]
+        self.assertEquals(wavetoyx_u0.refinement_levels, [0,1])
 
     def test__str(self):
         self.assertIn("vz", str(self.gf))
