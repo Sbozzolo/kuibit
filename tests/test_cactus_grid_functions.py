@@ -525,6 +525,8 @@ class TestOneGridFunctions3DGridandOpenPMD(unittest.TestCase):
         # 5. batman.it00000000.bp4 (OpenPMD bp4)
 
         # Here we can we find all the variables
+
+        # assert variables from OpenPMD bp4 file
         self.assertCountEqual(
             list(self.gf._vars_openpmd_files.keys()),
             ['wavetoyx_eps', 'wavetoyx_rho_err', 'wavetoyx_u_err', 'wavetoyx_rho_rhs', 
@@ -532,12 +534,14 @@ class TestOneGridFunctions3DGridandOpenPMD(unittest.TestCase):
             ]
         )
 
+        # assert variables from h5 file
         self.assertCountEqual(
             list(self.gf._vars_h5_files.keys()),
             ['P', 'rho_b', 'vx', 'vy', 'vz'
             ],
         )
 
+        # assert variables from ascii file
         self.assertCountEqual(
             list(self.gf._vars_ascii_files.keys()),
             ['P', 'rho_b', 'vx', 'vy', 'vz', 'rho_star'
@@ -546,11 +550,11 @@ class TestOneGridFunctions3DGridandOpenPMD(unittest.TestCase):
 
     def test_allfiles(self):
         # This is a weak test, we are just testing how many files we have...
-
-        # There should be 4 files
+        # There should be 5 files including the OpenPMD bp4 file
         self.assertEqual(len(self.gf.allfiles), 5)
 
     def test_total_filesize(self):
+        # OpenPMD bp4 file is a directory so we need to account for that
         size_B = sum({os.path.getsize(path) if os.path.isfile(path) else ca.get_dir_size(path) for path in self.gf.allfiles})
         self.assertEqual(size_B, self.gf.total_filesize("B"))
 
@@ -558,6 +562,7 @@ class TestOneGridFunctions3DGridandOpenPMD(unittest.TestCase):
         self.assertEqual(size_KB, self.gf.total_filesize("KB"))
 
     def test_multiple_mesh_refinement_levels(self):
+        # wavetouyx_u variable in the OpenPMD file has 2 mesh refinement levels
         wavetoyx_u = self.gf.fields.wavetoyx_u
         wavetoyx_u0=wavetoyx_u[0]
         self.assertEquals(wavetoyx_u0.refinement_levels, [0,1])
