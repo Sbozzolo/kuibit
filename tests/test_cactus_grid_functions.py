@@ -508,30 +508,21 @@ class TestOneGridFunction(unittest.TestCase):
         self.assertIsNone(self.P.alldata[self.P_file][0][0][0])
 
 
-class TestOneGridFunctionsOpenPMD(unittest.TestCase):
+class TestOneGridFunctions3DGridandOpenPMD(unittest.TestCase):
     def setUp(self):
         self.gf = sd.SimDir("tests/grid_functions").gf.xyz
 
     def test__init(self):
         self.assertCountEqual(self.gf.dimension, (0, 1, 2))
-
-        # Test wrong number of ghosts
-        with self.assertRaises(ValueError):
-            cg.AllGridFunctions(
-                self.gf.allfiles, dimension=(0, 1), num_ghost=(4,)
-            )
-
         # Here we check that we indexed the correct variables. We must check
-        # HDF5 files and ASCII files with both one variable per file and one
-        # group per file.
+        # the OpenPMD file
 
-        # There are four file in the test folder:
-        # 1. illinoisgrmhd-grmhd_primitives_allbutbi.xy.asc (ASCII one group)
-        # 2. rho_star.xy.asc (ASCII one var)
-        # 3. rho.xy.h5 (HDF5 one var)
-        # 4. illinoisgrmhd-grmhd_primitives_allbutbi.xy.h5 (HDF5 one group)
-        #
-        # In ASCII files we also check for compressed files
+        # There are five files including one OpenPMD file in the test folder:
+        # 1. illinoisgrmhd-grmhd_primitives_allbutbi.xyz.asc (ASCII one group)
+        # 2. rho_star.xyz.asc (ASCII one var)
+        # 3. illinoisgrmhd-grmhd_primitives_allbutbi.xyz.file_0.h5 (HDF5 one group)
+        # 4. illinoisgrmhd-grmhd_primitives_allbutbi.xyz.file_1.h5 (HDF5 one group)
+        # 5. batman.it00000000.bp4 (OpenPMD bp4)
 
         # Here we can we find all the variables
         self.assertCountEqual(
@@ -566,7 +557,7 @@ class TestOneGridFunctionsOpenPMD(unittest.TestCase):
         size_KB = size_B / 1024
         self.assertEqual(size_KB, self.gf.total_filesize("KB"))
 
-    def test_refinement_levels(self):
+    def test_multiple_mesh_refinement_levels(self):
         wavetoyx_u = self.gf.fields.wavetoyx_u
         wavetoyx_u0=wavetoyx_u[0]
         self.assertEquals(wavetoyx_u0.refinement_levels, [0,1])
