@@ -1,5 +1,10 @@
 # Changelog
 
+## Version 1.5.0
+
+#### General
+- Python 3.12 is now supported, Python 3.8.1 is required for development.
+
 ## Version 1.4.0 (2 May 2023)
 
 #### General
