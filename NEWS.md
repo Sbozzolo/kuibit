@@ -4,6 +4,7 @@
 
 #### General
 - Python 3.12 is now supported, Python 3.8.1 is required for development.
+- `total_filesize` now errors out when directories are passed.
 
 ## Version 1.4.0 (2 May 2023)
 
