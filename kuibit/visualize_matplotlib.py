@@ -86,7 +86,7 @@ from kuibit.cactus_grid_functions import BaseOneGridFunction
 
 
 def setup_matplotlib(
-    params: Optional[Dict[str, Any]] = None, rc_par_file: str = None
+    params: Optional[Dict[str, Any]] = None, rc_par_file: Optional[str] = None
 ) -> None:
     """Setup matplotlib with some reasonable defaults for better plots.
 
