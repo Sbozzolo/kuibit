@@ -529,8 +529,7 @@ class TestOneGridFunctions3DGridandOpenPMD(unittest.TestCase):
         # assert variables from OpenPMD bp4 file
         self.assertCountEqual(
             list(self.gf._vars_openpmd_files.keys()),
-            ['wavetoyx_eps', 'wavetoyx_rho_err', 'wavetoyx_u_err', 'wavetoyx_rho_rhs', 
-             'wavetoyx_u_rhs', 'wavetoyx_rho', 'wavetoyx_u'
+            ['wavetoyx_rho', 'wavetoyx_u'
             ]
         )
 
@@ -551,7 +550,7 @@ class TestOneGridFunctions3DGridandOpenPMD(unittest.TestCase):
     def test_allfiles(self):
         # This is a weak test, we are just testing how many files we have...
         # There should be 5 files including the OpenPMD bp4 file
-        self.assertEqual(len(self.gf.allfiles), 5)
+        self.assertEqual(len(self.gf.allfiles), 6)
 
     def test_total_filesize(self):
         # OpenPMD bp4 file is a directory so we need to account for that
