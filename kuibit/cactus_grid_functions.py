@@ -79,10 +79,6 @@ import json
 import adios2
 
 
-config = {'adios2': {'engine': {}, 'dataset': {}}}
-config['adios2']['engine'] = {'parameters': {'Threads': '4'}}
-
-
 class BaseOneGridFunction(ABC):
     """Abstract class that implements capabilities to handle grid functions.
 
@@ -1408,7 +1404,7 @@ class OneGridFunctionOpenPMD(BaseOneGridFunction):
         rx_mesh = re.compile(r"^(\w+)_(?:rl|lev)(\d+)$")
 
         print("path={}".format(path))
-        self.series = io.Series(path, io.Access.read_only, json.dumps(config))
+        self.series = io.Series(path, io.Access.read_only)
         iter_open_pmd = self.series.iterations
         for iter_item in iter_open_pmd.items():
             iter_no = iter_item[0]
@@ -1531,7 +1527,7 @@ class OneGridFunctionOpenPMD(BaseOneGridFunction):
 
         print("path={}".format(path))
         rx_mesh = re.compile(r"^(\w+)_(?:rl|lev)(\d+)$")
-        self.series = io.Series(path, io.Access.read_only, json.dumps(config))
+        self.series = io.Series(path, io.Access.read_only)
         iter_open_pmd = self.series.iterations
         all_mesh = iter_open_pmd[iteration].meshes
         for k_m, m in all_mesh.items():
@@ -1889,8 +1885,7 @@ class AllGridFunctions:
                 if self.dimension == (0, 1, 2):
                     dir_path = os.path.split(f)[0]
                     print("dir_path={}".format(dir_path))
-                    print("config = {}".format(config))
-                    series = io.Series(dir_path, io.Access.read_only, json.dumps(config))
+                    series = io.Series(dir_path, io.Access.read_only)
                     iterations = series.iterations
                     for iter_item in iterations.items():
                         iter_no = iter_item[0]
