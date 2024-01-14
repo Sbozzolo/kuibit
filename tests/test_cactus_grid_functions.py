@@ -23,7 +23,6 @@ import h5py
 import numpy as np
 
 from kuibit import cactus_grid_functions as cg
-from kuibit import cactus_ascii_utils as ca
 from kuibit import grid_data
 from kuibit import simdir as sd
 
