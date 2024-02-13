@@ -1440,8 +1440,8 @@ class OneGridFunctionOpenPMD(BaseOneGridFunction):
 
         if self.alldata[path][iteration][ref_level][component] is None:
             with openpmd_series(path) as series:
-                time = iterations_objs[iteration].time
-                mesh = series.iterations[iteration].meshes[]
+                time = series.iterations[iteration].time
+                all_meshes = series.iterations[iteration].meshes
                 for mesh_name, mesh_obj in all_meshes.items():
                     matched = rx_mesh.match(mesh_name)
                     if matched is None:
@@ -1562,6 +1562,9 @@ class AllGridFunctions:
         (1, 2): "yz",
         (0, 1, 2): "xyz",
     }
+
+    # Dict to store OpenPMD variables and mesh names 
+    _openpmd_mesh_dict = {}
 
     # The oddball case is with OpenPMD files. OpenPMD files are actually folders
     # with extension .bp4 and they are always 3D.
@@ -1772,29 +1775,6 @@ class AllGridFunctions:
                             var_list.add(f)
                     except RuntimeError:
                         pass
-            elif matched_openpmd is not None:
-                if self.dimension == (0, 1, 2):
-                    dir_path = os.path.split(f)[0]
-                    print("dir_path={}".format(dir_path))
-                    series = io.Series(dir_path, io.Access.read_only)
-                    iterations = series.iterations
-                    for iter_item in iterations.items():
-                        iter_no = iter_item[0]
-                        print("Iter # = {}".format(iter_no))
-                        iter_obj = iter_item[1]
-                        print("Iter dt = {}, time = {}".format(iter_obj.dt, iter_obj.time))
-                        all_mesh = iter_obj.meshes
-                        for mesh in all_mesh.items():
-                            mesh_name = mesh[0]
-                            mesh_obj = mesh[1]
-                            print("Mesh = {}".format(mesh_name))
-                            for mesh_var in mesh_obj.items():
-                                variable_name = mesh_var[0]
-                                print("variable_name={}".format(variable_name))
-                                var_list = self._vars_openpmd_files.setdefault(
-                                    variable_name, set()
-                                )
-                                var_list.add(dir_path)
 
             elif matched_openpmd is not None:
                 # We detected a data.0 file. Its parent directory is the actual
@@ -1811,6 +1791,7 @@ class AllGridFunctions:
                                     variable_name, set()
                                 )
                                 var_list.add(dir_path)
+                                self._openpmd_mesh_dict[mesh_var] = _mesh_name
 
         # What pythonize_name_dict does is to make the various variables
         # accessible as attributes, e.g. self.fields.rho
