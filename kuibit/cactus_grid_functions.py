@@ -1346,8 +1346,9 @@ class OneGridFunctionOpenPMD(BaseOneGridFunction):
     #    rl or lev
     # 5. (\d+) matches a number, the refinement level
     _pattern_group_name = r"^(\w+)_(?:rl|lev)(\d+)$"
+    _chunk_dict = {}
 
-    def __init__(self, allfiles, var_name: str, dimension):
+    def __init__(self, allfiles, var_name: str, dimension, mesh_name):
         """Constructor.
 
         :param allfiles: Paths of files associated to the variable.
@@ -1357,6 +1358,7 @@ class OneGridFunctionOpenPMD(BaseOneGridFunction):
 
         """
         self.dimension = dimension
+        self.mesh_name = mesh_name
         self.map = None
 
         self._iterations_to_times = {}
@@ -1385,38 +1387,32 @@ class OneGridFunctionOpenPMD(BaseOneGridFunction):
         # everything.
 
         with openpmd_series(path) as series:
-            iter_open_pmd = series.iterations
-            for iteration, iteration_obj in iter_open_pmd.items():
-                self._iterations_to_times[iteration] = iteration_obj.time
-                all_meshes = iteration_obj.meshes
-                for mesh_name, mesh_obj in all_meshes.items():
-                    matched = rx_mesh.match(mesh_name)
-                    if matched is None:
-                        raise RuntimeError(f"Could not parse mesh {mesh_name}")
-                    ref_level = int(matched.group(2))
-
-                    # Here is where we prepare are nested alldata dictionary
-                    alldata_file = self.alldata.setdefault(path, {})
-                    alldata_iteration = alldata_file.setdefault(
-                        int(iteration), {}
-                    )
-                    alldata_ref_level = alldata_iteration.setdefault(
-                        ref_level, {}
-                    )
-
-                    # Loop through all variables in specific mesh and index all
-                    # the variables and chunks (ie, components)
-                    for variable in mesh_obj.items():
-                        var_name = variable[0]
-                        self.mesh_name = mesh_name
-                        chunks = mesh_obj[var_name].available_chunks()
-                        chunk_no = 0
-                        for _chunk in chunks:
-                            component = chunk_no
-                            # We set the actual data to None, and we will read it in
-                            # _read_component_as_uniform_grid_data upon request
-                            alldata_ref_level.setdefault(component, None)
-                            chunk_no += 1
+            iterations = list(series.iterations)
+            matched = rx_mesh.match(self.mesh_name)
+            if matched is None:
+                raise RuntimeError(f"Could not parse mesh {mesh_name}")
+            ref_level = int(matched.group(2))
+            for iteration in iterations:
+                mrc = series.iterations[iteration].meshes[self.mesh_name][self.var_name]
+                # Here is where we prepare are nested alldata dictionary
+                alldata_file = self.alldata.setdefault(path, {})
+                alldata_iteration = alldata_file.setdefault(
+                    int(iteration), {}
+                )
+                alldata_ref_level = alldata_iteration.setdefault(
+                    ref_level, {}
+                )
+                chunks = mrc.available_chunks()
+                chunk_key = str(iteration)+'-'+self.mesh_name+'-'+self.var_name
+                component = 0
+                if chunk_key in self._chunk_dict.keys():
+                    component = self._chunk_dict[chunk_key]
+                for _chunk in chunks:
+                    # We set the actual data to None, and we will read it in
+                    # _read_component_as_uniform_grid_data upon request
+                    alldata_ref_level.setdefault(component, None)
+                    component += 1
+                self._chunk_dict[chunk_key] = component
 
     def _read_component_as_uniform_grid_data(
         self, path, iteration, ref_level, component
@@ -1441,46 +1437,37 @@ class OneGridFunctionOpenPMD(BaseOneGridFunction):
         if self.alldata[path][iteration][ref_level][component] is None:
             with openpmd_series(path) as series:
                 time = series.iterations[iteration].time
-                all_meshes = series.iterations[iteration].meshes
-                for mesh_name, mesh_obj in all_meshes.items():
-                    matched = rx_mesh.match(mesh_name)
-                    if matched is None:
-                        raise RuntimeError(f"Could not parse mesh {mesh_name}")
-                    ref_level_matched = int(matched.group(2))
+                mesh_obj = series.iterations[iteration].meshes[self.mesh_name]
+                mrc = series.iterations[iteration].meshes[self.mesh_name][self.var_name]
+                chunk = mrc.available_chunks()[
+                        component
+                ]
+                origin = np.array(mesh_obj.grid_global_offset)
+                dx = np.array(mesh_obj.grid_spacing)
+                chunk = mrc.available_chunks()[
+                    component
+                ]
+                offset = np.array(chunk.offset)
+                shape = chunk.extent
+                # Do the actual reading
+                data = mrc.load_chunk(
+                    chunk.offset, chunk.extent
+                )
+                series.flush()
+                grid = grid_data.UniformGrid(
+                    shape,
+                    x0=(origin + offset * dx),
+                    dx=dx,
+                    ref_level=ref_level,
+                    num_ghost=[0, 0, 0],
+                    time=time,
+                    iteration=iteration,
+                    component=component,
+                )
 
-                    if ref_level == ref_level_matched:
-                        origin = np.array(mesh_obj.grid_global_offset)
-                        dx = np.array(mesh_obj.grid_spacing)
-                        for variable, variable_obj in mesh_obj.items():
-                            if variable == self.var_name:
-
-                                chunk = variable_obj.available_chunks()[
-                                    component
-                                ]
-
-                                offset = np.array(chunk.offset)
-                                shape = chunk.extent
-
-                                # Do the actual reading
-                                data = variable_obj.load_chunk(
-                                    chunk.offset, chunk.extent
-                                )
-                                series.flush()
-
-                                grid = grid_data.UniformGrid(
-                                    shape,
-                                    x0=(origin + offset * dx),
-                                    dx=dx,
-                                    ref_level=ref_level,
-                                    num_ghost=[0, 0, 0],
-                                    time=time,
-                                    iteration=iteration,
-                                    component=component,
-                                )
-
-                                self.alldata[path][iteration][ref_level][
-                                    component
-                                ] = grid_data.UniformGridData(grid, data)
+                self.alldata[path][iteration][ref_level][
+                    component
+                ] = grid_data.UniformGridData(grid, data)
 
         return self.alldata[path][iteration][ref_level][component]
 
@@ -1791,7 +1778,7 @@ class AllGridFunctions:
                                     variable_name, set()
                                 )
                                 var_list.add(dir_path)
-                                self._openpmd_mesh_dict[mesh_var] = _mesh_name
+                                self._openpmd_mesh_dict[variable_name] = _mesh_name
 
         # What pythonize_name_dict does is to make the various variables
         # accessible as attributes, e.g. self.fields.rho
@@ -1820,6 +1807,7 @@ class AllGridFunctions:
                     self._vars_openpmd_files[var_name],
                     var_name,
                     self.dimension,
+                    self._openpmd_mesh_dict[var_name]
                 )
             elif var_name in self._vars_ascii_files:
                 if self.num_ghost is None:
