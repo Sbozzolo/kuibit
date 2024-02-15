@@ -1406,7 +1406,7 @@ class OneGridFunctionOpenPMD(BaseOneGridFunction):
                 chunk_key = str(iteration)+'-'+self.mesh_name+'-'+self.var_name
                 component = 0
                 if chunk_key in self._chunk_dict.keys():
-                    component = self._chunk_dict[chunk_key]
+                   component = self._chunk_dict[chunk_key]
                 for _chunk in chunks:
                     # We set the actual data to None, and we will read it in
                     # _read_component_as_uniform_grid_data upon request
@@ -1423,7 +1423,7 @@ class OneGridFunctionOpenPMD(BaseOneGridFunction):
         :type path: str
         :param iteration: Iteration.
         :type iteration: int
-        :param ref_level: Refinement level.
+        :param re:f_level: Refinement level.
         :type ref_level: int
         :param component: Component.
         :type component: int
@@ -1438,12 +1438,9 @@ class OneGridFunctionOpenPMD(BaseOneGridFunction):
             with openpmd_series(path) as series:
                 time = series.iterations[iteration].time
                 mesh_obj = series.iterations[iteration].meshes[self.mesh_name]
-                mrc = series.iterations[iteration].meshes[self.mesh_name][self.var_name]
-                chunk = mrc.available_chunks()[
-                        component
-                ]
                 origin = np.array(mesh_obj.grid_global_offset)
                 dx = np.array(mesh_obj.grid_spacing)
+                mrc = mesh_obj[self.var_name]
                 chunk = mrc.available_chunks()[
                     component
                 ]
