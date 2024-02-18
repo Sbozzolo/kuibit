@@ -1403,7 +1403,7 @@ class OneGridFunctionOpenPMD(BaseOneGridFunction):
                     ref_level, {}
                 )
                 chunks = mrc.available_chunks()
-                chunk_key = str(iteration)+'-'+self.mesh_name+'-'+self.var_name
+                chunk_key = str(iteration)+'-'+self.mesh_name+'-'+self.var_name+'-'+str(ref_level)
                 component = 0
                 if chunk_key in self._chunk_dict.keys():
                    component = self._chunk_dict[chunk_key]
@@ -1435,36 +1435,41 @@ class OneGridFunctionOpenPMD(BaseOneGridFunction):
         rx_mesh = re.compile(self._pattern_group_name)
 
         if self.alldata[path][iteration][ref_level][component] is None:
-            with openpmd_series(path) as series:
-                time = series.iterations[iteration].time
-                mesh_obj = series.iterations[iteration].meshes[self.mesh_name]
-                origin = np.array(mesh_obj.grid_global_offset)
-                dx = np.array(mesh_obj.grid_spacing)
-                mrc = mesh_obj[self.var_name]
-                chunk = mrc.available_chunks()[
-                    component
-                ]
-                offset = np.array(chunk.offset)
-                shape = chunk.extent
-                # Do the actual reading
-                data = mrc.load_chunk(
-                    chunk.offset, chunk.extent
-                )
-                series.flush()
-                grid = grid_data.UniformGrid(
-                    shape,
-                    x0=(origin + offset * dx),
-                    dx=dx,
-                    ref_level=ref_level,
-                    num_ghost=[0, 0, 0],
-                    time=time,
-                    iteration=iteration,
-                    component=component,
-                )
+            matched = rx_mesh.match(self.mesh_name)
+            if matched is None:
+                raise RuntimeError(f"Could not parse mesh {mesh_name}")
+            ref_level_matched = int(matched.group(2))
+            if ref_level == ref_level_matched:
+                with openpmd_series(path) as series:
+                    time = series.iterations[iteration].time
+                    mesh_obj = series.iterations[iteration].meshes[self.mesh_name]
+                    origin = np.array(mesh_obj.grid_global_offset)
+                    dx = np.array(mesh_obj.grid_spacing)
+                    mrc = mesh_obj[self.var_name]
+                    chunk = mrc.available_chunks()[
+                        component
+                    ]
+                    offset = np.array(chunk.offset)
+                    shape = chunk.extent
+                    # Do the actual reading
+                    data = mrc.load_chunk(
+                        chunk.offset, chunk.extent
+                    )
+                    series.flush()
+                    grid = grid_data.UniformGrid(
+                        shape,
+                        x0=(origin + offset * dx),
+                        dx=dx,
+                        ref_level=ref_level,
+                        num_ghost=[0, 0, 0],
+                        time=time,
+                        iteration=iteration,
+                        component=component,
+                    )
 
-                self.alldata[path][iteration][ref_level][
-                    component
-                ] = grid_data.UniformGridData(grid, data)
+                    self.alldata[path][iteration][ref_level][
+                        component
+                    ] = grid_data.UniformGridData(grid, data)
 
         return self.alldata[path][iteration][ref_level][component]
 
