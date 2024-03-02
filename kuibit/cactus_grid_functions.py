@@ -1388,31 +1388,37 @@ class OneGridFunctionOpenPMD(BaseOneGridFunction):
 
         with openpmd_series(path) as series:
             iterations = list(series.iterations)
-            matched = rx_mesh.match(self.mesh_name)
-            if matched is None:
-                raise RuntimeError(f"Could not parse mesh {mesh_name}")
-            ref_level = int(matched.group(2))
+            # matched = rx_mesh.match(self.mesh_name)
+            # if matched is None:
+            #     raise RuntimeError(f"Could not parse mesh {mesh_name}")
+            # ref_level = int(matched.group(2))
             for iteration in iterations:
-                mrc = series.iterations[iteration].meshes[self.mesh_name][self.var_name]
-                # Here is where we prepare are nested alldata dictionary
-                alldata_file = self.alldata.setdefault(path, {})
-                alldata_iteration = alldata_file.setdefault(
-                    int(iteration), {}
-                )
-                alldata_ref_level = alldata_iteration.setdefault(
-                    ref_level, {}
-                )
-                chunks = mrc.available_chunks()
-                chunk_key = str(iteration)+'-'+self.mesh_name+'-'+self.var_name+'-'+str(ref_level)
-                component = 0
-                if chunk_key in self._chunk_dict.keys():
-                   component = self._chunk_dict[chunk_key]
-                for _chunk in chunks:
-                    # We set the actual data to None, and we will read it in
-                    # _read_component_as_uniform_grid_data upon request
-                    alldata_ref_level.setdefault(component, None)
-                    component += 1
-                self._chunk_dict[chunk_key] = component
+                for k_m, mesh_obj in series.iterations[iteration].meshes.items():
+                    matched = rx_mesh.match(k_m)
+                    mesh_matched = matched.group(1)
+                    ref_level = int(matched.group(2))
+                    if self.mesh_name == mesh_matched:
+                        mrc = mesh_obj[self.var_name]
+                        # Here is where we prepare are nested alldata dictionary
+                        alldata_file = self.alldata.setdefault(path, {})
+                        alldata_iteration = alldata_file.setdefault(
+                            int(iteration), {}
+                        )
+                        alldata_ref_level = alldata_iteration.setdefault(
+                            ref_level, {}
+                        )
+                        chunks = mrc.available_chunks()
+                        chunk_key = str(iteration)+'-'+self.var_name+'-'+str(ref_level)
+                        print("chunk_key=", chunk_key)
+                        component = 0
+                        if chunk_key in self._chunk_dict.keys():
+                            component = self._chunk_dict[chunk_key]
+                        for _chunk in chunks:
+                            # We set the actual data to None, and we will read it in
+                            # _read_component_as_uniform_grid_data upon request
+                            alldata_ref_level.setdefault(component, None)
+                            component += 1
+                        self._chunk_dict[chunk_key] = component
 
     def _read_component_as_uniform_grid_data(
         self, path, iteration, ref_level, component
@@ -1432,44 +1438,50 @@ class OneGridFunctionOpenPMD(BaseOneGridFunction):
         :rtype: :py:class:`~.UniformGridData`
 
         """
-        rx_mesh = re.compile(self._pattern_group_name)
+        # rx_mesh = re.compile(self._pattern_group_name)
+        # matched = rx_mesh.match(self.mesh_name)
+        # print("matched=", matched)
+        # mesh_name_match = matched.group(1)
+        # lvl_prefix = matched.group(2)
+        mesh_name = self.mesh_name+'_lev'+"0"+str(ref_level)
+        print("mesh_name=", mesh_name)
 
         if self.alldata[path][iteration][ref_level][component] is None:
-            matched = rx_mesh.match(self.mesh_name)
-            if matched is None:
-                raise RuntimeError(f"Could not parse mesh {mesh_name}")
-            ref_level_matched = int(matched.group(2))
-            if ref_level == ref_level_matched:
-                with openpmd_series(path) as series:
-                    time = series.iterations[iteration].time
-                    mesh_obj = series.iterations[iteration].meshes[self.mesh_name]
-                    origin = np.array(mesh_obj.grid_global_offset)
-                    dx = np.array(mesh_obj.grid_spacing)
-                    mrc = mesh_obj[self.var_name]
-                    chunk = mrc.available_chunks()[
-                        component
-                    ]
-                    offset = np.array(chunk.offset)
-                    shape = chunk.extent
-                    # Do the actual reading
-                    data = mrc.load_chunk(
-                        chunk.offset, chunk.extent
-                    )
-                    series.flush()
-                    grid = grid_data.UniformGrid(
-                        shape,
-                        x0=(origin + offset * dx),
-                        dx=dx,
-                        ref_level=ref_level,
-                        num_ghost=[0, 0, 0],
-                        time=time,
-                        iteration=iteration,
-                        component=component,
-                    )
-
-                    self.alldata[path][iteration][ref_level][
-                        component
-                    ] = grid_data.UniformGridData(grid, data)
+            # matched = rx_mesh.match(self.mesh_name)
+            # if matched is None:
+            #     raise RuntimeError(f"Could not parse mesh {mesh_name}")
+            # ref_level_matched = int(matched.group(2))
+            # print("matched={}, ref_level_matched={}".format(matched, ref_level_matched))
+            # if ref_level == ref_level_matched:
+            with openpmd_series(path) as series:
+                time = series.iterations[iteration].time
+                mesh_obj = series.iterations[iteration].meshes[mesh_name]
+                origin = np.array(mesh_obj.grid_global_offset)
+                dx = np.array(mesh_obj.grid_spacing)
+                mrc = mesh_obj[self.var_name]
+                chunk = mrc.available_chunks()[
+                    component
+                ]
+                offset = np.array(chunk.offset)
+                shape = chunk.extent
+                # Do the actual reading
+                data = mrc.load_chunk(
+                    chunk.offset, chunk.extent
+                )
+                series.flush()
+                grid = grid_data.UniformGrid(
+                    shape,
+                    x0=(origin + offset * dx),
+                    dx=dx,
+                    ref_level=ref_level,
+                    num_ghost=[0, 0, 0],
+                    time=time,
+                    iteration=iteration,
+                    component=component,
+                )
+                self.alldata[path][iteration][ref_level][
+                    component
+                ] = grid_data.UniformGridData(grid, data)
 
         return self.alldata[path][iteration][ref_level][component]
 
@@ -1551,6 +1563,8 @@ class AllGridFunctions:
         (1, 2): "yz",
         (0, 1, 2): "xyz",
     }
+
+    _pattern_group_name = r"^(\w+)_(?:rl|lev)(\d+)$"
 
     # Dict to store OpenPMD variables and mesh names 
     _openpmd_mesh_dict = {}
@@ -1642,6 +1656,7 @@ class AllGridFunctions:
         rx_h5 = re.compile(h5_pattern)
         rx_ascii = re.compile(ascii_pattern)
         rx_openpmd = re.compile(openpmd_pattern)
+        rx_mesh = re.compile(self._pattern_group_name)
 
         # Here we scan all the files and find those with a name that match
         # one of our regular expressions.
@@ -1774,13 +1789,22 @@ class AllGridFunctions:
                     for _iteration, iteration_obj in iterations.items():
                         all_meshes = iteration_obj.meshes
                         for _mesh_name, mesh_obj in all_meshes.items():
+                            matched = rx_mesh.match(_mesh_name)
+                            print("matched=", matched)
+                            mesh_name_match = matched.group(1)
+                            print("mesh_name_match=", mesh_name_match)
                             for mesh_var in mesh_obj.items():
                                 variable_name = mesh_var[0]
                                 var_list = self._vars_openpmd_files.setdefault(
                                     variable_name, set()
                                 )
                                 var_list.add(dir_path)
-                                self._openpmd_mesh_dict[variable_name] = _mesh_name
+                                self._openpmd_mesh_dict[variable_name] = mesh_name_match
+
+        print("*************************")
+        for key in self._openpmd_mesh_dict.keys():
+            print(key, self._openpmd_mesh_dict[key])
+        print("*************************")
 
         # What pythonize_name_dict does is to make the various variables
         # accessible as attributes, e.g. self.fields.rho
