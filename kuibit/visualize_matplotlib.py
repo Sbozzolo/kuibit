@@ -75,7 +75,6 @@ from typing import Any, Dict, Optional
 import matplotlib
 import matplotlib.pyplot as plt
 import numpy as np
-import tikzplotlib
 from matplotlib.patches import Rectangle
 from mpl_toolkits.axes_grid1 import make_axes_locatable
 from mpl_toolkits.mplot3d import Axes3D
@@ -87,7 +86,7 @@ from kuibit.cactus_grid_functions import BaseOneGridFunction
 
 
 def setup_matplotlib(
-    params: Optional[Dict[str, Any]] = None, rc_par_file: str = None
+    params: Optional[Dict[str, Any]] = None, rc_par_file: Optional[str] = None
 ) -> None:
     """Setup matplotlib with some reasonable defaults for better plots.
 
@@ -433,6 +432,7 @@ def save(
 
     """
     if os.path.splitext(outputpath)[-1] == ".tikz":
+        import tikzplotlib
         # If clean_figure is True, we extract from kwargs those argument
         # that tikzplotlib.clean_figure would take. For this, we need to
         # know what argument that function takes.

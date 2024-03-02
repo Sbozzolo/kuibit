@@ -40,6 +40,7 @@ The functions available are:
 
 """
 
+from collections.abc import Iterable
 import os
 import re
 
@@ -226,9 +227,10 @@ def scan_header(
     return time_column, data_column
 
 
-def total_filesize(allfiles, unit="MB"):
+def total_filesize(allfiles: Iterable[str], unit="MB") -> float:
     """Return the total size of the given files.
-    Available units B, KB, MB and GB
+
+    Available units B, KB, MB and GB.
 
     :param allfiles: List of the full paths of the files.
     :type allfiles: list
@@ -238,10 +240,14 @@ def total_filesize(allfiles, unit="MB"):
     :rtype: float
 
     """
+    directories = [path for path in allfiles if not os.path.isfile(path)]
+
+    if len(directories) > 0:
+        raise ValueError(f"Given list contains directories: {directories}")
 
     # This function is here, but it could be anywhere, it doesn't really
     # apply only to ASCII files, nor only to Cactus files...
     units = {"B": 1, "KB": 1024, "MB": 1024**2, "GB": 1024**3}
     if unit not in units:
         raise ValueError(f"Invalid unit: expected one of {list(units.keys())}")
-    return sum(os.path.getsize(path) for path in set(allfiles)) / units[unit]
+    return sum(os.path.getsize(path) if os.path.isfile(path) else get_dir_size(path) for path in set(allfiles)) / units[unit]
