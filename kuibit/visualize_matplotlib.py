@@ -433,6 +433,7 @@ def save(
     """
     if os.path.splitext(outputpath)[-1] == ".tikz":
         import tikzplotlib
+
         # If clean_figure is True, we extract from kwargs those argument
         # that tikzplotlib.clean_figure would take. For this, we need to
         # know what argument that function takes.

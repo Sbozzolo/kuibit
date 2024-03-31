@@ -394,9 +394,7 @@ class TestVector(unittest.TestCase):
         self.assertEqual(dot, expected)
 
     def test_norm(self):
-        self.assertEqual(
-            self.vec.norm(), (sum(t**2 for t in self.ts)).sqrt()
-        )
+        self.assertEqual(self.vec.norm(), (sum(t**2 for t in self.ts)).sqrt())
 
 
 class TestMatrix(unittest.TestCase):

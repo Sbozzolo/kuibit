@@ -40,9 +40,9 @@ The functions available are:
 
 """
 
-from collections.abc import Iterable
 import os
 import re
+from collections.abc import Iterable
 
 
 def _scan_strings_for_columns(strings, pattern, path=None):
