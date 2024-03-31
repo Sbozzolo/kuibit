@@ -169,8 +169,7 @@ class TestGWUtils(unittest.TestCase):
         freqs = strain_plus_fft.f
         vals = (
             strain_plus_fft.f
-            * (0.5 * (strain_plus_fft.amp**2 + strain_cross_fft.amp**2))
-            ** 0.5
+            * (0.5 * (strain_plus_fft.amp**2 + strain_cross_fft.amp**2)) ** 0.5
         )
 
         expected_heff = FrequencySeries(freqs, vals)

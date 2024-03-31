@@ -807,9 +807,9 @@ class OneGridFunctionASCII(BaseOneGridFunction):
 
                     # Write iterations_to_time
                     if current_iteration not in self._iterations_to_times:
-                        self._iterations_to_times[
-                            current_iteration
-                        ] = current_time
+                        self._iterations_to_times[current_iteration] = (
+                            current_time
+                        )
 
                     # Reset everything
                     current_iteration = line_data[0]
@@ -1169,9 +1169,9 @@ class OneGridFunctionH5(BaseOneGridFunction):
                 )
                 data = np.transpose(dataset[()])
 
-                self.alldata[path][iteration][ref_level][
-                    component
-                ] = grid_data.UniformGridData(grid, data)
+                self.alldata[path][iteration][ref_level][component] = (
+                    grid_data.UniformGridData(grid, data)
+                )
 
         return self.alldata[path][iteration][ref_level][component]
 

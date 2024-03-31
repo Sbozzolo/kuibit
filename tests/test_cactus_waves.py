@@ -285,9 +285,7 @@ class TestCactusWaves(unittest.TestCase):
 
         phi2lm_2 = c_lm * np.conj(phi2lm)
 
-        force_lm = (
-            self.phi2.dist**2 / (4 * np.pi) * (phi2lm * phi2lm_2).real()
-        )
+        force_lm = self.phi2.dist**2 / (4 * np.pi) * (phi2lm * phi2lm_2).real()
 
         self.assertEqual(force_lm, self.phi2.get_force_z_lm(2, 2))
 
@@ -650,9 +648,7 @@ class TestCactusWaves(unittest.TestCase):
         )
 
         Pp_lm = (
-            psi4_234.dist**2
-            / (8 * np.pi)
-            * (psi4lm_xy_int1 * psi4lm_xy_int2)
+            psi4_234.dist**2 / (8 * np.pi) * (psi4lm_xy_int1 * psi4lm_xy_int2)
         )
 
         self.assertEqual(Pp_lm.real(), psi4_234.get_force_x_lm(3, 1, 0.1))
