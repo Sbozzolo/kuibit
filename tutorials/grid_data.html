@@ -2,10 +2,10 @@
 
 <!doctype html>
 
-<html>
+<html lang="en">
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
 
     <title>Working with grid data &#8212; kuibit 1.4.0 documentation</title>
     <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
@@ -14,12 +14,11 @@
     <link rel="stylesheet" type="text/css" href="../_static/css/custom.css" />
     
     <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
-    <script src="../_static/jquery.js"></script>
-    <script src="../_static/underscore.js"></script>
     <script src="../_static/doctools.js"></script>
+    <script src="../_static/sphinx_highlight.js"></script>
     <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
-    <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+    <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     <script src="../_static/bizstyle.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
@@ -56,7 +55,7 @@
           <div class="body" role="main">
             
   <section id="Working-with-grid-data">
-<h1>Working with grid data<a class="headerlink" href="#Working-with-grid-data" title="Permalink to this headline">¶</a></h1>
+<h1>Working with grid data<a class="headerlink" href="#Working-with-grid-data" title="Permalink to this heading">¶</a></h1>
 <p>In this notebook, we show some of the most useful features of the <a class="reference internal" href="../grid_data.html"><span class="doc">grid_data</span></a> module.</p>
 <p>There are three important objects in <a class="reference internal" href="../grid_data.html"><span class="doc">grid_data</span></a>: - <code class="docutils literal notranslate"><span class="pre">UniformGrid</span></code> represents Cartesian grids, - <code class="docutils literal notranslate"><span class="pre">UniformGridData</span></code> represents data on <code class="docutils literal notranslate"><span class="pre">UniformGrid</span></code>, - <code class="docutils literal notranslate"><span class="pre">HierarchicalGridData</span></code> represents data on multiple grids with different spacings (a mesh-refined grid).</p>
 <p>In most cases you will not define these objects directly, but it is important to know how they work. To learn how to read the simulation data, see <a class="reference internal" href="cactus_grid_functions.html"><span class="doc">working with grid funcitons</span></a>.</p>
@@ -76,7 +75,7 @@
 </div>
 </div>
 <section id="UniformGrid">
-<h2><code class="docutils literal notranslate"><span class="pre">UniformGrid</span></code><a class="headerlink" href="#UniformGrid" title="Permalink to this headline">¶</a></h2>
+<h2><code class="docutils literal notranslate"><span class="pre">UniformGrid</span></code><a class="headerlink" href="#UniformGrid" title="Permalink to this heading">¶</a></h2>
 <p>To generate data, we start from preparing a grid. <code class="docutils literal notranslate"><span class="pre">kuibit</span></code> follows the conventions in <code class="docutils literal notranslate"><span class="pre">Carpet</span></code> and identifies a grid with (1) the number of points along each direction, (2) the coordinate of left bottom cell, (3) the spacing or the coordinate of the top right cell. In addition, <code class="docutils literal notranslate"><span class="pre">UniformGrid</span></code> can contain additional information, like the number of refinement level, or the time. These grids are always cell-centered.</p>
 <p>Let us create a 2D grid:</p>
 <div class="nbinput nblast docutils container">
@@ -190,7 +189,7 @@ Is [-140, 50] in the grid?: False
 </div>
 </section>
 <section id="UniformGridData">
-<h2><code class="docutils literal notranslate"><span class="pre">UniformGridData</span></code><a class="headerlink" href="#UniformGridData" title="Permalink to this headline">¶</a></h2>
+<h2><code class="docutils literal notranslate"><span class="pre">UniformGridData</span></code><a class="headerlink" href="#UniformGridData" title="Permalink to this heading">¶</a></h2>
 <p><code class="docutils literal notranslate"><span class="pre">UniformGridData</span></code> are much more interesting. <code class="docutils literal notranslate"><span class="pre">UniformGridData</span></code> packages a <code class="docutils literal notranslate"><span class="pre">UniformGrid</span></code> and some data in the same object and provides many useful functionalities.</p>
 <p>Let us create some fake data to explore the capabilities. A simple way to generate a <code class="docutils literal notranslate"><span class="pre">UniformGridData</span></code> from a function is with <code class="docutils literal notranslate"><span class="pre">sample_function</span></code>.</p>
 <div class="nbinput nblast docutils container">
@@ -224,7 +223,7 @@ the x coordiante, but the y. We provide the aliaxs <code class="docutils literal
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-&lt;matplotlib.colorbar.Colorbar at 0x7fbec49da070&gt;
+&lt;matplotlib.colorbar.Colorbar at 0x7f2183ef3560&gt;
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
@@ -251,7 +250,7 @@ the x coordiante, but the y. We provide the aliaxs <code class="docutils literal
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-&lt;matplotlib.colorbar.Colorbar at 0x7fbec25dfe20&gt;
+&lt;matplotlib.colorbar.Colorbar at 0x7f2182f4eed0&gt;
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
@@ -329,7 +328,7 @@ The norm2 of funky_data is 20417.836
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-[&lt;matplotlib.lines.Line2D at 0x7fbec2572a60&gt;]
+[&lt;matplotlib.lines.Line2D at 0x7f2183073080&gt;]
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
@@ -358,7 +357,7 @@ The norm2 of funky_data is 20417.836
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-&lt;matplotlib.colorbar.Colorbar at 0x7fbec2498640&gt;
+&lt;matplotlib.colorbar.Colorbar at 0x7f2182d529f0&gt;
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
@@ -386,7 +385,7 @@ The norm2 of funky_data is 20417.836
 <p>The fastest format to save data in is <code class="docutils literal notranslate"><span class="pre">npz</span></code>, but this is not always portable. The <code class="docutils literal notranslate"><span class="pre">save</span></code> method accepts many other formats, like <code class="docutils literal notranslate"><span class="pre">txt</span></code>, <code class="docutils literal notranslate"><span class="pre">dat</span></code>, and also compressed ones (e.g., <code class="docutils literal notranslate"><span class="pre">txt.gz</span></code>).</p>
 </section>
 <section id="HierarchicalGridData">
-<h2><code class="docutils literal notranslate"><span class="pre">HierarchicalGridData</span></code><a class="headerlink" href="#HierarchicalGridData" title="Permalink to this headline">¶</a></h2>
+<h2><code class="docutils literal notranslate"><span class="pre">HierarchicalGridData</span></code><a class="headerlink" href="#HierarchicalGridData" title="Permalink to this heading">¶</a></h2>
 <p>Now that we have some familiarity with <code class="docutils literal notranslate"><span class="pre">UniformGridData</span></code>, we can move to the most important object, <code class="docutils literal notranslate"><span class="pre">HierarchicalGridData</span></code>. The relevance of this class is due to the fact that simulation data is represented with <code class="docutils literal notranslate"><span class="pre">HierarchicalGridData</span></code> objects.</p>
 <p>A <code class="docutils literal notranslate"><span class="pre">HierarchicalGridData</span></code> is a collection of <code class="docutils literal notranslate"><span class="pre">UniformGridData</span></code>, or (or more) for each refinement level.</p>
 <p>Let us prepare some fake data.</p>
@@ -488,7 +487,7 @@ more_funk of (2, 3) is 2.565
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-&lt;matplotlib.colorbar.Colorbar at 0x7fbec2149fa0&gt;
+&lt;matplotlib.colorbar.Colorbar at 0x7f21830248f0&gt;
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
@@ -516,7 +515,7 @@ more_funk of (2, 3) is 2.565
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-&lt;matplotlib.colorbar.Colorbar at 0x7fbec20aedf0&gt;
+&lt;matplotlib.colorbar.Colorbar at 0x7f2180cabbf0&gt;
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
@@ -546,7 +545,7 @@ more_funk of (2, 3) is 2.565
 Available refinement levels: [0, 1, 2]
 Spacing of the coarsest: [1. 1.]
 Spacing of the finest: [0.33333333 0.33333333]
-Finest level: &lt;kuibit.grid_data.UniformGridData object at 0x7fbec21e8130&gt;
+Finest level: &lt;kuibit.grid_data.UniformGridData object at 0x7f2182fb1b80&gt;
 </pre></div></div>
 </div>
 <p>Often, we want to look at a specific cut of the data. <code class="docutils literal notranslate"><span class="pre">UniformGridData</span></code> can be sliced easily. Just prepare a <code class="docutils literal notranslate"><span class="pre">cut</span></code> array with <code class="docutils literal notranslate"><span class="pre">None</span></code> where you want to keep the dimension, and the coordiante of where you want to slice. For example, here we extract the line with <code class="docutils literal notranslate"><span class="pre">y=0.7</span></code>.</p>
@@ -586,7 +585,7 @@ Iteration        = None
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-[&lt;matplotlib.lines.Line2D at 0x7fbec1fc74f0&gt;]
+[&lt;matplotlib.lines.Line2D at 0x7f2180b685c0&gt;]
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
@@ -612,7 +611,7 @@ Iteration        = None
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-[&lt;matplotlib.lines.Line2D at 0x7fbec1fb01f0&gt;]
+[&lt;matplotlib.lines.Line2D at 0x7f2180c86fc0&gt;]
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
@@ -624,7 +623,7 @@ Iteration        = None
 </div>
 </section>
 <section id="Masks">
-<h2>Masks<a class="headerlink" href="#Masks" title="Permalink to this headline">¶</a></h2>
+<h2>Masks<a class="headerlink" href="#Masks" title="Permalink to this heading">¶</a></h2>
 <p>It is often useful to mask the data according to some criterion. For example, mask the atmosphere out in a GRMHD simulation. <code class="docutils literal notranslate"><span class="pre">kuibit</span></code> fully supports mask with an interface that is similar to the one implemented in <code class="docutils literal notranslate"><span class="pre">NumPy</span></code> (but some features will not work with masked data, for example interpolation).</p>
 <p>The module <code class="docutils literal notranslate"><span class="pre">kuibit.masks</span></code> provides methods to apply masked functions in case the domain is restricted. For example, for the logarithm, or arcsin:</p>
 <div class="nbinput docutils container">
@@ -692,7 +691,7 @@ True
 </div>
 </section>
 <section id="visualize_matplotlib">
-<h2><code class="docutils literal notranslate"><span class="pre">visualize_matplotlib</span></code><a class="headerlink" href="#visualize_matplotlib" title="Permalink to this headline">¶</a></h2>
+<h2><code class="docutils literal notranslate"><span class="pre">visualize_matplotlib</span></code><a class="headerlink" href="#visualize_matplotlib" title="Permalink to this heading">¶</a></h2>
 <p>In this tutorial we plotted all the quantities directly accessing the data. This is a pedagogical choice: you need to know how things work to be able to take full advantage of <code class="docutils literal notranslate"><span class="pre">kuibit</span></code>. However, most often the methods in the module <code class="docutils literal notranslate"><span class="pre">visualize_matplotlib</span></code> will be enough.</p>
 <p>The main functions to plot 2D data are: <code class="docutils literal notranslate"><span class="pre">plot_color</span></code> and <code class="docutils literal notranslate"><span class="pre">plot_contourf</span></code>. These take all sorts of inputs, and you should read the documentation. For example, we can plot a <code class="docutils literal notranslate"><span class="pre">UniformGridData</span></code> (the function will behave similarly with <code class="docutils literal notranslate"><span class="pre">HierarchicalGridData</span></code> or NumPy arrays).</p>
 <div class="nbinput docutils container">
@@ -711,7 +710,7 @@ True
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-&lt;matplotlib.image.AxesImage at 0x7fbec1968040&gt;
+&lt;matplotlib.image.AxesImage at 0x7f2182ea70b0&gt;
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
@@ -739,7 +738,7 @@ True
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-&lt;matplotlib.image.AxesImage at 0x7fbec193b1f0&gt;
+&lt;matplotlib.image.AxesImage at 0x7f2182f9acc0&gt;
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
@@ -764,8 +763,9 @@ True
             <p class="logo"><a href="../index.html">
               <img class="logo" src="../_static/logo.png" alt="Logo"/>
             </a></p>
-  <h3><a href="../index.html">Table of Contents</a></h3>
-  <ul>
+  <div>
+    <h3><a href="../index.html">Table of Contents</a></h3>
+    <ul>
 <li><a class="reference internal" href="#">Working with grid data</a><ul>
 <li><a class="reference internal" href="#UniformGrid"><code class="docutils literal notranslate"><span class="pre">UniformGrid</span></code></a></li>
 <li><a class="reference internal" href="#UniformGridData"><code class="docutils literal notranslate"><span class="pre">UniformGridData</span></code></a></li>
@@ -776,12 +776,17 @@ True
 </li>
 </ul>
 
-  <h4>Previous topic</h4>
-  <p class="topless"><a href="timeseries.html"
-                        title="previous chapter">Working with time series, frequency series, and unit conversion</a></p>
-  <h4>Next topic</h4>
-  <p class="topless"><a href="cactus_grid_functions.html"
-                        title="next chapter">Working with Cactus grid functions</a></p>
+  </div>
+  <div>
+    <h4>Previous topic</h4>
+    <p class="topless"><a href="timeseries.html"
+                          title="previous chapter">Working with time series, frequency series, and unit conversion</a></p>
+  </div>
+  <div>
+    <h4>Next topic</h4>
+    <p class="topless"><a href="cactus_grid_functions.html"
+                          title="next chapter">Working with Cactus grid functions</a></p>
+  </div>
 <div id="searchbox" style="display: none" role="search">
   <h3 id="searchlabel">Quick search</h3>
     <div class="searchformwrapper">
@@ -791,7 +796,7 @@ True
     </form>
     </div>
 </div>
-<script>$('#searchbox').show(0);</script><div role="note" aria-label="version link">
+<script>document.getElementById('searchbox').style.display = "block"</script><div role="note" aria-label="version link">
   <h3>Versions</h3>
     <ul class="this-page-menu">
       <li><a href="../dev/tutorials/grid_data.html" rel="nofollow"> Development </a></li>
@@ -801,6 +806,8 @@ True
       <li><a href="../1.3.6/tutorials/grid_data.html" rel="nofollow"> 1.3.6 </a></li>
       
       <li><a href="../1.4.0/tutorials/grid_data.html" rel="nofollow"> 1.4.0 </a></li>
+      
+      <li><a href="../1.4.1/tutorials/grid_data.html" rel="nofollow"> 1.4.1 </a></li>
       
 
     </ul>
@@ -830,7 +837,7 @@ True
     </div>
     <div class="footer" role="contentinfo">
         &#169; Copyright 2020-2023, Gabriele Bozzola.
-      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 4.3.2.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 6.2.1.
     </div>
   </body>
 </html>
