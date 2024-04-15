@@ -157,8 +157,8 @@ class GravitationalWavesOneDet(mp.MultipoleOneDet):
             omega_abs > omega_threshold, omega_abs, omega_threshold
         )
 
-        # np.sign(omega) / (ffi_omega) is omega when omega_abs > omega_thres
-        # this is a convient way to group together positive and negative omega
+        # np.sign(omega) / (ffi_omega) is omega when omega_abs > omega_threshold
+        # this is a convenient way to group together positive and negative omega
         integration_factor = (np.sign(omega) / (1j * ffi_omega)) ** int(order)
 
         # Now, inverse fft
