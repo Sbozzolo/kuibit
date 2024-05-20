@@ -645,5 +645,8 @@ class TestOneGridFunctionOpenPMD(unittest.TestCase):
 
     def test_multiple_mesh_refinement_levels(self):
         # wavetouyx_u variable in the OpenPMD file has 2 mesh refinement levels
-        wavetoyx_u = self.gf.fields.wavetoyx_u
-        self.assertEqual(wavetoyx_u[0].refinement_levels, [0, 1])
+
+        wavetoyx_rho = self.gf.fields.wavetoyx_rho
+        self.assertEqual(wavetoyx_rho.iterations, [0,1])
+        wavetoyx_rho0 = wavetoyx_rho[0]
+        self.assertEqual(wavetoyx_rho0.refinement_levels, [0, 1])
