@@ -277,7 +277,7 @@ class TestOneGridFunction(unittest.TestCase):
         self.rho_star_file = self.rho_star.allfiles[0]
 
         # OpenPMD
-        self.wavetoy = sd.SimDir("tests/grid_functions").gf.xyz["wavetoyx_u"]
+        self.wavetoy = sd.SimDir("tests/grid_functions").gf.xyz["wavetoyx_rho"]
         self.wavetoy_file_it0 = sorted(self.wavetoy.allfiles)[0]
 
         # We are going to test all the methods of the baseclass with
@@ -601,7 +601,7 @@ class TestOneGridFunction(unittest.TestCase):
 
 class TestOneGridFunctionOpenPMD(unittest.TestCase):
     def setUp(self):
-        self.gf = sd.SimDir("tests/grid_functions").gf.xyz
+        self.gf = sd.SimDir("tests/grid_functions/").gf.xyz
 
     def test__init(self):
         self.assertCountEqual(self.gf.dimension, (0, 1, 2))
@@ -643,7 +643,11 @@ class TestOneGridFunctionOpenPMD(unittest.TestCase):
         # There should be 6 files including the OpenPMD bp4 files
         self.assertEqual(len(self.gf.allfiles), 6)
 
+    def test_iterations(self):
+        wavetoyx_rho = self.gf.fields.wavetoyx_rho
+        self.assertEqual(wavetoyx_rho.iterations, [0, 1])
+
     def test_multiple_mesh_refinement_levels(self):
-        # wavetouyx_u variable in the OpenPMD file has 2 mesh refinement levels
-        wavetoyx_u = self.gf.fields.wavetoyx_u
-        self.assertEqual(wavetoyx_u[0].refinement_levels, [0, 1])
+        # wavetouyx_rho variable in the OpenPMD file has 2 mesh refinement levels
+        wavetoyx_rho0 = self.gf.fields.wavetoyx_rho[0]
+        self.assertEqual(wavetoyx_rho0.refinement_levels, [0, 1])
