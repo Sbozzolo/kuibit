@@ -2,7 +2,7 @@
 
 <!doctype html>
 
-<html>
+<html lang="en">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -12,9 +12,8 @@
     <link rel="stylesheet" type="text/css" href="../../_static/css/custom.css" />
     
     <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
-    <script src="../../_static/jquery.js"></script>
-    <script src="../../_static/underscore.js"></script>
     <script src="../../_static/doctools.js"></script>
+    <script src="../../_static/sphinx_highlight.js"></script>
     <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
     <script src="../../_static/bizstyle.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
@@ -66,7 +65,6 @@
 <span class="c1">#</span>
 <span class="c1"># You should have received a copy of the GNU General Public License along with</span>
 <span class="c1"># this program; if not, see &lt;https://www.gnu.org/licenses/&gt;.</span>
-
 <span class="sd">&quot;&quot;&quot;The :py:mod:`~.cactus_grid` module provides functions to load grid function</span>
 <span class="sd">in Cactus formats.</span>
 
@@ -77,12 +75,11 @@
 <span class="sd">  object with keys the possible dimensions (e.g., ``x``, ``yz``, ``xyz``).</span>
 <span class="sd">- :py:class`~.AllGridFunctions` takes all the files in SimDir and sort them</span>
 <span class="sd">  according the different grid functions they contain.</span>
-<span class="sd">- There are two :py:class`~.OneGridFunction` classes, one for HDF5 files and one</span>
-<span class="sd">  for ASCII files. They describe one single grid function and they contains the</span>
-<span class="sd">  files associated to that grid function. Both the classes are derived from the</span>
-<span class="sd">  same abstract base class :py:class`~.OneGridFunctionBase`, which implements</span>
-<span class="sd">  the shared methods.</span>
-
+<span class="sd">- There are three :py:class`~.OneGridFunction` classes, one for HDF5 files, one</span>
+<span class="sd">  for ASCII files, and one for OpenPMD files. They describe one single grid</span>
+<span class="sd">  function and they contains the files associated to that grid function. Both</span>
+<span class="sd">  the classes are derived from the same abstract base class</span>
+<span class="sd">  :py:class`~.OneGridFunctionBase`, which implements the shared methods.</span>
 <span class="sd">These are hierarchical classes, one containing the others, so one typically ends</span>
 <span class="sd">up with a series of brackets to access the actual data. For example, if ``sim``</span>
 <span class="sd">is a :py:class:`~.SimDir`, ``sim.gf.xy[&#39;rho_b&#39;][0]`` is ``rho_b`` at iteration 0</span>
@@ -101,6 +98,7 @@
 
 <span class="kn">import</span> <span class="nn">h5py</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">openpmd_api</span> <span class="k">as</span> <span class="nn">openpmd_io</span>
 
 <span class="kn">from</span> <span class="nn">kuibit</span> <span class="kn">import</span> <span class="n">grid_data</span><span class="p">,</span> <span class="n">simdir</span>
 <span class="kn">from</span> <span class="nn">kuibit.attr_dict</span> <span class="kn">import</span> <span class="n">pythonize_name_dict</span>
@@ -165,7 +163,6 @@
         <span class="c1"># We use this to extract only the information related to the specific</span>
         <span class="c1"># variable</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">var_name</span> <span class="o">=</span> <span class="n">var_name</span>
-
         <span class="k">for</span> <span class="n">path</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">allfiles</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_parse_file</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
 
@@ -217,7 +214,7 @@
 <span class="sd">        :rtype: list</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="nb">sorted</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">alldata</span><span class="p">[</span><span class="n">path</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">()))</span>
+        <span class="k">return</span> <span class="nb">sorted</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">alldata</span><span class="p">[</span><span class="n">path</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
 
     <span class="k">def</span> <span class="nf">_min_iteration_in_file</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Return the minimum available iterations in the given file.</span>
@@ -854,9 +851,9 @@
 
                     <span class="c1"># Write iterations_to_time</span>
                     <span class="k">if</span> <span class="n">current_iteration</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_iterations_to_times</span><span class="p">:</span>
-                        <span class="bp">self</span><span class="o">.</span><span class="n">_iterations_to_times</span><span class="p">[</span>
-                            <span class="n">current_iteration</span>
-                        <span class="p">]</span> <span class="o">=</span> <span class="n">current_time</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">_iterations_to_times</span><span class="p">[</span><span class="n">current_iteration</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
+                            <span class="n">current_time</span>
+                        <span class="p">)</span>
 
                     <span class="c1"># Reset everything</span>
                     <span class="n">current_iteration</span> <span class="o">=</span> <span class="n">line_data</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
@@ -1053,7 +1050,7 @@
         <span class="c1"># file. We keep a collection of all these in the variable self.alldata</span>
         <span class="k">try</span><span class="p">:</span>
             <span class="k">with</span> <span class="n">h5py</span><span class="o">.</span><span class="n">File</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
-                <span class="k">for</span> <span class="n">group</span> <span class="ow">in</span> <span class="n">f</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+                <span class="k">for</span> <span class="n">group</span> <span class="ow">in</span> <span class="n">f</span><span class="p">:</span>
                     <span class="n">matched</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">rx_group_name</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">group</span><span class="p">)</span>
                     <span class="c1"># If this is not an interesting group, just skip it</span>
                     <span class="k">if</span> <span class="ow">not</span> <span class="n">matched</span><span class="p">:</span>
@@ -1216,9 +1213,9 @@
                 <span class="p">)</span>
                 <span class="n">data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="n">dataset</span><span class="p">[()])</span>
 
-                <span class="bp">self</span><span class="o">.</span><span class="n">alldata</span><span class="p">[</span><span class="n">path</span><span class="p">][</span><span class="n">iteration</span><span class="p">][</span><span class="n">ref_level</span><span class="p">][</span>
-                    <span class="n">component</span>
-                <span class="p">]</span> <span class="o">=</span> <span class="n">grid_data</span><span class="o">.</span><span class="n">UniformGridData</span><span class="p">(</span><span class="n">grid</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">alldata</span><span class="p">[</span><span class="n">path</span><span class="p">][</span><span class="n">iteration</span><span class="p">][</span><span class="n">ref_level</span><span class="p">][</span><span class="n">component</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
+                    <span class="n">grid_data</span><span class="o">.</span><span class="n">UniformGridData</span><span class="p">(</span><span class="n">grid</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span>
+                <span class="p">)</span>
 
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">alldata</span><span class="p">[</span><span class="n">path</span><span class="p">][</span><span class="n">iteration</span><span class="p">][</span><span class="n">ref_level</span><span class="p">][</span><span class="n">component</span><span class="p">]</span>
 
@@ -1295,7 +1292,7 @@
         <span class="k">for</span> <span class="n">filename</span><span class="p">,</span> <span class="n">file_reader</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">alldata</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
             <span class="k">for</span> <span class="n">iteration</span><span class="p">,</span> <span class="n">iteration_reader</span> <span class="ow">in</span> <span class="n">file_reader</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
                 <span class="k">for</span> <span class="n">ref_level</span><span class="p">,</span> <span class="n">ref_level_reader</span> <span class="ow">in</span> <span class="n">iteration_reader</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-                    <span class="k">for</span> <span class="n">component</span> <span class="ow">in</span> <span class="n">ref_level_reader</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+                    <span class="k">for</span> <span class="n">component</span> <span class="ow">in</span> <span class="n">ref_level_reader</span><span class="p">:</span>
                         <span class="bp">self</span><span class="o">.</span><span class="n">alldata</span><span class="p">[</span><span class="n">filename</span><span class="p">][</span><span class="n">iteration</span><span class="p">][</span><span class="n">ref_level</span><span class="p">][</span>
                             <span class="n">component</span>
                         <span class="p">]</span> <span class="o">=</span> <span class="kc">None</span></div>
@@ -1320,6 +1317,193 @@
             <span class="n">path</span><span class="p">,</span> <span class="n">iteration</span><span class="p">,</span> <span class="n">ref_levels</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">components</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
         <span class="p">)</span> <span class="k">as</span> <span class="n">dataset</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">dataset</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s2">&quot;time&quot;</span><span class="p">]</span></div></div>
+
+
+<span class="c1"># What is a context manager?</span>
+<span class="c1">#</span>
+<span class="c1"># Context managers are useful ways to handle resources in Python. With a</span>
+<span class="c1"># context manager, we do not have to worry about releasing resources. Here,</span>
+<span class="c1"># we create a context manager that automatically closes the OpenPMD series</span>
+<span class="c1"># object.</span>
+<div class="viewcode-block" id="openpmd_series"><a class="viewcode-back" href="../../cactus_grid_functions_ref.html#kuibit.cactus_grid_functions.openpmd_series">[docs]</a><span class="nd">@contextmanager</span>
+<span class="k">def</span> <span class="nf">openpmd_series</span><span class="p">(</span><span class="n">path</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Context manager to read an OpenPMD file.</span>
+
+<span class="sd">    :param path: Path of the file.</span>
+<span class="sd">    :type path: str</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">series</span> <span class="o">=</span> <span class="n">openpmd_io</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">openpmd_io</span><span class="o">.</span><span class="n">Access</span><span class="o">.</span><span class="n">read_only</span><span class="p">)</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">yield</span> <span class="n">series</span>
+    <span class="k">except</span> <span class="ne">RuntimeError</span> <span class="k">as</span> <span class="n">exce</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;File </span><span class="si">{</span><span class="n">path</span><span class="si">}</span><span class="s2"> cannot be processed&quot;</span><span class="p">)</span> <span class="kn">from</span> <span class="nn">exce</span>
+    <span class="k">finally</span><span class="p">:</span>
+        <span class="n">series</span><span class="o">.</span><span class="n">close</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="OneGridFunctionOpenPMD"><a class="viewcode-back" href="../../cactus_grid_functions_ref.html#kuibit.cactus_grid_functions.OneGridFunctionOpenPMD">[docs]</a><span class="k">class</span> <span class="nc">OneGridFunctionOpenPMD</span><span class="p">(</span><span class="n">BaseOneGridFunction</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Read grid data produced by CarpetOpenPMD files.</span>
+
+<span class="sd">    This class is derived from :py:class:`~.BaseOneGridFunction` and implements</span>
+<span class="sd">    the reading facilities.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># This class implements the details on how to read the data for OpenPMD</span>
+    <span class="c1"># files, most of the functionalities of the class are in</span>
+    <span class="c1"># OneGridFunctionBase.</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">allfiles</span><span class="p">,</span> <span class="n">var_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">dimension</span><span class="p">,</span> <span class="n">mesh_basename</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Constructor.</span>
+
+<span class="sd">        :param allfiles: Paths of files associated to the variable.</span>
+<span class="sd">        :type allfiles: list of str</span>
+<span class="sd">        :param var_name: Variable name.</span>
+<span class="sd">        :type var_name: str</span>
+<span class="sd">        :param mesh_basename: Basename of the OpenPMD mesh. Typically, &lt;thornname&gt;_&lt;groupname&gt;</span>
+<span class="sd">        :type mesh_basename: str</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dimension</span> <span class="o">=</span> <span class="n">dimension</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mesh_basename</span> <span class="o">=</span> <span class="n">mesh_basename</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">map</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_iterations_to_times</span> <span class="o">=</span> <span class="p">{}</span>
+
+        <span class="c1"># Let&#39;s unpack the regex</span>
+        <span class="c1">#</span>
+        <span class="c1"># 1. ^ $ match the beginning and end of string</span>
+        <span class="c1"># 2. {mesh_basename} is substituted with the prefix</span>
+        <span class="c1"># 3. _ is the literal underscore</span>
+        <span class="c1"># 4. (?:rl|lev) is a non-capturing group that matches the literals</span>
+        <span class="c1">#    rl or lev</span>
+        <span class="c1"># 5. (\d+) matches a number, the refinement level</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_pattern_mesh_name</span> <span class="o">=</span> <span class="sa">rf</span><span class="s2">&quot;^</span><span class="si">{</span><span class="n">mesh_basename</span><span class="si">}</span><span class="s2">_(?:rl|lev)(\d+)$&quot;</span>
+
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">allfiles</span><span class="p">,</span> <span class="n">var_name</span><span class="p">)</span>
+
+        <span class="c1"># super() will fill the other variables that we need for dataset_format</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">map</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">map</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+
+        <span class="c1"># OpenPMD data does not contain ghost zones</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">are_ghostzones_in_files</span> <span class="o">=</span> <span class="kc">False</span>
+
+    <span class="k">def</span> <span class="nf">_parse_file</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Read the content of the given file (without reading the data).</span>
+
+<span class="sd">        For OpenPMD files, a &quot;file&quot; is really a directory.</span>
+
+<span class="sd">        :param path: Path of the file.</span>
+<span class="sd">        :type path: str</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">rx_mesh</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_pattern_mesh_name</span><span class="p">)</span>
+
+        <span class="k">with</span> <span class="n">openpmd_series</span><span class="p">(</span><span class="n">path</span><span class="p">)</span> <span class="k">as</span> <span class="n">series</span><span class="p">:</span>
+            <span class="n">iter_open_pmd</span> <span class="o">=</span> <span class="n">series</span><span class="o">.</span><span class="n">iterations</span>
+            <span class="k">for</span> <span class="n">iteration</span><span class="p">,</span> <span class="n">iteration_obj</span> <span class="ow">in</span> <span class="n">iter_open_pmd</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_iterations_to_times</span><span class="p">[</span><span class="n">iteration</span><span class="p">]</span> <span class="o">=</span> <span class="n">iteration_obj</span><span class="o">.</span><span class="n">time</span>
+                <span class="n">all_meshes</span> <span class="o">=</span> <span class="n">iteration_obj</span><span class="o">.</span><span class="n">meshes</span>
+                <span class="k">for</span> <span class="n">mesh_name</span><span class="p">,</span> <span class="n">mesh_obj</span> <span class="ow">in</span> <span class="n">all_meshes</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                    <span class="n">matched</span> <span class="o">=</span> <span class="n">rx_mesh</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">mesh_name</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="n">matched</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                        <span class="n">ref_level</span> <span class="o">=</span> <span class="n">matched</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+                        <span class="c1"># Here is where we prepare are nested alldata dictionary</span>
+                        <span class="n">alldata_file</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">alldata</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="p">{})</span>
+                        <span class="n">alldata_iteration</span> <span class="o">=</span> <span class="n">alldata_file</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span>
+                            <span class="nb">int</span><span class="p">(</span><span class="n">iteration</span><span class="p">),</span> <span class="p">{}</span>
+                        <span class="p">)</span>
+                        <span class="n">alldata_ref_level</span> <span class="o">=</span> <span class="n">alldata_iteration</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span>
+                            <span class="nb">int</span><span class="p">(</span><span class="n">ref_level</span><span class="p">),</span> <span class="p">{}</span>
+                        <span class="p">)</span>
+                        <span class="n">component</span> <span class="o">=</span> <span class="mi">0</span>
+                        <span class="k">for</span> <span class="n">_chunk</span> <span class="ow">in</span> <span class="n">mesh_obj</span><span class="p">[</span>
+                            <span class="bp">self</span><span class="o">.</span><span class="n">var_name</span>
+                        <span class="p">]</span><span class="o">.</span><span class="n">available_chunks</span><span class="p">():</span>
+                            <span class="c1"># We set the actual data to None, and we will read it in</span>
+                            <span class="c1"># _read_component_as_uniform_grid_data upon request</span>
+                            <span class="n">alldata_ref_level</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="n">component</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+                            <span class="n">component</span> <span class="o">+=</span> <span class="mi">1</span>
+
+    <span class="k">def</span> <span class="nf">_read_component_as_uniform_grid_data</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">iteration</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">ref_level</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">component</span><span class="p">:</span> <span class="nb">int</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return the component at the given iteration, refinement level, and component.</span>
+
+<span class="sd">        :param path: Path of the file.</span>
+<span class="sd">        :type path: str</span>
+<span class="sd">        :param iteration: Iteration.</span>
+<span class="sd">        :type iteration: int</span>
+<span class="sd">        :param ref_level: Refinement level.</span>
+<span class="sd">        :type ref_level: int</span>
+<span class="sd">        :param component: Component.</span>
+<span class="sd">        :type component: int</span>
+
+<span class="sd">        :returns: Component as a :py:class:`~.UniformGridData`.</span>
+<span class="sd">        :rtype: :py:class:`~.UniformGridData`</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># ref_level is an integer like 0, 1, 2, 3, 4, 5.</span>
+        <span class="c1"># So it is formatted to 2 digits to give 00, 01, 04, 10, 11</span>
+        <span class="n">mesh_name</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">mesh_basename</span><span class="si">}</span><span class="s2">_lev</span><span class="si">{</span><span class="n">ref_level</span><span class="si">:</span><span class="s2">02d</span><span class="si">}</span><span class="s2">&quot;</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">alldata</span><span class="p">[</span><span class="n">path</span><span class="p">][</span><span class="n">iteration</span><span class="p">][</span><span class="n">ref_level</span><span class="p">][</span><span class="n">component</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">with</span> <span class="n">openpmd_series</span><span class="p">(</span><span class="n">path</span><span class="p">)</span> <span class="k">as</span> <span class="n">series</span><span class="p">:</span>
+                <span class="n">time</span> <span class="o">=</span> <span class="n">series</span><span class="o">.</span><span class="n">iterations</span><span class="p">[</span><span class="n">iteration</span><span class="p">]</span><span class="o">.</span><span class="n">time</span>
+                <span class="n">mesh_obj</span> <span class="o">=</span> <span class="n">series</span><span class="o">.</span><span class="n">iterations</span><span class="p">[</span><span class="n">iteration</span><span class="p">]</span><span class="o">.</span><span class="n">meshes</span><span class="p">[</span><span class="n">mesh_name</span><span class="p">]</span>
+                <span class="n">origin</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">mesh_obj</span><span class="o">.</span><span class="n">grid_global_offset</span><span class="p">)</span>
+                <span class="n">dx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">mesh_obj</span><span class="o">.</span><span class="n">grid_spacing</span><span class="p">)</span>
+                <span class="n">mrc</span> <span class="o">=</span> <span class="n">mesh_obj</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">var_name</span><span class="p">]</span>
+                <span class="n">chunk</span> <span class="o">=</span> <span class="n">mrc</span><span class="o">.</span><span class="n">available_chunks</span><span class="p">()[</span><span class="n">component</span><span class="p">]</span>
+                <span class="n">offset</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">chunk</span><span class="o">.</span><span class="n">offset</span><span class="p">)</span>
+                <span class="n">shape</span> <span class="o">=</span> <span class="n">chunk</span><span class="o">.</span><span class="n">extent</span>
+                <span class="c1"># Do the actual reading</span>
+                <span class="n">data</span> <span class="o">=</span> <span class="n">mrc</span><span class="o">.</span><span class="n">load_chunk</span><span class="p">(</span><span class="n">chunk</span><span class="o">.</span><span class="n">offset</span><span class="p">,</span> <span class="n">chunk</span><span class="o">.</span><span class="n">extent</span><span class="p">)</span>
+                <span class="n">series</span><span class="o">.</span><span class="n">flush</span><span class="p">()</span>
+                <span class="n">grid</span> <span class="o">=</span> <span class="n">grid_data</span><span class="o">.</span><span class="n">UniformGrid</span><span class="p">(</span>
+                    <span class="n">shape</span><span class="p">,</span>
+                    <span class="n">x0</span><span class="o">=</span><span class="p">(</span><span class="n">origin</span> <span class="o">+</span> <span class="n">offset</span> <span class="o">*</span> <span class="n">dx</span><span class="p">),</span>
+                    <span class="n">dx</span><span class="o">=</span><span class="n">dx</span><span class="p">,</span>
+                    <span class="n">ref_level</span><span class="o">=</span><span class="n">ref_level</span><span class="p">,</span>
+                    <span class="n">num_ghost</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span>
+                    <span class="n">time</span><span class="o">=</span><span class="n">time</span><span class="p">,</span>
+                    <span class="n">iteration</span><span class="o">=</span><span class="n">iteration</span><span class="p">,</span>
+                    <span class="n">component</span><span class="o">=</span><span class="n">component</span><span class="p">,</span>
+                <span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">alldata</span><span class="p">[</span><span class="n">path</span><span class="p">][</span><span class="n">iteration</span><span class="p">][</span><span class="n">ref_level</span><span class="p">][</span><span class="n">component</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
+                    <span class="n">grid_data</span><span class="o">.</span><span class="n">UniformGridData</span><span class="p">(</span><span class="n">grid</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span>
+                <span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">alldata</span><span class="p">[</span><span class="n">path</span><span class="p">][</span><span class="n">iteration</span><span class="p">][</span><span class="n">ref_level</span><span class="p">][</span><span class="n">component</span><span class="p">]</span>
+
+<div class="viewcode-block" id="OneGridFunctionOpenPMD.clear_cache"><a class="viewcode-back" href="../../cactus_grid_functions_ref.html#kuibit.cactus_grid_functions.OneGridFunctionOpenPMD.clear_cache">[docs]</a>    <span class="k">def</span> <span class="nf">clear_cache</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Remove all the cached entries.</span>
+
+<span class="sd">        Every time a component is read, :py:class:`~.OneGridFunctionsH5` caches</span>
+<span class="sd">        its value (reading can be expensive). In certain cases, this can lead to</span>
+<span class="sd">        an explosion in the size of this object. For example, when reading</span>
+<span class="sd">        several iterations to make a movie. This method removes all the cached</span>
+<span class="sd">        entries, keeping the size of the object under control.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">filename</span><span class="p">,</span> <span class="n">file_reader</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">alldata</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="k">for</span> <span class="n">iteration</span><span class="p">,</span> <span class="n">iteration_reader</span> <span class="ow">in</span> <span class="n">file_reader</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                <span class="k">for</span> <span class="n">ref_level</span><span class="p">,</span> <span class="n">ref_level_reader</span> <span class="ow">in</span> <span class="n">iteration_reader</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                    <span class="k">for</span> <span class="n">component</span> <span class="ow">in</span> <span class="n">ref_level_reader</span><span class="p">:</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">alldata</span><span class="p">[</span><span class="n">filename</span><span class="p">][</span><span class="n">iteration</span><span class="p">][</span><span class="n">ref_level</span><span class="p">][</span>
+                            <span class="n">component</span>
+                        <span class="p">]</span> <span class="o">=</span> <span class="kc">None</span></div>
+
+<div class="viewcode-block" id="OneGridFunctionOpenPMD.time_at_iteration"><a class="viewcode-back" href="../../cactus_grid_functions_ref.html#kuibit.cactus_grid_functions.OneGridFunctionOpenPMD.time_at_iteration">[docs]</a>    <span class="k">def</span> <span class="nf">time_at_iteration</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">iteration</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return the time corresponding to the provided iteration.</span>
+
+<span class="sd">        :param iteration: Iteration.</span>
+<span class="sd">        :type iteration: int</span>
+
+<span class="sd">        :returns: Time corresponding to ``iteration``.</span>
+<span class="sd">        :rtype: float</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_iterations_to_times</span><span class="p">[</span><span class="n">iteration</span><span class="p">]</span></div></div>
 
 
 <div class="viewcode-block" id="AllGridFunctions"><a class="viewcode-back" href="../../cactus_grid_functions_ref.html#kuibit.cactus_grid_functions.AllGridFunctions">[docs]</a><span class="k">class</span> <span class="nc">AllGridFunctions</span><span class="p">:</span>
@@ -1349,6 +1533,8 @@
     <span class="c1"># specific pattern corresponding to the dimension (which are the keys on</span>
     <span class="c1"># the following dictionary). In general, the file name will be:</span>
     <span class="c1"># variable-name.ext.h5, eg rho.xy.h5.</span>
+
+    <span class="c1"># Organizes data by dimensions and variables</span>
     <span class="n">filename_extensions</span> <span class="o">=</span> <span class="p">{</span>
         <span class="p">(</span><span class="mi">0</span><span class="p">,):</span> <span class="s2">&quot;.x&quot;</span><span class="p">,</span>
         <span class="p">(</span><span class="mi">1</span><span class="p">,):</span> <span class="s2">&quot;.y&quot;</span><span class="p">,</span>
@@ -1368,6 +1554,24 @@
         <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">):</span> <span class="s2">&quot;yz&quot;</span><span class="p">,</span>
         <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">):</span> <span class="s2">&quot;xyz&quot;</span><span class="p">,</span>
     <span class="p">}</span>
+
+    <span class="c1"># regex to match mesh_name like z4c_allc_lev05, admbasex_curv_lev00,</span>
+    <span class="c1"># admbasex_lapse_lev05</span>
+    <span class="c1"># Let&#39;s uinpack this regex:</span>
+    <span class="c1"># 1. ^ and $ mean that we are matching the entire string</span>
+    <span class="c1"># 2. (\w+) is a capturing group that matches a word. This is thorn_groupname</span>
+    <span class="c1">#    For example, wavetoy_state</span>
+    <span class="c1"># 3. _ matches the literal underscore</span>
+    <span class="c1"># 4. (?: ) is a non-capturing group, rl|lev means that we match one of the two</span>
+    <span class="c1"># 5. (\d+) matches numbers</span>
+    <span class="n">_mesh_name_pattern</span> <span class="o">=</span> <span class="sa">r</span><span class="s2">&quot;^(\w+)_(?:rl|lev)(\d+)$&quot;</span>
+
+    <span class="c1"># Mapping between a variable name and the prefix for the mesh name in the</span>
+    <span class="c1"># OpenPMD file. Typically, thorname_groupname.</span>
+    <span class="n">_openpmd_mesh_basenames</span> <span class="o">=</span> <span class="p">{}</span>
+
+    <span class="c1"># The oddball case is with OpenPMD files. OpenPMD files are actually folders</span>
+    <span class="c1"># with extension .bp4 and they are always 3D.</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">allfiles</span><span class="p">,</span> <span class="n">dimension</span><span class="p">,</span> <span class="n">num_ghost</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Constructor.</span>
@@ -1416,7 +1620,6 @@
         <span class="c1"># Example of filenames are:</span>
         <span class="c1"># admbase-metric.xyz.file_158.h5 (one group per file)</span>
         <span class="c1"># alp.xy.h5 (one variable per file)</span>
-        <span class="c1"># filename_pattern = r&quot;^([a-zA-Z0-9_]+)(-)?([a-zA-Z0-9\[\]_]+)%s.%s$&quot;</span>
         <span class="n">filename_pattern</span> <span class="o">=</span> <span class="sa">r</span><span class="s2">&quot;^(([a-zA-Z0-9_]+)-)?([a-zA-Z0-9\[\]_]+)</span><span class="si">%s</span><span class="s2">.</span><span class="si">%s</span><span class="s2">$&quot;</span>
         <span class="n">h5_pattern</span> <span class="o">=</span> <span class="n">filename_pattern</span> <span class="o">%</span> <span class="p">(</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">filename_extensions</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">dimension</span><span class="p">],</span>
@@ -1427,10 +1630,17 @@
             <span class="sa">r</span><span class="s2">&quot;asc(\.(gz|bz2))?&quot;</span><span class="p">,</span>
         <span class="p">)</span>
 
+        <span class="c1"># OpenPMD files are very different. Instead of being single files, they</span>
+        <span class="c1"># are full directories. We match them by find the data.0 file, which is</span>
+        <span class="c1"># contained in all the OpenPMD directories. Also, OpenPMD files are</span>
+        <span class="c1"># always for 3D variables.</span>
+        <span class="n">openpmd_pattern</span> <span class="o">=</span> <span class="sa">r</span><span class="s2">&quot;^data\.0$&quot;</span>
+
         <span class="c1"># Variable files is a dictionary, the keys are the variables, the</span>
         <span class="c1"># values the set of files associated to that variable</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_vars_ascii_files</span> <span class="o">=</span> <span class="p">{}</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_vars_h5_files</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_vars_openpmd_files</span> <span class="o">=</span> <span class="p">{}</span>
 
         <span class="c1"># _vars contains the actual data. It is used to cache results. _vars is</span>
         <span class="c1"># a dictionary with keys the variables and values OneGridFunction (H5 or</span>
@@ -1439,6 +1649,8 @@
 
         <span class="n">rx_h5</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="n">h5_pattern</span><span class="p">)</span>
         <span class="n">rx_ascii</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="n">ascii_pattern</span><span class="p">)</span>
+        <span class="n">rx_openpmd</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="n">openpmd_pattern</span><span class="p">)</span>
+        <span class="n">rx_mesh</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_mesh_name_pattern</span><span class="p">)</span>
 
         <span class="c1"># Here we scan all the files and find those with a name that match</span>
         <span class="c1"># one of our regular expressions.</span>
@@ -1447,6 +1659,14 @@
             <span class="n">filename</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">f</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span>
             <span class="n">matched_h5</span> <span class="o">=</span> <span class="n">rx_h5</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
             <span class="n">matched_ascii</span> <span class="o">=</span> <span class="n">rx_ascii</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+            <span class="c1"># OpenPMD files are always 3D, so we ignore them when the dimension</span>
+            <span class="c1"># is not xyz</span>
+            <span class="n">matched_openpmd</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="n">rx_openpmd</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dim_names</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">dimension</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;xyz&quot;</span>
+                <span class="k">else</span> <span class="kc">None</span>
+            <span class="p">)</span>
+
             <span class="c1"># If matched_pattern is not None, this is a Carpet h5 file</span>
             <span class="k">if</span> <span class="n">matched_h5</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="c1"># First, we understand if the file was output with</span>
@@ -1477,7 +1697,7 @@
                     <span class="k">try</span><span class="p">:</span>
                         <span class="k">with</span> <span class="n">h5py</span><span class="o">.</span><span class="n">File</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">h5f</span><span class="p">:</span>
                             <span class="c1"># Here group is in the sense of HDF5 group</span>
-                            <span class="k">for</span> <span class="n">group</span> <span class="ow">in</span> <span class="n">h5f</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+                            <span class="k">for</span> <span class="n">group</span> <span class="ow">in</span> <span class="n">h5f</span><span class="p">:</span>
                                 <span class="n">group_matched</span> <span class="o">=</span> <span class="n">rx_group_name</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">group</span><span class="p">)</span>
                                 <span class="c1"># If this is not an interesting group, just skip it</span>
                                 <span class="k">if</span> <span class="ow">not</span> <span class="n">group_matched</span><span class="p">:</span>
@@ -1544,13 +1764,38 @@
                             <span class="n">opener</span><span class="o">=</span><span class="n">opener</span><span class="p">,</span>
                             <span class="n">opener_mode</span><span class="o">=</span><span class="n">opener_mode</span><span class="p">,</span>
                         <span class="p">)</span>
-                        <span class="k">for</span> <span class="n">variable_name</span> <span class="ow">in</span> <span class="n">column_description</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+                        <span class="k">for</span> <span class="n">variable_name</span> <span class="ow">in</span> <span class="n">column_description</span><span class="p">:</span>
                             <span class="n">var_list</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_vars_ascii_files</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span>
                                 <span class="n">variable_name</span><span class="p">,</span> <span class="nb">set</span><span class="p">()</span>
                             <span class="p">)</span>
                             <span class="n">var_list</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
                     <span class="k">except</span> <span class="ne">RuntimeError</span><span class="p">:</span>
                         <span class="k">pass</span>
+
+            <span class="k">elif</span> <span class="n">matched_openpmd</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="c1"># We detected a data.0 file. Its parent directory is the actual</span>
+                <span class="c1"># bp4 file.</span>
+                <span class="n">dir_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">f</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+                <span class="k">with</span> <span class="n">openpmd_series</span><span class="p">(</span><span class="n">dir_path</span><span class="p">)</span> <span class="k">as</span> <span class="n">series</span><span class="p">:</span>
+                    <span class="k">for</span> <span class="n">_iteration</span><span class="p">,</span> <span class="n">iteration_obj</span> <span class="ow">in</span> <span class="n">series</span><span class="o">.</span><span class="n">iterations</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                        <span class="k">for</span> <span class="p">(</span>
+                            <span class="n">mesh_name</span><span class="p">,</span>
+                            <span class="n">mesh_obj</span><span class="p">,</span>
+                        <span class="p">)</span> <span class="ow">in</span> <span class="n">iteration_obj</span><span class="o">.</span><span class="n">meshes</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                            <span class="n">matched</span> <span class="o">=</span> <span class="n">rx_mesh</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">mesh_name</span><span class="p">)</span>
+                            <span class="k">if</span> <span class="n">matched</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                                <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span>
+                                    <span class="sa">f</span><span class="s2">&quot;Could not parse mesh </span><span class="si">{</span><span class="n">mesh_name</span><span class="si">}</span><span class="s2">&quot;</span>
+                                <span class="p">)</span>
+                            <span class="n">mesh_basename</span> <span class="o">=</span> <span class="n">matched</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+                            <span class="k">for</span> <span class="n">variable_name</span> <span class="ow">in</span> <span class="n">mesh_obj</span><span class="p">:</span>
+                                <span class="n">var_list</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_vars_openpmd_files</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span>
+                                    <span class="n">variable_name</span><span class="p">,</span> <span class="nb">set</span><span class="p">()</span>
+                                <span class="p">)</span>
+                                <span class="n">var_list</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">dir_path</span><span class="p">)</span>
+                                <span class="bp">self</span><span class="o">.</span><span class="n">_openpmd_mesh_basenames</span><span class="p">[</span><span class="n">variable_name</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
+                                    <span class="n">mesh_basename</span>
+                                <span class="p">)</span>
 
         <span class="c1"># What pythonize_name_dict does is to make the various variables</span>
         <span class="c1"># accessible as attributes, e.g. self.fields.rho</span>
@@ -1567,6 +1812,16 @@
             <span class="k">if</span> <span class="n">var_name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_vars_h5_files</span><span class="p">:</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">_vars</span><span class="p">[</span><span class="n">var_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">OneGridFunctionH5</span><span class="p">(</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">_vars_h5_files</span><span class="p">[</span><span class="n">var_name</span><span class="p">],</span> <span class="n">var_name</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">dimension</span>
+                <span class="p">)</span>
+            <span class="k">elif</span> <span class="n">var_name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_vars_openpmd_files</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_vars</span><span class="p">[</span><span class="n">var_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">OneGridFunctionOpenPMD</span><span class="p">(</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_vars_openpmd_files</span><span class="p">[</span><span class="n">var_name</span><span class="p">],</span>
+                    <span class="n">var_name</span><span class="p">,</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">dimension</span><span class="p">,</span>
+                    <span class="c1"># Get mesh_basenames corresponding to var name from dict.</span>
+                    <span class="c1"># mesh_basename is thornname_groupname, where groupname is the</span>
+                    <span class="c1"># name of the variable group that contains var_name</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_openpmd_mesh_basenames</span><span class="p">[</span><span class="n">var_name</span><span class="p">],</span>
                 <span class="p">)</span>
             <span class="k">elif</span> <span class="n">var_name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_vars_ascii_files</span><span class="p">:</span>
                 <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">num_ghost</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
@@ -1624,7 +1879,11 @@
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Return the list of all the available variables.&quot;&quot;&quot;</span>
         <span class="c1"># We merge the dictionaries and return the keys.</span>
         <span class="c1"># This automatically takes care of making sure that they keys are unique.</span>
-        <span class="k">return</span> <span class="p">{</span><span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">_vars_h5_files</span><span class="p">,</span> <span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">_vars_ascii_files</span><span class="p">}</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span></div>
+        <span class="k">return</span> <span class="p">{</span>
+            <span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">_vars_h5_files</span><span class="p">,</span>
+            <span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">_vars_ascii_files</span><span class="p">,</span>
+            <span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">_vars_openpmd_files</span><span class="p">,</span>
+        <span class="p">}</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span></div>
 
     <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">ret</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Available grid data of dimension &quot;</span>
@@ -1648,6 +1907,9 @@
             <span class="n">allfiles</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">file_list</span><span class="p">)</span>
         <span class="k">for</span> <span class="n">file_list</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_vars_ascii_files</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
             <span class="n">allfiles</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">file_list</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">dir_list</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_vars_openpmd_files</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+            <span class="c1"># OpenPMD files are actually directory</span>
+            <span class="n">allfiles</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">dir_list</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">allfiles</span>
 
 <div class="viewcode-block" id="AllGridFunctions.total_filesize"><a class="viewcode-back" href="../../cactus_grid_functions_ref.html#kuibit.cactus_grid_functions.AllGridFunctions.total_filesize">[docs]</a>    <span class="k">def</span> <span class="nf">total_filesize</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="s2">&quot;MB&quot;</span><span class="p">):</span>
@@ -1685,6 +1947,7 @@
     <span class="c1"># convenint to index them with numbers. This dictionary provides a way</span>
     <span class="c1"># to go from one notation to the other. Internally, we always use the</span>
     <span class="c1"># index notation.</span>
+
     <span class="n">_dim_indices</span> <span class="o">=</span> <span class="p">{</span>
         <span class="s2">&quot;x&quot;</span><span class="p">:</span> <span class="p">(</span><span class="mi">0</span><span class="p">,),</span>
         <span class="s2">&quot;y&quot;</span><span class="p">:</span> <span class="p">(</span><span class="mi">1</span><span class="p">,),</span>
@@ -1777,8 +2040,20 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1"># First we find all the unique files</span>
         <span class="n">allfiles</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
-        <span class="k">for</span> <span class="n">dim</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_all_griddata</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+        <span class="k">for</span> <span class="n">dim</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_all_griddata</span><span class="p">:</span>
             <span class="n">allfiles</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="bp">self</span><span class="p">[</span><span class="n">dim</span><span class="p">]</span><span class="o">.</span><span class="n">allfiles</span><span class="p">)</span>
+        <span class="c1"># OpenPMD &quot;files&quot; are really directories, so if we want to measure their</span>
+        <span class="c1"># size accurately we have to open them up</span>
+        <span class="k">for</span> <span class="n">f_</span> <span class="ow">in</span> <span class="nb">set</span><span class="p">(</span><span class="n">allfiles</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">f_</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s2">&quot;.bp4&quot;</span><span class="p">):</span>
+                <span class="c1"># Remove the directory and add all the files inside</span>
+                <span class="n">allfiles</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">f_</span><span class="p">)</span>
+                <span class="n">allfiles</span><span class="o">.</span><span class="n">update</span><span class="p">(</span>
+                    <span class="p">{</span>
+                        <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">f_</span><span class="p">,</span> <span class="n">p</span><span class="p">))</span>
+                        <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span><span class="n">f_</span><span class="p">)</span>
+                    <span class="p">}</span>
+                <span class="p">)</span>
         <span class="k">return</span> <span class="n">total_filesize</span><span class="p">(</span><span class="n">allfiles</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="n">unit</span><span class="p">)</span></div></div>
 </pre></div>
 
@@ -1800,7 +2075,7 @@
     </form>
     </div>
 </div>
-<script>$('#searchbox').show(0);</script><div role="note" aria-label="version link">
+<script>document.getElementById('searchbox').style.display = "block"</script><div role="note" aria-label="version link">
   <h3>Versions</h3>
     <ul class="this-page-menu">
       <li><a href="../../dev/_modules/kuibit/cactus_grid_functions.html" rel="nofollow"> Development </a></li>
@@ -1810,6 +2085,8 @@
       <li><a href="../../1.3.6/_modules/kuibit/cactus_grid_functions.html" rel="nofollow"> 1.3.6 </a></li>
       
       <li><a href="../../1.4.0/_modules/kuibit/cactus_grid_functions.html" rel="nofollow"> 1.4.0 </a></li>
+      
+      <li><a href="../../1.4.1/_modules/kuibit/cactus_grid_functions.html" rel="nofollow"> 1.4.1 </a></li>
       
 
     </ul>
@@ -1834,7 +2111,7 @@
     </div>
     <div class="footer" role="contentinfo">
         &#169; Copyright 2020-2023, Gabriele Bozzola.
-      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 4.3.2.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 6.2.1.
     </div>
   </body>
 </html>
