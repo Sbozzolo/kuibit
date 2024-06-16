@@ -19,7 +19,7 @@ sys.path.insert(0, os.path.abspath(".."))
 # -- Project information -----------------------------------------------------
 
 project = "kuibit"
-copyright = "2020-2023, Gabriele Bozzola"
+copyright = "2020-2024, Gabriele Bozzola"
 author = "Gabriele Bozzola"
 
 # The full version, including alpha/beta/rc tags
