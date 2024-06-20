@@ -1,0 +1,495 @@
+
+
+<!doctype html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+
+    <title>Working with gravitational waves &#8212; kuibit 1.5.0 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/bizstyle.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/nbsphinx-code-cells.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/css/custom.css" />
+    
+    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <script src="../_static/sphinx_highlight.js"></script>
+    <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+    <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="../_static/bizstyle.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Working with vector and matrices" href="tensor.html" />
+    <link rel="prev" title="Working with Cactus horizons" href="cactus_horizons.html" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0" />
+    <!--[if lt IE 9]>
+    <script src="_static/css3-mediaqueries.js"></script>
+    <![endif]-->
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="tensor.html" title="Working with vector and matrices"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="cactus_horizons.html" title="Working with Cactus horizons"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">kuibit 1.5.0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">Working with gravitational waves</a></li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <section id="Working-with-gravitational-waves">
+<h1>Working with gravitational waves<a class="headerlink" href="#Working-with-gravitational-waves" title="Permalink to this heading">¶</a></h1>
+<p>Gravitational waves are one of the most important quantity in numerical-relativity simulations. Here, we will see how to extract the strain and how to do some of the most common operations with gravitational waves. For this, we will some some sample data that we will read with the <a class="reference internal" href="../simdir.html"><span class="doc">SimDir</span></a> module.</p>
+<p>(This notebook is meant to be converted in Sphinx documentation and not used directly.)</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
+<span class="kn">from</span> <span class="nn">kuibit.simdir</span> <span class="kn">import</span> <span class="n">SimDir</span>
+</pre></div>
+</div>
+</div>
+<p>First, we load the data.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">sim</span> <span class="o">=</span> <span class="n">SimDir</span><span class="p">(</span><span class="s2">&quot;../../tests/gwsample&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<p>Here, we are only interested in gravitational waves, to access those, we use the <code class="docutils literal notranslate"><span class="pre">.gws</span></code> or <code class="docutils literal notranslate"><span class="pre">.gravitational_waves</span></code> attributes.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">gws</span> <span class="o">=</span> <span class="n">sim</span><span class="o">.</span><span class="n">gws</span>
+</pre></div>
+</div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">gws</span></code> is a <code class="docutils literal notranslate"><span class="pre">GravitationalWavesDir</span></code> object: it contains all the available information about gravitational waves. To see it, you can print <code class="docutils literal notranslate"><span class="pre">gws</span></code>.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="n">gws</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Avilable radii: [60.13, 77.93, 53.96, 44.78, 91.46, 67.88, 48.95, 140.16, 191.0, 110.69]
+
+At radius 44.78, (l, m) available: [(2, 2)] (missing: [(2, 0), (2, -2), (2, -1), (2, 1)])
+At radius 48.95, (l, m) available: [(2, 2)] (missing: [(2, 0), (2, -2), (2, -1), (2, 1)])
+At radius 53.96, (l, m) available: [(2, 2)] (missing: [(2, 0), (2, -2), (2, -1), (2, 1)])
+At radius 60.13, (l, m) available: [(2, 2)] (missing: [(2, 0), (2, -2), (2, -1), (2, 1)])
+At radius 67.88, (l, m) available: [(2, 2)] (missing: [(2, 0), (2, -2), (2, -1), (2, 1)])
+At radius 77.93, (l, m) available: [(2, 2)] (missing: [(2, 0), (2, -2), (2, -1), (2, 1)])
+At radius 91.46, (l, m) available: [(2, 2)] (missing: [(2, 0), (2, -2), (2, -1), (2, 1)])
+At radius 110.69, (l, m) available: [(2, 2)] (missing: [(2, 0), (2, -2), (2, -1), (2, 1)])
+At radius 140.16, (l, m) available: [(2, 2)] (missing: [(2, 0), (2, -2), (2, -1), (2, 1)])
+At radius 191.0, (l, m) available: [(2, 2)] (missing: [(2, 0), (2, -2), (2, -1), (2, 1)])
+
+</pre></div></div>
+</div>
+<p>We see the extraction radii available and the available multipoles. There’s also information about the missing multipoles. This information is also available through the <code class="docutils literal notranslate"><span class="pre">available_lm</span></code> and <code class="docutils literal notranslate"><span class="pre">missing_lm</span></code> attributes in <code class="docutils literal notranslate"><span class="pre">gws</span></code>. In this dataset we only have the (2, 2). In case you had a l=1 or l=0 mode, that would have been ignored.</p>
+<p>Data from ASCII files or from hdf5 files is supported.</p>
+<p><code class="docutils literal notranslate"><span class="pre">gws</span></code> is like a dictionary, where the keys are the radii and the values are <code class="docutils literal notranslate"><span class="pre">GravitationalWaveOneDet</span></code>.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">gws</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+dict_keys([60.13, 77.93, 53.96, 44.78, 91.46, 67.88, 48.95, 140.16, 191.0, 110.69])
+</pre></div></div>
+</div>
+<p>Let’s focus on one extraction radius. You can access the corresponding <code class="docutils literal notranslate"><span class="pre">GravitationalWavesOneDet</span></code> with the bracket operator.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">psi4</span> <span class="o">=</span> <span class="n">gws</span><span class="p">[</span><span class="mf">91.46</span><span class="p">]</span>
+</pre></div>
+</div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">GravitationalWavesOneDet</span></code> contains <span class="math notranslate nohighlight">\(\Psi_4\)</span> for the extraction radius selected. This object is very rich. You can see which multipoles are available with <code class="docutils literal notranslate"><span class="pre">available_l</span></code>, <code class="docutils literal notranslate"><span class="pre">available_m</span></code>, or <code class="docutils literal notranslate"><span class="pre">available_lm</span></code>. You can see the extraction radius with the <code class="docutils literal notranslate"><span class="pre">dist</span></code> method.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">psi4</span><span class="o">.</span><span class="n">dist</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+91.46
+</pre></div></div>
+</div>
+<p>You can loop over all the available (l, m) with a for loop. When you do this, you get the multipole l and m, and the corresponding timeseries.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">for</span> <span class="n">l</span><span class="p">,</span> <span class="n">m</span><span class="p">,</span> <span class="n">ts</span> <span class="ow">in</span> <span class="n">psi4</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">l</span><span class="p">,</span> <span class="n">m</span><span class="p">,</span> <span class="nb">type</span><span class="p">(</span><span class="n">ts</span><span class="p">))</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+2 2 &lt;class &#39;kuibit.timeseries.TimeSeries&#39;&gt;
+</pre></div></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">GravitationalWavesOneDet</span></code> are dictionary-like objects as well, with keys being the available (l, m).</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">psi4_22</span> <span class="o">=</span> <span class="n">psi4</span><span class="p">[(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">)]</span>
+<span class="c1"># In case you forget the [], that would work too</span>
+<span class="n">psi4_22</span> <span class="o">=</span> <span class="n">psi4</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+<span class="c1"># Alternatively, you can use the get_psi4_lm method</span>
+<span class="n">psi4_22</span> <span class="o">=</span> <span class="n">psi4</span><span class="o">.</span><span class="n">get_psi4_lm</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<p>This is a TimeSeries, we can plot it. <span class="math notranslate nohighlight">\(\Psi_4\)</span> is a complex number, so we only plot the real part.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+<span class="o">%</span><span class="k">matplotlib</span> inline
+
+<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s2">&quot;t [M]&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s2">&quot;$\Psi_4$&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">psi4_22</span><span class="o">.</span><span class="n">real</span><span class="p">())</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+[&lt;matplotlib.lines.Line2D at 0x7f93e18639d0&gt;]
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/tutorials_gravitational_waves_19_1.png" src="../_images/tutorials_gravitational_waves_19_1.png" />
+</div>
+</div>
+<p>In general, we are interested in the strain. <code class="docutils literal notranslate"><span class="pre">GravitationalWavesOneDet</span></code> objects have numerous methods to extract the strain. The most simple is the one to obtain the strain associated to a specific mode. This (as all the other methods that involve strains) needs to take a Fourier transform. To avoid aliasing effects, your signal should go smoothly to zero. In case it doesn’t, you have to window it. To do this, you have to pass the <code class="docutils literal notranslate"><span class="pre">window_function</span></code> parameter, and all the additional
+parameters that the window may need. You can pass the window in multiple ways, but the simplest is to use one the window functions already coded up. In this example, we will use the Tukey window. If you don’t need a window, you can pass <code class="docutils literal notranslate"><span class="pre">None</span></code> (or nothing). In addition to the window, you have to provide <code class="docutils literal notranslate"><span class="pre">pcut</span></code>. This is the period that will go in the fixed-frequency integration (<code class="docutils literal notranslate"><span class="pre">omega_threshold</span> <span class="pre">=</span> <span class="pre">2</span> <span class="pre">*</span> <span class="pre">pi</span> <span class="pre">/</span> <span class="pre">pcut</span></code>). Choose pcut as the longest physical period you expect in your signal.</p>
+<p>Also notice, when extracting the strain <code class="docutils literal notranslate"><span class="pre">h</span></code>, we always obtain <code class="docutils literal notranslate"><span class="pre">r</span> <span class="pre">*</span> <span class="pre">h</span></code>, where <code class="docutils literal notranslate"><span class="pre">r</span></code> is the extraction radius.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[11]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">strain_22</span> <span class="o">=</span> <span class="n">psi4</span><span class="o">.</span><span class="n">get_strain_lm</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="c1"># l</span>
+                               <span class="mi">2</span><span class="p">,</span> <span class="c1"># m</span>
+                               <span class="mi">120</span><span class="p">,</span> <span class="c1"># pcut</span>
+                               <span class="mf">0.1</span><span class="p">,</span> <span class="c1"># parameter of the window</span>
+                               <span class="n">window_function</span><span class="o">=</span><span class="s1">&#39;tukey&#39;</span>
+                               <span class="p">)</span>
+<span class="n">rhp</span> <span class="o">=</span> <span class="n">strain_22</span><span class="o">.</span><span class="n">real</span><span class="p">()</span>
+<span class="n">rhc</span> <span class="o">=</span> <span class="o">-</span><span class="n">strain_22</span><span class="o">.</span><span class="n">imag</span><span class="p">()</span>
+
+<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s2">&quot;t [M]&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s2">&quot;$rh [M]$&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">rhp</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;h_+&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">rhc</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;h_x&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[11]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+&lt;matplotlib.legend.Legend at 0x7f93e1459d00&gt;
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/tutorials_gravitational_waves_21_1.png" src="../_images/tutorials_gravitational_waves_21_1.png" />
+</div>
+</div>
+<p>This is a beautiful gravitational-wave signal! If may not have noticed that the signal is a little bit shorter than <span class="math notranslate nohighlight">\(\Psi_4\)</span>. This is because, by default, we remove part of the signal at the beginning and at the end, which typically is not very accurate. If do not want this to happen, send <code class="docutils literal notranslate"><span class="pre">trim_ends</span></code> to <code class="docutils literal notranslate"><span class="pre">False</span></code>.</p>
+<p>Now, let’s consider the signal that would be observed by LIGO-Virgo interferometers with function <code class="docutils literal notranslate"><span class="pre">get_observed_strain</span></code>. This method takes into account all the available modes and the localization in the sky. It knows about LIGO Hanford, LIGO Livingston and Virgo and returns a <code class="docutils literal notranslate"><span class="pre">Detectors</span></code> object. We will see in a second how <code class="docutils literal notranslate"><span class="pre">Detectors</span></code> work. No noise is added or taken into account.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[12]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">strains</span> <span class="o">=</span> <span class="n">psi4</span><span class="o">.</span><span class="n">get_observed_strain</span><span class="p">(</span><span class="mi">8</span><span class="p">,</span> <span class="c1"># Right ascension</span>
+                                   <span class="o">-</span><span class="mi">70</span><span class="p">,</span> <span class="c1"># Declination</span>
+                                    <span class="s2">&quot;2015-09-14 09:50:45&quot;</span><span class="p">,</span> <span class="c1"># Time UTC</span>
+                                   <span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">/</span><span class="mi">3</span><span class="p">,</span> <span class="c1"># theta_gw</span>
+                                   <span class="mi">0</span><span class="p">,</span> <span class="c1"># phi_gw</span>
+                                   <span class="mi">120</span><span class="p">,</span> <span class="c1"># pcut</span>
+                                   <span class="mf">0.1</span><span class="p">,</span> <span class="c1"># parameter of the window</span>
+                                   <span class="n">window_function</span><span class="o">=</span><span class="s1">&#39;tukey&#39;</span>
+                                   <span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<p>Now that we have <code class="docutils literal notranslate"><span class="pre">strains</span></code>, we can access its field as if they were attributes. The name of the fields are the different detectors.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[13]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s2">&quot;t [M]&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s2">&quot;$rh [M]$&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">strains</span><span class="o">.</span><span class="n">hanford</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;hanford&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">strains</span><span class="o">.</span><span class="n">livingston</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;livingston&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[13]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+&lt;matplotlib.legend.Legend at 0x7f93e11c57c0&gt;
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/tutorials_gravitational_waves_25_1.png" src="../_images/tutorials_gravitational_waves_25_1.png" />
+</div>
+</div>
+<p>There are additional useful function in <code class="docutils literal notranslate"><span class="pre">gw_utils</span></code>, for example, if we want to compute the signal-to-noise ratio of GW150914 assuming design-sensitivity LIGO:</p>
+<p>(Here we also see how to use bundled sensitivity curves)</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[14]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Let&#39;s convert this the strain to physical units</span>
+<span class="kn">from</span> <span class="nn">kuibit</span> <span class="kn">import</span> <span class="n">unitconv</span> <span class="k">as</span> <span class="n">uc</span>
+<span class="kn">import</span> <span class="nn">kuibit.gw_utils</span> <span class="k">as</span> <span class="nn">gwu</span>
+
+<span class="n">CU</span> <span class="o">=</span> <span class="n">uc</span><span class="o">.</span><span class="n">geom_umass_msun</span><span class="p">(</span><span class="mi">65</span><span class="p">)</span>
+<span class="n">distance</span> <span class="o">=</span> <span class="mi">410</span>  <span class="c1"># Mpc</span>
+<span class="n">distance_SI</span> <span class="o">=</span> <span class="n">distance</span> <span class="o">*</span> <span class="n">uc</span><span class="o">.</span><span class="n">MEGAPARSEC_SI</span>
+
+<span class="n">strain_hanford</span> <span class="o">=</span> <span class="n">strains</span><span class="o">.</span><span class="n">hanford</span> <span class="o">*</span> <span class="n">CU</span><span class="o">.</span><span class="n">length</span> <span class="o">/</span> <span class="n">distance_SI</span>
+<span class="n">strain_hanford</span><span class="o">.</span><span class="n">time_unit_change</span><span class="p">(</span><span class="n">CU</span><span class="o">.</span><span class="n">time</span><span class="p">,</span> <span class="n">inverse</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">redshift</span> <span class="o">=</span> <span class="n">gwu</span><span class="o">.</span><span class="n">luminosity_distance_to_redshift</span><span class="p">(</span><span class="n">distance</span><span class="p">)</span>
+<span class="n">strain_hanford</span><span class="o">.</span><span class="n">redshift</span><span class="p">(</span><span class="n">redshift</span><span class="p">)</span>
+
+<span class="kn">from</span> <span class="nn">kuibit.sensitivity_curves</span> <span class="kn">import</span> <span class="n">Sn_aLIGO</span>
+
+<span class="n">freqs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">20</span><span class="p">,</span> <span class="mi">512</span><span class="p">,</span> <span class="mi">1000</span><span class="p">)</span>
+<span class="n">aligo</span> <span class="o">=</span> <span class="n">Sn_aLIGO</span><span class="p">(</span><span class="n">freqs</span><span class="p">)</span>
+
+<span class="n">snr</span> <span class="o">=</span> <span class="n">gwu</span><span class="o">.</span><span class="n">signal_to_noise_ratio_from_strain</span><span class="p">(</span>
+    <span class="n">strain_hanford</span><span class="p">,</span>
+    <span class="mf">0.1</span><span class="p">,</span>
+    <span class="n">noise</span><span class="o">=</span><span class="n">aligo</span><span class="p">,</span>
+    <span class="n">fmin</span><span class="o">=</span><span class="mi">25</span><span class="p">,</span>
+    <span class="n">fmax</span><span class="o">=</span><span class="mi">256</span><span class="p">,</span>
+    <span class="n">window_function</span><span class="o">=</span><span class="s2">&quot;tukey&quot;</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;SNR = </span><span class="si">{</span><span class="n">snr</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+SNR = 38.56
+</pre></div></div>
+</div>
+<p>We can also compute energy and angular momentum carried away by these waves. There are methods to compute the instantaneous value, or the cumulative one. You can select a specific mode, or sum up all the modes.</p>
+<p>Let’s see a couple.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[15]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">power_22</span> <span class="o">=</span> <span class="n">psi4</span><span class="o">.</span><span class="n">get_power_lm</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="c1"># l</span>
+                             <span class="mi">2</span><span class="p">,</span> <span class="c1"># m</span>
+                             <span class="mi">120</span> <span class="c1"># pcut</span>
+                             <span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s2">&quot;t [M]&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s2">&quot;$dE/dt [M]$&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">power_22</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[15]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+[&lt;matplotlib.lines.Line2D at 0x7f93e1125b80&gt;]
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/tutorials_gravitational_waves_29_1.png" src="../_images/tutorials_gravitational_waves_29_1.png" />
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[16]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">angmom</span> <span class="o">=</span> <span class="n">psi4</span><span class="o">.</span><span class="n">get_total_angular_momentum_z</span><span class="p">(</span><span class="mi">120</span><span class="p">)</span>
+
+<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s2">&quot;t [M]&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s2">&quot;$L(&lt;t) [M]$&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">angmom</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[16]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+[&lt;matplotlib.lines.Line2D at 0x7f93e14af1f0&gt;]
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/tutorials_gravitational_waves_30_1.png" src="../_images/tutorials_gravitational_waves_30_1.png" />
+</div>
+</div>
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="../index.html">
+              <img class="logo" src="../_static/logo.png" alt="Logo"/>
+            </a></p>
+  <div>
+    <h4>Previous topic</h4>
+    <p class="topless"><a href="cactus_horizons.html"
+                          title="previous chapter">Working with Cactus horizons</a></p>
+  </div>
+  <div>
+    <h4>Next topic</h4>
+    <p class="topless"><a href="tensor.html"
+                          title="next chapter">Working with vector and matrices</a></p>
+  </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>document.getElementById('searchbox').style.display = "block"</script><div role="note" aria-label="version link">
+  <h3>Versions</h3>
+    <ul class="this-page-menu">
+      <li><a href="../dev/tutorials/gravitational_waves.html" rel="nofollow"> Development </a></li>
+      <li><a href="#" rel="nofollow"> Master </a></li>
+
+      
+      <li><a href="../1.3.6/tutorials/gravitational_waves.html" rel="nofollow"> 1.3.6 </a></li>
+      
+      <li><a href="../1.4.0/tutorials/gravitational_waves.html" rel="nofollow"> 1.4.0 </a></li>
+      
+      <li><a href="../1.4.1/tutorials/gravitational_waves.html" rel="nofollow"> 1.4.1 </a></li>
+      
+      <li><a href="../1.5.0/tutorials/gravitational_waves.html" rel="nofollow"> 1.5.0 </a></li>
+      
+
+    </ul>
+ </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="tensor.html" title="Working with vector and matrices"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="cactus_horizons.html" title="Working with Cactus horizons"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">kuibit 1.5.0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">Working with gravitational waves</a></li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2020-2024, Gabriele Bozzola.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 6.2.1.
+    </div>
+  </body>
+</html>

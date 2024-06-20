@@ -1,0 +1,651 @@
+
+
+<!doctype html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+
+    <title>Working with time series, frequency series, and unit conversion &#8212; kuibit 1.5.0 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/bizstyle.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/nbsphinx-code-cells.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/css/custom.css" />
+    
+    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <script src="../_static/sphinx_highlight.js"></script>
+    <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+    <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="../_static/bizstyle.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Working with grid data" href="grid_data.html" />
+    <link rel="prev" title="Working with Simulation Directories" href="simdir.html" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0" />
+    <!--[if lt IE 9]>
+    <script src="_static/css3-mediaqueries.js"></script>
+    <![endif]-->
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="grid_data.html" title="Working with grid data"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="simdir.html" title="Working with Simulation Directories"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">kuibit 1.5.0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">Working with time series, frequency series, and unit conversion</a></li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <section id="Working-with-time-series,-frequency-series,-and-unit-conversion">
+<h1>Working with time series, frequency series, and unit conversion<a class="headerlink" href="#Working-with-time-series,-frequency-series,-and-unit-conversion" title="Permalink to this heading">¶</a></h1>
+<p>In this notebook, we show some of the most useful features of the <a class="reference internal" href="../series.html"><span class="doc">timeseries</span></a> module. To do so, we will analyze a fake gravitational-wave signal. We will also show the <a class="reference internal" href="../series.html"><span class="doc">frequencyseries</span></a> module and the <a class="reference internal" href="../unitconv.html"><span class="doc">unitconv</span></a> modules.</p>
+<p>First, let’s generate this signal.</p>
+<p>(This notebook is meant to be converted in Sphinx documentation and not used directly.)</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">kuibit</span> <span class="kn">import</span> <span class="n">timeseries</span> <span class="k">as</span> <span class="n">ts</span>
+<span class="kn">from</span> <span class="nn">kuibit</span> <span class="kn">import</span> <span class="n">series</span>
+<span class="kn">from</span> <span class="nn">kuibit</span> <span class="kn">import</span> <span class="n">unitconv</span> <span class="k">as</span> <span class="n">uc</span>
+<span class="kn">from</span> <span class="nn">kuibit.gw_utils</span> <span class="kn">import</span> <span class="n">luminosity_distance_to_redshift</span>
+
+<span class="o">%</span><span class="k">matplotlib</span> inline
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">t</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">20</span><span class="p">,</span> <span class="mi">5000</span><span class="p">)</span>
+<span class="n">y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">t</span><span class="p">)</span>
+
+<span class="c1"># Generate a TimeSeries by providing the times and the values of the series</span>
+<span class="n">gw</span> <span class="o">=</span> <span class="n">ts</span><span class="o">.</span><span class="n">TimeSeries</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<p>To access the times and the values, use <code class="docutils literal notranslate"><span class="pre">gw.t</span></code> and <code class="docutils literal notranslate"><span class="pre">gw.y</span></code>. You can also iterate over the series with a for loop yielding the elements <code class="docutils literal notranslate"><span class="pre">(t,</span> <span class="pre">y)</span></code> at each iteration of the loop. For example.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">for</span> <span class="n">tt</span><span class="p">,</span> <span class="n">yy</span> <span class="ow">in</span> <span class="n">gw</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">tt</span> <span class="o">&gt;</span> <span class="mf">0.04</span><span class="p">:</span> <span class="k">break</span>  <span class="c1"># Added here only to avoid printing a long list</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">tt</span><span class="p">,</span> <span class="n">yy</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+0.0 0.0
+0.004000800160032006 0.004000789486971321
+0.008001600320064013 0.008001514935783532
+0.012002400480096018 0.012002112309302542
+0.016003200640128026 0.016002517572444287
+0.020004000800160033 0.020002666693199687
+0.024004800960192037 0.024002495643659576
+0.028005601120224044 0.028001940401039562
+0.03200640128025605 0.03200093694870479
+0.03600720144028806 0.03599942127719461
+</pre></div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">plot</span><span class="p">(</span><span class="n">ser</span><span class="p">,</span> <span class="n">lab1</span><span class="o">=</span><span class="s2">&quot;d h&quot;</span><span class="p">,</span> <span class="n">lab2</span><span class="o">=</span><span class="s2">&quot;t&quot;</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Plot Series ser with labels&quot;&quot;&quot;</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="n">lab1</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="n">lab2</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">ser</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+<span class="n">plot</span><span class="p">(</span><span class="n">gw</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/tutorials_timeseries_6_0.png" src="../_images/tutorials_timeseries_6_0.png" />
+</div>
+</div>
+<p>Let’s make this more interesting: we square the signal and add Gaussian noise. <a class="reference external" href="../timeseries_ref.html#kuibit.timeseries.TimeSeries">TimeSeries</a> support directly using all the basic mathematical operations in Python and NumPy, so we can easily square the signal and add another TimeSeries to it.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">noise</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">gw</span><span class="p">))</span>  <span class="c1"># Here we used len() on the TimeSeries</span>
+<span class="n">noise_ts</span> <span class="o">=</span> <span class="n">ts</span><span class="o">.</span><span class="n">TimeSeries</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">noise</span><span class="p">)</span>
+
+<span class="n">gw</span> <span class="o">+=</span> <span class="n">noise_ts</span>
+<span class="n">gw</span> <span class="o">**=</span> <span class="mi">2</span>
+
+<span class="n">plot</span><span class="p">(</span><span class="n">gw</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/tutorials_timeseries_8_0.png" src="../_images/tutorials_timeseries_8_0.png" />
+</div>
+</div>
+<p>To analyze this signal, first we will smooth it. To do that, we will use the <a class="reference external" href="../timeseries_ref.html#kuibit.timeseries.TimeSeries.savgol_smooth_time">savgol_smooth_time</a> method, which is a generalized “running average” filter. This method requires length of time over which we want to smooth the data.</p>
+<p>In <a class="reference external" href="../timeseries_ref.html#kuibit.timeseries.TimeSeries">TimeSeries</a> there are always two different methods to do the same task, one with imperative verb (e.g., smooth), and the other with the past tense (e.g., smoothed). The first modifies the data, the second returns a new <code class="docutils literal notranslate"><span class="pre">TimeSeries</span></code> with the operation applied. Here, we will find what smoothing length to use by trial and error, so we will use the second method.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">tsmooth</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">5</span><span class="p">)</span>
+
+<span class="k">for</span> <span class="n">tsm</span> <span class="ow">in</span> <span class="n">tsmooth</span><span class="p">:</span>
+    <span class="n">smoothed</span> <span class="o">=</span> <span class="n">gw</span><span class="o">.</span><span class="n">savgol_smoothed_time</span><span class="p">(</span><span class="n">tsm</span><span class="p">)</span>
+    <span class="n">plot</span><span class="p">(</span><span class="n">smoothed</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="n">tsm</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+&lt;matplotlib.legend.Legend at 0x7f90060ae070&gt;
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/tutorials_timeseries_10_1.png" src="../_images/tutorials_timeseries_10_1.png" />
+</div>
+</div>
+<p>From visual inspection it looks like that <code class="docutils literal notranslate"><span class="pre">tsmooth</span> <span class="pre">=</span> <span class="pre">1.5</span></code> will work yield a clean series faithful to the original one.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">gw</span><span class="o">.</span><span class="n">savgol_smooth_time</span><span class="p">(</span><span class="mf">1.5</span><span class="p">)</span>
+<span class="n">plot</span><span class="p">(</span><span class="n">gw</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/tutorials_timeseries_12_0.png" src="../_images/tutorials_timeseries_12_0.png" />
+</div>
+</div>
+<p>Next, for fun, we can compute integrals and derivatives. For instance, we can compute what is the integral from 5 to 10.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">gw_int</span> <span class="o">=</span> <span class="n">gw</span><span class="o">.</span><span class="n">integrated</span><span class="p">()</span>
+<span class="n">a</span> <span class="o">=</span> <span class="mi">5</span>
+<span class="n">b</span> <span class="o">=</span> <span class="mi">10</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;The integral from </span><span class="si">{</span><span class="n">a</span><span class="si">}</span><span class="s2"> to </span><span class="si">{</span><span class="n">b</span><span class="si">}</span><span class="s2"> is </span><span class="si">{</span><span class="n">gw_int</span><span class="p">(</span><span class="n">b</span><span class="p">)</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">gw_int</span><span class="p">(</span><span class="n">a</span><span class="p">)</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="n">plot</span><span class="p">(</span><span class="n">gw_int</span><span class="p">,</span> <span class="n">lab1</span><span class="o">=</span><span class="s2">&quot;integral_0^t(dh)&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+The integral from 5 to 10 is 2.2048
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/tutorials_timeseries_14_1.png" src="../_images/tutorials_timeseries_14_1.png" />
+</div>
+</div>
+<p>Here, we showed a very powerful feature of <code class="docutils literal notranslate"><span class="pre">TimeSeries</span></code>: you can call them on a specific time (as we did we <code class="docutils literal notranslate"><span class="pre">gw_int(b)</span></code>). This is done using splines to interpolate to the points that are not available. Splines can also be used to take derivatives. Alternatively, one can simply take the finite (central) difference. Let’s see what’s the derivative of <code class="docutils literal notranslate"><span class="pre">gw</span></code> using splines and finite difference.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">gw_spline_der</span> <span class="o">=</span> <span class="n">gw</span><span class="o">.</span><span class="n">spline_differentiated</span><span class="p">()</span>
+<span class="n">gw_numer_der</span> <span class="o">=</span> <span class="n">gw</span><span class="o">.</span><span class="n">differentiated</span><span class="p">()</span>
+
+<span class="n">plot</span><span class="p">(</span><span class="n">gw_spline_der</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;spline&#39;</span><span class="p">)</span>
+<span class="n">plot</span><span class="p">(</span><span class="n">gw_numer_der</span><span class="p">,</span> <span class="n">lab1</span><span class="o">=</span><span class="s2">&quot;derivative (dh)&quot;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;finite&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+&lt;matplotlib.legend.Legend at 0x7f9003c5d970&gt;
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/tutorials_timeseries_16_1.png" src="../_images/tutorials_timeseries_16_1.png" />
+</div>
+</div>
+<p>Clearly, derivatives will be noisier than the actual data, so often it is convenient to smooth them out as shown before.</p>
+<p>TimeSeries support complex signals. Now, we will create one using <code class="docutils literal notranslate"><span class="pre">gw</span></code> itself. We will copy <code class="docutils literal notranslate"><span class="pre">gw</span></code>, time-shift it, find the common time interval with the original <code class="docutils literal notranslate"><span class="pre">gw</span></code>, and use that as a the imaginary part.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">gw_imag</span> <span class="o">=</span> <span class="n">gw</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>  <span class="c1"># It is important to deep copy the object</span>
+<span class="n">gw_imag</span><span class="o">.</span><span class="n">time_shift</span><span class="p">(</span><span class="mi">4</span><span class="p">)</span>
+
+<span class="n">plot</span><span class="p">(</span><span class="n">gw_imag</span><span class="p">,</span> <span class="n">lab1</span> <span class="o">=</span><span class="s2">&quot;imag (dh)&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/tutorials_timeseries_19_0.png" src="../_images/tutorials_timeseries_19_0.png" />
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[11]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">gw</span><span class="p">,</span> <span class="n">gw_imag</span> <span class="o">=</span> <span class="n">series</span><span class="o">.</span><span class="n">sample_common</span><span class="p">([</span><span class="n">gw</span><span class="p">,</span> <span class="n">gw_imag</span><span class="p">],</span> <span class="n">resample</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>  <span class="c1"># Resampling to common times</span>
+
+<span class="n">plot</span><span class="p">(</span><span class="n">gw</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;orig&quot;</span><span class="p">)</span>
+<span class="n">plot</span><span class="p">(</span><span class="n">gw_imag</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;new&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[11]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+&lt;matplotlib.legend.Legend at 0x7f90008da280&gt;
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/tutorials_timeseries_20_1.png" src="../_images/tutorials_timeseries_20_1.png" />
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[12]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">gw_complex</span> <span class="o">=</span> <span class="n">ts</span><span class="o">.</span><span class="n">TimeSeries</span><span class="p">(</span><span class="n">gw</span><span class="o">.</span><span class="n">t</span><span class="p">,</span> <span class="n">gw</span><span class="o">.</span><span class="n">y</span> <span class="o">+</span> <span class="mi">1</span><span class="n">j</span> <span class="o">*</span> <span class="n">gw_imag</span><span class="o">.</span><span class="n">y</span><span class="p">)</span>
+
+<span class="n">plot</span><span class="p">(</span><span class="n">gw_complex</span><span class="o">.</span><span class="n">real</span><span class="p">(),</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;real&quot;</span><span class="p">)</span>
+<span class="n">plot</span><span class="p">(</span><span class="n">gw_complex</span><span class="o">.</span><span class="n">imag</span><span class="p">(),</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;imag&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[12]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+&lt;matplotlib.legend.Legend at 0x7f9003d34400&gt;
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/tutorials_timeseries_21_1.png" src="../_images/tutorials_timeseries_21_1.png" />
+</div>
+</div>
+<p>We can also compute the phase and absolute value. In particular, we will compute the unfolded phase (no wrapping over <span class="math notranslate nohighlight">\(2\pi\)</span>)</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[13]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">plot</span><span class="p">(</span><span class="n">gw_complex</span><span class="o">.</span><span class="n">abs</span><span class="p">(),</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;abs&#39;</span><span class="p">)</span>
+<span class="n">plot</span><span class="p">(</span><span class="n">gw_complex</span><span class="o">.</span><span class="n">unfolded_phase</span><span class="p">(),</span> <span class="n">lab1</span><span class="o">=</span><span class="s2">&quot;abs or phase&quot;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;phase&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[13]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+&lt;matplotlib.legend.Legend at 0x7f9000814c70&gt;
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/tutorials_timeseries_23_1.png" src="../_images/tutorials_timeseries_23_1.png" />
+</div>
+</div>
+<p>Here, the unfolded phase looks a little bit unusual. This is because we made up the signal.</p>
+<p>We can also compute the frequency of the phase, which we can directly smooth.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[14]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">plot</span><span class="p">(</span><span class="n">gw_complex</span><span class="o">.</span><span class="n">phase_frequency</span><span class="p">(</span><span class="n">tsmooth</span><span class="o">=</span><span class="mf">1.5</span><span class="p">),</span> <span class="n">lab1</span><span class="o">=</span><span class="s2">&quot;freq&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/tutorials_timeseries_26_0.png" src="../_images/tutorials_timeseries_26_0.png" />
+</div>
+</div>
+<p>Next, we will take a Fourier transform. Before, let’s pretend that the signal was in geometrized units (as in simulations), and let’s make it physical assuming a scale of <span class="math notranslate nohighlight">\(M = 1 M_\odot\)</span>. For that, use the <a class="reference internal" href="../unitconv.html"><span class="doc">unitconv</span></a> module. We define a CU object that knows how to convert units.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[15]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">CU</span> <span class="o">=</span> <span class="n">uc</span><span class="o">.</span><span class="n">geom_umass_msun</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+
+<span class="c1"># How to convert from geometrized length to physical length?</span>
+<span class="c1"># Simply multiply times CU.length. Let&#39;s check that it is 1.477 km</span>
+<span class="n">CU</span><span class="o">.</span><span class="n">length</span>  <span class="c1"># m</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[15]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+1476.6436994724972
+</pre></div></div>
+</div>
+<p>Now we rescale <code class="docutils literal notranslate"><span class="pre">gw</span></code>, assuming that <code class="docutils literal notranslate"><span class="pre">y</span></code> is strain times distance (as usually is). Let’s assume a distance of 500 Mpc.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[16]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">d_Mpc</span> <span class="o">=</span> <span class="mi">500</span>
+
+<span class="c1"># inverse = True means from geometrized to physical</span>
+<span class="n">gw_physical</span> <span class="o">=</span> <span class="n">gw_complex</span><span class="o">.</span><span class="n">time_unit_changed</span><span class="p">(</span><span class="n">CU</span><span class="o">.</span><span class="n">time</span><span class="p">,</span> <span class="n">inverse</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+<span class="n">gw_physical</span> <span class="o">*=</span> <span class="n">CU</span><span class="o">.</span><span class="n">length</span>  <span class="c1"># dh -&gt; dh physical</span>
+<span class="c1"># Now just the strain, since we assume a distance</span>
+<span class="n">gw_physical</span> <span class="o">/=</span> <span class="p">(</span><span class="n">d_Mpc</span> <span class="o">*</span> <span class="n">uc</span><span class="o">.</span><span class="n">MEGAPARSEC_SI</span><span class="p">)</span>
+
+<span class="c1"># We have to manually add the redshift</span>
+<span class="n">gw_physical</span><span class="o">.</span><span class="n">redshifted</span><span class="p">(</span><span class="n">luminosity_distance_to_redshift</span><span class="p">(</span><span class="n">d_Mpc</span><span class="p">))</span>
+
+<span class="c1"># And we can also find minima and maxima</span>
+<span class="c1"># Data can be noisy, so there are ways to filter the good extrema</span>
+<span class="c1"># See https://docs.scipy.org/doc/scipy/reference/generated/scipy.signal.find_peaks.html</span>
+<span class="n">maxima_t</span><span class="p">,</span> <span class="n">maxima_y</span> <span class="o">=</span> <span class="n">gw_physical</span><span class="o">.</span><span class="n">real</span><span class="p">()</span><span class="o">.</span><span class="n">local_maxima</span><span class="p">(</span><span class="n">prominence</span><span class="o">=</span><span class="mf">0.1e-22</span><span class="p">)</span>
+<span class="n">minima_t</span><span class="p">,</span> <span class="n">minima_y</span> <span class="o">=</span> <span class="n">gw_physical</span><span class="o">.</span><span class="n">real</span><span class="p">()</span><span class="o">.</span><span class="n">local_minima</span><span class="p">(</span><span class="n">width</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+
+<span class="n">plt</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">maxima_t</span><span class="p">,</span> <span class="n">maxima_y</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">minima_t</span><span class="p">,</span> <span class="n">minima_y</span><span class="p">)</span>
+
+<span class="n">plot</span><span class="p">(</span><span class="n">gw_physical</span><span class="o">.</span><span class="n">real</span><span class="p">(),</span> <span class="n">lab1</span><span class="o">=</span><span class="s2">&quot;h&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/tutorials_timeseries_30_0.png" src="../_images/tutorials_timeseries_30_0.png" />
+</div>
+</div>
+<p>Okay, now before taking the Fourier transform, we will remove the mean and window our signal. A Tukey window will work.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[17]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">gw_physical</span><span class="o">.</span><span class="n">mean_remove</span><span class="p">()</span>
+<span class="n">gw_physical</span><span class="o">.</span><span class="n">tukey_window</span><span class="p">(</span><span class="mf">0.3</span><span class="p">)</span>
+<span class="n">plot</span><span class="p">(</span><span class="n">gw_physical</span><span class="o">.</span><span class="n">real</span><span class="p">(),</span> <span class="n">lab1</span><span class="o">=</span><span class="s2">&quot;h&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/tutorials_timeseries_32_0.png" src="../_images/tutorials_timeseries_32_0.png" />
+</div>
+</div>
+<p>Finally, we can take the Fourier transform. This is easy to do:</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[18]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">gw_fft</span> <span class="o">=</span> <span class="n">gw_physical</span><span class="o">.</span><span class="n">to_FrequencySeries</span><span class="p">()</span>
+
+<span class="c1"># Plotting the amplitude of the Fourier transform</span>
+<span class="n">plot</span><span class="p">(</span><span class="n">gw_fft</span><span class="o">.</span><span class="n">abs</span><span class="p">(),</span> <span class="n">lab1</span><span class="o">=</span><span class="s2">&quot;abs(fft)&quot;</span><span class="p">,</span> <span class="n">lab2</span><span class="o">=</span><span class="s2">&quot;f&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/tutorials_timeseries_34_0.png" src="../_images/tutorials_timeseries_34_0.png" />
+</div>
+</div>
+<p>The new object is a <code class="docutils literal notranslate"><span class="pre">FrequencySeries</span></code>. It is very similar to a <code class="docutils literal notranslate"><span class="pre">TimeSeries</span></code> and it shares several properties, methods, and features.</p>
+<p>Let’s restrict to only positive frequencies close to zero.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[19]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">gw_fft</span><span class="o">.</span><span class="n">crop</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mf">1e5</span><span class="p">)</span>
+<span class="n">plot</span><span class="p">(</span><span class="n">gw_fft</span><span class="o">.</span><span class="n">abs</span><span class="p">(),</span> <span class="n">lab1</span><span class="o">=</span><span class="s2">&quot;abs(fft)&quot;</span><span class="p">,</span> <span class="n">lab2</span><span class="o">=</span><span class="s2">&quot;f&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/tutorials_timeseries_36_0.png" src="../_images/tutorials_timeseries_36_0.png" />
+</div>
+</div>
+<p>We can find the frequency of that peak! For this, we find all the peaks with amplitude larger than 1e-27.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[20]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">f_peak</span> <span class="o">=</span> <span class="n">gw_fft</span><span class="o">.</span><span class="n">peaks_frequencies</span><span class="p">(</span><span class="mf">1e-27</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Frequency: </span><span class="si">{</span><span class="n">f_peak</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="n">plot</span><span class="p">(</span><span class="n">gw_fft</span><span class="o">.</span><span class="n">abs</span><span class="p">(),</span> <span class="n">lab1</span><span class="o">=</span><span class="s2">&quot;abs(fft)&quot;</span><span class="p">,</span> <span class="n">lab2</span><span class="o">=</span><span class="s2">&quot;f&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">axvline</span><span class="p">(</span><span class="n">f_peak</span><span class="p">,</span> <span class="n">ls</span> <span class="o">=</span> <span class="s1">&#39;dashed&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Frequency: 64214.23
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[20]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+&lt;matplotlib.lines.Line2D at 0x7f90008fa040&gt;
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/tutorials_timeseries_38_2.png" src="../_images/tutorials_timeseries_38_2.png" />
+</div>
+</div>
+<p>The line is not on the maximum because we use a quadratic interpolation to find a more accurate location of the peak.</p>
+<p>Sometimes, it is useful to ignore some data (or example, when we know that the data is invalid). <code class="docutils literal notranslate"><span class="pre">Series</span></code> objects support <em>masks</em> to mark the points we want to ignore. Most functions work transparently with masks: for example, if you ask for the mean of a <code class="docutils literal notranslate"><span class="pre">Series</span></code>, the masked point will be ignored. Other functions do not support masks (most notably, splines). In that case, it is best to completely remove the masked points and work with clean data.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[21]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Let&#39;s mask all the point in the spectrum with value larger than 1e-27</span>
+
+<span class="n">spectrum</span> <span class="o">=</span> <span class="n">gw_fft</span><span class="o">.</span><span class="n">abs</span><span class="p">()</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Maximum without mask </span><span class="si">{</span><span class="n">spectrum</span><span class="o">.</span><span class="n">max</span><span class="p">()</span><span class="si">:</span><span class="s2">.3e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+<span class="c1"># Apply mask</span>
+<span class="n">spectrum</span><span class="o">.</span><span class="n">mask_greater</span><span class="p">(</span><span class="mf">1e-27</span><span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Maximum with mask </span><span class="si">{</span><span class="n">spectrum</span><span class="o">.</span><span class="n">max</span><span class="p">()</span><span class="si">:</span><span class="s2">.3e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Length with mask </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">spectrum</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+<span class="c1"># Remove points</span>
+<span class="n">spectrum</span><span class="o">.</span><span class="n">mask_remove</span><span class="p">()</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Length after having removed the masked points </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">spectrum</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Maximum without mask 3.112e-27
+Maximum with mask 8.627e-28
+Length with mask 8
+Length after having removed the masked points 7
+</pre></div></div>
+</div>
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="../index.html">
+              <img class="logo" src="../_static/logo.png" alt="Logo"/>
+            </a></p>
+  <div>
+    <h4>Previous topic</h4>
+    <p class="topless"><a href="simdir.html"
+                          title="previous chapter">Working with Simulation Directories</a></p>
+  </div>
+  <div>
+    <h4>Next topic</h4>
+    <p class="topless"><a href="grid_data.html"
+                          title="next chapter">Working with grid data</a></p>
+  </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>document.getElementById('searchbox').style.display = "block"</script><div role="note" aria-label="version link">
+  <h3>Versions</h3>
+    <ul class="this-page-menu">
+      <li><a href="../dev/tutorials/timeseries.html" rel="nofollow"> Development </a></li>
+      <li><a href="#" rel="nofollow"> Master </a></li>
+
+      
+      <li><a href="../1.3.6/tutorials/timeseries.html" rel="nofollow"> 1.3.6 </a></li>
+      
+      <li><a href="../1.4.0/tutorials/timeseries.html" rel="nofollow"> 1.4.0 </a></li>
+      
+      <li><a href="../1.4.1/tutorials/timeseries.html" rel="nofollow"> 1.4.1 </a></li>
+      
+      <li><a href="../1.5.0/tutorials/timeseries.html" rel="nofollow"> 1.5.0 </a></li>
+      
+
+    </ul>
+ </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="grid_data.html" title="Working with grid data"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="simdir.html" title="Working with Simulation Directories"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">kuibit 1.5.0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">Working with time series, frequency series, and unit conversion</a></li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2020-2024, Gabriele Bozzola.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 6.2.1.
+    </div>
+  </body>
+</html>

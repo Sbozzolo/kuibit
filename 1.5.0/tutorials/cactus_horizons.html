@@ -1,0 +1,579 @@
+
+
+<!doctype html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+
+    <title>Working with Cactus horizons &#8212; kuibit 1.5.0 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/bizstyle.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/nbsphinx-code-cells.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/css/custom.css" />
+    
+    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <script src="../_static/sphinx_highlight.js"></script>
+    <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+    <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="../_static/bizstyle.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Working with gravitational waves" href="gravitational_waves.html" />
+    <link rel="prev" title="Working with Cactus grid functions" href="cactus_grid_functions.html" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0" />
+    <!--[if lt IE 9]>
+    <script src="_static/css3-mediaqueries.js"></script>
+    <![endif]-->
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="gravitational_waves.html" title="Working with gravitational waves"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="cactus_grid_functions.html" title="Working with Cactus grid functions"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">kuibit 1.5.0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">Working with Cactus horizons</a></li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <section id="Working-with-Cactus-horizons">
+<h1>Working with Cactus horizons<a class="headerlink" href="#Working-with-Cactus-horizons" title="Permalink to this heading">¶</a></h1>
+<p>In this notebook, we learn how to work with horizon data.</p>
+<p>(This notebook is meant to be converted in Sphinx documentation and not used directly.)</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">kuibit.simdir</span> <span class="kn">import</span> <span class="n">SimDir</span>
+
+<span class="o">%</span><span class="k">matplotlib</span> inline
+</pre></div>
+</div>
+</div>
+<p>The best way to access horizon data is from <code class="docutils literal notranslate"><span class="pre">SimDir</span></code>:</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">hor</span> <span class="o">=</span> <span class="n">SimDir</span><span class="p">(</span><span class="s2">&quot;../../tests/horizons&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">horizons</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="n">hor</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Horizons found:
+3 horizons from QuasiLocalMeasures
+2 horizons from AHFinderDirect
+</pre></div></div>
+</div>
+<p>As we see, <code class="docutils literal notranslate"><span class="pre">kuibit</span></code> found some horizons. <code class="docutils literal notranslate"><span class="pre">kuibit</span></code> looks for data from <code class="docutils literal notranslate"><span class="pre">QuasiLocalMeasures</span></code> and <code class="docutils literal notranslate"><span class="pre">AHFinderDirect</span></code>. These two thorns use different indexing systems, and, at the moment, you must provide both to uniquely indentify an horizon. If you need information from only one of the two (e.g., you want to plot the apparent horizon), you can also use the functions <code class="docutils literal notranslate"><span class="pre">get_apparent_horizon</span></code> and <code class="docutils literal notranslate"><span class="pre">get_qlm_horizon</span></code>.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">h1</span> <span class="o">=</span> <span class="n">hor</span><span class="p">[(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">)]</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">h1</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Formation time: 0.0000
+Shape available
+VTK information available
+Final Mass = 5.538e-01
+Final Angular Momentum = -3.598e-07
+Final Dimensionless Spin = -1.173e-06
+</pre></div></div>
+</div>
+<p>You can find the available indices using suitable attributes:</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="n">hor</span><span class="o">.</span><span class="n">available_qlm_horizons</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">hor</span><span class="o">.</span><span class="n">available_apparent_horizons</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+[0, 1, 2]
+[1, 2]
+</pre></div></div>
+</div>
+<p>Once an horizon is fixed, you can access all the properties from <code class="docutils literal notranslate"><span class="pre">QuasiLocalMeasures</span></code> and from <code class="docutils literal notranslate"><span class="pre">AHFinderDirect</span></code> as attributes. These are all <code class="docutils literal notranslate"><span class="pre">TimeSeries</span></code>. For example, the mass as computed by <code class="docutils literal notranslate"><span class="pre">QuasiLocalMeasures</span></code>:</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">h1</span><span class="o">.</span><span class="n">mass</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+[&lt;matplotlib.lines.Line2D at 0x7f2d2db143a0&gt;]
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/tutorials_cactus_horizons_9_1.png" src="../_images/tutorials_cactus_horizons_9_1.png" />
+</div>
+</div>
+<p>For quantities from <code class="docutils literal notranslate"><span class="pre">AHFinderDirect</span></code> you have to use the <code class="docutils literal notranslate"><span class="pre">ah</span></code> namespace:</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">h1</span><span class="o">.</span><span class="n">ah</span><span class="o">.</span><span class="n">area</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+[&lt;matplotlib.lines.Line2D at 0x7f2d2d672820&gt;]
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/tutorials_cactus_horizons_11_1.png" src="../_images/tutorials_cactus_horizons_11_1.png" />
+</div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">kuibit</span></code> can also work with shape data. <code class="docutils literal notranslate"><span class="pre">AHFinderDirect</span></code> uses multiple patches, we can plot an example in 3D. <code class="docutils literal notranslate"><span class="pre">matplotlib</span></code> is not the correct tool for 3D plotting, but it will convey the idea;</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+<span class="o">%</span><span class="k">matplotlib</span> inline
+
+<span class="n">px</span><span class="p">,</span> <span class="n">py</span><span class="p">,</span> <span class="n">pz</span> <span class="o">=</span> <span class="n">h1</span><span class="o">.</span><span class="n">shape_at_iteration</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+
+<span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">axes</span><span class="p">(</span><span class="n">projection</span><span class="o">=</span><span class="s1">&#39;3d&#39;</span><span class="p">)</span>
+<span class="c1"># We plot one patch</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">px</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">py</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">pz</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;black&quot;</span><span class="p">,</span> <span class="n">edgecolor</span><span class="o">=</span><span class="s1">&#39;black&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+&lt;mpl_toolkits.mplot3d.art3d.Path3DCollection at 0x7f2d2d725ca0&gt;
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/tutorials_cactus_horizons_13_1.png" src="../_images/tutorials_cactus_horizons_13_1.png" />
+</div>
+</div>
+<p>If you plot all the patches, you will have the horizon in 3D.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">axes</span><span class="p">(</span><span class="n">projection</span><span class="o">=</span><span class="s1">&#39;3d&#39;</span><span class="p">)</span>
+<span class="k">for</span> <span class="n">ind</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">px</span><span class="p">)):</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">px</span><span class="p">[</span><span class="n">ind</span><span class="p">],</span> <span class="n">py</span><span class="p">[</span><span class="n">ind</span><span class="p">],</span> <span class="n">pz</span><span class="p">[</span><span class="n">ind</span><span class="p">])</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/tutorials_cactus_horizons_15_0.png" src="../_images/tutorials_cactus_horizons_15_0.png" />
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Or, to make it look like a black hole</span>
+<span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">axes</span><span class="p">(</span><span class="n">projection</span><span class="o">=</span><span class="s1">&#39;3d&#39;</span><span class="p">)</span>
+<span class="k">for</span> <span class="n">ind</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">px</span><span class="p">)):</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">px</span><span class="p">[</span><span class="n">ind</span><span class="p">],</span> <span class="n">py</span><span class="p">[</span><span class="n">ind</span><span class="p">],</span> <span class="n">pz</span><span class="p">[</span><span class="n">ind</span><span class="p">],</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;black&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/tutorials_cactus_horizons_16_0.png" src="../_images/tutorials_cactus_horizons_16_0.png" />
+</div>
+</div>
+<p>When VTK data is available (<code class="docutils literal notranslate"><span class="pre">QuasiLocalMeasures::output_vtk_every</span></code> set to a non-zero value), it is possible to work with <code class="docutils literal notranslate"><span class="pre">QuasiLocalMeasures</span></code> quantities defined on the horizon mesh. VTK data is stored in the <code class="docutils literal notranslate"><span class="pre">vtk</span></code> attribute, which is a dictionary that maps iterations to a dictionary-like object with the various variables. The most important VTK variables are <code class="docutils literal notranslate"><span class="pre">coordinates</span></code>, which are the 3D coordinates of the mesh, and <code class="docutils literal notranslate"><span class="pre">connectivity</span></code>, which describes how the various points are connected
+one with others.</p>
+<p><code class="docutils literal notranslate"><span class="pre">Matplotlib</span></code> does not have good methods to plot meshes, so we will look at a simple example with a cloud of points.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">coordinates</span> <span class="o">=</span> <span class="n">h1</span><span class="o">.</span><span class="n">vtk_at_it</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">coordinates</span>
+<span class="c1"># Let&#39;s consider one VTK variable</span>
+<span class="n">psi4_real</span> <span class="o">=</span> <span class="n">h1</span><span class="o">.</span><span class="n">vtk_at_it</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">repsi4</span>
+
+<span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">axes</span><span class="p">(</span><span class="n">projection</span><span class="o">=</span><span class="s1">&#39;3d&#39;</span><span class="p">)</span>
+<span class="c1"># coordinates is a list of (x, y, z) points, we</span>
+<span class="c1"># transpose it and unpack it to use it as argument</span>
+<span class="c1"># for scatter. Then, we color it with the values of</span>
+<span class="c1"># psi4_real</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="o">*</span><span class="n">coordinates</span><span class="o">.</span><span class="n">T</span><span class="p">,</span> <span class="n">c</span><span class="o">=</span><span class="n">psi4_real</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+&lt;mpl_toolkits.mplot3d.art3d.Path3DCollection at 0x7f2d2d3a3550&gt;
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/tutorials_cactus_horizons_18_1.png" src="../_images/tutorials_cactus_horizons_18_1.png" />
+</div>
+</div>
+<p>In case you want to work with a 2D slice, of the shape, you can use the method <code class="docutils literal notranslate"><span class="pre">shape_outline_at_iteration</span></code> and specify how to cut the shape.</p>
+<p>Note that the the distributions of points is not uniform across the horizon and <code class="docutils literal notranslate"><span class="pre">kuibit</span></code> does not do any interpolation across points. Therefore, there are values of <code class="docutils literal notranslate"><span class="pre">cut</span></code> that will lead to a malformed horizon. It is recommended to use cuts that are along the principal directions.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[11]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">cut</span> <span class="o">=</span> <span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>  <span class="c1"># Equatorial plane (z=0)</span>
+
+<span class="n">shape</span> <span class="o">=</span> <span class="n">h1</span><span class="o">.</span><span class="n">shape_outline_at_iteration</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">cut</span><span class="p">)</span>
+
+<span class="n">plt</span><span class="o">.</span><span class="n">fill</span><span class="p">(</span><span class="o">*</span><span class="n">shape</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[11]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+[&lt;matplotlib.patches.Polygon at 0x7f2d2d3c1730&gt;]
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/tutorials_cactus_horizons_20_1.png" src="../_images/tutorials_cactus_horizons_20_1.png" />
+</div>
+</div>
+<p>You can also use the module <code class="docutils literal notranslate"><span class="pre">visualize_matplotlib</span></code> to plot the horizon in 2D. If you already have the shape, you can use <code class="docutils literal notranslate"><span class="pre">plot_horizon</span></code>.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[12]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">kuibit</span> <span class="kn">import</span> <span class="n">visualize_matplotlib</span> <span class="k">as</span> <span class="n">viz</span>
+
+<span class="n">viz</span><span class="o">.</span><span class="n">plot_horizon</span><span class="p">(</span><span class="n">shape</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;r&#39;</span><span class="p">,</span> <span class="n">edgecolor</span><span class="o">=</span><span class="s1">&#39;b&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[12]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+[&lt;matplotlib.patches.Polygon at 0x7f2d28133b50&gt;]
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/tutorials_cactus_horizons_22_1.png" src="../_images/tutorials_cactus_horizons_22_1.png" />
+</div>
+</div>
+<p>Alternatively, you can use the higher level functions <code class="docutils literal notranslate"><span class="pre">plot_horizon_on_plane_at_iteration</span></code> or <code class="docutils literal notranslate"><span class="pre">plot_horizon_on_plane_at_time</span></code>. These take directly a <code class="docutils literal notranslate"><span class="pre">OneHorizon</span></code> object and the desired iteration/time.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[13]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">viz</span><span class="o">.</span><span class="n">plot_horizon_on_plane_at_time</span><span class="p">(</span><span class="n">h1</span><span class="p">,</span> <span class="n">time</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">plane</span><span class="o">=</span><span class="s2">&quot;xy&quot;</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;g&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[13]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+[&lt;matplotlib.patches.Polygon at 0x7f2d2d6d3280&gt;]
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/tutorials_cactus_horizons_24_1.png" src="../_images/tutorials_cactus_horizons_24_1.png" />
+</div>
+</div>
+<p>There are some operations that are very common in simulations of binary black holes. For example, computing the coordinate separation between the centroids of the horizons or the angular velocity of the binary. The module <code class="docutils literal notranslate"><span class="pre">hor_utils</span></code> contains several of these functions.</p>
+<p>To illustrate some of these functions, we manually create two <code class="docutils literal notranslate"><span class="pre">OneHorizon</span></code> objects that are nicely inspiraling. The details of how this is done are not important, so you can ignore the next cell and assume you have two horizons, one three times as massive as the other one.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[14]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">kuibit.cactus_horizons</span> <span class="kn">import</span> <span class="n">OneHorizon</span>
+<span class="kn">from</span> <span class="nn">kuibit.timeseries</span> <span class="kn">import</span> <span class="n">TimeSeries</span>
+
+<span class="kn">from</span> <span class="nn">kuibit</span> <span class="kn">import</span> <span class="n">hor_utils</span>
+
+<span class="n">times</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">100</span><span class="p">,</span> <span class="mi">1000</span><span class="p">)</span>
+<span class="c1"># We add a 0.1 to avoid having identically zero separation</span>
+<span class="n">cen_x</span> <span class="o">=</span> <span class="mf">0.1</span> <span class="o">+</span> <span class="mi">10</span> <span class="o">*</span> <span class="p">(</span><span class="n">times</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">times</span><span class="p">)</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">times</span><span class="p">)</span>
+<span class="n">cen_y</span> <span class="o">=</span> <span class="mf">0.1</span> <span class="o">+</span> <span class="mi">10</span> <span class="o">*</span> <span class="p">(</span><span class="n">times</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">times</span><span class="p">)</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">times</span><span class="p">)</span>
+<span class="n">cen_z</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros_like</span><span class="p">(</span><span class="n">times</span><span class="p">)</span>
+<span class="n">area</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones_like</span><span class="p">(</span><span class="n">times</span><span class="p">)</span>
+
+<span class="n">hor1</span> <span class="o">=</span> <span class="n">OneHorizon</span><span class="p">(</span><span class="n">ah_vars</span><span class="o">=</span><span class="p">{</span>
+                    <span class="s2">&quot;centroid_x&quot;</span><span class="p">:</span> <span class="n">TimeSeries</span><span class="p">(</span><span class="n">times</span><span class="p">,</span> <span class="n">cen_x</span><span class="p">),</span>
+                    <span class="s2">&quot;centroid_y&quot;</span><span class="p">:</span> <span class="n">TimeSeries</span><span class="p">(</span><span class="n">times</span><span class="p">,</span> <span class="n">cen_y</span><span class="p">),</span>
+                    <span class="s2">&quot;centroid_z&quot;</span><span class="p">:</span> <span class="n">TimeSeries</span><span class="p">(</span><span class="n">times</span><span class="p">,</span> <span class="n">cen_z</span><span class="p">),</span>
+                    <span class="s2">&quot;area&quot;</span><span class="p">:</span> <span class="n">TimeSeries</span><span class="p">(</span><span class="n">times</span><span class="p">,</span> <span class="n">area</span><span class="p">),},</span>
+                    <span class="n">qlm_vars</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">shape_files</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">vtk_files</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+
+<span class="n">hor2</span> <span class="o">=</span> <span class="n">OneHorizon</span><span class="p">(</span><span class="n">ah_vars</span><span class="o">=</span><span class="p">{</span>
+                    <span class="s2">&quot;centroid_x&quot;</span><span class="p">:</span> <span class="o">-</span><span class="n">TimeSeries</span><span class="p">(</span><span class="n">times</span><span class="p">,</span> <span class="n">cen_x</span><span class="p">),</span>
+                    <span class="s2">&quot;centroid_y&quot;</span><span class="p">:</span> <span class="o">-</span><span class="n">TimeSeries</span><span class="p">(</span><span class="n">times</span><span class="p">,</span> <span class="n">cen_y</span><span class="p">),</span>
+                    <span class="s2">&quot;centroid_z&quot;</span><span class="p">:</span> <span class="n">TimeSeries</span><span class="p">(</span><span class="n">times</span><span class="p">,</span> <span class="n">cen_z</span><span class="p">),</span>
+                    <span class="s2">&quot;area&quot;</span><span class="p">:</span> <span class="mi">3</span> <span class="o">*</span> <span class="n">TimeSeries</span><span class="p">(</span><span class="n">times</span><span class="p">,</span> <span class="n">area</span><span class="p">),},</span>
+                    <span class="n">qlm_vars</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">shape_files</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">vtk_files</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<p>First, let’s plot the tracjectory. For that, we do not need any special function.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[15]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">hor1</span><span class="o">.</span><span class="n">ah</span><span class="o">.</span><span class="n">centroid_x</span><span class="p">,</span> <span class="n">hor1</span><span class="o">.</span><span class="n">ah</span><span class="o">.</span><span class="n">centroid_y</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;AH 1&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">hor2</span><span class="o">.</span><span class="n">ah</span><span class="o">.</span><span class="n">centroid_x</span><span class="p">,</span> <span class="n">hor2</span><span class="o">.</span><span class="n">ah</span><span class="o">.</span><span class="n">centroid_y</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;AH 2&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s2">&quot;x&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s2">&quot;y&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[15]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+&lt;matplotlib.legend.Legend at 0x7f2d280afe50&gt;
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/tutorials_cactus_horizons_28_1.png" src="../_images/tutorials_cactus_horizons_28_1.png" />
+</div>
+</div>
+<p>This looks like a nice inspiral, but what if we moved to the frame of the center of mass? It is difficult to compute a gauge-invariant center of mass, so here we estimate it with the Netwonain formula and the irreducible mass of the horizons.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[16]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">com</span> <span class="o">=</span> <span class="n">hor_utils</span><span class="o">.</span><span class="n">compute_center_of_mass</span><span class="p">(</span><span class="n">hor1</span><span class="p">,</span> <span class="n">hor2</span><span class="p">)</span>
+
+<span class="c1"># com is a Vector of TimeSeries</span>
+<span class="n">com_x</span><span class="p">,</span> <span class="n">com_y</span> <span class="o">=</span> <span class="n">com</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">com</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">com_x</span><span class="o">.</span><span class="n">y</span><span class="p">,</span> <span class="n">com_y</span><span class="o">.</span><span class="n">y</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s2">&quot;x_CM&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s2">&quot;y_CM&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[16]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Text(0, 0.5, &#39;y_CM&#39;)
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/tutorials_cactus_horizons_30_1.png" src="../_images/tutorials_cactus_horizons_30_1.png" />
+</div>
+</div>
+<p>We see that the center of mass is not at the center, as usually assume. We can easily adjust our orbits by subtracting the location of the center of mass, if we want to do so.</p>
+<p>Another common task is to compute the separation, and we can easily compute it along the three axis or its magnitude. The separation comes with a sign: we compute it as <code class="docutils literal notranslate"><span class="pre">hor1</span> <span class="pre">-</span> <span class="pre">hor2</span></code>.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[17]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">separation</span> <span class="o">=</span> <span class="n">hor_utils</span><span class="o">.</span><span class="n">compute_separation_vector</span><span class="p">(</span><span class="n">hor1</span><span class="p">,</span> <span class="n">hor2</span><span class="p">)</span>
+<span class="n">separation_magn</span> <span class="o">=</span> <span class="n">hor_utils</span><span class="o">.</span><span class="n">compute_separation</span><span class="p">(</span><span class="n">hor1</span><span class="p">,</span> <span class="n">hor2</span><span class="p">)</span>
+
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">separation</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;x&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">separation</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;y&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">separation</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;z&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">separation_magn</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;Magnitude&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s2">&quot;Time&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s2">&quot;Separation&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[17]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+&lt;matplotlib.legend.Legend at 0x7f2d2d2fa9a0&gt;
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/tutorials_cactus_horizons_32_1.png" src="../_images/tutorials_cactus_horizons_32_1.png" />
+</div>
+</div>
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="../index.html">
+              <img class="logo" src="../_static/logo.png" alt="Logo"/>
+            </a></p>
+  <div>
+    <h4>Previous topic</h4>
+    <p class="topless"><a href="cactus_grid_functions.html"
+                          title="previous chapter">Working with Cactus grid functions</a></p>
+  </div>
+  <div>
+    <h4>Next topic</h4>
+    <p class="topless"><a href="gravitational_waves.html"
+                          title="next chapter">Working with gravitational waves</a></p>
+  </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>document.getElementById('searchbox').style.display = "block"</script><div role="note" aria-label="version link">
+  <h3>Versions</h3>
+    <ul class="this-page-menu">
+      <li><a href="../dev/tutorials/cactus_horizons.html" rel="nofollow"> Development </a></li>
+      <li><a href="#" rel="nofollow"> Master </a></li>
+
+      
+      <li><a href="../1.3.6/tutorials/cactus_horizons.html" rel="nofollow"> 1.3.6 </a></li>
+      
+      <li><a href="../1.4.0/tutorials/cactus_horizons.html" rel="nofollow"> 1.4.0 </a></li>
+      
+      <li><a href="../1.4.1/tutorials/cactus_horizons.html" rel="nofollow"> 1.4.1 </a></li>
+      
+      <li><a href="../1.5.0/tutorials/cactus_horizons.html" rel="nofollow"> 1.5.0 </a></li>
+      
+
+    </ul>
+ </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="gravitational_waves.html" title="Working with gravitational waves"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="cactus_grid_functions.html" title="Working with Cactus grid functions"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">kuibit 1.5.0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">Working with Cactus horizons</a></li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2020-2024, Gabriele Bozzola.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 6.2.1.
+    </div>
+  </body>
+</html>

@@ -1,0 +1,306 @@
+
+
+<!doctype html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>kuibit.visualize_mayavi &#8212; kuibit 1.3.0 documentation</title>
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/bizstyle.css" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/css/custom.css" />
+    
+    <script id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+    <script src="../../_static/jquery.js"></script>
+    <script src="../../_static/underscore.js"></script>
+    <script src="../../_static/doctools.js"></script>
+    <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="../../_static/bizstyle.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0" />
+    <!--[if lt IE 9]>
+    <script src="_static/css3-mediaqueries.js"></script>
+    <![endif]-->
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">kuibit 1.3.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../index.html" accesskey="U">Module code</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">kuibit.visualize_mayavi</a></li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for kuibit.visualize_mayavi</h1><div class="highlight"><pre>
+<span></span><span class="ch">#!/usr/bin/env python3</span>
+
+<span class="c1"># Copyright (C) 2020-2021 Gabriele Bozzola</span>
+<span class="c1">#</span>
+<span class="c1"># This program is free software; you can redistribute it and/or modify it under</span>
+<span class="c1"># the terms of the GNU General Public License as published by the Free Software</span>
+<span class="c1"># Foundation; either version 3 of the License, or (at your option) any later</span>
+<span class="c1"># version.</span>
+<span class="c1">#</span>
+<span class="c1"># This program is distributed in the hope that it will be useful, but WITHOUT</span>
+<span class="c1"># ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS</span>
+<span class="c1"># FOR A PARTICULAR PURPOSE. See the GNU General Public License for more</span>
+<span class="c1"># details.</span>
+<span class="c1">#</span>
+<span class="c1"># You should have received a copy of the GNU General Public License along with</span>
+<span class="c1"># this program; if not, see &lt;https://www.gnu.org/licenses/&gt;.</span>
+
+<span class="sd">&quot;&quot;&quot;The :py:mod:`~.visualize_mayavi` module provides functions to perform 3D</span>
+<span class="sd">renderings of ``kuibit`` objects using mayavi.</span>
+
+<span class="sd">The functions provided are:</span>
+<span class="sd">- :py:func:`~.enable_mayavi_offscreen_rendering` disables mayavi&#39;s interactive</span>
+<span class="sd">  window. This function must be called in batch scripts.</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">mayavi</span> <span class="kn">import</span> <span class="n">mlab</span>
+
+<span class="kn">from</span> <span class="nn">kuibit.cactus_horizons</span> <span class="kn">import</span> <span class="n">OneHorizon</span>
+
+
+<div class="viewcode-block" id="disable_interactive_window"><a class="viewcode-back" href="../../visualize_mayavi_ref.html#kuibit.visualize_mayavi.disable_interactive_window">[docs]</a><span class="k">def</span> <span class="nf">disable_interactive_window</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;Disable mayavi interactive window.</span>
+
+<span class="sd">    mayavi requires a window to be drawn to produce the image. With this</span>
+<span class="sd">    function, this window is created but is not presented to the user.</span>
+<span class="sd">    Always invoke this function in scripts!</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">mlab</span><span class="o">.</span><span class="n">options</span><span class="o">.</span><span class="n">offscreen</span> <span class="o">=</span> <span class="kc">True</span></div>
+
+
+<div class="viewcode-block" id="create_figure"><a class="viewcode-back" href="../../visualize_mayavi_ref.html#kuibit.visualize_mayavi.create_figure">[docs]</a><span class="k">def</span> <span class="nf">create_figure</span><span class="p">(</span>
+    <span class="n">background_color</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">foreground_color</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="p">(</span><span class="mi">1920</span><span class="p">,</span> <span class="mi">1080</span><span class="p">),</span> <span class="o">**</span><span class="n">kwargs</span>
+<span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Create a mayavi figure clearing up previous ones.</span>
+
+<span class="sd">    :param background_color: Color of the background of the image. It is a tuple that</span>
+<span class="sd">                             describes the intensity along the three channels. The value</span>
+<span class="sd">                             ``(1,1,1)`` is black.</span>
+<span class="sd">    :type background_color: tuple</span>
+<span class="sd">    :param foreground_color: Color of the elements like text and boxes. It is a tuple that</span>
+<span class="sd">                             describes the intensity along the three channels. The value</span>
+<span class="sd">                             ``(1,1,1)`` is black.</span>
+<span class="sd">    :type foreground_color: tuple</span>
+<span class="sd">    :param size: Size in pixels of the image.</span>
+<span class="sd">    :type size: tuple</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">mlab</span><span class="o">.</span><span class="n">clf</span><span class="p">()</span>
+
+    <span class="k">return</span> <span class="n">mlab</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span>
+        <span class="n">bgcolor</span><span class="o">=</span><span class="n">background_color</span><span class="p">,</span> <span class="n">fgcolor</span><span class="o">=</span><span class="n">foreground_color</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="n">size</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span>
+    <span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="plot_apparent_horizon"><a class="viewcode-back" href="../../visualize_mayavi_ref.html#kuibit.visualize_mayavi.plot_apparent_horizon">[docs]</a><span class="k">def</span> <span class="nf">plot_apparent_horizon</span><span class="p">(</span><span class="n">horizon</span><span class="p">,</span> <span class="n">iteration</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Plot given apparent horizon.</span>
+
+<span class="sd">    TODO: This is very tentative and will change in the future!</span>
+
+<span class="sd">    Unknown arguments are passed to ``mayavi.mesh``. One of these arguments</span>
+<span class="sd">    can be ``color``. You can set ``color`` to</span>
+
+<span class="sd">    :param horizon: Apparent horizon to plot.</span>
+<span class="sd">    :type horizon: `~.:py:class:OneHorizon`</span>
+<span class="sd">    :param color: RGB values of the color of the horizon.</span>
+<span class="sd">                  ``(1,1,1)`` for a white hole, ``(0,0,0)`` for a black hole.</span>
+<span class="sd">    :type color: tuple of three floats</span>
+<span class="sd">    :param iteration: Iteration to plot.</span>
+<span class="sd">    :type iteration: int</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">horizon</span><span class="p">,</span> <span class="n">OneHorizon</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;Invalid horizon&quot;</span><span class="p">)</span>
+
+    <span class="c1"># We add this here because one could set colormap instead of color.</span>
+    <span class="k">if</span> <span class="n">color</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">color</span> <span class="o">=</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+
+    <span class="c1"># TODO (FEATURE): Add time as parameter alternative to iteration.</span>
+
+    <span class="c1"># HACK: We are plotting multiple patches on top of each other.</span>
+    <span class="c1">#</span>
+    <span class="c1"># Apparent horizons are described by multiple patches. At the moment, kuibit</span>
+    <span class="c1"># cannot merge them in a meaningful way. So, we cheat and plot everything</span>
+    <span class="c1"># with the same color so that it is impossible to see that there are</span>
+    <span class="c1"># multiple patches.</span>
+
+    <span class="c1"># First, we get the patches</span>
+    <span class="c1">#</span>
+    <span class="c1"># patches is a list of three elements, the three coordinates. Each coordinate</span>
+    <span class="c1"># is a list with the various patches describes as a list of np.array.</span>
+    <span class="n">patches</span> <span class="o">=</span> <span class="n">horizon</span><span class="o">.</span><span class="n">shape_at_iteration</span><span class="p">(</span><span class="n">iteration</span><span class="p">)</span>
+
+    <span class="c1"># We must remove one layer from patches, the one that describes the various</span>
+    <span class="c1"># patches. We do this in a rather brutal way by looping over all the</span>
+    <span class="c1"># elements.</span>
+    <span class="c1">#</span>
+    <span class="c1"># What is going on here? We have an other loop (dim in range(3)) that loops</span>
+    <span class="c1"># over the three coordinates. The elements of this list comprehension are</span>
+    <span class="c1"># np.concatenate of the various points in the patch.</span>
+    <span class="n">shape_xyz</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">([</span><span class="n">patch</span> <span class="k">for</span> <span class="n">patch</span> <span class="ow">in</span> <span class="n">patches</span><span class="p">[</span><span class="n">dim</span><span class="p">]])</span> <span class="k">for</span> <span class="n">dim</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
+    <span class="p">]</span>
+
+    <span class="c1"># Here we plot!</span>
+    <span class="k">return</span> <span class="n">mlab</span><span class="o">.</span><span class="n">mesh</span><span class="p">(</span><span class="o">*</span><span class="n">shape_xyz</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">color</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="plot_ah_trajectory"><a class="viewcode-back" href="../../visualize_mayavi_ref.html#kuibit.visualize_mayavi.plot_ah_trajectory">[docs]</a><span class="k">def</span> <span class="nf">plot_ah_trajectory</span><span class="p">(</span><span class="n">horizon</span><span class="p">,</span> <span class="n">time</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Plot the 3D trajectory of the given horizon.</span>
+
+<span class="sd">    :param horizon: Apparent horizon to plot.</span>
+<span class="sd">    :type horizon: `~.:py:class:OneHorizon`</span>
+<span class="sd">    :param time: If not None, plot up to this time.</span>
+<span class="sd">    :type time: float or None</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">mlab</span><span class="o">.</span><span class="n">plot3d</span><span class="p">(</span>
+        <span class="n">horizon</span><span class="o">.</span><span class="n">ah</span><span class="o">.</span><span class="n">centroid_x</span><span class="o">.</span><span class="n">cropped</span><span class="p">(</span><span class="n">end</span><span class="o">=</span><span class="n">time</span><span class="p">)</span><span class="o">.</span><span class="n">y</span><span class="p">,</span>
+        <span class="n">horizon</span><span class="o">.</span><span class="n">ah</span><span class="o">.</span><span class="n">centroid_y</span><span class="o">.</span><span class="n">cropped</span><span class="p">(</span><span class="n">end</span><span class="o">=</span><span class="n">time</span><span class="p">)</span><span class="o">.</span><span class="n">y</span><span class="p">,</span>
+        <span class="n">horizon</span><span class="o">.</span><span class="n">ah</span><span class="o">.</span><span class="n">centroid_z</span><span class="o">.</span><span class="n">cropped</span><span class="p">(</span><span class="n">end</span><span class="o">=</span><span class="n">time</span><span class="p">)</span><span class="o">.</span><span class="n">y</span><span class="p">,</span>
+        <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+    <span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="plot_horizon_vector"><a class="viewcode-back" href="../../visualize_mayavi_ref.html#kuibit.visualize_mayavi.plot_horizon_vector">[docs]</a><span class="k">def</span> <span class="nf">plot_horizon_vector</span><span class="p">(</span>
+    <span class="n">horizon</span><span class="p">,</span> <span class="n">quantity</span><span class="p">,</span> <span class="n">iteration</span><span class="p">,</span> <span class="n">magnification</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span>
+<span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Plot an arrow from the centroid of an horizon in the direction</span>
+<span class="sd">    of a given quasi-local quantity</span>
+
+<span class="sd">    :param horizon: Horizon to plot.</span>
+<span class="sd">    :type horizon: `~.:py:class:OneHorizon`</span>
+<span class="sd">    :param quantity: Quasi-local quantity to plot.</span>
+<span class="sd">    :type quantity: str</span>
+<span class="sd">    :param iteration: Iteration to plot.</span>
+<span class="sd">    :type iteration: int</span>
+<span class="sd">    :param color: RGB values of the color of the horizon.</span>
+<span class="sd">                  ``(1,1,1)`` for a white, ``(0,0,0)`` for a black, default red.</span>
+<span class="sd">    :type color: tuple of three floats</span>
+<span class="sd">    :param magnification: Extend the length of the arrow by this amount</span>
+<span class="sd">    :type magnification: float</span>
+<span class="sd">    :param time: If not None, plot up to this time.</span>
+<span class="sd">    :type time: float or None</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">color</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">color</span> <span class="o">=</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+
+    <span class="n">cent_x</span><span class="p">,</span> <span class="n">cent_y</span><span class="p">,</span> <span class="n">cent_z</span> <span class="o">=</span> <span class="n">horizon</span><span class="o">.</span><span class="n">ah_origin_at_iteration</span><span class="p">(</span><span class="n">iteration</span><span class="p">)</span>
+
+    <span class="c1"># We are going to use the shape to convert between time to iteration,</span>
+    <span class="c1"># since the qlm variables are defined in terms of time</span>
+
+    <span class="n">time</span> <span class="o">=</span> <span class="n">horizon</span><span class="o">.</span><span class="n">shape_time_at_iteration</span><span class="p">(</span><span class="n">iteration</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">var</span><span class="p">(</span><span class="n">ax</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">magnification</span> <span class="o">*</span> <span class="n">horizon</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">quantity</span><span class="si">}{</span><span class="n">ax</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">](</span><span class="n">time</span><span class="p">)</span>
+
+    <span class="n">var_x</span><span class="p">,</span> <span class="n">var_y</span><span class="p">,</span> <span class="n">var_z</span> <span class="o">=</span> <span class="n">var</span><span class="p">(</span><span class="s2">&quot;x&quot;</span><span class="p">),</span> <span class="n">var</span><span class="p">(</span><span class="s2">&quot;y&quot;</span><span class="p">),</span> <span class="n">var</span><span class="p">(</span><span class="s2">&quot;z&quot;</span><span class="p">)</span>
+
+    <span class="n">vector</span> <span class="o">=</span> <span class="n">mlab</span><span class="o">.</span><span class="n">pipeline</span><span class="o">.</span><span class="n">vectors</span><span class="p">(</span>
+        <span class="n">mlab</span><span class="o">.</span><span class="n">pipeline</span><span class="o">.</span><span class="n">vector_scatter</span><span class="p">(</span>
+            <span class="n">cent_x</span><span class="p">,</span>
+            <span class="n">cent_y</span><span class="p">,</span>
+            <span class="n">cent_z</span><span class="p">,</span>
+            <span class="n">var_x</span><span class="p">,</span>
+            <span class="n">var_y</span><span class="p">,</span>
+            <span class="n">var_z</span><span class="p">,</span>
+        <span class="p">),</span>
+        <span class="n">color</span><span class="o">=</span><span class="n">color</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="n">vector</span><span class="o">.</span><span class="n">glyph</span><span class="o">.</span><span class="n">glyph</span><span class="o">.</span><span class="n">clamping</span> <span class="o">=</span> <span class="kc">False</span>
+
+    <span class="k">return</span> <span class="n">vector</span></div>
+
+
+<div class="viewcode-block" id="add_text_to_figure_corner"><a class="viewcode-back" href="../../visualize_mayavi_ref.html#kuibit.visualize_mayavi.add_text_to_figure_corner">[docs]</a><span class="k">def</span> <span class="nf">add_text_to_figure_corner</span><span class="p">(</span><span class="n">text</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Add text to the bottom right corner of a figure.</span>
+
+<span class="sd">    TODO: This is very tentative and will change in the future!</span>
+
+<span class="sd">    Unknown arguments are passed to mayavi.text.</span>
+
+<span class="sd">    :param text: Text to be inserted.</span>
+<span class="sd">    :type text: str</span>
+<span class="sd">    :param color: RGB colors of the text ``(1,1,1)`` for a white,</span>
+<span class="sd">                  ``(0,0,0)`` for black.</span>
+<span class="sd">    :type color: tuple of three floats</span>
+
+<span class="sd">    :returns: mayavi&#39;s Text object</span>
+<span class="sd">    :rtype: mayavi.Text</span>
+<span class="sd">    ``&quot;&quot;&quot;</span>
+
+    <span class="k">return</span> <span class="n">mlab</span><span class="o">.</span><span class="n">text</span><span class="p">(</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.93</span><span class="p">,</span> <span class="n">text</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">color</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="save"><a class="viewcode-back" href="../../visualize_mayavi_ref.html#kuibit.visualize_mayavi.save">[docs]</a><span class="k">def</span> <span class="nf">save</span><span class="p">(</span><span class="n">outputpath</span><span class="p">,</span> <span class="n">figure_extension</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Save figure to outputpath with figure_extension.</span>
+
+<span class="sd">    :param outputpath:  Output path without extension.</span>
+<span class="sd">    :type outputpath:  str</span>
+<span class="sd">    :param figure_extension: Extension of the figure to save.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">mlab</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">outputpath</span><span class="si">}</span><span class="s2">.</span><span class="si">{</span><span class="n">figure_extension</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
+</pre></div>
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="../../index.html">
+              <img class="logo" src="../../_static/logo.png" alt="Logo"/>
+            </a></p>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">kuibit 1.3.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../index.html" >Module code</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">kuibit.visualize_mayavi</a></li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2020-2021, Gabriele Bozzola.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 3.5.4.
+    </div>
+  </body>
+</html>

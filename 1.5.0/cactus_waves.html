@@ -1,0 +1,283 @@
+
+
+<!doctype html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+
+    <title>Gravitational waves &#8212; kuibit 1.5.0 documentation</title>
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="_static/bizstyle.css" />
+    <link rel="stylesheet" type="text/css" href="_static/css/custom.css" />
+    
+    <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+    <script src="_static/doctools.js"></script>
+    <script src="_static/sphinx_highlight.js"></script>
+    <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+    <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="_static/bizstyle.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="TwoPunctures metadata" href="cactus_twopunctures.html" />
+    <link rel="prev" title="Working with horizons" href="cactus_horizons.html" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0" />
+    <!--[if lt IE 9]>
+    <script src="_static/css3-mediaqueries.js"></script>
+    <![endif]-->
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="cactus_twopunctures.html" title="TwoPunctures metadata"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="cactus_horizons.html" title="Working with horizons"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">kuibit 1.5.0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">Gravitational waves</a></li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <section id="gravitational-waves">
+<h1>Gravitational waves<a class="headerlink" href="#gravitational-waves" title="Permalink to this heading">¶</a></h1>
+<p><code class="docutils literal notranslate"><span class="pre">kuibit</span></code> has a large number of features to work with gravitational (and
+electromagnetic) waves as extracted with the Newman-Penrose formalism. Most of
+these features are inherited from other objects: multipoles and timeseries, as
+gravitational waves are typically studied in a multipolar decomposition and they
+are functions evolving with time. For this reason, you should familiarize
+yourself with the objects in <code class="docutils literal notranslate"><span class="pre">kuibit</span></code> that represent those quantities:
+<a class="reference internal" href="series.html#time-and-frequency-series"><span class="std std-ref">Time and frequency series</span></a> and
+<a class="reference internal" href="cactus_multipoles.html#working-with-multipolar-decompositions"><span class="std std-ref">Working with multipolar decompositions</span></a>.</p>
+<p>The main two objects to work with gravitational waves are
+<a class="reference internal" href="cactus_waves_ref.html#kuibit.cactus_waves.GravitationalWavesOneDet" title="kuibit.cactus_waves.GravitationalWavesOneDet"><code class="xref py py-class docutils literal notranslate"><span class="pre">GravitationalWavesOneDet</span></code></a> and <a class="reference internal" href="cactus_waves_ref.html#kuibit.cactus_waves.GravitationalWavesDir" title="kuibit.cactus_waves.GravitationalWavesDir"><code class="xref py py-class docutils literal notranslate"><span class="pre">GravitationalWavesDir</span></code></a>.
+The first described waves as seen by one specific detector (fixed radius), the
+second collects <a class="reference internal" href="cactus_waves_ref.html#kuibit.cactus_waves.GravitationalWavesOneDet" title="kuibit.cactus_waves.GravitationalWavesOneDet"><code class="xref py py-class docutils literal notranslate"><span class="pre">GravitationalWavesOneDet</span></code></a> for all the available
+detectors. These classes inherit several features from the base version in the
+<a class="reference internal" href="cactus_multipoles_ref.html#module-kuibit.cactus_multipoles" title="kuibit.cactus_multipoles"><code class="xref py py-mod docutils literal notranslate"><span class="pre">cactus_multipoles</span></code></a> module (<a class="reference internal" href="cactus_waves_ref.html#module-kuibit.cactus_waves"><span class="std std-ref">Reference on kuibit.cactus_waves</span></a>).</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>While this page is devoted to gravitational waves, electromagnetic waves are
+implemented in a similar way. It is important to understand what kind of
+electromagnetic waves we are considering here: those that are extracted with
+the Newman-Penrose formalism. Most people will not deal with this kind of
+electromagnetic waves. An example of electromagnetic waves of this kind can
+be extracted with the <code class="docutils literal notranslate"><span class="pre">Proca</span></code> thorns.</p>
+</div>
+<section id="accessing-gravitational-wave-data">
+<h2>Accessing gravitational-wave data<a class="headerlink" href="#accessing-gravitational-wave-data" title="Permalink to this heading">¶</a></h2>
+<p>Most of the interesting functions related to gravitational waves (with exception
+of the extrapolation to infinity) are for a fixed extraction radius. Hence, they
+live in the class <a class="reference internal" href="cactus_waves_ref.html#kuibit.cactus_waves.GravitationalWavesOneDet" title="kuibit.cactus_waves.GravitationalWavesOneDet"><code class="xref py py-class docutils literal notranslate"><span class="pre">GravitationalWavesOneDet</span></code></a>. This object contains
+all the available multipoles for <code class="docutils literal notranslate"><span class="pre">Psi4</span></code> at a fixed radius.</p>
+<p>A typical workflow starts from a <a class="reference internal" href="simdir_ref.html#kuibit.simdir.SimDir" title="kuibit.simdir.SimDir"><code class="xref py py-class docutils literal notranslate"><span class="pre">SimDir</span></code></a>:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">sd</span> <span class="o">=</span> <span class="n">SimDir</span><span class="p">(</span><span class="s2">&quot;gw150914&quot;</span><span class="p">)</span>
+<span class="n">gws</span> <span class="o">=</span> <span class="n">sd</span><span class="o">.</span><span class="n">gws</span>
+<span class="n">gw_r100</span> <span class="o">=</span> <span class="n">gws</span><span class="p">[</span><span class="mi">100</span><span class="p">]</span>  <span class="c1"># This is a GravitationalWavesOneDet</span>
+</pre></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">gw_r100</span></code> contains all the information on <code class="docutils literal notranslate"><span class="pre">Psi4</span></code> at radius 100. There are
+multiple ways to get the actual timeseries for a specific monopole. For instance
+<code class="docutils literal notranslate"><span class="pre">psi4_22</span> <span class="pre">=</span> <span class="pre">gw_r100[(2,</span> <span class="pre">2)]</span></code>.</p>
+<p>The more interesting quantity is the gravitational-wave strain. To access this
+for a specific multipole, use the method <a class="reference internal" href="cactus_waves_ref.html#kuibit.cactus_waves.GravitationalWavesOneDet.get_strain_lm" title="kuibit.cactus_waves.GravitationalWavesOneDet.get_strain_lm"><code class="xref py py-meth docutils literal notranslate"><span class="pre">get_strain_lm()</span></code></a>.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p><code class="docutils literal notranslate"><span class="pre">kubit</span></code> finds gravitational waves by finding <code class="docutils literal notranslate"><span class="pre">psi4</span></code> in the name of the
+multipole variables. This is a user-adjustable parameters (in the par file),
+so this might fail if you choose names that do not contain the word <code class="docutils literal notranslate"><span class="pre">psi4</span></code>
+(case insensitive).</p>
+</div>
+<section id="strain">
+<h3>Strain<a class="headerlink" href="#strain" title="Permalink to this heading">¶</a></h3>
+<p>The method <a class="reference internal" href="cactus_waves_ref.html#kuibit.cactus_waves.GravitationalWavesOneDet.get_strain_lm" title="kuibit.cactus_waves.GravitationalWavesOneDet.get_strain_lm"><code class="xref py py-meth docutils literal notranslate"><span class="pre">get_strain_lm()</span></code></a> return the strain for the multipolar
+component (l, m) multiplied to the extraction distance. This is done via
+double-time integration using the method of the fixed-frequency in Fourier
+space. The fixed-frequency integration reduces drifts in the mean value of the
+strain.</p>
+<p>This function requires some care to be produce meaningful results.</p>
+<p>First, to avoid aliasing and spectral leakage, the timeseries must go to zero at
+the boundaries of the interval. If the physical signal does not have this
+property, a window function must be applied. This can be done directly with
+<a class="reference internal" href="cactus_waves_ref.html#kuibit.cactus_waves.GravitationalWavesOneDet.get_strain_lm" title="kuibit.cactus_waves.GravitationalWavesOneDet.get_strain_lm"><code class="xref py py-meth docutils literal notranslate"><span class="pre">get_strain_lm()</span></code></a> providing the argument <code class="docutils literal notranslate"><span class="pre">window_function</span></code>.</p>
+<p>If <code class="docutils literal notranslate"><span class="pre">window_function</span></code> is <code class="docutils literal notranslate"><span class="pre">None</span></code>, no window is applied. Alternatively, one can
+apply one the windows already defined in the <a class="reference internal" href="timeseries_ref.html#module-kuibit.timeseries" title="kuibit.timeseries"><code class="xref py py-mod docutils literal notranslate"><span class="pre">timeseries</span></code></a> module. To
+do this, just pass a string with the name of the window. You can find these
+names looking at the methods in <a class="reference internal" href="timeseries_ref.html#kuibit.timeseries.TimeSeries" title="kuibit.timeseries.TimeSeries"><code class="xref py py-class docutils literal notranslate"><span class="pre">TimeSeries</span></code></a> and finding those that
+end with <code class="docutils literal notranslate"><span class="pre">windowed</span></code>: the first part of the name is what you have to pass
+(e.g., <code class="docutils literal notranslate"><span class="pre">tukey</span></code>). Alternatively, you can pass a function that takes as first
+argument the length of the data and returns an array with the window (this is
+how windows in SciPy are implemented). In both cases, if the window requires
+additional parameters, you can pass them providing them directly to
+<a class="reference internal" href="cactus_waves_ref.html#kuibit.cactus_waves.GravitationalWavesOneDet.get_strain_lm" title="kuibit.cactus_waves.GravitationalWavesOneDet.get_strain_lm"><code class="xref py py-meth docutils literal notranslate"><span class="pre">get_strain_lm()</span></code></a>.</p>
+<p>Second, you must provide a <code class="docutils literal notranslate"><span class="pre">pcut</span></code> parameter. This is required by the
+fixed-frequency integration method. <code class="docutils literal notranslate"><span class="pre">pcut</span></code> is typically chosen as the longest
+physical period in the signal (or the shortest frequency). In the case of a
+binary inspiral, this is approximately the period of the first half orbit. The
+fixed-frequency integration suppresses smaller frequencies signals.</p>
+<p>Finally, because of the windowing and the integration, signals around the
+boundaries is not too reliable. It is removed by default. You can opt-out
+setting <code class="docutils literal notranslate"><span class="pre">trim_ends</span></code> to <code class="docutils literal notranslate"><span class="pre">False</span></code>.</p>
+<p>In case you are interested in summing up all multipole monopoles, you should use
+the more general function <a class="reference internal" href="cactus_waves_ref.html#kuibit.cactus_waves.GravitationalWavesOneDet.get_strain" title="kuibit.cactus_waves.GravitationalWavesOneDet.get_strain"><code class="xref py py-meth docutils literal notranslate"><span class="pre">get_strain()</span></code></a>. This function takes input
+similar to <a class="reference internal" href="cactus_waves_ref.html#kuibit.cactus_waves.GravitationalWavesOneDet.get_strain_lm" title="kuibit.cactus_waves.GravitationalWavesOneDet.get_strain_lm"><code class="xref py py-meth docutils literal notranslate"><span class="pre">get_strain_lm()</span></code></a>, and requires to specify an evaluation
+angle <code class="docutils literal notranslate"><span class="pre">(theta,</span> <span class="pre">phi)</span></code>. In case you want to sum up only up to a given <span class="math notranslate nohighlight">\(l\)</span>,
+pass the argument <code class="docutils literal notranslate"><span class="pre">l_max</span></code>.</p>
+<p>Similarly, you can compute what would be the gravitational wave strain observed
+by the LIGO-Virgo interferometers using <a class="reference internal" href="cactus_waves_ref.html#kuibit.cactus_waves.GravitationalWavesOneDet.get_observed_strain" title="kuibit.cactus_waves.GravitationalWavesOneDet.get_observed_strain"><code class="xref py py-meth docutils literal notranslate"><span class="pre">get_observed_strain()</span></code></a> and
+providing a sky localization. This method computes the strain and convolves it
+with the antenna responses <span class="math notranslate nohighlight">\(F\)</span> of the single detectors:</p>
+<div class="math notranslate nohighlight">
+\[h = F_\times h_\times(\theta_{\mathrm{GW}}, \phi_{\mathrm{GW}}) + F_+ h_+(\theta_{\mathrm{GW}}, \phi_{\mathrm{GW}})\]</div>
+<p>Here, <span class="math notranslate nohighlight">\(\theta_{\mathrm{GW}}\)</span> and <span class="math notranslate nohighlight">\(\phi_{\mathrm{GW}}\)</span> are the
+spherical coordinates of the observer from the binary’s frame, taking the
+angular momentum of the binary to point along the z-axis. This function does not
+add noise.</p>
+<section id="extrapolate-to-infinity">
+<h4>Extrapolate_to_infinity<a class="headerlink" href="#extrapolate-to-infinity" title="Permalink to this heading">¶</a></h4>
+<p>The function <a class="reference internal" href="cactus_waves_ref.html#kuibit.cactus_waves.GravitationalWavesDir.extrapolate_strain_lm_to_infinity" title="kuibit.cactus_waves.GravitationalWavesDir.extrapolate_strain_lm_to_infinity"><code class="xref py py-meth docutils literal notranslate"><span class="pre">extrapolate_strain_lm_to_infinity()</span></code></a> can be used to
+extrapolate gravitational waves strain to spatial infinity. This is done fitting
+polynomials to wavefronts that are aligned in retarded times (assuming a
+background Schwarzschild spacetime). The most important paramter that this
+function takes is the list of distances that you want to use for the
+extrapolation. These have to be distances at which you have detectors. You can
+find all the available distances with the <code class="docutils literal notranslate"><span class="pre">keys()</span></code> method.</p>
+<p>For improved stability, you can extrapolate the waves as amplitude and phase
+(instead of real and imaginary parts). To do this, provide the
+<code class="docutils literal notranslate"><span class="pre">extrapolate_amplitude_phase=True</span></code> option.</p>
+<p>TODO</p>
+<blockquote>
+<div><p>Expand this section.</p>
+</div></blockquote>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>This function has not been thorougly tested!</p>
+</div>
+</section>
+</section>
+<section id="energy-linear-and-angular-momentum-carried-away-by-waves">
+<h3>Energy, linear, and angular momentum carried away by waves<a class="headerlink" href="#energy-linear-and-angular-momentum-carried-away-by-waves" title="Permalink to this heading">¶</a></h3>
+<p><a class="reference internal" href="cactus_waves_ref.html#kuibit.cactus_waves.GravitationalWavesOneDet" title="kuibit.cactus_waves.GravitationalWavesOneDet"><code class="xref py py-class docutils literal notranslate"><span class="pre">GravitationalWavesOneDet</span></code></a> (and
+<a class="reference internal" href="cactus_waves_ref.html#kuibit.cactus_waves.ElectromagneticWavesOneDet" title="kuibit.cactus_waves.ElectromagneticWavesOneDet"><code class="xref py py-class docutils literal notranslate"><span class="pre">ElectromagneticWavesOneDet</span></code></a>) implements methods to compute the
+instantaneous power, the force, and torque due to emission of waves. To compute
+these quantities for a specific mode, just use
+<a class="reference internal" href="cactus_waves_ref.html#kuibit.cactus_waves.GravitationalWavesOneDet.get_power_lm" title="kuibit.cactus_waves.GravitationalWavesOneDet.get_power_lm"><code class="xref py py-meth docutils literal notranslate"><span class="pre">get_power_lm()</span></code></a> or
+<a class="reference internal" href="cactus_waves_ref.html#kuibit.cactus_waves.GravitationalWavesOneDet.get_torque_z_lm" title="kuibit.cactus_waves.GravitationalWavesOneDet.get_torque_z_lm"><code class="xref py py-meth docutils literal notranslate"><span class="pre">get_torque_z_lm()</span></code></a>. You can also compute these quantities for all the
+available multipoles up to a given <code class="docutils literal notranslate"><span class="pre">l_max</span></code> using the methods
+<a class="reference internal" href="cactus_waves_ref.html#kuibit.cactus_waves.GravitationalWavesOneDet.get_total_power" title="kuibit.cactus_waves.GravitationalWavesOneDet.get_total_power"><code class="xref py py-meth docutils literal notranslate"><span class="pre">get_total_power()</span></code></a> or
+<code class="xref py py-meth docutils literal notranslate"><span class="pre">()</span></code> The integrated (cumulative) versions are also
+available. These are the energy, the linear, and angular momentum in
+gravitational waves. The methods have similar names with <code class="docutils literal notranslate"><span class="pre">energy</span></code> instead of
+<code class="docutils literal notranslate"><span class="pre">power</span></code>, <code class="docutils literal notranslate"><span class="pre">linear_momentum</span></code> instead of <code class="docutils literal notranslate"><span class="pre">force</span></code> , and <code class="docutils literal notranslate"><span class="pre">angular_momentum</span></code>
+instead of <code class="docutils literal notranslate"><span class="pre">torque_z</span></code>.</p>
+</section>
+</section>
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="index.html">
+              <img class="logo" src="_static/logo.png" alt="Logo"/>
+            </a></p>
+  <div>
+    <h3><a href="index.html">Table of Contents</a></h3>
+    <ul>
+<li><a class="reference internal" href="#">Gravitational waves</a><ul>
+<li><a class="reference internal" href="#accessing-gravitational-wave-data">Accessing gravitational-wave data</a><ul>
+<li><a class="reference internal" href="#strain">Strain</a><ul>
+<li><a class="reference internal" href="#extrapolate-to-infinity">Extrapolate_to_infinity</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#energy-linear-and-angular-momentum-carried-away-by-waves">Energy, linear, and angular momentum carried away by waves</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+  </div>
+  <div>
+    <h4>Previous topic</h4>
+    <p class="topless"><a href="cactus_horizons.html"
+                          title="previous chapter">Working with horizons</a></p>
+  </div>
+  <div>
+    <h4>Next topic</h4>
+    <p class="topless"><a href="cactus_twopunctures.html"
+                          title="next chapter">TwoPunctures metadata</a></p>
+  </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>document.getElementById('searchbox').style.display = "block"</script><div role="note" aria-label="version link">
+  <h3>Versions</h3>
+    <ul class="this-page-menu">
+      <li><a href="dev/cactus_waves.html" rel="nofollow"> Development </a></li>
+      <li><a href="#" rel="nofollow"> Master </a></li>
+
+      
+      <li><a href="1.3.6/cactus_waves.html" rel="nofollow"> 1.3.6 </a></li>
+      
+      <li><a href="1.4.0/cactus_waves.html" rel="nofollow"> 1.4.0 </a></li>
+      
+      <li><a href="1.4.1/cactus_waves.html" rel="nofollow"> 1.4.1 </a></li>
+      
+      <li><a href="1.5.0/cactus_waves.html" rel="nofollow"> 1.5.0 </a></li>
+      
+
+    </ul>
+ </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="cactus_twopunctures.html" title="TwoPunctures metadata"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="cactus_horizons.html" title="Working with horizons"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">kuibit 1.5.0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">Gravitational waves</a></li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2020-2024, Gabriele Bozzola.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 6.2.1.
+    </div>
+  </body>
+</html>

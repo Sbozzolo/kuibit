@@ -1,0 +1,697 @@
+
+
+<!doctype html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>kuibit.gw_utils &#8212; kuibit 1.5.0 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/bizstyle.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/css/custom.css" />
+    
+    <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+    <script src="../../_static/doctools.js"></script>
+    <script src="../../_static/sphinx_highlight.js"></script>
+    <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="../../_static/bizstyle.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0" />
+    <!--[if lt IE 9]>
+    <script src="_static/css3-mediaqueries.js"></script>
+    <![endif]-->
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">kuibit 1.5.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../index.html" accesskey="U">Module code</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">kuibit.gw_utils</a></li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for kuibit.gw_utils</h1><div class="highlight"><pre>
+<span></span><span class="ch">#!/usr/bin/env python3</span>
+
+<span class="c1"># Copyright (C) 2020-2024 Gabriele Bozzola</span>
+<span class="c1"># sYlm: Copyright (C) Christian Reisswig</span>
+<span class="c1"># ra_dec_to_theta_phi: Copyright (C) 2020-2024 Yuk Tung Liu</span>
+<span class="c1">#</span>
+<span class="c1"># This program is free software; you can redistribute it and/or modify it under</span>
+<span class="c1"># the terms of the GNU General Public License as published by the Free Software</span>
+<span class="c1"># Foundation; either version 3 of the License, or (at your option) any later</span>
+<span class="c1"># version.</span>
+<span class="c1">#</span>
+<span class="c1"># This program is distributed in the hope that it will be useful, but WITHOUT</span>
+<span class="c1"># ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS</span>
+<span class="c1"># FOR A PARTICULAR PURPOSE. See the GNU General Public License for more</span>
+<span class="c1"># details.</span>
+<span class="c1">#</span>
+<span class="c1"># You should have received a copy of the GNU General Public License along with</span>
+<span class="c1"># this program; if not, see &lt;https://www.gnu.org/licenses/&gt;.</span>
+
+
+<span class="sd">&quot;&quot;&quot;The module :py:mod:`~.gw_utils` contains convenience functions and</span>
+<span class="sd">structures to analyze and work with gravitational waves.</span>
+
+<span class="sd">First, the ``Detectors`` object is defined. ``Detectors`` is a named tuple</span>
+<span class="sd">with fields &quot;hanford&quot;, &quot;livingston&quot;, &quot;virgo&quot;. This is used every time we</span>
+<span class="sd">deal with specific detectors.</span>
+
+<span class="sd">The functions provided are:</span>
+
+<span class="sd">- :py:func:`~.luminosity_distance_to_redshift`: convert a given luminosity</span>
+<span class="sd">  distance to a redshift in the ΛCDM cosmology.</span>
+<span class="sd">- :py:func:`~.sYlm`: return the spin-weighted spherical harmonics at a given</span>
+<span class="sd">  angle.</span>
+<span class="sd">- :py:func:`~.ra_dec_to_theta_phi`: convert right ascension and declination to</span>
+<span class="sd">  spherical coordinates.</span>
+<span class="sd">- :py:func:`~.antenna_responses`: compute the antenna responses of a given</span>
+<span class="sd">  angle.</span>
+<span class="sd">- :py:func:`~.antenna_responses_from_sky_localization`: compute the antenna</span>
+<span class="sd">  responses for known detectors at a given sky localization.</span>
+<span class="sd">- :py:func:`~.signal_to_noise_ratio_from_strain`: compute the signal to noise</span>
+<span class="sd">  for a given signal and a given noise curve.</span>
+<span class="sd">- :py:func:`~.effective_amplitude_spectral_density`: compute an effective (</span>
+<span class="sd">  polarization-averaged) amplitude spectral density (ASD) from a strain signal.</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">datetime</span>
+<span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">namedtuple</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">scipy</span> <span class="kn">import</span> <span class="n">integrate</span><span class="p">,</span> <span class="n">optimize</span>
+
+<span class="kn">import</span> <span class="nn">kuibit.timeseries</span> <span class="k">as</span> <span class="nn">ts</span>
+<span class="kn">import</span> <span class="nn">kuibit.unitconv</span> <span class="k">as</span> <span class="nn">uc</span>
+
+<span class="c1"># This is just a convenience to avoid having to remember the order of</span>
+<span class="c1"># the output (and for easy of extension)</span>
+<span class="c1"># One can access the output as detectos.hanford, or</span>
+<span class="c1"># detectors[&#39;hanford&#39;]</span>
+<span class="n">Detectors</span> <span class="o">=</span> <span class="n">namedtuple</span><span class="p">(</span><span class="s2">&quot;Detectors&quot;</span><span class="p">,</span> <span class="s2">&quot;hanford livingston virgo&quot;</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="luminosity_distance_to_redshift"><a class="viewcode-back" href="../../gw_utils_ref.html#kuibit.gw_utils.luminosity_distance_to_redshift">[docs]</a><span class="k">def</span> <span class="nf">luminosity_distance_to_redshift</span><span class="p">(</span>
+    <span class="n">luminosity_distance</span><span class="p">,</span>
+    <span class="n">Omega_m</span><span class="o">=</span><span class="mf">0.309</span><span class="p">,</span>
+    <span class="n">Omega_L</span><span class="o">=</span><span class="mf">0.691</span><span class="p">,</span>
+    <span class="n">initial_guess</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span>
+<span class="p">):</span>
+<span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Compute redshift from luminosity distance in Mpc assuming the ΛCDM cosmology.</span>
+
+<span class="sd">    This function is useful to correctly reproduce observed signals</span>
+<span class="sd">    from cosmological sources (e.g., binary black holes far away).</span>
+
+<span class="sd">    The redshift is computed via root-finding, so an initial guess is needed.</span>
+
+<span class="sd">    :param luminosity_distance: Luminosity distance in megaparsec.</span>
+<span class="sd">    :type luminosity_distance: float</span>
+<span class="sd">    :param Omega_m: :math:`\Omega_m` (matter) cosmological parameter.</span>
+<span class="sd">    :type Omega_m: float</span>
+<span class="sd">    :param Omega_L: :math:`\Omega_m` (dark energy) cosmological parameter.</span>
+<span class="sd">    :type Omega_L: float</span>
+<span class="sd">    :param initial_guess: Initial guess to the redshift for the</span>
+<span class="sd">                          root-finding routine.</span>
+<span class="sd">    :type initial_guess: float</span>
+
+<span class="sd">    :returns z: Redshift</span>
+<span class="sd">    :rtype z: float</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">distance_in_m</span> <span class="o">=</span> <span class="n">luminosity_distance</span> <span class="o">*</span> <span class="n">uc</span><span class="o">.</span><span class="n">MEGAPARSEC_SI</span>  <span class="c1"># m</span>
+    <span class="n">H0</span> <span class="o">=</span> <span class="n">uc</span><span class="o">.</span><span class="n">H0_SI</span>  <span class="c1"># 1/s</span>
+    <span class="n">c</span> <span class="o">=</span> <span class="n">uc</span><span class="o">.</span><span class="n">C_SI</span>  <span class="c1"># m/s</span>
+
+    <span class="k">def</span> <span class="nf">function_to_root_find</span><span class="p">(</span><span class="n">z</span><span class="p">):</span>
+        <span class="k">def</span> <span class="nf">z_to_DL</span><span class="p">(</span><span class="n">z</span><span class="p">):</span>
+            <span class="k">def</span> <span class="nf">DL_integral</span><span class="p">(</span><span class="n">z</span><span class="p">):</span>
+                <span class="k">return</span> <span class="mi">1</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">Omega_m</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="n">z</span><span class="p">)</span> <span class="o">**</span> <span class="mi">3</span> <span class="o">+</span> <span class="n">Omega_L</span><span class="p">)</span>
+
+            <span class="k">return</span> <span class="n">c</span> <span class="o">/</span> <span class="n">H0</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="n">z</span><span class="p">)</span> <span class="o">*</span> <span class="n">integrate</span><span class="o">.</span><span class="n">quad</span><span class="p">(</span><span class="n">DL_integral</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">z</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">distance_in_m</span> <span class="o">-</span> <span class="n">z_to_DL</span><span class="p">(</span><span class="n">z</span><span class="p">))</span>
+
+    <span class="n">redshift</span> <span class="o">=</span> <span class="n">optimize</span><span class="o">.</span><span class="n">root</span><span class="p">(</span><span class="n">function_to_root_find</span><span class="p">,</span> <span class="n">initial_guess</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">redshift</span><span class="p">[</span><span class="s2">&quot;status&quot;</span><span class="p">]</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s2">&quot;Conversion between distance and redshift failed!&quot;</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">redshift</span><span class="p">[</span><span class="s2">&quot;x&quot;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span></div>
+
+
+<div class="viewcode-block" id="sYlm"><a class="viewcode-back" href="../../gw_utils_ref.html#kuibit.gw_utils.sYlm">[docs]</a><span class="k">def</span> <span class="nf">sYlm</span><span class="p">(</span><span class="n">ss</span><span class="p">,</span> <span class="n">ll</span><span class="p">,</span> <span class="n">mm</span><span class="p">,</span> <span class="n">theta</span><span class="p">,</span> <span class="n">phi</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Compute spin-weighted spherical harmonics at the angles ``theta`` and ``phi``.</span>
+
+<span class="sd">    When ``ss = 0``, these are spherical harmonics.</span>
+
+<span class="sd">    :param ss: Spin weight.</span>
+<span class="sd">    :type ss: int</span>
+<span class="sd">    :param ll: :math:`l` multipolar number.</span>
+<span class="sd">    :type ll: int</span>
+<span class="sd">    :param mm: :math:`m` multipolar number.</span>
+<span class="sd">    :type mm: int</span>
+<span class="sd">    :param theta: Meridional angle.</span>
+<span class="sd">    :type theta: float</span>
+<span class="sd">    :param phi: Azimuthal angle.</span>
+<span class="sd">    :type phi: float</span>
+
+<span class="sd">    :returns sYlm: Spin-weighted spherical harmonic evaluated at</span>
+<span class="sd">                  ``theta`` and ``phi``.</span>
+<span class="sd">    :rtype sYlm: float</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Code by Christian Reisswig</span>
+
+    <span class="c1"># Recursion function for spin-weighted spherical harmonics</span>
+    <span class="k">def</span> <span class="nf">s_lambda_lm</span><span class="p">(</span><span class="n">local_s</span><span class="p">,</span> <span class="n">local_l</span><span class="p">,</span> <span class="n">local_m</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
+        <span class="c1"># Coefficient function for spin-weighted spherical harmonics</span>
+        <span class="k">def</span> <span class="nf">sYlm_Cslm</span><span class="p">(</span><span class="n">local_s</span><span class="p">,</span> <span class="n">local_l</span><span class="p">,</span> <span class="n">local_m</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span>
+                <span class="n">local_l</span>
+                <span class="o">*</span> <span class="n">local_l</span>
+                <span class="o">*</span> <span class="p">(</span><span class="mf">4.0</span> <span class="o">*</span> <span class="n">local_l</span> <span class="o">*</span> <span class="n">local_l</span> <span class="o">-</span> <span class="mf">1.0</span><span class="p">)</span>
+                <span class="o">/</span> <span class="p">(</span>
+                    <span class="p">(</span><span class="n">local_l</span> <span class="o">*</span> <span class="n">local_l</span> <span class="o">-</span> <span class="n">local_m</span> <span class="o">*</span> <span class="n">local_m</span><span class="p">)</span>
+                    <span class="o">*</span> <span class="p">(</span><span class="n">local_l</span> <span class="o">*</span> <span class="n">local_l</span> <span class="o">-</span> <span class="n">local_s</span> <span class="o">*</span> <span class="n">local_s</span><span class="p">)</span>
+                <span class="p">)</span>
+            <span class="p">)</span>
+
+        <span class="n">Pm</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">power</span><span class="p">(</span><span class="o">-</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">local_m</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">local_m</span> <span class="o">!=</span> <span class="n">local_s</span><span class="p">:</span>
+            <span class="n">Pm</span> <span class="o">=</span> <span class="n">Pm</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">power</span><span class="p">(</span><span class="mf">1.0</span> <span class="o">+</span> <span class="n">x</span><span class="p">,</span> <span class="p">(</span><span class="n">local_m</span> <span class="o">-</span> <span class="n">local_s</span><span class="p">)</span> <span class="o">*</span> <span class="mf">1.0</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">local_m</span> <span class="o">!=</span> <span class="o">-</span><span class="n">local_s</span><span class="p">:</span>
+            <span class="n">Pm</span> <span class="o">=</span> <span class="n">Pm</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">power</span><span class="p">(</span><span class="mf">1.0</span> <span class="o">-</span> <span class="n">x</span><span class="p">,</span> <span class="p">(</span><span class="n">local_m</span> <span class="o">+</span> <span class="n">local_s</span><span class="p">)</span> <span class="o">*</span> <span class="mf">1.0</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span>
+
+        <span class="n">Pm</span> <span class="o">=</span> <span class="n">Pm</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span>
+            <span class="n">np</span><span class="o">.</span><span class="n">math</span><span class="o">.</span><span class="n">factorial</span><span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">local_m</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+            <span class="o">*</span> <span class="mf">1.0</span>
+            <span class="o">/</span> <span class="p">(</span>
+                <span class="mf">4.0</span>
+                <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span>
+                <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">math</span><span class="o">.</span><span class="n">factorial</span><span class="p">(</span><span class="n">local_m</span> <span class="o">+</span> <span class="n">local_s</span><span class="p">)</span>
+                <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">math</span><span class="o">.</span><span class="n">factorial</span><span class="p">(</span><span class="n">local_m</span> <span class="o">-</span> <span class="n">local_s</span><span class="p">)</span>
+            <span class="p">)</span>
+        <span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">local_l</span> <span class="o">==</span> <span class="n">local_m</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">Pm</span>
+
+        <span class="n">Pm1</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="p">(</span><span class="n">x</span> <span class="o">+</span> <span class="n">local_s</span> <span class="o">*</span> <span class="mf">1.0</span> <span class="o">/</span> <span class="p">(</span><span class="n">local_m</span> <span class="o">+</span> <span class="mi">1</span><span class="p">))</span>
+            <span class="o">*</span> <span class="n">sYlm_Cslm</span><span class="p">(</span><span class="n">local_s</span><span class="p">,</span> <span class="n">local_m</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">local_m</span><span class="p">)</span>
+            <span class="o">*</span> <span class="n">Pm</span>
+        <span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">local_l</span> <span class="o">==</span> <span class="n">local_m</span> <span class="o">+</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">Pm1</span>
+
+        <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">local_m</span> <span class="o">+</span> <span class="mi">2</span><span class="p">,</span> <span class="n">local_l</span> <span class="o">+</span> <span class="mi">1</span><span class="p">):</span>
+            <span class="n">Pn</span> <span class="o">=</span> <span class="p">(</span><span class="n">x</span> <span class="o">+</span> <span class="n">local_s</span> <span class="o">*</span> <span class="n">local_m</span> <span class="o">*</span> <span class="mf">1.0</span> <span class="o">/</span> <span class="p">(</span><span class="n">n</span> <span class="o">*</span> <span class="p">(</span><span class="n">n</span> <span class="o">-</span> <span class="mf">1.0</span><span class="p">)))</span> <span class="o">*</span> <span class="n">sYlm_Cslm</span><span class="p">(</span>
+                <span class="n">local_s</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="n">local_m</span>
+            <span class="p">)</span> <span class="o">*</span> <span class="n">Pm1</span> <span class="o">-</span> <span class="n">sYlm_Cslm</span><span class="p">(</span><span class="n">local_s</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="n">local_m</span><span class="p">)</span> <span class="o">*</span> <span class="mf">1.0</span> <span class="o">/</span> <span class="n">sYlm_Cslm</span><span class="p">(</span>
+                <span class="n">local_s</span><span class="p">,</span> <span class="n">n</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="n">local_m</span>
+            <span class="p">)</span> <span class="o">*</span> <span class="n">Pm</span>
+            <span class="n">Pm</span> <span class="o">=</span> <span class="n">Pm1</span>
+            <span class="n">Pm1</span> <span class="o">=</span> <span class="n">Pn</span>
+
+        <span class="k">return</span> <span class="n">Pn</span>
+
+    <span class="n">Pm</span> <span class="o">=</span> <span class="mf">1.0</span>
+
+    <span class="n">mult_l</span> <span class="o">=</span> <span class="n">ll</span>
+    <span class="n">mult_m</span> <span class="o">=</span> <span class="n">mm</span>
+    <span class="n">mult_s</span> <span class="o">=</span> <span class="n">ss</span>
+
+    <span class="k">if</span> <span class="n">mult_l</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">return</span> <span class="mi">0</span>
+    <span class="k">if</span> <span class="nb">abs</span><span class="p">(</span><span class="n">mult_m</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">mult_l</span> <span class="ow">or</span> <span class="n">mult_l</span> <span class="o">&lt;</span> <span class="nb">abs</span><span class="p">(</span><span class="n">mult_s</span><span class="p">):</span>
+        <span class="k">return</span> <span class="mi">0</span>
+
+    <span class="k">if</span> <span class="nb">abs</span><span class="p">(</span><span class="n">mm</span><span class="p">)</span> <span class="o">&lt;</span> <span class="nb">abs</span><span class="p">(</span><span class="n">ss</span><span class="p">):</span>
+        <span class="n">mult_s</span> <span class="o">=</span> <span class="n">mm</span>
+        <span class="n">mult_m</span> <span class="o">=</span> <span class="n">ss</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">mult_m</span> <span class="o">+</span> <span class="n">mult_s</span><span class="p">)</span> <span class="o">%</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="n">Pm</span> <span class="o">=</span> <span class="o">-</span><span class="n">Pm</span>
+
+    <span class="k">if</span> <span class="n">mult_m</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">mult_s</span> <span class="o">=</span> <span class="o">-</span><span class="n">mult_s</span>
+        <span class="n">mult_m</span> <span class="o">=</span> <span class="o">-</span><span class="n">mult_m</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">mult_m</span> <span class="o">+</span> <span class="n">mult_s</span><span class="p">)</span> <span class="o">%</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="n">Pm</span> <span class="o">=</span> <span class="o">-</span><span class="n">Pm</span>
+
+    <span class="n">result</span> <span class="o">=</span> <span class="n">Pm</span> <span class="o">*</span> <span class="n">s_lambda_lm</span><span class="p">(</span><span class="n">mult_s</span><span class="p">,</span> <span class="n">mult_l</span><span class="p">,</span> <span class="n">mult_m</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">theta</span><span class="p">))</span>
+
+    <span class="k">return</span> <span class="nb">complex</span><span class="p">(</span><span class="n">result</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">mm</span> <span class="o">*</span> <span class="n">phi</span><span class="p">),</span> <span class="n">result</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">mm</span> <span class="o">*</span> <span class="n">phi</span><span class="p">))</span></div>
+
+
+<div class="viewcode-block" id="ra_dec_to_theta_phi"><a class="viewcode-back" href="../../gw_utils_ref.html#kuibit.gw_utils.ra_dec_to_theta_phi">[docs]</a><span class="k">def</span> <span class="nf">ra_dec_to_theta_phi</span><span class="p">(</span><span class="n">right_ascension</span><span class="p">,</span> <span class="n">declination</span><span class="p">,</span> <span class="n">time_utc</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Compute the spherical angles ``theta`` and ``phi`` for Hanford, Livingston</span>
+<span class="sd">    and Virgo for a given source localization.</span>
+
+<span class="sd">    ``utc_time`` has to have the following formatting: ``%Y-%m-%d %H:%M``,</span>
+<span class="sd">    (eg ``2015-09-14 09:50:45``)</span>
+
+<span class="sd">    :param right_ascension: Right ascension of the source in degrees.</span>
+<span class="sd">    :type right_ascension: float</span>
+<span class="sd">    :param declination: Declination of the source in degrees.</span>
+<span class="sd">    :type declination: float</span>
+<span class="sd">    :param time_utc: UTC time of the event.</span>
+<span class="sd">    :type declination: str</span>
+
+<span class="sd">    :returns spherical coordinates: ``Theta``, ``phi`` for the different detectors.</span>
+<span class="sd">    :rtype: namedtuple with fields hanford, livingston, and virgo</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># NOTE: This function can make use of some cleanup and double-checking</span>
+    <span class="c1"># This code is based on the one written by Yuk Tung Liu.</span>
+
+    <span class="c1"># RA and DEC of the GW source:</span>
+    <span class="n">alpha_hours</span> <span class="o">=</span> <span class="n">right_ascension</span>
+    <span class="n">delta_degrees</span> <span class="o">=</span> <span class="n">declination</span>
+
+    <span class="c1"># degrees to radian</span>
+    <span class="n">deg_to_rad</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">/</span> <span class="mf">180.0</span>
+
+    <span class="n">alpha</span> <span class="o">=</span> <span class="n">alpha_hours</span> <span class="o">*</span> <span class="mf">15.0</span> <span class="o">*</span> <span class="n">deg_to_rad</span>
+    <span class="n">delta</span> <span class="o">=</span> <span class="n">delta_degrees</span> <span class="o">*</span> <span class="n">deg_to_rad</span>
+
+    <span class="c1"># LIGO detector geometry from</span>
+    <span class="c1"># http://www.ligo.org/scientists/GW100916/GW100916-geometry.html</span>
+    <span class="c1"># and also</span>
+    <span class="c1"># http://www.ligo.org/scientists/GRB051103/GRB051103-geometry.php</span>
+    <span class="c1"># The two pages are consistent.</span>
+
+    <span class="c1"># LIGO Hanford (H) detector geometry</span>
+    <span class="c1"># Latitude, Longitude and azimuth of the x-arm</span>
+    <span class="c1"># Note: Longitude is measured positively westward from Greenwich</span>
+    <span class="c1"># Azimuth is measured from the South point, turning positive to the West.</span>
+    <span class="n">lat_H</span> <span class="o">=</span> <span class="p">(</span><span class="mi">46</span> <span class="o">+</span> <span class="mf">27.0</span> <span class="o">/</span> <span class="mi">60</span> <span class="o">+</span> <span class="mf">19.0</span> <span class="o">/</span> <span class="mi">3600</span><span class="p">)</span> <span class="o">*</span> <span class="n">deg_to_rad</span>
+    <span class="n">long_H</span> <span class="o">=</span> <span class="p">(</span><span class="mi">119</span> <span class="o">+</span> <span class="mf">24.0</span> <span class="o">/</span> <span class="mi">60</span> <span class="o">+</span> <span class="mf">28.0</span> <span class="o">/</span> <span class="mi">3600</span><span class="p">)</span> <span class="o">*</span> <span class="n">deg_to_rad</span>
+    <span class="n">xazi_H</span> <span class="o">=</span> <span class="p">(</span><span class="mi">180</span> <span class="o">-</span> <span class="mi">36</span><span class="p">)</span> <span class="o">*</span> <span class="n">deg_to_rad</span>
+
+    <span class="c1"># LIGO Livingston (L) detector geometry</span>
+    <span class="c1"># Latitude, Longitude and azimuth of the x-arm</span>
+    <span class="n">lat_L</span> <span class="o">=</span> <span class="p">(</span><span class="mi">30</span> <span class="o">+</span> <span class="mf">33.0</span> <span class="o">/</span> <span class="mi">60</span> <span class="o">+</span> <span class="mf">46.0</span> <span class="o">/</span> <span class="mi">3600</span><span class="p">)</span> <span class="o">*</span> <span class="n">deg_to_rad</span>
+    <span class="n">long_L</span> <span class="o">=</span> <span class="p">(</span><span class="mi">90</span> <span class="o">+</span> <span class="mf">46.0</span> <span class="o">/</span> <span class="mi">60</span> <span class="o">+</span> <span class="mf">27.0</span> <span class="o">/</span> <span class="mi">3600</span><span class="p">)</span> <span class="o">*</span> <span class="n">deg_to_rad</span>
+    <span class="n">xazi_L</span> <span class="o">=</span> <span class="p">(</span><span class="mi">90</span> <span class="o">-</span> <span class="mi">18</span><span class="p">)</span> <span class="o">*</span> <span class="n">deg_to_rad</span>
+
+    <span class="c1"># Virgo detector geometry</span>
+    <span class="c1"># https://arxiv.org/pdf/1706.09505.pdf (Table 3.1)</span>
+    <span class="n">lat_V</span> <span class="o">=</span> <span class="p">(</span><span class="mi">43</span> <span class="o">+</span> <span class="mf">37.0</span> <span class="o">/</span> <span class="mi">60</span> <span class="o">+</span> <span class="mf">53.0</span> <span class="o">/</span> <span class="mi">3600</span><span class="p">)</span> <span class="o">*</span> <span class="n">deg_to_rad</span>
+    <span class="n">long_V</span> <span class="o">=</span> <span class="o">-</span><span class="p">(</span><span class="mi">10</span> <span class="o">+</span> <span class="mf">30.0</span> <span class="o">/</span> <span class="mi">60</span> <span class="o">+</span> <span class="mf">16.0</span> <span class="o">/</span> <span class="mi">3600</span><span class="p">)</span> <span class="o">*</span> <span class="n">deg_to_rad</span>
+    <span class="n">xazi_V</span> <span class="o">=</span> <span class="o">-</span><span class="p">(</span><span class="mi">180</span> <span class="o">-</span> <span class="mi">19</span><span class="p">)</span> <span class="o">*</span> <span class="n">deg_to_rad</span>
+
+    <span class="c1"># Time of detection of GW150914: 2015-09-14 09:50:45 UTC</span>
+    <span class="c1"># The Greenwich sidereal time theta_G is calculated by</span>
+    <span class="c1"># the formula at https://en.wikipedia.org/wiki/Sidereal_time</span>
+
+    <span class="n">base_date</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">strptime</span><span class="p">(</span>
+        <span class="s2">&quot;2000-01-01 12:00:00&quot;</span><span class="p">,</span> <span class="s2">&quot;%Y-%m-</span><span class="si">%d</span><span class="s2"> %H:%M:%S&quot;</span>
+    <span class="p">)</span>
+    <span class="n">date</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">strptime</span><span class="p">(</span><span class="n">time_utc</span><span class="p">,</span> <span class="s2">&quot;%Y-%m-</span><span class="si">%d</span><span class="s2"> %H:%M:%S&quot;</span><span class="p">)</span>
+    <span class="c1"># Days between DATE and 2000-01-01 12:00</span>
+    <span class="n">D</span> <span class="o">=</span> <span class="p">(</span><span class="n">date</span> <span class="o">-</span> <span class="n">base_date</span><span class="p">)</span><span class="o">.</span><span class="n">total_seconds</span><span class="p">()</span> <span class="o">/</span> <span class="mi">86400</span>
+    <span class="n">theta_G</span> <span class="o">=</span> <span class="mf">18.697374558</span> <span class="o">+</span> <span class="mf">24.06570982441908</span> <span class="o">*</span> <span class="n">D</span>
+    <span class="c1"># theta_G mod 24h</span>
+    <span class="n">theta_G</span> <span class="o">=</span> <span class="n">theta_G</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">floor</span><span class="p">(</span><span class="n">theta_G</span> <span class="o">/</span> <span class="mf">24.0</span><span class="p">)</span> <span class="o">*</span> <span class="mi">24</span>
+    <span class="n">theta_G</span> <span class="o">=</span> <span class="n">theta_G</span> <span class="o">*</span> <span class="mi">15</span> <span class="o">*</span> <span class="n">deg_to_rad</span>
+
+    <span class="c1"># Equatorial -&gt; horizontal using the formulae at</span>
+    <span class="c1"># https://en.wikipedia.org/wiki/Celestial_coordinate_system</span>
+
+    <span class="c1"># Hour angles</span>
+    <span class="n">h_H</span> <span class="o">=</span> <span class="n">theta_G</span> <span class="o">-</span> <span class="n">long_H</span> <span class="o">-</span> <span class="n">alpha</span>
+    <span class="n">h_L</span> <span class="o">=</span> <span class="n">theta_G</span> <span class="o">-</span> <span class="n">long_L</span> <span class="o">-</span> <span class="n">alpha</span>
+    <span class="n">h_V</span> <span class="o">=</span> <span class="n">theta_G</span> <span class="o">-</span> <span class="n">long_V</span> <span class="o">-</span> <span class="n">alpha</span>
+
+    <span class="c1"># Zenith distance theta and azimuth A</span>
+    <span class="n">theta_H</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arccos</span><span class="p">(</span>
+        <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">lat_H</span><span class="p">)</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">delta</span><span class="p">)</span>
+        <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">lat_H</span><span class="p">)</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">delta</span><span class="p">)</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">h_H</span><span class="p">)</span>
+    <span class="p">)</span>
+    <span class="n">theta_L</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arccos</span><span class="p">(</span>
+        <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">lat_L</span><span class="p">)</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">delta</span><span class="p">)</span>
+        <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">lat_L</span><span class="p">)</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">delta</span><span class="p">)</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">h_L</span><span class="p">)</span>
+    <span class="p">)</span>
+    <span class="n">theta_V</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arccos</span><span class="p">(</span>
+        <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">lat_V</span><span class="p">)</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">delta</span><span class="p">)</span>
+        <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">lat_V</span><span class="p">)</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">delta</span><span class="p">)</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">h_V</span><span class="p">)</span>
+    <span class="p">)</span>
+
+    <span class="n">A_H</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arctan2</span><span class="p">(</span>
+        <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">delta</span><span class="p">)</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">h_H</span><span class="p">),</span>
+        <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">delta</span><span class="p">)</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">h_H</span><span class="p">)</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">lat_H</span><span class="p">)</span>
+        <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">delta</span><span class="p">)</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">lat_H</span><span class="p">),</span>
+    <span class="p">)</span>
+    <span class="n">phi_H</span> <span class="o">=</span> <span class="n">xazi_H</span> <span class="o">-</span> <span class="n">A_H</span>
+
+    <span class="n">A_L</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arctan2</span><span class="p">(</span>
+        <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">delta</span><span class="p">)</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">h_L</span><span class="p">),</span>
+        <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">delta</span><span class="p">)</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">h_L</span><span class="p">)</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">lat_L</span><span class="p">)</span>
+        <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">delta</span><span class="p">)</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">lat_L</span><span class="p">),</span>
+    <span class="p">)</span>
+    <span class="n">phi_L</span> <span class="o">=</span> <span class="n">xazi_L</span> <span class="o">-</span> <span class="n">A_L</span>
+
+    <span class="n">A_V</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arctan2</span><span class="p">(</span>
+        <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">delta</span><span class="p">)</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">h_V</span><span class="p">),</span>
+        <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">delta</span><span class="p">)</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">h_V</span><span class="p">)</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">lat_V</span><span class="p">)</span>
+        <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">delta</span><span class="p">)</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">lat_V</span><span class="p">),</span>
+    <span class="p">)</span>
+    <span class="n">phi_V</span> <span class="o">=</span> <span class="n">xazi_V</span> <span class="o">-</span> <span class="n">A_V</span>
+
+    <span class="n">coords</span> <span class="o">=</span> <span class="n">Detectors</span><span class="p">(</span>
+        <span class="n">hanford</span><span class="o">=</span><span class="p">(</span><span class="n">theta_H</span><span class="p">,</span> <span class="n">phi_H</span><span class="p">),</span>
+        <span class="n">livingston</span><span class="o">=</span><span class="p">(</span><span class="n">theta_L</span><span class="p">,</span> <span class="n">phi_L</span><span class="p">),</span>
+        <span class="n">virgo</span><span class="o">=</span><span class="p">(</span><span class="n">theta_V</span><span class="p">,</span> <span class="n">phi_V</span><span class="p">),</span>
+    <span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">coords</span></div>
+
+
+<div class="viewcode-block" id="antenna_responses"><a class="viewcode-back" href="../../gw_utils_ref.html#kuibit.gw_utils.antenna_responses">[docs]</a><span class="k">def</span> <span class="nf">antenna_responses</span><span class="p">(</span><span class="n">theta</span><span class="p">,</span> <span class="n">phi</span><span class="p">,</span> <span class="n">polarization</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Return the antenna response pattern of a detector on the z = 0 plane</span>
+<span class="sd">    with the arms on the x and y directions for a given localization defined</span>
+<span class="sd">    by the spherical angles ``theta`` and ``phi``.</span>
+
+<span class="sd">    :param theta: Meridional angle.</span>
+<span class="sd">    :type theta: float</span>
+<span class="sd">    :param phi: Azimuthal angle.</span>
+<span class="sd">    :type phi: float</span>
+<span class="sd">    :param polarization: Polarization angle of the wave.</span>
+<span class="sd">    :type polarization: float</span>
+
+<span class="sd">    :returns: Antenna response for cross and plus polarizations (in this order).</span>
+<span class="sd">    :rtype: tuple of floats.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># http://research.physics.illinois.edu/cta/movies/bhbh_sim/wavestrain.html</span>
+
+    <span class="n">Fp</span> <span class="o">=</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">theta</span><span class="p">)</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">theta</span><span class="p">))</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">phi</span><span class="p">)</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span>
+        <span class="mi">2</span> <span class="o">*</span> <span class="n">polarization</span>
+    <span class="p">)</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">theta</span><span class="p">)</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">phi</span><span class="p">)</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">polarization</span><span class="p">)</span>
+    <span class="n">Fc</span> <span class="o">=</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">theta</span><span class="p">)</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">theta</span><span class="p">))</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">phi</span><span class="p">)</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span>
+        <span class="mi">2</span> <span class="o">*</span> <span class="n">polarization</span>
+    <span class="p">)</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">theta</span><span class="p">)</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">phi</span><span class="p">)</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">polarization</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="p">(</span><span class="n">Fc</span><span class="p">,</span> <span class="n">Fp</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="antenna_responses_from_sky_localization"><a class="viewcode-back" href="../../gw_utils_ref.html#kuibit.gw_utils.antenna_responses_from_sky_localization">[docs]</a><span class="k">def</span> <span class="nf">antenna_responses_from_sky_localization</span><span class="p">(</span>
+    <span class="n">right_ascension</span><span class="p">,</span> <span class="n">declination</span><span class="p">,</span> <span class="n">time_utc</span><span class="p">,</span> <span class="n">polarization</span><span class="o">=</span><span class="mi">0</span>
+<span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Return the antenna responses for Hanford, Livingston and Virgo for a</span>
+<span class="sd">    given source.</span>
+
+<span class="sd">    See,</span>
+<span class="sd">    http://research.physics.illinois.edu/cta/movies/bhbh_sim/wavestrain.html.</span>
+
+<span class="sd">    ``utc_time`` has to have the following formatting: ``%Y-%m-%d %H:%M``,</span>
+<span class="sd">    (eg ``2015-09-14 09:50:45``)</span>
+
+<span class="sd">    :param right_ascension: Right ascension of the source in degrees</span>
+<span class="sd">    :type right_ascension: float</span>
+<span class="sd">    :param declination: Declination of the source in degrees</span>
+<span class="sd">    :type declination: float</span>
+<span class="sd">    :param time_utc: UTC time of the event</span>
+<span class="sd">    :type declination: str</span>
+<span class="sd">    :param polarization: Polarization of the wave</span>
+<span class="sd">    :type polarization: float</span>
+
+<span class="sd">    :returns antenna_pattern: Cross and plus antenna pattern for the different</span>
+<span class="sd">                             interferometers.</span>
+<span class="sd">    :rtype: namedtuple with fields hanford, livingston, and virgo</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">coords</span> <span class="o">=</span> <span class="n">ra_dec_to_theta_phi</span><span class="p">(</span><span class="n">right_ascension</span><span class="p">,</span> <span class="n">declination</span><span class="p">,</span> <span class="n">time_utc</span><span class="p">)</span>
+
+    <span class="n">Fc_H</span><span class="p">,</span> <span class="n">Fp_H</span> <span class="o">=</span> <span class="n">antenna_responses</span><span class="p">(</span><span class="o">*</span><span class="n">coords</span><span class="o">.</span><span class="n">hanford</span><span class="p">,</span> <span class="n">polarization</span><span class="p">)</span>
+    <span class="n">Fc_L</span><span class="p">,</span> <span class="n">Fp_L</span> <span class="o">=</span> <span class="n">antenna_responses</span><span class="p">(</span><span class="o">*</span><span class="n">coords</span><span class="o">.</span><span class="n">livingston</span><span class="p">,</span> <span class="n">polarization</span><span class="p">)</span>
+    <span class="n">Fc_V</span><span class="p">,</span> <span class="n">Fp_V</span> <span class="o">=</span> <span class="n">antenna_responses</span><span class="p">(</span><span class="o">*</span><span class="n">coords</span><span class="o">.</span><span class="n">virgo</span><span class="p">,</span> <span class="n">polarization</span><span class="p">)</span>
+
+    <span class="n">antenna</span> <span class="o">=</span> <span class="n">Detectors</span><span class="p">(</span>
+        <span class="n">hanford</span><span class="o">=</span><span class="p">(</span><span class="n">Fc_H</span><span class="p">,</span> <span class="n">Fp_H</span><span class="p">),</span>
+        <span class="n">livingston</span><span class="o">=</span><span class="p">(</span><span class="n">Fc_L</span><span class="p">,</span> <span class="n">Fp_L</span><span class="p">),</span>
+        <span class="n">virgo</span><span class="o">=</span><span class="p">(</span><span class="n">Fc_V</span><span class="p">,</span> <span class="n">Fp_V</span><span class="p">),</span>
+    <span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">antenna</span></div>
+
+
+<span class="c1"># Extrapolation of GWs at infinity.</span>
+<span class="c1"># Follows what done in the NRAR collaboration (1307.5307)</span>
+<span class="c1"># This is what we are going to do:</span>
+
+<span class="c1"># 1. Assume that the spacetime is almost Schwarzschild with mass M.</span>
+<span class="c1"># 2. Choose a set of retarded times u_i where GWs have to be evaluated</span>
+<span class="c1"># 3. Compute the coordinate times t_i that correspond to the retarded</span>
+<span class="c1">#    times u_i at the radius r. This uses tortoise coordinates.</span>
+<span class="c1"># 4. Interpolate the waveforms at the coordinate times corresponding to</span>
+<span class="c1">#    the retarded times u_i for different extraction radii.</span>
+<span class="c1">#    Now our waves are so that they are evaluate at different t_i but at</span>
+<span class="c1">#    the same u_i.</span>
+<span class="c1"># 5. We do this process for a bunch of extraction radii (rex1, rex2, rex3, ...)</span>
+<span class="c1">#    So, we should have wave1, wave2, wave3, with all the same number of</span>
+<span class="c1">#    points that correspond to the same retarded time.</span>
+<span class="c1"># 6. For each element in u_i, fit all the waves (wave1, wave2, ...) with a</span>
+<span class="c1">#    polynomial of the form a_n/r^n.</span>
+
+
+<div class="viewcode-block" id="Schwarzschild_radius_to_tortoise"><a class="viewcode-back" href="../../gw_utils_ref.html#kuibit.gw_utils.Schwarzschild_radius_to_tortoise">[docs]</a><span class="k">def</span> <span class="nf">Schwarzschild_radius_to_tortoise</span><span class="p">(</span><span class="n">radii</span><span class="p">,</span> <span class="n">mass</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Transform radial coordinates ``radii`` to tortoise coordinates assuming mass</span>
+<span class="sd">    ``mass``.</span>
+
+<span class="sd">    Equation (26) in 1307.5307.</span>
+
+<span class="sd">    :param radii: Radius in Schwarzschild coordinates.</span>
+<span class="sd">    :type radii: float or 1D NumPy array</span>
+<span class="sd">    :param mass: ADM mass.</span>
+<span class="sd">    :type mass: float</span>
+
+<span class="sd">    :returns: Tortoise radii.</span>
+<span class="sd">    :rtype: float or 1D NumPy array</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">radii</span> <span class="o">+</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">mass</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">radii</span> <span class="o">/</span> <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">mass</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="retarded_times_to_coordinate_times"><a class="viewcode-back" href="../../gw_utils_ref.html#kuibit.gw_utils.retarded_times_to_coordinate_times">[docs]</a><span class="k">def</span> <span class="nf">retarded_times_to_coordinate_times</span><span class="p">(</span><span class="n">retarded_times</span><span class="p">,</span> <span class="n">radii</span><span class="p">,</span> <span class="n">mass</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Compute the coordinate times corresponding to the retarded times at the</span>
+<span class="sd">      coordinate radii.</span>
+
+<span class="sd">    First, the tortoise radius is computed from ``radii``, then the</span>
+<span class="sd">    coordinate times are computed with :math:`t = u + r_{tortoise}(radii)`.</span>
+
+<span class="sd">    This function is used to extrapolate gravitational waves to infinity.</span>
+
+<span class="sd">    :param retarded_times: Retarded times.</span>
+<span class="sd">    :type retarded_times: float or 1D NumPy array</span>
+<span class="sd">    :param radii: Radii of evaluation.</span>
+<span class="sd">    :type radii: float or 1D NumPy array</span>
+<span class="sd">    :param mass: ADM mass (needed to compute tortoise radius).</span>
+<span class="sd">    :type mass: float</span>
+
+<span class="sd">    :returns: Coordinate times corresponding to the given retarded times</span>
+<span class="sd">              and evaluation radii.</span>
+<span class="sd">    :rtype: float or 1D NumPy array</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">retarded_times</span> <span class="o">+</span> <span class="n">Schwarzschild_radius_to_tortoise</span><span class="p">(</span><span class="n">radii</span><span class="p">,</span> <span class="n">mass</span><span class="p">)</span></div>
+
+
+<span class="k">def</span> <span class="nf">_coordinate_times_to_retarded_times</span><span class="p">(</span><span class="n">coordinate_times</span><span class="p">,</span> <span class="n">radii</span><span class="p">,</span> <span class="n">mass</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Compute the coordinate times corresponding to the retarded times</span>
+<span class="sd">      at the given coordinate radii.</span>
+
+<span class="sd">    This function is used to extrapolate gravitational waves to infinity.</span>
+
+<span class="sd">    :param retarded_times: Coordinate times.</span>
+<span class="sd">    :type retarded_times: float or 1D NumPy array</span>
+<span class="sd">    :param radii: Radii (it can be just one)</span>
+<span class="sd">    :type radii: float or 1D NumPy array</span>
+<span class="sd">    :param mass: ADM mass</span>
+<span class="sd">    :type mass: float</span>
+
+<span class="sd">    :returns: Retarded times corresponding to the given coordinate times</span>
+<span class="sd">              and evaluation radii.</span>
+<span class="sd">    :rtype: float or 1D NumPy array</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">coordinate_times</span> <span class="o">-</span> <span class="n">Schwarzschild_radius_to_tortoise</span><span class="p">(</span><span class="n">radii</span><span class="p">,</span> <span class="n">mass</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="signal_to_noise_ratio_from_strain"><a class="viewcode-back" href="../../gw_utils_ref.html#kuibit.gw_utils.signal_to_noise_ratio_from_strain">[docs]</a><span class="k">def</span> <span class="nf">signal_to_noise_ratio_from_strain</span><span class="p">(</span>
+    <span class="n">h</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="n">noise</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">fmin</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">fmax</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">inf</span><span class="p">,</span> <span class="n">window_function</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span>
+<span class="p">):</span>
+<span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Return the signal to noise ratio given a strain and a power spectal density</span>
+<span class="sd">    distribution for a detector.</span>
+
+<span class="sd">    If ``window_function`` is not None, the window will be applied to the signal.</span>
+<span class="sd">    All the unknown arguments are passed to the window function.</span>
+
+<span class="sd">    The SNR is computed as :math:`sqrt of 4 \int_fmin^fmax |\tilde{h} f|^2 / Sn(f) d f`</span>
+<span class="sd">    (equation from 1408.0740)</span>
+
+<span class="sd">    :param h: Gravitational-wave strain.</span>
+<span class="sd">    :type h: :py:class:`~.TimeSeries`</span>
+<span class="sd">    :param noise: Power spectral density of the noise of the detector.</span>
+<span class="sd">    :type noise: :py:class:`~.FrequencySeries`</span>
+<span class="sd">    :param fmin: Minimum frequency over which to compute the SNR.</span>
+<span class="sd">    :type fmin: float</span>
+<span class="sd">    :param fmax: Maximum frequency over which to compute the SNR.</span>
+<span class="sd">    :type fmax: float</span>
+<span class="sd">    :param window_function: If not None, apply ``window_function`` to the</span>
+<span class="sd">                            series before computing the strain.</span>
+<span class="sd">    :type window_function: callable, str, or None</span>
+<span class="sd">    :param args, kwargs: All the additional parameters are passed to</span>
+<span class="sd">                         the window function.</span>
+
+<span class="sd">    :returns: Signal-to-noise ratio.</span>
+<span class="sd">    :rtype: float</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">h</span><span class="p">,</span> <span class="n">ts</span><span class="o">.</span><span class="n">TimeSeries</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;Strain has to be a TimeSeries&quot;</span><span class="p">)</span>
+    <span class="c1"># First, we window to avoid spectral leakage</span>
+    <span class="n">h_win</span> <span class="o">=</span> <span class="n">h</span><span class="o">.</span><span class="n">windowed</span><span class="p">(</span><span class="n">window_function</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+    <span class="c1"># Then, we take the Fourier transform</span>
+    <span class="n">h_fft</span> <span class="o">=</span> <span class="n">h_win</span><span class="o">.</span><span class="n">to_FrequencySeries</span><span class="p">()</span>
+    <span class="c1"># The SNR is just the inner product of h_fft with itself</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span>
+        <span class="n">h_fft</span><span class="o">.</span><span class="n">inner_product</span><span class="p">(</span><span class="n">h_fft</span><span class="p">,</span> <span class="n">noises</span><span class="o">=</span><span class="n">noise</span><span class="p">,</span> <span class="n">fmin</span><span class="o">=</span><span class="n">fmin</span><span class="p">,</span> <span class="n">fmax</span><span class="o">=</span><span class="n">fmax</span><span class="p">)</span>
+    <span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="effective_amplitude_spectral_density"><a class="viewcode-back" href="../../gw_utils_ref.html#kuibit.gw_utils.effective_amplitude_spectral_density">[docs]</a><span class="k">def</span> <span class="nf">effective_amplitude_spectral_density</span><span class="p">(</span>
+    <span class="n">strain</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="n">window_function</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span>
+<span class="p">):</span>
+<span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Return the effective amplitude spectral density for a given</span>
+<span class="sd">    strain.</span>
+
+<span class="sd">    If ``window_function`` is not None, the window will be applied to the</span>
+<span class="sd">    signal. All the unknown arguments are passed to the window function.</span>
+
+<span class="sd">    The effective amplitude spectral density is computed for a strain (h)</span>
+<span class="sd">    as :math:`h_{\rm eff}(f) = f * \sqrt{(|h_{+}|^2 + |h_{\times}|^2) / 2.0}`</span>
+<span class="sd">    (see for instance 1604.00246)</span>
+
+<span class="sd">    :param strain: Gravitational-wave strain.</span>
+<span class="sd">    :type strain: :py:class:`~.TimeSeries`</span>
+<span class="sd">    :param window_function: If not None, apply ``window_function`` to the</span>
+<span class="sd">                            series before computing the strain.</span>
+<span class="sd">    :type window_function: callable, str, or None</span>
+<span class="sd">    :param args, kwargs: All the additional parameters are passed to</span>
+<span class="sd">                         the window function.</span>
+
+<span class="sd">    :returns: Effective amplitude spectral density</span>
+<span class="sd">    :rtype: :py:class:`~.FrequencySeries`</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">strain</span><span class="p">,</span> <span class="n">ts</span><span class="o">.</span><span class="n">TimeSeries</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;Strain has to be a TimeSeries&quot;</span><span class="p">)</span>
+
+    <span class="c1"># First, ensure we operate on a regularly sampled copy</span>
+    <span class="n">strain_regular</span> <span class="o">=</span> <span class="n">strain</span><span class="o">.</span><span class="n">regular_resampled</span><span class="p">()</span>
+
+    <span class="c1"># Next, we window to avoid spectral leakage</span>
+    <span class="k">if</span> <span class="n">window_function</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">strain_regular</span><span class="o">.</span><span class="n">window</span><span class="p">(</span><span class="n">window_function</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+    <span class="c1"># We extract the plus and cross components of the strain</span>
+
+    <span class="c1"># Note: for an unaltered kuibit strain, this will in reality be</span>
+    <span class="c1"># r * hp, r * hc respectively</span>
+    <span class="n">h_plus</span> <span class="o">=</span> <span class="n">strain_regular</span><span class="o">.</span><span class="n">real</span><span class="p">()</span>
+    <span class="n">h_cross</span> <span class="o">=</span> <span class="o">-</span><span class="n">strain_regular</span><span class="o">.</span><span class="n">imag</span><span class="p">()</span>
+
+    <span class="c1"># Then, we take the Fourier transform. By extracting hp and hc seperately we</span>
+    <span class="c1"># obtain the real signal only in the positive frequency space</span>
+    <span class="n">hp_fft</span> <span class="o">=</span> <span class="n">h_plus</span><span class="o">.</span><span class="n">to_FrequencySeries</span><span class="p">()</span>
+    <span class="n">hc_fft</span> <span class="o">=</span> <span class="n">h_cross</span><span class="o">.</span><span class="n">to_FrequencySeries</span><span class="p">()</span>
+
+    <span class="c1"># Finally, we can compute the effective strain amplitude power spectral</span>
+    <span class="c1"># density akin to [Eq (8-9) in 1604.00246]. To save some space, we write</span>
+    <span class="c1"># the return value is `hp_fft`.</span>
+    <span class="n">h_eff</span> <span class="o">=</span> <span class="n">hp_fft</span>
+    <span class="n">h_eff</span><span class="o">.</span><span class="n">fft</span> <span class="o">=</span> <span class="n">h_eff</span><span class="o">.</span><span class="n">f</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">((</span><span class="n">hp_fft</span><span class="o">.</span><span class="n">amp</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="n">hc_fft</span><span class="o">.</span><span class="n">amp</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span> <span class="o">/</span> <span class="mf">2.0</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">h_eff</span></div>
+</pre></div>
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="../../index.html">
+              <img class="logo" src="../../_static/logo.png" alt="Logo"/>
+            </a></p>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>document.getElementById('searchbox').style.display = "block"</script><div role="note" aria-label="version link">
+  <h3>Versions</h3>
+    <ul class="this-page-menu">
+      <li><a href="../../dev/_modules/kuibit/gw_utils.html" rel="nofollow"> Development </a></li>
+      <li><a href="#" rel="nofollow"> Master </a></li>
+
+      
+      <li><a href="../../1.3.6/_modules/kuibit/gw_utils.html" rel="nofollow"> 1.3.6 </a></li>
+      
+      <li><a href="../../1.4.0/_modules/kuibit/gw_utils.html" rel="nofollow"> 1.4.0 </a></li>
+      
+      <li><a href="../../1.4.1/_modules/kuibit/gw_utils.html" rel="nofollow"> 1.4.1 </a></li>
+      
+      <li><a href="../../1.5.0/_modules/kuibit/gw_utils.html" rel="nofollow"> 1.5.0 </a></li>
+      
+
+    </ul>
+ </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">kuibit 1.5.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../index.html" >Module code</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">kuibit.gw_utils</a></li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2020-2024, Gabriele Bozzola.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 6.2.1.
+    </div>
+  </body>
+</html>
