@@ -87,7 +87,7 @@ html_sidebars = {
     ],
 }
 
-html_context = {"versions": ["1.3.6", "1.4.0", "1.4.1", "1.5.0"]}
+html_context = {"versions": ["1.3.6", "1.4.0", "1.5.0"]}
 
 html_theme_options = {
     "maincolor": "#228B22",
