@@ -1199,7 +1199,10 @@ class OneGridFunctionH5(BaseOneGridFunction):
             with h5py.File(path, "r") as file_:
                 parameters = file_["Parameters and Global Attributes"]
                 all_pars = (
-                    parameters["All Parameters"][()].decode().split("\n")
+                    parameters["All Parameters"][()]
+                    .tostring()
+                    .decode()
+                    .split("\n")
                 )
                 # We make sure that everything is lowercase, we are case insensitive
                 iohdf5_pars = [

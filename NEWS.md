@@ -1,5 +1,12 @@
 # Changelog
 
+## Version 1.5.1 
+
+#### Bug fixes
+
+- Add support to ready HDF5 files created with very old versions of Carpet (<
+  2012).
+
 ## Version 1.5.0 (19 June 2024)
 
 #### General
