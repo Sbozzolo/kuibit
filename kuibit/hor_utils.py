@@ -165,7 +165,7 @@ def compute_center_of_mass(
     """
     cen1, cen2 = _two_centroids_as_Vectors(horizon1, horizon2, resample)
 
-    # Here we use the fact that the irreducible_mass is proportional to the
+    # Here we use the fact that the irreducible_mass is proportional to the square root of the
     # area. We prefer using the area because it is always available when the
     # centroids are available.
 
@@ -177,10 +177,15 @@ def compute_center_of_mass(
         resample=resample,
     )
 
-    # This is morally "total mass" (irreducible_mass = area / 4pi)
-    total_area = area1 + area2
+    # This is morally "total mass" (irreducible_mass \propto sqrt(area))
+    area1_sqrt = area1**0.5
+    area2_sqrt = area2**0.5
+    total_area_sqrt = area1_sqrt + area2_sqrt
 
-    return area1 * cen1 / total_area + area2 * cen2 / total_area
+    return (
+        area1_sqrt * cen1 / total_area_sqrt
+        + area2_sqrt * cen2 / total_area_sqrt
+    )
 
 
 def compute_angular_velocity_vector(
