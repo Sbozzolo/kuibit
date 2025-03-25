@@ -178,11 +178,14 @@ def compute_center_of_mass(
     )
 
     # This is morally "total mass" (irreducible_mass \propto sqrt(area))
-    area1_sqrt = area1 ** 0.5
-    area2_sqrt = area2 ** 0.5
+    area1_sqrt = area1**0.5
+    area2_sqrt = area2**0.5
     total_area_sqrt = area1_sqrt + area2_sqrt
 
-    return area1_sqrt * cen1 / total_area_sqrt + area2_sqrt * cen2 / total_area_sqrt
+    return (
+        area1_sqrt * cen1 / total_area_sqrt
+        + area2_sqrt * cen2 / total_area_sqrt
+    )
 
 
 def compute_angular_velocity_vector(
