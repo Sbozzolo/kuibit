@@ -15,8 +15,7 @@
 # You should have received a copy of the GNU General Public License along with
 # this program; if not, see <https://www.gnu.org/licenses/>.
 
-"""Tests for kuibit.grid_data_utils
-"""
+"""Tests for kuibit.grid_data_utils"""
 
 import unittest
 
