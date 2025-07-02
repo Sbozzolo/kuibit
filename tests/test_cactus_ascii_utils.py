@@ -19,8 +19,7 @@
 # You should have received a copy of the GNU General Public License along with
 # this program; if not, see <https://www.gnu.org/licenses/>.
 
-"""Tests for kuibit.cactus_ascii_utils
-"""
+"""Tests for kuibit.cactus_ascii_utils"""
 import unittest
 
 from kuibit import cactus_ascii_utils as cau

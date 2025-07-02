@@ -888,7 +888,9 @@ class BaseSeries(BaseNumerical):
         passing_x = self.x if dx is None else None
         return type(self)(
             self.x,
-            integrate.cumtrapz(self.y, x=passing_x, dx=dx, initial=0),
+            integrate.cumulative_trapezoid(
+                self.y, x=passing_x, dx=dx, initial=0
+            ),
             True,
         )
 
