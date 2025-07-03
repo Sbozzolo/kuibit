@@ -133,7 +133,7 @@ class TestCactusWaves(unittest.TestCase):
         psi4lm *= self.psi4.dist
 
         # Test when window is a function
-        ham_array = signal.hamming(len(psi4lm))
+        ham_array = signal.get_window("hamming", len(psi4lm))
         ham_psi4lm = psi4lm.copy()
         ham_psi4lm.y *= ham_array
         ffi_ham = self.psi4._fixed_frequency_integrated(
@@ -142,7 +142,7 @@ class TestCactusWaves(unittest.TestCase):
 
         np.testing.assert_allclose(
             self.psi4.get_strain_lm(
-                2, 2, 0.1, window_function=signal.hamming, trim_ends=False
+                2, 2, 0.1, window_function="hamming", trim_ends=False
             ).y,
             ffi_ham,
         )

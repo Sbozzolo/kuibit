@@ -755,8 +755,7 @@ class TimeSeries(BaseSeries):
         the number of points of the signal. ``window_function`` can take
         additional arguments as passed by ``windowed``. Alternatively,
         ``window_function`` can be a string with the name of the window
-        function, if this is already implemented in :py:class:`~.TimeSeries`
-        (e.g., ``tukey``).
+        function, as implemented in `scipy.signal`.
 
         :param window_function: Window function to apply to the timeseries.
         :type window_function: callable or str
@@ -779,11 +778,10 @@ class TimeSeries(BaseSeries):
             return TimeSeries(regular_ts.t, regular_ts.y * window_array)
 
         if isinstance(window_function, str):
-            window_function_method = f"{window_function}_windowed"
-            if not hasattr(self, window_function_method):
-                raise ValueError(f"Window {window_function} not implemented")
-            window_function_callable = getattr(self, window_function_method)
-            return window_function_callable(*args, **kwargs)
+            window_array = signal.get_window(
+                window_function, len(regular_ts), *args, **kwargs
+            )
+            return TimeSeries(regular_ts.t, regular_ts.y * window_array)
 
         raise TypeError("Window function is neither a callable or a string")
 
@@ -814,7 +812,7 @@ class TimeSeries(BaseSeries):
         :rtype:    :py:class:`~.TimeSeries`
 
         """
-        return self.windowed(signal.tukey, alpha)
+        return self.windowed("tukey", alpha)
 
     def tukey_window(self, alpha):
         """Apply Tukey window with parameter ``alpha``.
@@ -823,7 +821,7 @@ class TimeSeries(BaseSeries):
         :type alpha: float
 
         """
-        self.window(signal.tukey, alpha)
+        self.window("tukey", alpha)
 
     def hamming_windowed(self):
         """Return a timeseries with Hamming window applied.
@@ -832,19 +830,19 @@ class TimeSeries(BaseSeries):
         :rtype:    :py:class:`~.TimeSeries`
 
         """
-        return self.windowed(signal.hamming)
+        return self.windowed("hamming")
 
     def hamming_window(self):
         """Apply Hamming window."""
-        self.window(signal.hamming)
+        self.window("hamming")
 
     def blackman_windowed(self):
         """Return a timeseries with Blackman window applied."""
-        return self.windowed(signal.blackman)
+        return self.windowed("blackman")
 
     def blackman_window(self):
         """Apply Blackman window."""
-        self.window(signal.blackman)
+        self.window("blackman")
 
     def savgol_smoothed_time(self, tsmooth, order=3):
         """Return a resampled timeseries with uniform timesteps, smoothed with
