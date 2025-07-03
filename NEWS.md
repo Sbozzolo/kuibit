@@ -1,11 +1,19 @@
 # Changelog
 
-## Version 1.5.1 
+## Version 1.5.1 (2 July 2025)
+
+#### General
+- Python 3.13 is now supported.
 
 #### Bug fixes
 
-- Add support to ready HDF5 files created with very old versions of Carpet (<
+- Added support to ready HDF5 files created with very old versions of Carpet (<
   2012).
+- Fixed calculation of masses in `hor_utils`. Previously the mass was assumed
+  proportional to the area (and not its squared root) (@xuyumeng)
+- Fixed outdated call to `scipy.integrated.cumtrapz` (@meyersbs)
+- Fixed applications of window functions with new versions of SciPy
+- Fixed NumPy deprecation warnings
 
 ## Version 1.5.0 (19 June 2024)
 
