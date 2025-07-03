@@ -45,6 +45,7 @@ The functions provided are:
 """
 
 import datetime
+import math
 from collections import namedtuple
 
 import numpy as np
@@ -96,7 +97,14 @@ def luminosity_distance_to_redshift(
             def DL_integral(z):
                 return 1 / np.sqrt(Omega_m * (1 + z) ** 3 + Omega_L)
 
-            return c / H0 * (1 + z) * integrate.quad(DL_integral, 0, z)[0]
+            # For 0D arrays
+            z_scalar = (
+                float(z.item()) if isinstance(z, np.ndarray) else float(z)
+            )
+
+            return (
+                c / H0 * (1 + z) * integrate.quad(DL_integral, 0, z_scalar)[0]
+            )
 
         return np.abs(distance_in_m - z_to_DL(z))
 
@@ -153,13 +161,13 @@ def sYlm(ss, ll, mm, theta, phi):
             Pm = Pm * np.power(1.0 - x, (local_m + local_s) * 1.0 / 2)
 
         Pm = Pm * np.sqrt(
-            np.math.factorial(2 * local_m + 1)
+            math.factorial(2 * local_m + 1)
             * 1.0
             / (
                 4.0
                 * np.pi
-                * np.math.factorial(local_m + local_s)
-                * np.math.factorial(local_m - local_s)
+                * math.factorial(local_m + local_s)
+                * math.factorial(local_m - local_s)
             )
         )
 

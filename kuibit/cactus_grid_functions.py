@@ -1200,7 +1200,7 @@ class OneGridFunctionH5(BaseOneGridFunction):
                 parameters = file_["Parameters and Global Attributes"]
                 all_pars = (
                     parameters["All Parameters"][()]
-                    .tostring()
+                    .tobytes()
                     .decode()
                     .split("\n")
                 )
