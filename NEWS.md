@@ -1,5 +1,7 @@
 # Changelog
 
+## Version 1.5.2 (2 July 2025)
+(Version 1.5.1 was not published due to an error with the workflow)
 ## Version 1.5.1 (2 July 2025)
 
 #### General
