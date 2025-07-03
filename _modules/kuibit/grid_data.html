@@ -6,7 +6,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>kuibit.grid_data &#8212; kuibit 1.5.0 documentation</title>
+    <title>kuibit.grid_data &#8212; kuibit 1.5.1 documentation</title>
     <link rel="stylesheet" type="text/css" href="../../_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="../../_static/bizstyle.css" />
     <link rel="stylesheet" type="text/css" href="../../_static/css/custom.css" />
@@ -32,7 +32,7 @@
         <li class="right" >
           <a href="../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../index.html">kuibit 1.5.0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">kuibit 1.5.1 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="../index.html" accesskey="U">Module code</a> &#187;</li>
         <li class="nav-item nav-item-this"><a href="">kuibit.grid_data</a></li> 
       </ul>
@@ -46,7 +46,7 @@
   <h1>Source code for kuibit.grid_data</h1><div class="highlight"><pre>
 <span></span><span class="ch">#!/usr/bin/env python3</span>
 
-<span class="c1"># Copyright (C) 2020-2024 Gabriele Bozzola</span>
+<span class="c1"># Copyright (C) 2020-2025 Gabriele Bozzola</span>
 <span class="c1">#</span>
 <span class="c1"># Inspired by code originally developed by Wolfgang Kastaun. This file may</span>
 <span class="c1"># contain algorithms and/or structures first implemented in</span>
@@ -85,24 +85,24 @@
 <span class="sd">with.</span>
 
 <span class="sd">&quot;&quot;&quot;</span>
-<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">annotations</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
 
-<span class="kn">import</span> <span class="nn">warnings</span>
-<span class="kn">from</span> <span class="nn">bisect</span> <span class="kn">import</span> <span class="n">bisect_right</span>
-<span class="kn">from</span> <span class="nn">os.path</span> <span class="kn">import</span> <span class="n">splitext</span>
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Iterable</span><span class="p">,</span> <span class="n">Optional</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">warnings</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">bisect</span><span class="w"> </span><span class="kn">import</span> <span class="n">bisect_right</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">os.path</span><span class="w"> </span><span class="kn">import</span> <span class="n">splitext</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Iterable</span><span class="p">,</span> <span class="n">Optional</span>
 
-<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="kn">from</span> <span class="nn">scipy</span> <span class="kn">import</span> <span class="n">interpolate</span><span class="p">,</span> <span class="n">linalg</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">scipy</span><span class="w"> </span><span class="kn">import</span> <span class="n">interpolate</span><span class="p">,</span> <span class="n">linalg</span>
 
-<span class="kn">from</span> <span class="nn">kuibit</span> <span class="kn">import</span> <span class="n">grid_data_utils</span> <span class="k">as</span> <span class="n">gdu</span>
-<span class="kn">from</span> <span class="nn">kuibit.numerical</span> <span class="kn">import</span> <span class="n">BaseNumerical</span>
-<span class="kn">from</span> <span class="nn">kuibit.series</span> <span class="kn">import</span> <span class="n">BaseSeries</span>
-<span class="kn">from</span> <span class="nn">kuibit.tensor</span> <span class="kn">import</span> <span class="n">Tensor</span>
-<span class="kn">from</span> <span class="nn">kuibit.uniform_grid</span> <span class="kn">import</span> <span class="n">UniformGrid</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">kuibit</span><span class="w"> </span><span class="kn">import</span> <span class="n">grid_data_utils</span> <span class="k">as</span> <span class="n">gdu</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">kuibit.numerical</span><span class="w"> </span><span class="kn">import</span> <span class="n">BaseNumerical</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">kuibit.series</span><span class="w"> </span><span class="kn">import</span> <span class="n">BaseSeries</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">kuibit.tensor</span><span class="w"> </span><span class="kn">import</span> <span class="n">Tensor</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">kuibit.uniform_grid</span><span class="w"> </span><span class="kn">import</span> <span class="n">UniformGrid</span>
 
 
-<div class="viewcode-block" id="GridSeries"><a class="viewcode-back" href="../../grid_data_ref.html#kuibit.grid_data.GridSeries">[docs]</a><span class="k">class</span> <span class="nc">GridSeries</span><span class="p">(</span><span class="n">BaseSeries</span><span class="p">):</span>
+<div class="viewcode-block" id="GridSeries"><a class="viewcode-back" href="../../grid_data_ref.html#kuibit.grid_data.GridSeries">[docs]</a><span class="k">class</span><span class="w"> </span><span class="nc">GridSeries</span><span class="p">(</span><span class="n">BaseSeries</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;One-dimensional grid data, handled with the Series infrastructure.</span>
 
 <span class="sd">    When the data is one dimensional, sometimes it is more convenient to treat</span>
@@ -116,7 +116,7 @@
 <span class="sd">    :type y: 1D NumPy array</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">_</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">_</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Constructor.</span>
 
 <span class="sd">        The third argument can be anything. It is required to ensure</span>
@@ -131,7 +131,7 @@
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">guarantee_x_is_monotonic</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="UniformGridData"><a class="viewcode-back" href="../../grid_data_ref.html#kuibit.grid_data.UniformGridData">[docs]</a><span class="k">class</span> <span class="nc">UniformGridData</span><span class="p">(</span><span class="n">BaseNumerical</span><span class="p">):</span>
+<div class="viewcode-block" id="UniformGridData"><a class="viewcode-back" href="../../grid_data_ref.html#kuibit.grid_data.UniformGridData">[docs]</a><span class="k">class</span><span class="w"> </span><span class="nc">UniformGridData</span><span class="p">(</span><span class="n">BaseNumerical</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Represents a rectangular data grid with coordinates, supporting</span>
 <span class="sd">    common arithmetic operations.</span>
 
@@ -164,7 +164,7 @@
     <span class="c1"># mathematical operators for free, as long as we defined _apply_unary</span>
     <span class="c1"># and _apply_binary.</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">grid</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">grid</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        :param grid: Uniform grid over which the data is defined.</span>
 <span class="sd">        :type grid: :py:class:`~.UniformGrid`</span>
@@ -195,7 +195,7 @@
     <span class="c1"># This is a class method. It doesn&#39;t depend on the specific instance, and</span>
     <span class="c1"># it is used as an alternative constructor.</span>
 <div class="viewcode-block" id="UniformGridData.from_grid_structure"><a class="viewcode-back" href="../../grid_data_ref.html#kuibit.grid_data.UniformGridData.from_grid_structure">[docs]</a>    <span class="nd">@classmethod</span>
-    <span class="k">def</span> <span class="nf">from_grid_structure</span><span class="p">(</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">from_grid_structure</span><span class="p">(</span>
         <span class="bp">cls</span><span class="p">,</span>
         <span class="n">data</span><span class="p">,</span>
         <span class="n">x0</span><span class="p">,</span>
@@ -242,7 +242,7 @@
         <span class="p">)</span>
         <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">geom</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="UniformGridData.coordinates"><a class="viewcode-back" href="../../grid_data_ref.html#kuibit.grid_data.UniformGridData.coordinates">[docs]</a>    <span class="k">def</span> <span class="nf">coordinates</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="UniformGridData.coordinates"><a class="viewcode-back" href="../../grid_data_ref.html#kuibit.grid_data.UniformGridData.coordinates">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">coordinates</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Return coordinates of the grid points as list of</span>
 <span class="sd">        :py:class:`~.UniformGridData`.</span>
 
@@ -257,7 +257,7 @@
             <span class="k">for</span> <span class="n">coord</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">coordinates_from_grid</span><span class="p">(</span><span class="n">as_same_shape</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
         <span class="p">]</span></div>
 
-<div class="viewcode-block" id="UniformGridData.coordinates_from_grid"><a class="viewcode-back" href="../../grid_data_ref.html#kuibit.grid_data.UniformGridData.coordinates_from_grid">[docs]</a>    <span class="k">def</span> <span class="nf">coordinates_from_grid</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">as_meshgrid</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">as_same_shape</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<div class="viewcode-block" id="UniformGridData.coordinates_from_grid"><a class="viewcode-back" href="../../grid_data_ref.html#kuibit.grid_data.UniformGridData.coordinates_from_grid">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">coordinates_from_grid</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">as_meshgrid</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">as_same_shape</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Return coordinates of the grid points.</span>
 
 <span class="sd">        This is equivalent to ``self.grid.coordinates()``.</span>
@@ -287,7 +287,7 @@
             <span class="n">as_meshgrid</span><span class="o">=</span><span class="n">as_meshgrid</span><span class="p">,</span> <span class="n">as_same_shape</span><span class="o">=</span><span class="n">as_same_shape</span>
         <span class="p">)</span></div>
 
-<div class="viewcode-block" id="UniformGridData.coordinates_meshgrid"><a class="viewcode-back" href="../../grid_data_ref.html#kuibit.grid_data.UniformGridData.coordinates_meshgrid">[docs]</a>    <span class="k">def</span> <span class="nf">coordinates_meshgrid</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="UniformGridData.coordinates_meshgrid"><a class="viewcode-back" href="../../grid_data_ref.html#kuibit.grid_data.UniformGridData.coordinates_meshgrid">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">coordinates_meshgrid</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Return coordinates of the grid points as NumPy meshgrid.</span>
 
 <span class="sd">        This is syntactic sugar useful for plotting with matplotlib.</span>
@@ -298,7 +298,7 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">coordinates_from_grid</span><span class="p">(</span><span class="n">as_meshgrid</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span></div>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">data_xyz</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">data_xyz</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Return the data, but transposed.</span>
 
 <span class="sd">        This is useful when plotting, because we store data in a matrix form,</span>
@@ -311,7 +311,7 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">)</span>
 
-<div class="viewcode-block" id="UniformGridData.save"><a class="viewcode-back" href="../../grid_data_ref.html#kuibit.grid_data.UniformGridData.save">[docs]</a>    <span class="k">def</span> <span class="nf">save</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">file_name</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<div class="viewcode-block" id="UniformGridData.save"><a class="viewcode-back" href="../../grid_data_ref.html#kuibit.grid_data.UniformGridData.save">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">save</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">file_name</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Save data and grid information to a file.</span>
 
 <span class="sd">        Unless the file extension is ``npz``, the output file will ASCII. In</span>
@@ -383,7 +383,7 @@
         <span class="p">)</span></div>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">x0</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">x0</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Lower corner.</span>
 
 <span class="sd">        :returns: Center of lowest corner grid point.</span>
@@ -392,7 +392,7 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">grid</span><span class="o">.</span><span class="n">x0</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">shape</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">shape</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Number of cells across each dimension.</span>
 
 <span class="sd">        :returns: Number of cells across each dimension.</span>
@@ -401,7 +401,7 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">grid</span><span class="o">.</span><span class="n">shape</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">x1</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">x1</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Upper corner.</span>
 
 <span class="sd">        :returns: Center of top corner grid point.</span>
@@ -410,7 +410,7 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">grid</span><span class="o">.</span><span class="n">x1</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">origin</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">origin</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Lower corner.</span>
 
 <span class="sd">        Alias for :py:meth:`~.x0`.</span>
@@ -421,7 +421,7 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">x0</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">dx</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">dx</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Grid spacing.</span>
 
 <span class="sd">        :returns: Cell size across each dimension.</span>
@@ -430,7 +430,7 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">grid</span><span class="o">.</span><span class="n">dx</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">delta</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">delta</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Grid spacing.</span>
 
 <span class="sd">        Alias for :py:meth:`~.dx`.</span>
@@ -441,7 +441,7 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">dx</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">num_ghost</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">num_ghost</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Number of ghost zones.</span>
 
 <span class="sd">        :returns: Number of ghost zones across each dimension.</span>
@@ -450,7 +450,7 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">grid</span><span class="o">.</span><span class="n">num_ghost</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">ref_level</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">ref_level</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Refinement level number.</span>
 
 <span class="sd">        :returns: Refinement level number.</span>
@@ -459,7 +459,7 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">grid</span><span class="o">.</span><span class="n">ref_level</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">component</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">component</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Component number.</span>
 
 <span class="sd">        :returns: Component number.</span>
@@ -468,7 +468,7 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">grid</span><span class="o">.</span><span class="n">component</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">time</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">time</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Time.</span>
 
 <span class="sd">        :returns: Time.</span>
@@ -477,7 +477,7 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">grid</span><span class="o">.</span><span class="n">time</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">iteration</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">iteration</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Iteration number</span>
 
 <span class="sd">        :returns: Iteration number.</span>
@@ -485,10 +485,10 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">grid</span><span class="o">.</span><span class="n">iteration</span>
 
-    <span class="k">def</span> <span class="fm">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
 
-    <span class="k">def</span> <span class="nf">_make_spline</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">k</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_make_spline</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">k</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Private function to make spline representation of the data using</span>
 <span class="sd">        ``scipy.interpolate.RegularGridInterpolator``.</span>
 
@@ -558,7 +558,7 @@
 
         <span class="bp">self</span><span class="o">.</span><span class="n">invalid_spline</span> <span class="o">=</span> <span class="kc">False</span>
 
-    <span class="k">def</span> <span class="nf">_nearest_neighbor_interpolation</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">points</span><span class="p">,</span> <span class="n">ext</span><span class="o">=</span><span class="mi">2</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_nearest_neighbor_interpolation</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">points</span><span class="p">,</span> <span class="n">ext</span><span class="o">=</span><span class="mi">2</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Return data of nearest neighbors of given points x.</span>
 
 <span class="sd">        :param x: Points where to evaluate the data.</span>
@@ -622,7 +622,7 @@
 
         <span class="k">return</span> <span class="n">ret</span>
 
-<div class="viewcode-block" id="UniformGridData.evaluate_with_spline"><a class="viewcode-back" href="../../grid_data_ref.html#kuibit.grid_data.UniformGridData.evaluate_with_spline">[docs]</a>    <span class="k">def</span> <span class="nf">evaluate_with_spline</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">ext</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">piecewise_constant</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<div class="viewcode-block" id="UniformGridData.evaluate_with_spline"><a class="viewcode-back" href="../../grid_data_ref.html#kuibit.grid_data.UniformGridData.evaluate_with_spline">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">evaluate_with_spline</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">ext</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">piecewise_constant</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Evaluate the spline on the points ``x``.</span>
 
 <span class="sd">        Values outside the interval are set to 0 if ``ext=1``, or a</span>
@@ -696,7 +696,7 @@
                 <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_complex</span><span class="p">():</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">spline_imag</span><span class="o">.</span><span class="n">bounds_error</span> <span class="o">=</span> <span class="kc">False</span>
 
-            <span class="k">def</span> <span class="nf">apply_spline</span><span class="p">(</span><span class="n">points</span><span class="p">):</span>
+            <span class="k">def</span><span class="w"> </span><span class="nf">apply_spline</span><span class="p">(</span><span class="n">points</span><span class="p">):</span>
                 <span class="n">y_real</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">spline_real</span><span class="p">(</span><span class="n">points</span><span class="p">)</span>
                 <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_complex</span><span class="p">():</span>
                     <span class="n">y_imag</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">spline_imag</span><span class="p">(</span><span class="n">points</span><span class="p">)</span>
@@ -723,14 +723,14 @@
 
         <span class="k">return</span> <span class="n">ret</span></div>
 
-    <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
         <span class="c1"># TODO (FEATURE): Avoid splines when the data is already available.</span>
         <span class="c1">#</span>
         <span class="c1"># At the moment, the splines are calculated even on points in which</span>
         <span class="c1"># data is available. This is probably inefficient.</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">evaluate_with_spline</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
 
-<div class="viewcode-block" id="UniformGridData.sliced"><a class="viewcode-back" href="../../grid_data_ref.html#kuibit.grid_data.UniformGridData.sliced">[docs]</a>    <span class="k">def</span> <span class="nf">sliced</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cut</span><span class="p">,</span> <span class="n">resample</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<div class="viewcode-block" id="UniformGridData.sliced"><a class="viewcode-back" href="../../grid_data_ref.html#kuibit.grid_data.UniformGridData.sliced">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">sliced</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cut</span><span class="p">,</span> <span class="n">resample</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Return a new :py:class:`~.UniformGridData` obtained slicing the current one.</span>
 
 <span class="sd">        ``cut`` specifies how to slice the data. It has to be an array with the</span>
@@ -868,7 +868,7 @@
         <span class="n">slicer</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">slicer</span><span class="p">)</span>
         <span class="k">return</span> <span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)(</span><span class="n">new_grid</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">slicer</span><span class="p">])</span></div>
 
-<div class="viewcode-block" id="UniformGridData.slice"><a class="viewcode-back" href="../../grid_data_ref.html#kuibit.grid_data.UniformGridData.slice">[docs]</a>    <span class="k">def</span> <span class="nf">slice</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cut</span><span class="p">,</span> <span class="n">resample</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<div class="viewcode-block" id="UniformGridData.slice"><a class="viewcode-back" href="../../grid_data_ref.html#kuibit.grid_data.UniformGridData.slice">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">slice</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cut</span><span class="p">,</span> <span class="n">resample</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Slice the data along given direction.</span>
 
 <span class="sd">        ``cut`` specifies how to slice the data. It has to be an array with the</span>
@@ -892,7 +892,7 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_apply_to_self</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sliced</span><span class="p">,</span> <span class="n">cut</span><span class="o">=</span><span class="n">cut</span><span class="p">,</span> <span class="n">resample</span><span class="o">=</span><span class="n">resample</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="UniformGridData.resampled"><a class="viewcode-back" href="../../grid_data_ref.html#kuibit.grid_data.UniformGridData.resampled">[docs]</a>    <span class="k">def</span> <span class="nf">resampled</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_grid</span><span class="p">,</span> <span class="n">ext</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">piecewise_constant</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<div class="viewcode-block" id="UniformGridData.resampled"><a class="viewcode-back" href="../../grid_data_ref.html#kuibit.grid_data.UniformGridData.resampled">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">resampled</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_grid</span><span class="p">,</span> <span class="n">ext</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">piecewise_constant</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Return a new :py:class:`~.UniformGridData` resampled to ``new_grid``.</span>
 
 <span class="sd">        If you want to resample without using the spline, and you want a nearest</span>
@@ -924,7 +924,7 @@
             <span class="p">),</span>
         <span class="p">)</span></div>
 
-<div class="viewcode-block" id="UniformGridData.is_complex"><a class="viewcode-back" href="../../grid_data_ref.html#kuibit.grid_data.UniformGridData.is_complex">[docs]</a>    <span class="k">def</span> <span class="nf">is_complex</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="UniformGridData.is_complex"><a class="viewcode-back" href="../../grid_data_ref.html#kuibit.grid_data.UniformGridData.is_complex">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">is_complex</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Return whether the data is complex.</span>
 
 <span class="sd">        :returns:  True if the data is complex, false if it is not.</span>
@@ -934,7 +934,7 @@
         <span class="k">return</span> <span class="nb">issubclass</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">dtype</span><span class="o">.</span><span class="n">type</span><span class="p">,</span> <span class="nb">complex</span><span class="p">)</span></div>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">mask</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">mask</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Return where the data is valid (according to the mask).</span>
 
 <span class="sd">        :returns: Array of True/False of the same shape of the data.</span>
@@ -945,7 +945,7 @@
             <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">mask</span>
         <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">bool</span><span class="p">)</span>
 
-<div class="viewcode-block" id="UniformGridData.is_masked"><a class="viewcode-back" href="../../grid_data_ref.html#kuibit.grid_data.UniformGridData.is_masked">[docs]</a>    <span class="k">def</span> <span class="nf">is_masked</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="UniformGridData.is_masked"><a class="viewcode-back" href="../../grid_data_ref.html#kuibit.grid_data.UniformGridData.is_masked">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">is_masked</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Return whether the data is masked.</span>
 
 <span class="sd">        :returns:  True if the data is masked, false if it is not.</span>
@@ -955,10 +955,10 @@
         <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">ma</span><span class="o">.</span><span class="n">is_masked</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">)</span></div>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">dtype</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">dtype</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">dtype</span>
 
-    <span class="k">def</span> <span class="nf">_apply_to_self</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_apply_to_self</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Apply the method ``f`` to ``self``, modifying ``self``.</span>
 
 <span class="sd">        This function is used to implement those methods that act on the object</span>
@@ -974,7 +974,7 @@
         <span class="c1"># We have to recompute the splines</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">invalid_spline</span> <span class="o">=</span> <span class="kc">True</span>
 
-<div class="viewcode-block" id="UniformGridData.flat_dimensions_removed"><a class="viewcode-back" href="../../grid_data_ref.html#kuibit.grid_data.UniformGridData.flat_dimensions_removed">[docs]</a>    <span class="k">def</span> <span class="nf">flat_dimensions_removed</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="UniformGridData.flat_dimensions_removed"><a class="viewcode-back" href="../../grid_data_ref.html#kuibit.grid_data.UniformGridData.flat_dimensions_removed">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">flat_dimensions_removed</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Return a new :py:class:`~.UniformGridData` with dimensions of one grid point</span>
 <span class="sd">        removed.</span>
 
@@ -986,11 +986,11 @@
         <span class="n">new_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">new_grid</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
         <span class="k">return</span> <span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)(</span><span class="n">new_grid</span><span class="p">,</span> <span class="n">new_data</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="UniformGridData.flat_dimensions_remove"><a class="viewcode-back" href="../../grid_data_ref.html#kuibit.grid_data.UniformGridData.flat_dimensions_remove">[docs]</a>    <span class="k">def</span> <span class="nf">flat_dimensions_remove</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="UniformGridData.flat_dimensions_remove"><a class="viewcode-back" href="../../grid_data_ref.html#kuibit.grid_data.UniformGridData.flat_dimensions_remove">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">flat_dimensions_remove</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Remove dimensions which are only one gridpoint large.&quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_apply_to_self</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">flat_dimensions_removed</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="UniformGridData.ghost_zones_removed"><a class="viewcode-back" href="../../grid_data_ref.html#kuibit.grid_data.UniformGridData.ghost_zones_removed">[docs]</a>    <span class="k">def</span> <span class="nf">ghost_zones_removed</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="UniformGridData.ghost_zones_removed"><a class="viewcode-back" href="../../grid_data_ref.html#kuibit.grid_data.UniformGridData.ghost_zones_removed">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">ghost_zones_removed</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Return a new :py:class:`UniformGridData` with all the ghost zones removed.</span>
 
 <span class="sd">        :returns: New :py:class:`UniformGridData` without ghostzones.</span>
@@ -1007,11 +1007,11 @@
         <span class="n">new_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">slicer</span><span class="p">]</span>
         <span class="k">return</span> <span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)(</span><span class="n">new_grid</span><span class="p">,</span> <span class="n">new_data</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="UniformGridData.ghost_zones_remove"><a class="viewcode-back" href="../../grid_data_ref.html#kuibit.grid_data.UniformGridData.ghost_zones_remove">[docs]</a>    <span class="k">def</span> <span class="nf">ghost_zones_remove</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="UniformGridData.ghost_zones_remove"><a class="viewcode-back" href="../../grid_data_ref.html#kuibit.grid_data.UniformGridData.ghost_zones_remove">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">ghost_zones_remove</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Remove all the ghost zones.&quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_apply_to_self</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ghost_zones_removed</span><span class="p">)</span></div>
 
-    <span class="k">def</span> <span class="nf">_roto_reflection_symmetry_undone</span><span class="p">(</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_roto_reflection_symmetry_undone</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">dimension</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
         <span class="n">parity</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
@@ -1235,7 +1235,7 @@
 
         <span class="k">return</span> <span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)(</span><span class="n">new_grid</span><span class="p">,</span> <span class="n">new_data</span><span class="p">)</span>
 
-<div class="viewcode-block" id="UniformGridData.rotation180_symmetry_undone"><a class="viewcode-back" href="../../grid_data_ref.html#kuibit.grid_data.UniformGridData.rotation180_symmetry_undone">[docs]</a>    <span class="k">def</span> <span class="nf">rotation180_symmetry_undone</span><span class="p">(</span>
+<div class="viewcode-block" id="UniformGridData.rotation180_symmetry_undone"><a class="viewcode-back" href="../../grid_data_ref.html#kuibit.grid_data.UniformGridData.rotation180_symmetry_undone">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">rotation180_symmetry_undone</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">dimension</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
         <span class="n">plane</span><span class="p">:</span> <span class="n">Iterable</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
@@ -1290,7 +1290,7 @@
             <span class="n">second_reflect_dimension</span><span class="o">=</span><span class="n">second_reflect_dimension</span><span class="p">,</span>
         <span class="p">)</span></div>
 
-<div class="viewcode-block" id="UniformGridData.rotation180_symmetry_undo"><a class="viewcode-back" href="../../grid_data_ref.html#kuibit.grid_data.UniformGridData.rotation180_symmetry_undo">[docs]</a>    <span class="k">def</span> <span class="nf">rotation180_symmetry_undo</span><span class="p">(</span>
+<div class="viewcode-block" id="UniformGridData.rotation180_symmetry_undo"><a class="viewcode-back" href="../../grid_data_ref.html#kuibit.grid_data.UniformGridData.rotation180_symmetry_undo">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">rotation180_symmetry_undo</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">dimension</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
         <span class="n">plane</span><span class="p">:</span> <span class="n">Iterable</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
@@ -1329,7 +1329,7 @@
             <span class="n">parity</span><span class="o">=</span><span class="n">parity</span><span class="p">,</span>
         <span class="p">)</span></div>
 
-<div class="viewcode-block" id="UniformGridData.reflection_symmetry_undone"><a class="viewcode-back" href="../../grid_data_ref.html#kuibit.grid_data.UniformGridData.reflection_symmetry_undone">[docs]</a>    <span class="k">def</span> <span class="nf">reflection_symmetry_undone</span><span class="p">(</span>
+<div class="viewcode-block" id="UniformGridData.reflection_symmetry_undone"><a class="viewcode-back" href="../../grid_data_ref.html#kuibit.grid_data.UniformGridData.reflection_symmetry_undone">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">reflection_symmetry_undone</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="n">dimension</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">parity</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">UniformGridData</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Return a new UniformGridData with reflection symmetry undo for the given dimension.</span>
@@ -1364,7 +1364,7 @@
             <span class="n">dimension</span><span class="o">=</span><span class="n">dimension</span><span class="p">,</span> <span class="n">parity</span><span class="o">=</span><span class="n">parity</span><span class="p">,</span> <span class="n">second_reflect_dimension</span><span class="o">=</span><span class="kc">None</span>
         <span class="p">)</span></div>
 
-<div class="viewcode-block" id="UniformGridData.reflection_symmetry_undo"><a class="viewcode-back" href="../../grid_data_ref.html#kuibit.grid_data.UniformGridData.reflection_symmetry_undo">[docs]</a>    <span class="k">def</span> <span class="nf">reflection_symmetry_undo</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dimension</span><span class="p">,</span> <span class="n">parity</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+<div class="viewcode-block" id="UniformGridData.reflection_symmetry_undo"><a class="viewcode-back" href="../../grid_data_ref.html#kuibit.grid_data.UniformGridData.reflection_symmetry_undo">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">reflection_symmetry_undo</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dimension</span><span class="p">,</span> <span class="n">parity</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Undo reflection symmetry for the given dimension.</span>
 
 <span class="sd">        This method works only if the data crosses the value 0 along the given dimension.</span>
@@ -1382,7 +1382,7 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">reflection_symmetry_undone</span><span class="p">,</span> <span class="n">dimension</span><span class="p">,</span> <span class="n">parity</span><span class="o">=</span><span class="n">parity</span>
         <span class="p">)</span></div>
 
-<div class="viewcode-block" id="UniformGridData.dx_changed"><a class="viewcode-back" href="../../grid_data_ref.html#kuibit.grid_data.UniformGridData.dx_changed">[docs]</a>    <span class="k">def</span> <span class="nf">dx_changed</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_dx</span><span class="p">,</span> <span class="n">piecewise_constant</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<div class="viewcode-block" id="UniformGridData.dx_changed"><a class="viewcode-back" href="../../grid_data_ref.html#kuibit.grid_data.UniformGridData.dx_changed">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">dx_changed</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_dx</span><span class="p">,</span> <span class="n">piecewise_constant</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Return a new :py:class:`UniformGridData` with the same grid extent, but with</span>
 <span class="sd">        a new spacing. This effectively up-samples or down-samples the grid.</span>
 
@@ -1444,7 +1444,7 @@
 
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">resampled</span><span class="p">(</span><span class="n">new_grid</span><span class="p">,</span> <span class="n">piecewise_constant</span><span class="o">=</span><span class="n">piecewise_constant</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="UniformGridData.dx_change"><a class="viewcode-back" href="../../grid_data_ref.html#kuibit.grid_data.UniformGridData.dx_change">[docs]</a>    <span class="k">def</span> <span class="nf">dx_change</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_dx</span><span class="p">,</span> <span class="n">piecewise_constant</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<div class="viewcode-block" id="UniformGridData.dx_change"><a class="viewcode-back" href="../../grid_data_ref.html#kuibit.grid_data.UniformGridData.dx_change">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">dx_change</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_dx</span><span class="p">,</span> <span class="n">piecewise_constant</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Up-samples or down-samples the grid data.</span>
 
 <span class="sd">        Missing data is obtained with splines.</span>
@@ -1465,12 +1465,12 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">dx_changed</span><span class="p">,</span> <span class="n">new_dx</span><span class="p">,</span> <span class="n">piecewise_constant</span><span class="o">=</span><span class="n">piecewise_constant</span>
         <span class="p">)</span></div>
 
-<div class="viewcode-block" id="UniformGridData.copy"><a class="viewcode-back" href="../../grid_data_ref.html#kuibit.grid_data.UniformGridData.copy">[docs]</a>    <span class="k">def</span> <span class="nf">copy</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="UniformGridData.copy"><a class="viewcode-back" href="../../grid_data_ref.html#kuibit.grid_data.UniformGridData.copy">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">copy</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Return a deep of self.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)(</span><span class="bp">self</span><span class="o">.</span><span class="n">grid</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">)</span></div>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">num_dimensions</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">num_dimensions</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Number of dimensions of the grid.</span>
 
 <span class="sd">        :returns: Number of dimensions of the grid.</span>
@@ -1479,7 +1479,7 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">grid</span><span class="o">.</span><span class="n">num_dimensions</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">num_extended_dimensions</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">num_extended_dimensions</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Return the number of dimensions with size larger than one gridpoint.</span>
 
 <span class="sd">        :returns: The number of extended dimensions (the ones with more than one cell).</span>
@@ -1488,7 +1488,7 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">grid</span><span class="o">.</span><span class="n">num_extended_dimensions</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">extended_dimensions</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">extended_dimensions</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Return an array of bools with whether a dimension has more than one</span>
 <span class="sd">        point or not.</span>
 
@@ -1497,7 +1497,7 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">grid</span><span class="o">.</span><span class="n">extended_dimensions</span>
 
-<div class="viewcode-block" id="UniformGridData.integral"><a class="viewcode-back" href="../../grid_data_ref.html#kuibit.grid_data.UniformGridData.integral">[docs]</a>    <span class="k">def</span> <span class="nf">integral</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="UniformGridData.integral"><a class="viewcode-back" href="../../grid_data_ref.html#kuibit.grid_data.UniformGridData.integral">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">integral</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Compute the integral over the whole volume of the grid.</span>
 
 <span class="sd">        :returns: The integral computed as volume-weighted sum.</span>
@@ -1505,7 +1505,7 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">grid</span><span class="o">.</span><span class="n">dv</span></div>
 
-<div class="viewcode-block" id="UniformGridData.mean"><a class="viewcode-back" href="../../grid_data_ref.html#kuibit.grid_data.UniformGridData.mean">[docs]</a>    <span class="k">def</span> <span class="nf">mean</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="UniformGridData.mean"><a class="viewcode-back" href="../../grid_data_ref.html#kuibit.grid_data.UniformGridData.mean">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">mean</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Compute the mean of the data over the whole volume of the grid.</span>
 
 <span class="sd">        :returns: Arithmetic mean of the data.</span>
@@ -1515,7 +1515,7 @@
 
     <span class="n">average</span> <span class="o">=</span> <span class="n">mean</span>
 
-<div class="viewcode-block" id="UniformGridData.norm_p"><a class="viewcode-back" href="../../grid_data_ref.html#kuibit.grid_data.UniformGridData.norm_p">[docs]</a>    <span class="k">def</span> <span class="nf">norm_p</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">order</span><span class="p">):</span>
+<div class="viewcode-block" id="UniformGridData.norm_p"><a class="viewcode-back" href="../../grid_data_ref.html#kuibit.grid_data.UniformGridData.norm_p">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">norm_p</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">order</span><span class="p">):</span>
 <span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Compute the norm of order ``p`` over the whole volume of the grid.</span>
 
 <span class="sd">        :math:`\|u\|_p = (\sum \|u\|^p dv)^1/p`</span>
@@ -1530,7 +1530,7 @@
             <span class="mi">1</span> <span class="o">/</span> <span class="n">order</span>
         <span class="p">)</span></div>
 
-<div class="viewcode-block" id="UniformGridData.norm2"><a class="viewcode-back" href="../../grid_data_ref.html#kuibit.grid_data.UniformGridData.norm2">[docs]</a>    <span class="k">def</span> <span class="nf">norm2</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="UniformGridData.norm2"><a class="viewcode-back" href="../../grid_data_ref.html#kuibit.grid_data.UniformGridData.norm2">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">norm2</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Compute the norm over the whole volume of the grid.</span>
 
 <span class="sd">        :math:`\|u\|_2 = (\sum \|u\|^2 dv)^1/2`</span>
@@ -1540,7 +1540,7 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">norm_p</span><span class="p">(</span><span class="n">order</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="UniformGridData.norm1"><a class="viewcode-back" href="../../grid_data_ref.html#kuibit.grid_data.UniformGridData.norm1">[docs]</a>    <span class="k">def</span> <span class="nf">norm1</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="UniformGridData.norm1"><a class="viewcode-back" href="../../grid_data_ref.html#kuibit.grid_data.UniformGridData.norm1">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">norm1</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Compute the norm over the whole volume of the grid.</span>
 
 <span class="sd">        :math:`\|u\|_1 = \sum \|u\| dv`</span>
@@ -1550,7 +1550,7 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">norm_p</span><span class="p">(</span><span class="n">order</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="UniformGridData.histogram"><a class="viewcode-back" href="../../grid_data_ref.html#kuibit.grid_data.UniformGridData.histogram">[docs]</a>    <span class="k">def</span> <span class="nf">histogram</span><span class="p">(</span>
+<div class="viewcode-block" id="UniformGridData.histogram"><a class="viewcode-back" href="../../grid_data_ref.html#kuibit.grid_data.UniformGridData.histogram">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">histogram</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">weights</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">min_value</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
@@ -1599,7 +1599,7 @@
             <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
         <span class="p">)</span></div>
 
-<div class="viewcode-block" id="UniformGridData.percentiles"><a class="viewcode-back" href="../../grid_data_ref.html#kuibit.grid_data.UniformGridData.percentiles">[docs]</a>    <span class="k">def</span> <span class="nf">percentiles</span><span class="p">(</span>
+<div class="viewcode-block" id="UniformGridData.percentiles"><a class="viewcode-back" href="../../grid_data_ref.html#kuibit.grid_data.UniformGridData.percentiles">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">percentiles</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">fractions</span><span class="p">,</span>
         <span class="n">weights</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
@@ -1671,7 +1671,7 @@
             <span class="k">return</span> <span class="n">percentiles</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
         <span class="k">return</span> <span class="n">percentiles</span></div>
 
-<div class="viewcode-block" id="UniformGridData.mask_applied"><a class="viewcode-back" href="../../grid_data_ref.html#kuibit.grid_data.UniformGridData.mask_applied">[docs]</a>    <span class="k">def</span> <span class="nf">mask_applied</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mask</span><span class="p">,</span> <span class="n">ignore_existing</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<div class="viewcode-block" id="UniformGridData.mask_applied"><a class="viewcode-back" href="../../grid_data_ref.html#kuibit.grid_data.UniformGridData.mask_applied">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">mask_applied</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mask</span><span class="p">,</span> <span class="n">ignore_existing</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Return a new :py:class:`~.UniformGridData` with given mask applied to the</span>
 <span class="sd">        data.</span>
 
@@ -1694,7 +1694,7 @@
 
         <span class="k">return</span> <span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)(</span><span class="bp">self</span><span class="o">.</span><span class="n">grid</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ma</span><span class="o">.</span><span class="n">MaskedArray</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="n">mask</span><span class="o">=</span><span class="n">mask</span><span class="p">))</span></div>
 
-<div class="viewcode-block" id="UniformGridData.mask_apply"><a class="viewcode-back" href="../../grid_data_ref.html#kuibit.grid_data.UniformGridData.mask_apply">[docs]</a>    <span class="k">def</span> <span class="nf">mask_apply</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mask</span><span class="p">,</span> <span class="n">ignore_existing</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<div class="viewcode-block" id="UniformGridData.mask_apply"><a class="viewcode-back" href="../../grid_data_ref.html#kuibit.grid_data.UniformGridData.mask_apply">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">mask_apply</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mask</span><span class="p">,</span> <span class="n">ignore_existing</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Apply the given mask.</span>
 
 <span class="sd">        If a previous mask already exists, the new mask will be added on top,</span>
@@ -1712,7 +1712,7 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">mask_applied</span><span class="p">,</span> <span class="n">mask</span><span class="p">,</span> <span class="n">ignore_existing</span><span class="o">=</span><span class="n">ignore_existing</span>
         <span class="p">)</span></div>
 
-<div class="viewcode-block" id="UniformGridData.partial_differentiated"><a class="viewcode-back" href="../../grid_data_ref.html#kuibit.grid_data.UniformGridData.partial_differentiated">[docs]</a>    <span class="k">def</span> <span class="nf">partial_differentiated</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">direction</span><span class="p">,</span> <span class="n">order</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">accuracy_order</span><span class="o">=</span><span class="mi">2</span><span class="p">):</span>
+<div class="viewcode-block" id="UniformGridData.partial_differentiated"><a class="viewcode-back" href="../../grid_data_ref.html#kuibit.grid_data.UniformGridData.partial_differentiated">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">partial_differentiated</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">direction</span><span class="p">,</span> <span class="n">order</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">accuracy_order</span><span class="o">=</span><span class="mi">2</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Return a :py:class:`~.UniformGridData` that is the numerical</span>
 <span class="sd">        order-differentiation of the present grid_data along a given direction.</span>
 <span class="sd">        (``order`` = number of derivatives, ie ``order=2`` is second derivative)</span>
@@ -1752,7 +1752,7 @@
 
         <span class="n">ret_value</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros_like</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">)</span>
 
-        <span class="k">def</span> <span class="nf">slicer</span><span class="p">(</span><span class="n">index0</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">index1</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">slice</span><span class="p">:</span>
+        <span class="k">def</span><span class="w"> </span><span class="nf">slicer</span><span class="p">(</span><span class="n">index0</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">index1</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">slice</span><span class="p">:</span>
 <span class="w">            </span><span class="sd">&quot;&quot;&quot;Create a slicer objects between indices index0 and index1 along the direction</span>
 <span class="sd">            where the derivative is taken. Everything else is left untouched</span>
 
@@ -1761,7 +1761,7 @@
             <span class="n">slice_</span><span class="p">[</span><span class="n">direction</span><span class="p">]</span> <span class="o">=</span> <span class="nb">slice</span><span class="p">(</span><span class="n">index0</span><span class="p">,</span> <span class="n">index1</span><span class="p">)</span>
             <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">slice_</span><span class="p">)</span>
 
-        <span class="k">def</span> <span class="nf">slicer1</span><span class="p">(</span><span class="n">index0</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">slice</span><span class="p">:</span>
+        <span class="k">def</span><span class="w"> </span><span class="nf">slicer1</span><span class="p">(</span><span class="n">index0</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">slice</span><span class="p">:</span>
 <span class="w">            </span><span class="sd">&quot;&quot;&quot;Create a slicer objects that isolated the given ``index0`` along the</span>
 <span class="sd">            direction of the derivative.</span>
 
@@ -1850,7 +1850,7 @@
             <span class="n">data</span> <span class="o">=</span> <span class="n">ret_value</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
         <span class="k">return</span> <span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)(</span><span class="bp">self</span><span class="o">.</span><span class="n">grid</span><span class="p">,</span> <span class="n">ret_value</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="UniformGridData.gradient"><a class="viewcode-back" href="../../grid_data_ref.html#kuibit.grid_data.UniformGridData.gradient">[docs]</a>    <span class="k">def</span> <span class="nf">gradient</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">order</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">accuracy_order</span><span class="o">=</span><span class="mi">2</span><span class="p">):</span>
+<div class="viewcode-block" id="UniformGridData.gradient"><a class="viewcode-back" href="../../grid_data_ref.html#kuibit.grid_data.UniformGridData.gradient">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">gradient</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">order</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">accuracy_order</span><span class="o">=</span><span class="mi">2</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Return a list :py:class:`~.UniformGridData` that are the numerical</span>
 <span class="sd">        order-differentiation of the present grid_data along all the directions.</span>
 <span class="sd">        (``order`` = number of derivatives, ie ``order=2`` is second derivative)</span>
@@ -1880,7 +1880,7 @@
             <span class="k">for</span> <span class="n">direction</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">num_dimensions</span><span class="p">)</span>
         <span class="p">]</span></div>
 
-<div class="viewcode-block" id="UniformGridData.partial_differentiate"><a class="viewcode-back" href="../../grid_data_ref.html#kuibit.grid_data.UniformGridData.partial_differentiate">[docs]</a>    <span class="k">def</span> <span class="nf">partial_differentiate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dimension</span><span class="p">,</span> <span class="n">order</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">accuracy_order</span><span class="o">=</span><span class="mi">2</span><span class="p">):</span>
+<div class="viewcode-block" id="UniformGridData.partial_differentiate"><a class="viewcode-back" href="../../grid_data_ref.html#kuibit.grid_data.UniformGridData.partial_differentiate">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">partial_differentiate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dimension</span><span class="p">,</span> <span class="n">order</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">accuracy_order</span><span class="o">=</span><span class="mi">2</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Derive the data with numerical finite difference along a given direction</span>
 <span class="sd">        (``order`` = number of derivatives, ie ``order=2`` is second derivative).</span>
 
@@ -1905,7 +1905,7 @@
             <span class="n">accuracy_order</span><span class="o">=</span><span class="n">accuracy_order</span><span class="p">,</span>
         <span class="p">)</span></div>
 
-    <span class="k">def</span> <span class="nf">_coordinates_at</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">where</span><span class="p">,</span> <span class="n">absolute</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_coordinates_at</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">where</span><span class="p">,</span> <span class="n">absolute</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Return coordinates of a point in data as selected by the given function.</span>
 
 <span class="sd">        :param where: Function that extract a location in the data. The function</span>
@@ -1933,7 +1933,7 @@
             <span class="p">[</span><span class="n">coordinates</span><span class="p">[</span><span class="n">dim</span><span class="p">][</span><span class="n">pos</span><span class="p">]</span> <span class="k">for</span> <span class="n">dim</span><span class="p">,</span> <span class="n">pos</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">index</span><span class="p">)]</span>
         <span class="p">)</span>
 
-<div class="viewcode-block" id="UniformGridData.coordinates_at_maximum"><a class="viewcode-back" href="../../grid_data_ref.html#kuibit.grid_data.UniformGridData.coordinates_at_maximum">[docs]</a>    <span class="k">def</span> <span class="nf">coordinates_at_maximum</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">absolute</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+<div class="viewcode-block" id="UniformGridData.coordinates_at_maximum"><a class="viewcode-back" href="../../grid_data_ref.html#kuibit.grid_data.UniformGridData.coordinates_at_maximum">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">coordinates_at_maximum</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">absolute</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Return the point with maximum value.</span>
 
 <span class="sd">        :returns:  Coordinate at where the value is maximum. If ``absolute``</span>
@@ -1943,7 +1943,7 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_coordinates_at</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">argmax</span><span class="p">,</span> <span class="n">absolute</span><span class="o">=</span><span class="n">absolute</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="UniformGridData.coordinates_at_minimum"><a class="viewcode-back" href="../../grid_data_ref.html#kuibit.grid_data.UniformGridData.coordinates_at_minimum">[docs]</a>    <span class="k">def</span> <span class="nf">coordinates_at_minimum</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">absolute</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+<div class="viewcode-block" id="UniformGridData.coordinates_at_minimum"><a class="viewcode-back" href="../../grid_data_ref.html#kuibit.grid_data.UniformGridData.coordinates_at_minimum">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">coordinates_at_minimum</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">absolute</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Return the point with minimum value.</span>
 
 <span class="sd">        :returns:  Coordinate at where the value is minimum. If ``absolute``</span>
@@ -1953,7 +1953,7 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_coordinates_at</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">argmin</span><span class="p">,</span> <span class="n">absolute</span><span class="o">=</span><span class="n">absolute</span><span class="p">)</span></div>
 
-    <span class="k">def</span> <span class="nf">_apply_unary</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">function</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_apply_unary</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">function</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Apply a unary function to the data.</span>
 
 <span class="sd">        :param function: Unary function.</span>
@@ -1964,7 +1964,7 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)(</span><span class="bp">self</span><span class="o">.</span><span class="n">grid</span><span class="p">,</span> <span class="n">function</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">))</span>
 
-    <span class="k">def</span> <span class="nf">_apply_reduction</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">reduction</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_apply_reduction</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">reduction</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Apply a reduction to the data.</span>
 
 <span class="sd">        :param function: Function to apply to the data.</span>
@@ -1976,7 +1976,7 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="n">reduction</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 
-    <span class="k">def</span> <span class="nf">_apply_binary</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">,</span> <span class="n">function</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_apply_binary</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">,</span> <span class="n">function</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;This is an abstract function that is used to implement mathematical</span>
 <span class="sd">        operations with other :py:class:`~.UniformGridData` (if they have the</span>
 <span class="sd">        same grid) or scalars.</span>
@@ -2028,7 +2028,7 @@
         <span class="c1"># If we are here, it is because we cannot add the two objects</span>
         <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;I don&#39;t know how to combine these objects&quot;</span><span class="p">)</span>
 
-    <span class="k">def</span> <span class="fm">__eq__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__eq__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)):</span>
             <span class="k">return</span> <span class="kc">False</span>
         <span class="k">return</span> <span class="p">(</span>
@@ -2043,7 +2043,7 @@
     <span class="c1"># We consider grid data unhashable, this object also has to be unhashable.</span>
     <span class="fm">__hash__</span> <span class="o">=</span> <span class="kc">None</span>
 
-<div class="viewcode-block" id="UniformGridData.fourier_transform"><a class="viewcode-back" href="../../grid_data_ref.html#kuibit.grid_data.UniformGridData.fourier_transform">[docs]</a>    <span class="k">def</span> <span class="nf">fourier_transform</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="UniformGridData.fourier_transform"><a class="viewcode-back" href="../../grid_data_ref.html#kuibit.grid_data.UniformGridData.fourier_transform">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">fourier_transform</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Perform the multi-dimensional Fourier transform on the data.</span>
 
 <span class="sd">        We follow NumPy&#39;s conventions, with the exception that we normalize the</span>
@@ -2089,7 +2089,7 @@
 
         <span class="k">return</span> <span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)(</span><span class="n">grid</span><span class="p">,</span> <span class="n">fft_data</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="UniformGridData.to_GridSeries"><a class="viewcode-back" href="../../grid_data_ref.html#kuibit.grid_data.UniformGridData.to_GridSeries">[docs]</a>    <span class="k">def</span> <span class="nf">to_GridSeries</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="UniformGridData.to_GridSeries"><a class="viewcode-back" href="../../grid_data_ref.html#kuibit.grid_data.UniformGridData.to_GridSeries">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">to_GridSeries</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Return a :py:class:`~.GridSeries` (if the data is one-dimensional).</span>
 
 <span class="sd">        When the data is one dimensional, sometimes it is more convenient to</span>
@@ -2106,7 +2106,7 @@
         <span class="k">return</span> <span class="n">GridSeries</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">coordinates_from_grid</span><span class="p">()[</span><span class="mi">0</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">)</span></div></div>
 
 
-<div class="viewcode-block" id="HierarchicalGridData"><a class="viewcode-back" href="../../grid_data_ref.html#kuibit.grid_data.HierarchicalGridData">[docs]</a><span class="k">class</span> <span class="nc">HierarchicalGridData</span><span class="p">(</span><span class="n">BaseNumerical</span><span class="p">):</span>
+<div class="viewcode-block" id="HierarchicalGridData"><a class="viewcode-back" href="../../grid_data_ref.html#kuibit.grid_data.HierarchicalGridData">[docs]</a><span class="k">class</span><span class="w"> </span><span class="nc">HierarchicalGridData</span><span class="p">(</span><span class="n">BaseNumerical</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Represents data defined on mesh-refined grids, consisting of one or more</span>
 <span class="sd">    regular datasets with different grid spacings.</span>
 
@@ -2125,7 +2125,7 @@
 
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">uniform_grid_data</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">uniform_grid_data</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Constructor.</span>
 
 <span class="sd">        Here we try to merge the different components, if we can.</span>
@@ -2173,7 +2173,7 @@
         <span class="c1"># to save it and avoid re-computing the mapping all the time</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_component_mapping</span> <span class="o">=</span> <span class="kc">None</span>
 
-    <span class="k">def</span> <span class="nf">_check_ref_factors</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_check_ref_factors</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Check if all the grids have dx that is an integer multiple of dx_finest.</span>
 
 <span class="sd">        :returns: Whether dx/dx_finest if integer for all the components.</span>
@@ -2183,7 +2183,7 @@
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">refinement_levels</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
             <span class="k">return</span> <span class="kc">True</span>
 
-        <span class="k">def</span> <span class="nf">is_integer</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
+        <span class="k">def</span><span class="w"> </span><span class="nf">is_integer</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
             <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">allclose</span><span class="p">(</span><span class="n">x</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">rint</span><span class="p">(</span><span class="n">comp_ref_factor</span><span class="p">),</span> <span class="mi">0</span><span class="p">)</span>
 
         <span class="c1"># ref_factors is a dictionary that has as keys the number of refinement</span>
@@ -2239,7 +2239,7 @@
         <span class="c1"># All integers and constant</span>
         <span class="k">return</span> <span class="kc">True</span>
 
-    <span class="k">def</span> <span class="nf">_compute_component_mapping</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_compute_component_mapping</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Scan the grid structure and prepare a map between points and components.</span>
 
 <span class="sd">        :returns: Function that maps a point to the UniformGridData at highest</span>
@@ -2277,7 +2277,7 @@
         <span class="n">half_dx_finest</span> <span class="o">=</span> <span class="n">all_components</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">dx</span> <span class="o">/</span> <span class="mf">2.0</span>
         <span class="n">origin</span> <span class="o">=</span> <span class="n">all_components</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">x0</span>
 
-        <span class="k">def</span> <span class="nf">to_tilde</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
+        <span class="k">def</span><span class="w"> </span><span class="nf">to_tilde</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
 <span class="w">            </span><span class="sd">&quot;&quot;&quot;Convert a coordinate to tilde coordinate system (based on the first</span>
 <span class="sd">            finest component).</span>
 
@@ -2319,7 +2319,7 @@
             <span class="k">for</span> <span class="n">orig</span><span class="p">,</span> <span class="n">corn</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">unique_origins_tilde</span><span class="p">,</span> <span class="n">unique_corners_tilde</span><span class="p">)</span>
         <span class="p">]</span>
 
-        <span class="k">def</span> <span class="nf">x_tilde_to_component</span><span class="p">(</span><span class="n">x_tilde</span><span class="p">):</span>
+        <span class="k">def</span><span class="w"> </span><span class="nf">x_tilde_to_component</span><span class="p">(</span><span class="n">x_tilde</span><span class="p">):</span>
 <span class="w">            </span><span class="sd">&quot;&quot;&quot;Given a point in the tilde coordinates, return the indices of</span>
 <span class="sd">            boundaries_tilde that contain that point</span>
 
@@ -2358,7 +2358,7 @@
             <span class="p">]</span>
             <span class="n">finest_map</span><span class="p">[</span><span class="nb">tuple</span><span class="p">(</span><span class="n">slicer</span><span class="p">)]</span> <span class="o">=</span> <span class="n">component_index</span>
 
-        <span class="k">def</span> <span class="nf">get_component</span><span class="p">(</span><span class="n">coordinate</span><span class="p">):</span>
+        <span class="k">def</span><span class="w"> </span><span class="nf">get_component</span><span class="p">(</span><span class="n">coordinate</span><span class="p">):</span>
 <span class="w">            </span><span class="sd">&quot;&quot;&quot;Map a coordinate to the component that contains it.&quot;&quot;&quot;</span>
 
             <span class="c1"># This is like to_tilde, but we floor instead of rounding.</span>
@@ -2382,7 +2382,7 @@
         <span class="k">return</span> <span class="n">get_component</span>
 
     <span class="nd">@staticmethod</span>
-    <span class="k">def</span> <span class="nf">_fill_grid_with_components</span><span class="p">(</span><span class="n">grid</span><span class="p">,</span> <span class="n">components</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_fill_grid_with_components</span><span class="p">(</span><span class="n">grid</span><span class="p">,</span> <span class="n">components</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Given a grid, try to fill it with the components, return eturning a</span>
 <span class="sd">        :py:class:`~.UniformGridData` and the indices that actually were used in</span>
 <span class="sd">        filling the grid.</span>
@@ -2425,7 +2425,7 @@
 
         <span class="k">return</span> <span class="n">UniformGridData</span><span class="p">(</span><span class="n">grid</span><span class="p">,</span> <span class="n">data</span><span class="p">),</span> <span class="n">indices_used</span>
 
-    <span class="k">def</span> <span class="nf">_try_merge_components</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">components</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_try_merge_components</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">components</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Try to merge a list of :py:class:`~.UniformGridData` instances into one,</span>
 <span class="sd">        assuming they all have the same grid spacing and filling a regular grid</span>
 <span class="sd">        completely.</span>
@@ -2481,7 +2481,7 @@
 
         <span class="k">return</span> <span class="n">components</span>
 
-    <span class="k">def</span> <span class="fm">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Return the list of components at the given refinement level.</span>
 
 <span class="sd">        You can also consider using :py:meth:`~.get_level`, which returns a</span>
@@ -2497,7 +2497,7 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">grid_data_dict</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
 
-<div class="viewcode-block" id="HierarchicalGridData.get_level"><a class="viewcode-back" href="../../grid_data_ref.html#kuibit.grid_data.HierarchicalGridData.get_level">[docs]</a>    <span class="k">def</span> <span class="nf">get_level</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ref_level</span><span class="p">):</span>
+<div class="viewcode-block" id="HierarchicalGridData.get_level"><a class="viewcode-back" href="../../grid_data_ref.html#kuibit.grid_data.HierarchicalGridData.get_level">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">get_level</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ref_level</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Return the data at a given refinement level.</span>
 
 <span class="sd">        :param ref_level: Number of refinement level.</span>
@@ -2515,7 +2515,7 @@
             <span class="p">)</span>
         <span class="k">return</span> <span class="bp">self</span><span class="p">[</span><span class="n">ref_level</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span></div>
 
-<div class="viewcode-block" id="HierarchicalGridData.iter_from_finest"><a class="viewcode-back" href="../../grid_data_ref.html#kuibit.grid_data.HierarchicalGridData.iter_from_finest">[docs]</a>    <span class="k">def</span> <span class="nf">iter_from_finest</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="HierarchicalGridData.iter_from_finest"><a class="viewcode-back" href="../../grid_data_ref.html#kuibit.grid_data.HierarchicalGridData.iter_from_finest">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">iter_from_finest</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Iterator over the components, sorted by refinement level, from the finest to</span>
 <span class="sd">        the coarsest.</span>
 
@@ -2529,7 +2529,7 @@
             <span class="k">for</span> <span class="n">comp_index</span><span class="p">,</span> <span class="n">comp</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">data</span><span class="p">):</span>
                 <span class="k">yield</span> <span class="n">ref_level</span><span class="p">,</span> <span class="n">comp_index</span><span class="p">,</span> <span class="n">comp</span></div>
 
-    <span class="k">def</span> <span class="fm">__iter__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__iter__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Iterate across all the refinement levels and components from the coarsest</span>
 <span class="sd">        to the finest.</span>
 
@@ -2540,11 +2540,11 @@
             <span class="k">for</span> <span class="n">comp_index</span><span class="p">,</span> <span class="n">comp</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">data</span><span class="p">):</span>
                 <span class="k">yield</span> <span class="n">ref_level</span><span class="p">,</span> <span class="n">comp_index</span><span class="p">,</span> <span class="n">comp</span>
 
-    <span class="k">def</span> <span class="fm">__len__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__len__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">refinement_levels</span><span class="p">)</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">refinement_levels</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">refinement_levels</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Return a list with the refinement levels available.</span>
 
 <span class="sd">        :returns: List of refinement levels available.</span>
@@ -2553,7 +2553,7 @@
         <span class="k">return</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">grid_data_dict</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">all_components</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">all_components</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Return a list with all the components.</span>
 
 <span class="sd">        This is useful to create a new :py:class:`~.HierarchicalGridData`</span>
@@ -2575,7 +2575,7 @@
         <span class="k">return</span> <span class="n">all_components</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">num_finest_level</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">num_finest_level</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Return the number of the finest refinement level.</span>
 
 <span class="sd">        :returns: Index of the finest level.</span>
@@ -2584,7 +2584,7 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">refinement_levels</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">finest_level</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">finest_level</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Return the finest level, if it is a single grid.</span>
 
 <span class="sd">        :returns: Finest level.</span>
@@ -2593,7 +2593,7 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_level</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">num_finest_level</span><span class="p">)</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">max_refinement_level</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">max_refinement_level</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Return the number of the finest refinement level.</span>
 
 <span class="sd">        Alias for :py:meth:`~.num_finest_level`.</span>
@@ -2604,7 +2604,7 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">num_finest_level</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">num_coarsest_level</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">num_coarsest_level</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Return the number of the coarsest refinement level.</span>
 
 <span class="sd">        :returns: Index of the coarsest level.</span>
@@ -2613,7 +2613,7 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">refinement_levels</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">coarsest_level</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">coarsest_level</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Return the coarsest level, if it is a single grid.</span>
 
 <span class="sd">        :returns: Coarsest level.</span>
@@ -2622,7 +2622,7 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_level</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">num_coarsest_level</span><span class="p">)</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">first_component</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">first_component</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Return the first component of the coarsest refinement level.</span>
 
 <span class="sd">        :returns: First component of the coarsest level.</span>
@@ -2631,7 +2631,7 @@
         <span class="k">return</span> <span class="bp">self</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">num_coarsest_level</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">_a_component</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_a_component</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Return the a component of the hierarchy.</span>
 
 <span class="sd">        It is useful to understand various properties that are shared</span>
@@ -2646,11 +2646,11 @@
         <span class="k">return</span> <span class="nb">next</span><span class="p">(</span><span class="nb">iter</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">grid_data_dict</span><span class="o">.</span><span class="n">values</span><span class="p">()))[</span><span class="mi">0</span><span class="p">]</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">dtype</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">dtype</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_a_component</span><span class="o">.</span><span class="n">dtype</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">shape</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">shape</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Return the number of components per each refinement level.</span>
 
 <span class="sd">        For example, if data has three levels, with 1 component in the first, 2</span>
@@ -2670,7 +2670,7 @@
         <span class="p">}</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">x0</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">x0</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Origin of the coarsest grid, if it is a single component.</span>
 
 <span class="sd">        :returns: Origin of the coarsest grid, if it is a single component.</span>
@@ -2685,7 +2685,7 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">first_component</span><span class="o">.</span><span class="n">x0</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">x1</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">x1</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Corner of the coarsest grid, if it is a single component.</span>
 
 <span class="sd">        :returns: Corner of the coarsest grid, if it is a single component.</span>
@@ -2699,7 +2699,7 @@
             <span class="p">)</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">first_component</span><span class="o">.</span><span class="n">x1</span>
 
-<div class="viewcode-block" id="HierarchicalGridData.dx_at_level"><a class="viewcode-back" href="../../grid_data_ref.html#kuibit.grid_data.HierarchicalGridData.dx_at_level">[docs]</a>    <span class="k">def</span> <span class="nf">dx_at_level</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">level</span><span class="p">):</span>
+<div class="viewcode-block" id="HierarchicalGridData.dx_at_level"><a class="viewcode-back" href="../../grid_data_ref.html#kuibit.grid_data.HierarchicalGridData.dx_at_level">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">dx_at_level</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">level</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Return the grid spacing at the specified refinement level.</span>
 
 <span class="sd">        :param level: Refinement level number.</span>
@@ -2710,7 +2710,7 @@
         <span class="k">return</span> <span class="bp">self</span><span class="p">[</span><span class="n">level</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">dx</span></div>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">coarsest_dx</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">coarsest_dx</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Return the grid spacing of the coarsest level.</span>
 
 <span class="sd">        :returns:  Grid spacing of the coarsest level.</span>
@@ -2719,7 +2719,7 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">dx_at_level</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">num_coarsest_level</span><span class="p">)</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">finest_dx</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">finest_dx</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Return the grid spacing of the finest level.</span>
 
 <span class="sd">        :returns:  Grid spacing of the finest level.</span>
@@ -2728,7 +2728,7 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">dx_at_level</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">num_finest_level</span><span class="p">)</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">num_dimensions</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">num_dimensions</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Return the number of dimensions.</span>
 
 <span class="sd">        :returns:  Number of dimensions.</span>
@@ -2737,7 +2737,7 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_a_component</span><span class="o">.</span><span class="n">num_dimensions</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">num_extended_dimensions</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">num_extended_dimensions</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Return the number of dimensions with more than one cell.</span>
 
 <span class="sd">        :returns:  Number of dimensions with more than one gridpoint.</span>
@@ -2746,7 +2746,7 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_a_component</span><span class="o">.</span><span class="n">num_extended_dimensions</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">time</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">time</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;The time of the coarsest refinement level.</span>
 
 <span class="sd">        :returns:  Time of the coarsest refinement level.</span>
@@ -2755,7 +2755,7 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">first_component</span><span class="o">.</span><span class="n">time</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">iteration</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">iteration</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;The iteration of the coarsest refinement level.</span>
 
 <span class="sd">        :returns:  Iteration number of the coarsest refinement level.</span>
@@ -2763,7 +2763,7 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">first_component</span><span class="o">.</span><span class="n">iteration</span>
 
-<div class="viewcode-block" id="HierarchicalGridData.is_complex"><a class="viewcode-back" href="../../grid_data_ref.html#kuibit.grid_data.HierarchicalGridData.is_complex">[docs]</a>    <span class="k">def</span> <span class="nf">is_complex</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="HierarchicalGridData.is_complex"><a class="viewcode-back" href="../../grid_data_ref.html#kuibit.grid_data.HierarchicalGridData.is_complex">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">is_complex</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Return whether the data is complex.</span>
 
 <span class="sd">        :returns:  True if the data is complex, false if it is not.</span>
@@ -2773,7 +2773,7 @@
         <span class="k">return</span> <span class="nb">any</span><span class="p">(</span><span class="n">comp</span><span class="o">.</span><span class="n">is_complex</span><span class="p">()</span> <span class="k">for</span> <span class="n">comp</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">all_components</span><span class="p">)</span></div>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">mask</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">mask</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Return where the data is valid (according to the mask).</span>
 
 <span class="sd">        :returns: List of arrays of True/False, one per component</span>
@@ -2782,7 +2782,7 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="p">[</span><span class="n">comp</span><span class="o">.</span><span class="n">mask</span> <span class="k">for</span> <span class="n">comp</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">all_components</span><span class="p">]</span>
 
-<div class="viewcode-block" id="HierarchicalGridData.is_masked"><a class="viewcode-back" href="../../grid_data_ref.html#kuibit.grid_data.HierarchicalGridData.is_masked">[docs]</a>    <span class="k">def</span> <span class="nf">is_masked</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="HierarchicalGridData.is_masked"><a class="viewcode-back" href="../../grid_data_ref.html#kuibit.grid_data.HierarchicalGridData.is_masked">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">is_masked</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Return whether the data is masked.</span>
 
 <span class="sd">        :returns:  True if the data is masked, false if it is not.</span>
@@ -2791,7 +2791,7 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="nb">any</span><span class="p">(</span><span class="n">comp</span><span class="o">.</span><span class="n">is_masked</span><span class="p">()</span> <span class="k">for</span> <span class="n">comp</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">all_components</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="HierarchicalGridData.copy"><a class="viewcode-back" href="../../grid_data_ref.html#kuibit.grid_data.HierarchicalGridData.copy">[docs]</a>    <span class="k">def</span> <span class="nf">copy</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="HierarchicalGridData.copy"><a class="viewcode-back" href="../../grid_data_ref.html#kuibit.grid_data.HierarchicalGridData.copy">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">copy</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Return a deep copy.</span>
 
 <span class="sd">        :returns:  Deep copy of the :py:class:`~.HierarchicalGridData`.</span>
@@ -2799,7 +2799,7 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)(</span><span class="bp">self</span><span class="o">.</span><span class="n">all_components</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="HierarchicalGridData.mask_applied"><a class="viewcode-back" href="../../grid_data_ref.html#kuibit.grid_data.HierarchicalGridData.mask_applied">[docs]</a>    <span class="k">def</span> <span class="nf">mask_applied</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mask</span><span class="p">,</span> <span class="n">ignore_existing</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<div class="viewcode-block" id="HierarchicalGridData.mask_applied"><a class="viewcode-back" href="../../grid_data_ref.html#kuibit.grid_data.HierarchicalGridData.mask_applied">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">mask_applied</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mask</span><span class="p">,</span> <span class="n">ignore_existing</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Return a new grid data with given mask applied to the data.</span>
 
 <span class="sd">        If a previous mask already exists, the new mask will be added on top,</span>
@@ -2824,7 +2824,7 @@
             <span class="p">]</span>
         <span class="p">)</span></div>
 
-<div class="viewcode-block" id="HierarchicalGridData.mask_apply"><a class="viewcode-back" href="../../grid_data_ref.html#kuibit.grid_data.HierarchicalGridData.mask_apply">[docs]</a>    <span class="k">def</span> <span class="nf">mask_apply</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mask</span><span class="p">,</span> <span class="n">ignore_existing</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<div class="viewcode-block" id="HierarchicalGridData.mask_apply"><a class="viewcode-back" href="../../grid_data_ref.html#kuibit.grid_data.HierarchicalGridData.mask_apply">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">mask_apply</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mask</span><span class="p">,</span> <span class="n">ignore_existing</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Apply given mask.</span>
 
 <span class="sd">        If a previous mask already exists, the new mask will be added on top,</span>
@@ -2843,7 +2843,7 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">mask_applied</span><span class="p">,</span> <span class="n">mask</span><span class="p">,</span> <span class="n">ignore_existing</span><span class="o">=</span><span class="n">ignore_existing</span>
         <span class="p">)</span></div>
 
-    <span class="k">def</span> <span class="fm">__eq__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__eq__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Check for equality.&quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="p">(</span>
             <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="n">HierarchicalGridData</span><span class="p">)</span>
@@ -2860,7 +2860,7 @@
     <span class="c1"># We consider grid data unhashable, this object also has to be unhashable.</span>
     <span class="fm">__hash__</span> <span class="o">=</span> <span class="kc">None</span>
 
-    <span class="k">def</span> <span class="nf">_finest_component_at_point_mapping</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">coordinate</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_finest_component_at_point_mapping</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">coordinate</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Return the component of the most refined level that contains the given</span>
 <span class="sd">        coordinate assuming a valid input coordinate using the component mapping.</span>
 
@@ -2876,7 +2876,7 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_component_mapping</span><span class="p">(</span><span class="n">coordinate</span><span class="p">)</span>
 
-    <span class="k">def</span> <span class="nf">_finest_component_at_point_general</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">coordinate</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_finest_component_at_point_general</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">coordinate</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Return the component of the most refined level that contains the given</span>
 <span class="sd">        coordinate assuming a valid input coordinate.</span>
 
@@ -2897,7 +2897,7 @@
 
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">coordinate</span><span class="si">}</span><span class="s2"> outside the grid&quot;</span><span class="p">)</span>
 
-<div class="viewcode-block" id="HierarchicalGridData.finest_component_at_point"><a class="viewcode-back" href="../../grid_data_ref.html#kuibit.grid_data.HierarchicalGridData.finest_component_at_point">[docs]</a>    <span class="k">def</span> <span class="nf">finest_component_at_point</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">coordinate</span><span class="p">,</span> <span class="n">no_checks</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<div class="viewcode-block" id="HierarchicalGridData.finest_component_at_point"><a class="viewcode-back" href="../../grid_data_ref.html#kuibit.grid_data.HierarchicalGridData.finest_component_at_point">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">finest_component_at_point</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">coordinate</span><span class="p">,</span> <span class="n">no_checks</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Return the number and the component index of the most</span>
 <span class="sd">        refined level that contains the given coordinate.</span>
 
@@ -2934,7 +2934,7 @@
         <span class="c1"># finder is the function that returns the component given the coordinate</span>
         <span class="k">return</span> <span class="n">finder</span><span class="p">(</span><span class="n">coordinate</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="HierarchicalGridData.evaluate_with_spline"><a class="viewcode-back" href="../../grid_data_ref.html#kuibit.grid_data.HierarchicalGridData.evaluate_with_spline">[docs]</a>    <span class="k">def</span> <span class="nf">evaluate_with_spline</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">ext</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">piecewise_constant</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<div class="viewcode-block" id="HierarchicalGridData.evaluate_with_spline"><a class="viewcode-back" href="../../grid_data_ref.html#kuibit.grid_data.HierarchicalGridData.evaluate_with_spline">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">evaluate_with_spline</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">ext</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">piecewise_constant</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Evaluate the spline on the points ``x``.</span>
 
 <span class="sd">        Values outside the interval are set to 0 if ext=1, or a ``ValueError``</span>
@@ -3014,10 +3014,10 @@
         <span class="n">ret</span> <span class="o">=</span> <span class="n">ret</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">original_shape</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
         <span class="k">return</span> <span class="n">ret</span></div>
 
-    <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">evaluate_with_spline</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
 
-<div class="viewcode-block" id="HierarchicalGridData.to_UniformGridData_from_grid"><a class="viewcode-back" href="../../grid_data_ref.html#kuibit.grid_data.HierarchicalGridData.to_UniformGridData_from_grid">[docs]</a>    <span class="k">def</span> <span class="nf">to_UniformGridData_from_grid</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">grid</span><span class="p">,</span> <span class="n">resample</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<div class="viewcode-block" id="HierarchicalGridData.to_UniformGridData_from_grid"><a class="viewcode-back" href="../../grid_data_ref.html#kuibit.grid_data.HierarchicalGridData.to_UniformGridData_from_grid">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">to_UniformGridData_from_grid</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">grid</span><span class="p">,</span> <span class="n">resample</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Combine the refinement levels into a :py:class:`~.UniformGridData`</span>
 <span class="sd">        on the specified :py:class:`~.UniformGrid`.</span>
 
@@ -3036,7 +3036,7 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">evaluate_with_spline</span><span class="p">(</span><span class="n">grid</span><span class="p">,</span> <span class="n">piecewise_constant</span><span class="o">=</span><span class="p">(</span><span class="ow">not</span> <span class="n">resample</span><span class="p">)),</span>
         <span class="p">)</span></div>
 
-<div class="viewcode-block" id="HierarchicalGridData.to_UniformGridData"><a class="viewcode-back" href="../../grid_data_ref.html#kuibit.grid_data.HierarchicalGridData.to_UniformGridData">[docs]</a>    <span class="k">def</span> <span class="nf">to_UniformGridData</span><span class="p">(</span>
+<div class="viewcode-block" id="HierarchicalGridData.to_UniformGridData"><a class="viewcode-back" href="../../grid_data_ref.html#kuibit.grid_data.HierarchicalGridData.to_UniformGridData">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">to_UniformGridData</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="n">shape</span><span class="p">,</span> <span class="n">x0</span><span class="p">,</span> <span class="n">x1</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">dx</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">resample</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span>
     <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Combine the refinement levels into a :py:class:`~.UniformGridData` specified</span>
@@ -3065,7 +3065,7 @@
 
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">to_UniformGridData_from_grid</span><span class="p">(</span><span class="n">grid</span><span class="p">,</span> <span class="n">resample</span><span class="o">=</span><span class="n">resample</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="HierarchicalGridData.refinement_levels_merged"><a class="viewcode-back" href="../../grid_data_ref.html#kuibit.grid_data.HierarchicalGridData.refinement_levels_merged">[docs]</a>    <span class="k">def</span> <span class="nf">refinement_levels_merged</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">resample</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<div class="viewcode-block" id="HierarchicalGridData.refinement_levels_merged"><a class="viewcode-back" href="../../grid_data_ref.html#kuibit.grid_data.HierarchicalGridData.refinement_levels_merged">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">refinement_levels_merged</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">resample</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Return a new :py:class:`~.UniformGridData` with all the available</span>
 <span class="sd">        data combined and resampled to a grid that encompasses all the</span>
 <span class="sd">        components and has resolution of the finest refinement level.</span>
@@ -3113,7 +3113,7 @@
             <span class="n">resample</span><span class="o">=</span><span class="n">resample</span><span class="p">,</span>
         <span class="p">)</span></div>
 
-<div class="viewcode-block" id="HierarchicalGridData.merge_refinement_levels"><a class="viewcode-back" href="../../grid_data_ref.html#kuibit.grid_data.HierarchicalGridData.merge_refinement_levels">[docs]</a>    <span class="k">def</span> <span class="nf">merge_refinement_levels</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">resample</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<div class="viewcode-block" id="HierarchicalGridData.merge_refinement_levels"><a class="viewcode-back" href="../../grid_data_ref.html#kuibit.grid_data.HierarchicalGridData.merge_refinement_levels">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">merge_refinement_levels</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">resample</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;DEPRECATED.&quot;&quot;&quot;</span>
         <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
             <span class="s2">&quot;merge_refinement_levels was renamed to refinement_levels_merged &quot;</span>
@@ -3122,7 +3122,7 @@
         <span class="p">)</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">refinement_levels_merged</span><span class="p">(</span><span class="n">resample</span><span class="o">=</span><span class="n">resample</span><span class="p">)</span></div>
 
-    <span class="k">def</span> <span class="nf">_apply_to_self</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_apply_to_self</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Apply the method ``f`` to ``self``, modifying ``self``.</span>
 <span class="sd">        This is used to transform the commands from returning an object</span>
 <span class="sd">        to modifying ``self``.</span>
@@ -3136,7 +3136,7 @@
         <span class="c1"># We need to invalidate the _component_mapping (it may have changed)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_component_mapping</span> <span class="o">=</span> <span class="kc">None</span>
 
-    <span class="k">def</span> <span class="nf">_apply_binary</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">,</span> <span class="n">function</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_apply_binary</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">,</span> <span class="n">function</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Apply a binary function to the data of ``self`` and ``other``.</span>
 
 <span class="sd">        :param function: Function to apply to all the data in the various</span>
@@ -3181,7 +3181,7 @@
         <span class="c1"># If we are here, it is because we cannot add the two objects</span>
         <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;I don&#39;t know how to combine these objects&quot;</span><span class="p">)</span>
 
-    <span class="k">def</span> <span class="nf">_apply_reduction</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">reduction</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_apply_reduction</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">reduction</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Apply a reduction to the data.</span>
 
 <span class="sd">        :param function: Reduction to apply to all the data in the various</span>
@@ -3208,7 +3208,7 @@
             <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
         <span class="p">)</span>
 
-    <span class="k">def</span> <span class="nf">_apply_unary</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">function</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_apply_unary</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">function</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Apply a unary function to the data.</span>
 
 <span class="sd">        :param function: Function to apply to all the data in the various</span>
@@ -3229,7 +3229,7 @@
         <span class="p">]</span>
         <span class="k">return</span> <span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)(</span><span class="n">new_data</span><span class="p">)</span>
 
-    <span class="k">def</span> <span class="nf">_call_component_method</span><span class="p">(</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_call_component_method</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="n">method_name</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="n">method_returns_list</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span>
     <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Call a method on each component and return the result as a</span>
@@ -3281,7 +3281,7 @@
             <span class="k">for</span> <span class="n">dim</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">num_dimensions</span><span class="p">)</span>
         <span class="p">]</span>
 
-<div class="viewcode-block" id="HierarchicalGridData.partial_differentiated"><a class="viewcode-back" href="../../grid_data_ref.html#kuibit.grid_data.HierarchicalGridData.partial_differentiated">[docs]</a>    <span class="k">def</span> <span class="nf">partial_differentiated</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">direction</span><span class="p">,</span> <span class="n">order</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">accuracy_order</span><span class="o">=</span><span class="mi">2</span><span class="p">):</span>
+<div class="viewcode-block" id="HierarchicalGridData.partial_differentiated"><a class="viewcode-back" href="../../grid_data_ref.html#kuibit.grid_data.HierarchicalGridData.partial_differentiated">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">partial_differentiated</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">direction</span><span class="p">,</span> <span class="n">order</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">accuracy_order</span><span class="o">=</span><span class="mi">2</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Return a :py:class:`~.HierarchicalGridData` that is the numerical</span>
 <span class="sd">        order-differentiation of the present grid_data along a given direction.</span>
 <span class="sd">        (order = number of derivatives, ie ``order=2`` is second derivative)</span>
@@ -3310,7 +3310,7 @@
             <span class="n">accuracy_order</span><span class="o">=</span><span class="n">accuracy_order</span><span class="p">,</span>
         <span class="p">)</span></div>
 
-<div class="viewcode-block" id="HierarchicalGridData.gradient"><a class="viewcode-back" href="../../grid_data_ref.html#kuibit.grid_data.HierarchicalGridData.gradient">[docs]</a>    <span class="k">def</span> <span class="nf">gradient</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">order</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">accuracy_order</span><span class="o">=</span><span class="mi">2</span><span class="p">):</span>
+<div class="viewcode-block" id="HierarchicalGridData.gradient"><a class="viewcode-back" href="../../grid_data_ref.html#kuibit.grid_data.HierarchicalGridData.gradient">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">gradient</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">order</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">accuracy_order</span><span class="o">=</span><span class="mi">2</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Return a list :py:class:`~.HierarchicalGridData` that are the numerical</span>
 <span class="sd">        order-differentiation of the present grid_data along all the directions.</span>
 <span class="sd">        (order = number of derivatives, ie ``order=2`` is second derivative)</span>
@@ -3337,7 +3337,7 @@
             <span class="n">accuracy_order</span><span class="o">=</span><span class="n">accuracy_order</span><span class="p">,</span>
         <span class="p">)</span></div>
 
-<div class="viewcode-block" id="HierarchicalGridData.partial_differentiate"><a class="viewcode-back" href="../../grid_data_ref.html#kuibit.grid_data.HierarchicalGridData.partial_differentiate">[docs]</a>    <span class="k">def</span> <span class="nf">partial_differentiate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">direction</span><span class="p">,</span> <span class="n">order</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">accuracy_order</span><span class="o">=</span><span class="mi">2</span><span class="p">):</span>
+<div class="viewcode-block" id="HierarchicalGridData.partial_differentiate"><a class="viewcode-back" href="../../grid_data_ref.html#kuibit.grid_data.HierarchicalGridData.partial_differentiate">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">partial_differentiate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">direction</span><span class="p">,</span> <span class="n">order</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">accuracy_order</span><span class="o">=</span><span class="mi">2</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Apply a numerical differentiatin along the specified direction.</span>
 
 <span class="sd">        The derivative is calulated as centered differencing in the interior</span>
@@ -3364,7 +3364,7 @@
             <span class="n">accuracy_order</span><span class="o">=</span><span class="n">accuracy_order</span><span class="p">,</span>
         <span class="p">)</span></div>
 
-<div class="viewcode-block" id="HierarchicalGridData.ghost_zones_removed"><a class="viewcode-back" href="../../grid_data_ref.html#kuibit.grid_data.HierarchicalGridData.ghost_zones_removed">[docs]</a>    <span class="k">def</span> <span class="nf">ghost_zones_removed</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="HierarchicalGridData.ghost_zones_removed"><a class="viewcode-back" href="../../grid_data_ref.html#kuibit.grid_data.HierarchicalGridData.ghost_zones_removed">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">ghost_zones_removed</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Return a new :py:class:`~.HierarchicalGridData` with all the ghost zones removed.</span>
 
 <span class="sd">        :returns: New :py:class:`~.HierarchicalGridData` without ghostzones.</span>
@@ -3372,11 +3372,11 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_call_component_method</span><span class="p">(</span><span class="s2">&quot;ghost_zones_removed&quot;</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="HierarchicalGridData.ghost_zones_remove"><a class="viewcode-back" href="../../grid_data_ref.html#kuibit.grid_data.HierarchicalGridData.ghost_zones_remove">[docs]</a>    <span class="k">def</span> <span class="nf">ghost_zones_remove</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="HierarchicalGridData.ghost_zones_remove"><a class="viewcode-back" href="../../grid_data_ref.html#kuibit.grid_data.HierarchicalGridData.ghost_zones_remove">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">ghost_zones_remove</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Remove all the ghost zones.&quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_apply_to_self</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ghost_zones_removed</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="HierarchicalGridData.sliced"><a class="viewcode-back" href="../../grid_data_ref.html#kuibit.grid_data.HierarchicalGridData.sliced">[docs]</a>    <span class="k">def</span> <span class="nf">sliced</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cut</span><span class="p">,</span> <span class="n">resample</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<div class="viewcode-block" id="HierarchicalGridData.sliced"><a class="viewcode-back" href="../../grid_data_ref.html#kuibit.grid_data.HierarchicalGridData.sliced">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">sliced</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cut</span><span class="p">,</span> <span class="n">resample</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Return a new :py:class:`~.HierarchicalGridData` obtained slicing the current one.</span>
 
 <span class="sd">        ``cut`` specifies how to slice the data. It has to be an array with the</span>
@@ -3426,7 +3426,7 @@
 
         <span class="k">return</span> <span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)(</span><span class="n">new_data</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="HierarchicalGridData.slice"><a class="viewcode-back" href="../../grid_data_ref.html#kuibit.grid_data.HierarchicalGridData.slice">[docs]</a>    <span class="k">def</span> <span class="nf">slice</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cut</span><span class="p">,</span> <span class="n">resample</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<div class="viewcode-block" id="HierarchicalGridData.slice"><a class="viewcode-back" href="../../grid_data_ref.html#kuibit.grid_data.HierarchicalGridData.slice">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">slice</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cut</span><span class="p">,</span> <span class="n">resample</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Slice the data along given direction.</span>
 
 <span class="sd">        ``cut`` specifies how to slice the data. It has to be an array with the</span>
@@ -3450,7 +3450,7 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_apply_to_self</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sliced</span><span class="p">,</span> <span class="n">cut</span><span class="o">=</span><span class="n">cut</span><span class="p">,</span> <span class="n">resample</span><span class="o">=</span><span class="n">resample</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="HierarchicalGridData.coordinates"><a class="viewcode-back" href="../../grid_data_ref.html#kuibit.grid_data.HierarchicalGridData.coordinates">[docs]</a>    <span class="k">def</span> <span class="nf">coordinates</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="HierarchicalGridData.coordinates"><a class="viewcode-back" href="../../grid_data_ref.html#kuibit.grid_data.HierarchicalGridData.coordinates">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">coordinates</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Return coordinates as a list of :py:class:`~.HierarchicalGridData`.</span>
 
 <span class="sd">        Useful for computations involving coordinates.</span>
@@ -3462,7 +3462,7 @@
             <span class="s2">&quot;coordinates&quot;</span><span class="p">,</span> <span class="n">method_returns_list</span><span class="o">=</span><span class="kc">True</span>
         <span class="p">)</span></div>
 
-<div class="viewcode-block" id="HierarchicalGridData.coordinates_at_maximum"><a class="viewcode-back" href="../../grid_data_ref.html#kuibit.grid_data.HierarchicalGridData.coordinates_at_maximum">[docs]</a>    <span class="k">def</span> <span class="nf">coordinates_at_maximum</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">absolute</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+<div class="viewcode-block" id="HierarchicalGridData.coordinates_at_maximum"><a class="viewcode-back" href="../../grid_data_ref.html#kuibit.grid_data.HierarchicalGridData.coordinates_at_maximum">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">coordinates_at_maximum</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">absolute</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Return the point with maximum value.</span>
 
 <span class="sd">        :returns:  Coordinate at where the value is maximum. If ``absolute``</span>
@@ -3482,7 +3482,7 @@
         <span class="n">comp_max</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argmax</span><span class="p">(</span><span class="n">maxima</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">comps</span><span class="p">[</span><span class="n">comp_max</span><span class="p">]</span><span class="o">.</span><span class="n">coordinates_at_maximum</span><span class="p">(</span><span class="n">absolute</span><span class="o">=</span><span class="n">absolute</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="HierarchicalGridData.coordinates_at_minimum"><a class="viewcode-back" href="../../grid_data_ref.html#kuibit.grid_data.HierarchicalGridData.coordinates_at_minimum">[docs]</a>    <span class="k">def</span> <span class="nf">coordinates_at_minimum</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">absolute</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+<div class="viewcode-block" id="HierarchicalGridData.coordinates_at_minimum"><a class="viewcode-back" href="../../grid_data_ref.html#kuibit.grid_data.HierarchicalGridData.coordinates_at_minimum">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">coordinates_at_minimum</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">absolute</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Return the point with minimum value.</span>
 
 <span class="sd">        :returns:  Coordinate at where the value is minimum. If ``absolute``</span>
@@ -3502,7 +3502,7 @@
         <span class="n">comp_min</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argmin</span><span class="p">(</span><span class="n">minima</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">comps</span><span class="p">[</span><span class="n">comp_min</span><span class="p">]</span><span class="o">.</span><span class="n">coordinates_at_minimum</span><span class="p">(</span><span class="n">absolute</span><span class="o">=</span><span class="n">absolute</span><span class="p">)</span></div>
 
-    <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">ret</span> <span class="o">=</span> <span class="s2">&quot;Available refinement levels (components):</span><span class="se">\n</span><span class="s2">&quot;</span>
         <span class="k">for</span> <span class="n">ref_level</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">refinement_levels</span><span class="p">:</span>
             <span class="n">ret</span> <span class="o">+=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">ref_level</span><span class="si">}</span><span class="s2"> (</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="p">[</span><span class="n">ref_level</span><span class="p">])</span><span class="si">}</span><span class="s2">)</span><span class="se">\n</span><span class="s2">&quot;</span>
@@ -3559,13 +3559,13 @@
         <li class="right" >
           <a href="../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../index.html">kuibit 1.5.0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">kuibit 1.5.1 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="../index.html" >Module code</a> &#187;</li>
         <li class="nav-item nav-item-this"><a href="">kuibit.grid_data</a></li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">
-        &#169; Copyright 2020-2024, Gabriele Bozzola.
+        &#169; Copyright 2020-2025, Gabriele Bozzola.
       Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 6.2.1.
     </div>
   </body>

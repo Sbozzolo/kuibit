@@ -6,7 +6,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>kuibit.visualize_matplotlib &#8212; kuibit 1.5.0 documentation</title>
+    <title>kuibit.visualize_matplotlib &#8212; kuibit 1.5.1 documentation</title>
     <link rel="stylesheet" type="text/css" href="../../_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="../../_static/bizstyle.css" />
     <link rel="stylesheet" type="text/css" href="../../_static/css/custom.css" />
@@ -32,7 +32,7 @@
         <li class="right" >
           <a href="../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../index.html">kuibit 1.5.0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">kuibit 1.5.1 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="../index.html" accesskey="U">Module code</a> &#187;</li>
         <li class="nav-item nav-item-this"><a href="">kuibit.visualize_matplotlib</a></li> 
       </ul>
@@ -46,7 +46,7 @@
   <h1>Source code for kuibit.visualize_matplotlib</h1><div class="highlight"><pre>
 <span></span><span class="ch">#!/usr/bin/env python3</span>
 
-<span class="c1"># Copyright (C) 2020-2024 Gabriele Bozzola</span>
+<span class="c1"># Copyright (C) 2020-2025 Gabriele Bozzola</span>
 <span class="c1">#</span>
 <span class="c1"># Inspired by code originally developed by Wolfgang Kastaun. This file may</span>
 <span class="c1"># contain algorithms and/or structures first implemented in</span>
@@ -113,25 +113,25 @@
 
 <span class="sd">&quot;&quot;&quot;</span>
 
-<span class="kn">import</span> <span class="nn">itertools</span>
-<span class="kn">import</span> <span class="nn">os</span>
-<span class="kn">import</span> <span class="nn">warnings</span>
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Optional</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">itertools</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">warnings</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Optional</span>
 
-<span class="kn">import</span> <span class="nn">matplotlib</span>
-<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
-<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="kn">from</span> <span class="nn">matplotlib.patches</span> <span class="kn">import</span> <span class="n">Rectangle</span>
-<span class="kn">from</span> <span class="nn">mpl_toolkits.axes_grid1</span> <span class="kn">import</span> <span class="n">make_axes_locatable</span>
-<span class="kn">from</span> <span class="nn">mpl_toolkits.mplot3d</span> <span class="kn">import</span> <span class="n">Axes3D</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.pyplot</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">plt</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">matplotlib.patches</span><span class="w"> </span><span class="kn">import</span> <span class="n">Rectangle</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">mpl_toolkits.axes_grid1</span><span class="w"> </span><span class="kn">import</span> <span class="n">make_axes_locatable</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">mpl_toolkits.mplot3d</span><span class="w"> </span><span class="kn">import</span> <span class="n">Axes3D</span>
 
-<span class="kn">from</span> <span class="nn">kuibit</span> <span class="kn">import</span> <span class="n">grid_data</span> <span class="k">as</span> <span class="n">gd</span>
-<span class="kn">from</span> <span class="nn">kuibit.cactus_grid_functions</span> <span class="kn">import</span> <span class="n">BaseOneGridFunction</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">kuibit</span><span class="w"> </span><span class="kn">import</span> <span class="n">grid_data</span> <span class="k">as</span> <span class="n">gd</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">kuibit.cactus_grid_functions</span><span class="w"> </span><span class="kn">import</span> <span class="n">BaseOneGridFunction</span>
 
 <span class="c1"># UTILITIES</span>
 
 
-<div class="viewcode-block" id="setup_matplotlib"><a class="viewcode-back" href="../../visualize_matplotlib_ref.html#kuibit.visualize_matplotlib.setup_matplotlib">[docs]</a><span class="k">def</span> <span class="nf">setup_matplotlib</span><span class="p">(</span>
+<div class="viewcode-block" id="setup_matplotlib"><a class="viewcode-back" href="../../visualize_matplotlib_ref.html#kuibit.visualize_matplotlib.setup_matplotlib">[docs]</a><span class="k">def</span><span class="w"> </span><span class="nf">setup_matplotlib</span><span class="p">(</span>
     <span class="n">params</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">rc_par_file</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Setup matplotlib with some reasonable defaults for better plots.</span>
@@ -183,7 +183,7 @@
         <span class="n">matplotlib</span><span class="o">.</span><span class="n">rcParams</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">params</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="preprocess_plot"><a class="viewcode-back" href="../../visualize_matplotlib_ref.html#kuibit.visualize_matplotlib.preprocess_plot">[docs]</a><span class="k">def</span> <span class="nf">preprocess_plot</span><span class="p">(</span><span class="n">func</span><span class="p">):</span>
+<div class="viewcode-block" id="preprocess_plot"><a class="viewcode-back" href="../../visualize_matplotlib_ref.html#kuibit.visualize_matplotlib.preprocess_plot">[docs]</a><span class="k">def</span><span class="w"> </span><span class="nf">preprocess_plot</span><span class="p">(</span><span class="n">func</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Decorator to set-up plot functions.</span>
 
 <span class="sd">    When we plot anything, there is always some boilerplate that has to be</span>
@@ -208,7 +208,7 @@
 
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="nf">inner</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">inner</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="c1"># Setdetault addes the key if it is not already there</span>
         <span class="n">kwargs</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="s2">&quot;axis&quot;</span><span class="p">,</span> <span class="n">plt</span><span class="o">.</span><span class="n">gca</span><span class="p">())</span>
         <span class="n">kwargs</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="s2">&quot;figure&quot;</span><span class="p">,</span> <span class="n">plt</span><span class="o">.</span><span class="n">gcf</span><span class="p">())</span>
@@ -217,7 +217,7 @@
     <span class="k">return</span> <span class="n">inner</span></div>
 
 
-<div class="viewcode-block" id="preprocess_plot_grid"><a class="viewcode-back" href="../../visualize_matplotlib_ref.html#kuibit.visualize_matplotlib.preprocess_plot_grid">[docs]</a><span class="k">def</span> <span class="nf">preprocess_plot_grid</span><span class="p">(</span><span class="n">func</span><span class="p">):</span>
+<div class="viewcode-block" id="preprocess_plot_grid"><a class="viewcode-back" href="../../visualize_matplotlib_ref.html#kuibit.visualize_matplotlib.preprocess_plot_grid">[docs]</a><span class="k">def</span><span class="w"> </span><span class="nf">preprocess_plot_grid</span><span class="p">(</span><span class="n">func</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Decorator to set-up plot functions that plot grid data.</span>
 
 <span class="sd">    This decorator extends :py:func:`~.preprocess_plot` for specific functions.</span>
@@ -245,20 +245,20 @@
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="nd">@preprocess_plot</span>
-    <span class="k">def</span> <span class="nf">inner</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">inner</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="c1"># The flow is: We check if data is BaseOneGridFunction or derived. If</span>
         <span class="c1"># yes, we read the requested iteration. Then, we check if data is</span>
         <span class="c1"># HierachicalGridData, if yes, we resample to UniformGridData. Then we</span>
         <span class="c1"># work with UniformGridData and handle coordinates, finally we work</span>
         <span class="c1"># with NumPy arrays, which is what we pass to the function.</span>
 
-        <span class="k">def</span> <span class="nf">attr_not_available</span><span class="p">(</span><span class="n">attr</span><span class="p">):</span>
+        <span class="k">def</span><span class="w"> </span><span class="nf">attr_not_available</span><span class="p">(</span><span class="n">attr</span><span class="p">):</span>
 <span class="w">            </span><span class="sd">&quot;&quot;&quot;This is a helper function to see if the user passed an attribute</span>
 <span class="sd">            or if the attribute is None</span>
 <span class="sd">            &quot;&quot;&quot;</span>
             <span class="k">return</span> <span class="n">attr</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">kwargs</span> <span class="ow">or</span> <span class="n">kwargs</span><span class="p">[</span><span class="n">attr</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">None</span>
 
-        <span class="k">def</span> <span class="nf">default_or_kwargs</span><span class="p">(</span><span class="n">attr</span><span class="p">,</span> <span class="n">default</span><span class="p">):</span>
+        <span class="k">def</span><span class="w"> </span><span class="nf">default_or_kwargs</span><span class="p">(</span><span class="n">attr</span><span class="p">,</span> <span class="n">default</span><span class="p">):</span>
 <span class="w">            </span><span class="sd">&quot;&quot;&quot;Return default if the attribute is not available in kwargs, otherwise return</span>
 <span class="sd">            the attribute</span>
 
@@ -343,7 +343,7 @@
 
         <span class="c1"># We remove what we don&#39;t need from kwargs, so that it is not</span>
         <span class="c1"># accidentally passed to the function</span>
-        <span class="k">def</span> <span class="nf">remove_attributes</span><span class="p">(</span><span class="o">*</span><span class="n">attributes</span><span class="p">):</span>
+        <span class="k">def</span><span class="w"> </span><span class="nf">remove_attributes</span><span class="p">(</span><span class="o">*</span><span class="n">attributes</span><span class="p">):</span>
             <span class="k">for</span> <span class="n">attr</span> <span class="ow">in</span> <span class="n">attributes</span><span class="p">:</span>
                 <span class="k">if</span> <span class="n">attr</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="p">:</span>
                     <span class="k">del</span> <span class="n">kwargs</span><span class="p">[</span><span class="n">attr</span><span class="p">]</span>
@@ -355,7 +355,7 @@
     <span class="k">return</span> <span class="n">inner</span></div>
 
 
-<span class="k">def</span> <span class="nf">_process_anchor_info</span><span class="p">(</span><span class="n">anchor</span><span class="p">,</span> <span class="n">offset</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">_process_anchor_info</span><span class="p">(</span><span class="n">anchor</span><span class="p">,</span> <span class="n">offset</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Prepare the correct arguments for text_function in</span>
 <span class="sd">    :py:func:`~.add_text_to_corner`</span>
 
@@ -405,7 +405,7 @@
 
 
 <span class="nd">@preprocess_plot</span>
-<span class="k">def</span> <span class="nf">add_text_to_corner</span><span class="p">(</span><span class="n">text</span><span class="p">,</span> <span class="n">anchor</span><span class="o">=</span><span class="s2">&quot;SE&quot;</span><span class="p">,</span> <span class="n">figure</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">offset</span><span class="o">=</span><span class="mf">0.01</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">add_text_to_corner</span><span class="p">(</span><span class="n">text</span><span class="p">,</span> <span class="n">anchor</span><span class="o">=</span><span class="s2">&quot;SE&quot;</span><span class="p">,</span> <span class="n">figure</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">offset</span><span class="o">=</span><span class="mf">0.01</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Add text to a figure.</span>
 
 <span class="sd">    Specify the location of the label using cardinal points (NSWE).</span>
@@ -439,7 +439,7 @@
 
 
 <span class="nd">@preprocess_plot</span>
-<span class="k">def</span> <span class="nf">save</span><span class="p">(</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">save</span><span class="p">(</span>
     <span class="n">outputpath</span><span class="p">,</span>
     <span class="n">figure</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
     <span class="n">axis</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
@@ -478,7 +478,7 @@
 
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">splitext</span><span class="p">(</span><span class="n">outputpath</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;.tikz&quot;</span><span class="p">:</span>
-        <span class="kn">import</span> <span class="nn">tikzplotlib</span>
+        <span class="kn">import</span><span class="w"> </span><span class="nn">tikzplotlib</span>
 
         <span class="c1"># If clean_figure is True, we extract from kwargs those argument</span>
         <span class="c1"># that tikzplotlib.clean_figure would take. For this, we need to</span>
@@ -509,7 +509,7 @@
 
 
 <span class="nd">@preprocess_plot</span>
-<span class="k">def</span> <span class="nf">save_from_dir_filename_ext</span><span class="p">(</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">save_from_dir_filename_ext</span><span class="p">(</span>
     <span class="n">output_dir</span><span class="p">,</span>
     <span class="n">file_name</span><span class="p">,</span>
     <span class="n">file_ext</span><span class="p">,</span>
@@ -553,7 +553,7 @@
 
 
 <span class="nd">@preprocess_plot</span>
-<span class="k">def</span> <span class="nf">set_axis_limits</span><span class="p">(</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">set_axis_limits</span><span class="p">(</span>
     <span class="n">xmin</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">xmax</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">ymin</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">ymax</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">figure</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="kc">None</span>
 <span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Set limits on the two axes of axis.</span>
@@ -580,7 +580,7 @@
 
 
 <span class="nd">@preprocess_plot</span>
-<span class="k">def</span> <span class="nf">set_axis_limits_from_args</span><span class="p">(</span><span class="n">args</span><span class="p">,</span> <span class="n">figure</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">set_axis_limits_from_args</span><span class="p">(</span><span class="n">args</span><span class="p">,</span> <span class="n">figure</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Set limits on the two axes of axis with data read from ``args``.</span>
 
 <span class="sd">    It uses the ``xmin``, ``xmax``, ``ymin``, ``ymax`` attributes.</span>
@@ -607,7 +607,7 @@
     <span class="p">)</span>
 
 
-<div class="viewcode-block" id="get_figname"><a class="viewcode-back" href="../../visualize_matplotlib_ref.html#kuibit.visualize_matplotlib.get_figname">[docs]</a><span class="k">def</span> <span class="nf">get_figname</span><span class="p">(</span><span class="n">args</span><span class="p">,</span> <span class="n">default</span><span class="p">):</span>
+<div class="viewcode-block" id="get_figname"><a class="viewcode-back" href="../../visualize_matplotlib_ref.html#kuibit.visualize_matplotlib.get_figname">[docs]</a><span class="k">def</span><span class="w"> </span><span class="nf">get_figname</span><span class="p">(</span><span class="n">args</span><span class="p">,</span> <span class="n">default</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Return the figure name checking if the user has passed one.</span>
 
 <span class="sd">    If it is defined, return ``args.figname``, otherwise return default.</span>
@@ -630,7 +630,7 @@
 <span class="c1"># GRID FUNCTIONS</span>
 
 
-<span class="k">def</span> <span class="nf">_vmin_vmax_extend</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">vmin</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">vmax</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">_vmin_vmax_extend</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">vmin</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">vmax</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Helper function to decide what to do with the colorbar (to extend it or not?).&quot;&quot;&quot;</span>
 
     <span class="n">colorbar_extend</span> <span class="o">=</span> <span class="s2">&quot;neither&quot;</span>
@@ -655,7 +655,7 @@
 
 <span class="c1"># All the difficult stuff is in preprocess_plot_grid</span>
 <span class="nd">@preprocess_plot_grid</span>
-<span class="k">def</span> <span class="nf">_plot_grid</span><span class="p">(</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">_plot_grid</span><span class="p">(</span>
     <span class="n">data</span><span class="p">,</span>
     <span class="n">plot_type</span><span class="o">=</span><span class="s2">&quot;color&quot;</span><span class="p">,</span>
     <span class="n">figure</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
@@ -764,7 +764,7 @@
     <span class="k">return</span> <span class="n">image</span>
 
 
-<div class="viewcode-block" id="plot_contourf"><a class="viewcode-back" href="../../visualize_matplotlib_ref.html#kuibit.visualize_matplotlib.plot_contourf">[docs]</a><span class="k">def</span> <span class="nf">plot_contourf</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<div class="viewcode-block" id="plot_contourf"><a class="viewcode-back" href="../../visualize_matplotlib_ref.html#kuibit.visualize_matplotlib.plot_contourf">[docs]</a><span class="k">def</span><span class="w"> </span><span class="nf">plot_contourf</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Plot the given data drawing filled contours.</span>
 
 <span class="sd">    You can pass (everything is processed by :py:func:`~.preprocess_plot_grid` so</span>
@@ -862,7 +862,7 @@
     <span class="k">return</span> <span class="n">_plot_grid</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">plot_type</span><span class="o">=</span><span class="s2">&quot;contourf&quot;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="plot_color"><a class="viewcode-back" href="../../visualize_matplotlib_ref.html#kuibit.visualize_matplotlib.plot_color">[docs]</a><span class="k">def</span> <span class="nf">plot_color</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<div class="viewcode-block" id="plot_color"><a class="viewcode-back" href="../../visualize_matplotlib_ref.html#kuibit.visualize_matplotlib.plot_color">[docs]</a><span class="k">def</span><span class="w"> </span><span class="nf">plot_color</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Plot the given data.</span>
 
 <span class="sd">    You can pass (everything is processed by :py:func:`~.preprocess_plot_grid` so</span>
@@ -960,7 +960,7 @@
     <span class="k">return</span> <span class="n">_plot_grid</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">plot_type</span><span class="o">=</span><span class="s2">&quot;color&quot;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="plot_contour"><a class="viewcode-back" href="../../visualize_matplotlib_ref.html#kuibit.visualize_matplotlib.plot_contour">[docs]</a><span class="k">def</span> <span class="nf">plot_contour</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">levels</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<div class="viewcode-block" id="plot_contour"><a class="viewcode-back" href="../../visualize_matplotlib_ref.html#kuibit.visualize_matplotlib.plot_contour">[docs]</a><span class="k">def</span><span class="w"> </span><span class="nf">plot_contour</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">levels</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Plot the given data drawing the contours.</span>
 
 <span class="sd">    You can pass (everything is processed by :py:func:`~.preprocess_plot_grid` so</span>
@@ -1066,7 +1066,7 @@
 
 
 <span class="nd">@preprocess_plot</span>
-<span class="k">def</span> <span class="nf">plot_colorbar</span><span class="p">(</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">plot_colorbar</span><span class="p">(</span>
     <span class="n">mpl_artist</span><span class="p">,</span>
     <span class="n">figure</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
     <span class="n">axis</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
@@ -1113,7 +1113,7 @@
 
 
 <span class="nd">@preprocess_plot</span>
-<span class="k">def</span> <span class="nf">plot_components_boundaries</span><span class="p">(</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">plot_components_boundaries</span><span class="p">(</span>
     <span class="n">hierarchical_data</span><span class="p">,</span> <span class="n">figure</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">remove_ghosts</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span>
 <span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Plot the boundaries of all the components available in the data.</span>
@@ -1176,7 +1176,7 @@
 
 
 <span class="nd">@preprocess_plot</span>
-<span class="k">def</span> <span class="nf">plot_horizon</span><span class="p">(</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">plot_horizon</span><span class="p">(</span>
     <span class="n">shape</span><span class="p">,</span>
     <span class="n">color</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
     <span class="n">edgecolor</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
@@ -1206,7 +1206,7 @@
 
 
 <span class="nd">@preprocess_plot</span>
-<span class="k">def</span> <span class="nf">_plot_horizon_on_plane</span><span class="p">(</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">_plot_horizon_on_plane</span><span class="p">(</span>
     <span class="n">horizon</span><span class="p">,</span>
     <span class="n">plot_type</span><span class="o">=</span><span class="s2">&quot;iteration&quot;</span><span class="p">,</span>
     <span class="n">iteration</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
@@ -1283,7 +1283,7 @@
 
 
 <span class="nd">@preprocess_plot</span>
-<span class="k">def</span> <span class="nf">plot_horizon_on_plane_at_iteration</span><span class="p">(</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">plot_horizon_on_plane_at_iteration</span><span class="p">(</span>
     <span class="n">horizon</span><span class="p">,</span>
     <span class="n">iteration</span><span class="p">,</span>
     <span class="n">plane</span><span class="p">,</span>
@@ -1343,7 +1343,7 @@
 
 
 <span class="nd">@preprocess_plot</span>
-<span class="k">def</span> <span class="nf">plot_horizon_on_plane_at_time</span><span class="p">(</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">plot_horizon_on_plane_at_time</span><span class="p">(</span>
     <span class="n">horizon</span><span class="p">,</span>
     <span class="n">time</span><span class="p">,</span>
     <span class="n">plane</span><span class="p">,</span>
@@ -1454,13 +1454,13 @@
         <li class="right" >
           <a href="../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../index.html">kuibit 1.5.0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">kuibit 1.5.1 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="../index.html" >Module code</a> &#187;</li>
         <li class="nav-item nav-item-this"><a href="">kuibit.visualize_matplotlib</a></li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">
-        &#169; Copyright 2020-2024, Gabriele Bozzola.
+        &#169; Copyright 2020-2025, Gabriele Bozzola.
       Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 6.2.1.
     </div>
   </body>

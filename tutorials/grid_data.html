@@ -7,7 +7,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
 
-    <title>Working with grid data &#8212; kuibit 1.5.0 documentation</title>
+    <title>Working with grid data &#8212; kuibit 1.5.1 documentation</title>
     <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="../_static/bizstyle.css" />
     <link rel="stylesheet" type="text/css" href="../_static/nbsphinx-code-cells.css" />
@@ -44,7 +44,7 @@
         <li class="right" >
           <a href="timeseries.html" title="Working with time series, frequency series, and unit conversion"
              accesskey="P">previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../index.html">kuibit 1.5.0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">kuibit 1.5.1 documentation</a> &#187;</li>
         <li class="nav-item nav-item-this"><a href="">Working with grid data</a></li> 
       </ul>
     </div>  
@@ -57,18 +57,23 @@
   <section id="Working-with-grid-data">
 <h1>Working with grid data<a class="headerlink" href="#Working-with-grid-data" title="Permalink to this heading">¶</a></h1>
 <p>In this notebook, we show some of the most useful features of the <a class="reference internal" href="../grid_data.html"><span class="doc">grid_data</span></a> module.</p>
-<p>There are three important objects in <a class="reference internal" href="../grid_data.html"><span class="doc">grid_data</span></a>: - <code class="docutils literal notranslate"><span class="pre">UniformGrid</span></code> represents Cartesian grids, - <code class="docutils literal notranslate"><span class="pre">UniformGridData</span></code> represents data on <code class="docutils literal notranslate"><span class="pre">UniformGrid</span></code>, - <code class="docutils literal notranslate"><span class="pre">HierarchicalGridData</span></code> represents data on multiple grids with different spacings (a mesh-refined grid).</p>
+<p>There are three important objects in <a class="reference internal" href="../grid_data.html"><span class="doc">grid_data</span></a>:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">UniformGrid</span></code> represents Cartesian grids,</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">UniformGridData</span></code> represents data on <code class="docutils literal notranslate"><span class="pre">UniformGrid</span></code>,</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">HierarchicalGridData</span></code> represents data on multiple grids with different spacings (a mesh-refined grid).</p></li>
+</ul>
 <p>In most cases you will not define these objects directly, but it is important to know how they work. To learn how to read the simulation data, see <a class="reference internal" href="cactus_grid_functions.html"><span class="doc">working with grid funcitons</span></a>.</p>
 <p>(This notebook is meant to be converted in Sphinx documentation and not used directly.)</p>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
-<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="kn">from</span> <span class="nn">kuibit</span> <span class="kn">import</span> <span class="n">grid_data</span> <span class="k">as</span> <span class="n">gd</span>
-<span class="kn">from</span> <span class="nn">kuibit</span> <span class="kn">import</span> <span class="n">grid_data_utils</span> <span class="k">as</span> <span class="n">gdu</span>
-<span class="kn">from</span> <span class="nn">kuibit</span> <span class="kn">import</span> <span class="n">series</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.pyplot</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">plt</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">kuibit</span><span class="w"> </span><span class="kn">import</span> <span class="n">grid_data</span> <span class="k">as</span> <span class="n">gd</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">kuibit</span><span class="w"> </span><span class="kn">import</span> <span class="n">grid_data_utils</span> <span class="k">as</span> <span class="n">gdu</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">kuibit</span><span class="w"> </span><span class="kn">import</span> <span class="n">series</span>
 
 <span class="o">%</span><span class="k">matplotlib</span> inline
 </pre></div>
@@ -223,7 +228,7 @@ the x coordiante, but the y. We provide the aliaxs <code class="docutils literal
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-&lt;matplotlib.colorbar.Colorbar at 0x7f07921e94c0&gt;
+&lt;matplotlib.colorbar.Colorbar at 0x7f8a7963a120&gt;
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
@@ -250,7 +255,7 @@ the x coordiante, but the y. We provide the aliaxs <code class="docutils literal
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-&lt;matplotlib.colorbar.Colorbar at 0x7f078fde6eb0&gt;
+&lt;matplotlib.colorbar.Colorbar at 0x7f8a79244e10&gt;
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
@@ -328,7 +333,7 @@ The norm2 of funky_data is 20417.836
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-[&lt;matplotlib.lines.Line2D at 0x7f078fd788b0&gt;]
+[&lt;matplotlib.lines.Line2D at 0x7f8a792e0e10&gt;]
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
@@ -357,7 +362,7 @@ The norm2 of funky_data is 20417.836
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-&lt;matplotlib.colorbar.Colorbar at 0x7f078fc9f640&gt;
+&lt;matplotlib.colorbar.Colorbar at 0x7f8a79179950&gt;
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
@@ -376,7 +381,7 @@ The norm2 of funky_data is 20417.836
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">resampled_funky</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="s2">&quot;/tmp/funky.npz&quot;</span><span class="p">)</span>
 
-<span class="kn">from</span> <span class="nn">kuibit.grid_data_utils</span> <span class="kn">import</span> <span class="n">load_UniformGridData</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">kuibit.grid_data_utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">load_UniformGridData</span>
 
 <span class="n">loaded_data</span> <span class="o">=</span> <span class="n">load_UniformGridData</span><span class="p">(</span><span class="s2">&quot;/tmp/funky.npz&quot;</span><span class="p">)</span>
 </pre></div>
@@ -487,7 +492,7 @@ more_funk of (2, 3) is 2.565
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-&lt;matplotlib.colorbar.Colorbar at 0x7f078f954dc0&gt;
+&lt;matplotlib.colorbar.Colorbar at 0x7f8a79026850&gt;
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
@@ -515,7 +520,7 @@ more_funk of (2, 3) is 2.565
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-&lt;matplotlib.colorbar.Colorbar at 0x7f078f8b6d30&gt;
+&lt;matplotlib.colorbar.Colorbar at 0x7f8a78f44f50&gt;
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
@@ -545,7 +550,7 @@ more_funk of (2, 3) is 2.565
 Available refinement levels: [0, 1, 2]
 Spacing of the coarsest: [1. 1.]
 Spacing of the finest: [0.33333333 0.33333333]
-Finest level: &lt;kuibit.grid_data.UniformGridData object at 0x7f078f9e10a0&gt;
+Finest level: &lt;kuibit.grid_data.UniformGridData object at 0x7f8a7961d910&gt;
 </pre></div></div>
 </div>
 <p>Often, we want to look at a specific cut of the data. <code class="docutils literal notranslate"><span class="pre">UniformGridData</span></code> can be sliced easily. Just prepare a <code class="docutils literal notranslate"><span class="pre">cut</span></code> array with <code class="docutils literal notranslate"><span class="pre">None</span></code> where you want to keep the dimension, and the coordiante of where you want to slice. For example, here we extract the line with <code class="docutils literal notranslate"><span class="pre">y=0.7</span></code>.</p>
@@ -585,7 +590,7 @@ Iteration        = None
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-[&lt;matplotlib.lines.Line2D at 0x7f078f7d7820&gt;]
+[&lt;matplotlib.lines.Line2D at 0x7f8a78fc7c50&gt;]
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
@@ -611,7 +616,7 @@ Iteration        = None
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-[&lt;matplotlib.lines.Line2D at 0x7f078f745130&gt;]
+[&lt;matplotlib.lines.Line2D at 0x7f8a78e90050&gt;]
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
@@ -630,7 +635,7 @@ Iteration        = None
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[24]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">kuibit.masks</span> <span class="k">as</span> <span class="nn">km</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">kuibit.masks</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">km</span>
 
 <span class="n">arcsin_funk</span> <span class="o">=</span> <span class="n">km</span><span class="o">.</span><span class="n">arcsin</span><span class="p">(</span><span class="n">more_funk</span><span class="p">)</span>
 
@@ -698,7 +703,7 @@ True
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[27]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">kuibit.visualize_matplotlib</span> <span class="k">as</span> <span class="nn">viz</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">kuibit.visualize_matplotlib</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">viz</span>
 
 <span class="n">viz</span><span class="o">.</span><span class="n">plot_color</span><span class="p">(</span><span class="n">funky_data</span><span class="p">)</span>
 </pre></div>
@@ -710,7 +715,7 @@ True
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-&lt;matplotlib.image.AxesImage at 0x7f078f681850&gt;
+&lt;matplotlib.image.AxesImage at 0x7f8a78eecc20&gt;
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
@@ -738,7 +743,7 @@ True
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-&lt;matplotlib.image.AxesImage at 0x7f078f785670&gt;
+&lt;matplotlib.image.AxesImage at 0x7f8a78d9f9d0&gt;
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
@@ -831,12 +836,12 @@ True
         <li class="right" >
           <a href="timeseries.html" title="Working with time series, frequency series, and unit conversion"
              >previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../index.html">kuibit 1.5.0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">kuibit 1.5.1 documentation</a> &#187;</li>
         <li class="nav-item nav-item-this"><a href="">Working with grid data</a></li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">
-        &#169; Copyright 2020-2024, Gabriele Bozzola.
+        &#169; Copyright 2020-2025, Gabriele Bozzola.
       Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 6.2.1.
     </div>
   </body>

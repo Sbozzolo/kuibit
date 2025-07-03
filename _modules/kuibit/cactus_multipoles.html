@@ -6,7 +6,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>kuibit.cactus_multipoles &#8212; kuibit 1.5.0 documentation</title>
+    <title>kuibit.cactus_multipoles &#8212; kuibit 1.5.1 documentation</title>
     <link rel="stylesheet" type="text/css" href="../../_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="../../_static/bizstyle.css" />
     <link rel="stylesheet" type="text/css" href="../../_static/css/custom.css" />
@@ -32,7 +32,7 @@
         <li class="right" >
           <a href="../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../index.html">kuibit 1.5.0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">kuibit 1.5.1 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="../index.html" accesskey="U">Module code</a> &#187;</li>
         <li class="nav-item nav-item-this"><a href="">kuibit.cactus_multipoles</a></li> 
       </ul>
@@ -46,7 +46,7 @@
   <h1>Source code for kuibit.cactus_multipoles</h1><div class="highlight"><pre>
 <span></span><span class="ch">#!/usr/bin/env python3</span>
 
-<span class="c1"># Copyright (C) 2020-2024 Gabriele Bozzola</span>
+<span class="c1"># Copyright (C) 2020-2025 Gabriele Bozzola</span>
 <span class="c1">#</span>
 <span class="c1"># Based on code originally developed by Wolfgang Kastaun. This file may contain</span>
 <span class="c1"># algorithms and/or structures first implemented in</span>
@@ -87,18 +87,18 @@
 
 <span class="sd">&quot;&quot;&quot;</span>
 
-<span class="kn">import</span> <span class="nn">os</span>
-<span class="kn">import</span> <span class="nn">re</span>
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Optional</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">re</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Optional</span>
 
-<span class="kn">import</span> <span class="nn">h5py</span>
-<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">h5py</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
 
-<span class="kn">from</span> <span class="nn">kuibit</span> <span class="kn">import</span> <span class="n">timeseries</span>
-<span class="kn">from</span> <span class="nn">kuibit.attr_dict</span> <span class="kn">import</span> <span class="n">pythonize_name_dict</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">kuibit</span><span class="w"> </span><span class="kn">import</span> <span class="n">timeseries</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">kuibit.attr_dict</span><span class="w"> </span><span class="kn">import</span> <span class="n">pythonize_name_dict</span>
 
 
-<div class="viewcode-block" id="MultipoleOneDet"><a class="viewcode-back" href="../../cactus_multipoles_ref.html#kuibit.cactus_multipoles.MultipoleOneDet">[docs]</a><span class="k">class</span> <span class="nc">MultipoleOneDet</span><span class="p">:</span>
+<div class="viewcode-block" id="MultipoleOneDet"><a class="viewcode-back" href="../../cactus_multipoles_ref.html#kuibit.cactus_multipoles.MultipoleOneDet">[docs]</a><span class="k">class</span><span class="w"> </span><span class="nc">MultipoleOneDet</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;This class collects multipole components of a specific variable</span>
 <span class="sd">    a given spherical surface.</span>
 
@@ -133,7 +133,7 @@
 
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dist</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">l_min</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dist</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">l_min</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Constructor.</span>
 
 <span class="sd">        :param dist: Radius of the spherical surface.</span>
@@ -193,7 +193,7 @@
         <span class="c1"># Data is in the format expected by __init__</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="p">[(</span><span class="n">lm</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">lm</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">ts</span><span class="p">)</span> <span class="k">for</span> <span class="n">lm</span><span class="p">,</span> <span class="n">ts</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_multipoles</span><span class="o">.</span><span class="n">items</span><span class="p">()]</span>
 
-<div class="viewcode-block" id="MultipoleOneDet.copy"><a class="viewcode-back" href="../../cactus_multipoles_ref.html#kuibit.cactus_multipoles.MultipoleOneDet.copy">[docs]</a>    <span class="k">def</span> <span class="nf">copy</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="MultipoleOneDet.copy"><a class="viewcode-back" href="../../cactus_multipoles_ref.html#kuibit.cactus_multipoles.MultipoleOneDet.copy">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">copy</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Return a deep copy.</span>
 
 <span class="sd">        :returns: Deep copy of ``self``.</span>
@@ -201,7 +201,7 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)(</span><span class="bp">self</span><span class="o">.</span><span class="n">dist</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">l_min</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="MultipoleOneDet.crop"><a class="viewcode-back" href="../../cactus_multipoles_ref.html#kuibit.cactus_multipoles.MultipoleOneDet.crop">[docs]</a>    <span class="k">def</span> <span class="nf">crop</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">init</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">end</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+<div class="viewcode-block" id="MultipoleOneDet.crop"><a class="viewcode-back" href="../../cactus_multipoles_ref.html#kuibit.cactus_multipoles.MultipoleOneDet.crop">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">crop</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">init</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">end</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Remove all the data before ``init`` and after ``end``.</span>
 
 <span class="sd">        If ``init`` or ``end`` are not specified, do not crop on that side.</span>
@@ -209,7 +209,7 @@
         <span class="k">for</span> <span class="n">_</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">ts</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">:</span>
             <span class="n">ts</span><span class="o">.</span><span class="n">crop</span><span class="p">(</span><span class="n">init</span><span class="o">=</span><span class="n">init</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="n">end</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="MultipoleOneDet.cropped"><a class="viewcode-back" href="../../cactus_multipoles_ref.html#kuibit.cactus_multipoles.MultipoleOneDet.cropped">[docs]</a>    <span class="k">def</span> <span class="nf">cropped</span><span class="p">(</span>
+<div class="viewcode-block" id="MultipoleOneDet.cropped"><a class="viewcode-back" href="../../cactus_multipoles_ref.html#kuibit.cactus_multipoles.MultipoleOneDet.cropped">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">cropped</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="n">init</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">end</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Return a copy where the data is cropped in the provided interval.</span>
@@ -223,16 +223,16 @@
         <span class="n">ret</span><span class="o">.</span><span class="n">crop</span><span class="p">(</span><span class="n">init</span><span class="o">=</span><span class="n">init</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="n">end</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">ret</span></div>
 
-    <span class="k">def</span> <span class="fm">__contains__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__contains__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">):</span>
         <span class="k">return</span> <span class="n">key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_multipoles</span>
 
-    <span class="k">def</span> <span class="fm">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_multipoles</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
 
-    <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mult_l</span><span class="p">,</span> <span class="n">mult_m</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mult_l</span><span class="p">,</span> <span class="n">mult_m</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="p">[(</span><span class="n">mult_l</span><span class="p">,</span> <span class="n">mult_m</span><span class="p">)]</span>
 
-    <span class="k">def</span> <span class="fm">__eq__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__eq__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)):</span>
             <span class="k">return</span> <span class="kc">False</span>
         <span class="k">return</span> <span class="p">(</span>
@@ -246,14 +246,14 @@
     <span class="c1"># Since we consider series unhashable, this object also has to be unhashable.</span>
     <span class="fm">__hash__</span> <span class="o">=</span> <span class="kc">None</span>
 
-    <span class="k">def</span> <span class="fm">__iter__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__iter__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">for</span> <span class="p">(</span><span class="n">mult_l</span><span class="p">,</span> <span class="n">mult_m</span><span class="p">),</span> <span class="n">ts</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_multipoles</span><span class="o">.</span><span class="n">items</span><span class="p">()):</span>
             <span class="k">yield</span> <span class="n">mult_l</span><span class="p">,</span> <span class="n">mult_m</span><span class="p">,</span> <span class="n">ts</span>
 
-    <span class="k">def</span> <span class="fm">__len__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__len__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_multipoles</span><span class="p">)</span>
 
-<div class="viewcode-block" id="MultipoleOneDet.keys"><a class="viewcode-back" href="../../cactus_multipoles_ref.html#kuibit.cactus_multipoles.MultipoleOneDet.keys">[docs]</a>    <span class="k">def</span> <span class="nf">keys</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="MultipoleOneDet.keys"><a class="viewcode-back" href="../../cactus_multipoles_ref.html#kuibit.cactus_multipoles.MultipoleOneDet.keys">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">keys</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Return available multipolar numbers.</span>
 
 <span class="sd">        :returns: Available multipolar numbers.</span>
@@ -261,13 +261,13 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_multipoles</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span></div>
 
-    <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">ret</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;(l, m) available: </span><span class="si">{</span><span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span><span class="si">}</span><span class="s2">&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">missing_lm</span><span class="p">:</span>
             <span class="n">ret</span> <span class="o">+=</span> <span class="sa">f</span><span class="s2">&quot; (missing: </span><span class="si">{</span><span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">missing_lm</span><span class="p">)</span><span class="si">}</span><span class="s2">)&quot;</span>
         <span class="k">return</span> <span class="n">ret</span>
 
-<div class="viewcode-block" id="MultipoleOneDet.total_function_on_available_lm"><a class="viewcode-back" href="../../cactus_multipoles_ref.html#kuibit.cactus_multipoles.MultipoleOneDet.total_function_on_available_lm">[docs]</a>    <span class="k">def</span> <span class="nf">total_function_on_available_lm</span><span class="p">(</span>
+<div class="viewcode-block" id="MultipoleOneDet.total_function_on_available_lm"><a class="viewcode-back" href="../../cactus_multipoles_ref.html#kuibit.cactus_multipoles.MultipoleOneDet.total_function_on_available_lm">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">total_function_on_available_lm</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="n">function</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="n">l_max</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span>
     <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Evaluate ``function`` on each multipole and accumulate the result.</span>
@@ -329,7 +329,7 @@
         <span class="k">return</span> <span class="n">result</span></div></div>
 
 
-<div class="viewcode-block" id="MultipoleAllDets"><a class="viewcode-back" href="../../cactus_multipoles_ref.html#kuibit.cactus_multipoles.MultipoleAllDets">[docs]</a><span class="k">class</span> <span class="nc">MultipoleAllDets</span><span class="p">:</span>
+<div class="viewcode-block" id="MultipoleAllDets"><a class="viewcode-back" href="../../cactus_multipoles_ref.html#kuibit.cactus_multipoles.MultipoleAllDets">[docs]</a><span class="k">class</span><span class="w"> </span><span class="nc">MultipoleAllDets</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;This class collects available surfaces with multipole data.</span>
 
 <span class="sd">    It is a dictionary-like object with keys the spherical surface radius, and</span>
@@ -354,7 +354,7 @@
 
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">l_min</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">l_min</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Constructor.</span>
 
 <span class="sd">        :param data: List of tuples with ``(multipole_l, multipole_m,</span>
@@ -412,7 +412,7 @@
             <span class="k">for</span> <span class="n">mult_l</span><span class="p">,</span> <span class="n">mult_m</span><span class="p">,</span> <span class="n">ts</span> <span class="ow">in</span> <span class="n">det</span><span class="p">:</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">mult_l</span><span class="p">,</span> <span class="n">mult_m</span><span class="p">,</span> <span class="n">radius</span><span class="p">,</span> <span class="n">ts</span><span class="p">))</span>
 
-<div class="viewcode-block" id="MultipoleAllDets.copy"><a class="viewcode-back" href="../../cactus_multipoles_ref.html#kuibit.cactus_multipoles.MultipoleAllDets.copy">[docs]</a>    <span class="k">def</span> <span class="nf">copy</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="MultipoleAllDets.copy"><a class="viewcode-back" href="../../cactus_multipoles_ref.html#kuibit.cactus_multipoles.MultipoleAllDets.copy">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">copy</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Return a deep copy.</span>
 
 <span class="sd">        :returns: Deep copy of ``self``.</span>
@@ -420,7 +420,7 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">l_min</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="MultipoleAllDets.has_detector"><a class="viewcode-back" href="../../cactus_multipoles_ref.html#kuibit.cactus_multipoles.MultipoleAllDets.has_detector">[docs]</a>    <span class="k">def</span> <span class="nf">has_detector</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mult_l</span><span class="p">,</span> <span class="n">mult_m</span><span class="p">,</span> <span class="n">dist</span><span class="p">):</span>
+<div class="viewcode-block" id="MultipoleAllDets.has_detector"><a class="viewcode-back" href="../../cactus_multipoles_ref.html#kuibit.cactus_multipoles.MultipoleAllDets.has_detector">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">has_detector</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mult_l</span><span class="p">,</span> <span class="n">mult_m</span><span class="p">,</span> <span class="n">dist</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Check if a given multipole component extracted at a given</span>
 <span class="sd">        distance is available.</span>
 
@@ -438,17 +438,17 @@
             <span class="k">return</span> <span class="p">(</span><span class="n">mult_l</span><span class="p">,</span> <span class="n">mult_m</span><span class="p">)</span> <span class="ow">in</span> <span class="bp">self</span><span class="p">[</span><span class="n">dist</span><span class="p">]</span>
         <span class="k">return</span> <span class="kc">False</span></div>
 
-    <span class="k">def</span> <span class="fm">__contains__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__contains__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">):</span>
         <span class="k">return</span> <span class="n">key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dets</span>
 
-    <span class="k">def</span> <span class="fm">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dets</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
 
-    <span class="k">def</span> <span class="fm">__iter__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__iter__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">radii</span><span class="p">:</span>
             <span class="k">yield</span> <span class="bp">self</span><span class="p">[</span><span class="n">r</span><span class="p">]</span>
 
-    <span class="k">def</span> <span class="fm">__eq__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__eq__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)):</span>
             <span class="k">return</span> <span class="kc">False</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">radii</span> <span class="o">==</span> <span class="n">other</span><span class="o">.</span><span class="n">radii</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dets</span> <span class="o">==</span> <span class="n">other</span><span class="o">.</span><span class="n">_dets</span>
@@ -460,10 +460,10 @@
     <span class="c1"># Since we consider series unhashable, this object also has to be unhashable.</span>
     <span class="fm">__hash__</span> <span class="o">=</span> <span class="kc">None</span>
 
-    <span class="k">def</span> <span class="fm">__len__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__len__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_dets</span><span class="p">)</span>
 
-<div class="viewcode-block" id="MultipoleAllDets.keys"><a class="viewcode-back" href="../../cactus_multipoles_ref.html#kuibit.cactus_multipoles.MultipoleAllDets.keys">[docs]</a>    <span class="k">def</span> <span class="nf">keys</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="MultipoleAllDets.keys"><a class="viewcode-back" href="../../cactus_multipoles_ref.html#kuibit.cactus_multipoles.MultipoleAllDets.keys">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">keys</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Return available extraction radii.</span>
 
 <span class="sd">        :returns: Available extraction radii.</span>
@@ -471,14 +471,14 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dets</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span></div>
 
-    <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">ret</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;Avilable radii: </span><span class="si">{</span><span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span><span class="si">}</span><span class="se">\n\n</span><span class="s2">&quot;</span>
         <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">keys</span><span class="p">()):</span>
             <span class="n">ret</span> <span class="o">+=</span> <span class="sa">f</span><span class="s2">&quot;At radius </span><span class="si">{</span><span class="n">d</span><span class="si">}</span><span class="s2">, </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_dets</span><span class="p">[</span><span class="n">d</span><span class="p">]</span><span class="si">}</span><span class="se">\n</span><span class="s2">&quot;</span>
         <span class="k">return</span> <span class="n">ret</span></div>
 
 
-<div class="viewcode-block" id="MultipolesDir"><a class="viewcode-back" href="../../cactus_multipoles_ref.html#kuibit.cactus_multipoles.MultipolesDir">[docs]</a><span class="k">class</span> <span class="nc">MultipolesDir</span><span class="p">:</span>
+<div class="viewcode-block" id="MultipolesDir"><a class="viewcode-back" href="../../cactus_multipoles_ref.html#kuibit.cactus_multipoles.MultipolesDir">[docs]</a><span class="k">class</span><span class="w"> </span><span class="nc">MultipolesDir</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;This class provides acces to various types of multipole data in a given</span>
 <span class="sd">    simulation directory.</span>
 
@@ -491,7 +491,7 @@
 
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sd</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sd</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Constructor.</span>
 
 <span class="sd">        :param sd: Simulation directory.</span>
@@ -575,7 +575,7 @@
         <span class="c1"># accessible as attributes, e.g. self.fields.rho</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">fields</span> <span class="o">=</span> <span class="n">pythonize_name_dict</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">keys</span><span class="p">()),</span> <span class="bp">self</span><span class="o">.</span><span class="fm">__getitem__</span><span class="p">)</span>
 
-    <span class="k">def</span> <span class="fm">__contains__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__contains__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">):</span>
         <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="n">key</span><span class="p">)</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span>
 
     <span class="c1"># The following are staticmethods because they do not depend on the bound</span>
@@ -583,7 +583,7 @@
     <span class="c1"># initialize them only once.</span>
 
     <span class="nd">@staticmethod</span>
-    <span class="k">def</span> <span class="nf">_multipole_from_textfile</span><span class="p">(</span><span class="n">path</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_multipole_from_textfile</span><span class="p">(</span><span class="n">path</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Read multipole data from a text file.</span>
 
 <span class="sd">        :param path: File to read.</span>
@@ -599,7 +599,7 @@
         <span class="k">return</span> <span class="n">timeseries</span><span class="o">.</span><span class="n">remove_duplicated_iters</span><span class="p">(</span><span class="n">a</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">complex_mp</span><span class="p">)</span>
 
     <span class="nd">@staticmethod</span>
-    <span class="k">def</span> <span class="nf">_multipoles_from_h5file</span><span class="p">(</span><span class="n">path</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_multipoles_from_h5file</span><span class="p">(</span><span class="n">path</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Read multipole data from a HDF5 file.</span>
 
 <span class="sd">        :param path: File to read.</span>
@@ -628,11 +628,11 @@
                         <span class="p">)</span>
                         <span class="n">alldets</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">mult_l</span><span class="p">,</span> <span class="n">mult_m</span><span class="p">,</span> <span class="n">radius</span><span class="p">,</span> <span class="n">ts</span><span class="p">))</span>
         <span class="k">except</span> <span class="ne">RuntimeError</span> <span class="k">as</span> <span class="n">exce</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;File </span><span class="si">{</span><span class="n">data</span><span class="si">}</span><span class="s2"> cannot be processed&quot;</span><span class="p">)</span> <span class="kn">from</span> <span class="nn">exce</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;File </span><span class="si">{</span><span class="n">data</span><span class="si">}</span><span class="s2"> cannot be processed&quot;</span><span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="nn">exce</span>
 
         <span class="k">return</span> <span class="n">alldets</span>
 
-    <span class="k">def</span> <span class="nf">_multipoles_from_textfiles</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mpfiles</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_multipoles_from_textfiles</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mpfiles</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Read all the multipole data in several text files.</span>
 
 <span class="sd">        :param mpfiles: Files to read.</span>
@@ -653,7 +653,7 @@
         <span class="p">]</span>
         <span class="k">return</span> <span class="n">MultipoleAllDets</span><span class="p">(</span><span class="n">alldets</span><span class="p">)</span>
 
-    <span class="k">def</span> <span class="nf">_multipoles_from_h5files</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mpfiles</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_multipoles_from_h5files</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mpfiles</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Read all the multipole data in several HDF5 files.</span>
 
 <span class="sd">        :param mpfiles: Files to read.</span>
@@ -669,7 +669,7 @@
 
         <span class="k">return</span> <span class="n">MultipoleAllDets</span><span class="p">(</span><span class="n">mult_l</span><span class="p">)</span>
 
-    <span class="k">def</span> <span class="fm">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Read data associated to variable ``key``.</span>
 
 <span class="sd">        HDF5 files are preferred over ASCII ones.</span>
@@ -697,7 +697,7 @@
 
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_vars</span><span class="p">[</span><span class="n">k</span><span class="p">]</span>
 
-<div class="viewcode-block" id="MultipolesDir.get"><a class="viewcode-back" href="../../cactus_multipoles_ref.html#kuibit.cactus_multipoles.MultipolesDir.get">[docs]</a>    <span class="k">def</span> <span class="nf">get</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<div class="viewcode-block" id="MultipolesDir.get"><a class="viewcode-back" href="../../cactus_multipoles_ref.html#kuibit.cactus_multipoles.MultipolesDir.get">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">get</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Return a the multipolar data for the given variable if available, else return</span>
 <span class="sd">        the default value.</span>
 
@@ -715,7 +715,7 @@
             <span class="k">return</span> <span class="n">default</span>
         <span class="k">return</span> <span class="bp">self</span><span class="p">[</span><span class="n">key</span><span class="p">]</span></div>
 
-<div class="viewcode-block" id="MultipolesDir.keys"><a class="viewcode-back" href="../../cactus_multipoles_ref.html#kuibit.cactus_multipoles.MultipolesDir.keys">[docs]</a>    <span class="k">def</span> <span class="nf">keys</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="MultipolesDir.keys"><a class="viewcode-back" href="../../cactus_multipoles_ref.html#kuibit.cactus_multipoles.MultipolesDir.keys">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">keys</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Return available variables with multipolar data.</span>
 
 <span class="sd">        :returns: Available variables that have multipolar data.</span>
@@ -725,7 +725,7 @@
         <span class="c1"># This automatically takes care of making sure that they keys are unique.</span>
         <span class="k">return</span> <span class="p">{</span><span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">_vars_h5_files</span><span class="p">,</span> <span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">_vars_ascii_files</span><span class="p">}</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span></div>
 
-    <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;NOTE: __str__ requires opening all the h5 files! This can be slow!&quot;&quot;&quot;</span>
         <span class="n">ret</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;Variables available: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span><span class="si">}</span><span class="se">\n</span><span class="s2">&quot;</span>
         <span class="k">for</span> <span class="n">variable</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
@@ -781,13 +781,13 @@
         <li class="right" >
           <a href="../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../index.html">kuibit 1.5.0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">kuibit 1.5.1 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="../index.html" >Module code</a> &#187;</li>
         <li class="nav-item nav-item-this"><a href="">kuibit.cactus_multipoles</a></li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">
-        &#169; Copyright 2020-2024, Gabriele Bozzola.
+        &#169; Copyright 2020-2025, Gabriele Bozzola.
       Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 6.2.1.
     </div>
   </body>

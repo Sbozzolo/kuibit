@@ -6,7 +6,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>kuibit.frequencyseries &#8212; kuibit 1.5.0 documentation</title>
+    <title>kuibit.frequencyseries &#8212; kuibit 1.5.1 documentation</title>
     <link rel="stylesheet" type="text/css" href="../../_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="../../_static/bizstyle.css" />
     <link rel="stylesheet" type="text/css" href="../../_static/css/custom.css" />
@@ -32,7 +32,7 @@
         <li class="right" >
           <a href="../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../index.html">kuibit 1.5.0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">kuibit 1.5.1 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="../index.html" accesskey="U">Module code</a> &#187;</li>
         <li class="nav-item nav-item-this"><a href="">kuibit.frequencyseries</a></li> 
       </ul>
@@ -46,7 +46,7 @@
   <h1>Source code for kuibit.frequencyseries</h1><div class="highlight"><pre>
 <span></span><span class="ch">#!/usr/bin/env python3</span>
 
-<span class="c1"># Copyright (C) 2020-2024 Gabriele Bozzola</span>
+<span class="c1"># Copyright (C) 2020-2025 Gabriele Bozzola</span>
 <span class="c1">#</span>
 <span class="c1"># Inspired by code originally developed by Wolfgang Kastaun. This file may</span>
 <span class="c1"># contain algorithms and/or structures first implemented in</span>
@@ -90,14 +90,14 @@
 
 <span class="sd">&quot;&quot;&quot;</span>
 
-<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="kn">from</span> <span class="nn">scipy.signal</span> <span class="kn">import</span> <span class="n">argrelextrema</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">scipy.signal</span><span class="w"> </span><span class="kn">import</span> <span class="n">argrelextrema</span>
 
-<span class="kn">from</span> <span class="nn">kuibit</span> <span class="kn">import</span> <span class="n">timeseries</span>
-<span class="kn">from</span> <span class="nn">kuibit.series</span> <span class="kn">import</span> <span class="n">BaseSeries</span><span class="p">,</span> <span class="n">sample_common</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">kuibit</span><span class="w"> </span><span class="kn">import</span> <span class="n">timeseries</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">kuibit.series</span><span class="w"> </span><span class="kn">import</span> <span class="n">BaseSeries</span><span class="p">,</span> <span class="n">sample_common</span>
 
 
-<div class="viewcode-block" id="load_FrequencySeries"><a class="viewcode-back" href="../../frequencyseries_ref.html#kuibit.frequencyseries.load_FrequencySeries">[docs]</a><span class="k">def</span> <span class="nf">load_FrequencySeries</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="n">complex_on_two_columns</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<div class="viewcode-block" id="load_FrequencySeries"><a class="viewcode-back" href="../../frequencyseries_ref.html#kuibit.frequencyseries.load_FrequencySeries">[docs]</a><span class="k">def</span><span class="w"> </span><span class="nf">load_FrequencySeries</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="n">complex_on_two_columns</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Load a text file as a :py:class:`~.FrequencySeries`.</span>
 
 <span class="sd">    The backend is ``np.loadtxt``, and the unknown arguments passed to this</span>
@@ -126,7 +126,7 @@
     <span class="k">return</span> <span class="n">FrequencySeries</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">fft</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="load_noise_curve"><a class="viewcode-back" href="../../frequencyseries_ref.html#kuibit.frequencyseries.load_noise_curve">[docs]</a><span class="k">def</span> <span class="nf">load_noise_curve</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<div class="viewcode-block" id="load_noise_curve"><a class="viewcode-back" href="../../frequencyseries_ref.html#kuibit.frequencyseries.load_noise_curve">[docs]</a><span class="k">def</span><span class="w"> </span><span class="nf">load_noise_curve</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Load a noise curve as a :py:class:`~.FrequencySeries`.</span>
 
 <span class="sd">    Unknown arguments are passed to ``np.loadtxt``.</span>
@@ -143,7 +143,7 @@
     <span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="FrequencySeries"><a class="viewcode-back" href="../../frequencyseries_ref.html#kuibit.frequencyseries.FrequencySeries">[docs]</a><span class="k">class</span> <span class="nc">FrequencySeries</span><span class="p">(</span><span class="n">BaseSeries</span><span class="p">):</span>
+<div class="viewcode-block" id="FrequencySeries"><a class="viewcode-back" href="../../frequencyseries_ref.html#kuibit.frequencyseries.FrequencySeries">[docs]</a><span class="k">class</span><span class="w"> </span><span class="nc">FrequencySeries</span><span class="p">(</span><span class="n">BaseSeries</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Class representing a Fourier spectrum.</span>
 
 <span class="sd">    :ivar f:   Frequency</span>
@@ -155,7 +155,7 @@
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="c1"># skiqc PYL-W0235</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">fft</span><span class="p">,</span> <span class="n">guarantee_f_is_monotonic</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">fft</span><span class="p">,</span> <span class="n">guarantee_f_is_monotonic</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Create a :py:class:`~.FrequencySeries` providing frequencies and the value at</span>
 <span class="sd">        those frequencies.</span>
 
@@ -185,7 +185,7 @@
     <span class="c1"># resolve &quot;self.f&quot; and &quot;self.fft&quot;</span>
     <span class="c1"># Read documentation on BaseSeries</span>
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">f</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">f</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Frequencies.</span>
 
 <span class="sd">        :returns: Frequencies.</span>
@@ -195,12 +195,12 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">x</span>
 
     <span class="nd">@f</span><span class="o">.</span><span class="n">setter</span>
-    <span class="k">def</span> <span class="nf">f</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">f</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">f</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">f</span><span class="p">):</span>
         <span class="c1"># This is defined BaseClass</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">x</span> <span class="o">=</span> <span class="n">f</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">fft</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">fft</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Fourier components.</span>
 
 <span class="sd">        :returns: Fourier components.</span>
@@ -210,12 +210,12 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">y</span>
 
     <span class="nd">@fft</span><span class="o">.</span><span class="n">setter</span>
-    <span class="k">def</span> <span class="nf">fft</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fft</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">fft</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fft</span><span class="p">):</span>
         <span class="c1"># This is defined BaseClass</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">y</span> <span class="o">=</span> <span class="n">fft</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">fmin</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">fmin</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Return the minimum frequency.</span>
 
 <span class="sd">        :returns:  Minimum frequency of the series.</span>
@@ -224,7 +224,7 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">xmin</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">fmax</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">fmax</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Return the maximum frequency.</span>
 
 <span class="sd">        :returns:  Maximum frequency of the series.</span>
@@ -233,7 +233,7 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">xmax</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">frange</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">frange</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Return the range of frequencies.</span>
 <span class="sd">        The range is defined as the maximum frequency minus the minimum.</span>
 
@@ -243,7 +243,7 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">fmax</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">fmin</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">amplitude</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">amplitude</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Return the amplitude of frequencies.</span>
 
 <span class="sd">        :returns:  Amplitude of the series.</span>
@@ -255,7 +255,7 @@
     <span class="n">amp</span> <span class="o">=</span> <span class="n">amplitude</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">df</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">df</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Return the spacing (``delta_f``) if the series is regularly sampled,</span>
 <span class="sd">        otherwise raise error.</span>
 
@@ -268,7 +268,7 @@
 
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">f</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">f</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
 
-<div class="viewcode-block" id="FrequencySeries.normalized"><a class="viewcode-back" href="../../frequencyseries_ref.html#kuibit.frequencyseries.FrequencySeries.normalized">[docs]</a>    <span class="k">def</span> <span class="nf">normalized</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="FrequencySeries.normalized"><a class="viewcode-back" href="../../frequencyseries_ref.html#kuibit.frequencyseries.FrequencySeries.normalized">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">normalized</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Return a new :py:class:`~.FrequencySeries` with maximum amplitude of 1.</span>
 
 <span class="sd">        :returns: Normalized :py:class:`~.FrequencySeries` series.</span>
@@ -282,11 +282,11 @@
 
         <span class="k">return</span> <span class="bp">self</span> <span class="o">/</span> <span class="n">m</span></div>
 
-<div class="viewcode-block" id="FrequencySeries.normalize"><a class="viewcode-back" href="../../frequencyseries_ref.html#kuibit.frequencyseries.FrequencySeries.normalize">[docs]</a>    <span class="k">def</span> <span class="nf">normalize</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="FrequencySeries.normalize"><a class="viewcode-back" href="../../frequencyseries_ref.html#kuibit.frequencyseries.FrequencySeries.normalize">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">normalize</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Scale values so that the maximum of the amplitude is 1.&quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_apply_to_self</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">normalized</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="FrequencySeries.low_passed"><a class="viewcode-back" href="../../frequencyseries_ref.html#kuibit.frequencyseries.FrequencySeries.low_passed">[docs]</a>    <span class="k">def</span> <span class="nf">low_passed</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">f</span><span class="p">):</span>
+<div class="viewcode-block" id="FrequencySeries.low_passed"><a class="viewcode-back" href="../../frequencyseries_ref.html#kuibit.frequencyseries.FrequencySeries.low_passed">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">low_passed</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">f</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Remove frequencies higher or equal than the given.</span>
 
 <span class="sd">        :param f: Frequency above which the series will be zeroed.</span>
@@ -299,7 +299,7 @@
         <span class="n">msk</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">f</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="n">f</span>
         <span class="k">return</span> <span class="n">FrequencySeries</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">f</span><span class="p">[</span><span class="n">msk</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">fft</span><span class="p">[</span><span class="n">msk</span><span class="p">])</span></div>
 
-<div class="viewcode-block" id="FrequencySeries.low_pass"><a class="viewcode-back" href="../../frequencyseries_ref.html#kuibit.frequencyseries.FrequencySeries.low_pass">[docs]</a>    <span class="k">def</span> <span class="nf">low_pass</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">f</span><span class="p">):</span>
+<div class="viewcode-block" id="FrequencySeries.low_pass"><a class="viewcode-back" href="../../frequencyseries_ref.html#kuibit.frequencyseries.FrequencySeries.low_pass">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">low_pass</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">f</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Remove frequencies higher or equal than ``f`` (absolute value).</span>
 
 <span class="sd">        :param f: Frequency above which series will be zeroed.</span>
@@ -308,7 +308,7 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_apply_to_self</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">low_passed</span><span class="p">,</span> <span class="n">f</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="FrequencySeries.high_passed"><a class="viewcode-back" href="../../frequencyseries_ref.html#kuibit.frequencyseries.FrequencySeries.high_passed">[docs]</a>    <span class="k">def</span> <span class="nf">high_passed</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">f</span><span class="p">):</span>
+<div class="viewcode-block" id="FrequencySeries.high_passed"><a class="viewcode-back" href="../../frequencyseries_ref.html#kuibit.frequencyseries.FrequencySeries.high_passed">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">high_passed</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">f</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Remove frequencies lower or equal than the given.</span>
 
 <span class="sd">        :param f: Frequency below which series will be zeroed.</span>
@@ -320,7 +320,7 @@
         <span class="n">msk</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">f</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="n">f</span>
         <span class="k">return</span> <span class="n">FrequencySeries</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">f</span><span class="p">[</span><span class="n">msk</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">fft</span><span class="p">[</span><span class="n">msk</span><span class="p">])</span></div>
 
-<div class="viewcode-block" id="FrequencySeries.high_pass"><a class="viewcode-back" href="../../frequencyseries_ref.html#kuibit.frequencyseries.FrequencySeries.high_pass">[docs]</a>    <span class="k">def</span> <span class="nf">high_pass</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">f</span><span class="p">):</span>
+<div class="viewcode-block" id="FrequencySeries.high_pass"><a class="viewcode-back" href="../../frequencyseries_ref.html#kuibit.frequencyseries.FrequencySeries.high_pass">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">high_pass</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">f</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Remove all the frequencies smaller than f</span>
 
 <span class="sd">        :param f: Frequency below which series will be zeroed.</span>
@@ -329,7 +329,7 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_apply_to_self</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">high_passed</span><span class="p">,</span> <span class="n">f</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="FrequencySeries.negative_frequencies_removed"><a class="viewcode-back" href="../../frequencyseries_ref.html#kuibit.frequencyseries.FrequencySeries.negative_frequencies_removed">[docs]</a>    <span class="k">def</span> <span class="nf">negative_frequencies_removed</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="FrequencySeries.negative_frequencies_removed"><a class="viewcode-back" href="../../frequencyseries_ref.html#kuibit.frequencyseries.FrequencySeries.negative_frequencies_removed">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">negative_frequencies_removed</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Remove frequencies lower than 0.</span>
 
 <span class="sd">        :returns:  Frequencyeseries with only positive frequencies.</span>
@@ -339,11 +339,11 @@
         <span class="n">msk</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">f</span> <span class="o">&gt;=</span> <span class="mi">0</span>
         <span class="k">return</span> <span class="n">FrequencySeries</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">f</span><span class="p">[</span><span class="n">msk</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">fft</span><span class="p">[</span><span class="n">msk</span><span class="p">])</span></div>
 
-<div class="viewcode-block" id="FrequencySeries.negative_frequencies_remove"><a class="viewcode-back" href="../../frequencyseries_ref.html#kuibit.frequencyseries.FrequencySeries.negative_frequencies_remove">[docs]</a>    <span class="k">def</span> <span class="nf">negative_frequencies_remove</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="FrequencySeries.negative_frequencies_remove"><a class="viewcode-back" href="../../frequencyseries_ref.html#kuibit.frequencyseries.FrequencySeries.negative_frequencies_remove">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">negative_frequencies_remove</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Remove all the frequencies smaller than 0.&quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_apply_to_self</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">negative_frequencies_removed</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="FrequencySeries.band_passed"><a class="viewcode-back" href="../../frequencyseries_ref.html#kuibit.frequencyseries.FrequencySeries.band_passed">[docs]</a>    <span class="k">def</span> <span class="nf">band_passed</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fmin</span><span class="p">,</span> <span class="n">fmax</span><span class="p">):</span>
+<div class="viewcode-block" id="FrequencySeries.band_passed"><a class="viewcode-back" href="../../frequencyseries_ref.html#kuibit.frequencyseries.FrequencySeries.band_passed">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">band_passed</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fmin</span><span class="p">,</span> <span class="n">fmax</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Remove frequencies outside the given range ``fmin, fmax``.</span>
 
 <span class="sd">        :param fmin: Minimum frequency.</span>
@@ -355,7 +355,7 @@
         <span class="n">ret</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">low_passed</span><span class="p">(</span><span class="n">fmax</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">ret</span><span class="o">.</span><span class="n">high_passed</span><span class="p">(</span><span class="n">fmin</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="FrequencySeries.band_pass"><a class="viewcode-back" href="../../frequencyseries_ref.html#kuibit.frequencyseries.FrequencySeries.band_pass">[docs]</a>    <span class="k">def</span> <span class="nf">band_pass</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fmin</span><span class="p">,</span> <span class="n">fmax</span><span class="p">):</span>
+<div class="viewcode-block" id="FrequencySeries.band_pass"><a class="viewcode-back" href="../../frequencyseries_ref.html#kuibit.frequencyseries.FrequencySeries.band_pass">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">band_pass</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fmin</span><span class="p">,</span> <span class="n">fmax</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Remove all the frequencies below ``fmin`` and above ``fmax``.</span>
 
 <span class="sd">        :param fmin: Minimum frequency.</span>
@@ -366,7 +366,7 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_apply_to_self</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">band_passed</span><span class="p">,</span> <span class="n">fmin</span><span class="p">,</span> <span class="n">fmax</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="FrequencySeries.peaks"><a class="viewcode-back" href="../../frequencyseries_ref.html#kuibit.frequencyseries.FrequencySeries.peaks">[docs]</a>    <span class="k">def</span> <span class="nf">peaks</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">amp_threshold</span><span class="o">=</span><span class="mf">0.0</span><span class="p">):</span>
+<div class="viewcode-block" id="FrequencySeries.peaks"><a class="viewcode-back" href="../../frequencyseries_ref.html#kuibit.frequencyseries.FrequencySeries.peaks">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">peaks</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">amp_threshold</span><span class="o">=</span><span class="mf">0.0</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Return the location and amplitude of the peaks of the amplitude.</span>
 
 <span class="sd">        Peaks at the boundaries are not considered.</span>
@@ -405,7 +405,7 @@
 
         <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">peaks_f</span><span class="p">,</span> <span class="n">peaks_ff</span><span class="p">,</span> <span class="n">peaks_amp</span><span class="p">))</span></div>
 
-<div class="viewcode-block" id="FrequencySeries.peaks_frequencies"><a class="viewcode-back" href="../../frequencyseries_ref.html#kuibit.frequencyseries.FrequencySeries.peaks_frequencies">[docs]</a>    <span class="k">def</span> <span class="nf">peaks_frequencies</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">amp_threshold</span><span class="o">=</span><span class="mf">0.0</span><span class="p">):</span>
+<div class="viewcode-block" id="FrequencySeries.peaks_frequencies"><a class="viewcode-back" href="../../frequencyseries_ref.html#kuibit.frequencyseries.FrequencySeries.peaks_frequencies">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">peaks_frequencies</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">amp_threshold</span><span class="o">=</span><span class="mf">0.0</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Return the frequencies of the peaks of the amplitude larger</span>
 <span class="sd">        than ``amp_threshold``.</span>
 
@@ -423,7 +423,7 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">p</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">peaks</span><span class="p">(</span><span class="n">amp_threshold</span><span class="p">)])</span></div>
 
-<div class="viewcode-block" id="FrequencySeries.to_TimeSeries"><a class="viewcode-back" href="../../frequencyseries_ref.html#kuibit.frequencyseries.FrequencySeries.to_TimeSeries">[docs]</a>    <span class="k">def</span> <span class="nf">to_TimeSeries</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="FrequencySeries.to_TimeSeries"><a class="viewcode-back" href="../../frequencyseries_ref.html#kuibit.frequencyseries.FrequencySeries.to_TimeSeries">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">to_TimeSeries</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Perform a inverse Fourier transform.</span>
 
 <span class="sd">        If only positive frequencies are found, we will assume that the</span>
@@ -471,7 +471,7 @@
         <span class="c1">#       It works, and PyCBC does it too. But what is the reason?</span>
         <span class="k">return</span> <span class="n">timeseries</span><span class="o">.</span><span class="n">TimeSeries</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">y</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">t</span><span class="p">)</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="FrequencySeries.inner_product"><a class="viewcode-back" href="../../frequencyseries_ref.html#kuibit.frequencyseries.FrequencySeries.inner_product">[docs]</a>    <span class="k">def</span> <span class="nf">inner_product</span><span class="p">(</span>
+<div class="viewcode-block" id="FrequencySeries.inner_product"><a class="viewcode-back" href="../../frequencyseries_ref.html#kuibit.frequencyseries.FrequencySeries.inner_product">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">inner_product</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">other</span><span class="p">,</span>
         <span class="n">fmin</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
@@ -587,7 +587,7 @@
         <span class="c1"># a trapeziodial one</span>
         <span class="k">return</span> <span class="mi">4</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">integrand</span><span class="o">.</span><span class="n">fft</span><span class="o">.</span><span class="n">real</span><span class="p">)</span> <span class="o">*</span> <span class="n">integrand</span><span class="o">.</span><span class="n">df</span></div>
 
-<div class="viewcode-block" id="FrequencySeries.overlap"><a class="viewcode-back" href="../../frequencyseries_ref.html#kuibit.frequencyseries.FrequencySeries.overlap">[docs]</a>    <span class="k">def</span> <span class="nf">overlap</span><span class="p">(</span>
+<div class="viewcode-block" id="FrequencySeries.overlap"><a class="viewcode-back" href="../../frequencyseries_ref.html#kuibit.frequencyseries.FrequencySeries.overlap">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">overlap</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">other</span><span class="p">,</span>
         <span class="n">fmin</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
@@ -707,13 +707,13 @@
         <li class="right" >
           <a href="../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../index.html">kuibit 1.5.0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">kuibit 1.5.1 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="../index.html" >Module code</a> &#187;</li>
         <li class="nav-item nav-item-this"><a href="">kuibit.frequencyseries</a></li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">
-        &#169; Copyright 2020-2024, Gabriele Bozzola.
+        &#169; Copyright 2020-2025, Gabriele Bozzola.
       Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 6.2.1.
     </div>
   </body>

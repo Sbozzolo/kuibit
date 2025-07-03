@@ -6,7 +6,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>kuibit.sensitivity_curves &#8212; kuibit 1.5.0 documentation</title>
+    <title>kuibit.sensitivity_curves &#8212; kuibit 1.5.1 documentation</title>
     <link rel="stylesheet" type="text/css" href="../../_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="../../_static/bizstyle.css" />
     <link rel="stylesheet" type="text/css" href="../../_static/css/custom.css" />
@@ -32,7 +32,7 @@
         <li class="right" >
           <a href="../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../index.html">kuibit 1.5.0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">kuibit 1.5.1 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="../index.html" accesskey="U">Module code</a> &#187;</li>
         <li class="nav-item nav-item-this"><a href="">kuibit.sensitivity_curves</a></li> 
       </ul>
@@ -46,7 +46,7 @@
   <h1>Source code for kuibit.sensitivity_curves</h1><div class="highlight"><pre>
 <span></span><span class="ch">#!/usr/bin/env python3</span>
 
-<span class="c1"># Copyright (C) 2020-2024 Gabriele Bozzola</span>
+<span class="c1"># Copyright (C) 2020-2025 Gabriele Bozzola</span>
 <span class="c1">#</span>
 <span class="c1"># This program is free software; you can redistribute it and/or modify it under</span>
 <span class="c1"># the terms of the GNU General Public License as published by the Free Software</span>
@@ -75,16 +75,16 @@
 
 <span class="sd">&quot;&quot;&quot;</span>
 
-<span class="kn">import</span> <span class="nn">pkgutil</span>
-<span class="kn">from</span> <span class="nn">io</span> <span class="kn">import</span> <span class="n">StringIO</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">pkgutil</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">io</span><span class="w"> </span><span class="kn">import</span> <span class="n">StringIO</span>
 
-<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
 
-<span class="kn">from</span> <span class="nn">kuibit.frequencyseries</span> <span class="kn">import</span> <span class="n">FrequencySeries</span><span class="p">,</span> <span class="n">load_FrequencySeries</span>
-<span class="kn">from</span> <span class="nn">kuibit.unitconv</span> <span class="kn">import</span> <span class="n">C_SI</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">kuibit.frequencyseries</span><span class="w"> </span><span class="kn">import</span> <span class="n">FrequencySeries</span><span class="p">,</span> <span class="n">load_FrequencySeries</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">kuibit.unitconv</span><span class="w"> </span><span class="kn">import</span> <span class="n">C_SI</span>
 
 
-<div class="viewcode-block" id="Sn_LISA"><a class="viewcode-back" href="../../sensitivity_curves_ref.html#kuibit.sensitivity_curves.Sn_LISA">[docs]</a><span class="k">def</span> <span class="nf">Sn_LISA</span><span class="p">(</span><span class="n">freqs</span><span class="p">,</span> <span class="n">arms_length</span><span class="o">=</span><span class="mf">2.5e9</span><span class="p">):</span>
+<div class="viewcode-block" id="Sn_LISA"><a class="viewcode-back" href="../../sensitivity_curves_ref.html#kuibit.sensitivity_curves.Sn_LISA">[docs]</a><span class="k">def</span><span class="w"> </span><span class="nf">Sn_LISA</span><span class="p">(</span><span class="n">freqs</span><span class="p">,</span> <span class="n">arms_length</span><span class="o">=</span><span class="mf">2.5e9</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Return the average power spectral density noise for LISA in 1/Hz.</span>
 
 <span class="sd">    The expression implemented is Equation (13) in</span>
@@ -101,7 +101,7 @@
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">freqs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">freqs</span><span class="p">)</span>
 
-    <span class="k">def</span> <span class="nf">P_acc</span><span class="p">(</span><span class="n">f</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">P_acc</span><span class="p">(</span><span class="n">f</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Equation (11) of 1803.01944&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="p">(</span>
             <span class="p">(</span><span class="mf">3.0e-15</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span>
@@ -109,7 +109,7 @@
             <span class="o">*</span> <span class="p">(</span><span class="mf">1.0</span> <span class="o">+</span> <span class="p">(</span><span class="n">f</span> <span class="o">/</span> <span class="mf">8e-3</span><span class="p">)</span> <span class="o">**</span> <span class="mi">4</span><span class="p">)</span>
         <span class="p">)</span>  <span class="c1"># 1/Hz</span>
 
-    <span class="k">def</span> <span class="nf">P_OMS</span><span class="p">(</span><span class="n">f</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">P_OMS</span><span class="p">(</span><span class="n">f</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Equation (10) of 1803.01944&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="p">(</span><span class="mf">1.5e-11</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">*</span> <span class="p">(</span><span class="mf">1.0</span> <span class="o">+</span> <span class="p">(</span><span class="mf">2e-3</span> <span class="o">/</span> <span class="n">f</span><span class="p">)</span> <span class="o">**</span> <span class="mi">4</span><span class="p">)</span>  <span class="c1"># 1/Hz</span>
 
@@ -132,7 +132,7 @@
     <span class="k">return</span> <span class="n">FrequencySeries</span><span class="p">(</span><span class="n">freqs</span><span class="p">,</span> <span class="n">Sn</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="Sn_ET_B"><a class="viewcode-back" href="../../sensitivity_curves_ref.html#kuibit.sensitivity_curves.Sn_ET_B">[docs]</a><span class="k">def</span> <span class="nf">Sn_ET_B</span><span class="p">(</span><span class="n">freqs</span><span class="p">):</span>
+<div class="viewcode-block" id="Sn_ET_B"><a class="viewcode-back" href="../../sensitivity_curves_ref.html#kuibit.sensitivity_curves.Sn_ET_B">[docs]</a><span class="k">def</span><span class="w"> </span><span class="nf">Sn_ET_B</span><span class="p">(</span><span class="n">freqs</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Return the average power spectral density noise for Einstein Telescope</span>
 <span class="sd">    (variant B) in 1/Hz.</span>
 
@@ -167,7 +167,7 @@
     <span class="k">return</span> <span class="n">psd</span></div>
 
 
-<div class="viewcode-block" id="Sn_ET_D"><a class="viewcode-back" href="../../sensitivity_curves_ref.html#kuibit.sensitivity_curves.Sn_ET_D">[docs]</a><span class="k">def</span> <span class="nf">Sn_ET_D</span><span class="p">(</span><span class="n">freqs</span><span class="p">):</span>
+<div class="viewcode-block" id="Sn_ET_D"><a class="viewcode-back" href="../../sensitivity_curves_ref.html#kuibit.sensitivity_curves.Sn_ET_D">[docs]</a><span class="k">def</span><span class="w"> </span><span class="nf">Sn_ET_D</span><span class="p">(</span><span class="n">freqs</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Return the average power spectral density noise for Einstein Telescope</span>
 <span class="sd">    (variant D) in 1/Hz.</span>
 
@@ -204,7 +204,7 @@
     <span class="k">return</span> <span class="n">psd</span></div>
 
 
-<div class="viewcode-block" id="Sn_CE1"><a class="viewcode-back" href="../../sensitivity_curves_ref.html#kuibit.sensitivity_curves.Sn_CE1">[docs]</a><span class="k">def</span> <span class="nf">Sn_CE1</span><span class="p">(</span><span class="n">freqs</span><span class="p">):</span>
+<div class="viewcode-block" id="Sn_CE1"><a class="viewcode-back" href="../../sensitivity_curves_ref.html#kuibit.sensitivity_curves.Sn_CE1">[docs]</a><span class="k">def</span><span class="w"> </span><span class="nf">Sn_CE1</span><span class="p">(</span><span class="n">freqs</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Return the average power spectral density noise for Einstein Telescope in</span>
 <span class="sd">    1/Hz.</span>
 
@@ -239,7 +239,7 @@
     <span class="k">return</span> <span class="n">psd</span></div>
 
 
-<div class="viewcode-block" id="Sn_CE2"><a class="viewcode-back" href="../../sensitivity_curves_ref.html#kuibit.sensitivity_curves.Sn_CE2">[docs]</a><span class="k">def</span> <span class="nf">Sn_CE2</span><span class="p">(</span><span class="n">freqs</span><span class="p">):</span>
+<div class="viewcode-block" id="Sn_CE2"><a class="viewcode-back" href="../../sensitivity_curves_ref.html#kuibit.sensitivity_curves.Sn_CE2">[docs]</a><span class="k">def</span><span class="w"> </span><span class="nf">Sn_CE2</span><span class="p">(</span><span class="n">freqs</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Return the average power spectral density noise for Einstein Telescope in</span>
 <span class="sd">    1/Hz.</span>
 
@@ -274,7 +274,7 @@
     <span class="k">return</span> <span class="n">psd</span></div>
 
 
-<div class="viewcode-block" id="Sn_aLIGO"><a class="viewcode-back" href="../../sensitivity_curves_ref.html#kuibit.sensitivity_curves.Sn_aLIGO">[docs]</a><span class="k">def</span> <span class="nf">Sn_aLIGO</span><span class="p">(</span><span class="n">freqs</span><span class="p">):</span>
+<div class="viewcode-block" id="Sn_aLIGO"><a class="viewcode-back" href="../../sensitivity_curves_ref.html#kuibit.sensitivity_curves.Sn_aLIGO">[docs]</a><span class="k">def</span><span class="w"> </span><span class="nf">Sn_aLIGO</span><span class="p">(</span><span class="n">freqs</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Return the average power spectral density noise for advanced LIGO in</span>
 <span class="sd">    1/Hz. This is the Zero-Detuned-High-Power noise curve.</span>
 
@@ -309,7 +309,7 @@
     <span class="k">return</span> <span class="n">psd</span></div>
 
 
-<div class="viewcode-block" id="Sn_voyager"><a class="viewcode-back" href="../../sensitivity_curves_ref.html#kuibit.sensitivity_curves.Sn_voyager">[docs]</a><span class="k">def</span> <span class="nf">Sn_voyager</span><span class="p">(</span><span class="n">freqs</span><span class="p">):</span>
+<div class="viewcode-block" id="Sn_voyager"><a class="viewcode-back" href="../../sensitivity_curves_ref.html#kuibit.sensitivity_curves.Sn_voyager">[docs]</a><span class="k">def</span><span class="w"> </span><span class="nf">Sn_voyager</span><span class="p">(</span><span class="n">freqs</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Return the average power spectral density noise for voyager in</span>
 <span class="sd">    1/Hz.</span>
 
@@ -344,7 +344,7 @@
     <span class="k">return</span> <span class="n">psd</span></div>
 
 
-<div class="viewcode-block" id="Sn_KAGRA_D"><a class="viewcode-back" href="../../sensitivity_curves_ref.html#kuibit.sensitivity_curves.Sn_KAGRA_D">[docs]</a><span class="k">def</span> <span class="nf">Sn_KAGRA_D</span><span class="p">(</span><span class="n">freqs</span><span class="p">):</span>
+<div class="viewcode-block" id="Sn_KAGRA_D"><a class="viewcode-back" href="../../sensitivity_curves_ref.html#kuibit.sensitivity_curves.Sn_KAGRA_D">[docs]</a><span class="k">def</span><span class="w"> </span><span class="nf">Sn_KAGRA_D</span><span class="p">(</span><span class="n">freqs</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Return the average power spectral density noise for KAGRA in</span>
 <span class="sd">    1/Hz.</span>
 
@@ -380,7 +380,7 @@
     <span class="k">return</span> <span class="n">psd</span></div>
 
 
-<div class="viewcode-block" id="Sn_aLIGO_plus"><a class="viewcode-back" href="../../sensitivity_curves_ref.html#kuibit.sensitivity_curves.Sn_aLIGO_plus">[docs]</a><span class="k">def</span> <span class="nf">Sn_aLIGO_plus</span><span class="p">(</span><span class="n">freqs</span><span class="p">):</span>
+<div class="viewcode-block" id="Sn_aLIGO_plus"><a class="viewcode-back" href="../../sensitivity_curves_ref.html#kuibit.sensitivity_curves.Sn_aLIGO_plus">[docs]</a><span class="k">def</span><span class="w"> </span><span class="nf">Sn_aLIGO_plus</span><span class="p">(</span><span class="n">freqs</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Return the average power spectral density noise for Advanced LIGO + in</span>
 <span class="sd">    1/Hz.</span>
 
@@ -462,13 +462,13 @@
         <li class="right" >
           <a href="../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../index.html">kuibit 1.5.0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">kuibit 1.5.1 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="../index.html" >Module code</a> &#187;</li>
         <li class="nav-item nav-item-this"><a href="">kuibit.sensitivity_curves</a></li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">
-        &#169; Copyright 2020-2024, Gabriele Bozzola.
+        &#169; Copyright 2020-2025, Gabriele Bozzola.
       Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 6.2.1.
     </div>
   </body>

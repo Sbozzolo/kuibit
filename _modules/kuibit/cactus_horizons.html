@@ -6,7 +6,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>kuibit.cactus_horizons &#8212; kuibit 1.5.0 documentation</title>
+    <title>kuibit.cactus_horizons &#8212; kuibit 1.5.1 documentation</title>
     <link rel="stylesheet" type="text/css" href="../../_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="../../_static/bizstyle.css" />
     <link rel="stylesheet" type="text/css" href="../../_static/css/custom.css" />
@@ -32,7 +32,7 @@
         <li class="right" >
           <a href="../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../index.html">kuibit 1.5.0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">kuibit 1.5.1 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="../index.html" accesskey="U">Module code</a> &#187;</li>
         <li class="nav-item nav-item-this"><a href="">kuibit.cactus_horizons</a></li> 
       </ul>
@@ -46,7 +46,7 @@
   <h1>Source code for kuibit.cactus_horizons</h1><div class="highlight"><pre>
 <span></span><span class="ch">#!/usr/bin/env python3</span>
 
-<span class="c1"># Copyright (C) 2020-2024 Gabriele Bozzola</span>
+<span class="c1"># Copyright (C) 2020-2025 Gabriele Bozzola</span>
 <span class="c1">#</span>
 <span class="c1"># Inspired by code originally developed by Wolfgang Kastaun. This file may</span>
 <span class="c1"># contain algorithms and/or structures first implemented in</span>
@@ -90,20 +90,20 @@
 <span class="sd">(seen as a 3D mesh).</span>
 <span class="sd">&quot;&quot;&quot;</span>
 
-<span class="kn">import</span> <span class="nn">os</span>
-<span class="kn">import</span> <span class="nn">re</span>
-<span class="kn">import</span> <span class="nn">warnings</span>
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Optional</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">re</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">warnings</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Optional</span>
 
-<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="kn">from</span> <span class="nn">numpy.typing</span> <span class="kn">import</span> <span class="n">NDArray</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">numpy.typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">NDArray</span>
 
-<span class="kn">from</span> <span class="nn">kuibit.attr_dict</span> <span class="kn">import</span> <span class="n">AttributeDictionary</span><span class="p">,</span> <span class="n">pythonize_name_dict</span>
-<span class="kn">from</span> <span class="nn">kuibit.series</span> <span class="kn">import</span> <span class="n">sample_common</span>
-<span class="kn">from</span> <span class="nn">kuibit.timeseries</span> <span class="kn">import</span> <span class="n">TimeSeries</span><span class="p">,</span> <span class="n">combine_ts</span><span class="p">,</span> <span class="n">remove_duplicated_iters</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">kuibit.attr_dict</span><span class="w"> </span><span class="kn">import</span> <span class="n">AttributeDictionary</span><span class="p">,</span> <span class="n">pythonize_name_dict</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">kuibit.series</span><span class="w"> </span><span class="kn">import</span> <span class="n">sample_common</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">kuibit.timeseries</span><span class="w"> </span><span class="kn">import</span> <span class="n">TimeSeries</span><span class="p">,</span> <span class="n">combine_ts</span><span class="p">,</span> <span class="n">remove_duplicated_iters</span>
 
 
-<div class="viewcode-block" id="compute_horizons_separation"><a class="viewcode-back" href="../../cactus_horizons_ref.html#kuibit.cactus_horizons.compute_horizons_separation">[docs]</a><span class="k">def</span> <span class="nf">compute_horizons_separation</span><span class="p">(</span><span class="n">horizon1</span><span class="p">,</span> <span class="n">horizon2</span><span class="p">,</span> <span class="n">resample</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+<div class="viewcode-block" id="compute_horizons_separation"><a class="viewcode-back" href="../../cactus_horizons_ref.html#kuibit.cactus_horizons.compute_horizons_separation">[docs]</a><span class="k">def</span><span class="w"> </span><span class="nf">compute_horizons_separation</span><span class="p">(</span><span class="n">horizon1</span><span class="p">,</span> <span class="n">horizon2</span><span class="p">,</span> <span class="n">resample</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Compute the coordinate separation between the centroids of two horizons.</span>
 
 <span class="sd">    The information from the apparent horizons is used (contained in the</span>
@@ -156,7 +156,7 @@
     <span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="OneHorizon"><a class="viewcode-back" href="../../cactus_horizons_ref.html#kuibit.cactus_horizons.OneHorizon">[docs]</a><span class="k">class</span> <span class="nc">OneHorizon</span><span class="p">:</span>
+<div class="viewcode-block" id="OneHorizon"><a class="viewcode-back" href="../../cactus_horizons_ref.html#kuibit.cactus_horizons.OneHorizon">[docs]</a><span class="k">class</span><span class="w"> </span><span class="nc">OneHorizon</span><span class="p">:</span>
 <span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;This class represents properties of an apparent horizon</span>
 <span class="sd">    computed from the quasi-isolated horizon formalism.</span>
 
@@ -182,7 +182,7 @@
 
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">qlm_vars</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">TimeSeries</span><span class="p">]],</span>
         <span class="n">ah_vars</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">TimeSeries</span><span class="p">]],</span>
@@ -301,14 +301,14 @@
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_vtk_vars</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="n">AttributeDictionary</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
 
-    <span class="k">def</span> <span class="fm">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">key</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_qlm_vars</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
             <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Quantity </span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s2"> does not exist&quot;</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_qlm_vars</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">vtk_available_iterations</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">]:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">vtk_available_iterations</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Return the list of iterations at which VTK data is available.</span>
 
 <span class="sd">        :returns: List of iteration with associated VTK data</span>
@@ -316,7 +316,7 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_vtk_files</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
 
-    <span class="k">def</span> <span class="nf">_load_vtk_at_iteration</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">iteration</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_load_vtk_at_iteration</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">iteration</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Read and load the VTK file at the given iteration.</span>
 
 <span class="sd">        Raises an error when the iteration is not available.</span>
@@ -449,7 +449,7 @@
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_vtk_vars</span><span class="p">[</span><span class="n">iteration</span><span class="p">]</span> <span class="o">=</span> <span class="n">AttributeDictionary</span><span class="p">(</span><span class="n">variables</span><span class="p">)</span>
 
-<div class="viewcode-block" id="OneHorizon.available_vtk_variables_at_iteration"><a class="viewcode-back" href="../../cactus_horizons_ref.html#kuibit.cactus_horizons.OneHorizon.available_vtk_variables_at_iteration">[docs]</a>    <span class="k">def</span> <span class="nf">available_vtk_variables_at_iteration</span><span class="p">(</span>
+<div class="viewcode-block" id="OneHorizon.available_vtk_variables_at_iteration"><a class="viewcode-back" href="../../cactus_horizons_ref.html#kuibit.cactus_horizons.OneHorizon.available_vtk_variables_at_iteration">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">available_vtk_variables_at_iteration</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="n">iteration</span><span class="p">:</span> <span class="nb">int</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Return the variables available in the VTK file at the given iteration.</span>
@@ -474,7 +474,7 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">vtk_at_iteration</span><span class="p">(</span><span class="n">iteration</span><span class="p">)</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span></div>
 
-<div class="viewcode-block" id="OneHorizon.vtk_at_iteration"><a class="viewcode-back" href="../../cactus_horizons_ref.html#kuibit.cactus_horizons.OneHorizon.vtk_at_iteration">[docs]</a>    <span class="k">def</span> <span class="nf">vtk_at_iteration</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">iteration</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">AttributeDictionary</span><span class="p">:</span>
+<div class="viewcode-block" id="OneHorizon.vtk_at_iteration"><a class="viewcode-back" href="../../cactus_horizons_ref.html#kuibit.cactus_horizons.OneHorizon.vtk_at_iteration">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">vtk_at_iteration</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">iteration</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">AttributeDictionary</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Return a dictionary-like object containing all the VTK variables at the given iteration.</span>
 
 <span class="sd">        :param iteration: Desired iteration</span>
@@ -489,7 +489,7 @@
     <span class="c1"># Alias</span>
     <span class="n">vtk_at_it</span> <span class="o">=</span> <span class="n">vtk_at_iteration</span>
 
-<div class="viewcode-block" id="OneHorizon.vtk_variable_at_iteration"><a class="viewcode-back" href="../../cactus_horizons_ref.html#kuibit.cactus_horizons.OneHorizon.vtk_variable_at_iteration">[docs]</a>    <span class="k">def</span> <span class="nf">vtk_variable_at_iteration</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">iteration</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">:</span>
+<div class="viewcode-block" id="OneHorizon.vtk_variable_at_iteration"><a class="viewcode-back" href="../../cactus_horizons_ref.html#kuibit.cactus_horizons.OneHorizon.vtk_variable_at_iteration">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">vtk_variable_at_iteration</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">iteration</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Return a variable from the VTK file at the given iteration.</span>
 
 <span class="sd">        See also docstring in :py:meth:`~.available_vtk_variables_at_iteration`.</span>
@@ -504,7 +504,7 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">vtk_at_iteration</span><span class="p">(</span><span class="n">iteration</span><span class="p">)[</span><span class="n">key</span><span class="p">]</span></div>
 
-<div class="viewcode-block" id="OneHorizon.get_ah_property"><a class="viewcode-back" href="../../cactus_horizons_ref.html#kuibit.cactus_horizons.OneHorizon.get_ah_property">[docs]</a>    <span class="k">def</span> <span class="nf">get_ah_property</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">):</span>
+<div class="viewcode-block" id="OneHorizon.get_ah_property"><a class="viewcode-back" href="../../cactus_horizons_ref.html#kuibit.cactus_horizons.OneHorizon.get_ah_property">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">get_ah_property</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Return a property from AHFinderDirect as timeseries.</span>
 
 <span class="sd">        :param key: AH property.</span>
@@ -514,7 +514,7 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ah_vars</span><span class="p">[</span><span class="n">key</span><span class="p">]</span></div>
 
-    <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Conversion to string.</span>
 <span class="sd">        :returns: Human readable summary</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -531,7 +531,7 @@
             <span class="n">ret</span> <span class="o">+=</span> <span class="sa">f</span><span class="s2">&quot;Final Dimensionless Spin = </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">dimensionless_spin_final</span><span class="si">:</span><span class="s2">.3e</span><span class="si">}</span><span class="s2">&quot;</span>
         <span class="k">return</span> <span class="n">ret</span>
 
-<div class="viewcode-block" id="OneHorizon.ah_origin_at_iteration"><a class="viewcode-back" href="../../cactus_horizons_ref.html#kuibit.cactus_horizons.OneHorizon.ah_origin_at_iteration">[docs]</a>    <span class="k">def</span> <span class="nf">ah_origin_at_iteration</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">iteration</span><span class="p">):</span>
+<div class="viewcode-block" id="OneHorizon.ah_origin_at_iteration"><a class="viewcode-back" href="../../cactus_horizons_ref.html#kuibit.cactus_horizons.OneHorizon.ah_origin_at_iteration">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">ah_origin_at_iteration</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">iteration</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Return the AH origin at the given iteration.</span>
 
 <span class="sd">        :param iteration: Iteration number.</span>
@@ -541,7 +541,7 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_patches_at_iteration</span><span class="p">(</span><span class="n">iteration</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span></div>
 
-    <span class="k">def</span> <span class="nf">_patches_at_iteration</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">iteration</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_patches_at_iteration</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">iteration</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Return the shape of the horizon as a dictionary of patches with</span>
 <span class="sd">        3D coordinates.&quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">shape_available</span><span class="p">:</span>
@@ -558,7 +558,7 @@
 
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_patches</span><span class="p">[</span><span class="n">iteration</span><span class="p">]</span>
 
-<div class="viewcode-block" id="OneHorizon.shape_at_iteration"><a class="viewcode-back" href="../../cactus_horizons_ref.html#kuibit.cactus_horizons.OneHorizon.shape_at_iteration">[docs]</a>    <span class="k">def</span> <span class="nf">shape_at_iteration</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">iteration</span><span class="p">):</span>
+<div class="viewcode-block" id="OneHorizon.shape_at_iteration"><a class="viewcode-back" href="../../cactus_horizons_ref.html#kuibit.cactus_horizons.OneHorizon.shape_at_iteration">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">shape_at_iteration</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">iteration</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Return the shape of the horizon as 3 arrays with the</span>
 <span class="sd">        coordinates of the points.</span>
 
@@ -582,7 +582,7 @@
 
         <span class="k">return</span> <span class="n">coord_x</span><span class="p">,</span> <span class="n">coord_y</span><span class="p">,</span> <span class="n">coord_z</span></div>
 
-<div class="viewcode-block" id="OneHorizon.shape_at_time"><a class="viewcode-back" href="../../cactus_horizons_ref.html#kuibit.cactus_horizons.OneHorizon.shape_at_time">[docs]</a>    <span class="k">def</span> <span class="nf">shape_at_time</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">time</span><span class="p">,</span> <span class="n">tolerance</span><span class="o">=</span><span class="mf">1e-10</span><span class="p">):</span>
+<div class="viewcode-block" id="OneHorizon.shape_at_time"><a class="viewcode-back" href="../../cactus_horizons_ref.html#kuibit.cactus_horizons.OneHorizon.shape_at_time">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">shape_at_time</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">time</span><span class="p">,</span> <span class="n">tolerance</span><span class="o">=</span><span class="mf">1e-10</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Return the shape of the horizon as 3 arrays with the</span>
 <span class="sd">        coordinates of the points.</span>
 
@@ -608,7 +608,7 @@
 
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">shape_at_iteration</span><span class="p">(</span><span class="n">iteration</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="OneHorizon.shape_time_at_iteration"><a class="viewcode-back" href="../../cactus_horizons_ref.html#kuibit.cactus_horizons.OneHorizon.shape_time_at_iteration">[docs]</a>    <span class="k">def</span> <span class="nf">shape_time_at_iteration</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">iteration</span><span class="p">):</span>
+<div class="viewcode-block" id="OneHorizon.shape_time_at_iteration"><a class="viewcode-back" href="../../cactus_horizons_ref.html#kuibit.cactus_horizons.OneHorizon.shape_time_at_iteration">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">shape_time_at_iteration</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">iteration</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Return the time corresponding to the given iteration using the information</span>
 <span class="sd">        from the shape files.</span>
 
@@ -623,7 +623,7 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_iterations_to_times</span><span class="p">(</span><span class="n">iteration</span><span class="p">)</span></div>
 
     <span class="nd">@staticmethod</span>
-    <span class="k">def</span> <span class="nf">_load_patches</span><span class="p">(</span><span class="n">path</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_load_patches</span><span class="p">(</span><span class="n">path</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;AHFinderDirect uses a system of multipatches to avoid coordinates</span>
 <span class="sd">        singularities. Each patch covers a portion around an axis (e.g., +z</span>
 <span class="sd">        axis). We will load this data.</span>
@@ -729,7 +729,7 @@
         <span class="p">}</span>
         <span class="k">return</span> <span class="n">patches</span><span class="p">,</span> <span class="n">origin</span>
 
-<div class="viewcode-block" id="OneHorizon.shape_outline_at_iteration"><a class="viewcode-back" href="../../cactus_horizons_ref.html#kuibit.cactus_horizons.OneHorizon.shape_outline_at_iteration">[docs]</a>    <span class="k">def</span> <span class="nf">shape_outline_at_iteration</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">iteration</span><span class="p">,</span> <span class="n">cut</span><span class="p">):</span>
+<div class="viewcode-block" id="OneHorizon.shape_outline_at_iteration"><a class="viewcode-back" href="../../cactus_horizons_ref.html#kuibit.cactus_horizons.OneHorizon.shape_outline_at_iteration">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">shape_outline_at_iteration</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">iteration</span><span class="p">,</span> <span class="n">cut</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Return the cut of the 3D shape on a specified plane.</span>
 
 <span class="sd">        ``cut`` has to be a 3D tuple or list with None on the dimensions you</span>
@@ -861,7 +861,7 @@
             <span class="n">ordering</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argsort</span><span class="p">(</span><span class="n">phi</span><span class="p">)</span>
             <span class="k">return</span> <span class="n">points0</span><span class="p">[</span><span class="n">ordering</span><span class="p">],</span> <span class="n">points1</span><span class="p">[</span><span class="n">ordering</span><span class="p">]</span></div>
 
-<div class="viewcode-block" id="OneHorizon.shape_outline_at_time"><a class="viewcode-back" href="../../cactus_horizons_ref.html#kuibit.cactus_horizons.OneHorizon.shape_outline_at_time">[docs]</a>    <span class="k">def</span> <span class="nf">shape_outline_at_time</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">time</span><span class="p">,</span> <span class="n">cut</span><span class="p">,</span> <span class="n">tolerance</span><span class="o">=</span><span class="mf">1e-10</span><span class="p">):</span>
+<div class="viewcode-block" id="OneHorizon.shape_outline_at_time"><a class="viewcode-back" href="../../cactus_horizons_ref.html#kuibit.cactus_horizons.OneHorizon.shape_outline_at_time">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">shape_outline_at_time</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">time</span><span class="p">,</span> <span class="n">cut</span><span class="p">,</span> <span class="n">tolerance</span><span class="o">=</span><span class="mf">1e-10</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Return the cut of the 3D shape on a specified plane.</span>
 
 <span class="sd">        ``cut`` has to be a 3D tuple or list with None on the dimensions you</span>
@@ -904,7 +904,7 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">shape_outline_at_iteration</span><span class="p">(</span><span class="n">iteration</span><span class="p">,</span> <span class="n">cut</span><span class="o">=</span><span class="n">cut</span><span class="p">)</span></div></div>
 
 
-<div class="viewcode-block" id="HorizonsDir"><a class="viewcode-back" href="../../cactus_horizons_ref.html#kuibit.cactus_horizons.HorizonsDir">[docs]</a><span class="k">class</span> <span class="nc">HorizonsDir</span><span class="p">:</span>
+<div class="viewcode-block" id="HorizonsDir"><a class="viewcode-back" href="../../cactus_horizons_ref.html#kuibit.cactus_horizons.HorizonsDir">[docs]</a><span class="k">class</span><span class="w"> </span><span class="nc">HorizonsDir</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Class to collect information on apparent horizons</span>
 <span class="sd">    available from thorns AHFinderDirect and QuasiLocalMeasures.</span>
 
@@ -919,7 +919,7 @@
     <span class="c1"># What variables should not be passed to OneHorizon?</span>
     <span class="n">_exclude_ah_vars</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;cctk_time&quot;</span><span class="p">]</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sd</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sd</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Constructor.</span>
 
 <span class="sd">        :param sd:  SimDir object providing access to data directory.</span>
@@ -984,7 +984,7 @@
             <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_qlm_vars</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ah_vars</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_shape_files</span><span class="p">]</span>
         <span class="p">)</span>
 
-    <span class="k">def</span> <span class="nf">_populate_qlm_vars</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sd</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_populate_qlm_vars</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sd</span><span class="p">):</span>
         <span class="c1"># Here we a regular expression with two capturing groups</span>
         <span class="c1"># 1. ^ $ means that we match the entire string</span>
         <span class="c1"># 2. qlm_ is matched to itself</span>
@@ -1003,7 +1003,7 @@
                 <span class="n">horizon_vars</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_qlm_vars</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="n">horizon_number</span><span class="p">,</span> <span class="p">{})</span>
                 <span class="n">horizon_vars</span><span class="p">[</span><span class="n">var_name_stripped</span><span class="p">]</span> <span class="o">=</span> <span class="n">sd</span><span class="o">.</span><span class="n">ts</span><span class="o">.</span><span class="n">scalar</span><span class="p">[</span><span class="n">var_name</span><span class="p">]</span>
 
-    <span class="k">def</span> <span class="nf">_populate_vtk_files</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sd</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_populate_vtk_files</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sd</span><span class="p">):</span>
         <span class="c1"># Here we a regular expression with two capturing groups</span>
         <span class="c1"># 1. ^ $ means that we match the entire string</span>
         <span class="c1"># 2. surface is matched to itself</span>
@@ -1024,7 +1024,7 @@
                 <span class="n">iteration</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">matched</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">lstrip</span><span class="p">(</span><span class="s2">&quot;0&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="s2">&quot;0&quot;</span><span class="p">)</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">_vtk_files</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="n">vtk_index</span><span class="p">,</span> <span class="p">{})[</span><span class="n">iteration</span><span class="p">]</span> <span class="o">=</span> <span class="n">path</span>
 
-    <span class="k">def</span> <span class="nf">_populate_ah_vars</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sd</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_populate_ah_vars</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sd</span><span class="p">):</span>
         <span class="c1"># First, we find all the files related to apparent horizons. These</span>
         <span class="c1"># have names like BH_diagnostics.ah1.gp</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_ah_files</span> <span class="o">=</span> <span class="p">{}</span>
@@ -1135,7 +1135,7 @@
                     <span class="p">)</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">_ah_vars</span><span class="p">[</span><span class="n">ah_index</span><span class="p">][</span><span class="n">var_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">data_ts</span>
 
-    <span class="k">def</span> <span class="nf">_populate_shape_files</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sd</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_populate_shape_files</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sd</span><span class="p">):</span>
         <span class="c1"># Here we match the files with a regular expression:</span>
         <span class="c1"># 1. ^ $ means that we match the entire string</span>
         <span class="c1"># 2. Then we match the literal h.t</span>
@@ -1154,7 +1154,7 @@
                 <span class="n">ah_shape_dict</span><span class="p">[</span><span class="n">iteration</span><span class="p">]</span> <span class="o">=</span> <span class="n">path</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">available_qlm_horizons</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">available_qlm_horizons</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Horizons in QLM indexing with associated data.</span>
 
 <span class="sd">        :returns: Indices of the QLM horizons found in the data.</span>
@@ -1163,14 +1163,14 @@
         <span class="k">return</span> <span class="nb">sorted</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_qlm_vars</span><span class="o">.</span><span class="n">keys</span><span class="p">()))</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">available_apparent_horizons</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">available_apparent_horizons</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Horizons in AH indexing with associated data.</span>
 
 <span class="sd">        :returns: Indices of the AH horizons found in the data.</span>
 <span class="sd">        :rtype: list&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="nb">sorted</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_ah_vars</span><span class="o">.</span><span class="n">keys</span><span class="p">()))</span>
 
-<div class="viewcode-block" id="HorizonsDir.get_apparent_horizon"><a class="viewcode-back" href="../../cactus_horizons_ref.html#kuibit.cactus_horizons.HorizonsDir.get_apparent_horizon">[docs]</a>    <span class="k">def</span> <span class="nf">get_apparent_horizon</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ah</span><span class="p">):</span>
+<div class="viewcode-block" id="HorizonsDir.get_apparent_horizon"><a class="viewcode-back" href="../../cactus_horizons_ref.html#kuibit.cactus_horizons.HorizonsDir.get_apparent_horizon">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">get_apparent_horizon</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ah</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Return a :py:func:`~.OneHorizon` corresponding to an horizon as</span>
 <span class="sd">        found by AHFinderDirect.</span>
 
@@ -1184,7 +1184,7 @@
             <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;AH horizon </span><span class="si">{</span><span class="n">ah</span><span class="si">}</span><span class="s2"> not available&quot;</span><span class="p">)</span>
         <span class="k">return</span> <span class="bp">self</span><span class="p">[(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">ah</span><span class="p">)]</span></div>
 
-<div class="viewcode-block" id="HorizonsDir.get_qlm_horizon"><a class="viewcode-back" href="../../cactus_horizons_ref.html#kuibit.cactus_horizons.HorizonsDir.get_qlm_horizon">[docs]</a>    <span class="k">def</span> <span class="nf">get_qlm_horizon</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">qlm</span><span class="p">):</span>
+<div class="viewcode-block" id="HorizonsDir.get_qlm_horizon"><a class="viewcode-back" href="../../cactus_horizons_ref.html#kuibit.cactus_horizons.HorizonsDir.get_qlm_horizon">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">get_qlm_horizon</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">qlm</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Return a :py:func:`~.OneHorizon` corresponding to an horizon as</span>
 <span class="sd">        analyzed by QuasiLocalMeasures.</span>
 
@@ -1198,7 +1198,7 @@
             <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;QLM horizon </span><span class="si">{</span><span class="n">qlm</span><span class="si">}</span><span class="s2"> not available&quot;</span><span class="p">)</span>
         <span class="k">return</span> <span class="bp">self</span><span class="p">[(</span><span class="n">qlm</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">)]</span></div>
 
-    <span class="k">def</span> <span class="fm">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">):</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="p">(</span><span class="nb">tuple</span><span class="p">,</span> <span class="nb">list</span><span class="p">)):</span>
             <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;You have to provide both the QLM and AH indices&quot;</span><span class="p">)</span>
 
@@ -1223,7 +1223,7 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">_vtk_files</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">qlm_index</span><span class="p">,</span> <span class="p">{}),</span>
         <span class="p">)</span>
 
-    <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">found_any</span><span class="p">:</span>
             <span class="k">return</span> <span class="s2">&quot;No horizon found&quot;</span>
 
@@ -1294,13 +1294,13 @@
         <li class="right" >
           <a href="../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../index.html">kuibit 1.5.0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">kuibit 1.5.1 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="../index.html" >Module code</a> &#187;</li>
         <li class="nav-item nav-item-this"><a href="">kuibit.cactus_horizons</a></li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">
-        &#169; Copyright 2020-2024, Gabriele Bozzola.
+        &#169; Copyright 2020-2025, Gabriele Bozzola.
       Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 6.2.1.
     </div>
   </body>

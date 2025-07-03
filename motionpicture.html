@@ -7,7 +7,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
 
-    <title>A quick introduction to motionpicture &#8212; kuibit 1.5.0 documentation</title>
+    <title>A quick introduction to motionpicture &#8212; kuibit 1.5.1 documentation</title>
     <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="_static/bizstyle.css" />
     <link rel="stylesheet" type="text/css" href="_static/css/custom.css" />
@@ -41,7 +41,7 @@
         <li class="right" >
           <a href="argparse_helper.html" title="Building command-line scripts"
              accesskey="P">previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">kuibit 1.5.0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="index.html">kuibit 1.5.1 documentation</a> &#187;</li>
         <li class="nav-item nav-item-this"><a href="">A quick introduction to motionpicture</a></li> 
       </ul>
     </div>  
@@ -186,15 +186,15 @@ simulations with parameters you can control via command-line. One of the most
 useful option is <code class="docutils literal notranslate"><span class="pre">--parallel</span></code> to render frames using all the cores of the
 machine.</p>
 <p>Let us have a look at a simplified version of <code class="docutils literal notranslate"><span class="pre">grid_var</span></code>:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">kuibit</span> <span class="kn">import</span> <span class="n">argparse_helper</span> <span class="k">as</span> <span class="n">kah</span>
-<span class="kn">from</span> <span class="nn">kuibit.simdir</span> <span class="kn">import</span> <span class="n">SimDir</span>
-<span class="kn">from</span> <span class="nn">kuibit.visualize_matplotlib</span> <span class="kn">import</span> <span class="p">(</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">kuibit</span><span class="w"> </span><span class="kn">import</span> <span class="n">argparse_helper</span> <span class="k">as</span> <span class="n">kah</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">kuibit.simdir</span><span class="w"> </span><span class="kn">import</span> <span class="n">SimDir</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">kuibit.visualize_matplotlib</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
     <span class="n">plot_color</span><span class="p">,</span>
     <span class="n">save</span><span class="p">,</span>
 <span class="p">)</span>
 
 
-<span class="k">def</span> <span class="nf">mopi_add_custom_options</span><span class="p">(</span><span class="n">parser</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">mopi_add_custom_options</span><span class="p">(</span><span class="n">parser</span><span class="p">):</span>
     <span class="c1"># These are the custom options that mopi will see.</span>
 
     <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s2">&quot;--datadir&quot;</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="s2">&quot;.&quot;</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Data directory.&quot;</span><span class="p">)</span>
@@ -205,8 +205,8 @@ machine.</p>
         <span class="s2">&quot;--variable&quot;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="nb">str</span><span class="p">,</span> <span class="n">required</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Variable to plot.&quot;</span>
     <span class="p">)</span>
 
-<span class="k">class</span> <span class="nc">MOPIMovie</span><span class="p">:</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">args</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">MOPIMovie</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">args</span><span class="p">):</span>
         <span class="c1"># Here we initialize all the objects that we need for all the frames.</span>
         <span class="c1"># All the expensive stuff has to be done here.</span>
 
@@ -218,12 +218,12 @@ machine.</p>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">iterations</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">var</span><span class="o">.</span><span class="n">available_iterations</span>
 
-    <span class="k">def</span> <span class="nf">get_frames</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_frames</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="c1"># Here we define what is a &quot;frame&quot; (it is one iteration). This function</span>
         <span class="c1"># has to return an iterable on what we want to make frames of.</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">iterations</span>
 
-    <span class="k">def</span> <span class="nf">make_frame</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="n">iteration</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">make_frame</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="n">iteration</span><span class="p">):</span>
         <span class="c1"># Here we plot a frame. This function has to take the output path and</span>
         <span class="c1"># the identifier of what is a frame (in this case, an iteration).</span>
 
@@ -333,12 +333,12 @@ files.</p>
         <li class="right" >
           <a href="argparse_helper.html" title="Building command-line scripts"
              >previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">kuibit 1.5.0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="index.html">kuibit 1.5.1 documentation</a> &#187;</li>
         <li class="nav-item nav-item-this"><a href="">A quick introduction to motionpicture</a></li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">
-        &#169; Copyright 2020-2024, Gabriele Bozzola.
+        &#169; Copyright 2020-2025, Gabriele Bozzola.
       Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 6.2.1.
     </div>
   </body>
