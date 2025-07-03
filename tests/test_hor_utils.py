@@ -54,16 +54,16 @@ class TestHorUtils(unittest.TestCase):
             vtk_files=None,
         )
 
-        # Opposite on the (x, y) plane, and with thrice the area (to make some
+        # Opposite on the (x, y) plane, and with nine times the area (to make some
         # calculations more interesting, e.g. for the center of mass, which uses
-        # the area)
+        # the area). Nine times the area means three times the mass
         self.ho2 = OneHorizon(
             qlm_vars=None,
             ah_vars={
                 "centroid_x": TimeSeries(times, -cen_x),
                 "centroid_y": TimeSeries(times, -cen_y),
                 "centroid_z": TimeSeries(times, cen_z),
-                "area": TimeSeries(times, 3 * area),
+                "area": TimeSeries(times, 9 * area),
             },
             shape_files=None,
             vtk_files=None,
