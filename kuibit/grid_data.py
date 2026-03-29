@@ -318,12 +318,12 @@ class UniformGridData(BaseNumerical):
         #
         # In the header we save all the metadata for the grid.
         # We will use colons to read the data from the comment
-        header = f"shape: {list(self.shape)}\n"
-        header += f"x0: {list(self.x0)}\n"
-        header += f"dx: {list(self.dx)}\n"
-        header += f"ref_level: {self.ref_level}\n"
-        header += f"component: {self.component}\n"
-        header += f"num_ghost: {list(self.num_ghost)}\n"
+        header = f"shape: {[int(s) for s in self.shape]}\n"
+        header += f"x0: {self.x0.tolist()}\n"
+        header += f"dx: {self.dx.tolist()}\n"
+        header += f"ref_level: {int(self.ref_level)}\n"
+        header += f"component: {int(self.component)}\n"
+        header += f"num_ghost: {self.num_ghost.tolist()}\n"
         header += f"time: {self.time}\n"
         header += f"iteration: {self.iteration}"
         np.savetxt(
