@@ -778,9 +778,9 @@ class TimeSeries(BaseSeries):
             return TimeSeries(regular_ts.t, regular_ts.y * window_array)
 
         if isinstance(window_function, str):
-            window_array = signal.get_window(
-                window_function, len(regular_ts), *args, **kwargs
-            )
+            if args:
+                window_function = (window_function, *args)
+            window_array = signal.get_window(window_function, len(regular_ts))
             return TimeSeries(regular_ts.t, regular_ts.y * window_array)
 
         raise TypeError("Window function is neither a callable or a string")

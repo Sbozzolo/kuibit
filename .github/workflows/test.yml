@@ -8,7 +8,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: [ '3.8', '3.13' ]
+        python-version: [ '3.9', '3.14' ]
 
     steps:
       - uses: actions/checkout@v4
@@ -32,7 +32,7 @@ jobs:
         id: cached-poetry-dependencies
         with:
           path: .venv
-          key: venv-${{ runner.os }}-${{ hashFiles('**/poetry.lock') }}
+          key: venv-${{ runner.os }}-${{ matrix.python-version }}-${{ hashFiles('**/poetry.lock') }}
 
       - name: Install Dependencies
         run: |
@@ -46,7 +46,7 @@ jobs:
 
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v3
-        if: runner.python-version == '3.8' && github.event_name != 'pull_request'
+        if: runner.python-version == '3.9' && github.event_name != 'pull_request'
         with:
           file: coverage.xml
           flags: unittests

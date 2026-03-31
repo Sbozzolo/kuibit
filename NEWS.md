@@ -1,5 +1,10 @@
 # Changelog
 
+## Version 1.5.3
+
+#### General
+- Minimum version of Python required is now 3.9.
+
 ## Version 1.5.2 (2 July 2025)
 (Version 1.5.2 does not really exist. Version 1.5.1 was not correctly published due to a workflow error.)
 

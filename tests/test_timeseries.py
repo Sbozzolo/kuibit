@@ -1057,7 +1057,7 @@ class TestTimeseries(unittest.TestCase):
 
     def test_windows(self):
         ones = ts.TimeSeries(self.times, np.ones_like(self.times))
-        tuk_array = signal.get_window("tukey", len(ones), 0.5)
+        tuk_array = signal.get_window(("tukey", 0.5), len(ones))
         ham_array = signal.get_window("hamming", len(ones))
         black_array = signal.get_window("blackman", (len(ones)))
 
