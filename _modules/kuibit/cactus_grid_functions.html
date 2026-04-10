@@ -1835,19 +1835,18 @@
                             <span class="n">mesh_obj</span><span class="p">,</span>
                         <span class="p">)</span> <span class="ow">in</span> <span class="n">iteration_obj</span><span class="o">.</span><span class="n">meshes</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
                             <span class="n">matched</span> <span class="o">=</span> <span class="n">rx_mesh</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">mesh_name</span><span class="p">)</span>
-                            <span class="k">if</span> <span class="n">matched</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-                                <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span>
-                                    <span class="sa">f</span><span class="s2">&quot;Could not parse mesh </span><span class="si">{</span><span class="n">mesh_name</span><span class="si">}</span><span class="s2">&quot;</span>
-                                <span class="p">)</span>
-                            <span class="n">mesh_basename</span> <span class="o">=</span> <span class="n">matched</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
-                            <span class="k">for</span> <span class="n">variable_name</span> <span class="ow">in</span> <span class="n">mesh_obj</span><span class="p">:</span>
-                                <span class="n">var_list</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_vars_openpmd_files</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span>
-                                    <span class="n">variable_name</span><span class="p">,</span> <span class="nb">set</span><span class="p">()</span>
-                                <span class="p">)</span>
-                                <span class="n">var_list</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">dir_path</span><span class="p">)</span>
-                                <span class="bp">self</span><span class="o">.</span><span class="n">_openpmd_mesh_basenames</span><span class="p">[</span><span class="n">variable_name</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
-                                    <span class="n">mesh_basename</span>
-                                <span class="p">)</span>
+                            <span class="k">if</span> <span class="n">matched</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                                <span class="n">mesh_basename</span> <span class="o">=</span> <span class="n">matched</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+                                <span class="k">for</span> <span class="n">variable_name</span> <span class="ow">in</span> <span class="n">mesh_obj</span><span class="p">:</span>
+                                    <span class="n">var_list</span> <span class="o">=</span> <span class="p">(</span>
+                                        <span class="bp">self</span><span class="o">.</span><span class="n">_vars_openpmd_files</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span>
+                                            <span class="n">variable_name</span><span class="p">,</span> <span class="nb">set</span><span class="p">()</span>
+                                        <span class="p">)</span>
+                                    <span class="p">)</span>
+                                    <span class="n">var_list</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">dir_path</span><span class="p">)</span>
+                                    <span class="bp">self</span><span class="o">.</span><span class="n">_openpmd_mesh_basenames</span><span class="p">[</span>
+                                        <span class="n">variable_name</span>
+                                    <span class="p">]</span> <span class="o">=</span> <span class="n">mesh_basename</span>
 
         <span class="c1"># What pythonize_name_dict does is to make the various variables</span>
         <span class="c1"># accessible as attributes, e.g. self.fields.rho</span>
