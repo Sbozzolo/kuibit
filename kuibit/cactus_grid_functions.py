@@ -1740,19 +1740,18 @@ class AllGridFunctions:
                             mesh_obj,
                         ) in iteration_obj.meshes.items():
                             matched = rx_mesh.match(mesh_name)
-                            if matched is None:
-                                raise RuntimeError(
-                                    f"Could not parse mesh {mesh_name}"
-                                )
-                            mesh_basename = matched.group(1)
-                            for variable_name in mesh_obj:
-                                var_list = self._vars_openpmd_files.setdefault(
-                                    variable_name, set()
-                                )
-                                var_list.add(dir_path)
-                                self._openpmd_mesh_basenames[variable_name] = (
-                                    mesh_basename
-                                )
+                            if matched is not None:
+                                mesh_basename = matched.group(1)
+                                for variable_name in mesh_obj:
+                                    var_list = (
+                                        self._vars_openpmd_files.setdefault(
+                                            variable_name, set()
+                                        )
+                                    )
+                                    var_list.add(dir_path)
+                                    self._openpmd_mesh_basenames[
+                                        variable_name
+                                    ] = mesh_basename
 
         # What pythonize_name_dict does is to make the various variables
         # accessible as attributes, e.g. self.fields.rho
