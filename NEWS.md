@@ -5,6 +5,11 @@
 #### General
 - Minimum version of Python required is now 3.9.
 
+#### Bug fixes
+- Fixed reading OpenPMD files with mesh names that do not conform to the
+  `<basename>_rl<N>` or `<basename>_lev<N>` names (e.g.,
+  `odesolvers_do_substeps`, as reported by Steven Brandt)
+
 ## Version 1.5.2 (2 July 2025)
 (Version 1.5.2 does not really exist. Version 1.5.1 was not correctly published due to a workflow error.)
 
