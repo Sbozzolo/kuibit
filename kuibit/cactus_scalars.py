@@ -78,16 +78,17 @@ class OneScalar:
 
     # What is this pattern?
     # Let's understand it. We have ^ and $, so we match the entire string and
-    # we have seven capturing groups.
+    # we have eight capturing groups.
     # 1: (\w+) matches any number of characters greater than 0 (w = word)
     # 2: ((-(\w+))|(\[\d+\]))? optionally match one of the two
     # 3: Matches - with followed by 4: any word
     # 5: Matches brackets with a number inside
+    # 6: (\.0)? optionally match .0
     # In between match a dot (\.)
-    # 6: (minimum|maximum|norm1|norm2|norm_inf|average|scalars)? optionally match one
+    # 7: (minimum|maximum|norm1|norm2|norm_inf|average|scalars)? optionally match one
     #    of those
     # In between match .asc (\.asc)
-    # 7: (\.(gz|bz2))? optionally match .gz or .bz2
+    # 8: (\.(gz|bz2))? optionally match .gz or .bz2
 
     # We want to match file names like hydrobase-press.maximum.asc or
     # hydrobase-vel[0].maximum.asc
@@ -98,6 +99,7 @@ class OneScalar:
     _pattern_filename = r"""
     ^(\w+)
     ((-(\w+))|(\[\d+\]))?
+    (\.0)?
     \.(minimum|maximum|norm1|norm2|norm_inf|average|scalars)?
     \.asc
     (\.(gz|bz2))?$"""
@@ -154,6 +156,7 @@ class OneScalar:
             _1,
             variable_name2,
             index_in_brackets,
+            _multipatch,
             reduction_type,
             _2,
             compression_method,
