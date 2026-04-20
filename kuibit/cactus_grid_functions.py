@@ -1493,9 +1493,9 @@ class AllGridFunctions:
 
     # Organizes data by dimensions and variables
     filename_extensions = {
-        (0,): ".x",
-        (1,): ".y",
-        (2,): ".z",
+        (0,): "(.0)?.x",
+        (1,): "(.0)?.y",
+        (2,): "(.0)?.z",
         (0, 1): "(.0)?.xy",
         (0, 2): "(.0)?.xz",
         (1, 2): "(.0)?.yz",
