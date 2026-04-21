@@ -93,7 +93,7 @@ are (make sure to read below this list!):
 
 0. For contributions longer than a few lines, announce on GitHub or Telegram
    that you are working on a given feature.
-1. Fork `kubit` on GitHub.
+1. Fork `kuibit` on GitHub.
 2. Create a branch. If your contribution is a bugfix, an improvement in
    documentation, or a small feature, you should branch off `master`. If it is a
    significant improvement, you should branch off `next`.
