@@ -645,7 +645,7 @@ class OneGridFunctionASCII(BaseOneGridFunction):
         # detailed explanation, see AllGridFunctions. The only difference here
         # is that we don't care about the extension, so we have an addition (*)?
         rx_filename = re.compile(
-            r"^(([a-zA-Z0-9_]+)-)?([a-zA-Z0-9\[\]_]+).([xyz]+)?.asc(\.(gz|bz2))?$"
+            r"^(([a-zA-Z0-9_]+)-)?([a-zA-Z0-9\[\]_]+)(\.0)?.([xyz]+)?.asc(\.(gz|bz2))?$"
         )
 
         filename = os.path.split(path)[1]
@@ -656,7 +656,7 @@ class OneGridFunctionASCII(BaseOneGridFunction):
 
         is_one_file_per_group = matched.group(1) is not None
 
-        compression_method = matched.group(6)
+        compression_method = matched.group(7)
         opener, opener_mode = OneGridFunctionASCII._decompressor[
             compression_method
         ]
