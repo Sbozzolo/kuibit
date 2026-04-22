@@ -47,12 +47,13 @@ class TestSimDir(unittest.TestCase):
         # 2 err files, one in each folder
         self.assertEqual(len(self.sim.errfiles), 2)
 
-        # 5 dirs: tov, tov/output-000i, tov/output-000i/static_tov
-        self.assertEqual(len(self.sim.dirs), 5)
+        # 6 dirs: tov, tov/output-000i, tov/output-000i/static_tov,
+        #         tov/files-with-llama
+        self.assertEqual(len(self.sim.dirs), 6)
 
         # find . -type f | grep -v "SIMFACTORY" | grep -v "NODES" | wc -l
-        # 446
-        self.assertEqual(len(self.sim.allfiles), 450)
+        # 449
+        self.assertEqual(len(self.sim.allfiles), 453)
 
         # Checking max_depth
         sim_max_depth = sd.SimDir("tests/tov", max_depth=2)
@@ -66,12 +67,12 @@ class TestSimDir(unittest.TestCase):
         # 2 err files, one in each folder
         self.assertEqual(len(sim_max_depth.errfiles), 2)
 
-        # 3 dirs: tov, tov/output-000i
-        self.assertEqual(len(sim_max_depth.dirs), 3)
+        # 4 dirs: tov, tov/output-000i, tov/files-with-llama
+        self.assertEqual(len(sim_max_depth.dirs), 4)
 
         # find . -maxdepth 2 -type f | grep -v "SIMFACTORY" | grep -v "NODES" | wc -l
-        # 8
-        self.assertEqual(len(sim_max_depth.allfiles), 8)
+        # 11
+        self.assertEqual(len(sim_max_depth.allfiles), 11)
 
         # Check that all the expected components are in
         # the string representation
@@ -86,7 +87,7 @@ class TestSimDir(unittest.TestCase):
 
         # Test symlink
         sim_with_symlink = sd.SimDir("tests/tov", ignore_symlinks=False)
-        self.assertEqual(len(sim_with_symlink.allfiles), 451)
+        self.assertEqual(len(sim_with_symlink.allfiles), 454)
 
     def test_pickle(self):
         path = "/tmp/sim.pickle"

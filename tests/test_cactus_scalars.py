@@ -76,6 +76,12 @@ class TestCactusScalar(unittest.TestCase):
         self.assertEqual(asc_bz._compression_method, "bz2")
         self.assertDictEqual(asc_bz._vars_columns, {"eps": 2})
 
+        # Multipatch (Llama) 0D scalar file with .0. in the name
+        path = "tests/tov/files-with-llama/phi1.0..asc"
+        asc_llama = cs.OneScalar(path)
+        self.assertIs(asc_llama.reduction_type, "scalar")
+        self.assertDictEqual(asc_llama._vars_columns, {"phi1": None})
+
     def test_OneScalar_magic_methods(self):
         path = "tests/tov/output-0000/static_tov/vel[0].maximum.asc"
         asc = cs.OneScalar(path)
@@ -199,6 +205,13 @@ class TestCactusScalar(unittest.TestCase):
 
         with self.assertRaises(KeyError):
             reader["BOB"]
+
+    def test_AllScalars_llama(self):
+        llama_files = ["tests/tov/files-with-llama/phi1.0..asc"]
+        reader = cs.AllScalars(llama_files, "scalar")
+        self.assertIn("phi1", reader)
+        phi1_ts = reader["phi1"]
+        self.assertAlmostEqual(phi1_ts(0), 0.28209479177387814)
 
     def test_AllScalars_magic_methods(self):
         reader = cs.AllScalars(sd.SimDir("tests/tov").allfiles, "average")

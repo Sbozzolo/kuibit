@@ -546,6 +546,16 @@ class TestOneGridFunction(unittest.TestCase):
         with self.assertRaises(RuntimeError):
             self.rho_star._parse_file("/tmp/wrongname")
 
+    def test_llama_1d_ascii(self):
+        llama_files = ["tests/tov/files-with-llama/phi1.0.x.asc"]
+        gf = cg.AllGridFunctions(llama_files, dimension=(0,))
+        self.assertIn("phi1", gf)
+
+    def test_llama_1d_h5(self):
+        llama_files = ["tests/tov/files-with-llama/phi1.0.x.h5"]
+        gf = cg.AllGridFunctions(llama_files, dimension=(0,))
+        self.assertIn("phi1", gf)
+
     def test_openpmd(self):
         iteration = 0
         component = 0
