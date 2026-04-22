@@ -11,8 +11,9 @@
   `odesolvers_do_substeps`, as reported by Steven Brandt)
 
 #### Features
-- Added support to read 0D and 1D data from the `Carpet` grid, generated during multipatch simulations (i.e. using `Llama`)
-(@Jordan-Nicoules, ticket [#47](https://github.com/Sbozzolo/kuibit/issues/47)).
+- Added support to read 0D and 1D data from the `Carpet` grid, generated during
+multipatch simulations (i.e. using `Llama`) (@Jordan-Nicoules,
+[#48](https://github.com/Sbozzolo/kuibit/pull/48)).
 
 ## Version 1.5.2 (2 July 2025)
 (Version 1.5.2 does not really exist. Version 1.5.1 was not correctly published due to a workflow error.)
