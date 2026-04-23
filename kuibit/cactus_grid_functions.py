@@ -1412,6 +1412,12 @@ class OneGridFunctionOpenPMD(BaseOneGridFunction):
                 origin = np.array(mesh_obj.grid_global_offset)
                 dx = np.array(mesh_obj.grid_spacing)
                 mrc = mesh_obj[self.var_name]
+                position = np.asarray(mrc.position, dtype=float)
+                if position.shape != dx.shape:
+                    raise RuntimeError(
+                        "OpenPMD record position has incompatible dimensions "
+                        f"for variable {self.var_name}"
+                    )
                 chunk = mrc.available_chunks()[component]
                 offset = np.array(chunk.offset)
                 shape = chunk.extent
@@ -1420,7 +1426,7 @@ class OneGridFunctionOpenPMD(BaseOneGridFunction):
                 series.flush()
                 grid = grid_data.UniformGrid(
                     shape,
-                    x0=(origin + offset * dx),
+                    x0=(origin + (offset + position) * dx),
                     dx=dx,
                     ref_level=ref_level,
                     num_ghost=[0, 0, 0],
