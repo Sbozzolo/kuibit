@@ -193,11 +193,6 @@ class OneScalar:
 
         extended_format = self.reduction_type == "scalar"
 
-        if self._all_reductions_in_one_file and self._is_one_file_per_group:
-            raise RuntimeError(
-                f"Grouped *.scalars.asc files are not supported: {self.path}"
-            )
-
         # What method to we need to use to open the file?
         # opener can be open, gopen, or bopen depending on the extension
         # of the file
@@ -212,19 +207,20 @@ class OneScalar:
             opener_mode=opener_mode,
         )
 
-        if self._is_one_file_per_group:
-            self._vars_columns.update(columns_info)
-        elif self._all_reductions_in_one_file:
-            # ``var.scalars.asc`` stores multiple reductions for one variable.
+        if self._all_reductions_in_one_file:
+            # ``*.scalars.asc`` stores multiple reductions in one file.
             self._reduction_vars_columns = columns_info
             self._vars_columns = next(
                 iter(self._reduction_vars_columns.values())
             )
         else:
-            # There is only one data_column
-            self._vars_columns = {
-                list(self._vars_columns.keys())[0]: columns_info
-            }
+            if self._is_one_file_per_group:
+                self._vars_columns.update(columns_info)
+            else:
+                # There is only one data_column
+                self._vars_columns = {
+                    list(self._vars_columns.keys())[0]: columns_info
+                }
 
         self._was_header_scanned = True
 

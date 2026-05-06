@@ -254,6 +254,36 @@ class TestCactusScalar(unittest.TestCase):
         self.assertEqual(minimum["alp"], ts.TimeSeries(t_min, y_min))
         self.assertEqual(norm2["alp"], ts.TimeSeries(t_n2, y_n2))
 
+    def test_AllScalars_group_scalars_file(self):
+        path = "tests/tov/output-0000/static_tov/admbase-curv.scalars.asc"
+
+        average = cs.AllScalars([path], "average")
+        minimum = cs.AllScalars([path], "minimum")
+        infnorm = cs.AllScalars([path], "infnorm")
+
+        vars_curv = ["kxx", "kxy", "kxz", "kyy", "kyz", "kzz"]
+        self.assertCountEqual(average.keys(), vars_curv)
+        self.assertCountEqual(minimum.keys(), vars_curv)
+        self.assertCountEqual(infnorm.keys(), vars_curv)
+
+        t_avg, kxx_avg = np.loadtxt(
+            path, ndmin=2, unpack=True, usecols=(1, 20)
+        )
+        _, kxy_avg = np.loadtxt(path, ndmin=2, unpack=True, usecols=(1, 21))
+        t_min, kxx_min = np.loadtxt(path, ndmin=2, unpack=True, usecols=(1, 8))
+        _, kxy_min = np.loadtxt(path, ndmin=2, unpack=True, usecols=(1, 9))
+        t_inf, kxx_inf = np.loadtxt(
+            path, ndmin=2, unpack=True, usecols=(1, 38)
+        )
+        _, kxy_inf = np.loadtxt(path, ndmin=2, unpack=True, usecols=(1, 39))
+
+        self.assertEqual(average["kxx"], ts.TimeSeries(t_avg, kxx_avg))
+        self.assertEqual(average["kxy"], ts.TimeSeries(t_avg, kxy_avg))
+        self.assertEqual(minimum["kxx"], ts.TimeSeries(t_min, kxx_min))
+        self.assertEqual(minimum["kxy"], ts.TimeSeries(t_min, kxy_min))
+        self.assertEqual(infnorm["kxx"], ts.TimeSeries(t_inf, kxx_inf))
+        self.assertEqual(infnorm["kxy"], ts.TimeSeries(t_inf, kxy_inf))
+
     def test_scan_header_all_reductions_in_one_file(self):
         path = "tests/tov/output-0000/static_tov/alp.scalars.asc"
         time_column, columns_description = cau.scan_header(
