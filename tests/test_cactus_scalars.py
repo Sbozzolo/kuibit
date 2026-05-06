@@ -234,3 +234,43 @@ class TestCactusScalar(unittest.TestCase):
         # Check string representation
         # (this is a very weak check...)
         self.assertIn("io_count", scaldir.__str__())
+
+    def test_AllScalars_var_scalars_file(self):
+        path = "tests/tov/output-0000/static_tov/alp.scalars.asc"
+
+        average = cs.AllScalars([path], "average")
+        minimum = cs.AllScalars([path], "minimum")
+        norm2 = cs.AllScalars([path], "norm2")
+
+        self.assertCountEqual(average.keys(), ["alp"])
+        self.assertCountEqual(minimum.keys(), ["alp"])
+        self.assertCountEqual(norm2.keys(), ["alp"])
+
+        t_avg, y_avg = np.loadtxt(path, ndmin=2, unpack=True, usecols=(1, 4))
+        t_min, y_min = np.loadtxt(path, ndmin=2, unpack=True, usecols=(1, 2))
+        t_n2, y_n2 = np.loadtxt(path, ndmin=2, unpack=True, usecols=(1, 6))
+
+        self.assertEqual(average["alp"], ts.TimeSeries(t_avg, y_avg))
+        self.assertEqual(minimum["alp"], ts.TimeSeries(t_min, y_min))
+        self.assertEqual(norm2["alp"], ts.TimeSeries(t_n2, y_n2))
+
+    def test_scan_header_all_reductions_in_one_file(self):
+        path = "tests/tov/output-0000/static_tov/alp.scalars.asc"
+        time_column, columns_description = cau.scan_header(
+            path,
+            one_file_per_group=False,
+            extended_format=False,
+            all_reductions_in_one_file=True,
+        )
+
+        self.assertEqual(time_column, 1)
+        self.assertDictEqual(
+            columns_description,
+            {
+                "minimum": {"alp": 2},
+                "maximum": {"alp": 3},
+                "average": {"alp": 4},
+                "norm1": {"alp": 5},
+                "norm2": {"alp": 6},
+            },
+        )

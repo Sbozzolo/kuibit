@@ -111,7 +111,13 @@ class OneScalar:
         "norm2": "norm2",
         "norm_inf": "infnorm",
         "average": "average",
+        "scalars": "scalars",
         None: "scalar",
+    }
+    _reduction_types_inv = {
+        value: key
+        for key, value in _reduction_types.items()
+        if key is not None
     }
 
     # What function to use to open the file?
@@ -164,6 +170,8 @@ class OneScalar:
         self.reduction_type = (
             reduction_type if reduction_type is not None else "scalar"
         )
+        self._all_reductions_in_one_file = reduction_type == "scalars"
+        self._reduction_vars_columns = None
 
         # If the file contains multiple variables, we will scan the header
         # immediately to understand the content. If not, we scan the header
@@ -185,6 +193,11 @@ class OneScalar:
 
         extended_format = self.reduction_type == "scalar"
 
+        if self._all_reductions_in_one_file and self._is_one_file_per_group:
+            raise RuntimeError(
+                f"Grouped *.scalars.asc files are not supported: {self.path}"
+            )
+
         # What method to we need to use to open the file?
         # opener can be open, gopen, or bopen depending on the extension
         # of the file
@@ -194,12 +207,19 @@ class OneScalar:
             self.path,
             self._is_one_file_per_group,
             extended_format,
+            all_reductions_in_one_file=self._all_reductions_in_one_file,
             opener=opener,
             opener_mode=opener_mode,
         )
 
         if self._is_one_file_per_group:
             self._vars_columns.update(columns_info)
+        elif self._all_reductions_in_one_file:
+            # ``var.scalars.asc`` stores multiple reductions for one variable.
+            self._reduction_vars_columns = columns_info
+            self._vars_columns = next(
+                iter(self._reduction_vars_columns.values())
+            )
         else:
             # There is only one data_column
             self._vars_columns = {
@@ -299,6 +319,35 @@ class AllScalars:
                     for var in list(cactusascii_file.keys()):
                         # We add to the _vars_readers dictionary the mapping:
                         # [var][folder] to OneScalar(f)
+                        folder = cactusascii_file.folder
+                        self._vars_readers.setdefault(var, {})[
+                            folder
+                        ] = cactusascii_file
+                elif cactusascii_file._all_reductions_in_one_file:
+                    try:
+                        if not cactusascii_file._was_header_scanned:
+                            cactusascii_file._scan_header()
+
+                        # Map kuibit reduction names back to the file/header
+                        # tokens used in ``*.scalars.asc``.
+                        fh_reduction_type = (
+                            cactusascii_file._reduction_types_inv.get(
+                                reduction_type, reduction_type
+                            )
+                        )
+                        columns = cactusascii_file._reduction_vars_columns.get(
+                            fh_reduction_type
+                        )
+                        if columns is None:
+                            raise KeyError(
+                                f"{fh_reduction_type} not available in "
+                                f"{cactusascii_file.path}"
+                            )
+                        cactusascii_file._vars_columns = columns
+                    except KeyError:
+                        continue
+                    cactusascii_file.reduction_type = reduction_type
+                    for var in list(cactusascii_file.keys()):
                         folder = cactusascii_file.folder
                         self._vars_readers.setdefault(var, {})[
                             folder
