@@ -4,6 +4,8 @@
 
 #### General
 - Minimum version of Python required is now 3.9.
+
+#### Features
 - Support `IOScalar::all_reductions_in_one_file`, in preparation for CarpetX
   norms. (Max Rizzo)
 

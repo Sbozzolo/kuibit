@@ -224,6 +224,22 @@ class OneScalar:
 
         self._was_header_scanned = True
 
+    def _get_vars_columns_allreds(self, reduction_type):
+        if not self._was_header_scanned:
+            self._scan_header()
+
+        # Map kuibit reduction names back to the file/header
+        # tokens used in ``*.scalars.asc``.
+        fh_reduction_type = self._reduction_types_inv.get(
+            reduction_type, reduction_type
+        )
+        columns = self._reduction_vars_columns.get(fh_reduction_type)
+        if columns is None:
+            raise KeyError(f"{fh_reduction_type} not available in {self.path}")
+
+        self._vars_columns = columns
+        self.reduction_type = reduction_type
+
     @lru_cache(128)
     def load(self, variable):
         """Read file and return a TimeSeries with the requested variable.
@@ -312,42 +328,26 @@ class AllScalars:
             try:
                 cactusascii_file = OneScalar(file_)
                 if cactusascii_file.reduction_type == reduction_type:
-                    for var in list(cactusascii_file.keys()):
-                        # We add to the _vars_readers dictionary the mapping:
-                        # [var][folder] to OneScalar(f)
-                        folder = cactusascii_file.folder
-                        self._vars_readers.setdefault(var, {})[
-                            folder
-                        ] = cactusascii_file
+                    use_as_fallback = False
                 elif cactusascii_file._all_reductions_in_one_file:
+                    use_as_fallback = True
                     try:
-                        if not cactusascii_file._was_header_scanned:
-                            cactusascii_file._scan_header()
-
-                        # Map kuibit reduction names back to the file/header
-                        # tokens used in ``*.scalars.asc``.
-                        fh_reduction_type = (
-                            cactusascii_file._reduction_types_inv.get(
-                                reduction_type, reduction_type
-                            )
+                        cactusascii_file._get_vars_columns_allreds(
+                            reduction_type
                         )
-                        columns = cactusascii_file._reduction_vars_columns.get(
-                            fh_reduction_type
-                        )
-                        if columns is None:
-                            raise KeyError(
-                                f"{fh_reduction_type} not available in "
-                                f"{cactusascii_file.path}"
-                            )
-                        cactusascii_file._vars_columns = columns
                     except KeyError:
                         continue
-                    cactusascii_file.reduction_type = reduction_type
-                    for var in list(cactusascii_file.keys()):
-                        folder = cactusascii_file.folder
-                        self._vars_readers.setdefault(var, {})[
-                            folder
-                        ] = cactusascii_file
+                else:
+                    continue
+
+                for var in list(cactusascii_file.keys()):
+                    # We add to the _vars_readers dictionary the mapping:
+                    # [var][folder] to OneScalar(f)
+                    folder = cactusascii_file.folder
+                    self._vars_readers.setdefault(var, {})
+                    if use_as_fallback and folder in self._vars_readers[var]:
+                        continue
+                    self._vars_readers[var][folder] = cactusascii_file
             except RuntimeError:
                 pass
 

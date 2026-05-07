@@ -284,6 +284,26 @@ class TestCactusScalar(unittest.TestCase):
         self.assertEqual(infnorm["kxx"], ts.TimeSeries(t_inf, kxx_inf))
         self.assertEqual(infnorm["kxy"], ts.TimeSeries(t_inf, kxy_inf))
 
+    def test_AllScalars_prefers_direct_reduction_file(self):
+        path_scalars = (
+            "tests/tov/output-0000/static_tov/admbase-curv.scalars.asc"
+        )
+        path_minimum = (
+            "tests/tov/output-0000/static_tov/admbase-curv.minimum.asc"
+        )
+
+        minimum = cs.AllScalars([path_scalars, path_minimum], "minimum")
+        self.assertEqual(len(minimum._vars_readers["kxx"]), 1)
+        reader = next(iter(minimum._vars_readers["kxx"].values()))
+        self.assertEqual(reader.path, path_minimum)
+        self.assertNotEqual(reader.path, path_scalars)
+
+        minimum = cs.AllScalars([path_minimum, path_scalars], "minimum")
+        self.assertEqual(len(minimum._vars_readers["kxx"]), 1)
+        reader = next(iter(minimum._vars_readers["kxx"].values()))
+        self.assertEqual(reader.path, path_minimum)
+        self.assertNotEqual(reader.path, path_scalars)
+
     def test_scan_header_all_reductions_in_one_file(self):
         path = "tests/tov/output-0000/static_tov/alp.scalars.asc"
         time_column, columns_description = cau.scan_header(
