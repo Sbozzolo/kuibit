@@ -76,7 +76,8 @@ class TestSimDir(unittest.TestCase):
         # Check that all the expected components are in
         # the string representation
         #
-        self.assertIn(self.sim.ts.__str__(), self.sim.__str__())
+        with self.assertWarns(RuntimeWarning):
+            self.assertIn(self.sim.ts.__str__(), self.sim.__str__())
         self.assertIn(self.sim.multipoles.__str__(), self.sim.__str__())
 
         # Test for a simdir with no information

@@ -42,6 +42,7 @@ up with a series of brackets or dots to access the actual data. For example, if
 
 import os
 import re
+import warnings
 from bz2 import open as bopen
 from functools import lru_cache
 from gzip import open as gopen
@@ -327,26 +328,28 @@ class AllScalars:
             # We only save those that variables are well-behaved
             try:
                 cactusascii_file = OneScalar(file_)
-                if cactusascii_file.reduction_type == reduction_type:
-                    use_as_fallback = False
-                elif cactusascii_file._all_reductions_in_one_file:
-                    use_as_fallback = True
+                if cactusascii_file.reduction_type != reduction_type:
+                    if not cactusascii_file._all_reductions_in_one_file:
+                        continue
                     try:
                         cactusascii_file._get_vars_columns_allreds(
                             reduction_type
                         )
                     except KeyError:
                         continue
-                else:
-                    continue
 
                 for var in list(cactusascii_file.keys()):
                     # We add to the _vars_readers dictionary the mapping:
                     # [var][folder] to OneScalar(f)
                     folder = cactusascii_file.folder
                     self._vars_readers.setdefault(var, {})
-                    if use_as_fallback and folder in self._vars_readers[var]:
-                        continue
+                    if folder in self._vars_readers[var]:
+                        warnings.warn(
+                            f"Overwriting {var} {reduction_type} from "
+                            f"{self._vars_readers[var][folder].path} with "
+                            f"{cactusascii_file.path}",
+                            RuntimeWarning,
+                        )
                     self._vars_readers[var][folder] = cactusascii_file
             except RuntimeError:
                 pass
