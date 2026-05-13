@@ -81,7 +81,7 @@ Frequencyseries support:
 Scalar data
 -----------
 
-- Read data from ``CarpetASCII`` (max, min, norm, ...) as timeseries (both ``one_file_per_group`` or ``one_variable_per_group`` options).
+- Read data from ``CarpetASCII`` (max, min, norm, ...) as timeseries (supporting options ``one_file_per_group``, ``all_reductions_in_one_file``, or both).
 - Combine all the different files from multiple checkpoints in a single timeseries.
 - Read data transparently compressed with gzip or bzip2.
 

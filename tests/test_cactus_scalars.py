@@ -159,8 +159,8 @@ class TestCactusScalar(unittest.TestCase):
 
     def test_AllScalars(self):
         sim = sd.SimDir("tests/tov")
-
-        reader = cs.AllScalars(sim.allfiles, "average")
+        with self.assertWarns(RuntimeWarning):
+            reader = cs.AllScalars(sim.allfiles, "average")
 
         # Let's check that all the files are properly indexed
         vars_tov = [
@@ -201,7 +201,8 @@ class TestCactusScalar(unittest.TestCase):
             reader["BOB"]
 
     def test_AllScalars_magic_methods(self):
-        reader = cs.AllScalars(sd.SimDir("tests/tov").allfiles, "average")
+        with self.assertWarns(RuntimeWarning):
+            reader = cs.AllScalars(sd.SimDir("tests/tov").allfiles, "average")
         self.assertIn("rho", reader)
 
         path1 = "tests/tov/output-0000/static_tov/hydrobase-rho.average.asc"
@@ -221,7 +222,8 @@ class TestCactusScalar(unittest.TestCase):
         with self.assertRaises(TypeError):
             cs.ScalarsDir(0)
 
-        scaldir = cs.ScalarsDir(sd.SimDir("tests/tov"))
+        with self.assertWarns(RuntimeWarning):
+            scaldir = cs.ScalarsDir(sd.SimDir("tests/tov"))
 
         # Check that the getter (and []) work
         self.assertEqual(scaldir["average"].reduction_type, "average")
@@ -234,3 +236,73 @@ class TestCactusScalar(unittest.TestCase):
         # Check string representation
         # (this is a very weak check...)
         self.assertIn("io_count", scaldir.__str__())
+
+    def test_AllScalars_var_scalars_file(self):
+        path = "tests/tov/output-0000/static_tov/alp.scalars.asc"
+
+        average = cs.AllScalars([path], "average")
+        minimum = cs.AllScalars([path], "minimum")
+        norm2 = cs.AllScalars([path], "norm2")
+
+        self.assertCountEqual(average.keys(), ["alp"])
+        self.assertCountEqual(minimum.keys(), ["alp"])
+        self.assertCountEqual(norm2.keys(), ["alp"])
+
+        t_avg, y_avg = np.loadtxt(path, ndmin=2, unpack=True, usecols=(1, 4))
+        t_min, y_min = np.loadtxt(path, ndmin=2, unpack=True, usecols=(1, 2))
+        t_n2, y_n2 = np.loadtxt(path, ndmin=2, unpack=True, usecols=(1, 6))
+
+        self.assertEqual(average["alp"], ts.TimeSeries(t_avg, y_avg))
+        self.assertEqual(minimum["alp"], ts.TimeSeries(t_min, y_min))
+        self.assertEqual(norm2["alp"], ts.TimeSeries(t_n2, y_n2))
+
+    def test_AllScalars_group_scalars_file(self):
+        path = "tests/tov/output-0000/static_tov/admbase-curv.scalars.asc"
+
+        average = cs.AllScalars([path], "average")
+        minimum = cs.AllScalars([path], "minimum")
+        infnorm = cs.AllScalars([path], "infnorm")
+
+        vars_curv = ["kxx", "kxy", "kxz", "kyy", "kyz", "kzz"]
+        self.assertCountEqual(average.keys(), vars_curv)
+        self.assertCountEqual(minimum.keys(), vars_curv)
+        self.assertCountEqual(infnorm.keys(), vars_curv)
+
+        t_avg, kxx_avg = np.loadtxt(
+            path, ndmin=2, unpack=True, usecols=(1, 20)
+        )
+        _, kxy_avg = np.loadtxt(path, ndmin=2, unpack=True, usecols=(1, 21))
+        t_min, kxx_min = np.loadtxt(path, ndmin=2, unpack=True, usecols=(1, 8))
+        _, kxy_min = np.loadtxt(path, ndmin=2, unpack=True, usecols=(1, 9))
+        t_inf, kxx_inf = np.loadtxt(
+            path, ndmin=2, unpack=True, usecols=(1, 38)
+        )
+        _, kxy_inf = np.loadtxt(path, ndmin=2, unpack=True, usecols=(1, 39))
+
+        self.assertEqual(average["kxx"], ts.TimeSeries(t_avg, kxx_avg))
+        self.assertEqual(average["kxy"], ts.TimeSeries(t_avg, kxy_avg))
+        self.assertEqual(minimum["kxx"], ts.TimeSeries(t_min, kxx_min))
+        self.assertEqual(minimum["kxy"], ts.TimeSeries(t_min, kxy_min))
+        self.assertEqual(infnorm["kxx"], ts.TimeSeries(t_inf, kxx_inf))
+        self.assertEqual(infnorm["kxy"], ts.TimeSeries(t_inf, kxy_inf))
+
+    def test_scan_header_all_reductions_in_one_file(self):
+        path = "tests/tov/output-0000/static_tov/alp.scalars.asc"
+        time_column, columns_description = cau.scan_header(
+            path,
+            one_file_per_group=False,
+            extended_format=False,
+            all_reductions_in_one_file=True,
+        )
+
+        self.assertEqual(time_column, 1)
+        self.assertDictEqual(
+            columns_description,
+            {
+                "minimum": {"alp": 2},
+                "maximum": {"alp": 3},
+                "average": {"alp": 4},
+                "norm1": {"alp": 5},
+                "norm2": {"alp": 6},
+            },
+        )

@@ -42,6 +42,7 @@ up with a series of brackets or dots to access the actual data. For example, if
 
 import os
 import re
+import warnings
 from bz2 import open as bopen
 from functools import lru_cache
 from gzip import open as gopen
@@ -111,7 +112,13 @@ class OneScalar:
         "norm2": "norm2",
         "norm_inf": "infnorm",
         "average": "average",
+        "scalars": "scalars",
         None: "scalar",
+    }
+    _reduction_types_inv = {
+        value: key
+        for key, value in _reduction_types.items()
+        if key is not None
     }
 
     # What function to use to open the file?
@@ -164,6 +171,8 @@ class OneScalar:
         self.reduction_type = (
             reduction_type if reduction_type is not None else "scalar"
         )
+        self._all_reductions_in_one_file = reduction_type == "scalars"
+        self._reduction_vars_columns = None
 
         # If the file contains multiple variables, we will scan the header
         # immediately to understand the content. If not, we scan the header
@@ -194,19 +203,43 @@ class OneScalar:
             self.path,
             self._is_one_file_per_group,
             extended_format,
+            all_reductions_in_one_file=self._all_reductions_in_one_file,
             opener=opener,
             opener_mode=opener_mode,
         )
 
-        if self._is_one_file_per_group:
-            self._vars_columns.update(columns_info)
+        if self._all_reductions_in_one_file:
+            # ``*.scalars.asc`` stores multiple reductions in one file.
+            self._reduction_vars_columns = columns_info
+            self._vars_columns = next(
+                iter(self._reduction_vars_columns.values())
+            )
         else:
-            # There is only one data_column
-            self._vars_columns = {
-                list(self._vars_columns.keys())[0]: columns_info
-            }
+            if self._is_one_file_per_group:
+                self._vars_columns.update(columns_info)
+            else:
+                # There is only one data_column
+                self._vars_columns = {
+                    list(self._vars_columns.keys())[0]: columns_info
+                }
 
         self._was_header_scanned = True
+
+    def _get_vars_columns_allreds(self, reduction_type):
+        if not self._was_header_scanned:
+            self._scan_header()
+
+        # Map kuibit reduction names back to the file/header
+        # tokens used in ``*.scalars.asc``.
+        fh_reduction_type = self._reduction_types_inv.get(
+            reduction_type, reduction_type
+        )
+        columns = self._reduction_vars_columns.get(fh_reduction_type)
+        if columns is None:
+            raise KeyError(f"{fh_reduction_type} not available in {self.path}")
+
+        self._vars_columns = columns
+        self.reduction_type = reduction_type
 
     @lru_cache(128)
     def load(self, variable):
@@ -295,14 +328,29 @@ class AllScalars:
             # We only save those that variables are well-behaved
             try:
                 cactusascii_file = OneScalar(file_)
-                if cactusascii_file.reduction_type == reduction_type:
-                    for var in list(cactusascii_file.keys()):
-                        # We add to the _vars_readers dictionary the mapping:
-                        # [var][folder] to OneScalar(f)
-                        folder = cactusascii_file.folder
-                        self._vars_readers.setdefault(var, {})[
-                            folder
-                        ] = cactusascii_file
+                if cactusascii_file.reduction_type != reduction_type:
+                    if not cactusascii_file._all_reductions_in_one_file:
+                        continue
+                    try:
+                        cactusascii_file._get_vars_columns_allreds(
+                            reduction_type
+                        )
+                    except KeyError:
+                        continue
+
+                for var in list(cactusascii_file.keys()):
+                    # We add to the _vars_readers dictionary the mapping:
+                    # [var][folder] to OneScalar(f)
+                    folder = cactusascii_file.folder
+                    self._vars_readers.setdefault(var, {})
+                    if folder in self._vars_readers[var]:
+                        warnings.warn(
+                            f"Overwriting {var} {reduction_type} from "
+                            f"{self._vars_readers[var][folder].path} with "
+                            f"{cactusascii_file.path}",
+                            RuntimeWarning,
+                        )
+                    self._vars_readers[var][folder] = cactusascii_file
             except RuntimeError:
                 pass
 

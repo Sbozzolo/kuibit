@@ -122,10 +122,48 @@ def _scan_strings_for_columns(strings, pattern, path=None):
     return columns_description
 
 
+def _scan_strings_for_columns_and_reductions(strings, pattern, path=None):
+    """Return a mapping ``reduction -> {variable: column}`` from header lines."""
+
+    # Here we match (number):(word[number])([word])
+    # We are matching expressions like 3:kxx(minimum)
+    pattern_columns = r"^(\d+):(\w+(?:\[\d+\])?)\(([\w_]+)\)$"
+    rx_columns = re.compile(pattern_columns)
+
+    # We scan these lines and see if any matches with the regexp for the
+    # data columns
+    for line in strings:
+        matched_pattern = pattern.match(line)
+        if matched_pattern is not None:
+            break
+    else:
+        raise RuntimeError(f"Unrecognized header in file {path}")
+
+    columns = [
+        rx_columns.match(column)
+        for column in matched_pattern.groups()[0].split()
+    ]
+
+    if not all(columns):
+        raise RuntimeError(f"Bad header found in file {path}")
+
+    # Build a nested mapping from reduction names to variable columns.
+    columns_description = {}
+    for column in columns:
+        column_number, variable_name, reduction_name = column.groups()
+        columns_description.setdefault(reduction_name, {})
+        columns_description[reduction_name][variable_name] = (
+            int(column_number) - 1
+        )
+
+    return columns_description
+
+
 def scan_header(
     path,
     one_file_per_group,
     extended_format=True,
+    all_reductions_in_one_file=False,
     opener=open,
     opener_mode="r",
 ):
@@ -218,6 +256,11 @@ def scan_header(
 
     # When we have one file per group we have many data columns
     # Se update _vars to add all the new ones
+    if all_reductions_in_one_file:
+        columns_description = _scan_strings_for_columns_and_reductions(
+            header, rx_data_columns, path=path
+        )
+        return time_column, columns_description
     if one_file_per_group:
         columns_description = _scan_strings_for_columns(
             header, rx_data_columns, path=path
