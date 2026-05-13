@@ -1498,6 +1498,12 @@
                 <span class="n">origin</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">mesh_obj</span><span class="o">.</span><span class="n">grid_global_offset</span><span class="p">)</span>
                 <span class="n">dx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">mesh_obj</span><span class="o">.</span><span class="n">grid_spacing</span><span class="p">)</span>
                 <span class="n">mrc</span> <span class="o">=</span> <span class="n">mesh_obj</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">var_name</span><span class="p">]</span>
+                <span class="n">position</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">mrc</span><span class="o">.</span><span class="n">position</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">position</span><span class="o">.</span><span class="n">shape</span> <span class="o">!=</span> <span class="n">dx</span><span class="o">.</span><span class="n">shape</span><span class="p">:</span>
+                    <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span>
+                        <span class="s2">&quot;OpenPMD record position has incompatible dimensions &quot;</span>
+                        <span class="sa">f</span><span class="s2">&quot;for variable </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">var_name</span><span class="si">}</span><span class="s2">&quot;</span>
+                    <span class="p">)</span>
                 <span class="n">chunk</span> <span class="o">=</span> <span class="n">mrc</span><span class="o">.</span><span class="n">available_chunks</span><span class="p">()[</span><span class="n">component</span><span class="p">]</span>
                 <span class="n">offset</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">chunk</span><span class="o">.</span><span class="n">offset</span><span class="p">)</span>
                 <span class="n">shape</span> <span class="o">=</span> <span class="n">chunk</span><span class="o">.</span><span class="n">extent</span>
@@ -1506,7 +1512,7 @@
                 <span class="n">series</span><span class="o">.</span><span class="n">flush</span><span class="p">()</span>
                 <span class="n">grid</span> <span class="o">=</span> <span class="n">grid_data</span><span class="o">.</span><span class="n">UniformGrid</span><span class="p">(</span>
                     <span class="n">shape</span><span class="p">,</span>
-                    <span class="n">x0</span><span class="o">=</span><span class="p">(</span><span class="n">origin</span> <span class="o">+</span> <span class="n">offset</span> <span class="o">*</span> <span class="n">dx</span><span class="p">),</span>
+                    <span class="n">x0</span><span class="o">=</span><span class="p">(</span><span class="n">origin</span> <span class="o">+</span> <span class="p">(</span><span class="n">offset</span> <span class="o">+</span> <span class="n">position</span><span class="p">)</span> <span class="o">*</span> <span class="n">dx</span><span class="p">),</span>
                     <span class="n">dx</span><span class="o">=</span><span class="n">dx</span><span class="p">,</span>
                     <span class="n">ref_level</span><span class="o">=</span><span class="n">ref_level</span><span class="p">,</span>
                     <span class="n">num_ghost</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span>
