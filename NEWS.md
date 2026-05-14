@@ -5,10 +5,17 @@
 #### General
 - Minimum version of Python required is now 3.9.
 
+#### Features
+- Support `IOScalar::all_reductions_in_one_file`, in preparation for CarpetX
+  norms. (Max Rizzo)
+
 #### Bug fixes
 - Fixed reading OpenPMD files with mesh names that do not conform to the
   `<basename>_rl<N>` or `<basename>_lev<N>` names (e.g.,
   `odesolvers_do_substeps`, as reported by Steven Brandt)
+- Fixed reading openPMD grid coordinates for non-vertex-centered
+  variables; all CarpetX centering types are now supported. Added a
+  corresponding test with sample openPMD data. (Max Rizzo)
 
 #### Features
 - Added support to read 0D and 1D data from the `Carpet` grid, generated during

@@ -154,9 +154,10 @@ class TestHorizonsDir(unittest.TestCase):
         )
 
     def test__str(self):
-        self.assertEqual(
-            str(sd.SimDir("tests/tov").horizons), "No horizon found"
-        )
+        with self.assertWarns(RuntimeWarning):
+            self.assertEqual(
+                str(sd.SimDir("tests/tov").horizons), "No horizon found"
+            )
 
         expected_str = "Horizons found:\n"
         expected_str += "3 horizons from QuasiLocalMeasures\n"

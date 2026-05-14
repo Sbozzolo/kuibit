@@ -590,6 +590,66 @@ class TestOneGridFunction(unittest.TestCase):
             expected_grid_data,
         )
 
+    def test_openpmd_centering(self):
+        iteration = 0
+        reader_xyz = sd.SimDir("tests/grid_functions").gf.xyz
+        base_grids = {
+            0: grid_data.UniformGrid(
+                [17, 17, 17],
+                x0=[-1.0, -1.0, -1.0],
+                x1=[1.0, 1.0, 1.0],
+                ref_level=0,
+                num_ghost=[0, 0, 0],
+                time=0,
+                iteration=iteration,
+                component=-1,
+            ),
+            1: grid_data.UniformGrid(
+                [17, 17, 17],
+                x0=[-0.5, -0.5, -0.5],
+                x1=[0.5, 0.5, 0.5],
+                ref_level=1,
+                num_ghost=[0, 0, 0],
+                time=0,
+                iteration=iteration,
+                component=-1,
+            ),
+        }
+        shifts = {
+            "staggeredwavetoyx_u": np.array([0.0, 0.0, 0.0]),
+            "staggeredwavetoyx_fx": np.array([0.0, 0.0, 0.5]),
+            "staggeredwavetoyx_fy": np.array([0.0, 0.5, 0.0]),
+            "staggeredwavetoyx_fz": np.array([0.5, 0.0, 0.0]),
+            "staggeredwavetoyx_curlfx": np.array([0.5, 0.5, 0.0]),
+            "staggeredwavetoyx_curlfy": np.array([0.5, 0.0, 0.5]),
+            "staggeredwavetoyx_curlfz": np.array([0.0, 0.5, 0.5]),
+            "staggeredwavetoyx_eps": np.array([0.5, 0.5, 0.5]),
+        }
+
+        def shifted_grid(base_grid, shift):
+            shape = np.array(base_grid.shape) - (shift > 0).astype(int)
+            x0 = base_grid.x0 + shift * base_grid.dx
+            x1 = base_grid.x1 - shift * base_grid.dx
+            return grid_data.UniformGrid(
+                shape,
+                x0=x0,
+                x1=x1,
+                ref_level=base_grid.ref_level,
+                num_ghost=base_grid.num_ghost,
+                time=base_grid.time,
+                iteration=base_grid.iteration,
+                component=base_grid.component,
+            )
+
+        for var_name, shift in shifts.items():
+            actual_hgd = reader_xyz[var_name][iteration]
+            self.assertEqual(actual_hgd.refinement_levels, [0, 1])
+            self.assertEqual(actual_hgd.shape, {0: 1, 1: 1})
+
+            for ref_level in (0, 1):
+                expected_grid = shifted_grid(base_grids[ref_level], shift)
+                self.assertEqual(actual_hgd[ref_level][0].grid, expected_grid)
+
     def test_clear_cache(self):
         # Read something
         self.P[0]
@@ -613,19 +673,31 @@ class TestOneGridFunctionOpenPMD(unittest.TestCase):
         # Here we check that we indexed the correct variables. We must check
         # the OpenPMD file
 
-        # There are five files including one OpenPMD file in the test folder:
+        # There are seven files including three OpenPMD files in the test
+        # folder:
         # 1. illinoisgrmhd-grmhd_primitives_allbutbi.xyz.asc (ASCII one group)
         # 2. rho_star.xyz.asc (ASCII one var)
         # 3. illinoisgrmhd-grmhd_primitives_allbutbi.xyz.file_0.h5 (HDF5 one group)
         # 4. illinoisgrmhd-grmhd_primitives_allbutbi.xyz.file_1.h5 (HDF5 one group)
         # 5. batman.it00000000.bp4 (OpenPMD bp4)
+        # 6. batman.it00000001.bp4 (OpenPMD bp4)
+        # 7. staggeredwavetoyx_openpmd_16.it00000000.bp5 (OpenPMD bp5)
 
         # Here we can we find all the variables
 
-        # assert variables from OpenPMD bp4 file
+        # assert variables from OpenPMD files
         self.assertCountEqual(
             list(self.gf._vars_openpmd_files.keys()),
             [
+                "staggeredwavetoyx_curlfx",
+                "staggeredwavetoyx_curlfy",
+                "staggeredwavetoyx_curlfz",
+                "staggeredwavetoyx_eps",
+                "staggeredwavetoyx_ft",
+                "staggeredwavetoyx_fx",
+                "staggeredwavetoyx_fy",
+                "staggeredwavetoyx_fz",
+                "staggeredwavetoyx_u",
                 "wavetoyx_rho",
                 "wavetoyx_u",
             ],
@@ -645,8 +717,8 @@ class TestOneGridFunctionOpenPMD(unittest.TestCase):
 
     def test_allfiles(self):
         # This is a weak test, we are just testing how many files we have...
-        # There should be 6 files including the OpenPMD bp4 files
-        self.assertEqual(len(self.gf.allfiles), 6)
+        # There should be 7 files including the OpenPMD bp4/bp5 files
+        self.assertEqual(len(self.gf.allfiles), 7)
 
     def test_iterations(self):
         wavetoyx_rho = self.gf.fields.wavetoyx_rho
