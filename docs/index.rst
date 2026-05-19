@@ -30,8 +30,8 @@ For a full list of available features, see the :doc:`features page <features>`.
 
 - Read and organize simulation data (:py:mod:`~.simdir`). Checkpoints and
   restarts are handled transparently.
-- Work with scalar data as produced by ``CarpetIOASCII``
-  (:py:mod:`~.cactus_scalars`).
+- Work with scalar data as produced by ``CarpetIOASCII`` or norms/reductions
+  produced by ``CarpetX`` (:py:mod:`~.cactus_scalars`).
 - Analyze the multipolar decompositions output by ``Multipoles``
   (:py:mod:`~.cactus_multipoles`).
 - Analyze gravitational waves extracted with the Newman-Penrose formalism

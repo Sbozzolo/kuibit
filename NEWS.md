@@ -8,6 +8,7 @@
 #### Features
 - Support `IOScalar::all_reductions_in_one_file`, in preparation for CarpetX
   norms. (Max Rizzo)
+- Support CarpetX norm files `norms/<thorn>-<group>.tsv`. (Max Rizzo)
 
 #### Bug fixes
 - Fixed reading OpenPMD files with mesh names that do not conform to the

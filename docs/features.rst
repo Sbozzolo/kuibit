@@ -82,6 +82,7 @@ Scalar data
 -----------
 
 - Read data from ``CarpetASCII`` (max, min, norm, ...) as timeseries (supporting options ``one_file_per_group``, ``all_reductions_in_one_file``, or both).
+- Read (norms only) data from ``CarpetX`` (max, min, norm, ...) as timeseries.
 - Combine all the different files from multiple checkpoints in a single timeseries.
 - Read data transparently compressed with gzip or bzip2.
 

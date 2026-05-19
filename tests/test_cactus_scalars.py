@@ -319,3 +319,114 @@ class TestCactusScalar(unittest.TestCase):
                 "norm2": {"alp": 6},
             },
         )
+
+    def test_scan_header_carpetx_norms(self):
+        path = "tests/tovX/output-0000/static_tovX/norms/hydrobasex-rho.tsv"
+        time_column, columns_description = cau.scan_header(
+            path,
+            one_file_per_group=True,
+            extended_format=False,
+            all_reductions_in_one_file=True,
+            all_reductions_format="carpetx_norms",
+        )
+
+        self.assertEqual(time_column, 1)
+        self.assertEqual(columns_description["min"], {"rho": 2})
+        self.assertEqual(columns_description["max"], {"rho": 3})
+        self.assertEqual(columns_description["avg"], {"rho": 5})
+        self.assertEqual(columns_description["L1norm"], {"rho": 8})
+        self.assertEqual(columns_description["L2norm"], {"rho": 9})
+        self.assertEqual(columns_description["maxabs"], {"rho": 10})
+
+    def test_ScalarsDir_carpetx(self):
+        scaldir = cs.ScalarsDir(sd.SimDir("tests/tovX"))
+
+        self.assertEqual(scaldir["average"].reduction_type, "average")
+        self.assertEqual(scaldir.get("infnorm").reduction_type, "infnorm")
+        self.assertIsNone(scaldir.get("bubu", default=None))
+
+        self.assertIs(scaldir["maximum"], scaldir["max"])
+        self.assertIs(scaldir["minimum"], scaldir["min"])
+
+        self.assertIn("rho", scaldir["average"])
+        self.assertIn("velx", scaldir["average"])
+        self.assertIn("vely", scaldir["infnorm"])
+
+    def test_AllScalars_carpetx_norm_var_file(self):
+        paths = [
+            "tests/tovX/output-0000/static_tovX/norms/hydrobasex-rho.tsv",
+            "tests/tovX/output-0001/static_tovX/norms/hydrobasex-rho.tsv",
+        ]
+
+        average = cs.AllScalars(paths, "average")
+        minimum = cs.AllScalars(paths, "minimum")
+        norm2 = cs.AllScalars(paths, "norm2")
+
+        self.assertCountEqual(average.keys(), ["rho"])
+        self.assertCountEqual(minimum.keys(), ["rho"])
+        self.assertCountEqual(norm2.keys(), ["rho"])
+
+        path0, path1 = paths
+        t0, y0 = np.loadtxt(path0, ndmin=2, unpack=True, usecols=(1, 5))
+        t1, y1 = np.loadtxt(path1, ndmin=2, unpack=True, usecols=(1, 5))
+        rho_avg = ts.TimeSeries(np.append(t0, t1), np.append(y0, y1))
+
+        t0, y0 = np.loadtxt(path0, ndmin=2, unpack=True, usecols=(1, 2))
+        t1, y1 = np.loadtxt(path1, ndmin=2, unpack=True, usecols=(1, 2))
+        rho_min = ts.TimeSeries(np.append(t0, t1), np.append(y0, y1))
+
+        t0, y0 = np.loadtxt(path0, ndmin=2, unpack=True, usecols=(1, 9))
+        t1, y1 = np.loadtxt(path1, ndmin=2, unpack=True, usecols=(1, 9))
+        rho_n2 = ts.TimeSeries(np.append(t0, t1), np.append(y0, y1))
+
+        self.assertEqual(average["rho"], rho_avg)
+        self.assertEqual(minimum["rho"], rho_min)
+        self.assertEqual(norm2["rho"], rho_n2)
+
+    def test_AllScalars_carpetx_norm_group_file(self):
+        paths = [
+            "tests/tovX/output-0000/static_tovX/norms/hydrobasex-vel.tsv",
+            "tests/tovX/output-0001/static_tovX/norms/hydrobasex-vel.tsv",
+        ]
+
+        average = cs.AllScalars(paths, "average")
+        minimum = cs.AllScalars(paths, "minimum")
+        infnorm = cs.AllScalars(paths, "infnorm")
+
+        vars_vel = ["velx", "vely", "velz"]
+        self.assertCountEqual(average.keys(), vars_vel)
+        self.assertCountEqual(minimum.keys(), vars_vel)
+        self.assertCountEqual(infnorm.keys(), vars_vel)
+
+        path0, path1 = paths
+
+        t0, y0 = np.loadtxt(path0, ndmin=2, unpack=True, usecols=(1, 5))
+        t1, y1 = np.loadtxt(path1, ndmin=2, unpack=True, usecols=(1, 5))
+        velx_avg = ts.TimeSeries(np.append(t0, t1), np.append(y0, y1))
+
+        t0, y0 = np.loadtxt(path0, ndmin=2, unpack=True, usecols=(1, 17))
+        t1, y1 = np.loadtxt(path1, ndmin=2, unpack=True, usecols=(1, 17))
+        vely_avg = ts.TimeSeries(np.append(t0, t1), np.append(y0, y1))
+
+        t0, y0 = np.loadtxt(path0, ndmin=2, unpack=True, usecols=(1, 2))
+        t1, y1 = np.loadtxt(path1, ndmin=2, unpack=True, usecols=(1, 2))
+        velx_min = ts.TimeSeries(np.append(t0, t1), np.append(y0, y1))
+
+        t0, y0 = np.loadtxt(path0, ndmin=2, unpack=True, usecols=(1, 14))
+        t1, y1 = np.loadtxt(path1, ndmin=2, unpack=True, usecols=(1, 14))
+        vely_min = ts.TimeSeries(np.append(t0, t1), np.append(y0, y1))
+
+        t0, y0 = np.loadtxt(path0, ndmin=2, unpack=True, usecols=(1, 10))
+        t1, y1 = np.loadtxt(path1, ndmin=2, unpack=True, usecols=(1, 10))
+        velx_inf = ts.TimeSeries(np.append(t0, t1), np.append(y0, y1))
+
+        t0, y0 = np.loadtxt(path0, ndmin=2, unpack=True, usecols=(1, 22))
+        t1, y1 = np.loadtxt(path1, ndmin=2, unpack=True, usecols=(1, 22))
+        vely_inf = ts.TimeSeries(np.append(t0, t1), np.append(y0, y1))
+
+        self.assertEqual(average["velx"], velx_avg)
+        self.assertEqual(average["vely"], vely_avg)
+        self.assertEqual(minimum["velx"], velx_min)
+        self.assertEqual(minimum["vely"], vely_min)
+        self.assertEqual(infnorm["velx"], velx_inf)
+        self.assertEqual(infnorm["vely"], vely_inf)
