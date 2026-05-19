@@ -19,8 +19,11 @@
 
 #### Features
 - Added support to read 0D and 1D data from the `Carpet` grid, generated during
-multipatch simulations (i.e. using `Llama`) (@Jordan-Nicoules,
-[#48](https://github.com/Sbozzolo/kuibit/pull/48)).
+  multipatch simulations (i.e. using `Llama`) \
+  WARNING: For now, only patch 0 files are detected. For patch systems
+  'Thornburg04' and 'Thornburg13', it corresponds to the central cartesian
+  patch, giving the expected behavior. This may not apply to other patch systems.
+  (@Jordan-Nicoules, [#48](https://github.com/Sbozzolo/kuibit/pull/48)).
 
 ## Version 1.5.2 (2 July 2025)
 (Version 1.5.2 does not really exist. Version 1.5.1 was not correctly published due to a workflow error.)

@@ -84,7 +84,7 @@ class OneScalar:
     # 2: ((-(\w+))|(\[\d+\]))? optionally match one of the two
     # 3: Matches - with followed by 4: any word
     # 5: Matches brackets with a number inside
-    # 6: (\.0)? optionally match .0
+    # 6: (\.0)? optionally match .0 (see WARNING below)
     # In between match a dot (\.)
     # 7: (minimum|maximum|norm1|norm2|norm_inf|average|scalars)? optionally match one
     #    of those
@@ -96,6 +96,12 @@ class OneScalar:
     #
     # The .scalars. file is the one generated with the option
     # all_reductions_in_one_file
+
+    # For runs with Llama, there is an additional .N before the extension,
+    # where N is the number of the patch (eg rho.0..asc).
+    # WARNING: For now, only patch 0 files are detected. For patch systems
+    # 'Thornburg04' and 'Thornburg13', it corresponds to the central cartesian
+    # patch, giving the expected behavior. This may not apply to other patch systems.
 
     _pattern_filename = r"""
     ^(\w+)
