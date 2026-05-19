@@ -17,6 +17,7 @@
 
 import os
 import unittest
+import warnings
 from unittest import mock
 
 import h5py
@@ -89,6 +90,23 @@ class TestGridFunctionsDir(unittest.TestCase):
         # Test invalid unit
         with self.assertRaises(ValueError):
             self.gd.total_filesize("bob")
+
+    def test_griddir_llama_warning_single_across_dimensions(self):
+        # When creating GridFunctionsDir with llama files, only one warning
+        # should be issued even though multiple AllGridFunctions are created
+        # (one per dimension) and they all see the same llama files.
+        with warnings.catch_warnings(record=True) as caught:
+            warnings.simplefilter("always")
+            # Create a SimDir with files that have .0 extension (llama format)
+            sim = sd.SimDir("tests/tov/files-with-llama")
+            cg.GridFunctionsDir(sim)
+
+        llama_warnings = [
+            warning
+            for warning in caught
+            if "generated with llama" in str(warning.message)
+        ]
+        self.assertEqual(len(llama_warnings), 1)
 
 
 class TestAllGridFunctions(unittest.TestCase):
@@ -262,6 +280,66 @@ class TestAllGridFunctions(unittest.TestCase):
     def test__str(self):
         self.assertIn("vz", str(self.gf))
         self.assertIn("Available grid data of dimension 2D (xy)", str(self.gf))
+
+    def test_llama_warnings_multiple_without_shared_flags(self):
+        # Without shared state, each instance can emit one llama warning.
+        with warnings.catch_warnings(record=True) as caught:
+            warnings.simplefilter("always")
+            cg.AllGridFunctions(
+                ["tests/tov/files-with-llama/phi1.0.x.asc"],
+                dimension=(0,),
+            )
+            cg.AllGridFunctions(
+                ["tests/tov/files-with-llama/phi1.0.x.h5"],
+                dimension=(0,),
+            )
+
+        llama_warnings = [
+            warning
+            for warning in caught
+            if "generated with llama" in str(warning.message)
+        ]
+        self.assertEqual(len(llama_warnings), 2)
+
+    def test_llama_warnings_single_with_shared_flags(self):
+        # With shared state, warning should be emitted only once.
+        shared_flags = {"llama_gf_warned": False}
+
+        with warnings.catch_warnings(record=True) as caught:
+            warnings.simplefilter("always")
+            cg.AllGridFunctions(
+                ["tests/tov/files-with-llama/phi1.0.x.asc"],
+                dimension=(0,),
+                shared_flags=shared_flags,
+            )
+            cg.AllGridFunctions(
+                ["tests/tov/files-with-llama/phi1.0.x.h5"],
+                dimension=(0,),
+                shared_flags=shared_flags,
+            )
+
+        llama_warnings = [
+            warning
+            for warning in caught
+            if "generated with llama" in str(warning.message)
+        ]
+        self.assertEqual(len(llama_warnings), 1)
+
+    def test_llama_warnings_none_in_3d(self):
+        # Llama warning logic is only for 1D/2D dimensions.
+        with warnings.catch_warnings(record=True) as caught:
+            warnings.simplefilter("always")
+            cg.AllGridFunctions(
+                ["tests/tov/files-with-llama/phi1.0.x.asc"],
+                dimension=(0, 1, 2),
+            )
+
+        llama_warnings = [
+            warning
+            for warning in caught
+            if "generated with llama" in str(warning.message)
+        ]
+        self.assertEqual(len(llama_warnings), 0)
 
 
 class TestOneGridFunction(unittest.TestCase):
@@ -555,6 +633,12 @@ class TestOneGridFunction(unittest.TestCase):
         llama_files = ["tests/tov/files-with-llama/phi1.0.x.h5"]
         gf = cg.AllGridFunctions(llama_files, dimension=(0,))
         self.assertIn("phi1", gf)
+
+    def test_llama_warnings_one_dimension(self):
+        # Test that a warning is issued because of .0 llama file
+        with self.assertWarns(Warning):
+            llama_files = ["tests/tov/files-with-llama/phi1.0.x.asc"]
+            cg.AllGridFunctions(llama_files, dimension=(0,))
 
     def test_openpmd(self):
         iteration = 0
