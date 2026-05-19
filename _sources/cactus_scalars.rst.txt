@@ -9,12 +9,14 @@ quantities. Data is loaded lazily.
 What data can be read?
 -----------------------
 
-:py:class:`~.OneScalar` reads files produced by ``CarpetASCII``. It
-recognizes transparently ``gz`` and ``bz2`` compressed files and it works with
-multiple variables in one file, or different files for each variable. In the
-former case, :py:class:`~.OneScalar` reads the ``column format`` line in
-the file and deduces the content. :py:class:`~.OneScalar` can return
-a :py:class:`~.TimeSeries` with the time evolution of the various scalars.
+:py:class:`~.OneScalar` reads files produced by ``CarpetASCII`` and norms/
+reductions produced by ``CarpetX``. It recognizes transparently ``gz`` and
+``bz2`` compressed files and it works with multiple variables in one file, or
+different files for each variable. In the former case, :py:class:`~.OneScalar`
+reads the ``column format`` line in the file and deduces the content.
+:py:class:`~.OneScalar` can return a :py:class:`~.TimeSeries` with the time
+evolution of the various scalars. It also supports either all reductions in one
+file, or different files for each reduction.
 
 Accessing data
 --------------

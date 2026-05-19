@@ -66,6 +66,7 @@
 
 <span class="sd">&quot;&quot;&quot;The :py:mod:`~.cactus_scalars` module provides simple interfaces to access</span>
 <span class="sd">time series data as output by CarpetASCII, including all the reductions.</span>
+<span class="sd">CarpetX reductions (norms) are also supported.</span>
 
 <span class="sd">There are multiple classes defined in this module:</span>
 
@@ -103,7 +104,7 @@
 <div class="viewcode-block" id="OneScalar">
 <a class="viewcode-back" href="../../cactus_scalars_ref.html#kuibit.cactus_scalars.OneScalar">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">OneScalar</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Read scalar data produced by CarpetASCII.</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Read scalar data produced by CarpetASCII or CarpetX norms.</span>
 
 <span class="sd">    :py:class:`~.OneScalar` is a dictionary-like object with keys the variables</span>
 <span class="sd">    and values the :py:class:`~.TimeSeries`.</span>
@@ -160,9 +161,14 @@
 
     <span class="n">_rx_filename</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="n">_pattern_filename</span><span class="p">,</span> <span class="n">re</span><span class="o">.</span><span class="n">VERBOSE</span><span class="p">)</span>
 
+    <span class="c1"># CarpetX norm files are named by thorn and group, e.g.,</span>
+    <span class="c1"># hydrobasex-rho.tsv. Variables and reductions are read from the header.</span>
+    <span class="n">_pattern_filename_carpetx_norms</span> <span class="o">=</span> <span class="sa">r</span><span class="s2">&quot;^\w+-\w+\.tsv$&quot;</span>
+    <span class="n">_rx_filename_carpetx_norms</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="n">_pattern_filename_carpetx_norms</span><span class="p">)</span>
+
     <span class="n">_reduction_types</span> <span class="o">=</span> <span class="p">{</span>
-        <span class="s2">&quot;minimum&quot;</span><span class="p">:</span> <span class="s2">&quot;min&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;maximum&quot;</span><span class="p">:</span> <span class="s2">&quot;max&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;minimum&quot;</span><span class="p">:</span> <span class="s2">&quot;minimum&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;maximum&quot;</span><span class="p">:</span> <span class="s2">&quot;maximum&quot;</span><span class="p">,</span>
         <span class="s2">&quot;norm1&quot;</span><span class="p">:</span> <span class="s2">&quot;norm1&quot;</span><span class="p">,</span>
         <span class="s2">&quot;norm2&quot;</span><span class="p">:</span> <span class="s2">&quot;norm2&quot;</span><span class="p">,</span>
         <span class="s2">&quot;norm_inf&quot;</span><span class="p">:</span> <span class="s2">&quot;infnorm&quot;</span><span class="p">,</span>
@@ -170,10 +176,15 @@
         <span class="s2">&quot;scalars&quot;</span><span class="p">:</span> <span class="s2">&quot;scalars&quot;</span><span class="p">,</span>
         <span class="kc">None</span><span class="p">:</span> <span class="s2">&quot;scalar&quot;</span><span class="p">,</span>
     <span class="p">}</span>
-    <span class="n">_reduction_types_inv</span> <span class="o">=</span> <span class="p">{</span>
-        <span class="n">value</span><span class="p">:</span> <span class="n">key</span>
-        <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">_reduction_types</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
-        <span class="k">if</span> <span class="n">key</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+
+    <span class="c1"># Map CarpetX norm header reduction names to kuibit reduction names.</span>
+    <span class="n">_reduction_types_carpetx</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s2">&quot;min&quot;</span><span class="p">:</span> <span class="s2">&quot;minimum&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;max&quot;</span><span class="p">:</span> <span class="s2">&quot;maximum&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;L1norm&quot;</span><span class="p">:</span> <span class="s2">&quot;norm1&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;L2norm&quot;</span><span class="p">:</span> <span class="s2">&quot;norm2&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;maxabs&quot;</span><span class="p">:</span> <span class="s2">&quot;infnorm&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;avg&quot;</span><span class="p">:</span> <span class="s2">&quot;average&quot;</span><span class="p">,</span>
     <span class="p">}</span>
 
     <span class="c1"># What function to use to open the file?</span>
@@ -201,13 +212,43 @@
         <span class="c1"># cached loaded data.</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_vars</span> <span class="o">=</span> <span class="p">{}</span>
 
+        <span class="c1"># Defaults overwritten by file-specific initialization.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_compression_method</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">reduction_type</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_all_reductions_in_one_file</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_reduction_vars_columns</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_all_reductions_format</span> <span class="o">=</span> <span class="s2">&quot;carpet&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_is_one_file_per_group</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_was_header_scanned</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_time_column</span> <span class="o">=</span> <span class="kc">None</span>
+
         <span class="bp">self</span><span class="o">.</span><span class="n">folder</span><span class="p">,</span> <span class="n">filename</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">path</span><span class="p">)</span>
 
         <span class="n">filename_match</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_rx_filename</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
 
+        <span class="k">if</span> <span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_rx_filename_carpetx_norms</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+            <span class="ow">and</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">folder</span><span class="p">)</span> <span class="o">==</span> <span class="s2">&quot;norms&quot;</span>
+        <span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_init_carpetx_norms_file</span><span class="p">()</span>
+            <span class="k">return</span>
+
         <span class="k">if</span> <span class="n">filename_match</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Name scheme not recognized for </span><span class="si">{</span><span class="n">filename</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 
+        <span class="bp">self</span><span class="o">.</span><span class="n">_init_carpetascii_file</span><span class="p">(</span><span class="n">filename_match</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_init_carpetx_norms_file</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_compression_method</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">reduction_type</span> <span class="o">=</span> <span class="s2">&quot;scalars&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_all_reductions_in_one_file</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_reduction_vars_columns</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_all_reductions_format</span> <span class="o">=</span> <span class="s2">&quot;carpetx_norms&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_is_one_file_per_group</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_was_header_scanned</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_scan_header</span><span class="p">()</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_init_carpetascii_file</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename_match</span><span class="p">):</span>
         <span class="c1"># variable_name1 may be a thorn name (e.g. hydrobase-press)</span>
         <span class="c1"># Or the actual variable name (e.g. H)</span>
         <span class="p">(</span>
@@ -224,11 +265,10 @@
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_compression_method</span> <span class="o">=</span> <span class="n">compression_method</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">reduction_type</span> <span class="o">=</span> <span class="p">(</span>
-            <span class="n">reduction_type</span> <span class="k">if</span> <span class="n">reduction_type</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="s2">&quot;scalar&quot;</span>
-        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">reduction_type</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_reduction_types</span><span class="p">[</span><span class="n">reduction_type</span><span class="p">]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_all_reductions_in_one_file</span> <span class="o">=</span> <span class="n">reduction_type</span> <span class="o">==</span> <span class="s2">&quot;scalars&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_reduction_vars_columns</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_all_reductions_format</span> <span class="o">=</span> <span class="s2">&quot;carpet&quot;</span>
 
         <span class="c1"># If the file contains multiple variables, we will scan the header</span>
         <span class="c1"># immediately to understand the content. If not, we scan the header</span>
@@ -260,13 +300,22 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">_is_one_file_per_group</span><span class="p">,</span>
             <span class="n">extended_format</span><span class="p">,</span>
             <span class="n">all_reductions_in_one_file</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_all_reductions_in_one_file</span><span class="p">,</span>
+            <span class="n">all_reductions_format</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_all_reductions_format</span><span class="p">,</span>
             <span class="n">opener</span><span class="o">=</span><span class="n">opener</span><span class="p">,</span>
             <span class="n">opener_mode</span><span class="o">=</span><span class="n">opener_mode</span><span class="p">,</span>
         <span class="p">)</span>
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_all_reductions_in_one_file</span><span class="p">:</span>
             <span class="c1"># ``*.scalars.asc`` stores multiple reductions in one file.</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_reduction_vars_columns</span> <span class="o">=</span> <span class="n">columns_info</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_all_reductions_format</span> <span class="o">==</span> <span class="s2">&quot;carpet&quot;</span><span class="p">:</span>
+                <span class="n">reduction_types</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_reduction_types</span>
+            <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">_all_reductions_format</span> <span class="o">==</span> <span class="s2">&quot;carpetx_norms&quot;</span><span class="p">:</span>
+                <span class="n">reduction_types</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_reduction_types_carpetx</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">_reduction_vars_columns</span> <span class="o">=</span> <span class="p">{</span>
+                <span class="n">reduction_types</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">reduction_name</span><span class="p">,</span> <span class="n">reduction_name</span><span class="p">):</span> <span class="n">columns</span>
+                <span class="k">for</span> <span class="n">reduction_name</span><span class="p">,</span> <span class="n">columns</span> <span class="ow">in</span> <span class="n">columns_info</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+            <span class="p">}</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_vars_columns</span> <span class="o">=</span> <span class="nb">next</span><span class="p">(</span>
                 <span class="nb">iter</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_reduction_vars_columns</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
             <span class="p">)</span>
@@ -285,14 +334,9 @@
         <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_was_header_scanned</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_scan_header</span><span class="p">()</span>
 
-        <span class="c1"># Map kuibit reduction names back to the file/header</span>
-        <span class="c1"># tokens used in ``*.scalars.asc``.</span>
-        <span class="n">fh_reduction_type</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_reduction_types_inv</span><span class="o">.</span><span class="n">get</span><span class="p">(</span>
-            <span class="n">reduction_type</span><span class="p">,</span> <span class="n">reduction_type</span>
-        <span class="p">)</span>
-        <span class="n">columns</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_reduction_vars_columns</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">fh_reduction_type</span><span class="p">)</span>
+        <span class="n">columns</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_reduction_vars_columns</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">reduction_type</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">columns</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">fh_reduction_type</span><span class="si">}</span><span class="s2"> not available in </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">path</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">reduction_type</span><span class="si">}</span><span class="s2"> not available in </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">path</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_vars_columns</span> <span class="o">=</span> <span class="n">columns</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">reduction_type</span> <span class="o">=</span> <span class="n">reduction_type</span>
