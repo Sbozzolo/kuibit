@@ -645,7 +645,7 @@ class OneGridFunctionASCII(BaseOneGridFunction):
         # detailed explanation, see AllGridFunctions. The only difference here
         # is that we don't care about the extension, so we have an addition (*)?
         rx_filename = re.compile(
-            r"^(([a-zA-Z0-9_]+)-)?([a-zA-Z0-9\[\]_]+).([xyz]+)?.asc(\.(gz|bz2))?$"
+            r"^(([a-zA-Z0-9_]+)-)?([a-zA-Z0-9\[\]_]+)(\.0)?.([xyz]+)?.asc(\.(gz|bz2))?$"
         )
 
         filename = os.path.split(path)[1]
@@ -656,7 +656,7 @@ class OneGridFunctionASCII(BaseOneGridFunction):
 
         is_one_file_per_group = matched.group(1) is not None
 
-        compression_method = matched.group(6)
+        compression_method = matched.group(7)
         opener, opener_mode = OneGridFunctionASCII._decompressor[
             compression_method
         ]
@@ -1497,11 +1497,17 @@ class AllGridFunctions:
     # the following dictionary). In general, the file name will be:
     # variable-name.ext.h5, eg rho.xy.h5.
 
+    # For runs with Llama, there is an additional .N before the dimension,
+    # where N is the number of the patch (eg rho.0.xy.h5).
+    # WARNING: For now, only patch 0 files are detected. For patch systems
+    # 'Thornburg04' and 'Thornburg13', it corresponds to the central cartesian
+    # patch, giving the expected behavior. This may not apply to other patch systems.
+
     # Organizes data by dimensions and variables
     filename_extensions = {
-        (0,): ".x",
-        (1,): ".y",
-        (2,): ".z",
+        (0,): "(.0)?.x",
+        (1,): "(.0)?.y",
+        (2,): "(.0)?.z",
         (0, 1): "(.0)?.xy",
         (0, 2): "(.0)?.xz",
         (1, 2): "(.0)?.yz",
@@ -1556,7 +1562,7 @@ class AllGridFunctions:
 
         # If we are using ASCII files, we have to know how many ghost zones are
         # in the data. At the moment we ask the user to provide the data, but
-        # in the future we will parse the paramter file and find this value.
+        # in the future we will parse the parameter file and find this value.
         #
         # We don't use this value for HDF5 data, as it is more reliable to just
         # read it from the files.
@@ -1566,10 +1572,10 @@ class AllGridFunctions:
         # This is a simple regex:
         # 1. ^ and $ mean that we have to match the entire string
         # 2. ([a-zA-Z0-9_]+) means that we match any combination of letters
-        #    and numebrs. This is the thorn name when we output one group
+        #    and numbers. This is the thorn name when we output one group
         #    per file. We wrap this into another capturing group:
         #    (([a-zA-Z0-9_]+)-). Here we also try to match the literal '-'.
-        #    This separates the thron name from the group name. If we match
+        #    This separates the thorn name from the group name. If we match
         #    this larger capturing group, it means that the file was output
         #    with the option "one_group_per_file".
         # 3. ([a-zA-Z0-9\[\]_]+) means that we match any character any number
