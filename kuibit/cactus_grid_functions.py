@@ -1536,7 +1536,7 @@ class AllGridFunctions:
     # The oddball case is with OpenPMD files. OpenPMD files are actually folders
     # with extension .bp4 and they are always 3D.
 
-    def __init__(self, allfiles, dimension, num_ghost=None):
+    def __init__(self, allfiles, dimension, num_ghost=None, shared_flags=None):
         """Constructor.
 
         :param allfiles: List of all the files.
@@ -1546,6 +1546,10 @@ class AllGridFunctions:
         :param num_ghost: Number of ghost zones in the data for each dimension.
                           This is used only for ASCII data.
         :type num_ghost: list or tuple of the same length as the number of dimension
+        :param shared_flags: Optional shared mutable dictionary to coordinate
+                     state across multiple ``AllGridFunctions``
+                     instances.
+        :type shared_flags: dict or None
 
         """
 
@@ -1556,20 +1560,25 @@ class AllGridFunctions:
 
         # If we are using ASCII files, we have to know how many ghost zones are
         # in the data. At the moment we ask the user to provide the data, but
-        # in the future we will parse the paramter file and find this value.
+        # in the future we will parse the parameter file and find this value.
         #
         # We don't use this value for HDF5 data, as it is more reliable to just
         # read it from the files.
         # Here we are using a setter for num_ghost, see below
         self.num_ghost = num_ghost
 
+        # Optional shared state across different AllGridFunctions instances
+        # (for example one per dimension in GridFunctionsDir).
+        self._shared_flags = {} if shared_flags is None else shared_flags
+        self._shared_flags.setdefault("llama_gf_warned", False)
+
         # This is a simple regex:
         # 1. ^ and $ mean that we have to match the entire string
         # 2. ([a-zA-Z0-9_]+) means that we match any combination of letters
-        #    and numebrs. This is the thorn name when we output one group
+        #    and numbers. This is the thorn name when we output one group
         #    per file. We wrap this into another capturing group:
         #    (([a-zA-Z0-9_]+)-). Here we also try to match the literal '-'.
-        #    This separates the thron name from the group name. If we match
+        #    This separates the thorn name from the group name. If we match
         #    this larger capturing group, it means that the file was output
         #    with the option "one_group_per_file".
         # 3. ([a-zA-Z0-9\[\]_]+) means that we match any character any number
@@ -1629,6 +1638,29 @@ class AllGridFunctions:
                 if self._dim_names[self.dimension] == "xyz"
                 else None
             )
+
+            # Issue warning about .0 files generated with llama
+            h5_cond_llama = (
+                matched_h5 is not None and matched_h5.group(4) is not None
+            )  # .0 group if not 3D
+            ascii_cond_llama = (
+                matched_ascii is not None
+                and matched_ascii.group(4) is not None
+            )  # .0 group if not 3D
+            # 3D filename_extensions and groups are different
+            cond = (
+                not self._shared_flags["llama_gf_warned"]
+                and len(self.dimension) in [1, 2]
+                and (h5_cond_llama or ascii_cond_llama)
+            )
+            if cond:
+                warnings.warn(
+                    f"File {f} was generated with llama. Only .0 grid "
+                    "function files from simulations with patch systems "
+                    "'Thornburg04' and 'Thornburg13' are properly supported. "
+                    "Not issuing the warning again for this simulation."
+                )
+                self._shared_flags["llama_gf_warned"] = True
 
             # If matched_pattern is not None, this is a Carpet h5 file
             if matched_h5 is not None:
@@ -1930,11 +1962,16 @@ class GridFunctionsDir:
         if not isinstance(sd, simdir.SimDir):
             raise TypeError("Input is not SimDir")
 
+        # Shared mutable state for all dimensional readers.
+        self._grid_functions_flags = {"llama_gf_warned": False}
+
         # _all_griddata is a dictionary that maps dimension to an object
         # AllGridFunctions, which contains all the variables for which that
         # dimension is available
         self._all_griddata = {
-            dim: AllGridFunctions(sd.allfiles, dim)
+            dim: AllGridFunctions(
+                sd.allfiles, dim, shared_flags=self._grid_functions_flags
+            )
             for dim in self._dim_indices.values()
         }
 
