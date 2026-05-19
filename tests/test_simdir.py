@@ -71,8 +71,8 @@ class TestSimDir(unittest.TestCase):
         self.assertEqual(len(sim_max_depth.dirs), 4)
 
         # find . -maxdepth 2 -type f | grep -v "SIMFACTORY" | grep -v "NODES" | wc -l
-        # 11
-        self.assertEqual(len(sim_max_depth.allfiles), 11)
+        # 12
+        self.assertEqual(len(sim_max_depth.allfiles), 12)
 
         # Check that all the expected components are in
         # the string representation
