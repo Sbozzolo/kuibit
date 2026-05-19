@@ -122,18 +122,35 @@ def _scan_strings_for_columns(strings, pattern, path=None):
     return columns_description
 
 
-def _scan_strings_for_columns_and_reductions(strings, pattern, path=None):
+def _scan_strings_for_columns_and_reductions(
+    strings,
+    path=None,
+    all_reductions_format="carpet",
+):
     """Return a mapping ``reduction -> {variable: column}`` from header lines."""
 
-    # Here we match (number):(word[number])([word])
-    # We are matching expressions like 3:kxx(minimum)
-    pattern_columns = r"^(\d+):(\w+(?:\[\d+\])?)\(([\w_]+)\)$"
+    if all_reductions_format == "carpet":
+        pattern_header = r"^# data columns: (.+)$"
+        # Here we match (number):(word[number])([word])
+        # We are matching expressions like 3:kxx(minimum)
+        pattern_columns = r"^(\d+):(\w+(?:\[\d+\])?)\(([\w_]+)\)$"
+    elif all_reductions_format == "carpetx_norms":
+        pattern_header = r"^#\s+1:iteration\s+2:time\s+(.+)$"
+        # Here we match (number):(word)::(word).(word[optional_index])
+        # CarpetX norm columns look like 3:hydrobasex::rho.min
+        pattern_columns = r"^(\d+):\w+::(\w+)\.([\w]+(?:\[\d+\])?)$"
+    else:
+        raise ValueError(
+            f"Unsupported all_reductions_format: {all_reductions_format}"
+        )
+
+    rx_header = re.compile(pattern_header)
     rx_columns = re.compile(pattern_columns)
 
     # We scan these lines and see if any matches with the regexp for the
     # data columns
     for line in strings:
-        matched_pattern = pattern.match(line)
+        matched_pattern = rx_header.match(line)
         if matched_pattern is not None:
             break
     else:
@@ -166,6 +183,7 @@ def scan_header(
     all_reductions_in_one_file=False,
     opener=open,
     opener_mode="r",
+    all_reductions_format="carpet",
 ):
     """Use regular expressions to understand the content of a CarpetASCII file.
     In particular, we look for column format and data columns by reading the
@@ -193,6 +211,9 @@ def scan_header(
     :type opener: callable
     :param opener_mode: Mode to open the file with (e.g., ``r`` as in ``read``).
     :type opener_mode: str
+    :param all_reductions_format: Header format for files with all reductions,
+                                  either "carpet" or "carpetx_norms".
+    :type all_reductions_format: str
 
     :returns: time_column and either the data column (if it is one variable per
               group), or a dictionary with column: variable.
@@ -258,7 +279,9 @@ def scan_header(
     # Se update _vars to add all the new ones
     if all_reductions_in_one_file:
         columns_description = _scan_strings_for_columns_and_reductions(
-            header, rx_data_columns, path=path
+            header,
+            path=path,
+            all_reductions_format=all_reductions_format,
         )
         return time_column, columns_description
     if one_file_per_group:

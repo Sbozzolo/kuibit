@@ -21,6 +21,7 @@
 
 """The :py:mod:`~.cactus_scalars` module provides simple interfaces to access
 time series data as output by CarpetASCII, including all the reductions.
+CarpetX reductions (norms) are also supported.
 
 There are multiple classes defined in this module:
 
@@ -56,7 +57,7 @@ from kuibit.cactus_ascii_utils import scan_header
 
 
 class OneScalar:
-    """Read scalar data produced by CarpetASCII.
+    """Read scalar data produced by CarpetASCII or CarpetX norms.
 
     :py:class:`~.OneScalar` is a dictionary-like object with keys the variables
     and values the :py:class:`~.TimeSeries`.
@@ -105,9 +106,14 @@ class OneScalar:
 
     _rx_filename = re.compile(_pattern_filename, re.VERBOSE)
 
+    # CarpetX norm files are named by thorn and group, e.g.,
+    # hydrobasex-rho.tsv. Variables and reductions are read from the header.
+    _pattern_filename_carpetx_norms = r"^\w+-\w+\.tsv$"
+    _rx_filename_carpetx_norms = re.compile(_pattern_filename_carpetx_norms)
+
     _reduction_types = {
-        "minimum": "min",
-        "maximum": "max",
+        "minimum": "minimum",
+        "maximum": "maximum",
         "norm1": "norm1",
         "norm2": "norm2",
         "norm_inf": "infnorm",
@@ -115,10 +121,15 @@ class OneScalar:
         "scalars": "scalars",
         None: "scalar",
     }
-    _reduction_types_inv = {
-        value: key
-        for key, value in _reduction_types.items()
-        if key is not None
+
+    # Map CarpetX norm header reduction names to kuibit reduction names.
+    _reduction_types_carpetx = {
+        "min": "minimum",
+        "max": "maximum",
+        "L1norm": "norm1",
+        "L2norm": "norm2",
+        "maxabs": "infnorm",
+        "avg": "average",
     }
 
     # What function to use to open the file?
@@ -150,9 +161,29 @@ class OneScalar:
 
         filename_match = self._rx_filename.match(filename)
 
+        if (
+            self._rx_filename_carpetx_norms.match(filename)
+            and os.path.basename(self.folder) == "norms"
+        ):
+            self._init_carpetx_norms_file()
+            return
+
         if filename_match is None:
             raise RuntimeError(f"Name scheme not recognized for {filename}")
 
+        self._init_carpetascii_file(filename_match)
+
+    def _init_carpetx_norms_file(self):
+        self._compression_method = None
+        self.reduction_type = "scalars"
+        self._all_reductions_in_one_file = True
+        self._reduction_vars_columns = None
+        self._all_reductions_format = "carpetx_norms"
+        self._is_one_file_per_group = True
+        self._was_header_scanned = False
+        self._scan_header()
+
+    def _init_carpetascii_file(self, filename_match):
         # variable_name1 may be a thorn name (e.g. hydrobase-press)
         # Or the actual variable name (e.g. H)
         (
@@ -168,11 +199,10 @@ class OneScalar:
 
         self._compression_method = compression_method
 
-        self.reduction_type = (
-            reduction_type if reduction_type is not None else "scalar"
-        )
+        self.reduction_type = self._reduction_types[reduction_type]
         self._all_reductions_in_one_file = reduction_type == "scalars"
         self._reduction_vars_columns = None
+        self._all_reductions_format = "carpet"
 
         # If the file contains multiple variables, we will scan the header
         # immediately to understand the content. If not, we scan the header
@@ -204,13 +234,22 @@ class OneScalar:
             self._is_one_file_per_group,
             extended_format,
             all_reductions_in_one_file=self._all_reductions_in_one_file,
+            all_reductions_format=self._all_reductions_format,
             opener=opener,
             opener_mode=opener_mode,
         )
 
         if self._all_reductions_in_one_file:
             # ``*.scalars.asc`` stores multiple reductions in one file.
-            self._reduction_vars_columns = columns_info
+            if self._all_reductions_format == "carpet":
+                reduction_types = self._reduction_types
+            elif self._all_reductions_format == "carpetx_norms":
+                reduction_types = self._reduction_types_carpetx
+
+            self._reduction_vars_columns = {
+                reduction_types.get(reduction_name, reduction_name): columns
+                for reduction_name, columns in columns_info.items()
+            }
             self._vars_columns = next(
                 iter(self._reduction_vars_columns.values())
             )
@@ -229,14 +268,9 @@ class OneScalar:
         if not self._was_header_scanned:
             self._scan_header()
 
-        # Map kuibit reduction names back to the file/header
-        # tokens used in ``*.scalars.asc``.
-        fh_reduction_type = self._reduction_types_inv.get(
-            reduction_type, reduction_type
-        )
-        columns = self._reduction_vars_columns.get(fh_reduction_type)
+        columns = self._reduction_vars_columns.get(reduction_type)
         if columns is None:
-            raise KeyError(f"{fh_reduction_type} not available in {self.path}")
+            raise KeyError(f"{reduction_type} not available in {self.path}")
 
         self._vars_columns = columns
         self.reduction_type = reduction_type
