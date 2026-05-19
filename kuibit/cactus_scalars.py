@@ -157,6 +157,16 @@ class OneScalar:
         # cached loaded data.
         self._vars = {}
 
+        # Defaults overwritten by file-specific initilization.
+        self.reduction_type = None
+        self._compression_method = None
+        self._all_reductions_in_one_file = False
+        self._reduction_vars_columns = None
+        self._all_reductions_format = "carpet"
+        self._is_one_file_per_group = False
+        self._was_header_scanned = False
+        self._time_column = None
+
         self.folder, filename = os.path.split(self.path)
 
         filename_match = self._rx_filename.match(filename)
