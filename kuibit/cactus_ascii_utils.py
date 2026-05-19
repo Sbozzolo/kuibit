@@ -43,6 +43,7 @@ The functions available are:
 import os
 import re
 from collections.abc import Iterable
+from typing import Literal
 
 
 def _scan_strings_for_columns(strings, pattern, path=None):
@@ -125,7 +126,7 @@ def _scan_strings_for_columns(strings, pattern, path=None):
 def _scan_strings_for_columns_and_reductions(
     strings,
     path=None,
-    all_reductions_format: Literal["carpet", "carpetx_norms"] ="carpet",
+    all_reductions_format: Literal["carpet", "carpetx_norms"] = "carpet",
 ):
     """Return a mapping ``reduction -> {variable: column}`` from header lines."""
 

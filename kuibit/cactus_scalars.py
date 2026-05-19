@@ -157,9 +157,9 @@ class OneScalar:
         # cached loaded data.
         self._vars = {}
 
-        # Defaults overwritten by file-specific initilization.
-        self.reduction_type = None
+        # Defaults overwritten by file-specific initialization.
         self._compression_method = None
+        self.reduction_type = None
         self._all_reductions_in_one_file = False
         self._reduction_vars_columns = None
         self._all_reductions_format = "carpet"
