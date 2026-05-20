@@ -134,7 +134,7 @@
     <span class="c1"># 5: Matches brackets with a number inside</span>
     <span class="c1"># 6: (\.0)? optionally match .0 (see WARNING below)</span>
     <span class="c1"># In between match a dot (\.)</span>
-    <span class="c1"># 7: (minimum|maximum|norm1|norm2|norm_inf|average|scalars)? optionally match one</span>
+    <span class="c1"># 7: (minimum|maximum|norm1|norm2|norm_inf|average|sum|scalars)? optionally match one</span>
     <span class="c1">#    of those</span>
     <span class="c1"># In between match .asc (\.asc)</span>
     <span class="c1"># 8: (\.(gz|bz2))? optionally match .gz or .bz2</span>
@@ -155,7 +155,7 @@
 <span class="s2">    ^(\w+)</span>
 <span class="s2">    ((-(\w+))|(\[\d+\]))?</span>
 <span class="s2">    (\.0)?</span>
-<span class="s2">    \.(minimum|maximum|norm1|norm2|norm_inf|average|scalars)?</span>
+<span class="s2">    \.(minimum|maximum|norm1|norm2|norm_inf|average|sum|scalars)?</span>
 <span class="s2">    \.asc</span>
 <span class="s2">    (\.(gz|bz2))?$&quot;&quot;&quot;</span>
 
@@ -173,6 +173,7 @@
         <span class="s2">&quot;norm2&quot;</span><span class="p">:</span> <span class="s2">&quot;norm2&quot;</span><span class="p">,</span>
         <span class="s2">&quot;norm_inf&quot;</span><span class="p">:</span> <span class="s2">&quot;infnorm&quot;</span><span class="p">,</span>
         <span class="s2">&quot;average&quot;</span><span class="p">:</span> <span class="s2">&quot;average&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;sum&quot;</span><span class="p">:</span> <span class="s2">&quot;sum&quot;</span><span class="p">,</span>
         <span class="s2">&quot;scalars&quot;</span><span class="p">:</span> <span class="s2">&quot;scalars&quot;</span><span class="p">,</span>
         <span class="kc">None</span><span class="p">:</span> <span class="s2">&quot;scalar&quot;</span><span class="p">,</span>
     <span class="p">}</span>
@@ -185,6 +186,7 @@
         <span class="s2">&quot;L2norm&quot;</span><span class="p">:</span> <span class="s2">&quot;norm2&quot;</span><span class="p">,</span>
         <span class="s2">&quot;maxabs&quot;</span><span class="p">:</span> <span class="s2">&quot;infnorm&quot;</span><span class="p">,</span>
         <span class="s2">&quot;avg&quot;</span><span class="p">:</span> <span class="s2">&quot;average&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;sum&quot;</span><span class="p">:</span> <span class="s2">&quot;sum&quot;</span><span class="p">,</span>
     <span class="p">}</span>
 
     <span class="c1"># What function to use to open the file?</span>
@@ -313,8 +315,9 @@
                 <span class="n">reduction_types</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_reduction_types_carpetx</span>
 
             <span class="bp">self</span><span class="o">.</span><span class="n">_reduction_vars_columns</span> <span class="o">=</span> <span class="p">{</span>
-                <span class="n">reduction_types</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">reduction_name</span><span class="p">,</span> <span class="n">reduction_name</span><span class="p">):</span> <span class="n">columns</span>
+                <span class="n">reduction_types</span><span class="p">[</span><span class="n">reduction_name</span><span class="p">]:</span> <span class="n">columns</span>
                 <span class="k">for</span> <span class="n">reduction_name</span><span class="p">,</span> <span class="n">columns</span> <span class="ow">in</span> <span class="n">columns_info</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+                <span class="k">if</span> <span class="n">reduction_name</span> <span class="ow">in</span> <span class="n">reduction_types</span>
             <span class="p">}</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_vars_columns</span> <span class="o">=</span> <span class="nb">next</span><span class="p">(</span>
                 <span class="nb">iter</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_reduction_vars_columns</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
@@ -538,6 +541,7 @@
 <span class="sd">    :ivar norm1:     access to norm1 reduction.</span>
 <span class="sd">    :ivar norm2:     access to norm2 reduction.</span>
 <span class="sd">    :ivar average:   access to average reduction.</span>
+<span class="sd">    :ivar sum:       access to sum reduction.</span>
 <span class="sd">    :ivar infnorm:   access to inf-norm reduction.</span>
 
 <span class="sd">    Each of those works as a dictionary mapping variable names to</span>
@@ -568,6 +572,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">norm1</span> <span class="o">=</span> <span class="n">AllScalars</span><span class="p">(</span><span class="n">sd</span><span class="o">.</span><span class="n">allfiles</span><span class="p">,</span> <span class="s2">&quot;norm1&quot;</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">norm2</span> <span class="o">=</span> <span class="n">AllScalars</span><span class="p">(</span><span class="n">sd</span><span class="o">.</span><span class="n">allfiles</span><span class="p">,</span> <span class="s2">&quot;norm2&quot;</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">average</span> <span class="o">=</span> <span class="n">AllScalars</span><span class="p">(</span><span class="n">sd</span><span class="o">.</span><span class="n">allfiles</span><span class="p">,</span> <span class="s2">&quot;average&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sum</span> <span class="o">=</span> <span class="n">AllScalars</span><span class="p">(</span><span class="n">sd</span><span class="o">.</span><span class="n">allfiles</span><span class="p">,</span> <span class="s2">&quot;sum&quot;</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">infnorm</span> <span class="o">=</span> <span class="n">AllScalars</span><span class="p">(</span><span class="n">sd</span><span class="o">.</span><span class="n">allfiles</span><span class="p">,</span> <span class="s2">&quot;infnorm&quot;</span><span class="p">)</span>
 
         <span class="c1"># Aliases</span>
@@ -599,6 +604,7 @@
             <span class="s2">&quot;norm1&quot;</span><span class="p">,</span>
             <span class="s2">&quot;norm2&quot;</span><span class="p">,</span>
             <span class="s2">&quot;average&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;sum&quot;</span><span class="p">,</span>
             <span class="s2">&quot;infnorm&quot;</span><span class="p">,</span>
         <span class="p">]:</span>
             <span class="k">return</span> <span class="bp">self</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
@@ -616,6 +622,7 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">norm1</span><span class="p">,</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">norm2</span><span class="p">,</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">average</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">sum</span><span class="p">,</span>
         <span class="p">):</span>
             <span class="n">str_</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">key</span><span class="p">))</span>
         <span class="k">return</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">str_</span><span class="p">)</span></div>
