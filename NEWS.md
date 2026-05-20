@@ -7,8 +7,9 @@
 
 #### Features
 - Support `IOScalar::all_reductions_in_one_file`, in preparation for CarpetX
-  norms. (Max Rizzo)
-- Support CarpetX norm files `norms/<thorn>-<group>.tsv`. (Max Rizzo)
+  norms. (Max Rizzo, [#51](https://github.com/Sbozzolo/kuibit/pull/51))
+- Support CarpetX norm files `norms/<thorn>-<group>.tsv`.
+  (Max Rizzo, [#53](https://github.com/Sbozzolo/kuibit/pull/53))
 
 #### Bug fixes
 - Fixed reading OpenPMD files with mesh names that do not conform to the
@@ -16,7 +17,7 @@
   `odesolvers_do_substeps`, as reported by Steven Brandt)
 - Fixed reading openPMD grid coordinates for non-vertex-centered
   variables; all CarpetX centering types are now supported. Added a
-  corresponding test with sample openPMD data. (Max Rizzo)
+  corresponding test with sample openPMD data. (Max Rizzo, [#50](https://github.com/Sbozzolo/kuibit/pull/50))
 
 #### Features
 - Added support to read 0D and 1D data from the `Carpet` grid, generated during

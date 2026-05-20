@@ -87,7 +87,7 @@ class OneScalar:
     # 5: Matches brackets with a number inside
     # 6: (\.0)? optionally match .0 (see WARNING below)
     # In between match a dot (\.)
-    # 7: (minimum|maximum|norm1|norm2|norm_inf|average|scalars)? optionally match one
+    # 7: (minimum|maximum|norm1|norm2|norm_inf|average|sum|scalars)? optionally match one
     #    of those
     # In between match .asc (\.asc)
     # 8: (\.(gz|bz2))? optionally match .gz or .bz2
@@ -108,7 +108,7 @@ class OneScalar:
     ^(\w+)
     ((-(\w+))|(\[\d+\]))?
     (\.0)?
-    \.(minimum|maximum|norm1|norm2|norm_inf|average|scalars)?
+    \.(minimum|maximum|norm1|norm2|norm_inf|average|sum|scalars)?
     \.asc
     (\.(gz|bz2))?$"""
 
@@ -126,6 +126,7 @@ class OneScalar:
         "norm2": "norm2",
         "norm_inf": "infnorm",
         "average": "average",
+        "sum": "sum",
         "scalars": "scalars",
         None: "scalar",
     }
@@ -138,6 +139,7 @@ class OneScalar:
         "L2norm": "norm2",
         "maxabs": "infnorm",
         "avg": "average",
+        "sum": "sum",
     }
 
     # What function to use to open the file?
@@ -266,8 +268,9 @@ class OneScalar:
                 reduction_types = self._reduction_types_carpetx
 
             self._reduction_vars_columns = {
-                reduction_types.get(reduction_name, reduction_name): columns
+                reduction_types[reduction_name]: columns
                 for reduction_name, columns in columns_info.items()
+                if reduction_name in reduction_types
             }
             self._vars_columns = next(
                 iter(self._reduction_vars_columns.values())
@@ -473,6 +476,7 @@ class ScalarsDir:
     :ivar norm1:     access to norm1 reduction.
     :ivar norm2:     access to norm2 reduction.
     :ivar average:   access to average reduction.
+    :ivar sum:       access to sum reduction.
     :ivar infnorm:   access to inf-norm reduction.
 
     Each of those works as a dictionary mapping variable names to
@@ -503,6 +507,7 @@ class ScalarsDir:
         self.norm1 = AllScalars(sd.allfiles, "norm1")
         self.norm2 = AllScalars(sd.allfiles, "norm2")
         self.average = AllScalars(sd.allfiles, "average")
+        self.sum = AllScalars(sd.allfiles, "sum")
         self.infnorm = AllScalars(sd.allfiles, "infnorm")
 
         # Aliases
@@ -532,6 +537,7 @@ class ScalarsDir:
             "norm1",
             "norm2",
             "average",
+            "sum",
             "infnorm",
         ]:
             return self[key]
@@ -548,6 +554,7 @@ class ScalarsDir:
             self.norm1,
             self.norm2,
             self.average,
+            self.sum,
         ):
             str_.append(str(key))
         return "\n".join(str_)

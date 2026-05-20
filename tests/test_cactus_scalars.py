@@ -299,6 +299,42 @@ class TestCactusScalar(unittest.TestCase):
         self.assertEqual(infnorm["kxx"], ts.TimeSeries(t_inf, kxx_inf))
         self.assertEqual(infnorm["kxy"], ts.TimeSeries(t_inf, kxy_inf))
 
+    def test_AllScalars_loads_all_supported_reductions(self):
+        # Kuibit reduction names
+        # excluding true scalar/multi-reduction file identifiers
+        reductions = tuple(
+            reduction
+            for reduction in cs.OneScalar._reduction_types.values()
+            if reduction not in ("scalars", "scalar")
+        )
+        cases = [
+            (
+                "tests/tov/output-0000/static_tov/admbase-curv.scalars.asc",
+                "kxx",
+                # Column numbers as written in the file header.
+                (9, 15, 27, 33, 39, 21, 45),
+            ),
+            (
+                "tests/tovX/output-0000/static_tovX/norms/hydrobasex-rho.tsv",
+                "rho",
+                (3, 4, 9, 10, 11, 6, 5),
+            ),
+        ]
+
+        for path, variable, header_columns in cases:
+            for reduction, header_column in zip(reductions, header_columns):
+                with self.subTest(path=path, reduction=reduction):
+                    reader = cs.AllScalars([path], reduction)
+                    self.assertIn(variable, reader)
+
+                    t, y = np.loadtxt(
+                        path,
+                        ndmin=2,
+                        unpack=True,
+                        usecols=(1, header_column - 1),
+                    )
+                    self.assertEqual(reader[variable], ts.TimeSeries(t, y))
+
     def test_scan_header_all_reductions_in_one_file(self):
         path = "tests/tov/output-0000/static_tov/alp.scalars.asc"
         time_column, columns_description = cau.scan_header(

@@ -54,7 +54,7 @@ You can also print the content of a :py:class:`~.ScalarsDir`:
     # .....
 
 
-The easieast way to access data is using the brackets operator, or using the
+The easiest way to access data is using the brackets operator, or using the
 ``get`` function. (You can also access reductions in the same way.)
 
 .. code-block:: python
@@ -69,8 +69,9 @@ Yet another way is to use the ``.fields`` attribute:
 
     rho_max = timeseries.maximum.fields.rho
 
-Clearly, instead of ``maximum``, you can use any reduction you want. Use
-``scalars`` for scalar values.
+Clearly, instead of ``maximum``, you can use any reduction you want. Valid
+reductions are ``minimum``, ``maximum``, ``norm1``, ``norm2``, ``infnorm``,
+``average``, or ``sum``. Use ``scalars`` for scalar values.
 
 The return values of all these calls are :py:class:`~.TimeSeries`. The page
 :ref:`series:Time and frequency series` has abundant information about these
