@@ -1,6 +1,6 @@
 # Changelog
 
-## Version 1.5.3
+## Version 1.6.0 (20 May 2026)
 
 #### General
 - Minimum version of Python required is now 3.9.

@@ -13,10 +13,10 @@ jobs:
         with:
           fetch-depth: 1
 
-      - name: Set up Python 3.8
+      - name: Set up Python 3.9
         uses: actions/setup-python@v5
         with:
-          python-version: 3.8
+          python-version: 3.9
 
       - name: Install Poetry
         uses: snok/install-poetry@v1
@@ -63,6 +63,8 @@ jobs:
         if: steps.cached-poetry-dependencies.outputs.cache-hit != 'true'
 
       - name: Produce documentation
+        env:
+            ADS_API: ${{ secrets.ADS_API }}
         run: |
           sudo apt-get update
           sudo apt-get install -y pandoc
