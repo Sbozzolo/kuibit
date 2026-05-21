@@ -1,5 +1,8 @@
 # Changelog
 
+## Version 1.6.1 (20 May 2026)
+(Version 1.6.1 does not really exist. Version 1.6.0 was not correctly published because I don't make releases frequently enough.)
+
 ## Version 1.6.0 (20 May 2026)
 
 #### General
