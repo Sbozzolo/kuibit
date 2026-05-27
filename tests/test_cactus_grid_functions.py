@@ -445,6 +445,50 @@ class TestOneGridFunction(unittest.TestCase):
             )
         )
 
+    def test_hdf5_active_bboxset_multibox(self):
+        h5_file = "tests/grid_functions_multibox/rho_multibox.xy.h5"
+        rho = cg.OneGridFunctionH5([h5_file], "rho", (0, 1))
+
+        data = rho[0]
+        self.assertEqual(data.shape, {7: 2})
+
+        pieces = data[7]
+        # Component 100 has two active bboxes in this Carpet HDF5 output.
+        piece0, piece1 = pieces
+        np.testing.assert_array_equal(piece0.shape, [68, 75])
+        np.testing.assert_array_equal(piece1.shape, [64, 3])
+        np.testing.assert_array_equal(piece0.num_ghost, [0, 0])
+        np.testing.assert_array_equal(piece1.num_ghost, [0, 0])
+        np.testing.assert_array_equal(piece0.x0, [8.125, 4.75])
+        np.testing.assert_array_equal(piece1.x0, [8.125, 14.125])
+        self.assertEqual(piece0.component, 100)
+        self.assertEqual(piece1.component, 100)
+
+        # Interpolation groups by internal component, not Carpet component id.
+        np.testing.assert_array_equal(
+            data.evaluate_with_spline(
+                np.array([piece0.x0, piece1.x0]), piecewise_constant=True
+            ),
+            [piece0.data[0, 0], piece1.data[0, 0]],
+        )
+
+        # The full active bboxset is not one rectangle, but these maximal
+        # rectangles from its lower-left corner are covered.
+        lower_rectangle = data.to_UniformGridData(
+            [68, 75], [8.125, 4.75], dx=[0.125, 0.125]
+        )
+        np.testing.assert_array_equal(lower_rectangle.shape, [68, 75])
+        np.testing.assert_array_equal(lower_rectangle.data, piece0.data)
+
+        left_rectangle = data.to_UniformGridData(
+            [64, 78], [8.125, 4.75], dx=[0.125, 0.125]
+        )
+        np.testing.assert_array_equal(left_rectangle.shape, [64, 78])
+        np.testing.assert_array_equal(
+            left_rectangle.data,
+            np.concatenate((piece0.data[:64, :75], piece1.data), axis=1),
+        )
+
     def test_time_at_iteration(self):
         self.assertEqual(self.P.time_at_iteration(2), 0.5)
 
