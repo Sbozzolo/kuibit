@@ -1193,6 +1193,7 @@ class OneGridFunctionH5(BaseOneGridFunction):
         ) as dataset:
             active = dataset.attrs.get("active")
             if active is None:
+                # Fallback for HDF5 files without Carpet active metadata.
                 return [data]
 
             active = active if isinstance(active, str) else active.decode()
