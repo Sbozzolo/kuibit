@@ -1197,19 +1197,21 @@ class OneGridFunctionH5(BaseOneGridFunction):
 
             active = active if isinstance(active, str) else active.decode()
             iorigin = dataset.attrs["iorigin"]
-            # active is bboxset<...>(.../[lower]:[upper]/...). The bounds are
-            # Carpet integer coordinates, so subtract iorigin for local slices.
+            # Parse active cells from Carpet bboxset attrs, e.g.
+            # bboxset<...>(set<bbox>:{(.../[lower]:[upper]/...)},...).
+            active_bbox_pattern = r"/\[([^\]]+)\]:\[([^\]]+)\]/"
             active_boxes = [
                 (
                     np.fromstring(lower, dtype=int, sep=",") - iorigin,
                     np.fromstring(upper, dtype=int, sep=",") - iorigin,
                 )
-                for lower, upper in re.findall(
-                    r"/\[([^\]]+)\]:\[([^\]]+)\]/", active
-                )
+                for lower, upper in re.findall(active_bbox_pattern, active)
             ]
 
         if not active_boxes:
+            # Fully overlapped components have an empty active set.
+            if "set<bbox>:{}" in active:
+                return []
             raise ValueError(f"Could not parse Carpet active bbox: {active}")
 
         components = []
