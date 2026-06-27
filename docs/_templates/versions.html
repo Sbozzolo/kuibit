@@ -1,11 +1,17 @@
 <div role="note" aria-label="version link">
   <h3>Versions</h3>
     <ul class="this-page-menu">
-      <li><a href="{{ pathto('dev/' + pagename + file_suffix, true)|e }}" rel="nofollow"> {{ _('Development') }} </a></li>
-      <li><a href="{{ pathto(pagename + file_suffix, true)|e }}" rel="nofollow"> {{ _('Master') }} </a></li>
+      {# Links are absolute, anchored at the documentation site root          #}
+      {# (doc_base_path, set in conf.py). They must NOT use pathto(..., true), #}
+      {# because each version is an independent Sphinx build that does not     #}
+      {# know it will be deployed inside a <version>/ subdirectory: a          #}
+      {# build-root-relative link from e.g. /kuibit/1.6.0/ would resolve to    #}
+      {# /kuibit/1.6.0/1.5.1/... instead of /kuibit/1.5.1/...                  #}
+      <li><a href="{{ doc_base_path }}dev/{{ pagename }}{{ file_suffix }}" rel="nofollow"> {{ _('Development') }} </a></li>
+      <li><a href="{{ doc_base_path }}{{ pagename }}{{ file_suffix }}" rel="nofollow"> {{ _('Master') }} </a></li>
 
       {% for version in versions %}
-      <li><a href="{{ pathto(version + '/' + pagename + file_suffix, true)|e }}" rel="nofollow"> {{ _(version) }} </a></li>
+      <li><a href="{{ doc_base_path }}{{ version }}/{{ pagename }}{{ file_suffix }}" rel="nofollow"> {{ _(version) }} </a></li>
       {% endfor %}
 
     </ul>

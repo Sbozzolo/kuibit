@@ -38,6 +38,26 @@ jobs:
           poetry install --with dev -E full
         if: steps.cached-poetry-dependencies.outputs.cache-hit != 'true'
 
+      - name: Clone gh-pages
+        run: |
+          git clone https://github.com/sbozzolo/kuibit.git --branch gh-pages --single-branch gh-pages
+
+      # Build the "Versions" sidebar list from the version directories that
+      # actually exist on gh-pages, keeping only the latest patch release of each
+      # minor series. This guarantees every link in the sidebar points to a
+      # directory that exists, and keeps the master/dev docs in sync with the
+      # released versions.
+      - name: Compute versions list
+        run: |
+          VERSIONS=$( ls -1 gh-pages 2>/dev/null \
+            | grep -E '^[0-9]+\.[0-9]+\.[0-9]+$' \
+            | sort -V \
+            | awk -F. '{ latest[$1"."$2] = $0 } END { for (k in latest) print latest[k] }' \
+            | sort -V \
+            | paste -sd, - )
+          echo "Versions for sidebar: $VERSIONS"
+          echo "KUIBIT_DOC_VERSIONS=$VERSIONS" >> "$GITHUB_ENV"
+
       - name: Produce documentation
         env:
             ADS_API: ${{ secrets.ADS_API }}
@@ -51,7 +71,6 @@ jobs:
       - name: Commit documentation changes
         if: github.event_name != 'pull_request'
         run: |
-          git clone https://github.com/sbozzolo/kuibit.git --branch gh-pages --single-branch gh-pages
           mkdir -p gh-pages/dev
           [[ $(git branch --show-current) == 'next' ]] && cp -r docs/_build/html/* gh-pages/dev/ || cp -r docs/_build/html/* gh-pages/
           cd gh-pages

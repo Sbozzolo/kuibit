@@ -25,13 +25,6 @@ jobs:
           virtualenvs-create: true
           virtualenvs-in-project: true
 
-      - name: Load cached Poetry virtualenv
-        uses: actions/cache@v4
-        id: cached-poetry-dependencies
-        with:
-          path: .venv
-          key: venv-${{ runner.os }}-${{ hashFiles('**/poetry.lock') }}
-
       - name: Build
         run: poetry build
 
@@ -57,10 +50,62 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
+  # The documentation deploy is a separate job on purpose: a failure in the
+  # Publish job above (e.g. PyPI rejecting an already-uploaded file) must not
+  # prevent the versioned documentation from being deployed to gh-pages.
+  Documentation:
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/')
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Set up Python 3.13
+        id: setup-python
+        uses: actions/setup-python@v5
+        with:
+          python-version: 3.13
+
+      - name: Install Poetry
+        uses: snok/install-poetry@v1
+        with:
+          version: 1.8.5
+          virtualenvs-create: true
+          virtualenvs-in-project: true
+
+      - name: Load cached Poetry virtualenv
+        uses: actions/cache@v4
+        id: cached-poetry-dependencies
+        with:
+          path: .venv
+          key: venv-${{ runner.os }}-${{ steps.setup-python.outputs.python-version }}-${{ hashFiles('**/poetry.lock') }}
+
       - name: Install Dependencies
         run: |
           poetry install --with dev -E full
         if: steps.cached-poetry-dependencies.outputs.cache-hit != 'true'
+
+      - name: Clone gh-pages
+        run: |
+          git clone https://github.com/sbozzolo/kuibit.git --branch gh-pages --single-branch gh-pages
+
+      # Build the "Versions" sidebar list from the version directories that
+      # actually exist on gh-pages (plus the version being released now), keeping
+      # only the latest patch release of each minor series. This guarantees every
+      # link in the sidebar points to a directory that exists.
+      - name: Compute versions list
+        run: |
+          VERSION="$(poetry version -s)"
+          VERSIONS=$( { ls -1 gh-pages 2>/dev/null; echo "$VERSION"; } \
+            | grep -E '^[0-9]+\.[0-9]+\.[0-9]+$' \
+            | sort -V \
+            | awk -F. '{ latest[$1"."$2] = $0 } END { for (k in latest) print latest[k] }' \
+            | sort -V \
+            | paste -sd, - )
+          echo "Versions for sidebar: $VERSIONS"
+          echo "KUIBIT_DOC_VERSIONS=$VERSIONS" >> "$GITHUB_ENV"
 
       - name: Produce documentation
         env:
@@ -75,7 +120,6 @@ jobs:
 
       - name: Commit documentation changes
         run: |
-          git clone https://github.com/sbozzolo/kuibit.git --branch gh-pages --single-branch gh-pages
           mkdir -p gh-pages/"$(poetry version -s)"
           cp -r docs/_build/html/* gh-pages/"$(poetry version -s)"
           cd gh-pages
