@@ -561,19 +561,22 @@ class TestOneGridFunction(unittest.TestCase):
         component = 0
 
         with cg.openpmd_series(self.wavetoy_file_it0) as series:
-            variable = series.iterations[iteration].meshes[
-                "wavetoyx_state_lev00"
-            ]["wavetoyx_u"]
+            mesh = series.iterations[iteration].meshes["wavetoyx_state_lev00"]
+            self.assertEqual(tuple(mesh.axis_labels), ("z", "y", "x"))
+            variable = mesh["wavetoyx_u"]
             chunk = variable.available_chunks()[component]
+            self.assertEqual(tuple(chunk.extent), (9, 33, 33))
 
             # Do the actual reading
-            data = variable.load_chunk(chunk.offset, chunk.extent)
+            data_zyx = variable.load_chunk(chunk.offset, chunk.extent)
             series.flush()
 
-        expected_grid = grid_data.UniformGrid(
-            [9, 33, 33],
+        # The fixture stores (Nz, Ny, Nx) = (9, 33, 33). kuibit uses
+        # (Nx, Ny, Nz), so the expected grid shape is (33, 33, 9).
+        expected_grid_xyz = grid_data.UniformGrid(
+            [33, 33, 9],
             x0=[-1.0, -1.0, -1.0],
-            x1=[1.0, 0.0, 0.0],
+            x1=[0.0, 0.0, 1.0],
             ref_level=0,
             num_ghost=[0, 0, 0],
             time=0,
@@ -581,14 +584,35 @@ class TestOneGridFunction(unittest.TestCase):
             component=0,
         )
 
-        expected_grid_data = grid_data.UniformGridData(expected_grid, data)
+        expected_grid_data_xyz = grid_data.UniformGridData(
+            expected_grid_xyz, data_zyx.transpose(2, 1, 0)
+        )
 
         self.assertEqual(
             self.wavetoy._read_component_as_uniform_grid_data(
                 self.wavetoy_file_it0, 0, 0, 0
             ),
-            expected_grid_data,
+            expected_grid_data_xyz,
         )
+
+        # Check that the four component origins are interpreted correctly.
+        # Each origin is in kuibit's (x, y, z) coordinate order, and entry n
+        # is the expected origin of component n.
+        component_origins_xyz = [
+            tuple(
+                self.wavetoy._read_component_as_uniform_grid_data(
+                    self.wavetoy_file_it0, 0, 0, component
+                ).x0
+            )
+            for component in range(4)
+        ]
+        expected_component_origins_xyz = [
+            (-1.0, -1.0, -1.0),  # component 0: lower-left x-y tile
+            (0.0, -1.0, -1.0),  # component 1: lower-right x-y tile
+            (-1.0, 0.0, -1.0),  # component 2: upper-left x-y tile
+            (0.0, 0.0, -1.0),  # component 3: upper-right x-y tile
+        ]
+        self.assertEqual(component_origins_xyz, expected_component_origins_xyz)
 
     def test_openpmd_centering(self):
         iteration = 0
@@ -617,12 +641,12 @@ class TestOneGridFunction(unittest.TestCase):
         }
         shifts = {
             "staggeredwavetoyx_u": np.array([0.0, 0.0, 0.0]),
-            "staggeredwavetoyx_fx": np.array([0.0, 0.0, 0.5]),
+            "staggeredwavetoyx_fx": np.array([0.5, 0.0, 0.0]),
             "staggeredwavetoyx_fy": np.array([0.0, 0.5, 0.0]),
-            "staggeredwavetoyx_fz": np.array([0.5, 0.0, 0.0]),
-            "staggeredwavetoyx_curlfx": np.array([0.5, 0.5, 0.0]),
+            "staggeredwavetoyx_fz": np.array([0.0, 0.0, 0.5]),
+            "staggeredwavetoyx_curlfx": np.array([0.0, 0.5, 0.5]),
             "staggeredwavetoyx_curlfy": np.array([0.5, 0.0, 0.5]),
-            "staggeredwavetoyx_curlfz": np.array([0.0, 0.5, 0.5]),
+            "staggeredwavetoyx_curlfz": np.array([0.5, 0.5, 0.0]),
             "staggeredwavetoyx_eps": np.array([0.5, 0.5, 0.5]),
         }
 
