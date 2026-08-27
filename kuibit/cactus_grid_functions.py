@@ -1409,8 +1409,19 @@ class OneGridFunctionOpenPMD(BaseOneGridFunction):
             with openpmd_series(path) as series:
                 time = series.iterations[iteration].time
                 mesh_obj = series.iterations[iteration].meshes[mesh_name]
-                origin = np.array(mesh_obj.grid_global_offset)
-                dx = np.array(mesh_obj.grid_spacing)
+                # OpenPMD metadata and array dimensions follow axis_labels,
+                # while kuibit represents Cartesian grids in x, y, z order.
+                axis_labels = tuple(mesh_obj.axis_labels)
+                # kuibit currently supports only 3D Cartesian OpenPMD grids.
+                if sorted(axis_labels) != list("xyz"):
+                    raise RuntimeError(
+                        f"Unsupported OpenPMD axis labels {axis_labels} "
+                        f"for variable {self.var_name}"
+                    )
+                axis_order = [axis_labels.index(axis) for axis in "xyz"]
+
+                origin = np.asarray(mesh_obj.grid_global_offset)
+                dx = np.asarray(mesh_obj.grid_spacing)
                 mrc = mesh_obj[self.var_name]
                 position = np.asarray(mrc.position, dtype=float)
                 if position.shape != dx.shape:
@@ -1419,11 +1430,21 @@ class OneGridFunctionOpenPMD(BaseOneGridFunction):
                         f"for variable {self.var_name}"
                     )
                 chunk = mrc.available_chunks()[component]
-                offset = np.array(chunk.offset)
-                shape = chunk.extent
+                offset = np.asarray(chunk.offset)
+                shape = np.asarray(chunk.extent)
+
                 # Do the actual reading
                 data = mrc.load_chunk(chunk.offset, chunk.extent)
                 series.flush()
+
+                # Convert OpenPMD axis order to kuibit's x, y, z order.
+                origin = origin[axis_order]
+                dx = dx[axis_order]
+                position = position[axis_order]
+                offset = offset[axis_order]
+                shape = shape[axis_order]
+                data = np.transpose(data, axes=axis_order)
+
                 grid = grid_data.UniformGrid(
                     shape,
                     x0=(origin + (offset + position) * dx),
