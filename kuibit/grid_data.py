@@ -2932,34 +2932,22 @@ class HierarchicalGridData(BaseNumerical):
         #       Note also that is it tested by testing finest_component_at_point
         #       (and not directly)
 
-        # Next, we organize points depending on the component/refinement level
-        # they belong.
-        #
-        # level_comps is a dictionary with keys the refinement levels and
-        # components for which we have to compute points and for values a list
-        # with the index of the points in points_arr. We need the indices because
-        # we need to put back the values where they were, since we are going to
-        # take bit and pieces of the array.
-        #
-        # Then, we have another mapping level_comps_data that has as keys the
-        # same keys as level_comps, but values the actual component
-        # (UniformGridData) that has to be used for the calculation
+        # Use object ids because distinct components can have the same
+        # refinement level and component number.
         level_comps = {}
         level_comps_data = {}
         for index, point in enumerate(points_arr):
             data = self.finest_component_at_point(point, no_checks=True)
-            ref_level, comp = data.ref_level, data.component
-            level_comps.setdefault((ref_level, comp), []).append(index)
-            level_comps_data.setdefault((ref_level, comp), data)
+            comp_key = id(data)
+            level_comps.setdefault(comp_key, []).append(index)
+            level_comps_data.setdefault(comp_key, data)
 
         # Now, we can evaluate the points using the methods of UniformGridData.
         # We collect all results in a new array that is initially full of zeros
         ret = np.zeros(len(points_arr), dtype=self.dtype)
-        for (ref_level, comp), points_indices in level_comps.items():
-            points = points_arr[level_comps[ref_level, comp]]
-            evaluated_points = level_comps_data[
-                (ref_level, comp)
-            ].evaluate_with_spline(
+        for comp_key, points_indices in level_comps.items():
+            points = points_arr[points_indices]
+            evaluated_points = level_comps_data[comp_key].evaluate_with_spline(
                 points, ext=ext, piecewise_constant=piecewise_constant
             )
             ret[points_indices] = evaluated_points

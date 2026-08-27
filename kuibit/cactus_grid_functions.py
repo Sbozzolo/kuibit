@@ -460,8 +460,8 @@ class BaseOneGridFunction(ABC):
                 for comp in self._components_in_file(
                     path, iteration, ref_level
                 ):
-                    uniform_grid_data_components.append(
-                        self._read_component_as_uniform_grid_data(
+                    uniform_grid_data_components.extend(
+                        self._read_component_as_uniform_grid_data_pieces(
                             path, iteration, ref_level, comp
                         )
                     )
@@ -471,6 +471,15 @@ class BaseOneGridFunction(ABC):
             if uniform_grid_data_components
             else None
         )
+
+    def _read_component_as_uniform_grid_data_pieces(
+        self, path, iteration, ref_level, component
+    ):
+        return [
+            self._read_component_as_uniform_grid_data(
+                path, iteration, ref_level, component
+            )
+        ]
 
     def get_iteration(self, iteration, default=None):
         """Return the data at the given iteration as a :py:class:`~.HierarchicalGridData`.
@@ -1172,6 +1181,67 @@ class OneGridFunctionH5(BaseOneGridFunction):
                 )
 
         return self.alldata[path][iteration][ref_level][component]
+
+    def _read_component_as_uniform_grid_data_pieces(
+        self, path, iteration, ref_level, component
+    ):
+        data = self._read_component_as_uniform_grid_data(
+            path, iteration, ref_level, component
+        )
+        with self._get_dataset(
+            path, iteration, ref_level, component
+        ) as dataset:
+            active = dataset.attrs.get("active")
+            if active is None:
+                # Fallback for HDF5 files without Carpet active metadata.
+                return [data]
+
+            active = active if isinstance(active, str) else active.decode()
+            iorigin = dataset.attrs["iorigin"]
+            # Parse active cells from Carpet bboxset attrs, e.g.
+            # bboxset<...>(set<bbox>:{(.../[lower]:[upper]/...)},...).
+            active_bbox_pattern = r"/\[([^\]]+)\]:\[([^\]]+)\]/"
+            active_boxes = [
+                (
+                    np.fromstring(lower, dtype=int, sep=",") - iorigin,
+                    np.fromstring(upper, dtype=int, sep=",") - iorigin,
+                )
+                for lower, upper in re.findall(active_bbox_pattern, active)
+            ]
+
+        if not active_boxes:
+            # Fully overlapped components have an empty active set.
+            if "set<bbox>:{}" in active:
+                return []
+            raise ValueError(f"Could not parse Carpet active bbox: {active}")
+
+        components = []
+        for local_lower, local_upper in active_boxes:
+            if np.any(local_lower < 0) or np.any(local_upper >= data.shape):
+                raise ValueError(
+                    "Active Carpet bbox is outside its HDF5 "
+                    f"dataset: lower={local_lower}, upper={local_upper}, "
+                    f"data_shape={data.shape}"
+                )
+
+            box_slice = tuple(
+                slice(start, stop)
+                for start, stop in zip(local_lower, local_upper + 1)
+            )
+            components.append(
+                grid_data.UniformGridData.from_grid_structure(
+                    data.data[box_slice],
+                    x0=data.x0 + local_lower * data.dx,
+                    dx=data.dx,
+                    ref_level=data.ref_level,
+                    component=data.component,
+                    # No ghost zones after building from the active box.
+                    num_ghost=np.zeros_like(local_lower),
+                    time=data.time,
+                    iteration=data.iteration,
+                )
+            )
+        return components
 
     @staticmethod
     def _are_ghostzones_in_file(path: str, is_3D_file: bool) -> bool:
