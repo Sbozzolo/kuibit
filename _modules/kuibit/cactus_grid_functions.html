@@ -1495,8 +1495,19 @@
             <span class="k">with</span> <span class="n">openpmd_series</span><span class="p">(</span><span class="n">path</span><span class="p">)</span> <span class="k">as</span> <span class="n">series</span><span class="p">:</span>
                 <span class="n">time</span> <span class="o">=</span> <span class="n">series</span><span class="o">.</span><span class="n">iterations</span><span class="p">[</span><span class="n">iteration</span><span class="p">]</span><span class="o">.</span><span class="n">time</span>
                 <span class="n">mesh_obj</span> <span class="o">=</span> <span class="n">series</span><span class="o">.</span><span class="n">iterations</span><span class="p">[</span><span class="n">iteration</span><span class="p">]</span><span class="o">.</span><span class="n">meshes</span><span class="p">[</span><span class="n">mesh_name</span><span class="p">]</span>
-                <span class="n">origin</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">mesh_obj</span><span class="o">.</span><span class="n">grid_global_offset</span><span class="p">)</span>
-                <span class="n">dx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">mesh_obj</span><span class="o">.</span><span class="n">grid_spacing</span><span class="p">)</span>
+                <span class="c1"># OpenPMD metadata and array dimensions follow axis_labels,</span>
+                <span class="c1"># while kuibit represents Cartesian grids in x, y, z order.</span>
+                <span class="n">axis_labels</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">mesh_obj</span><span class="o">.</span><span class="n">axis_labels</span><span class="p">)</span>
+                <span class="c1"># kuibit currently supports only 3D Cartesian OpenPMD grids.</span>
+                <span class="k">if</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">axis_labels</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">list</span><span class="p">(</span><span class="s2">&quot;xyz&quot;</span><span class="p">):</span>
+                    <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span>
+                        <span class="sa">f</span><span class="s2">&quot;Unsupported OpenPMD axis labels </span><span class="si">{</span><span class="n">axis_labels</span><span class="si">}</span><span class="s2"> &quot;</span>
+                        <span class="sa">f</span><span class="s2">&quot;for variable </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">var_name</span><span class="si">}</span><span class="s2">&quot;</span>
+                    <span class="p">)</span>
+                <span class="n">axis_order</span> <span class="o">=</span> <span class="p">[</span><span class="n">axis_labels</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">axis</span><span class="p">)</span> <span class="k">for</span> <span class="n">axis</span> <span class="ow">in</span> <span class="s2">&quot;xyz&quot;</span><span class="p">]</span>
+
+                <span class="n">origin</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">mesh_obj</span><span class="o">.</span><span class="n">grid_global_offset</span><span class="p">)</span>
+                <span class="n">dx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">mesh_obj</span><span class="o">.</span><span class="n">grid_spacing</span><span class="p">)</span>
                 <span class="n">mrc</span> <span class="o">=</span> <span class="n">mesh_obj</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">var_name</span><span class="p">]</span>
                 <span class="n">position</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">mrc</span><span class="o">.</span><span class="n">position</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
                 <span class="k">if</span> <span class="n">position</span><span class="o">.</span><span class="n">shape</span> <span class="o">!=</span> <span class="n">dx</span><span class="o">.</span><span class="n">shape</span><span class="p">:</span>
@@ -1505,11 +1516,21 @@
                         <span class="sa">f</span><span class="s2">&quot;for variable </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">var_name</span><span class="si">}</span><span class="s2">&quot;</span>
                     <span class="p">)</span>
                 <span class="n">chunk</span> <span class="o">=</span> <span class="n">mrc</span><span class="o">.</span><span class="n">available_chunks</span><span class="p">()[</span><span class="n">component</span><span class="p">]</span>
-                <span class="n">offset</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">chunk</span><span class="o">.</span><span class="n">offset</span><span class="p">)</span>
-                <span class="n">shape</span> <span class="o">=</span> <span class="n">chunk</span><span class="o">.</span><span class="n">extent</span>
+                <span class="n">offset</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">chunk</span><span class="o">.</span><span class="n">offset</span><span class="p">)</span>
+                <span class="n">shape</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">chunk</span><span class="o">.</span><span class="n">extent</span><span class="p">)</span>
+
                 <span class="c1"># Do the actual reading</span>
                 <span class="n">data</span> <span class="o">=</span> <span class="n">mrc</span><span class="o">.</span><span class="n">load_chunk</span><span class="p">(</span><span class="n">chunk</span><span class="o">.</span><span class="n">offset</span><span class="p">,</span> <span class="n">chunk</span><span class="o">.</span><span class="n">extent</span><span class="p">)</span>
                 <span class="n">series</span><span class="o">.</span><span class="n">flush</span><span class="p">()</span>
+
+                <span class="c1"># Convert OpenPMD axis order to kuibit&#39;s x, y, z order.</span>
+                <span class="n">origin</span> <span class="o">=</span> <span class="n">origin</span><span class="p">[</span><span class="n">axis_order</span><span class="p">]</span>
+                <span class="n">dx</span> <span class="o">=</span> <span class="n">dx</span><span class="p">[</span><span class="n">axis_order</span><span class="p">]</span>
+                <span class="n">position</span> <span class="o">=</span> <span class="n">position</span><span class="p">[</span><span class="n">axis_order</span><span class="p">]</span>
+                <span class="n">offset</span> <span class="o">=</span> <span class="n">offset</span><span class="p">[</span><span class="n">axis_order</span><span class="p">]</span>
+                <span class="n">shape</span> <span class="o">=</span> <span class="n">shape</span><span class="p">[</span><span class="n">axis_order</span><span class="p">]</span>
+                <span class="n">data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">axes</span><span class="o">=</span><span class="n">axis_order</span><span class="p">)</span>
+
                 <span class="n">grid</span> <span class="o">=</span> <span class="n">grid_data</span><span class="o">.</span><span class="n">UniformGrid</span><span class="p">(</span>
                     <span class="n">shape</span><span class="p">,</span>
                     <span class="n">x0</span><span class="o">=</span><span class="p">(</span><span class="n">origin</span> <span class="o">+</span> <span class="p">(</span><span class="n">offset</span> <span class="o">+</span> <span class="n">position</span><span class="p">)</span> <span class="o">*</span> <span class="n">dx</span><span class="p">),</span>
