@@ -1024,7 +1024,7 @@ class OneGridFunctionTSV(OneGridFunctionASCII):
         except RuntimeError as error:
             warnings.warn(f"Skipping file: {error}", RuntimeWarning)
             return []
-        with open(path) as tsv_file:
+        with open(path) as tsv_file:  # skipcq: PTC-W6004
             if not any(line[:1].isdigit() for line in tsv_file):
                 return []
         return list(variables)
