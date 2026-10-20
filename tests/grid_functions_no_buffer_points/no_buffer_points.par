@@ -1,0 +1,76 @@
+# Tiny Carpet run to produce HDF5 output with
+# CarpetIOHDF5::output_buffer_points = "no" (test data for kuibit).
+# The finest refinement level is the union of two overlapping boxes, so its
+# active region is not a rectangle.
+
+ActiveThorns = "
+  Boundary
+  Carpet
+  CarpetIOBasic
+  CarpetIOHDF5
+  CarpetLib
+  CarpetReduce
+  CarpetRegrid2
+  CarpetSlab
+  CartGrid3D
+  CoordBase
+  InitBase
+  IOUtil
+  LoopControl
+  MoL
+  SymBase
+"
+
+Cactus::cctk_itlast = 0
+
+CoordBase::domainsize = "minmax"
+CoordBase::xmin = -16.0
+CoordBase::ymin = -16.0
+CoordBase::zmin = -16.0
+CoordBase::xmax = 16.0
+CoordBase::ymax = 16.0
+CoordBase::zmax = 16.0
+CoordBase::dx = 1.0
+CoordBase::dy = 1.0
+CoordBase::dz = 1.0
+CoordBase::boundary_size_x_lower = 3
+CoordBase::boundary_size_y_lower = 3
+CoordBase::boundary_size_z_lower = 3
+CoordBase::boundary_size_x_upper = 3
+CoordBase::boundary_size_y_upper = 3
+CoordBase::boundary_size_z_upper = 3
+CartGrid3D::type = "coordbase"
+
+Carpet::domain_from_coordbase = yes
+Carpet::ghost_size = 3
+Carpet::max_refinement_levels = 2
+Carpet::use_buffer_zones = yes
+Carpet::prolongation_order_space = 3
+Carpet::prolongation_order_time = 2
+Carpet::init_fill_timelevels = yes
+MoL::ODE_Method = "RK4"
+MoL::MoL_Intermediate_Steps = 4
+MoL::MoL_Num_Scratch_Levels = 1
+
+# Do not merge the two refined regions into their bounding box
+CarpetRegrid2::min_fraction = 1.0
+CarpetRegrid2::num_centres = 2
+CarpetRegrid2::num_levels_1 = 2
+CarpetRegrid2::position_x_1 = -3.0
+CarpetRegrid2::radius_1[1] = 3.0
+CarpetRegrid2::num_levels_2 = 2
+CarpetRegrid2::position_x_2 = 3.0
+CarpetRegrid2::position_y_2 = 3.0
+CarpetRegrid2::radius_2[1] = 3.0
+
+IO::out_dir = $parfile
+IO::out_fileinfo = "all"
+
+CarpetIOHDF5::output_buffer_points = "no"
+CarpetIOHDF5::compression_level = 9
+CarpetIOHDF5::out1D_every = 1
+CarpetIOHDF5::out1D_vars = "grid::x"
+CarpetIOHDF5::out2D_every = 1
+CarpetIOHDF5::out2D_vars = "grid::x"
+CarpetIOHDF5::out3D_every = 1
+CarpetIOHDF5::out3D_vars = "grid::x"
