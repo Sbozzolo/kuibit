@@ -270,3 +270,14 @@ class TestCactusMultipoles(unittest.TestCase):
 
         # test __str__()
         self.assertIn("harmonic", cacdir.__str__())
+
+    def test_MultipolesDir_tsv(self):
+        # Output of the SpacetimeX Multipole test q1
+        cacdir = mp.MultipolesDir(sd.SimDir("tests/carpetx/multipole"))
+
+        path = "tests/carpetx/multipole/mp_Psi4_l2_m2_r5.00.tsv"
+        time, real, imag = np.loadtxt(path).T
+        expected = ts.TimeSeries(time, real + 1j * imag)
+
+        self.assertIn("psi4", cacdir)
+        self.assertEqual(cacdir["psi4"][5](2, 2), expected)

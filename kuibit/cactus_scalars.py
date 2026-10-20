@@ -20,8 +20,8 @@
 # this program; if not, see <https://www.gnu.org/licenses/>.
 
 """The :py:mod:`~.cactus_scalars` module provides simple interfaces to access
-time series data as output by CarpetASCII, including all the reductions.
-CarpetX reductions (norms) are also supported.
+time series data as output by CarpetASCII or CarpetX, including all the
+reductions.
 
 There are multiple classes defined in this module:
 
@@ -53,18 +53,22 @@ import numpy as np
 from kuibit import simdir
 from kuibit import timeseries as ts
 from kuibit.attr_dict import pythonize_name_dict
-from kuibit.cactus_ascii_utils import scan_header
+from kuibit.cactus_ascii_utils import (
+    get_carpetx_variable_columns,
+    scan_carpetx_header,
+    scan_header,
+)
 
 
 class OneScalar:
-    """Read scalar data produced by CarpetASCII or CarpetX norms.
+    """Read scalar data produced by CarpetASCII or CarpetX.
 
     :py:class:`~.OneScalar` is a dictionary-like object with keys the variables
     and values the :py:class:`~.TimeSeries`.
 
     Single variable per file or single file per group are supported. In the
     latter case, the header is inspected to understand the content of the file.
-    Compressed files (gz and bz2) are supported too.
+    CarpetASCII files compressed with gzip or bzip2 are also supported.
 
     :py:class:`~.OneScalar` represents one scalar file, there can be multiple
     variables inside, (if it was output with ``one_file_per_group = yes``).
@@ -114,10 +118,12 @@ class OneScalar:
 
     _rx_filename = re.compile(_pattern_filename, re.VERBOSE)
 
-    # CarpetX norm files are named by thorn and group, e.g.,
-    # hydrobasex-rho.tsv. Variables and reductions are read from the header.
-    _pattern_filename_carpetx_norms = r"^\w+-\w+\.tsv$"
-    _rx_filename_carpetx_norms = re.compile(_pattern_filename_carpetx_norms)
+    # CarpetX TSV files are named by thorn and group and can combine iterations
+    # or use one file per iteration, e.g. hydrobasex-rho.tsv or
+    # quasilocalmeasures-qlm_scalars.it000004.tsv. Norm files are always
+    # norms/<thorn>-<group>.tsv.
+    _pattern_filename_carpetx = r"^\w+-\w+(?P<iteration>\.it\d+)?\.tsv$"
+    _rx_filename_carpetx = re.compile(_pattern_filename_carpetx)
 
     _reduction_types = {
         "minimum": "minimum",
@@ -172,38 +178,48 @@ class OneScalar:
         self.reduction_type = None
         self._all_reductions_in_one_file = False
         self._reduction_vars_columns = None
-        self._all_reductions_format = "carpet"
         self._is_one_file_per_group = False
         self._was_header_scanned = False
         self._time_column = None
+        self._file_per_iteration = False
 
         self.folder, filename = os.path.split(self.path)
 
         filename_match = self._rx_filename.match(filename)
-
-        if (
-            self._rx_filename_carpetx_norms.match(filename)
-            and os.path.basename(self.folder) == "norms"
-        ):
-            self._init_carpetx_norms_file()
-            return
-
-        if filename_match is None:
+        carpetx_filename_match = self._rx_filename_carpetx.match(filename)
+        if filename_match is not None:
+            self._init_carpetascii_file(filename_match)
+        elif carpetx_filename_match is not None:
+            self._init_carpetx_tsv_file(carpetx_filename_match)
+        else:
             raise RuntimeError(f"Name scheme not recognized for {filename}")
 
-        self._init_carpetascii_file(filename_match)
+    def _init_carpetx_tsv_file(self, filename_match):
+        """Initialize a CarpetX scalar or combined norm file."""
 
-    def _init_carpetx_norms_file(self):
-        self._compression_method = None
-        self.reduction_type = "scalars"
-        self._all_reductions_in_one_file = True
-        self._reduction_vars_columns = None
-        self._all_reductions_format = "carpetx_norms"
+        self._file_format = "TSV"
+        # Skip the header line, which starts with "#" or (plain) "iteration"
+        self._comments = ("#", "iteration")
         self._is_one_file_per_group = True
-        self._was_header_scanned = False
-        self._scan_header()
+        if os.path.basename(self.folder) == "norms":
+            self.reduction_type = "scalars"
+            self._all_reductions_in_one_file = True
+        else:
+            self.reduction_type = "scalar"
+        self._file_per_iteration = (
+            filename_match.group("iteration") is not None
+        )
+        try:
+            self._scan_header()
+        except RuntimeError as error:
+            # The name looks like CarpetX output, so tell the user why the
+            # file cannot be read
+            warnings.warn(f"Skipping file: {error}", RuntimeWarning)
+            raise
 
     def _init_carpetascii_file(self, filename_match):
+        self._file_format = "ASCII"
+        self._comments = "#"
         # variable_name1 may be a thorn name (e.g. hydrobase-press)
         # Or the actual variable name (e.g. H)
         (
@@ -222,14 +238,11 @@ class OneScalar:
 
         self.reduction_type = self._reduction_types[reduction_type]
         self._all_reductions_in_one_file = reduction_type == "scalars"
-        self._reduction_vars_columns = None
-        self._all_reductions_format = "carpet"
 
         # If the file contains multiple variables, we will scan the header
         # immediately to understand the content. If not, we scan the header
         # only when needed
         self._is_one_file_per_group = variable_name2 is not None
-        self._was_header_scanned = False
 
         if self._is_one_file_per_group:
             # We need the variable names
@@ -241,50 +254,72 @@ class OneScalar:
             self._vars_columns = {variable_name: None}
 
     def _scan_header(self):
-        # Call scan_header with the right argument
+        # Normalize each format to variable -> column, or, for combined
+        # reductions, reduction -> {variable: column}.
 
-        extended_format = self.reduction_type == "scalar"
-
-        # What method to we need to use to open the file?
-        # opener can be open, gopen, or bopen depending on the extension
-        # of the file
-        opener, opener_mode = self._decompressor[self._compression_method]
-
-        self._time_column, columns_info = scan_header(
-            self.path,
-            self._is_one_file_per_group,
-            extended_format,
-            all_reductions_in_one_file=self._all_reductions_in_one_file,
-            all_reductions_format=self._all_reductions_format,
-            opener=opener,
-            opener_mode=opener_mode,
-        )
+        if self._file_format == "ASCII":
+            opener, opener_mode = self._decompressor[self._compression_method]
+            self._time_column, columns_info = scan_header(
+                self.path,
+                self._is_one_file_per_group,
+                extended_format=self.reduction_type == "scalar",
+                all_reductions_in_one_file=self._all_reductions_in_one_file,
+                opener=opener,
+                opener_mode=opener_mode,
+            )
+            if self._all_reductions_in_one_file:
+                columns_info = {
+                    self._reduction_types[name]: columns
+                    for name, columns in columns_info.items()
+                    if name in self._reduction_types
+                }
+            elif not self._is_one_file_per_group:
+                variable = next(iter(self._vars_columns))
+                columns_info = {variable: columns_info}
+        elif self._file_format == "TSV":
+            self._time_column, columns_info, is_comment = scan_carpetx_header(
+                self.path
+            )
+            if self._all_reductions_in_one_file:
+                columns_info = self._get_carpetx_reduction_columns(
+                    columns_info
+                )
+            else:
+                columns_info = get_carpetx_variable_columns(
+                    columns_info, {"iteration", "time"}, is_comment=is_comment
+                )
 
         if self._all_reductions_in_one_file:
-            # ``*.scalars.asc`` stores multiple reductions in one file.
-            if self._all_reductions_format == "carpet":
-                reduction_types = self._reduction_types
-            elif self._all_reductions_format == "carpetx_norms":
-                reduction_types = self._reduction_types_carpetx
-
-            self._reduction_vars_columns = {
-                reduction_types[reduction_name]: columns
-                for reduction_name, columns in columns_info.items()
-                if reduction_name in reduction_types
-            }
-            self._vars_columns = next(
-                iter(self._reduction_vars_columns.values())
-            )
-        else:
-            if self._is_one_file_per_group:
-                self._vars_columns.update(columns_info)
-            else:
-                # There is only one data_column
-                self._vars_columns = {
-                    list(self._vars_columns.keys())[0]: columns_info
-                }
+            if not columns_info:
+                raise RuntimeError(
+                    f"No supported reductions found in {self.path}"
+                )
+            self._reduction_vars_columns = columns_info
+            columns_info = next(iter(columns_info.values()))
+        self._vars_columns = columns_info
 
         self._was_header_scanned = True
+
+    def _get_carpetx_reduction_columns(self, columns_description):
+        """Group norm columns by kuibit reduction name and variable."""
+
+        # Norm labels have the form hydrobasex::rho.min.
+        rx_norm_column = re.compile(r"^\w+::(\w+)\.([\w]+(?:\[\d+\])?)$")
+        reductions = {}
+        for column_name, column_number in columns_description.items():
+            if column_name in ("iteration", "time"):
+                continue
+            matched = rx_norm_column.match(column_name)
+            if matched is None:
+                raise RuntimeError(
+                    f"Bad CarpetX norm header found in file {self.path}"
+                )
+            variable_name, reduction_name = matched.groups()
+            reduction = self._reduction_types_carpetx.get(reduction_name)
+            if reduction is not None:
+                columns = reductions.setdefault(reduction, {})
+                columns[variable_name] = column_number
+        return reductions
 
     def _get_vars_columns_allreds(self, reduction_type):
         if not self._was_header_scanned:
@@ -315,13 +350,21 @@ class OneScalar:
         if variable not in self:
             raise KeyError(f"{variable} not available")
 
-        column_number = self._vars_columns[variable]
-        t, y = np.loadtxt(
+        data_columns = self._vars_columns[variable]
+        if not isinstance(data_columns, tuple):
+            data_columns = (data_columns,)
+
+        columns = np.loadtxt(
             self.path,
+            comments=self._comments,
             unpack=True,
             ndmin=2,
-            usecols=(self._time_column, column_number),
+            usecols=(self._time_column,) + data_columns,
         )
+        t = columns[0]
+        y = columns[1]
+        if len(data_columns) == 2:
+            y = y + 1j * columns[2]
 
         return ts.remove_duplicated_iters(t, y)
 
@@ -370,13 +413,11 @@ class AllScalars:
         """
         self.reduction_type = str(reduction_type)
 
-        # TODO: Is it necessary to have the folder level?
-        # Probably not, so remove it
-
-        # _vars_readers is like _vars_readers['variable']['folder'] ->
-        # OneScalar(f) _vars_readers['variable'] is a dictionary with as keys
-        # the folders where to find the files associated to the variable and the
-        # reduction reduction_type
+        # _vars_readers is like _vars_readers['variable']['folder'][file_key]
+        # -> OneScalar(f). Each folder is one run. CarpetX can write one file
+        # per iteration, so these files are keyed by their path and combined
+        # within the run. Other files have file_key None, as there is one file
+        # per variable in each run.
         #
         # OneScalar objects act as readers.
         self._vars_readers = {}
@@ -394,19 +435,26 @@ class AllScalars:
                     except KeyError:
                         continue
 
+                file_key = (
+                    cactusascii_file.path
+                    if cactusascii_file._file_per_iteration
+                    else None
+                )
                 for var in list(cactusascii_file.keys()):
                     # We add to the _vars_readers dictionary the mapping:
-                    # [var][folder] to OneScalar(f)
+                    # [var][folder][file_key] to OneScalar(f)
                     folder = cactusascii_file.folder
-                    self._vars_readers.setdefault(var, {})
-                    if folder in self._vars_readers[var]:
+                    readers = self._vars_readers.setdefault(
+                        var, {}
+                    ).setdefault(folder, {})
+                    if file_key in readers:
                         warnings.warn(
                             f"Overwriting {var} {reduction_type} from "
-                            f"{self._vars_readers[var][folder].path} with "
+                            f"{readers[file_key].path} with "
                             f"{cactusascii_file.path}",
                             RuntimeWarning,
                         )
-                    self._vars_readers[var][folder] = cactusascii_file
+                    readers[file_key] = cactusascii_file
             except RuntimeError:
                 pass
 
@@ -423,9 +471,11 @@ class AllScalars:
             raise KeyError(f"{key} not available")
 
         if key not in self._vars:
-            # We read all the files associated to variable key
-            folders = self._vars_readers[key]
-            series = [f[key] for f in folders.values()]
+            # Combine files within each run, then combine the restarts.
+            series = [
+                ts.combine_ts([reader[key] for reader in run.values()])
+                for run in self._vars_readers[key].values()
+            ]
             self._vars[key] = ts.combine_ts(series)
 
         return self._vars[key]
@@ -500,7 +550,6 @@ class ScalarsDir:
             raise TypeError("Input is not SimDir")
 
         self.path = sd.path
-        self.point = AllScalars(sd.allfiles, "scalar")
         self.scalar = AllScalars(sd.allfiles, "scalar")
         self.minimum = AllScalars(sd.allfiles, "minimum")
         self.maximum = AllScalars(sd.allfiles, "maximum")
@@ -513,6 +562,7 @@ class ScalarsDir:
         # Aliases
         self.max = self.maximum
         self.min = self.minimum
+        self.point = self.scalar
 
     def __getitem__(self, reduction):
         return getattr(self, reduction)

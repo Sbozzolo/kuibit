@@ -82,14 +82,14 @@ Scalar data
 -----------
 
 - Read data from ``CarpetASCII`` (max, min, norm, ...) as timeseries (supporting options ``one_file_per_group``, ``all_reductions_in_one_file``, or both).
-- Read (norms only) data from ``CarpetX`` (max, min, norm, ...) as timeseries.
+- Read TSV data from ``CarpetX`` (reductions/norms, real or complex scalars) as timeseries (supporting ``out_tsv_combine_iterations`` for scalars).
 - Combine all the different files from multiple checkpoints in a single timeseries.
-- Read data transparently compressed with gzip or bzip2.
+- Read CarpetASCII data transparently compressed with gzip or bzip2.
 
 Multipoles and waves
 --------------------
 
-- Read ASCII and HDF5 data from ``Multipoles``.
+- Read ASCII, TSV, and HDF5 data from ``Multipoles``.
 - Represent multipoles with objects that can be accessed with the multipole numbers.
 - Use the fixed frequency integration method to compute from ``Psi4``:
 
@@ -120,7 +120,7 @@ Units
 Grid Data
 ---------
 
-- Read 1D, 2D, and 3D ASCII, HDF5 and OpenPMD (experimental) files as ``HierarchicalGridData``, which supports:
+- Read 1D, 2D, and 3D ``Carpet`` ASCII and HDF5 files, and 3D ``CarpetX`` OpenPMD files (experimental), as ``HierarchicalGridData``, which supports:
 
   - working with multiple components and refinement levels;
   - handling ghost-zones;
@@ -136,6 +136,15 @@ Grid Data
   - being resampled to ``UniformGridData`` (unigrid);
   - masks;
   - abitrarily slicing with lower-dimensional cuts (e.g., equatorial plane from 3D data).
+- Read 1D and 3D ``CarpetX`` TSV data files as ``HierarchicalGridData``, supporting many of the above features. Note:
+
+  - ``CarpetX`` can output 1D TSV data either one file per iteration, or with
+    iterations combined using ``out_tsv_combine_iterations``. Each variable
+    group and output direction has its own file. 3D TSV data is always output
+    one file per iteration, per MPI rank, per variable group.
+  - ``kuibit`` needs a header that describes the ``CarpetX`` TSV output.
+    ``out_tsv_header`` options ``plain`` or ``comment`` are supported, while
+    the ``none`` option is not supported.
 
 - In addition to above ``UniformGridData`` support:
 

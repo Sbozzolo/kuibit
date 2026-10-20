@@ -19,8 +19,8 @@
 # You should have received a copy of the GNU General Public License along with
 # this program; if not, see <https://www.gnu.org/licenses/>.
 
-"""This module provides helper functions to extract information from Cactus
-ASCII files.
+"""This module provides helper functions to extract information from
+CarpetASCII and CarpetX TSV files.
 
 The functions available are:
 
@@ -34,6 +34,12 @@ The functions available are:
                             (or a single number) with the description of the
                             content of the other columns.
 
+- :py:func:`~.scan_carpetx_header`: Reads the commented or plain column header
+                                    used by CarpetX TSV output.
+
+- :py:func:`~.get_carpetx_variable_columns`: Identifies variable columns in
+                                             CarpetX output.
+
 - :py:func:`~.total_filesize`: Takes a list of files are return the total
                                filesize with a given unit. This also works for
                                non-ASCII files.
@@ -43,7 +49,6 @@ The functions available are:
 import os
 import re
 from collections.abc import Iterable
-from typing import Literal
 
 
 def _scan_strings_for_columns(strings, pattern, path=None):
@@ -123,27 +128,13 @@ def _scan_strings_for_columns(strings, pattern, path=None):
     return columns_description
 
 
-def _scan_strings_for_columns_and_reductions(
-    strings,
-    path=None,
-    all_reductions_format: Literal["carpet", "carpetx_norms"] = "carpet",
-):
-    """Return a mapping ``reduction -> {variable: column}`` from header lines."""
+def _scan_strings_for_columns_and_reductions(strings, path=None):
+    """Return CarpetASCII columns as ``reduction -> {variable: column}``."""
 
-    if all_reductions_format == "carpet":
-        pattern_header = r"^# data columns: (.+)$"
-        # Here we match (number):(word[number])([word])
-        # We are matching expressions like 3:kxx(minimum)
-        pattern_columns = r"^(\d+):(\w+(?:\[\d+\])?)\(([\w_]+)\)$"
-    elif all_reductions_format == "carpetx_norms":
-        pattern_header = r"^#\s+1:iteration\s+2:time\s+(.+)$"
-        # Here we match (number):(word)::(word).(word[optional_index])
-        # CarpetX norm columns look like 3:hydrobasex::rho.min
-        pattern_columns = r"^(\d+):\w+::(\w+)\.([\w]+(?:\[\d+\])?)$"
-    else:
-        raise ValueError(
-            f"Unsupported all_reductions_format: {all_reductions_format}"
-        )
+    pattern_header = r"^# data columns: (.+)$"
+    # Here we match (number):(word[number])([word])
+    # We are matching expressions like 3:kxx(minimum)
+    pattern_columns = r"^(\d+):(\w+(?:\[\d+\])?)\(([\w_]+)\)$"
 
     rx_header = re.compile(pattern_header)
     rx_columns = re.compile(pattern_columns)
@@ -177,6 +168,104 @@ def _scan_strings_for_columns_and_reductions(
     return columns_description
 
 
+def scan_carpetx_header(path, opener=open, opener_mode="r"):
+    """Read the column labels of a CarpetX TSV file.
+
+    CarpetX writes the labels either in a comment (``# 1:iteration 2:time
+    ...``) or in the first row (``iteration time ...``). Other comments before
+    the labels (e.g., from ``IO::out_fileinfo``) are skipped.
+
+    :param path: Path of the file to scan.
+    :type path: str
+    :param opener: Function used to open the file.
+    :type opener: callable
+    :param opener_mode: Mode passed to ``opener``.
+    :type opener_mode: str
+
+    :returns: Time column, column mapping, and whether the header is commented.
+    :rtype: tuple
+
+    """
+
+    column_names = None
+    with opener(path, mode=opener_mode) as tsv_file:
+        for line in tsv_file:
+            is_comment = line.startswith("#")
+            names = line.lstrip("#").split()
+            if is_comment:
+                # Commented labels are numbered, e.g. 1:iteration
+                names = [name.partition(":")[2] for name in names]
+            if names[:1] == ["iteration"]:
+                column_names = names
+                break
+            if names and not is_comment:
+                # Data without column labels
+                break
+
+    if column_names is None:
+        raise RuntimeError(
+            f"No CarpetX column labels found in {path} "
+            "(kuibit needs out_tsv_header = comment or plain)"
+        )
+
+    if not all(column_names) or len(set(column_names)) != len(column_names):
+        raise RuntimeError(f"Bad CarpetX header found in file {path}")
+
+    columns_description = {
+        column_name: column_number
+        for column_number, column_name in enumerate(column_names)
+    }
+
+    if "time" not in columns_description:
+        raise RuntimeError(f"Missing time column in {path}")
+
+    return columns_description["time"], columns_description, is_comment
+
+
+def get_carpetx_variable_columns(
+    columns_description, metadata_columns, *, is_comment
+):
+    """Map CarpetX variable names to column numbers, excluding metadata.
+
+    Complex scalars and arrays use adjacent ``.real``/``.imag`` columns
+    (``_real``/``_imag`` in plain headers), mapped to a pair of column numbers.
+
+    :param columns_description: Mapping from all column names to positions.
+    :type columns_description: dict
+    :param metadata_columns: Names of columns that do not contain variables.
+    :type metadata_columns: collection of str
+    :param is_comment: Whether the column header is commented.
+    :type is_comment: bool
+
+    :returns: Mapping from variable names to one column or a complex pair.
+    :rtype: dict
+
+    """
+
+    real_suffix, imag_suffix = (
+        (".real", ".imag") if is_comment else ("_real", "_imag")
+    )
+
+    variables = {}
+    imag_names = set()
+    for name, column in columns_description.items():
+        if name in metadata_columns or name in imag_names:
+            continue
+        # A complex variable has its imaginary part in the next column
+        variable_name = name.removesuffix(real_suffix)
+        imag_name = variable_name + imag_suffix
+        if (
+            variable_name != name
+            and columns_description.get(imag_name) == column + 1
+        ):
+            variables[variable_name] = (column, column + 1)
+            imag_names.add(imag_name)
+        else:
+            variables[name] = column
+
+    return variables
+
+
 def scan_header(
     path,
     one_file_per_group,
@@ -184,7 +273,6 @@ def scan_header(
     all_reductions_in_one_file=False,
     opener=open,
     opener_mode="r",
-    all_reductions_format="carpet",
 ):
     """Use regular expressions to understand the content of a CarpetASCII file.
     In particular, we look for column format and data columns by reading the
@@ -212,9 +300,6 @@ def scan_header(
     :type opener: callable
     :param opener_mode: Mode to open the file with (e.g., ``r`` as in ``read``).
     :type opener_mode: str
-    :param all_reductions_format: Header format for files with all reductions,
-                                  either "carpet" or "carpetx_norms".
-    :type all_reductions_format: str
 
     :returns: time_column and either the data column (if it is one variable per
               group), or a dictionary with column: variable.
@@ -282,7 +367,6 @@ def scan_header(
         columns_description = _scan_strings_for_columns_and_reductions(
             header,
             path=path,
-            all_reductions_format=all_reductions_format,
         )
         return time_column, columns_description
     if one_file_per_group:

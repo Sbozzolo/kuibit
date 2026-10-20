@@ -1,0 +1,66 @@
+# kuibit test fixture: CarpetX TSV output, first segment (output-0000).
+# Run with 2 MPI processes:
+#   mpirun -np 2 cactus_<config> carpetx_tsv.par
+# Then continue with carpetx_tsv_recover.par.
+
+ActiveThorns = "
+    BoxInBox
+    CarpetX
+    CarpetXRegrid
+    CoordinatesX
+    IOUtil
+"
+
+Cactus::cctk_show_schedule = no
+Cactus::presync_mode = "presync-only"
+Cactus::cctk_itlast = 4
+
+# Tiny grid: two coarse boxes along x, plus two separate refined regions on
+# level 1, so that 1D lines along x have a gap between two level-1 boxes.
+CarpetX::ncells_x = 16
+CarpetX::ncells_y = 1
+CarpetX::ncells_z = 1
+CarpetX::blocking_factor_x = 1
+CarpetX::blocking_factor_y = 1
+CarpetX::blocking_factor_z = 1
+CarpetX::max_grid_size_x = 8
+CarpetX::max_grid_size_y = 8
+CarpetX::max_grid_size_z = 8
+CarpetX::max_num_levels = 2
+CarpetX::regrid_every = 1
+
+BoxInBox::num_regions = 2
+BoxInBox::num_levels_1 = 2
+BoxInBox::position_x_1 = -0.5
+BoxInBox::radius_x_1[1] = 0.25
+BoxInBox::radius_y_1[1] = 4.0
+BoxInBox::radius_z_1[1] = 4.0
+BoxInBox::num_levels_2 = 2
+BoxInBox::position_x_2 = +0.5
+BoxInBox::radius_x_2[1] = 0.25
+BoxInBox::radius_y_2[1] = 4.0
+BoxInBox::radius_z_2[1] = 4.0
+
+IO::out_dir = "output-0000/carpetx_tsv"
+IO::out_every = 1
+IO::out_fileinfo = "all"
+CarpetX::out_metadata = no
+
+# 1D, scalar, and array TSV output with comment headers, one file per
+# iteration. Also 3D TSV output (one file per process).
+CarpetX::out_tsv = yes
+CarpetX::out_tsv_header = "comment"
+CarpetX::out_tsv_combine_iterations = no
+CarpetX::out_tsv_vars = "
+    CoordinatesX::cell_coords
+    BoxInBox::positions
+    BoxInBox::radii
+"
+
+# Checkpoint at iteration 3. The second segment restarts from there, so
+# iterations 3 and 4 are output by both segments.
+CarpetX::checkpoint_method = "openpmd"
+IO::checkpoint_dir = "checkpoints"
+IO::checkpoint_ID = no
+IO::checkpoint_every = 3
+IO::checkpoint_on_terminate = no
