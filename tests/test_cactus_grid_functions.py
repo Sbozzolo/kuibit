@@ -410,7 +410,7 @@ class TestOneGridFunction(unittest.TestCase):
         #       We are also not testing all the different combinations of
         #       parameters and ways to set "true" in Cactus
 
-        # Here we are testing _are_ghostzones_in_file
+        # Here we are testing _output_points_in_file
         self.assertTrue(self.P.are_ghostzones_in_files)
 
     def test_read_hdf5(self):
@@ -444,6 +444,54 @@ class TestOneGridFunction(unittest.TestCase):
                 self.reader["int_em_T_rph"][0], grid_data.HierarchicalGridData
             )
         )
+
+    def test_hdf5_no_buffer_points(self):
+        # Output of a small Carpet run with output_buffer_points = "no", where
+        # the finest refinement level is the union of two overlapping boxes
+        # (see no_buffer_points.par). Its datasets have no ghost points along
+        # the cuts, and some are smaller than twice cctk_nghostzones. The
+        # variable is the x coordinate, and we expect exactly the active
+        # points of the finest refinement level.
+        folder = "tests/grid_functions_no_buffer_points"
+        for filename, dims, num_active_points in [
+            ("x.y.h5", (1,), 19),
+            ("x.xy.h5", (0, 1), 331),
+            ("x.xyz.h5", (0, 1, 2), 4303),
+        ]:
+            with self.subTest(filename=filename):
+                x = cg.OneGridFunctionH5([f"{folder}/{filename}"], "x", dims)
+                comps = x[0][1]
+                self.assertEqual(
+                    sum(np.prod(comp.shape) for comp in comps),
+                    num_active_points,
+                )
+                for comp in comps:
+                    self.assertTrue(np.all(comp.shape > 0))
+                    np.testing.assert_array_equal(comp.num_ghost, 0)
+                    # Along y (x.y.h5), x is zero
+                    expected = (
+                        comp.coordinates_from_grid(as_same_shape=True)[0]
+                        if dims[0] == 0
+                        else 0
+                    )
+                    np.testing.assert_allclose(comp.data, expected)
+
+    def test_hdf5_out3D_ghosts(self):
+        # This data has CarpetIOHDF5::out3D_ghosts = no, which applies to 2D
+        # outputs too, so there are no ghost points between the components
+        rho = cg.OneGridFunctionH5(
+            ["tests/tov/output-0000/static_tov/rho.xz.h5"], "rho", (0, 2)
+        )
+        self.assertFalse(rho.are_ghostzones_in_files)
+        (merged,) = rho[0][0]
+        np.testing.assert_array_equal(merged.shape, [30, 30])
+
+        # The refinement buffer points are kept
+        rho = cg.OneGridFunctionH5(
+            ["tests/tov/output-0000/static_tov/rho.xy.h5"], "rho", (0, 1)
+        )
+        (merged,) = rho[0][1]
+        np.testing.assert_array_equal(merged.shape, [40, 40])
 
     def test_time_at_iteration(self):
         self.assertEqual(self.P.time_at_iteration(2), 0.5)

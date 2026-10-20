@@ -569,6 +569,19 @@ class TestUniformGridData(unittest.TestCase):
         ug_data.ghost_zones_remove()
         self.assertEqual(ug_data, ug_data.copy())
 
+        # Check with num_ghost = 0 along only one direction
+        geom = gd.UniformGrid(
+            [101, 201], x0=[0, 0], x1=[100, 200], num_ghost=[1, 0]
+        )
+        ug_data = gd.UniformGridData(geom, data)
+
+        expected_grid = gd.UniformGrid(
+            [99, 201], x0=[1, 0], x1=[99, 200], num_ghost=[0, 0]
+        )
+        expected_ug_data = gd.UniformGridData(expected_grid, data[1:-1, :])
+
+        self.assertEqual(ug_data.ghost_zones_removed(), expected_ug_data)
+
     def test_reflection_symmetry_undo(self):
         g_zero = gdu.sample_function(
             lambda x, y: 2 * x + y,

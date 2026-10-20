@@ -956,7 +956,8 @@ class UniformGridData(BaseNumerical):
         new_grid = self.grid.ghost_zones_removed()
         # We remove the borders from the data using the slicing operator
         slicer = tuple(
-            slice(ghost_zones, -ghost_zones) for ghost_zones in self.num_ghost
+            slice(ghost_zones, shape - ghost_zones)
+            for ghost_zones, shape in zip(self.num_ghost, self.shape)
         )
         new_data = self.data[slicer]
         return type(self)(new_grid, new_data)
@@ -2932,14 +2933,15 @@ class HierarchicalGridData(BaseNumerical):
         #       Note also that is it tested by testing finest_component_at_point
         #       (and not directly)
 
-        # Next, we organize points depending on the component/refinement level
-        # they belong.
+        # Next, we organize points depending on the component they belong.
         #
-        # level_comps is a dictionary with keys the refinement levels and
-        # components for which we have to compute points and for values a list
-        # with the index of the points in points_arr. We need the indices because
-        # we need to put back the values where they were, since we are going to
-        # take bit and pieces of the array.
+        # level_comps is a dictionary with keys the components for which we
+        # have to compute points and for values a list with the index of the
+        # points in points_arr. We need the indices because we need to put back
+        # the values where they were, since we are going to take bit and pieces
+        # of the array. We identify the components by their id, because
+        # different components can have the same refinement level and
+        # component number (e.g., pieces of the same Carpet component).
         #
         # Then, we have another mapping level_comps_data that has as keys the
         # same keys as level_comps, but values the actual component
@@ -2948,18 +2950,15 @@ class HierarchicalGridData(BaseNumerical):
         level_comps_data = {}
         for index, point in enumerate(points_arr):
             data = self.finest_component_at_point(point, no_checks=True)
-            ref_level, comp = data.ref_level, data.component
-            level_comps.setdefault((ref_level, comp), []).append(index)
-            level_comps_data.setdefault((ref_level, comp), data)
+            level_comps.setdefault(id(data), []).append(index)
+            level_comps_data.setdefault(id(data), data)
 
         # Now, we can evaluate the points using the methods of UniformGridData.
         # We collect all results in a new array that is initially full of zeros
         ret = np.zeros(len(points_arr), dtype=self.dtype)
-        for (ref_level, comp), points_indices in level_comps.items():
-            points = points_arr[level_comps[ref_level, comp]]
-            evaluated_points = level_comps_data[
-                (ref_level, comp)
-            ].evaluate_with_spline(
+        for comp, points_indices in level_comps.items():
+            points = points_arr[points_indices]
+            evaluated_points = level_comps_data[comp].evaluate_with_spline(
                 points, ext=ext, piecewise_constant=piecewise_constant
             )
             ret[points_indices] = evaluated_points

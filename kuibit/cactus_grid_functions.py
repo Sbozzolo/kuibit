@@ -53,6 +53,7 @@ from gzip import open as gopen
 import h5py
 import numpy as np
 import openpmd_api as openpmd_io
+from scipy.ndimage import binary_erosion
 
 from kuibit import grid_data, simdir
 from kuibit.attr_dict import pythonize_name_dict
@@ -453,24 +454,38 @@ class BaseOneGridFunction(ABC):
 
         """
 
-        uniform_grid_data_components = []
+        components_by_level = {}
 
         for path in self.allfiles:
             for ref_level in self._ref_levels_in_file(path, iteration):
                 for comp in self._components_in_file(
                     path, iteration, ref_level
                 ):
-                    uniform_grid_data_components.append(
+                    components_by_level.setdefault(ref_level, []).append(
                         self._read_component_as_uniform_grid_data(
                             path, iteration, ref_level, comp
                         )
                     )
+
+        uniform_grid_data_components = [
+            piece
+            for components in components_by_level.values()
+            for piece in self._level_without_ghost_zones(components)
+        ]
 
         return (
             grid_data.HierarchicalGridData(uniform_grid_data_components)
             if uniform_grid_data_components
             else None
         )
+
+    def _level_without_ghost_zones(self, components):
+        """Return the components of one refinement level, ready to be merged.
+
+        By default, they are returned untouched, and
+        :py:class:`~.HierarchicalGridData` removes the ghost zones.
+        """
+        return components
 
     def get_iteration(self, iteration, default=None):
         """Return the data at the given iteration as a :py:class:`~.HierarchicalGridData`.
@@ -971,16 +986,18 @@ class OneGridFunctionH5(BaseOneGridFunction):
             f"{self.thorn_name}::{self.var_name} it=%d tl=0{self.map}%s%s"
         )
 
-        file_is_3D = len(self.dimension) == 3
-
-        # HDF5 files can contain ghostzones or not. Here, we can that all the
-        # files have the same behavior (they all contain, or they all don't)
+        # HDF5 files can contain ghostzones or not, and refinement buffer
+        # points or not. Here, we check that all the files have the same
+        # behavior (they all contain, or they all don't)
         #
-        # self._are_ghostzones_in_file(path) returns True or False, so this
-        # is a set with True, False or a mix
-        ghost_in_files = {
-            self._are_ghostzones_in_file(path, file_is_3D)
-            for path in self.allfiles
+        # self._output_points_in_file(path) returns two booleans, so these
+        # are sets with True, False or a mix
+        output_points_in_files = [
+            self._output_points_in_file(path) for path in self.allfiles
+        ]
+        ghost_in_files = {ghosts for ghosts, _ in output_points_in_files}
+        buffer_points_in_files = {
+            buffer_points for _, buffer_points in output_points_in_files
         }
 
         # Here we check that we only have True or False
@@ -988,10 +1005,16 @@ class OneGridFunctionH5(BaseOneGridFunction):
             raise ValueError(
                 "Inconsistent IOHDF5::output_ghost_points across files"
             )
+        if len(buffer_points_in_files) != 1:
+            raise ValueError(
+                "Inconsistent IOHDF5::output_buffer_points across files"
+            )
 
-        # We know that ghost_in_files has only one element (either True or
-        # False), so we pick that (with tuple unpacking)
+        # We know that the sets have only one element (either True or False),
+        # so we pick that (with tuple unpacking)
         (self.are_ghostzones_in_files,) = ghost_in_files
+        # See _level_without_ghost_zones
+        (self.are_buffer_points_in_files,) = buffer_points_in_files
 
     def _parse_file(self, path):
         """Read the content of the given file (without reading the data).
@@ -1173,26 +1196,141 @@ class OneGridFunctionH5(BaseOneGridFunction):
 
         return self.alldata[path][iteration][ref_level][component]
 
+    def _level_without_ghost_zones(self, components):
+        """Return the components of one refinement level without ghost zones.
+
+        With ``CarpetIOHDF5::output_buffer_points = "no"``, Carpet crops the
+        components to the active region, which can split a component into
+        datasets that have no ghost points along the cuts (but the same
+        ``cctk_nghostzones``). So, a point is a ghost point only if it is
+        within ``num_ghost`` points of the edge of the region covered by all
+        the datasets of the refinement level. Otherwise, we leave the ghost
+        zones to :py:class:`~.HierarchicalGridData`.
+        """
+        if self.are_buffer_points_in_files or not self.are_ghostzones_in_files:
+            return components
+
+        # Index of the first point of each component in the refinement level
+        dx = components[0].dx
+        origin = np.min([comp.x0 for comp in components], axis=0)
+        starts = [
+            np.rint((comp.x0 - origin) / dx).astype(int) for comp in components
+        ]
+        num_ghost = components[0].num_ghost
+
+        # Start from the points written in the files for this refinement
+        # level, and keep those that are not within num_ghost of the edge of
+        # this region (eroding one direction at a time, which is faster)
+        level_shape = np.max(
+            [start + comp.shape for start, comp in zip(starts, components)],
+            axis=0,
+        )
+        to_keep = np.zeros(level_shape, dtype=bool)
+        for start, comp in zip(starts, components):
+            to_keep[self._slices(start, start + comp.shape)] = True
+        for dim, ghost in enumerate(num_ghost):
+            structure_shape = np.ones(to_keep.ndim, dtype=int)
+            structure_shape[dim] = 2 * ghost + 1
+            to_keep = binary_erosion(
+                to_keep, structure=np.ones(structure_shape, dtype=bool)
+            )
+
+        # First, the interior of each dataset, as when all the faces have
+        # ghost points
+        ret = []
+        interiors = [
+            self._slices(start + num_ghost, start + comp.shape - num_ghost)
+            for start, comp in zip(starts, components)
+        ]
+        for start, comp, interior in zip(starts, components, interiors):
+            for lower, upper in self._boxes_from_mask(to_keep[interior]):
+                ret.append(
+                    self._sub_component(
+                        comp, num_ghost + lower, num_ghost + upper
+                    )
+                )
+
+        # Then, the points along the cuts, which can be in more than one
+        # dataset, so we take each of them only once
+        for interior in interiors:
+            to_keep[interior] = False
+        for start, comp in zip(starts, components):
+            box = self._slices(start, start + comp.shape)
+            for lower, upper in self._boxes_from_mask(to_keep[box]):
+                ret.append(self._sub_component(comp, lower, upper))
+            to_keep[box] = False
+
+        return ret
+
     @staticmethod
-    def _are_ghostzones_in_file(path: str, is_3D_file: bool) -> bool:
-        """Return whether the ghostzones were output or not.
+    def _slices(lower, upper):
+        """Return the slices to index the box from ``lower`` to ``upper``
+        (excluded)."""
+        return tuple(slice(lo, up) for lo, up in zip(lower, upper))
+
+    def _sub_component(self, comp, lower, upper):
+        """Return the part of ``comp`` between the indices ``lower`` and
+        ``upper`` (excluded), without ghost zones."""
+        return grid_data.UniformGridData.from_grid_structure(
+            comp.data[self._slices(lower, upper)],
+            x0=comp.x0 + lower * comp.dx,
+            dx=comp.dx,
+            ref_level=comp.ref_level,
+            component=comp.component,
+            num_ghost=np.zeros_like(lower),
+            time=comp.time,
+            iteration=comp.iteration,
+        )
+
+    def _boxes_from_mask(self, mask):
+        """Split the True values of a boolean array into rectangular boxes,
+        returned as lower and upper (excluded) indices.
+
+        Each box starts from the first True value left and grows along each
+        direction as long as it contains only True values.
+        """
+        if mask.size > 0 and mask.all():
+            return [(np.zeros(mask.ndim, dtype=int), np.array(mask.shape))]
+
+        mask = mask.copy()
+        boxes = []
+        while mask.any():
+            lower = np.array(np.unravel_index(np.argmax(mask), mask.shape))
+            upper = lower + 1
+            for dim in range(mask.ndim):
+                # Grow the box along dim while the next layer is all True
+                while upper[dim] < mask.shape[dim]:
+                    next_layer = list(self._slices(lower, upper))
+                    next_layer[dim] = slice(upper[dim], upper[dim] + 1)
+                    if not mask[tuple(next_layer)].all():
+                        break
+                    upper[dim] += 1
+            mask[self._slices(lower, upper)] = False
+            boxes.append((lower, upper))
+        return boxes
+
+    @staticmethod
+    def _output_points_in_file(path: str):
+        """Return whether the ghostzones and the refinement buffer points were
+        output or not.
 
         :param path: File to inspect.
         :type path: str
-        :param is_3D_file: The file contains 3D data
-        :type is_3D_file: bool
 
-        :returns: Whether ``path`` contains ghost zones.
-        :rtype: bool
+        :returns: Whether ``path`` contains ghost zones, and whether it
+                  contains refinement buffer points.
+        :rtype: tuple of two bool
 
         """
         # This is a tricky and important function to stitch together all the
         # different components. Carpet has an option (technically two) to output
         # the ghostzones in the files. These are: output_ghost_points and
-        # out3D_ghosts (which is deprecated). For 3D files, when they are both
-        # set to yes, the ghostzones are output in the h5 files. When one of the
-        # two is set to no, the ghostzones are not output. For 2D files, when
-        # it depends only on the value of the first.
+        # out3D_ghosts (which is deprecated). When they are both set to yes,
+        # the ghostzones are output in the h5 files. When one of the two is set
+        # to no, the ghostzones are not output. Despite its name, out3D_ghosts
+        # applies to outputs of all dimensions (see GetOutputBBoxes in
+        # CarpetIOHDF5/src/OutputSlice.cc). output_buffer_points works in the
+        # same way for the refinement buffer points.
 
         # The default value of these parameters is yes
         try:
@@ -1226,14 +1364,13 @@ class OneGridFunctionH5(BaseOneGridFunction):
                         or ("1" in param[0])
                     )
 
-                params_to_check = {"output_ghost_points"}
-
-                if is_3D_file:
-                    params_to_check.add("out3D_ghosts")
-
                 # Ghostzones are in the file if all the relevant parameters are set
                 # to true
-                return all(is_param_true(param) for param in params_to_check)
+                ghostzones = all(
+                    is_param_true(name)
+                    for name in ("output_ghost_points", "out3D_ghosts")
+                )
+                return ghostzones, is_param_true("output_buffer_points")
         except RuntimeError as exce:
             raise RuntimeError(f"File {path} cannot be processed") from exce
 
