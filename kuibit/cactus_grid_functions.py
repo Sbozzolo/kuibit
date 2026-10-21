@@ -971,22 +971,21 @@ class OneGridFunctionH5(BaseOneGridFunction):
             f"{self.thorn_name}::{self.var_name} it=%d tl=0{self.map}%s%s"
         )
 
-        file_is_3D = len(self.dimension) == 3
-
         # HDF5 files can contain ghostzones or not. Here, we can that all the
         # files have the same behavior (they all contain, or they all don't)
         #
         # self._are_ghostzones_in_file(path) returns True or False, so this
         # is a set with True, False or a mix
         ghost_in_files = {
-            self._are_ghostzones_in_file(path, file_is_3D)
-            for path in self.allfiles
+            self._are_ghostzones_in_file(path) for path in self.allfiles
         }
 
         # Here we check that we only have True or False
         if len(ghost_in_files) != 1:
             raise ValueError(
-                "Inconsistent IOHDF5::output_ghost_points across files"
+                "Inconsistent ghost zone output settings "
+                "(IOHDF5::output_ghost_points or CarpetIOHDF5::out3D_ghosts) "
+                "across files"
             )
 
         # We know that ghost_in_files has only one element (either True or
@@ -1174,13 +1173,11 @@ class OneGridFunctionH5(BaseOneGridFunction):
         return self.alldata[path][iteration][ref_level][component]
 
     @staticmethod
-    def _are_ghostzones_in_file(path: str, is_3D_file: bool) -> bool:
+    def _are_ghostzones_in_file(path: str) -> bool:
         """Return whether the ghostzones were output or not.
 
         :param path: File to inspect.
         :type path: str
-        :param is_3D_file: The file contains 3D data
-        :type is_3D_file: bool
 
         :returns: Whether ``path`` contains ghost zones.
         :rtype: bool
@@ -1189,10 +1186,11 @@ class OneGridFunctionH5(BaseOneGridFunction):
         # This is a tricky and important function to stitch together all the
         # different components. Carpet has an option (technically two) to output
         # the ghostzones in the files. These are: output_ghost_points and
-        # out3D_ghosts (which is deprecated). For 3D files, when they are both
-        # set to yes, the ghostzones are output in the h5 files. When one of the
-        # two is set to no, the ghostzones are not output. For 2D files, when
-        # it depends only on the value of the first.
+        # out3D_ghosts (which is deprecated). When they are both set to yes,
+        # the ghostzones are output in the h5 files. When one of the two is set
+        # to no, the ghostzones are not output. Despite its name, out3D_ghosts
+        # applies to outputs of all dimensions (see GetOutputBBoxes in
+        # CarpetIOHDF5/src/OutputSlice.cc).
 
         # The default value of these parameters is yes
         try:
@@ -1226,10 +1224,7 @@ class OneGridFunctionH5(BaseOneGridFunction):
                         or ("1" in param[0])
                     )
 
-                params_to_check = {"output_ghost_points"}
-
-                if is_3D_file:
-                    params_to_check.add("out3D_ghosts")
+                params_to_check = {"output_ghost_points", "out3D_ghosts"}
 
                 # Ghostzones are in the file if all the relevant parameters are set
                 # to true
