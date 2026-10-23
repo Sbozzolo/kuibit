@@ -17,6 +17,7 @@
 
 import os
 import unittest
+from tempfile import TemporaryDirectory
 from unittest import mock
 
 import h5py
@@ -95,6 +96,18 @@ class TestAllGridFunctions(unittest.TestCase):
     def setUp(self):
         self.gf = sd.SimDir("tests/grid_functions").gf.xy
         self.gf_xyz = sd.SimDir("tests/grid_functions").gf.xyz
+
+    def test_carpetx_tsv_variables_by_dimension(self):
+        sim = sd.SimDir("tests/carpetx/boxinbox")
+        coordinates = ["ccoordx", "ccoordy", "ccoordz"]
+        radii = ["radius[0]", "radius[1]", "radius[2]"]
+        # CarpetX writes 1D lines and full 3D data, and arrays as 1D lines.
+        # There is no 2D TSV output, so no TSV file is read as 2D data.
+        self.assertCountEqual(sim.gf.x.keys(), coordinates + radii)
+        self.assertCountEqual(sim.gf.y.keys(), coordinates)
+        self.assertCountEqual(sim.gf.z.keys(), coordinates)
+        self.assertCountEqual(sim.gf.xy.keys(), [])
+        self.assertCountEqual(sim.gf.xyz.keys(), coordinates)
 
     def test__init(self):
         self.assertCountEqual(self.gf.dimension, (0, 1))
@@ -722,6 +735,244 @@ class TestOneGridFunction(unittest.TestCase):
 
         # Check that we are clear
         self.assertIsNone(self.P.alldata[self.P_file][0][0][0])
+
+
+class TestOneGridFunctionTSV(unittest.TestCase):
+    # tests/carpetx/boxinbox is a CarpetX run on two processes with two
+    # refinement levels, where level 1 has two separate boxes. output-0000 has
+    # comment headers and one file per iteration (iterations 0-4). output-0001
+    # restarts from iteration 3, with plain headers and iterations 3-6 combined
+    # in one file. The values of ccoordx/y/z are the coordinates themselves.
+    def setUp(self):
+        self.sim = sd.SimDir("tests/carpetx/boxinbox")
+
+    def assert_coordinates(self, grid_function, axis):
+        coordinates = grid_function.coordinates_from_grid(as_same_shape=True)
+        np.testing.assert_allclose(grid_function.data, coordinates[axis])
+
+    def test_carpetx_tsv_line(self):
+        reader = self.sim.gf.x
+        with self.assertWarns(Warning) as warn:
+            ccoordx = reader["ccoordx"]
+        self.assertIn("TSV", str(warn.warning))
+
+        self.assertIsInstance(ccoordx, cg.OneGridFunctionTSV)
+        self.assertEqual(ccoordx.available_iterations, list(range(7)))
+        np.testing.assert_allclose(
+            ccoordx.available_times, 0.03125 * np.arange(7)
+        )
+
+        # Without component numbers, the gap between the two level-1 boxes
+        # separates two components
+        for path in ccoordx.allfiles:
+            for iteration in ccoordx._iterations_in_file(path):
+                self.assertEqual(
+                    ccoordx._components_in_file(path, iteration, 1), [0, 1]
+                )
+
+        for iteration in (0, 6):
+            data = ccoordx[iteration]
+            self.assertEqual(data.shape, {0: 1, 1: 2})
+            for level, component in ((0, 0), (1, 0), (1, 1)):
+                self.assert_coordinates(data[level][component], 0)
+            # The ghost points are included
+            np.testing.assert_allclose(data[0][0].x0, [-1.0625])
+            np.testing.assert_allclose(data[0][0].dx, [0.125])
+            np.testing.assert_allclose(data[1][0].x0, [-0.78125])
+            np.testing.assert_allclose(data[1][1].x0, [0.21875])
+
+        # The line along y passes between the refined boxes
+        with self.assertWarns(Warning):
+            ccoordy = self.sim.gf.y["ccoordy"]
+        self.assertEqual(ccoordy[6].shape, {0: 1})
+        self.assert_coordinates(ccoordy[6][0][0], 0)
+
+    def test_carpetx_tsv_line_num_ghost(self):
+        reader = self.sim.gf.x
+        reader.num_ghost = (1,)
+        data = reader["ccoordx"][0]
+
+        # The ghost zones are removed on level 0, which is one grid. The two
+        # level-1 boxes cannot be merged, so they keep their ghost zones.
+        self.assertEqual(data.shape, {0: 1, 1: 2})
+        np.testing.assert_allclose(data[0][0].x0, [-0.9375])
+        np.testing.assert_array_equal(data[0][0].shape, [16])
+        np.testing.assert_array_equal(data[1][0].num_ghost, [1])
+        self.assert_coordinates(data[1][1], 0)
+
+    def test_carpetx_tsv_array(self):
+        reader = self.sim.gf.x
+        # Grid arrays have no ghost zones, so num_ghost does not apply to them
+        reader.num_ghost = (1,)
+        radius = reader["radius[0]"]
+
+        self.assertEqual(radius.available_iterations, list(range(7)))
+        path = (
+            "tests/carpetx/boxinbox/output-0000/carpetx_tsv/"
+            "boxinbox-radii.it000000.x.tsv"
+        )
+        expected = np.loadtxt(path, usecols=3)
+        array = radius[0]
+        self.assertEqual(array.shape, {-1: 1})
+        component = array[-1][-1]
+        self.assertEqual(component.component, -1)
+        np.testing.assert_allclose(component.x0, [0])
+        np.testing.assert_allclose(component.dx, [1])
+        np.testing.assert_array_equal(component.num_ghost, [0])
+        np.testing.assert_array_equal(component.data, expected)
+
+    def test_carpetx_tsv_complex_array(self):
+        # Output of the CarpetX TestOutput test, a 3D complex array
+        path = "tests/carpetx/testoutput/testoutput-a3_complex.it000000.%s.tsv"
+        for axis, dimension in (("x", (0,)), ("z", (2,))):
+            with self.subTest(axis=axis):
+                arrays = cg.AllGridFunctions(
+                    [path % axis], dimension=dimension
+                )
+                self.assertCountEqual(arrays.keys(), ["a3_complex"])
+                real, imag = np.loadtxt(path % axis, usecols=(5, 6)).T
+                np.testing.assert_array_equal(
+                    arrays["a3_complex"][0][-1][-1].data, real + 1j * imag
+                )
+
+    def test_carpetx_tsv_3d(self):
+        reader = self.sim.gf.xyz
+        reader.num_ghost = (1, 1, 1)
+
+        for axis, name in enumerate(("ccoordx", "ccoordy", "ccoordz")):
+            with self.subTest(name=name):
+                grid_function = reader[name]
+                self.assertEqual(grid_function.available_iterations, [0])
+                self.assertCountEqual(
+                    grid_function._files_with_iteration(0),
+                    grid_function.allfiles,
+                )
+                # One file per process, each with one component per level
+                for path in grid_function.allfiles:
+                    for level in (0, 1):
+                        self.assertEqual(
+                            len(
+                                grid_function._components_in_file(
+                                    path, 0, level
+                                )
+                            ),
+                            1,
+                        )
+
+                data = grid_function[0]
+                self.assertEqual(data.shape, {0: 1, 1: 2})
+                for _, _, component in data:
+                    self.assert_coordinates(component, axis)
+
+
+class TestOneGridFunctionTSVSynthetic(unittest.TestCase):
+    # Small files for the cases that the CarpetX fixtures do not cover
+    columns_1d = "iteration time patch level i j k x y z rho"
+    columns_3d = "iteration time patch level component i j k x y z rho"
+
+    def setUp(self):
+        directory = TemporaryDirectory()
+        self.addCleanup(directory.cleanup)
+        self.directory = directory.name
+
+    def _write_tsv(self, rows, is_3d=False, filename=None):
+        if filename is None:
+            filename = (
+                "test-grid.it000000.p0000.tsv" if is_3d else "test-grid.x.tsv"
+            )
+        path = os.path.join(self.directory, filename)
+        with open(path, "w") as tsv_file:
+            tsv_file.write(self.columns_3d if is_3d else self.columns_1d)
+            tsv_file.write("\n")
+            for row in rows:
+                tsv_file.write(" ".join(map(str, row)) + "\n")
+        return path
+
+    def _rows_3d(self, iteration=0, level=0, component=0, x0=0):
+        # Distinct axis lengths and spacings expose transposes
+        return [
+            [iteration, iteration * 0.5, 0, level, component, i, j, k]
+            + [x0 + i * 0.5, j * 0.25, k * 2, i + 10 * j + 100 * k]
+            for i, j, k in np.ndindex(2, 3, 4)
+        ]
+
+    def test_discovery_skips_unreadable_and_empty_files(self):
+        # Empty 1D lines are normal output, so only the file without column
+        # labels (out_tsv_header = none) gives a warning
+        self._write_tsv([], filename="test-empty.x.tsv")
+        path = os.path.join(self.directory, "test-headerless.x.tsv")
+        with open(path, "w") as stream:
+            stream.write("0 0 1\n")
+        self._write_tsv([[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1]])
+
+        files = sorted(os.listdir(self.directory))
+        files = [os.path.join(self.directory, name) for name in files]
+        with self.assertWarnsRegex(RuntimeWarning, "labels.*test-headerless"):
+            variables = cg.AllGridFunctions(files, (0,))
+        self.assertCountEqual(variables.keys(), ["rho"])
+
+    def test_1d_components_are_separated_by_gaps(self):
+        rows = []
+        for iteration, level, indices in (
+            (0, 0, [0, 1]),
+            (0, 0, [4, 5]),
+            (0, 1, [0, 1]),
+            (1, 0, [0, 1]),
+            (0, 0, [8, 9]),
+        ):
+            for index in indices:
+                rows.append(
+                    [iteration, iteration * 0.5, 0, level, index, 0, 0]
+                    + [index, 0, 0, index + 1]
+                )
+        path = self._write_tsv(rows)
+        reader = cg.OneGridFunctionTSV([path], "rho", num_ghost=(0,))
+
+        # Inspect the components before HierarchicalGridData merges them
+        components = reader.alldata[path]
+        np.testing.assert_array_equal(components[0][0][0].data, [1, 2])
+        np.testing.assert_array_equal(components[0][0][1].data, [5, 6])
+        np.testing.assert_array_equal(components[0][0][2].data, [9, 10])
+        self.assertCountEqual(components[0][1], [0])
+        self.assertCountEqual(components[1][0], [0])
+        self.assertEqual(reader.time_at_iteration(1), 0.5)
+
+    def test_3d_rows_in_any_order(self):
+        rows = []
+        for iteration, level, component in np.ndindex(2, 2, 2):
+            for row in self._rows_3d(iteration, level, component, component):
+                row[-1] += 1000 * iteration + 100 * level + 10 * component
+                rows.append(row)
+        np.random.default_rng(42).shuffle(rows)
+        path = self._write_tsv(rows, is_3d=True)
+        reader = cg.OneGridFunctionTSV([path], "rho", num_ghost=(0, 0, 0))
+
+        i, j, k = np.indices((2, 3, 4))
+        for iteration, level, component in np.ndindex(2, 2, 2):
+            grid = reader.alldata[path][iteration][level][component]
+            np.testing.assert_array_equal(
+                grid.data,
+                i
+                + 10 * j
+                + 100 * k
+                + 1000 * iteration
+                + 100 * level
+                + 10 * component,
+            )
+            np.testing.assert_array_equal(grid.x0, [component, 0, 0])
+            np.testing.assert_array_equal(grid.dx, [0.5, 0.25, 2])
+            self.assertEqual(grid.time, iteration * 0.5)
+
+    def test_invalid_data(self):
+        rows = self._rows_3d()
+        path = self._write_tsv(rows[:-1], is_3d=True)
+        with self.assertRaisesRegex(RuntimeError, "Incomplete"):
+            cg.OneGridFunctionTSV([path], "rho")
+
+        rows[0][2] = 1  # patch
+        path = self._write_tsv(rows, is_3d=True)
+        with self.assertRaisesRegex(NotImplementedError, "patch 0"):
+            cg.OneGridFunctionTSV([path], "rho")
 
 
 class TestOneGridFunctionOpenPMD(unittest.TestCase):

@@ -106,8 +106,9 @@ object and the keys are the names of the variables and the values are
 :py:class:`~.MultipolesDir` is multiple variable, multiple radii.
 
 :py:class:`~.MultipolesDir` is initialized by providing a :py:class:`~.SimDir`.
-The class finds both ASCII file and h5 files with multipole information. These
-files are read when needed, with h5 files having precedence. As in
+The class finds ASCII (``.asc``), TSV (``.tsv``), and HDF5 files with
+multipole information. These files are read when needed, with HDF5 files
+having precedence. As in
 :py:class:`~.ScalarsDir`, there are three ways to access data:
 
 .. code-block:: python

@@ -438,8 +438,8 @@ Once you selected the data you are interested in, you will be working with a
 :py:class:`~.AllGridFunctions` object. This is a dictionary-like object that
 organizes all the variables available for the requested dimensions. You can
 access the variables using the bracket operator of looking in the ``fields``
-attribute. In case a variable is available as HDF5 file and as ASCII file, the
-HDF5 representation is preferred.
+attribute. In case a variable is available as HDF5 or OpenPMD and as ASCII or
+TSV, the HDF5 or OpenPMD representation is preferred.
 
 .. code-block:: python
 
@@ -447,8 +447,12 @@ HDF5 representation is preferred.
     rho = sim.gf.xy['rho']
     rho = sim.gf.xy.fields.rho
 
-In case you are reading an ASCII file, you have to set the correct number of
-ghost zones. The simplest way to do this is to set the :py:meth:`~.num_ghost`
+``CarpetX`` TSV supports 1D output and full 3D grid functions on coordinate
+patch 0. It also supports real or complex 1D grid arrays. See
+:ref:`features:Grid Data` for supported output options.
+
+In case you are reading an ASCII or TSV file, you have to set the correct number
+of ghost zones. The simplest way to do this is to set the :py:meth:`~.num_ghost`
 attribute. If the output does not contain ghost zones, set them to zero.
 
 .. code-block:: python
@@ -465,17 +469,18 @@ a direction.
 
 .. warning::
 
-   ASCII files do not have information about how many ghost zones are in the
-   data, so we will assume that there are none. This can lead to imperfect
-   results in the regions of overlap between two grid patches. In the future, we
-   will try to read this value from the parameter file.
+   ASCII and TSV files do not have information about how many ghost zones are
+   in the data, so we will assume that there are none. This can lead to
+   imperfect results in the regions of overlap between two grid patches. In the
+   future, we will try to read this value from the parameter file.
 
 Finally, once you selected the variable, you will have a
-:py:class:`~.OneGridFunctionH5` or :py:class:`~.OneGridFunctionASCII` object.
-These are derived from the same base class :py:class:`~.OneGridFunctionBase` and
-share the interface. The main difference is how files are read (which justifies
-why we need to different classes). These objects are certainly the most
-interesting ones and the ones you will deal with most of the time.
+:py:class:`~.OneGridFunctionH5`, :py:class:`~.OneGridFunctionASCII`, or
+:py:class:`~.OneGridFunctionTSV` object. These are derived from the same base
+class :py:class:`~.BaseOneGridFunction` and share the interface. The main
+difference is how files are read (which justifies why we need to different
+classes). These objects are certainly the most interesting ones and the ones
+you will deal with most of the time.
 
 At first level, :py:class:`~.OneGridFunctionH5` (we will consider this for
 definiteness, but the most of what said here holds true for

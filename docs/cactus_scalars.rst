@@ -9,11 +9,19 @@ quantities. Data is loaded lazily.
 What data can be read?
 -----------------------
 
-:py:class:`~.OneScalar` reads files produced by ``CarpetASCII`` and norms/
-reductions produced by ``CarpetX``. It recognizes transparently ``gz`` and
-``bz2`` compressed files and it works with multiple variables in one file, or
-different files for each variable. In the former case, :py:class:`~.OneScalar`
-reads the ``column format`` line in the file and deduces the content.
+:py:class:`~.OneScalar` reads files produced by ``CarpetASCII`` and scalar or
+norm/reduction output produced by ``CarpetX``. It recognizes transparently
+``gz`` and ``bz2`` compressed CarpetASCII files and it works with multiple
+variables in one file, or different files for each variable. In the former case,
+:py:class:`~.OneScalar` reads the column labels and deduces the content.
+
+``CarpetX`` scalar TSV files can contain real or complex values, with iterations
+combined or separate (``out_tsv_combine_iterations``). ``out_tsv_header`` options
+``plain`` or ``comment`` are supported; ``none`` is not supported.
+Adjacent ``name_real``/``name_imag`` columns in plain headers are read as one
+complex variable. Use commented headers to distinguish separate real variables
+with those names. This also applies to grid arrays.
+
 :py:class:`~.OneScalar` can return a :py:class:`~.TimeSeries` with the time
 evolution of the various scalars. It also supports either all reductions in one
 file, or different files for each reduction.
@@ -71,7 +79,8 @@ Yet another way is to use the ``.fields`` attribute:
 
 Clearly, instead of ``maximum``, you can use any reduction you want. Valid
 reductions are ``minimum``, ``maximum``, ``norm1``, ``norm2``, ``infnorm``,
-``average``, or ``sum``. Use ``scalars`` for scalar values.
+``average``, or ``sum``. Use ``scalar`` for scalar values; ``point`` is an alias
+for the same object.
 
 The return values of all these calls are :py:class:`~.TimeSeries`. The page
 :ref:`series:Time and frequency series` has abundant information about these

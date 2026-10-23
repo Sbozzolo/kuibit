@@ -2,6 +2,11 @@
 
 ## Version 1.6.2
 
+#### Features
+- Read CarpetX TSV output: scalars, 1D and 3D grid functions, and grid arrays
+  (including complex scalars and arrays). Also read SpacetimeX TSV multipoles.
+  (Max Rizzo)
+
 #### Bug fixes
 - Fixed the axis ordering of OpenPMD grid data by respecting mesh axis labels.
   Thanks Allen Wen for reporting. (Max Rizzo)

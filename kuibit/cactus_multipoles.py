@@ -480,7 +480,8 @@ class MultipolesDir:
         # There are text files and h5 files
         #
         # We use a regular expressions on the name
-        # The structure is like mp_Psi4_l_m2_r110.69.asc
+        # The structure is like mp_Psi4_l2_m2_r110.69.asc or
+        # mp_Psi4_l2_m2_r110.69.tsv.
         #
         # Let's understand the regexp:
         # 0. ^ and $ means that we match the entire name
@@ -491,14 +492,14 @@ class MultipolesDir:
         # 4. We match _r with any combination of numbers with possibly
         #    dots
         # 5. We possibly match a compression
-        rx_ascii = re.compile(
+        rx_text = re.compile(
             r"""^
         mp_([a-zA-Z0-9\[\]_]+)
         _l(\d+)
         _m([-]?\d+)
         _r([0-9.]+)
-        .asc
-        (?:.bz2|.gz)?
+        \.(?:asc|tsv)
+        (?:\.(?:bz2|gz))?
         $""",
             re.VERBOSE,
         )
@@ -509,17 +510,17 @@ class MultipolesDir:
         for f in sd.allfiles:
             filename = os.path.split(f)[1]
             matched_h5 = rx_h5.match(filename)
-            matched_ascii = rx_ascii.match(filename)
+            matched_text = rx_text.match(filename)
             if matched_h5 is not None:
                 variable_name = matched_h5.group(1).lower()
                 var_list = self._vars_h5_files.setdefault(variable_name, set())
                 # We are flagging that this h5
                 var_list.add(f)
-            elif matched_ascii is not None:
-                variable_name = matched_ascii.group(1).lower()
-                mult_l = int(matched_ascii.group(2))
-                mult_m = int(matched_ascii.group(3))
-                radius = float(matched_ascii.group(4))
+            elif matched_text is not None:
+                variable_name = matched_text.group(1).lower()
+                mult_l = int(matched_text.group(2))
+                mult_m = int(matched_text.group(3))
+                radius = float(matched_text.group(4))
                 var_list = self._vars_ascii_files.setdefault(
                     variable_name, set()
                 )

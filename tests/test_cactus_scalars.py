@@ -18,6 +18,7 @@
 import os
 import re
 import unittest
+from tempfile import TemporaryDirectory
 
 import numpy as np
 
@@ -82,6 +83,18 @@ class TestCactusScalar(unittest.TestCase):
         self.assertIs(asc_llama.reduction_type, "scalar")
         self.assertDictEqual(asc_llama._vars_columns, {"phi1": None})
 
+        # CarpetX scalar TSV, one file per iteration and combined iterations
+        sim = "tests/carpetx/boxinbox"
+        for path in (
+            f"{sim}/output-0000/carpetx_tsv/boxinbox-positions.it000000.tsv",
+            f"{sim}/output-0001/carpetx_tsv/boxinbox-positions.tsv",
+        ):
+            scalar_tsv = cs.OneScalar(path)
+            self.assertIs(scalar_tsv.reduction_type, "scalar")
+            self.assertEqual(len(scalar_tsv.keys()), 9)
+            self.assertIn("position_x[0]", scalar_tsv)
+            self.assertNotIn("iteration", scalar_tsv)
+
     def test_OneScalar_magic_methods(self):
         path = "tests/tov/output-0000/static_tov/vel[0].maximum.asc"
         asc = cs.OneScalar(path)
@@ -89,6 +102,26 @@ class TestCactusScalar(unittest.TestCase):
         self.assertIn("vel[0]", asc)
 
         self.assertCountEqual(asc.keys(), ["vel[0]"])
+
+    def test_carpetx_tsv_complex_scalar(self):
+        # Output of the CarpetX TestOutput test
+        path = "tests/carpetx/testoutput/testoutput-sc_complex.it000000.tsv"
+        scalar = cs.OneScalar(path)
+
+        self.assertCountEqual(scalar.keys(), ["sc_complex"])
+        self.assertEqual(
+            scalar["sc_complex"], ts.TimeSeries([0], [4.1415926535897931j])
+        )
+
+    def test_carpetx_tsv_without_header(self):
+        # With out_tsv_header = none, the files cannot be read
+        with TemporaryDirectory() as directory:
+            path = os.path.join(directory, "test-scalars.tsv")
+            with open(path, "w") as stream:
+                stream.write("0 0 1\n")
+            with self.assertWarnsRegex(RuntimeWarning, "labels.*test-scalars"):
+                scalars = cs.AllScalars([path], "scalar")
+        self.assertEqual(len(scalars.keys()), 0)
 
     def test__scan_strings_for_columns(self):
         rx_columns = re.compile(r"^(\d+):(\w+(\[\d+\])?)$")
@@ -245,6 +278,7 @@ class TestCactusScalar(unittest.TestCase):
 
         self.assertIs(scaldir["maximum"], scaldir["max"])
         self.assertIs(scaldir["minimum"], scaldir["min"])
+        self.assertIs(scaldir.point, scaldir.scalar)
 
         # Check string representation
         # (this is a very weak check...)
@@ -360,24 +394,6 @@ class TestCactusScalar(unittest.TestCase):
             },
         )
 
-    def test_scan_header_carpetx_norms(self):
-        path = "tests/tovX/output-0000/static_tovX/norms/hydrobasex-rho.tsv"
-        time_column, columns_description = cau.scan_header(
-            path,
-            one_file_per_group=True,
-            extended_format=False,
-            all_reductions_in_one_file=True,
-            all_reductions_format="carpetx_norms",
-        )
-
-        self.assertEqual(time_column, 1)
-        self.assertEqual(columns_description["min"], {"rho": 2})
-        self.assertEqual(columns_description["max"], {"rho": 3})
-        self.assertEqual(columns_description["avg"], {"rho": 5})
-        self.assertEqual(columns_description["L1norm"], {"rho": 8})
-        self.assertEqual(columns_description["L2norm"], {"rho": 9})
-        self.assertEqual(columns_description["maxabs"], {"rho": 10})
-
     def test_ScalarsDir_carpetx(self):
         scaldir = cs.ScalarsDir(sd.SimDir("tests/tovX"))
 
@@ -391,6 +407,21 @@ class TestCactusScalar(unittest.TestCase):
         self.assertIn("rho", scaldir["average"])
         self.assertIn("velx", scaldir["average"])
         self.assertIn("vely", scaldir["infnorm"])
+
+    def test_ScalarsDir_carpetx_tsv_restart(self):
+        # output-0000 has one file per iteration for iterations 0-4. The
+        # restart in output-0001 starts at iteration 3 and combines iterations
+        # 3-6 in one file.
+        scalars = cs.ScalarsDir(sd.SimDir("tests/carpetx/boxinbox")).scalar
+
+        self.assertEqual(len(scalars.keys()), 9)
+        times = 0.03125 * np.arange(7)
+        self.assertEqual(
+            scalars["position_x[0]"], ts.TimeSeries(times, np.full(7, -0.5))
+        )
+        self.assertEqual(
+            scalars["position_x[1]"], ts.TimeSeries(times, np.full(7, 0.5))
+        )
 
     def test_AllScalars_carpetx_norm_var_file(self):
         paths = [

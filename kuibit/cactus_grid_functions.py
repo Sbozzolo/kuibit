@@ -19,21 +19,22 @@
 #
 # You should have received a copy of the GNU General Public License along with
 # this program; if not, see <https://www.gnu.org/licenses/>.
-"""The :py:mod:`~.cactus_grid` module provides functions to load grid function
-in Cactus formats.
+"""The :py:mod:`~.cactus_grid_functions` module provides functions to load grid
+function in Cactus formats.
 
 There are multiple classes defined in this module:
 
-- :py:class`~.GridFunctionsDir` interfaces with :py:class:`~.SimDir` and
+- :py:class:`~.GridFunctionsDir` interfaces with :py:class:`~.SimDir` and
   organizes the grid functions by dimensionality. This is a dictionary-like
   object with keys the possible dimensions (e.g., ``x``, ``yz``, ``xyz``).
-- :py:class`~.AllGridFunctions` takes all the files in SimDir and sort them
-  according the different grid functions they contain.
-- There are three :py:class`~.OneGridFunction` classes, one for HDF5 files, one
-  for ASCII files, and one for OpenPMD files. They describe one single grid
-  function and they contains the files associated to that grid function. Both
-  the classes are derived from the same abstract base class
-  :py:class`~.OneGridFunctionBase`, which implements the shared methods.
+- :py:class:`~.AllGridFunctions` takes all the files in SimDir and sorts them
+  according to the grid functions they contain.
+- There are four ``OneGridFunction`` classes, one for HDF5 files, one for
+  ASCII files, one for OpenPMD files, and one for CarpetX TSV files. They
+  describe one single grid function and they contain the files associated to
+  that grid function. All the classes are derived from the same abstract base
+  class :py:class:`~.BaseOneGridFunction`, which implements the shared methods.
+
 These are hierarchical classes, one containing the others, so one typically ends
 up with a series of brackets to access the actual data. For example, if ``sim``
 is a :py:class:`~.SimDir`, ``sim.gf.xy['rho_b'][0]`` is ``rho_b`` at iteration 0
@@ -56,15 +57,19 @@ import openpmd_api as openpmd_io
 
 from kuibit import grid_data, simdir
 from kuibit.attr_dict import pythonize_name_dict
-from kuibit.cactus_ascii_utils import scan_header, total_filesize
+from kuibit.cactus_ascii_utils import (
+    get_carpetx_variable_columns,
+    scan_carpetx_header,
+    scan_header,
+    total_filesize,
+)
 
 
 class BaseOneGridFunction(ABC):
     """Abstract class that implements capabilities to handle grid functions.
 
-    This class is the parent class of :py:class:`~.OneGridFunctionASCII` and
-    :py:class:`~.OneGridFunctionH5`. :py:class:`~.BaseOneGridFunction`
-    implements most methods, except the readers.
+    This is the parent class for all the grid-function readers. It implements
+    the format-independent methods.
 
     The derived classes have to specify:
 
@@ -72,7 +77,7 @@ class BaseOneGridFunction(ABC):
       (method ``_parse_file``).
     - How to populate the last level of ``self.alldata`` by returning
       a :py:class:`~.UniformGridData` for a given iteration and component
-      (method ``_read_componenent_as_uniform_grid``)
+      (method ``_read_component_as_uniform_grid_data``)
     - How to associate an iteration with a time (method
       ``time_at_iteration``).
 
@@ -128,7 +133,7 @@ class BaseOneGridFunction(ABC):
     #    last level (excluded or included) (_parse_file). This should also
     # 2. How to populate the last level of self.alldata by returning
     #    a UniformGridData for a given iteration and component
-    #    (_read_componenent_as_uniform_grid)
+    #    (_read_component_as_uniform_grid_data)
     # 3. How to associate an iteration with a time (time_at_iteration)
 
     @abstractmethod
@@ -236,18 +241,16 @@ class BaseOneGridFunction(ABC):
         # this will ignore repeated runs in which the iterations are a subset
         # of the previous one.
         ret = [first]
-        for min_iteration, max_iteration, path in others:
+        for min_iteration, max_iteration, paths in others:
+            max_iteration_in_ret = ret[-1][1]
             # If we have exactly the same iterations, we are looking at ones
             # of those 3D files, so we collect them
             if (min_iteration, max_iteration) == (ret[-1][0], ret[-1][1]):
-                ret[-1][2].append(path)
-                continue
-
-            max_iteration_in_ret = ret[-1][1]
-            if max_iteration > max_iteration_in_ret:
-                ret.append((min_iteration, max_iteration, path))
+                ret[-1][2].extend(paths)
+            elif max_iteration > max_iteration_in_ret:
+                ret.append((min_iteration, max_iteration, paths))
             else:
-                warnings.warn(f"Unused (redundant) file: {path}")
+                warnings.warn(f"Unused (redundant) file: {paths}")
 
         return ret
 
@@ -893,6 +896,277 @@ class OneGridFunctionASCII(BaseOneGridFunction):
             raise ValueError("Iteration {iteration} not available")
 
         return self._iterations_to_times[iteration]
+
+
+class OneGridFunctionTSV(OneGridFunctionASCII):
+    """Read grid data produced by CarpetX TSV output.
+
+    This class is derived from :py:class:`~.OneGridFunctionASCII` and only
+    changes how files are parsed. As with ASCII files, the files are read
+    entirely when the object is created.
+
+    CarpetX writes 1D data (``.x.tsv``, ``.y.tsv``, and ``.z.tsv``) and 3D data
+    (``.itNNNNNN.pNNNN.tsv``, one file per process). 1D files have no component
+    column, so components are separated by gaps in the grid indices. Grid
+    arrays have no coordinates, so their indices are used instead.
+
+    TSV files do not contain information about the ghost zones, but this can be
+    set "by hand".
+
+    """
+
+    # 1D: thorn-group[.itNNNNNN].x.tsv (or y, z)
+    # 3D: thorn-group.itNNNNNN.pNNNN.tsv
+    _rx_filename = re.compile(
+        r"^\w+-\w+(?:(?:\.it\d+)?\.(?P<axis>[xyz])|\.it\d+\.p\d+)\.tsv$"
+    )
+
+    # Columns that CarpetX writes before the grid functions (see
+    # CarpetX/src/io_tsv.cxx). 3D files also have a component column after the
+    # level. Grid arrays have only iteration, time, and one index per dimension.
+    _grid_function_columns = (
+        "iteration",
+        "time",
+        "patch",
+        "level",
+        "i",
+        "j",
+        "k",
+        "x",
+        "y",
+        "z",
+    )
+
+    @classmethod
+    def _axes_in_filename(cls, filename):
+        """Return the axes of a TSV file (``x``, ``y``, ``z``, or ``xyz``).
+
+        :param filename: Name of the file, without directories.
+        :type filename: str
+
+        :returns: Axes covered by the file, or None if this is not a TSV
+                  grid file.
+        :rtype: str or None
+
+        """
+        matched = cls._rx_filename.match(filename)
+        if matched is None:
+            return None
+        return matched.group("axis") or "xyz"
+
+    @classmethod
+    def _scan_header(cls, path, is_3d):
+        """Return the metadata and the variable columns of a TSV file.
+
+        :param path: Path of the file.
+        :type path: str
+        :param is_3d: Whether this is a 3D file (with a component column).
+        :type is_3d: bool
+
+        :returns: Dictionaries mapping metadata names to columns, and variable
+                  names to columns (a pair of columns for complex arrays).
+        :rtype: tuple of dict
+
+        """
+        _, columns, is_comment = scan_carpetx_header(path)
+        names = tuple(columns)
+
+        is_grid_function = "patch" in columns
+        if is_grid_function:
+            metadata = cls._grid_function_columns
+            if is_3d:
+                metadata = metadata[:4] + ("component",) + metadata[4:]
+        else:
+            metadata = names[:2]
+            for index_name, name in zip("ijk", names[2:]):
+                if name != index_name:
+                    break
+                metadata += (name,)
+
+        # A grid array needs at least one index column to place its values
+        if names[: len(metadata)] != metadata or len(metadata) == 2:
+            raise RuntimeError(f"Unrecognized CarpetX TSV header in {path}")
+
+        if is_grid_function:
+            # CarpetX grid functions are always real
+            variables = {
+                name: column
+                for name, column in columns.items()
+                if column >= len(metadata)
+            }
+        else:
+            variables = get_carpetx_variable_columns(
+                columns, metadata, is_comment=is_comment
+            )
+
+        return {name: columns[name] for name in metadata}, variables
+
+    @classmethod
+    def _variables_in_file(cls, path, is_3d):
+        """Return the variables in a TSV file, if it can be read.
+
+        Files that we cannot read are skipped with a warning, as their names
+        identify them as CarpetX output. CarpetX writes the header even when a
+        1D line does not intersect the grid, so files without data are skipped
+        silently.
+
+        :param path: Path of the file.
+        :type path: str
+        :param is_3d: Whether this is a 3D file (with a component column).
+        :type is_3d: bool
+
+        :returns: Names of the variables in the file.
+        :rtype: list of str
+
+        """
+        try:
+            _, variables = cls._scan_header(path, is_3d)
+        except RuntimeError as error:
+            warnings.warn(f"Skipping file: {error}", RuntimeWarning)
+            return []
+        with open(path) as tsv_file:  # skipcq: PTC-W6004
+            if not any(line[:1].isdigit() for line in tsv_file):
+                return []
+        return list(variables)
+
+    def _parse_file(self, path):
+        """Read the content of the given file.
+
+        :param path: Path of the file to read.
+        :type path: str
+
+        """
+        axes = self._axes_in_filename(os.path.basename(path))
+        if axes is None:
+            raise RuntimeError(f"Found file with unusual name: {path}")
+        is_3d = axes == "xyz"
+
+        metadata, variables = self._scan_header(path, is_3d)
+        is_grid_function = "patch" in metadata
+
+        var_columns = variables[self.var_name]
+        if not isinstance(var_columns, tuple):
+            var_columns = (var_columns,)
+
+        # Groups can have many variables, so we load only the columns we need.
+        # Skip the header line, which starts with "#" or (plain) "iteration"
+        data = np.loadtxt(
+            path,
+            comments=("#", "iteration"),
+            ndmin=2,
+            usecols=tuple(metadata.values()) + var_columns,
+        )
+        # The loaded columns are in the order we asked for
+        metadata = {name: column for column, name in enumerate(metadata)}
+        values = data[:, len(metadata)]
+        if len(var_columns) == 2:
+            values = values + 1j * data[:, len(metadata) + 1]
+
+        def column(name):
+            return data[:, metadata[name]].astype(int)
+
+        iterations = column("iteration")
+        axis_to_index = {"x": "i", "y": "j", "z": "k"}
+        index_names = [axis_to_index[axis] for axis in axes]
+        indices = np.column_stack([column(name) for name in index_names])
+        components = (
+            column("component") if is_3d else np.zeros_like(iterations)
+        )
+
+        if is_grid_function:
+            if np.any(column("patch") != 0):
+                raise NotImplementedError(
+                    f"Only patch 0 is supported for CarpetX TSV files ({path})"
+                )
+            ref_levels = column("level")
+            coordinates = data[:, [metadata[axis] for axis in axes]]
+        else:
+            # Grid arrays are on refinement level -1, as in ASCII files
+            ref_levels = np.full_like(iterations, -1)
+            coordinates = None
+
+        unique_iterations, first_rows = np.unique(
+            iterations, return_index=True
+        )
+        times = data[first_rows, metadata["time"]]
+        for iteration, time in zip(unique_iterations, times):
+            self._iterations_to_times.setdefault(int(iteration), time)
+
+        # Group the rows by iteration, refinement level, and component. Within
+        # each group, rows are sorted along the first index. Sorting once
+        # keeps this fast for files with many iterations.
+        order = np.lexsort((indices[:, 0], components, ref_levels, iterations))
+        keys = np.column_stack((iterations, ref_levels, components))[order]
+        new_keys = np.flatnonzero(np.any(np.diff(keys, axis=0), axis=1)) + 1
+        for group_keys, rows in zip(
+            np.split(keys, new_keys), np.split(order, new_keys)
+        ):
+            iteration, ref_level, component = map(int, group_keys[0])
+            if is_3d:
+                pieces = [(component, rows)]
+            else:
+                # 1D components are separated by gaps in the indices. As in
+                # ASCII files, the components of grid arrays start at -1.
+                gaps = np.flatnonzero(np.diff(indices[rows, 0]) != 1) + 1
+                first_component = 0 if is_grid_function else -1
+                pieces = enumerate(np.split(rows, gaps), start=first_component)
+
+            for component, piece in pieces:
+                uniform_grid_data = self._rows_to_UniformGridData(
+                    path,
+                    indices[piece],
+                    None if coordinates is None else coordinates[piece],
+                    values[piece],
+                    iteration,
+                    ref_level,
+                    component,
+                )
+                alldata_file = self.alldata.setdefault(path, {})
+                alldata_iteration = alldata_file.setdefault(iteration, {})
+                alldata_ref_level = alldata_iteration.setdefault(ref_level, {})
+                alldata_ref_level[component] = uniform_grid_data
+
+    def _rows_to_UniformGridData(
+        self,
+        path,
+        indices,
+        coordinates,
+        values,
+        iteration,
+        ref_level,
+        component,
+    ):
+        """Place the values of one component on a grid using their indices."""
+
+        first_index = np.min(indices, axis=0)
+        shape = np.max(indices, axis=0) - first_index + 1
+        if np.prod(shape) != len(values):
+            raise RuntimeError(f"Incomplete CarpetX TSV component in {path}")
+
+        # 3D rows are not necessarily ordered
+        data = np.empty(shape, dtype=values.dtype)
+        data[tuple((indices - first_index).T)] = values
+
+        if coordinates is None:
+            # Grid arrays use their indices as coordinates
+            grid_kwargs = {"x0": first_index, "dx": np.ones_like(shape)}
+        else:
+            grid_kwargs = {
+                "x0": np.min(coordinates, axis=0),
+                "x1": np.max(coordinates, axis=0),
+                "num_ghost": self.num_ghost,
+            }
+
+        grid = grid_data.UniformGrid(
+            shape,
+            component=component,
+            ref_level=ref_level,
+            time=self._iterations_to_times[iteration],
+            iteration=iteration,
+            **grid_kwargs,
+        )
+
+        return grid_data.UniformGridData(grid, data)
 
 
 class OneGridFunctionH5(BaseOneGridFunction):
@@ -1566,7 +1840,7 @@ class AllGridFunctions:
         :param dimension: Dimension associated to this object.
         :type dimension: tuple
         :param num_ghost: Number of ghost zones in the data for each dimension.
-                          This is used only for ASCII data.
+                          This is used only for ASCII and TSV data.
         :type num_ghost: list or tuple of the same length as the number of dimension
 
         """
@@ -1576,9 +1850,10 @@ class AllGridFunctions:
         # form and not in string form)
         self.dimension = dimension
 
-        # If we are using ASCII files, we have to know how many ghost zones are
-        # in the data. At the moment we ask the user to provide the data, but
-        # in the future we will parse the parameter file and find this value.
+        # If we are using ASCII or TSV files, we have to know how many ghost
+        # zones are in the data. At the moment we ask the user to provide the
+        # data, but in the future we will parse the parameter file and find
+        # this value.
         #
         # We don't use this value for HDF5 data, as it is more reliable to just
         # read it from the files.
@@ -1624,12 +1899,13 @@ class AllGridFunctions:
         # Variable files is a dictionary, the keys are the variables, the
         # values the set of files associated to that variable
         self._vars_ascii_files = {}
+        self._vars_tsv_files = {}
         self._vars_h5_files = {}
         self._vars_openpmd_files = {}
 
         # _vars contains the actual data. It is used to cache results. _vars is
-        # a dictionary with keys the variables and values OneGridFunction (H5 or
-        # ASCII)
+        # a dictionary with keys the variables and values OneGridFunction (H5,
+        # OpenPMD, ASCII, or TSV)
         self._vars = {}
 
         rx_h5 = re.compile(h5_pattern)
@@ -1757,6 +2033,18 @@ class AllGridFunctions:
                     except RuntimeError:
                         pass
 
+            elif (
+                OneGridFunctionTSV._axes_in_filename(filename)
+                == self._dim_names[self.dimension]
+            ):
+                for variable_name in OneGridFunctionTSV._variables_in_file(
+                    f, is_3d=len(self.dimension) == 3
+                ):
+                    var_list = self._vars_tsv_files.setdefault(
+                        variable_name, set()
+                    )
+                    var_list.add(f)
+
             elif matched_openpmd is not None:
                 # We detected a data.0 file. Its parent directory is the actual
                 # bp4 file.
@@ -1819,6 +2107,18 @@ class AllGridFunctions:
                     var_name,
                     num_ghost=self.num_ghost,
                 )
+            elif var_name in self._vars_tsv_files:
+                if self.num_ghost is None:
+                    warnings.warn(
+                        "You are using CarpetX TSV files, which have no information"
+                        " about ghost zone information. Set the attribute num_ghost"
+                        " of this object to properly account for the ghost zones. "
+                    )
+                self._vars[var_name] = OneGridFunctionTSV(
+                    self._vars_tsv_files[var_name],
+                    var_name,
+                    num_ghost=self.num_ghost,
+                )
 
         return self._vars[var_name]
 
@@ -1866,6 +2166,7 @@ class AllGridFunctions:
         return {
             **self._vars_h5_files,
             **self._vars_ascii_files,
+            **self._vars_tsv_files,
             **self._vars_openpmd_files,
         }.keys()
 
@@ -1891,6 +2192,8 @@ class AllGridFunctions:
             allfiles.update(file_list)
         for file_list in self._vars_ascii_files.values():
             allfiles.update(file_list)
+        for file_list in self._vars_tsv_files.values():
+            allfiles.update(file_list)
         for dir_list in self._vars_openpmd_files.values():
             # OpenPMD files are actually directory
             allfiles.update(dir_list)
@@ -1912,9 +2215,10 @@ class AllGridFunctions:
 class GridFunctionsDir:
     """This class provides access to all grid data.
 
-    This includes 1D-3D data in HDF5 and ASCII formats. Data of the required
-    dimensionality is read from any format available (HDF5 preferred over
-    ASCII). If you need lower dimensional data, read the higher dimensional one
+    This includes 1D-3D data in HDF5 and ASCII formats, 3D OpenPMD data, and 1D
+    and 3D CarpetX TSV data. Data of the required dimensionality is read from
+    any format available (binary formats preferred over ASCII, and ASCII over
+    TSV). If you need lower dimensional data, read the higher dimensional one
     and slice the data.
 
     :ivar x:           Access to 1D data along x-axis.
