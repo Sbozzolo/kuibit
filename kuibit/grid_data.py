@@ -39,6 +39,7 @@ reason this is useful is that ``Series`` are much simpler and leaner to work
 with.
 
 """
+
 from __future__ import annotations
 
 import warnings
@@ -956,7 +957,7 @@ class UniformGridData(BaseNumerical):
         new_grid = self.grid.ghost_zones_removed()
         # We remove the borders from the data using the slicing operator
         slicer = tuple(
-            slice(ghost_zones, -ghost_zones) for ghost_zones in self.num_ghost
+            slice(g, n - g) for g, n in zip(self.num_ghost, self.shape)
         )
         new_data = self.data[slicer]
         return type(self)(new_grid, new_data)

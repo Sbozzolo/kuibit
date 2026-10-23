@@ -445,6 +445,42 @@ class TestOneGridFunction(unittest.TestCase):
             )
         )
 
+    def test_hdf5_out3D_ghosts(self):
+        # 1D data also respects out3D_ghosts = no
+        rho_1d = cg.OneGridFunctionH5(["tests/tov_alt/rho.x.h5"], "rho", (0,))
+        self.assertFalse(rho_1d.are_ghostzones_in_files)
+        (merged_1d,) = rho_1d[0][0]
+        np.testing.assert_array_equal(merged_1d.shape, [30])
+
+        # This data has CarpetIOHDF5::out3D_ghosts = no, which applies to 2D
+        # outputs too, so there are no ghost points between the components
+        rho = cg.OneGridFunctionH5(
+            ["tests/tov/output-0000/static_tov/rho.xz.h5"], "rho", (0, 2)
+        )
+        self.assertFalse(rho.are_ghostzones_in_files)
+        (merged,) = rho[0][0]
+        np.testing.assert_array_equal(merged.shape, [30, 30])
+
+        # The refinement buffer points are kept
+        rho = cg.OneGridFunctionH5(
+            ["tests/tov/output-0000/static_tov/rho.xy.h5"], "rho", (0, 1)
+        )
+        (merged,) = rho[0][1]
+        np.testing.assert_array_equal(merged.shape, [40, 40])
+
+        # 3D data also respects out3D_ghosts = no
+        rho_3d = cg.OneGridFunctionH5(
+            [
+                "tests/tov/output-0000/static_tov/rho.xyz.file_0.h5",
+                "tests/tov/output-0000/static_tov/rho.xyz.file_1.h5",
+            ],
+            "rho",
+            (0, 1, 2),
+        )
+        self.assertFalse(rho_3d.are_ghostzones_in_files)
+        (merged_3d,) = rho_3d[0][0]
+        np.testing.assert_array_equal(merged_3d.shape, [30, 30, 30])
+
     def test_time_at_iteration(self):
         self.assertEqual(self.P.time_at_iteration(2), 0.5)
 
